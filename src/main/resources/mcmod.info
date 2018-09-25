@@ -1,0 +1,17 @@
+[
+{
+  "modid": "kiwi",
+  "name": "Kiwi",
+  "description": "",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Snownee", "3TUSK"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "useDependencyInformation": true,
+  "requiredMods": ["forge@[14.23.4.2748,)"]
+}
+]
