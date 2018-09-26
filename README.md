@@ -9,7 +9,7 @@ Make modding no longer cumbersome.
 public class ModRegistry implements IModule
 {
     // Register a simple item. Kiwi will automatically register and map models
-    public static final ItemMod FIRST_Item = new ItemMod("my_first_item");
+    public static final ItemMod FIRST_ITEM = new ItemMod("my_first_item");
 
     // Register a simple block and its ItemBlock
     public static final BlockMod FIRST_BLOCK = new BlockMod("my_first_block");
