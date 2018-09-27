@@ -19,7 +19,8 @@ group = "snownee"
 archivesBaseName = "Kiwi-${minecraft_version}"
 
 if (System.getenv().BUILD_NUMBER != null) {
-    version += "-build${System.getenv().BUILD_NUMBER}"
+    // Maven version scheme uses dot to separate things
+    version += ".${System.getenv().BUILD_NUMBER}"
 }
 
 sourceCompatibility = targetCompatibility = '1.8'
@@ -68,6 +69,8 @@ jar {
     exclude "**/*.txt"
     manifest {
         attributes 'FMLAT': 'kiwi_at.cfg'
+        attributes 'Maven-Artifact': '${project.group}:${project.archivesBaseName}:${project.version}'
+        attributes 'Timestamp': System.currentTimeMillis()
     }
 }
 
