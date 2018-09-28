@@ -4,6 +4,6 @@ public class Util
 {
     public static String color(int color)
     {
-        return String.format("§x%06x", color);
+        return String.format("§x%06x", color & 0x00FFFFFF);
     }
 }
