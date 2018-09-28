@@ -8,6 +8,8 @@ import java.util.Set;
 import org.apache.logging.log4j.Logger;
 
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.config.Config;
+import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.discovery.ASMDataTable;
@@ -53,6 +55,19 @@ public class Kiwi
             {
                 name = modid;
             }
+            Boolean optional = (Boolean) data.getAnnotationInfo().get("optional");
+            if (optional == Boolean.TRUE)
+            {
+                Boolean enabled = KiwiConfig.MODULES.modules.get(modid + ":" + name);
+                if (enabled == null)
+                {
+                    KiwiConfig.MODULES.modules.put(modid + ":" + name, Boolean.TRUE);
+                }
+                else if (enabled == Boolean.FALSE)
+                {
+                    continue;
+                }
+            }
             String dependency = (String) data.getAnnotationInfo().get("dependency");
             if (dependency != null && !Loader.isModLoaded(dependency))
             {
@@ -62,6 +77,7 @@ public class Kiwi
             IModule instance = asmClass.asSubclass(IModule.class).newInstance();
             KiwiManager.addInstance(new ResourceLocation(modid, name), instance);
         }
+        ConfigManager.sync(MODID, Config.Type.INSTANCE);
 
         for (Entry<ResourceLocation, IModule> entry : KiwiManager.MODULES.entrySet())
         {
@@ -122,5 +138,10 @@ public class Kiwi
         KiwiManager.POTIONS.clear();
         KiwiManager.POTIONS = null;
         KiwiManager.MODULES.clear();
+    }
+
+    public static boolean isOptionalModuleLoaded(String modid, String name)
+    {
+        return KiwiConfig.MODULES.modules.getOrDefault(modid + ":" + name, false);
     }
 }

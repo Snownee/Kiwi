@@ -14,4 +14,6 @@ public @interface KiwiModule
     String name() default "";
 
     String dependency() default "";
+
+    boolean optional() default false;
 }
