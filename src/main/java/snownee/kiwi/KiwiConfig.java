@@ -35,6 +35,17 @@ public class KiwiConfig
         @Config.LangKey("kiwi.config.general.oredict_preference")
         @Config.Name("OreDict Preference")
         public String[] orePreference = new String[] { "cuisine", "minecraft" };
+
+        @Config.Comment("Tooltips require pressing shift to be shown")
+        @Config.LangKey("kiwi.config.general.press_shift")
+        @Config.Name("Tooltip Requires Shift")
+        public boolean tooltipRequiresShift = false;
+
+        @Config.Comment("Max line width shown in description of tooltips")
+        @Config.LangKey("kiwi.config.general.tip_width")
+        @Config.Name("Tooltip Wrap Width")
+        @Config.RangeInt(min = 50)
+        public int tooltipWrapWidth = 100;
     }
 
     public static final class Modules
@@ -44,7 +55,7 @@ public class KiwiConfig
             // No-op. Package-level access.
         }
 
-        @Config.Comment("TODO") // TODO
+        @Config.Comment("You can set the value to false to force disable the optional module")
         @Config.LangKey("kiwi.config.modules.optional_modules")
         @Config.Name("Optional Modules")
         @Config.RequiresMcRestart
