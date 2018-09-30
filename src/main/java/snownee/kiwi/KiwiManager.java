@@ -5,7 +5,6 @@ import java.util.Map;
 
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
@@ -15,6 +14,7 @@ import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import snownee.kiwi.block.IModBlock;
 import snownee.kiwi.item.IModItem;
+import snownee.kiwi.item.ItemModBlock;
 import snownee.kiwi.potion.PotionMod;
 
 @EventBusSubscriber(modid = Kiwi.MODID)
@@ -66,8 +66,12 @@ public class KiwiManager
             if (block.hasItem())
             {
                 Loader.instance().setActiveModContainer(map.get(modid));
-                ItemBlock item = new ItemBlock(block.cast());
+                ItemModBlock item = new ItemModBlock(block.cast());
                 item.setRegistryName(block.getRegistryName());
+                if (block.getItemSubtypeAmount() > 1)
+                {
+                    item.setHasSubtypes(true);
+                }
                 event.getRegistry().register(item);
             }
         });

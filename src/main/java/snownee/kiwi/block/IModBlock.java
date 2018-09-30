@@ -20,6 +20,11 @@ public interface IModBlock extends IForgeRegistryEntry<Block>
         return true;
     }
 
+    default int getItemSubtypeAmount()
+    {
+        return 1;
+    }
+
     @SideOnly(Side.CLIENT)
     default void mapModel()
     {
