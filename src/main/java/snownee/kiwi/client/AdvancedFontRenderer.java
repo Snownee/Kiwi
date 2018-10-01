@@ -32,6 +32,7 @@ public class AdvancedFontRenderer extends FontRenderer implements ISelectiveReso
 {
     public static final AdvancedFontRenderer INSTANCE = new AdvancedFontRenderer();
 
+    // Used for updating enforceUnicodeFlag; should be removed in 1.13
     @SubscribeEvent
     public static void onLanguageGuiOpening(GuiScreenEvent.ActionPerformedEvent.Post event)
     {
@@ -222,7 +223,7 @@ public class AdvancedFontRenderer extends FontRenderer implements ISelectiveReso
         return character == '，' ? 9 : super.getCharWidth(character);
     }
 
-    private static final String COLOR_CODE = "123456789abcdef";
+    private static final String COLOR_CODE = "0123456789abcdef";
     private static final String FORMATTING_CODE = "klmno";
 
     // Adapted form https://github.com/3TUSK/PanI18n/blob/ada872f7f191b7d40aaeb25d1e2821c12e973049/src/main/java/info/tritusk/pani18n/FormattingEngine.java
@@ -235,7 +236,7 @@ public class AdvancedFontRenderer extends FontRenderer implements ISelectiveReso
         lineBreakEngine.setText(str);
         ArrayList<String> lines = new ArrayList<>(8);
         String cachedFormat = "";
-        char color = '0', format = 'r'; // 0 is format code for black-colored-text; r is format code to reset format to default
+        char color = '\0', format = 'r'; // 0 is format code for black-colored-text; r is format code to reset format to default
         int start = 0; // Position of first character of each line, in terms of source string, i.e. 1st param of substring call
         int width = 0; // Width tracker
         boolean boldMode = false; // Bold font occupies extra width of one unit. Set up a tracker to track it
@@ -260,12 +261,12 @@ public class AdvancedFontRenderer extends FontRenderer implements ISelectiveReso
                 char f = Character.toLowerCase(str.charAt(index));
                 if (f == 'r' || f == 'R')
                 {
-                    color = '0';
+                    color = '\0';
                     format = 'r';
                 }
                 else if (f == 'x')
                 {
-                    color = '0';
+                    color = '\0';
                     hexColor = str.substring(index, index + 7);
                     index += 6;
                     format = 'r';
@@ -337,13 +338,59 @@ public class AdvancedFontRenderer extends FontRenderer implements ISelectiveReso
         return lines;
     }
 
+    /*
+     * Modified version of getStringWidth (`func_78256_a`), changes:
+     *   1. Skip 6 characters when encountered §x
+     */
+    @Override
+    public int getStringWidth(String text)
+    {
+        int len = 0;
+        boolean bold = false;
+        for (int index = 0; index < text.length(); index++)
+        {
+            int width = this.getCharWidth(text.charAt(index));
+            if (width < 0) // \u00A7 (`§`) is considered as having width of -1
+            {
+                ++index;
+                char format = text.charAt(index);
+                if (Character.toLowerCase(format) == 'l')
+                {
+                    bold = true;
+                }
+                else if (Character.toLowerCase(format) == 'r')
+                {
+                    bold = false;
+                }
+                else if (Character.toLowerCase(format) == 'x')
+                {
+                    index += 6; // Skip §x format
+                }
+                width = 0; // Reset so we don't accidentally shrink the width
+            }
+            len += width;
+            if (bold && width > 0)
+            {
+                len++;
+            }
+        }
+        return len;
+    }
+
     private static String determineFormat(char color, char format, String hexColor)
     {
         if (format != 'r')
         {
             if (hexColor.isEmpty())
             {
-                return new String(new char[] { '\u00A7', color, '\u00A7', format });
+                if (color == '\0')
+                {
+                    return new String(new char[] {'\u00A7', format});
+                }
+                else
+                {
+                    return new String(new char[]{'\u00A7', color, '\u00A7', format});
+                }
             }
             else
             {
@@ -354,7 +401,7 @@ public class AdvancedFontRenderer extends FontRenderer implements ISelectiveReso
         {
             if (hexColor.isEmpty())
             {
-                return new String(new char[] { '\u00A7', color });
+                return color == '\0' ? "" : new String(new char[] { '\u00A7', color });
             }
             else
             {
