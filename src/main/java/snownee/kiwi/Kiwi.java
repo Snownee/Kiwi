@@ -62,6 +62,10 @@ public class Kiwi
                 if (enabled == null)
                 {
                     KiwiConfig.MODULES.modules.put(modid + ":" + name, modid == Kiwi.MODID ? Boolean.FALSE : Boolean.TRUE);
+                    if (modid == Kiwi.MODID)
+                    {
+                        continue;
+                    }
                 }
                 else if (enabled == Boolean.FALSE)
                 {
