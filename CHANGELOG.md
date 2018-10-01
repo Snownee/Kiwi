@@ -11,4 +11,3 @@
 
  - Add ability to disable optional module in config file
  - Fix formatting error with AdvancedFontRenderer
- 

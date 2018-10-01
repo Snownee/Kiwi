@@ -65,8 +65,7 @@ public class ItemMod extends Item implements IModItem
                     fontRenderer = Minecraft.getMinecraft().fontRenderer;
                 }
                 int width = fontRenderer.getStringWidth(tooltip.get(0));
-                tooltip.addAll(fontRenderer.listFormattedStringToWidth("testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttest", Math.max(width, KiwiConfig.GENERAL.tooltipWrapWidth)));
-                //                tooltip.addAll(fontRenderer.listFormattedStringToWidth(I18n.format(stack.getTranslationKey() + ".tip"), Math.max(width, KiwiConfig.GENERAL.tooltipWrapWidth)));
+                tooltip.addAll(fontRenderer.listFormattedStringToWidth(I18n.format(stack.getTranslationKey() + ".tip"), Math.max(width, KiwiConfig.GENERAL.tooltipWrapWidth)));
             }
             else if (KiwiConfig.GENERAL.tooltipRequiresShift)
             {
