@@ -4,6 +4,7 @@
 
  - Add item tooltip description support
  - ItemBlock allows subtypes
+ - Fix AdvancedFontRenderer
  - Add test module
 
 ## 0.2.1
