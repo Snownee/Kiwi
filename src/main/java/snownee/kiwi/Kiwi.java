@@ -61,7 +61,7 @@ public class Kiwi
                 Boolean enabled = KiwiConfig.MODULES.modules.get(modid + ":" + name);
                 if (enabled == null)
                 {
-                    KiwiConfig.MODULES.modules.put(modid + ":" + name, Boolean.TRUE);
+                    KiwiConfig.MODULES.modules.put(modid + ":" + name, modid == Kiwi.MODID ? Boolean.FALSE : Boolean.TRUE);
                 }
                 else if (enabled == Boolean.FALSE)
                 {

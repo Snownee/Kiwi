@@ -55,7 +55,7 @@ public class ItemMod extends Item implements IModItem
     @SideOnly(Side.CLIENT)
     public static void addTip(ItemStack stack, List<String> tooltip)
     {
-        if (I18n.hasKey(stack.getTranslationKey() + ".tip"))
+        if (tooltip.size() > 0 && I18n.hasKey(stack.getTranslationKey() + ".tip"))
         {
             if (!KiwiConfig.GENERAL.tooltipRequiresShift || Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT))
             {
@@ -64,7 +64,9 @@ public class ItemMod extends Item implements IModItem
                 {
                     fontRenderer = Minecraft.getMinecraft().fontRenderer;
                 }
-                tooltip.addAll(fontRenderer.listFormattedStringToWidth(I18n.format(stack.getTranslationKey() + ".tip"), KiwiConfig.GENERAL.tooltipWrapWidth));
+                int width = fontRenderer.getStringWidth(tooltip.get(0));
+                tooltip.addAll(fontRenderer.listFormattedStringToWidth("testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttest", Math.max(width, KiwiConfig.GENERAL.tooltipWrapWidth)));
+                //                tooltip.addAll(fontRenderer.listFormattedStringToWidth(I18n.format(stack.getTranslationKey() + ".tip"), Math.max(width, KiwiConfig.GENERAL.tooltipWrapWidth)));
             }
             else if (KiwiConfig.GENERAL.tooltipRequiresShift)
             {

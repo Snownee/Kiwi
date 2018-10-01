@@ -12,7 +12,7 @@ public class ModRegistry implements IModule
     public static final ItemMod FIRST_ITEM = new ItemMod("my_first_item");
 
     // Register a simple block and its ItemBlock
-    public static final BlockMod FIRST_BLOCK = new BlockMod("my_first_block");
+    public static final BlockMod FIRST_BLOCK = new BlockMod("my_first_block", Material.ROCK);
 }
 ```
 
