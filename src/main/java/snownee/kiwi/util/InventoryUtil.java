@@ -5,7 +5,6 @@ import java.util.List;
 
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.items.IItemHandler;
 import snownee.kiwi.crafting.input.ProcessingInput;
 
@@ -23,26 +22,6 @@ public class InventoryUtil
     public static boolean stackEqualExact(ItemStack stack1, ItemStack stack2)
     {
         return stack1.getItem() == stack2.getItem() && (!stack1.getHasSubtypes() || stack1.getMetadata() == stack2.getMetadata()) && ItemStack.areItemStackTagsEqual(stack1, stack2);
-    }
-
-    public static int calcRedstoneFromInventory(IItemHandler inv)
-    {
-        int i = 0;
-        float f = 0.0F;
-
-        for (int j = 0; j < inv.getSlots(); ++j)
-        {
-            ItemStack itemstack = inv.getStackInSlot(j);
-
-            if (!itemstack.isEmpty())
-            {
-                f += (float) itemstack.getCount() / (float) Math.min(inv.getSlotLimit(j), itemstack.getMaxStackSize());
-                ++i;
-            }
-        }
-
-        f = f / inv.getSlots();
-        return MathHelper.floor(f * 14.0F) + (i > 0 ? 1 : 0);
     }
 
     // TODO: check size limit

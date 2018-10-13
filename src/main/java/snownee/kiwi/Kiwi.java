@@ -141,7 +141,6 @@ public class Kiwi
         KiwiManager.ITEMS = null;
         KiwiManager.POTIONS.clear();
         KiwiManager.POTIONS = null;
-        KiwiManager.MODULES.clear();
     }
 
     public static boolean isOptionalModuleLoaded(String modid, String name)
