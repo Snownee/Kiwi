@@ -19,7 +19,7 @@ public class ModRegistry implements IModule
 ## Plugin
 
 ``` java
-// This module will be loaded will when `dependency` mod is loaded
+// This module will be loaded only when `dependency` mod is loaded
 @KiwiModule(modid = MyAddon.MODID, name = "dependency", dependency = "dependency")
 public class ModAddon implements IModule
 {
