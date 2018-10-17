@@ -1,11 +1,13 @@
 package snownee.kiwi;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Loader;
@@ -88,6 +90,19 @@ public class KiwiManager
             event.getRegistry().register(potion);
         });
         Loader.instance().setActiveModContainer(null);
+    }
+
+    @SubscribeEvent
+    public static void registerPotionEffects(RegistryEvent.Register<PotionType> event)
+    {
+        Map<String, ModContainer> map = Loader.instance().getIndexedModList();
+        POTIONS.forEach((potion, modid) -> {
+            Collection<PotionType> types = potion.getPotionTypes();
+            for (PotionType type : types)
+            {
+                event.getRegistry().register(type.setRegistryName(modid, type.getNamePrefixed("")));
+            }
+        });
     }
 
 }

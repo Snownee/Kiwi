@@ -6,6 +6,7 @@ import snownee.kiwi.IModule;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.block.BlockMod;
+import snownee.kiwi.potion.PotionMod;
 
 @KiwiModule(modid = Kiwi.MODID, optional = true)
 public class TestModule implements IModule
@@ -16,10 +17,13 @@ public class TestModule implements IModule
     // Register a simple block and its ItemBlock
     public static final BlockMod FIRST_BLOCK = new BlockMod("my_first_block", Material.ROCK);
 
+    // Register a simple potion and its PotionEffect
+    public static final PotionMod FIRST_POTION = new PotionMod("my_first_potion", false, 0, false, 0xFF0000, -1, true);
+
     @Override
     public void init()
     {
-        FIRST_ITEM.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
+        FIRST_BLOCK.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
         FIRST_ITEM.setCreativeTab(CreativeTabs.MISC);
     }
 }

@@ -1,5 +1,7 @@
 package snownee.kiwi.potion;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -7,7 +9,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.potion.PotionType;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class PotionMod extends Potion
 {
@@ -61,9 +66,15 @@ public class PotionMod extends Potion
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     public int getStatusIconIndex()
     {
         Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(getRegistryName().getNamespace(), "textures/gui/potions.png"));
         return super.getStatusIconIndex();
+    }
+
+    public Collection<PotionType> getPotionTypes()
+    {
+        return Arrays.asList(new PotionType(name, new PotionEffect(this, isBadEffect() ? 600 : 1200, 0)));
     }
 }
