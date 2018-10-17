@@ -68,12 +68,8 @@ public class KiwiManager
             if (block.hasItem())
             {
                 Loader.instance().setActiveModContainer(map.get(modid));
-                ItemModBlock item = new ItemModBlock(block.cast());
+                ItemModBlock item = new ItemModBlock(block);
                 item.setRegistryName(block.getRegistryName());
-                if (block.getItemSubtypeAmount() > 1)
-                {
-                    item.setHasSubtypes(true);
-                }
                 event.getRegistry().register(item);
             }
         });
