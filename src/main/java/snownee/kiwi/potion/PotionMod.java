@@ -18,10 +18,16 @@ public class PotionMod extends Potion
 {
     private final boolean shouldRender;
     private final boolean canCure;
+    private final boolean registerType;
     final int tickrate;
     private final String name;
 
     public PotionMod(String name, boolean shouldRender, int icon, boolean isBadEffect, int color, int tick, boolean canCure)
+    {
+        this(name, shouldRender, icon, isBadEffect, color, tick, canCure, true);
+    }
+
+    public PotionMod(String name, boolean shouldRender, int icon, boolean isBadEffect, int color, int tick, boolean canCure, boolean registerType)
     {
         super(isBadEffect, color);
         if (!isBadEffect)
@@ -31,6 +37,7 @@ public class PotionMod extends Potion
         this.name = name;
         this.shouldRender = shouldRender;
         this.canCure = canCure;
+        this.registerType = registerType;
         this.tickrate = tick;
         this.setIconIndex(icon % 8, icon / 8);
     }
@@ -75,6 +82,6 @@ public class PotionMod extends Potion
 
     public Collection<PotionType> getPotionTypes()
     {
-        return Arrays.asList(new PotionType(name, new PotionEffect(this, isBadEffect() ? 600 : 1200, 0)));
+        return registerType ? Arrays.asList(new PotionType(name, new PotionEffect(this, isBadEffect() ? 600 : 1200, 0))) : Collections.EMPTY_LIST;
     }
 }
