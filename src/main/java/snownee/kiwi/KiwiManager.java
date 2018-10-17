@@ -97,12 +97,14 @@ public class KiwiManager
     {
         Map<String, ModContainer> map = Loader.instance().getIndexedModList();
         POTIONS.forEach((potion, modid) -> {
+            Loader.instance().setActiveModContainer(map.get(modid));
             Collection<PotionType> types = potion.getPotionTypes();
             for (PotionType type : types)
             {
                 event.getRegistry().register(type.setRegistryName(modid, type.getNamePrefixed("")));
             }
         });
+        Loader.instance().setActiveModContainer(null);
     }
 
 }
