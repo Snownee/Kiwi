@@ -82,6 +82,6 @@ public class PotionMod extends Potion
 
     public Collection<PotionType> getPotionTypes()
     {
-        return registerType ? Arrays.asList(new PotionType(name, new PotionEffect(this, isBadEffect() ? 600 : 1200, 0))) : Collections.EMPTY_LIST;
+        return registerType ? Arrays.asList(new PotionType(getRegistryName().getNamespace() + "." + getRegistryName().getPath(), new PotionEffect(this, isBadEffect() ? 600 : 1200, 0))) : Collections.EMPTY_LIST;
     }
 }
