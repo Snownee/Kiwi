@@ -73,6 +73,7 @@ public class ItemModBlock extends ItemBlock implements IModItem
     @SideOnly(Side.CLIENT)
     public void addInformation(ItemStack stack, World worldIn, List<String> tooltip, ITooltipFlag flagIn)
     {
+        super.addInformation(stack, worldIn, tooltip, flagIn);
         ItemMod.addTip(stack, tooltip);
     }
 
