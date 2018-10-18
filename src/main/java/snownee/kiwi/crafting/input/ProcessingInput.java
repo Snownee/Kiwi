@@ -3,7 +3,8 @@ package snownee.kiwi.crafting.input;
 import javax.annotation.Nonnull;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.NonNullList;
+
+import java.util.List;
 
 public interface ProcessingInput
 {
@@ -18,8 +19,7 @@ public interface ProcessingInput
      * @return A list of ItemStack instances that satisfy <code>matches(e)
      * == true</code>.
      */
-    @Nonnull
-    NonNullList<ItemStack> examples();
+    @Nonnull List<ItemStack> examples();
 
     /**
      * Perform a check to determine whether the actual ItemStack satisfies

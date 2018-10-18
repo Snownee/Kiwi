@@ -1,13 +1,19 @@
 package snownee.kiwi.util.definition;
 
 import net.minecraft.block.Block;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraftforge.oredict.OreDictionary;
+import net.minecraftforge.registries.IRegistryDelegate;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.crafting.input.ProcessingInput;
+
+import javax.annotation.Nonnull;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Comparable, NBT-insensitive, size-insensitive item definition that may be used as key of Map.
@@ -44,6 +50,8 @@ public final class ItemDefinition implements Comparable<ItemDefinition>, Process
         return new ItemDefinition(item, metadata);
     }
 
+    //private static final Pattern ITEM_DEFINITION_FORMAT = Pattern.compile("(?<namespace>[\\w\\-]+):(?<path>[^A-Z]+):(?<metadata>[0-9]+)");
+
     public static ItemDefinition parse(String string, boolean allowWildcard)
     {
         String[] parts = string.split(":");
@@ -74,18 +82,18 @@ public final class ItemDefinition implements Comparable<ItemDefinition>, Process
         return ItemDefinition.of(Items.AIR);
     }
 
-    private final Item item;
+    private final IRegistryDelegate<Item> item;
     private final int metadata;
 
     public ItemDefinition(Item item, int metadata)
     {
-        this.item = item;
+        this.item = item.delegate;
         this.metadata = metadata;
     }
 
     public Item getItem()
     {
-        return item;
+        return item.get();
     }
 
     public int getMetadata()
@@ -93,19 +101,28 @@ public final class ItemDefinition implements Comparable<ItemDefinition>, Process
         return metadata;
     }
 
+    @Nonnull
     @Override
-    public NonNullList<ItemStack> examples()
+    public List<ItemStack> examples()
     {
-        NonNullList<ItemStack> stacks = NonNullList.create();
-        if (metadata == OreDictionary.WILDCARD_VALUE && item.getCreativeTab() != null)
+        if (metadata == OreDictionary.WILDCARD_VALUE)
         {
-            item.getSubItems(item.getCreativeTab(), stacks);
+            CreativeTabs itemGroup = item.get().getCreativeTab();
+            if (itemGroup != null)
+            {
+                NonNullList<ItemStack> stacks = NonNullList.create();
+                item.get().getSubItems(itemGroup, stacks);
+                return stacks;
+            }
+            else
+            {
+                return Collections.emptyList();
+            }
         }
         else
         {
-            stacks.add(this.getItemStack());
+            return Collections.singletonList(this.getItemStack());
         }
-        return stacks;
     }
 
     @Override
@@ -126,11 +143,14 @@ public final class ItemDefinition implements Comparable<ItemDefinition>, Process
     @Override
     public boolean matches(ItemStack stack)
     {
-        return stack.getItem() == this.item && (OreDictionary.WILDCARD_VALUE == metadata || stack.getMetadata() == metadata);
+        return stack.getItem().delegate == this.item && (OreDictionary.WILDCARD_VALUE == metadata || stack.getMetadata() == metadata);
     }
 
     /**
-     * Size-insensitive implementation.
+     * {@inheritDoc}
+     *
+     * @implSpec
+     * This provides a size-insensitive implementation.
      *
      * @return Constant of one (1).
      */
@@ -149,14 +169,14 @@ public final class ItemDefinition implements Comparable<ItemDefinition>, Process
     @Override
     public int compareTo(ItemDefinition o)
     {
-        int result = this.item.getRegistryName().compareTo(o.item.getRegistryName());
+        int result = this.item.name().compareTo(o.item.name());
         return result == 0 ? this.metadata - o.metadata : result;
     }
 
     @Override
     public String toString()
     {
-        return item.getRegistryName() + ":" + (metadata != OreDictionary.WILDCARD_VALUE ? metadata : "*");
+        return item.name() + ":" + (metadata != OreDictionary.WILDCARD_VALUE ? metadata : "*");
     }
 
     /**
@@ -165,12 +185,13 @@ public final class ItemDefinition implements Comparable<ItemDefinition>, Process
      */
     public ItemStack getItemStack()
     {
-        return new ItemStack(this.item, 1, this.metadata, null);
+        // TODO (3TUSK): YOU CANNOT USE OreDictionary.WILDCARD HERE! Unless we can come up a restriction on how to use this return value.
+        return new ItemStack(this.item.get(), 1, this.metadata, null);
     }
 
     @Override
     public boolean isEmpty()
     {
-        return item == Items.AIR;
+        return item.get() == Items.AIR;
     }
 }
