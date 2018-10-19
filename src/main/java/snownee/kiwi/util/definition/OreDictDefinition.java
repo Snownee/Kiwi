@@ -1,9 +1,10 @@
 package snownee.kiwi.util.definition;
 
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.NonNullList;
 import snownee.kiwi.crafting.input.ProcessingInput;
 import snownee.kiwi.util.OreUtil;
 
@@ -36,9 +37,9 @@ public class OreDictDefinition implements ProcessingInput
     }
 
     @Override
-    public NonNullList<ItemStack> examples()
+    public List<ItemStack> examples()
     {
-        return isEmpty() ? NonNullList.withSize(1, ItemStack.EMPTY) : OreUtil.getItemsFromOre(ore, size);
+        return isEmpty() ? Collections.emptyList() : OreUtil.getItemsFromOre(ore, size);
     }
 
     public ItemStack getItemStack()
@@ -103,8 +104,7 @@ final class WeirdCompartor implements Comparator<ProcessingInput>
             if (b instanceof OreDictDefinition)
             {
                 int result = ((OreDictDefinition) a).ore.compareTo(((OreDictDefinition) b).ore);
-                return result == 0 ? Integer.compare(((OreDictDefinition) b).size, ((OreDictDefinition) a).size)
-                        : result;
+                return result == 0 ? Integer.compare(((OreDictDefinition) b).size, ((OreDictDefinition) a).size) : result;
             }
             else
             {

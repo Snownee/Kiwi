@@ -1,12 +1,14 @@
 package snownee.kiwi.crafting.input;
 
+import java.util.Collections;
+import java.util.List;
+
 import javax.annotation.Nonnull;
 
 import net.minecraft.block.Block;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.NonNullList;
 
 /**
  * NBT-insensitive recipe input implementation. It also serves as a
@@ -20,8 +22,7 @@ public class RegularItemStackInput implements ProcessingInput
 
     public static RegularItemStackInput of(@Nonnull ItemStack instance)
     {
-        return instance.isEmpty() ? of(Items.AIR)
-                : new RegularItemStackInput(instance.getItem(), instance.getMetadata(), instance.getCount());
+        return instance.isEmpty() ? of(Items.AIR) : new RegularItemStackInput(instance.getItem(), instance.getMetadata(), instance.getCount());
     }
 
     public static RegularItemStackInput of(@Nonnull Block block)
@@ -62,16 +63,15 @@ public class RegularItemStackInput implements ProcessingInput
     }
 
     @Override
-    public NonNullList<ItemStack> examples()
+    public List<ItemStack> examples()
     {
-        return NonNullList.withSize(1, this.isEmpty() ? ItemStack.EMPTY : new ItemStack(item, size, meta));
+        return isEmpty() ? Collections.emptyList() : Collections.singletonList(new ItemStack(item, size, meta));
     }
 
     @Override
     public boolean matches(ItemStack stack)
     {
-        return stack.isEmpty() ? this.isEmpty()
-                : (stack.getItem() == this.item && stack.getMetadata() == this.meta && stack.getCount() >= this.size);
+        return stack.isEmpty() ? this.isEmpty() : (stack.getItem() == this.item && stack.getMetadata() == this.meta && stack.getCount() >= this.size);
     }
 
     @Override
