@@ -137,7 +137,7 @@ public final class ItemDefinition implements Comparable<ItemDefinition>, Process
             return false;
         }
         ItemDefinition that = (ItemDefinition) o;
-        return this.item == that.item && this.metadata == that.metadata;
+        return this.item.equals(that.item) && this.metadata == that.metadata;
     }
 
     @Override
