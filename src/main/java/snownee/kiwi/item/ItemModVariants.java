@@ -4,6 +4,9 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.NonNullList;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
 import org.apache.commons.lang3.Validate;
 import snownee.kiwi.client.ModelUtil;
 import snownee.kiwi.util.VariantsHolder;
@@ -21,6 +24,7 @@ public class ItemModVariants extends ItemMod
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     public void mapModel()
     {
         ModelUtil.mapItemVariantsModel(this, getName() + "_", variants, "");

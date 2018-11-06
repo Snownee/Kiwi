@@ -45,6 +45,7 @@ public class ItemModBlock extends ItemBlock implements IModItem
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     public void mapModel()
     {
         iModBlock.mapModel();
