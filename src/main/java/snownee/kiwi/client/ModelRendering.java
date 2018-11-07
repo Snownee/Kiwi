@@ -8,6 +8,7 @@ import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiManager;
 import snownee.kiwi.block.IModBlock;
 import snownee.kiwi.item.IModItem;
+import snownee.kiwi.item.ItemModBlock;
 
 @EventBusSubscriber(modid = Kiwi.MODID, value = Side.CLIENT)
 public class ModelRendering
@@ -16,6 +17,6 @@ public class ModelRendering
     public static void onModelRegister(ModelRegistryEvent event)
     {
         KiwiManager.BLOCKS.keySet().forEach(IModBlock::mapModel);
-        KiwiManager.ITEMS.keySet().forEach(IModItem::mapModel);
+        KiwiManager.ITEMS.keySet().stream().filter(item -> !(item instanceof ItemModBlock)).forEach(IModItem::mapModel);
     }
 }

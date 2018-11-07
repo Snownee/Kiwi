@@ -27,6 +27,7 @@ public class BlockMod extends Block implements IModBlock
         return name;
     }
 
+    @Override
     @SideOnly(Side.CLIENT)
     public void mapModel()
     {
