@@ -1,6 +1,7 @@
 package snownee.kiwi.block;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
@@ -17,8 +18,14 @@ public class BlockMod extends Block implements IModBlock
 
     public BlockMod(String name, Material materialIn)
     {
+        this(name, materialIn, deduceSoundType(materialIn));
+    }
+
+    public BlockMod(String name, Material materialIn, SoundType soundType)
+    {
         super(materialIn);
         this.name = name;
+        setSoundType(soundType);
     }
 
     @Override
@@ -57,5 +64,46 @@ public class BlockMod extends Block implements IModBlock
         {
             items.add(new ItemStack(this, 1, i));
         }
+    }
+
+    public static SoundType deduceSoundType(final Material material)
+    {
+        if (material == Material.WOOD || material == Material.GOURD)
+        {
+            return SoundType.WOOD;
+        }
+        if (material == Material.GROUND || material == Material.CLAY)
+        {
+            return SoundType.GROUND;
+        }
+        if (material == Material.PLANTS || material == Material.GRASS || material == Material.LEAVES || material == Material.VINE || material == Material.SPONGE || material == Material.TNT)
+        {
+            return SoundType.PLANT;
+        }
+        if (material == Material.IRON)
+        {
+            return SoundType.METAL;
+        }
+        if (material == Material.GLASS || material == Material.PORTAL || material == Material.ICE || material == Material.PACKED_ICE || material == Material.REDSTONE_LIGHT)
+        {
+            return SoundType.GLASS;
+        }
+        if (material == Material.CLOTH || material == Material.CARPET || material == Material.CACTUS || material == Material.CAKE || material == Material.FIRE)
+        {
+            return SoundType.CLOTH;
+        }
+        if (material == Material.SAND)
+        {
+            return SoundType.SAND;
+        }
+        if (material == Material.SNOW || material == Material.CRAFTED_SNOW)
+        {
+            return SoundType.SNOW;
+        }
+        if (material == Material.ANVIL)
+        {
+            return SoundType.ANVIL;
+        }
+        return SoundType.STONE;
     }
 }
