@@ -15,6 +15,7 @@ public interface IModBlock extends IForgeRegistryEntry<Block>
 
     Block cast();
 
+    @Deprecated
     default boolean hasItem()
     {
         return true;
@@ -22,13 +23,13 @@ public interface IModBlock extends IForgeRegistryEntry<Block>
 
     default int getItemSubtypeAmount()
     {
-        return 1;
+        return hasItem() ? 1 : 0;
     }
 
     @SideOnly(Side.CLIENT)
     default void mapModel()
     {
-        if (hasItem())
+        if (getItemSubtypeAmount() > 0)
         {
             ModelUtil.mapItemModel(Item.getItemFromBlock(cast()));
         }

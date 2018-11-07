@@ -31,12 +31,9 @@ public class BlockMod extends Block implements IModBlock
     @SideOnly(Side.CLIENT)
     public void mapModel()
     {
-        if (hasItem())
+        for (int i = 0; i < getItemSubtypeAmount(); i++)
         {
-            for (int i = 0; i < getItemSubtypeAmount(); i++)
-            {
-                ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(this), i, new ModelResourceLocation(getRegistryName(), "inventory"));
-            }
+            ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(this), i, new ModelResourceLocation(getRegistryName(), "inventory"));
         }
     }
 

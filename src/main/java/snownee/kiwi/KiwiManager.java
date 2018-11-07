@@ -65,7 +65,7 @@ public class KiwiManager
             event.getRegistry().register(item.cast());
         });
         BLOCKS.forEach((block, modid) -> {
-            if (block.hasItem())
+            if (block.getItemSubtypeAmount() > 0)
             {
                 Loader.instance().setActiveModContainer(map.get(modid));
                 ItemModBlock item = new ItemModBlock(block);
