@@ -26,6 +26,7 @@ public class BlockMod extends Block implements IModBlock
         super(materialIn);
         this.name = name;
         setSoundType(soundType);
+        setHardness(deduceHardness(materialIn));
     }
 
     @Override
@@ -105,5 +106,50 @@ public class BlockMod extends Block implements IModBlock
             return SoundType.ANVIL;
         }
         return SoundType.STONE;
+    }
+
+    public static float deduceHardness(final Material material)
+    {
+        if (material == Material.PLANTS || material == Material.CIRCUITS || material == Material.AIR)
+        {
+            return 0;
+        }
+        if (material == Material.ROCK)
+        {
+            return 2.5F;
+        }
+        if (material == Material.WOOD)
+        {
+            return 2;
+        }
+        if (material == Material.GRASS)
+        {
+            return 0.6F;
+        }
+        if (material == Material.SAND || material == Material.GROUND || material == Material.CLAY)
+        {
+            return 0.5F;
+        }
+        if (material == Material.GLASS)
+        {
+            return 0.3F;
+        }
+        if (material == Material.IRON || material == Material.ANVIL)
+        {
+            return 5;
+        }
+        if (material == Material.WEB)
+        {
+            return 4;
+        }
+        if (material == Material.CLOTH)
+        {
+            return 0.8F;
+        }
+        if (material == Material.WATER || material == Material.LAVA)
+        {
+            return 100;
+        }
+        return 1;
     }
 }
