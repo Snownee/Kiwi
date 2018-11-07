@@ -7,7 +7,10 @@ import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -151,5 +154,65 @@ public class BlockMod extends Block implements IModBlock
             return 100;
         }
         return 1;
+    }
+
+    @Override
+    public int getFlammability(IBlockAccess world, BlockPos pos, EnumFacing face)
+    {
+        if (material == Material.WOOD)
+        {
+            return 20;
+        }
+        if (material == Material.PLANTS)
+        {
+            return 100;
+        }
+        if (material == Material.CARPET)
+        {
+            return 20;
+        }
+        if (material == Material.VINE)
+        {
+            return 100;
+        }
+        if (material == Material.LEAVES)
+        {
+            return 60;
+        }
+        if (material == Material.CLOTH)
+        {
+            return 60;
+        }
+        return 0;
+    }
+
+    @Override
+    public int getFireSpreadSpeed(IBlockAccess world, BlockPos pos, EnumFacing face)
+    {
+        if (material == Material.WOOD)
+        {
+            return 5;
+        }
+        if (material == Material.PLANTS)
+        {
+            return 60;
+        }
+        if (material == Material.CARPET)
+        {
+            return 60;
+        }
+        if (material == Material.VINE)
+        {
+            return 15;
+        }
+        if (material == Material.LEAVES)
+        {
+            return 30;
+        }
+        if (material == Material.CLOTH)
+        {
+            return 30;
+        }
+        return 0;
     }
 }
