@@ -56,9 +56,9 @@ public final class OreUtil
             }
             String modid = item.getItem().getCreatorModId(item);
             inner:
-            for (int j = 0; j <= Math.min(i, KiwiConfig.GENERAL.orePreference.length - 1); j++) // TODO: config
+            for (int j = 0; j <= Math.min(i, KiwiConfig.GENERAL.orePreference.length - 1); j++)
             {
-                if (modid.equals(KiwiConfig.GENERAL.orePreference[j])) // TODO (Snownee): Move config to Kiwi
+                if (modid.equals(KiwiConfig.GENERAL.orePreference[j]))
                 {
                     i = j;
                     preferred = item;
@@ -70,6 +70,7 @@ public final class OreUtil
                 }
             }
         }
+        preferred = preferred.copy();
         if (!preferred.isEmpty() && preferred.getMetadata() == OreDictionary.WILDCARD_VALUE)
         {
             preferred.setItemDamage(0);
