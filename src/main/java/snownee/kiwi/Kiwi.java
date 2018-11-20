@@ -120,6 +120,7 @@ public class Kiwi
             }
 
             Kiwi.logger.info("[{}:{}]: Block: {}, Item: {}", modid, name, countBlock, countItem);
+            Loader.instance().setActiveModContainer(null);
             KiwiManager.MODULES.values().forEach(IModule::preInit);
         }
 
@@ -128,12 +129,14 @@ public class Kiwi
     @Mod.EventHandler
     public void init(FMLInitializationEvent event)
     {
+        Loader.instance().setActiveModContainer(null);
         KiwiManager.MODULES.values().forEach(IModule::init);
     }
 
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent event)
     {
+        Loader.instance().setActiveModContainer(null);
         KiwiManager.MODULES.values().forEach(IModule::postInit);
         KiwiManager.BLOCKS.clear();
         KiwiManager.BLOCKS = null;
