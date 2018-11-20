@@ -1,6 +1,6 @@
 package snownee.kiwi.client;
 
-public class Modal9Grid
+public class DrawableNineSlice
 {
     public int u;
     public int v;
@@ -11,7 +11,7 @@ public class Modal9Grid
     public int y1;
     public int y2;
 
-    public Modal9Grid(int u, int v, int x1, int y1, int x2, int y2, int width, int height)
+    public DrawableNineSlice(int u, int v, int x1, int y1, int x2, int y2, int width, int height)
     {
         this.u = u;
         this.v = v;
