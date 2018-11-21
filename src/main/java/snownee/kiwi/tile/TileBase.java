@@ -12,7 +12,7 @@ import net.minecraft.tileentity.TileEntity;
  * Base TileEntity skeleton used by all TileEntity in Cuisine. It contains several standardized
  * implementations regarding networking.
  */
-abstract class TileBase extends TileEntity
+public abstract class TileBase extends TileEntity
 {
     @Override
     public final SPacketUpdateTileEntity getUpdatePacket()
