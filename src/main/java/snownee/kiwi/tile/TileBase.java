@@ -9,7 +9,7 @@ import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 
 /**
- * Base TileEntity skeleton used by all TileEntity in Cuisine. It contains several standardized
+ * Base TileEntity skeleton used by all TileEntity. It contains several standardized
  * implementations regarding networking.
  */
 public abstract class TileBase extends TileEntity
