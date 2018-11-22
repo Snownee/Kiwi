@@ -38,6 +38,7 @@ public abstract class ComponentList extends Component
     private int headerHeight;
     protected boolean captureMouse = true;
     private int cacheContentHeight;
+    private boolean drawBackground = true;
 
     public ComponentList(GuiControl parent, int width, int top, int bottom, int left, int screenWidth, int screenHeight)
     {
@@ -57,6 +58,11 @@ public abstract class ComponentList extends Component
         this.headerHeight = headerHeight;
         if (!hasHeader)
             this.headerHeight = 0;
+    }
+
+    protected void setDrawBackground(boolean drawBackground)
+    {
+        this.drawBackground = drawBackground;
     }
 
     protected abstract int getSize();
@@ -271,30 +277,34 @@ public abstract class ComponentList extends Component
         GL11.glScissor((int) (this.offsetX * scaleW), (int) (parent.mc.displayHeight - ((offsetY + bottom) * scaleH)),
                 (int) (listWidth * scaleW), (int) (viewHeight * scaleH));
 
-        if (this.parent.mc.world != null)
+        if (drawBackground)
         {
-            this.drawGradientRect(left, top, right, bottom, 0xC0DDDDDD, 0xC0DDDDDD);
-        }
-        else // Draw dark dirt background
-        {
-            GlStateManager.disableLighting();
-            GlStateManager.disableFog();
-            this.parent.mc.renderEngine.bindTexture(Gui.OPTIONS_BACKGROUND);
-            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            final float scale = 32.0F;
-            worldr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-            worldr.pos(this.left, this.bottom, 0.0D)
-                    .tex(this.left / scale, (this.bottom + (int) this.scrollDistance) / scale)
-                    .color(0x20, 0x20, 0x20, 0xFF).endVertex();
-            worldr.pos(this.right, this.bottom, 0.0D)
-                    .tex(this.right / scale, (this.bottom + (int) this.scrollDistance) / scale)
-                    .color(0x20, 0x20, 0x20, 0xFF).endVertex();
-            worldr.pos(this.right, this.top, 0.0D)
-                    .tex(this.right / scale, (this.top + (int) this.scrollDistance) / scale)
-                    .color(0x20, 0x20, 0x20, 0xFF).endVertex();
-            worldr.pos(this.left, this.top, 0.0D).tex(this.left / scale, (this.top + (int) this.scrollDistance) / scale)
-                    .color(0x20, 0x20, 0x20, 0xFF).endVertex();
-            tess.draw();
+            if (this.parent.mc.world != null)
+            {
+                this.drawGradientRect(left, top, right, bottom, 0xC0DDDDDD, 0xC0DDDDDD);
+            }
+            else // Draw dark dirt background
+            {
+                GlStateManager.disableLighting();
+                GlStateManager.disableFog();
+                this.parent.mc.renderEngine.bindTexture(Gui.OPTIONS_BACKGROUND);
+                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+                final float scale = 32.0F;
+                worldr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
+                worldr.pos(this.left, this.bottom, 0.0D)
+                        .tex(this.left / scale, (this.bottom + (int) this.scrollDistance) / scale)
+                        .color(0x20, 0x20, 0x20, 0xFF).endVertex();
+                worldr.pos(this.right, this.bottom, 0.0D)
+                        .tex(this.right / scale, (this.bottom + (int) this.scrollDistance) / scale)
+                        .color(0x20, 0x20, 0x20, 0xFF).endVertex();
+                worldr.pos(this.right, this.top, 0.0D)
+                        .tex(this.right / scale, (this.top + (int) this.scrollDistance) / scale)
+                        .color(0x20, 0x20, 0x20, 0xFF).endVertex();
+                worldr.pos(this.left, this.top, 0.0D)
+                        .tex(this.left / scale, (this.top + (int) this.scrollDistance) / scale)
+                        .color(0x20, 0x20, 0x20, 0xFF).endVertex();
+                tess.draw();
+            }
         }
 
         int baseY = this.top + border - (int) this.scrollDistance;
@@ -366,12 +376,15 @@ public abstract class ComponentList extends Component
             }
 
             GlStateManager.disableTexture2D();
-            worldr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-            worldr.pos(scrollBarLeft, this.bottom, 0.0D).tex(0.0D, 1.0D).color(0xDD, 0xDD, 0xDD, 0xFF).endVertex();
-            worldr.pos(scrollBarRight, this.bottom, 0.0D).tex(1.0D, 1.0D).color(0xDD, 0xDD, 0xDD, 0xFF).endVertex();
-            worldr.pos(scrollBarRight, this.top, 0.0D).tex(1.0D, 0.0D).color(0xDD, 0xDD, 0xDD, 0xFF).endVertex();
-            worldr.pos(scrollBarLeft, this.top, 0.0D).tex(0.0D, 0.0D).color(0xDD, 0xDD, 0xDD, 0xFF).endVertex();
-            tess.draw();
+            if (drawBackground)
+            {
+                worldr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
+                worldr.pos(scrollBarLeft, this.bottom, 0.0D).tex(0.0D, 1.0D).color(0xDD, 0xDD, 0xDD, 0xFF).endVertex();
+                worldr.pos(scrollBarRight, this.bottom, 0.0D).tex(1.0D, 1.0D).color(0xDD, 0xDD, 0xDD, 0xFF).endVertex();
+                worldr.pos(scrollBarRight, this.top, 0.0D).tex(1.0D, 0.0D).color(0xDD, 0xDD, 0xDD, 0xFF).endVertex();
+                worldr.pos(scrollBarLeft, this.top, 0.0D).tex(0.0D, 0.0D).color(0xDD, 0xDD, 0xDD, 0xFF).endVertex();
+                tess.draw();
+            }
             worldr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
             worldr.pos(scrollBarLeft, barTop + height, 0.0D).tex(0.0D, 1.0D).color(0x80, 0x80, 0x80, 0xFF).endVertex();
             worldr.pos(scrollBarRight, barTop + height, 0.0D).tex(1.0D, 1.0D).color(0x80, 0x80, 0x80, 0xFF).endVertex();
