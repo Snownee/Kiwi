@@ -16,13 +16,8 @@ import snownee.kiwi.client.gui.GuiControl;
 public abstract class ComponentList extends Component
 {
 
-    protected final int listWidth;
     protected final int screenWidth;
     protected final int screenHeight;
-    protected final int top;
-    protected final int bottom;
-    protected final int right;
-    protected final int left;
     protected int mouseX;
     protected int mouseY;
     protected int offsetX;
@@ -40,14 +35,11 @@ public abstract class ComponentList extends Component
     private int cacheContentHeight;
     private boolean drawBackground = true;
 
-    public ComponentList(GuiControl parent, int width, int top, int bottom, int left, int screenWidth, int screenHeight)
+    public ComponentList(GuiControl parent, int width, int height, int left, int top, int screenWidth, int screenHeight)
     {
-        super(parent);
-        this.listWidth = width;
+        super(parent, width, height);
         this.top = top;
-        this.bottom = bottom;
         this.left = left;
-        this.right = width + this.left;
         this.screenWidth = screenWidth;
         this.screenHeight = screenHeight;
     }
@@ -111,7 +103,7 @@ public abstract class ComponentList extends Component
 
     private void applyScrollLimits()
     {
-        int listHeight = this.getContentHeight() - (this.bottom - this.top);
+        int listHeight = this.getContentHeight() - height;
 
         if (listHeight < 0)
         {
@@ -140,8 +132,7 @@ public abstract class ComponentList extends Component
     @Override
     public void handleMouseInput(int mouseX, int mouseY)
     {
-        boolean isHovering = mouseX >= this.left && mouseX <= this.left + this.listWidth && mouseY >= this.top
-                && mouseY <= this.bottom;
+        boolean isHovering = mouseX >= left && mouseX <= left + width && mouseY >= top && mouseY <= top + height;
         if (!isHovering)
             return;
 
@@ -167,8 +158,7 @@ public abstract class ComponentList extends Component
 
         this.drawBackground();
 
-        boolean isHovering = mouseX >= this.left && mouseX <= this.left + this.listWidth && mouseY >= this.top
-                && mouseY <= this.bottom;
+        boolean isHovering = mouseX >= left && mouseX <= left + width && mouseY >= top && mouseY <= top + height;
 
         if (!isHovering)
         {
@@ -177,11 +167,9 @@ public abstract class ComponentList extends Component
 
         int listLength = this.getSize();
         int scrollBarWidth = 6;
-        int scrollBarRight = this.left + this.listWidth;
+        int scrollBarRight = this.left + this.width;
         int scrollBarLeft = scrollBarRight - scrollBarWidth;
-        int entryLeft = this.left;
         int entryRight = scrollBarLeft - 1;
-        int viewHeight = this.bottom - this.top;
         int border = 0;
 
         if (Mouse.isButtonDown(0))
@@ -190,16 +178,15 @@ public abstract class ComponentList extends Component
             {
                 if (isHovering)
                 {
-                    int mouseListY = mouseY - this.top - this.headerHeight + (int) this.scrollDistance - border;
+                    int mouseListY = mouseY - top - this.headerHeight + (int) this.scrollDistance - border;
 
-                    if (mouseX >= entryLeft && mouseX <= entryRight && mouseListY >= 0)
+                    if (mouseX >= left && mouseX <= entryRight && mouseListY >= 0)
                     {
                         if (mouseListY >= 0)
                         {
                             if (hoveringIndex >= 0 && hoveringIndex < listLength)
                             {
-                                this.elementClicked(hoveringIndex, hoveringIndex == this.selectedIndex
-                                        && System.currentTimeMillis() - this.lastClickTime < 250L);
+                                this.elementClicked(hoveringIndex, hoveringIndex == this.selectedIndex && System.currentTimeMillis() - this.lastClickTime < 250L);
                                 this.selectedIndex = hoveringIndex;
                                 this.lastClickTime = System.currentTimeMillis();
                             }
@@ -220,26 +207,25 @@ public abstract class ComponentList extends Component
                         }
                         else
                         {
-                            this.clickHeader(mouseX - entryLeft,
-                                    mouseY - this.top + (int) this.scrollDistance - border);
+                            this.clickHeader(mouseX - left, mouseY - top + (int) this.scrollDistance - border);
                         }
                     }
 
                     if (mouseX >= scrollBarLeft && mouseX <= scrollBarRight)
                     {
                         this.scrollFactor = -1.0F;
-                        int scrollHeight = this.getContentHeight() - viewHeight - border;
+                        int scrollHeight = this.getContentHeight() - height - border;
                         if (scrollHeight < 1)
                             scrollHeight = 1;
 
-                        int var13 = (int) ((float) (viewHeight * viewHeight) / (float) this.getContentHeight());
+                        int var13 = (int) ((float) (height * height) / (float) this.getContentHeight());
 
                         if (var13 < 32)
                             var13 = 32;
-                        if (var13 > viewHeight - border * 2)
-                            var13 = viewHeight - border * 2;
+                        if (var13 > height - border * 2)
+                            var13 = height - border * 2;
 
-                        this.scrollFactor /= (float) (viewHeight - var13) / (float) scrollHeight;
+                        this.scrollFactor /= (float) (height - var13) / (float) scrollHeight;
                     }
                     else
                     {
@@ -274,14 +260,13 @@ public abstract class ComponentList extends Component
         double scaleW = parent.mc.displayWidth / res.getScaledWidth_double();
         double scaleH = parent.mc.displayHeight / res.getScaledHeight_double();
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
-        GL11.glScissor((int) (this.offsetX * scaleW), (int) (parent.mc.displayHeight - ((offsetY + bottom) * scaleH)),
-                (int) (listWidth * scaleW), (int) (viewHeight * scaleH));
+        GL11.glScissor((int) (this.offsetX * scaleW), (int) (parent.mc.displayHeight - ((offsetY + top + height) * scaleH)), (int) (width * scaleW), (int) (height * scaleH));
 
         if (drawBackground)
         {
             if (this.parent.mc.world != null)
             {
-                this.drawGradientRect(left, top, right, bottom, 0xC0DDDDDD, 0xC0DDDDDD);
+                this.drawGradientRect(left, top, left + width, top + height, 0xC0DDDDDD, 0xC0DDDDDD);
             }
             else // Draw dark dirt background
             {
@@ -291,24 +276,16 @@ public abstract class ComponentList extends Component
                 GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
                 final float scale = 32.0F;
                 worldr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-                worldr.pos(this.left, this.bottom, 0.0D)
-                        .tex(this.left / scale, (this.bottom + (int) this.scrollDistance) / scale)
-                        .color(0x20, 0x20, 0x20, 0xFF).endVertex();
-                worldr.pos(this.right, this.bottom, 0.0D)
-                        .tex(this.right / scale, (this.bottom + (int) this.scrollDistance) / scale)
-                        .color(0x20, 0x20, 0x20, 0xFF).endVertex();
-                worldr.pos(this.right, this.top, 0.0D)
-                        .tex(this.right / scale, (this.top + (int) this.scrollDistance) / scale)
-                        .color(0x20, 0x20, 0x20, 0xFF).endVertex();
-                worldr.pos(this.left, this.top, 0.0D)
-                        .tex(this.left / scale, (this.top + (int) this.scrollDistance) / scale)
-                        .color(0x20, 0x20, 0x20, 0xFF).endVertex();
+                worldr.pos(left, top + height, 0.0D).tex(left / scale, (top + height + scrollDistance) / scale).color(0x20, 0x20, 0x20, 0xFF).endVertex();
+                worldr.pos(left + width, top + height, 0.0D).tex((left + width) / scale, (top + height + scrollDistance) / scale).color(0x20, 0x20, 0x20, 0xFF).endVertex();
+                worldr.pos(left + width, top, 0.0D).tex((left + width) / scale, (top + scrollDistance) / scale).color(0x20, 0x20, 0x20, 0xFF).endVertex();
+                worldr.pos(left, top, 0.0D).tex(left / scale, (this.top + scrollDistance) / scale).color(0x20, 0x20, 0x20, 0xFF).endVertex();
                 tess.draw();
             }
         }
 
         int baseY = this.top + border - (int) this.scrollDistance;
-        int extraHeight = (this.getContentHeight() + border) - viewHeight;
+        int extraHeight = (this.getContentHeight() + border) - height;
         int contentHeight = 0;
 
         if (this.hasHeader)
@@ -324,10 +301,9 @@ public abstract class ComponentList extends Component
             contentHeight += sloltHeight;
             int slotBuffer = sloltHeight - border;
 
-            if (slotTop <= this.bottom && slotTop + slotBuffer >= this.top)
+            if (slotTop <= this.top + this.height && slotTop + slotBuffer >= this.top)
             {
-                if (isHovering && (extraHeight <= 0 || mouseX < scrollBarLeft) && mouseY >= slotTop
-                        && mouseY < slotTop + sloltHeight)
+                if (isHovering && (extraHeight <= 0 || mouseX < scrollBarLeft) && mouseY >= slotTop && mouseY < slotTop + sloltHeight)
                 {
                     hoveringIndex = slotIdx;
                 }
@@ -342,10 +318,8 @@ public abstract class ComponentList extends Component
                     worldr.pos(max, slotTop + slotBuffer + 2, 0).tex(1, 1).color(0x80, 0x80, 0x80, 0xFF).endVertex();
                     worldr.pos(max, slotTop - 2, 0).tex(1, 0).color(0x80, 0x80, 0x80, 0xFF).endVertex();
                     worldr.pos(min, slotTop - 2, 0).tex(0, 0).color(0x80, 0x80, 0x80, 0xFF).endVertex();
-                    worldr.pos(min + 1, slotTop + slotBuffer + 1, 0).tex(0, 1).color(0x00, 0x00, 0x00, 0xFF)
-                            .endVertex();
-                    worldr.pos(max - 1, slotTop + slotBuffer + 1, 0).tex(1, 1).color(0x00, 0x00, 0x00, 0xFF)
-                            .endVertex();
+                    worldr.pos(min + 1, slotTop + slotBuffer + 1, 0).tex(0, 1).color(0x00, 0x00, 0x00, 0xFF).endVertex();
+                    worldr.pos(max - 1, slotTop + slotBuffer + 1, 0).tex(1, 1).color(0x00, 0x00, 0x00, 0xFF).endVertex();
                     worldr.pos(max - 1, slotTop - 1, 0).tex(1, 0).color(0x00, 0x00, 0x00, 0xFF).endVertex();
                     worldr.pos(min + 1, slotTop - 1, 0).tex(0, 0).color(0x00, 0x00, 0x00, 0xFF).endVertex();
                     tess.draw();
@@ -361,41 +335,39 @@ public abstract class ComponentList extends Component
 
         if (extraHeight > 0) // Draw scroll bar
         {
-            int height = (viewHeight * viewHeight) / this.getContentHeight();
+            int scrollBarHeight = (height * height) / this.getContentHeight();
 
-            if (height < 32)
-                height = 32;
+            if (scrollBarHeight < 32)
+                scrollBarHeight = 32;
 
-            if (height > viewHeight - border * 2)
-                height = viewHeight - border * 2;
+            if (scrollBarHeight > height - border * 2)
+                scrollBarHeight = height - border * 2;
 
-            int barTop = (int) this.scrollDistance * (viewHeight - height) / extraHeight + this.top;
-            if (barTop < this.top)
+            int barTop = (int) this.scrollDistance * (height - scrollBarHeight) / extraHeight + top;
+            if (barTop < top)
             {
-                barTop = this.top;
+                barTop = top;
             }
 
             GlStateManager.disableTexture2D();
             if (drawBackground)
             {
                 worldr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-                worldr.pos(scrollBarLeft, this.bottom, 0.0D).tex(0.0D, 1.0D).color(0xDD, 0xDD, 0xDD, 0xFF).endVertex();
-                worldr.pos(scrollBarRight, this.bottom, 0.0D).tex(1.0D, 1.0D).color(0xDD, 0xDD, 0xDD, 0xFF).endVertex();
-                worldr.pos(scrollBarRight, this.top, 0.0D).tex(1.0D, 0.0D).color(0xDD, 0xDD, 0xDD, 0xFF).endVertex();
-                worldr.pos(scrollBarLeft, this.top, 0.0D).tex(0.0D, 0.0D).color(0xDD, 0xDD, 0xDD, 0xFF).endVertex();
+                worldr.pos(scrollBarLeft, top + height, 0.0D).tex(0.0D, 1.0D).color(0xDD, 0xDD, 0xDD, 0xFF).endVertex();
+                worldr.pos(scrollBarRight, top + height, 0.0D).tex(1.0D, 1.0D).color(0xDD, 0xDD, 0xDD, 0xFF).endVertex();
+                worldr.pos(scrollBarRight, top, 0.0D).tex(1.0D, 0.0D).color(0xDD, 0xDD, 0xDD, 0xFF).endVertex();
+                worldr.pos(scrollBarLeft, top, 0.0D).tex(0.0D, 0.0D).color(0xDD, 0xDD, 0xDD, 0xFF).endVertex();
                 tess.draw();
             }
             worldr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-            worldr.pos(scrollBarLeft, barTop + height, 0.0D).tex(0.0D, 1.0D).color(0x80, 0x80, 0x80, 0xFF).endVertex();
-            worldr.pos(scrollBarRight, barTop + height, 0.0D).tex(1.0D, 1.0D).color(0x80, 0x80, 0x80, 0xFF).endVertex();
+            worldr.pos(scrollBarLeft, barTop + scrollBarHeight, 0.0D).tex(0.0D, 1.0D).color(0x80, 0x80, 0x80, 0xFF).endVertex();
+            worldr.pos(scrollBarRight, barTop + scrollBarHeight, 0.0D).tex(1.0D, 1.0D).color(0x80, 0x80, 0x80, 0xFF).endVertex();
             worldr.pos(scrollBarRight, barTop, 0.0D).tex(1.0D, 0.0D).color(0x80, 0x80, 0x80, 0xFF).endVertex();
             worldr.pos(scrollBarLeft, barTop, 0.0D).tex(0.0D, 0.0D).color(0x80, 0x80, 0x80, 0xFF).endVertex();
             tess.draw();
             worldr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-            worldr.pos(scrollBarLeft, barTop + height - 1, 0.0D).tex(0.0D, 1.0D).color(0xC0, 0xC0, 0xC0, 0xFF)
-                    .endVertex();
-            worldr.pos(scrollBarRight - 1, barTop + height - 1, 0.0D).tex(1.0D, 1.0D).color(0xC0, 0xC0, 0xC0, 0xFF)
-                    .endVertex();
+            worldr.pos(scrollBarLeft, barTop + scrollBarHeight - 1, 0.0D).tex(0.0D, 1.0D).color(0xC0, 0xC0, 0xC0, 0xFF).endVertex();
+            worldr.pos(scrollBarRight - 1, barTop + scrollBarHeight - 1, 0.0D).tex(1.0D, 1.0D).color(0xC0, 0xC0, 0xC0, 0xFF).endVertex();
             worldr.pos(scrollBarRight - 1, barTop, 0.0D).tex(1.0D, 0.0D).color(0xC0, 0xC0, 0xC0, 0xFF).endVertex();
             worldr.pos(scrollBarLeft, barTop, 0.0D).tex(0.0D, 0.0D).color(0xC0, 0xC0, 0xC0, 0xFF).endVertex();
             tess.draw();

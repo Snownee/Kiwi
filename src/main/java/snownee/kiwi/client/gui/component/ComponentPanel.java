@@ -13,20 +13,22 @@ public class ComponentPanel extends Component
 
     public ComponentPanel(GuiControl parent, int width, int height)
     {
-        super(parent);
+        super(parent, height, width);
+        left = (parent.width - width) / 2;
+        top = (parent.height - height) / 2;
         background = new DrawableNineSlice(TEXTURE, 82, 208, 32, 32, 4, 4, 4, 4);
         background.setHeight(height);
         background.setWidth(width);
         control = new GuiControl(parent.mc, width - 8, height - 8);
-        control.offsetX = (parent.width - width) / 2 + 4;
-        control.offsetY = (parent.height - height) / 2 - 4;
+        control.offsetX = left + 4;
+        control.offsetY = top + 4;
     }
 
     @Override
     public void drawScreen(int offsetX, int offsetY, int relMouseX, int relMouseY, float partialTicks)
     {
         GlStateManager.color(1, 1, 1, 1);
-        background.draw(parent.mc, offsetX + control.offsetX - 4, offsetY + control.offsetY - 4);
+        background.draw(parent.mc, offsetX + left, offsetY + top);
         control.drawScreen(relMouseX, relMouseY, partialTicks);
     }
 

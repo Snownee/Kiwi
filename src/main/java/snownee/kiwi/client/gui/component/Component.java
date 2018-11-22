@@ -7,11 +7,17 @@ import snownee.kiwi.client.gui.GuiControl;
 public abstract class Component
 {
     private int zLevel;
+    public int width;
+    public int height;
+    public int top;
+    public int left;
     protected GuiControl parent;
 
-    public Component(GuiControl parent)
+    public Component(GuiControl parent, int width, int height)
     {
         this.parent = parent;
+        this.width = width;
+        this.height = height;
     }
 
     public int getZLevel()
