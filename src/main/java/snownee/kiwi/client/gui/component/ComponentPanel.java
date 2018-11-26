@@ -19,7 +19,7 @@ public class ComponentPanel extends Component
         background = new DrawableNineSlice(TEXTURE, 82, 208, 32, 32, 4, 4, 4, 4);
         background.setHeight(height);
         background.setWidth(width);
-        control = new GuiControl(parent.mc, width - 8, height - 8);
+        control = new GuiControl(parent.mc, width - 8, height - 8, parent);
         control.offsetX = left + 4;
         control.offsetY = top + 4;
     }

@@ -9,7 +9,7 @@ import org.lwjgl.input.Mouse;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.inventory.Container;
 
-public abstract class GuiContainerMod extends GuiContainer
+public abstract class GuiContainerMod extends GuiContainer implements IMessageHandler
 {
     public GuiControl control;
 
@@ -23,7 +23,7 @@ public abstract class GuiContainerMod extends GuiContainer
     public void initGui()
     {
         super.initGui();
-        this.control = new GuiControl(mc, width, height);
+        this.control = new GuiControl(mc, width, height, this);
     }
 
     @Override

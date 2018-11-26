@@ -2,6 +2,7 @@ package snownee.kiwi.client.gui.component;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 
+import net.minecraft.nbt.NBTTagCompound;
 import snownee.kiwi.client.gui.GuiControl;
 
 public abstract class Component
@@ -11,6 +12,7 @@ public abstract class Component
     public int height;
     public int top;
     public int left;
+    public boolean visible;
     protected GuiControl parent;
 
     public Component(GuiControl parent, int width, int height)
@@ -18,6 +20,7 @@ public abstract class Component
         this.parent = parent;
         this.width = width;
         this.height = height;
+        this.visible = true;
     }
 
     public int getZLevel()
@@ -25,7 +28,7 @@ public abstract class Component
         return zLevel;
     }
 
-    public abstract void drawScreen(int offsetX, int offsetY, int relMouseX, int relMouseY, float partialTicks2);
+    public abstract void drawScreen(int offsetX, int offsetY, int relMouseX, int relMouseY, float partialTicks);
 
     public void keyTyped(char typedChar, int keyCode)
     {
@@ -39,5 +42,15 @@ public abstract class Component
     public void onDestroy()
     {
         parent = null;
+    }
+
+    public int sendMessage(int param1, int param2)
+    {
+        return parent.messageHandler.messageReceived(parent, this, param1, param2);
+    }
+
+    public int sendMessage(NBTTagCompound data)
+    {
+        return parent.messageHandler.messageReceived(parent, this, data);
     }
 }
