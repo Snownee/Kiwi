@@ -120,9 +120,9 @@ public class Kiwi
             }
 
             Kiwi.logger.info("[{}:{}]: Block: {}, Item: {}", modid, name, countBlock, countItem);
-            Loader.instance().setActiveModContainer(null);
-            KiwiManager.MODULES.values().forEach(IModule::preInit);
         }
+        Loader.instance().setActiveModContainer(null);
+        KiwiManager.MODULES.values().forEach(IModule::preInit);
 
     }
 
