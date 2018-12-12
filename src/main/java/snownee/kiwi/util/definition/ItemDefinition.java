@@ -1,19 +1,22 @@
 package snownee.kiwi.util.definition;
 
+import java.util.Collections;
+import java.util.List;
+
+import javax.annotation.Nonnull;
+
 import net.minecraft.block.Block;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.registries.IRegistryDelegate;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.crafting.input.ProcessingInput;
-
-import javax.annotation.Nonnull;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Comparable, NBT-insensitive, size-insensitive item definition that may be used as key of Map.
@@ -57,7 +60,7 @@ public final class ItemDefinition implements Comparable<ItemDefinition>, Process
         String[] parts = string.split(":");
         if (parts.length >= 2 && parts.length <= 3)
         {
-            int meta = (allowWildcard && parts.length == 3) ? -1 : 0;
+            int meta = 0;
             if (parts.length == 3)
             {
                 if (allowWildcard && parts[2].equals("*"))
@@ -66,20 +69,27 @@ public final class ItemDefinition implements Comparable<ItemDefinition>, Process
                 }
                 else
                 {
-                    meta = Integer.parseInt(parts[2]);
+                    try
+                    {
+                        meta = Integer.parseInt(parts[2]);
+                    }
+                    catch (Exception e)
+                    {
+                    }
+                    if (!allowWildcard && meta == OreDictionary.WILDCARD_VALUE)
+                    {
+                        meta = 0;
+                    }
                 }
             }
-            if (meta >= 0)
+            Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(parts[0], parts[1]));
+            if (item != null && item != Items.AIR)
             {
-                Item item = Item.getByNameOrId(parts[0] + ":" + parts[1]);
-                if (item != null && item != Items.AIR)
-                {
-                    return new ItemDefinition(item, meta);
-                }
+                return new ItemDefinition(item, meta);
             }
         }
         Kiwi.logger.error("Fail to parse \"{}\" to ItemDefinition.", string);
-        return ItemDefinition.of(Items.AIR);
+        return ItemDefinition.EMPTY;
     }
 
     private final IRegistryDelegate<Item> item;
