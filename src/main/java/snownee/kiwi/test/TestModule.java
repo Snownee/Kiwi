@@ -1,5 +1,7 @@
 package snownee.kiwi.test;
 
+import com.jcraft.jorbis.Block;
+
 import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
 import snownee.kiwi.IModule;
@@ -14,6 +16,8 @@ public class TestModule implements IModule
     // Register a simple item. Kiwi will automatically register and map models
     public static final ItemTest FIRST_ITEM = new ItemTest("my_first_item");
 
+    public static final ItemVariantTest<Block, VariantTest> MISC = new ItemVariantTest<>("misc");
+
     // Register a simple block and its ItemBlock
     public static final BlockMod FIRST_BLOCK = new BlockMod("my_first_block", Material.ROCK);
 
@@ -25,5 +29,6 @@ public class TestModule implements IModule
     {
         FIRST_BLOCK.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
         FIRST_ITEM.setCreativeTab(CreativeTabs.MISC);
+        MISC.setCreativeTab(CreativeTabs.MISC);
     }
 }

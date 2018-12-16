@@ -12,6 +12,8 @@ import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import snownee.kiwi.Kiwi;
+import snownee.kiwi.item.IVariant;
+import snownee.kiwi.item.ItemModVariantsNew;
 import snownee.kiwi.util.VariantsHolder.Variant;
 
 import java.util.List;
@@ -40,6 +42,12 @@ public final class ModelUtil
     {
         String modID = Objects.requireNonNull(item.getRegistryName()).getNamespace();
         variants.forEach(variant -> ModelLoader.setCustomModelResourceLocation(item, variant.getMeta(), new ModelResourceLocation(modID + ":" + prefix + variant.getValue().getName() + suffix, "inventory")));
+    }
+
+    public static void mapItemVariantsModelNew(ItemModVariantsNew<?, ?> item, String prefix, String suffix)
+    {
+        String modID = Objects.requireNonNull(item.getRegistryName()).getNamespace();
+        item.getVariants().forEach(variant -> ModelLoader.setCustomModelResourceLocation(item, variant.getMeta(), new ModelResourceLocation(modID + ":" + prefix + variant.getName() + suffix, "inventory")));
     }
 
     public static void mapFluidModel(BlockFluidBase fluidBlock)
