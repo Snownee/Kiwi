@@ -64,8 +64,13 @@ public class Kiwi
                 Boolean enabled = KiwiConfig.MODULES.modules.get(modid + ":" + name);
                 if (enabled == null)
                 {
-                    KiwiConfig.MODULES.modules.put(modid + ":" + name, !Kiwi.MODID.equals(modid));
-                    if (Kiwi.MODID.equals(modid))
+                    Boolean disabledByDefault = (Boolean) data.getAnnotationInfo().get("disabledByDefault");
+                    if (disabledByDefault == null)
+                    {
+                        disabledByDefault = false;
+                    }
+                    KiwiConfig.MODULES.modules.put(modid + ":" + name, !disabledByDefault);
+                    if (disabledByDefault)
                     {
                         continue;
                     }

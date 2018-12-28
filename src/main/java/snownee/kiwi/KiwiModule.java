@@ -16,4 +16,6 @@ public @interface KiwiModule
     String dependency() default "";
 
     boolean optional() default false;
+
+    boolean disabledByDefault() default false;
 }

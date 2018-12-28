@@ -10,7 +10,7 @@ import snownee.kiwi.KiwiModule;
 import snownee.kiwi.block.BlockMod;
 import snownee.kiwi.potion.PotionMod;
 
-@KiwiModule(modid = Kiwi.MODID, optional = true)
+@KiwiModule(modid = Kiwi.MODID, optional = true, disabledByDefault = true)
 public class TestModule implements IModule
 {
     // Register a simple item. Kiwi will automatically register and map models
