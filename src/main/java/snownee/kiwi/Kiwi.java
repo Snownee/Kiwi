@@ -2,8 +2,8 @@ package snownee.kiwi;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Map.Entry;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.logging.log4j.Logger;
@@ -40,8 +40,7 @@ public class Kiwi
     public static Logger logger;
 
     @Mod.EventHandler
-    public void preInit(FMLPreInitializationEvent event)
-            throws IllegalArgumentException, IllegalAccessException, InstantiationException, ClassNotFoundException
+    public void preInit(FMLPreInitializationEvent event) throws IllegalArgumentException, IllegalAccessException, InstantiationException, ClassNotFoundException
     {
         logger = event.getModLog();
 
@@ -158,6 +157,11 @@ public class Kiwi
 
     public static boolean isOptionalModuleLoaded(String modid, String name)
     {
-        return KiwiConfig.MODULES.modules.getOrDefault(modid + ":" + name, false);
+        return isOptionalModuleLoaded(modid + ":" + name);
+    }
+
+    public static boolean isOptionalModuleLoaded(String module)
+    {
+        return KiwiConfig.MODULES.modules.getOrDefault(module, false);
     }
 }
