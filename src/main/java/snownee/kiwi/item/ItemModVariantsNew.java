@@ -26,7 +26,7 @@ public class ItemModVariantsNew<T, E extends IVariant<T>> extends ItemMod
     @SideOnly(Side.CLIENT)
     public void mapModel()
     {
-        ModelUtil.mapItemVariantsModelNew(this, getName() + "_", "");
+        ModelUtil.mapItemVariantsModelNew(this, getName() + "_", this.values, "");
     }
 
     public List<E> getVariants()

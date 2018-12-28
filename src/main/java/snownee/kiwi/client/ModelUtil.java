@@ -16,6 +16,7 @@ import snownee.kiwi.item.IVariant;
 import snownee.kiwi.item.ItemModVariantsNew;
 import snownee.kiwi.util.VariantsHolder.Variant;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -44,10 +45,10 @@ public final class ModelUtil
         variants.forEach(variant -> ModelLoader.setCustomModelResourceLocation(item, variant.getMeta(), new ModelResourceLocation(modID + ":" + prefix + variant.getValue().getName() + suffix, "inventory")));
     }
 
-    public static void mapItemVariantsModelNew(ItemModVariantsNew<?, ?> item, String prefix, String suffix)
+    public static void mapItemVariantsModelNew(Item item, String prefix, IVariant<?>[] variants, String suffix)
     {
         String modID = Objects.requireNonNull(item.getRegistryName()).getNamespace();
-        item.getVariants().forEach(variant -> ModelLoader.setCustomModelResourceLocation(item, variant.getMeta(), new ModelResourceLocation(modID + ":" + prefix + variant.getName() + suffix, "inventory")));
+        Arrays.asList(variants).forEach(variant -> ModelLoader.setCustomModelResourceLocation(item, variant.getMeta(), new ModelResourceLocation(modID + ":" + prefix + variant.getName() + suffix, "inventory")));
     }
 
     public static void mapFluidModel(BlockFluidBase fluidBlock)
