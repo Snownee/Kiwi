@@ -62,7 +62,7 @@ public class ItemModVariantsNew<T, E extends IVariant<T>> extends ItemMod
     {
         if (this.isInCreativeTab(tab))
         {
-            Arrays.asList(values).forEach(v -> items.add(getItemStack(v)));
+            getVariants().forEach(v -> items.add(getItemStack(v)));
         }
     }
 
