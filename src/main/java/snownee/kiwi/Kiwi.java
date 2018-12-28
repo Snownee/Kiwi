@@ -3,6 +3,7 @@ package snownee.kiwi;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Map.Entry;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.logging.log4j.Logger;
@@ -12,6 +13,7 @@ import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.discovery.ASMDataTable;
 import net.minecraftforge.fml.common.discovery.ASMDataTable.ASMData;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -47,6 +49,7 @@ public class Kiwi
         Set<ASMData> allModules = table.getAll(KiwiModule.class.getName());
         logger.info("Processing " + allModules.size() + " KiwiModule annotations");
 
+        Map<String, ModContainer> map = Loader.instance().getIndexedModList();
         for (ASMData data : allModules)
         {
             String modid = (String) data.getAnnotationInfo().get("modid");
@@ -78,8 +81,10 @@ public class Kiwi
                 continue;
             }
             Class<?> asmClass = Class.forName(data.getClassName());
+            Loader.instance().setActiveModContainer(map.get(modid));
             IModule instance = asmClass.asSubclass(IModule.class).newInstance();
             KiwiManager.addInstance(new ResourceLocation(modid, name), instance);
+            Loader.instance().setActiveModContainer(null);
         }
         ConfigManager.sync(MODID, Config.Type.INSTANCE);
 
