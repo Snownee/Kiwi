@@ -2,6 +2,7 @@ package snownee.kiwi;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import net.minecraft.block.Block;
@@ -23,6 +24,7 @@ import snownee.kiwi.potion.PotionMod;
 public class KiwiManager
 {
     public static final HashMap<ResourceLocation, IModule> MODULES = new HashMap<>();
+    public static final HashSet<ResourceLocation> ENABLED_MODULES = new HashSet<>();
     public static Map<IModBlock, String> BLOCKS = new HashMap<>();
     public static Map<IModItem, String> ITEMS = new HashMap<>();
     public static Map<PotionMod, String> POTIONS = new HashMap<>();
@@ -40,6 +42,7 @@ public class KiwiManager
         else
         {
             MODULES.put(resourceLocation, module);
+            ENABLED_MODULES.add(resourceLocation);
         }
     }
 

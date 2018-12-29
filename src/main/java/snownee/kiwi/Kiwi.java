@@ -157,11 +157,11 @@ public class Kiwi
 
     public static boolean isOptionalModuleLoaded(String modid, String name)
     {
-        return isOptionalModuleLoaded(modid + ":" + name);
+        return isLoaded(new ResourceLocation(modid, name));
     }
 
-    public static boolean isOptionalModuleLoaded(String module)
+    public static boolean isLoaded(ResourceLocation module)
     {
-        return KiwiConfig.MODULES.modules.getOrDefault(module, false);
+        return KiwiManager.ENABLED_MODULES.contains(module);
     }
 }

@@ -3,6 +3,6 @@
     "no_containers": "snownee.kiwi.crafting.RecipeNoContainers$Factory"
   },
   "conditions": {
-    "optional_enabled": "snownee.kiwi.crafting.ConditionOptionalEnabled"
+    "is_loaded": "snownee.kiwi.crafting.ConditionModuleLoaded"
   }
 }
