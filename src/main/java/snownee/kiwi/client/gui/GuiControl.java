@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.nbt.NBTTagCompound;
 import snownee.kiwi.client.gui.component.Component;
 
@@ -180,6 +181,12 @@ public class GuiControl implements IMessageHandler
     public int messageReceived(GuiControl control, Component component, NBTTagCompound data)
     {
         return this.messageHandler.messageReceived(control, component, data);
+    }
+
+    @Override
+    public void setTooltip(GuiControl control, Component component, List<String> tooltip, FontRenderer fontRenderer)
+    {
+        this.messageHandler.setTooltip(control, component, tooltip, fontRenderer);
     }
 
 }

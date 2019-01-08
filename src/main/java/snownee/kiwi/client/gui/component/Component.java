@@ -1,7 +1,11 @@
 package snownee.kiwi.client.gui.component;
 
+import java.util.List;
+
+import javax.annotation.Nullable;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.nbt.NBTTagCompound;
 import snownee.kiwi.client.gui.GuiControl;
 
@@ -52,5 +56,10 @@ public abstract class Component
     public int sendMessage(NBTTagCompound data)
     {
         return parent.messageHandler.messageReceived(parent, this, data);
+    }
+
+    public void setTooltip(List<String> tooltip, @Nullable FontRenderer fontRenderer)
+    {
+        parent.messageHandler.setTooltip(parent, this, tooltip, fontRenderer);
     }
 }

@@ -1,17 +1,22 @@
 package snownee.kiwi.client.gui;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 
 import org.lwjgl.input.Mouse;
 
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.inventory.Container;
+import snownee.kiwi.client.gui.component.Component;
 
 public abstract class GuiContainerMod extends GuiContainer implements IMessageHandler
 {
     public GuiControl control;
+    protected List<String> tooltip;
+    protected FontRenderer tooltipFont;
 
     public GuiContainerMod(Container container)
     {
@@ -32,6 +37,16 @@ public abstract class GuiContainerMod extends GuiContainer implements IMessageHa
         this.drawDefaultBackground();
         control.drawScreen(mouseX, mouseY, partialTicks);
         super.drawScreen(mouseX, mouseY, partialTicks);
+        if (tooltip != null && !tooltip.isEmpty())
+        {
+            if (tooltipFont == null)
+            {
+                tooltipFont = fontRenderer;
+            }
+            drawHoveringText(tooltip, mouseX, mouseY, tooltipFont);
+        }
+        this.tooltip = null;
+        this.tooltipFont = null;
     }
 
     @Override
@@ -48,6 +63,13 @@ public abstract class GuiContainerMod extends GuiContainer implements IMessageHa
         int mouseY = height - Mouse.getEventY() * height / mc.displayHeight - 1;
         super.handleMouseInput();
         control.handleMouseInput(mouseX, mouseY);
+    }
+
+    @Override
+    public void setTooltip(GuiControl control, Component component, List<String> tooltip, FontRenderer fontRenderer)
+    {
+        this.tooltip = tooltip;
+        this.tooltipFont = fontRenderer;
     }
 
     @Override
