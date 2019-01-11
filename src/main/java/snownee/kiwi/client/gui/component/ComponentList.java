@@ -120,9 +120,9 @@ public abstract class ComponentList extends Component
             this.scrollDistance = 0.0F;
         }
 
-        if (this.scrollDistance > (float) listHeight)
+        if (this.scrollDistance > listHeight)
         {
-            this.scrollDistance = (float) listHeight;
+            this.scrollDistance = listHeight;
         }
     }
 
@@ -143,7 +143,7 @@ public abstract class ComponentList extends Component
         int scroll = Mouse.getEventDWheel();
         if (scroll != 0)
         {
-            this.scrollDistance += (float) ((-1 * scroll / 120.0F) * cacheContentHeight / getSize() / 2);
+            this.scrollDistance += (-1 * scroll / 120.0F) * cacheContentHeight / getSize() / 2;
         }
     }
 
@@ -244,8 +244,8 @@ public abstract class ComponentList extends Component
             }
             else if (this.initialMouseClickY >= 0.0F)
             {
-                this.scrollDistance -= ((float) mouseY - this.initialMouseClickY) * this.scrollFactor;
-                this.initialMouseClickY = (float) mouseY;
+                this.scrollDistance -= (mouseY - this.initialMouseClickY) * this.scrollFactor;
+                this.initialMouseClickY = mouseY;
             }
         }
         else

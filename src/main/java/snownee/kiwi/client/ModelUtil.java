@@ -13,7 +13,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.item.IVariant;
-import snownee.kiwi.item.ItemModVariantsNew;
 import snownee.kiwi.util.VariantsHolder.Variant;
 
 import java.util.Arrays;

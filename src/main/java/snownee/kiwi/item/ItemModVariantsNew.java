@@ -2,8 +2,6 @@ package snownee.kiwi.item;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
-
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
