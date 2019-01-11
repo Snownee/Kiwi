@@ -1,5 +1,8 @@
 {
   "recipes": {
     "no_containers": "snownee.kiwi.crafting.RecipeNoContainers$Factory"
+  },
+  "conditions": {
+    "is_loaded": "snownee.kiwi.crafting.ConditionModuleLoaded"
   }
 }

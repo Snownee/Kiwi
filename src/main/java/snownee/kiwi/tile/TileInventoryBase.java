@@ -20,9 +20,15 @@ public class TileInventoryBase extends TileBase
     {
         private final int stackLimit;
 
-        StackHandler(TileInventoryBase tile, int i, int stackLimit)
+        @Deprecated
+        StackHandler(TileInventoryBase tile, int slot, int stackLimit)
         {
-            super(i);
+            this(slot, stackLimit);
+        }
+
+        StackHandler(int slot, int stackLimit)
+        {
+            super(slot);
             this.stackLimit = stackLimit;
         }
 
@@ -71,7 +77,7 @@ public class TileInventoryBase extends TileBase
 
     public TileInventoryBase(int slot, int stackLimit)
     {
-        stacks = new StackHandler(this, slot, stackLimit);
+        stacks = new StackHandler(slot, stackLimit);
     }
 
     @Override

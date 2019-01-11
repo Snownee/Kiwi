@@ -84,4 +84,10 @@ public class PotionMod extends Potion
     {
         return registerType ? Arrays.asList(new PotionType(getRegistryName().getNamespace() + "." + getRegistryName().getPath(), new PotionEffect(this, isBadEffect() ? 600 : 1200, 0))) : Collections.EMPTY_LIST;
     }
+
+    @Override
+    public boolean isReady(int duration, int amplifier)
+    {
+        return tickrate > 0 && duration % tickrate == 0;
+    }
 }
