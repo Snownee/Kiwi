@@ -242,6 +242,26 @@ public class NBTUtil
         return 0;
     }
 
+    public NBTUtil setBoolean(String key, boolean value)
+    {
+        getTagInternal(key).setBoolean(getLastNode(key), value);
+        return this;
+    }
+
+    public boolean getBoolean(String key, boolean defaultValue)
+    {
+        NBTTagCompound subTag = getTagInternal(key, false, true);
+        if (subTag != null)
+        {
+            String actualKey = getLastNode(key);
+            if (subTag.hasKey(actualKey, Tag.BYTE))
+            {
+                return subTag.getBoolean(actualKey);
+            }
+        }
+        return defaultValue;
+    }
+
     public NBTUtil setString(String key, String value)
     {
         getTagInternal(key).setString(getLastNode(key), value);
