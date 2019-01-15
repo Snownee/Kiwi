@@ -5,6 +5,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 import snownee.kiwi.client.AdvancedFontRenderer;
@@ -27,12 +28,9 @@ public class ItemTest extends ItemMod
     @Override
     public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn)
     {
-        if (handIn == EnumHand.MAIN_HAND)
-        {
-            ItemStack stack = playerIn.getHeldItem(handIn);
-            NBTTagCompound tag = TagUtil.of(stack).setInt("Fluid.Amount", 1000).getTag("Fluid");
-            System.out.println(tag);
-        }
-        return super.onItemRightClick(worldIn, playerIn, handIn);
+        ItemStack stack = playerIn.getHeldItem(handIn);
+        NBTTagCompound tag = TagUtil.of(stack).setInt("Fluid.Amount", 1000).getTag("Fluid");
+        System.out.println(tag);
+        return new ActionResult<>(EnumActionResult.SUCCESS, stack);
     }
 }
