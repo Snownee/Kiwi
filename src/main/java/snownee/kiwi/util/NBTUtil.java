@@ -7,7 +7,7 @@ import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.util.Constants.NBT;
 
-public class TagUtil
+public class NBTUtil
 {
     public static class Tag
     {
@@ -32,7 +32,7 @@ public class TagUtil
     @Nullable
     private NBTTagCompound tag;
 
-    private TagUtil(@Nullable NBTTagCompound tag, @Nullable ItemStack stack)
+    private NBTUtil(@Nullable NBTTagCompound tag, @Nullable ItemStack stack)
     {
         this.stack = stack;
         this.tag = tag;
@@ -112,13 +112,13 @@ public class TagUtil
         }
     }
 
-    public TagUtil setTag(String key, NBTBase value)
+    public NBTUtil setTag(String key, NBTBase value)
     {
         getTagInternal(key).setTag(getLastNode(key), value);
         return this;
     }
 
-    public TagUtil setInt(String key, int value)
+    public NBTUtil setInt(String key, int value)
     {
         getTagInternal(key).setInteger(getLastNode(key), value);
         return this;
@@ -131,7 +131,7 @@ public class TagUtil
         return subTag.hasKey(actualKey, Tag.INT) ? subTag.getInteger(actualKey) : 0;
     }
 
-    public TagUtil setLong(String key, long value)
+    public NBTUtil setLong(String key, long value)
     {
         getTagInternal(key).setLong(getLastNode(key), value);
         return this;
@@ -144,7 +144,7 @@ public class TagUtil
         return subTag.hasKey(actualKey, Tag.LONG) ? subTag.getLong(actualKey) : 0;
     }
 
-    public TagUtil setShort(String key, short value)
+    public NBTUtil setShort(String key, short value)
     {
         getTagInternal(key).setShort(getLastNode(key), value);
         return this;
@@ -157,7 +157,7 @@ public class TagUtil
         return subTag.hasKey(actualKey, Tag.SHORT) ? subTag.getShort(actualKey) : 0;
     }
 
-    public TagUtil setDouble(String key, double value)
+    public NBTUtil setDouble(String key, double value)
     {
         getTagInternal(key).setDouble(getLastNode(key), value);
         return this;
@@ -170,7 +170,7 @@ public class TagUtil
         return subTag.hasKey(actualKey, Tag.DOUBLE) ? subTag.getDouble(actualKey) : 0;
     }
 
-    public TagUtil setFloat(String key, float value)
+    public NBTUtil setFloat(String key, float value)
     {
         getTagInternal(key).setFloat(getLastNode(key), value);
         return this;
@@ -183,7 +183,7 @@ public class TagUtil
         return subTag.hasKey(actualKey, Tag.FLOAT) ? subTag.getFloat(actualKey) : 0;
     }
 
-    public TagUtil setByte(String key, byte value)
+    public NBTUtil setByte(String key, byte value)
     {
         getTagInternal(key).setFloat(getLastNode(key), value);
         return this;
@@ -196,7 +196,7 @@ public class TagUtil
         return subTag.hasKey(actualKey, Tag.BYTE) ? subTag.getByte(actualKey) : 0;
     }
 
-    public TagUtil setString(String key, String value)
+    public NBTUtil setString(String key, String value)
     {
         getTagInternal(key).setString(getLastNode(key), value);
         return this;
@@ -209,7 +209,7 @@ public class TagUtil
         return subTag.hasKey(actualKey, Tag.STRING) ? subTag.getString(actualKey) : "";
     }
 
-    public TagUtil setIntArray(String key, int[] value)
+    public NBTUtil setIntArray(String key, int[] value)
     {
         getTagInternal(key).setIntArray(getLastNode(key), value);
         return this;
@@ -222,7 +222,7 @@ public class TagUtil
         return subTag.hasKey(actualKey, Tag.INT_ARRAY) ? subTag.getIntArray(actualKey) : new int[0];
     }
 
-    public TagUtil setByteArray(String key, byte[] value)
+    public NBTUtil setByteArray(String key, byte[] value)
     {
         getTagInternal(key).setByteArray(getLastNode(key), value);
         return this;
@@ -247,7 +247,7 @@ public class TagUtil
     }
 
     // TODO: remove parent if empty?
-    public TagUtil remove(String key)
+    public NBTUtil remove(String key)
     {
         NBTTagCompound subTag = getTagInternal(key, false, true);
         if (subTag != null)
@@ -269,19 +269,19 @@ public class TagUtil
         return stack == null ? ItemStack.EMPTY : stack;
     }
 
-    public static TagUtil of(ItemStack stack)
+    public static NBTUtil of(ItemStack stack)
     {
-        return new TagUtil(stack.getTagCompound(), stack);
+        return new NBTUtil(stack.getTagCompound(), stack);
     }
 
-    public static TagUtil of(NBTTagCompound tag)
+    public static NBTUtil of(NBTTagCompound tag)
     {
-        return new TagUtil(tag, null);
+        return new NBTUtil(tag, null);
     }
 
-    public static TagUtil of()
+    public static NBTUtil of()
     {
-        return new TagUtil(null, null);
+        return new NBTUtil(null, null);
     }
 
 }

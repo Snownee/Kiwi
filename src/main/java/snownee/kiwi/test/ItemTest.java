@@ -10,7 +10,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 import snownee.kiwi.client.AdvancedFontRenderer;
 import snownee.kiwi.item.ItemMod;
-import snownee.kiwi.util.TagUtil;
+import snownee.kiwi.util.NBTUtil;
 
 public class ItemTest extends ItemMod
 {
@@ -29,7 +29,7 @@ public class ItemTest extends ItemMod
     public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn)
     {
         ItemStack stack = playerIn.getHeldItem(handIn);
-        NBTTagCompound tag = TagUtil.of(stack).setInt("Fluid.Amount", 1000).getTag("Fluid");
+        NBTTagCompound tag = NBTUtil.of(stack).setInt("Fluid.Amount", 1000).getTag("Fluid");
         System.out.println(tag);
         return new ActionResult<>(EnumActionResult.SUCCESS, stack);
     }
