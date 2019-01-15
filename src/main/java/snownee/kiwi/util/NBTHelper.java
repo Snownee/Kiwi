@@ -48,7 +48,7 @@ public class NBTHelper
 
     public NBTTagCompound getTag(String key)
     {
-        return getTag(key, true);
+        return getTag(key, false);
     }
 
     public NBTTagCompound getTag(String key, boolean createIfNull)
@@ -325,7 +325,7 @@ public class NBTHelper
 
     public NBTHelper setBlockState(String key, IBlockState value)
     {
-        NBTUtil.writeBlockState(getTag(key), value);
+        NBTUtil.writeBlockState(getTag(key, true), value);
         return this;
     }
 
@@ -342,7 +342,7 @@ public class NBTHelper
 
     public NBTHelper setGameProfile(String key, GameProfile value)
     {
-        NBTUtil.writeGameProfile(getTag(key), value);
+        NBTUtil.writeGameProfile(getTag(key, true), value);
         return this;
     }
 
