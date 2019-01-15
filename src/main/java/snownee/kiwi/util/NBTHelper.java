@@ -502,7 +502,7 @@ public class NBTHelper
         return new NBTHelper(tag, null);
     }
 
-    public static NBTHelper of()
+    public static NBTHelper create()
     {
         return new NBTHelper(null, null);
     }
