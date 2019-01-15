@@ -5,25 +5,26 @@ import javax.annotation.Nullable;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.common.util.Constants.NBT;
 
 public class TagUtil
 {
     public static class Tag
     {
-        public static final int END = 0;
-        public static final int BYTE = 1;
-        public static final int SHORT = 2;
-        public static final int INT = 3;
-        public static final int LONG = 4;
-        public static final int FLOAT = 5;
-        public static final int DOUBLE = 6;
-        public static final int BYTE_ARRAY = 7;
-        public static final int STRING = 8;
-        public static final int LIST = 9;
-        public static final int COMPOUND = 10;
-        public static final int INT_ARRAY = 11;
-        public static final int LONG_ARRAY = 12;
-        public static final int ANY_NUMERIC = 99;
+        public static final int END = NBT.TAG_END;
+        public static final int BYTE = NBT.TAG_BYTE;
+        public static final int SHORT = NBT.TAG_SHORT;
+        public static final int INT = NBT.TAG_INT;
+        public static final int LONG = NBT.TAG_LONG;
+        public static final int FLOAT = NBT.TAG_FLOAT;
+        public static final int DOUBLE = NBT.TAG_DOUBLE;
+        public static final int BYTE_ARRAY = NBT.TAG_BYTE_ARRAY;
+        public static final int STRING = NBT.TAG_STRING;
+        public static final int LIST = NBT.TAG_LIST;
+        public static final int COMPOUND = NBT.TAG_COMPOUND;
+        public static final int INT_ARRAY = NBT.TAG_INT_ARRAY;
+        public static final int LONG_ARRAY = NBT.TAG_LONG_ARRAY;
+        public static final int ANY_NUMERIC = NBT.TAG_ANY_NUMERIC;
     }
 
     @Nullable
@@ -257,9 +258,15 @@ public class TagUtil
         return this;
     }
 
+    @Nullable
     public NBTTagCompound get()
     {
         return tag;
+    }
+
+    public ItemStack getItem()
+    {
+        return stack == null ? ItemStack.EMPTY : stack;
     }
 
     public static TagUtil of(ItemStack stack)
