@@ -1,10 +1,13 @@
 package snownee.kiwi.util;
 
+import java.util.UUID;
+
 import javax.annotation.Nullable;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraftforge.common.util.Constants.NBT;
 
 public class NBTUtil
@@ -78,6 +81,7 @@ public class NBTUtil
         }
         for (int i = 0; i < length; ++i)
         {
+            // TODO: list support. e.g. a.b[2].c.d
             if (!subTag.hasKey(parts[i], Tag.COMPOUND))
             {
                 if (createIfNull)
@@ -202,11 +206,12 @@ public class NBTUtil
         return this;
     }
 
+    @Nullable
     public String getString(String key)
     {
         NBTTagCompound subTag = getTagInternal(key);
         String actualKey = getLastNode(key);
-        return subTag.hasKey(actualKey, Tag.STRING) ? subTag.getString(actualKey) : "";
+        return subTag.hasKey(actualKey, Tag.STRING) ? subTag.getString(actualKey) : null;
     }
 
     public NBTUtil setIntArray(String key, int[] value)
@@ -233,6 +238,35 @@ public class NBTUtil
         NBTTagCompound subTag = getTagInternal(key);
         String actualKey = getLastNode(key);
         return subTag.hasKey(actualKey, Tag.BYTE_ARRAY) ? subTag.getByteArray(actualKey) : new byte[0];
+    }
+
+    public NBTUtil setUUID(String key, UUID value)
+    {
+        getTagInternal(key).setUniqueId(getLastNode(key), value);
+        return this;
+    }
+
+    @Nullable
+    public UUID getUUID(String key)
+    {
+        NBTTagCompound subTag = getTagInternal(key);
+        String actualKey = getLastNode(key);
+        if (!subTag.hasKey(actualKey + "Most", Tag.LONG) || !subTag.hasKey(actualKey + "Least", Tag.LONG))
+        {
+            return null;
+        }
+        return subTag.getUniqueId(actualKey);
+    }
+
+    public NBTTagList getTagList(String key, int type)
+    {
+        NBTTagCompound subTag = getTagInternal(key);
+        String actualKey = getLastNode(key);
+        if (subTag.hasKey(actualKey, Tag.LIST))
+        {
+            return subTag.getTagList(actualKey, type);
+        }
+        return null;
     }
 
     public boolean hasTag(String key, int type)
