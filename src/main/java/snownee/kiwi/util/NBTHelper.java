@@ -135,6 +135,11 @@ public class NBTHelper
 
     public int getInt(String key)
     {
+        return getInt(key, 0);
+    }
+
+    public int getInt(String key, int defaultValue)
+    {
         NBTTagCompound subTag = getTagInternal(key, false, true);
         if (subTag != null)
         {
@@ -144,7 +149,7 @@ public class NBTHelper
                 return subTag.getInteger(actualKey);
             }
         }
-        return 0;
+        return defaultValue;
     }
 
     public NBTHelper setLong(String key, long value)
@@ -155,6 +160,11 @@ public class NBTHelper
 
     public long getLong(String key)
     {
+        return getLong(key, 0);
+    }
+
+    public long getLong(String key, long defaultValue)
+    {
         NBTTagCompound subTag = getTagInternal(key, false, true);
         if (subTag != null)
         {
@@ -164,7 +174,7 @@ public class NBTHelper
                 return subTag.getLong(actualKey);
             }
         }
-        return 0;
+        return defaultValue;
     }
 
     public NBTHelper setShort(String key, short value)
@@ -173,7 +183,12 @@ public class NBTHelper
         return this;
     }
 
-    public long getShort(String key)
+    public short getShort(String key)
+    {
+        return getShort(key, (short) 0);
+    }
+
+    public short getShort(String key, short defaultValue)
     {
         NBTTagCompound subTag = getTagInternal(key, false, true);
         if (subTag != null)
@@ -184,7 +199,7 @@ public class NBTHelper
                 return subTag.getShort(actualKey);
             }
         }
-        return 0;
+        return defaultValue;
     }
 
     public NBTHelper setDouble(String key, double value)
@@ -195,6 +210,11 @@ public class NBTHelper
 
     public double getDouble(String key)
     {
+        return getDouble(key, 0);
+    }
+
+    public double getDouble(String key, double defaultValue)
+    {
         NBTTagCompound subTag = getTagInternal(key, false, true);
         if (subTag != null)
         {
@@ -204,7 +224,7 @@ public class NBTHelper
                 return subTag.getDouble(actualKey);
             }
         }
-        return 0;
+        return defaultValue;
     }
 
     public NBTHelper setFloat(String key, float value)
@@ -215,6 +235,11 @@ public class NBTHelper
 
     public float getFloat(String key)
     {
+        return getFloat(key, 0);
+    }
+
+    public float getFloat(String key, float defaultValue)
+    {
         NBTTagCompound subTag = getTagInternal(key, false, true);
         if (subTag != null)
         {
@@ -224,7 +249,7 @@ public class NBTHelper
                 return subTag.getFloat(actualKey);
             }
         }
-        return 0;
+        return defaultValue;
     }
 
     public NBTHelper setByte(String key, byte value)
@@ -235,6 +260,11 @@ public class NBTHelper
 
     public byte getByte(String key)
     {
+        return getByte(key, (byte) 0);
+    }
+
+    public byte getByte(String key, byte defaultValue)
+    {
         NBTTagCompound subTag = getTagInternal(key, false, true);
         if (subTag != null)
         {
@@ -244,13 +274,18 @@ public class NBTHelper
                 return subTag.getByte(actualKey);
             }
         }
-        return 0;
+        return defaultValue;
     }
 
     public NBTHelper setBoolean(String key, boolean value)
     {
         getTagInternal(key).setBoolean(getLastNode(key), value);
         return this;
+    }
+
+    public boolean getBoolean(String key)
+    {
+        return getBoolean(key, false);
     }
 
     public boolean getBoolean(String key, boolean defaultValue)
@@ -331,6 +366,11 @@ public class NBTHelper
     @Nullable
     public String getString(String key)
     {
+        return getString(key, null);
+    }
+
+    public String getString(String key, String defaultValue)
+    {
         NBTTagCompound subTag = getTagInternal(key, false, true);
         if (subTag != null)
         {
@@ -340,7 +380,7 @@ public class NBTHelper
                 return subTag.getString(actualKey);
             }
         }
-        return null;
+        return defaultValue;
     }
 
     public NBTHelper setIntArray(String key, int[] value)
