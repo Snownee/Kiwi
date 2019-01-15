@@ -130,9 +130,16 @@ public class NBTUtil
 
     public int getInt(String key)
     {
-        NBTTagCompound subTag = getTagInternal(key);
-        String actualKey = getLastNode(key);
-        return subTag.hasKey(actualKey, Tag.INT) ? subTag.getInteger(actualKey) : 0;
+        NBTTagCompound subTag = getTagInternal(key, false, true);
+        if (subTag != null)
+        {
+            String actualKey = getLastNode(key);
+            if (subTag.hasKey(actualKey, Tag.INT))
+            {
+                return subTag.getInteger(actualKey);
+            }
+        }
+        return 0;
     }
 
     public NBTUtil setLong(String key, long value)
@@ -143,9 +150,16 @@ public class NBTUtil
 
     public long getLong(String key)
     {
-        NBTTagCompound subTag = getTagInternal(key);
-        String actualKey = getLastNode(key);
-        return subTag.hasKey(actualKey, Tag.LONG) ? subTag.getLong(actualKey) : 0;
+        NBTTagCompound subTag = getTagInternal(key, false, true);
+        if (subTag != null)
+        {
+            String actualKey = getLastNode(key);
+            if (subTag.hasKey(actualKey, Tag.LONG))
+            {
+                return subTag.getLong(actualKey);
+            }
+        }
+        return 0;
     }
 
     public NBTUtil setShort(String key, short value)
@@ -156,9 +170,16 @@ public class NBTUtil
 
     public long getShort(String key)
     {
-        NBTTagCompound subTag = getTagInternal(key);
-        String actualKey = getLastNode(key);
-        return subTag.hasKey(actualKey, Tag.SHORT) ? subTag.getShort(actualKey) : 0;
+        NBTTagCompound subTag = getTagInternal(key, false, true);
+        if (subTag != null)
+        {
+            String actualKey = getLastNode(key);
+            if (subTag.hasKey(actualKey, Tag.SHORT))
+            {
+                return subTag.getShort(actualKey);
+            }
+        }
+        return 0;
     }
 
     public NBTUtil setDouble(String key, double value)
@@ -169,9 +190,16 @@ public class NBTUtil
 
     public double getDouble(String key)
     {
-        NBTTagCompound subTag = getTagInternal(key);
-        String actualKey = getLastNode(key);
-        return subTag.hasKey(actualKey, Tag.DOUBLE) ? subTag.getDouble(actualKey) : 0;
+        NBTTagCompound subTag = getTagInternal(key, false, true);
+        if (subTag != null)
+        {
+            String actualKey = getLastNode(key);
+            if (subTag.hasKey(actualKey, Tag.DOUBLE))
+            {
+                return subTag.getDouble(actualKey);
+            }
+        }
+        return 0;
     }
 
     public NBTUtil setFloat(String key, float value)
@@ -182,9 +210,16 @@ public class NBTUtil
 
     public float getFloat(String key)
     {
-        NBTTagCompound subTag = getTagInternal(key);
-        String actualKey = getLastNode(key);
-        return subTag.hasKey(actualKey, Tag.FLOAT) ? subTag.getFloat(actualKey) : 0;
+        NBTTagCompound subTag = getTagInternal(key, false, true);
+        if (subTag != null)
+        {
+            String actualKey = getLastNode(key);
+            if (subTag.hasKey(actualKey, Tag.FLOAT))
+            {
+                return subTag.getFloat(actualKey);
+            }
+        }
+        return 0;
     }
 
     public NBTUtil setByte(String key, byte value)
@@ -195,9 +230,16 @@ public class NBTUtil
 
     public byte getByte(String key)
     {
-        NBTTagCompound subTag = getTagInternal(key);
-        String actualKey = getLastNode(key);
-        return subTag.hasKey(actualKey, Tag.BYTE) ? subTag.getByte(actualKey) : 0;
+        NBTTagCompound subTag = getTagInternal(key, false, true);
+        if (subTag != null)
+        {
+            String actualKey = getLastNode(key);
+            if (subTag.hasKey(actualKey, Tag.BYTE))
+            {
+                return subTag.getByte(actualKey);
+            }
+        }
+        return 0;
     }
 
     public NBTUtil setString(String key, String value)
@@ -209,9 +251,16 @@ public class NBTUtil
     @Nullable
     public String getString(String key)
     {
-        NBTTagCompound subTag = getTagInternal(key);
-        String actualKey = getLastNode(key);
-        return subTag.hasKey(actualKey, Tag.STRING) ? subTag.getString(actualKey) : null;
+        NBTTagCompound subTag = getTagInternal(key, false, true);
+        if (subTag != null)
+        {
+            String actualKey = getLastNode(key);
+            if (subTag.hasKey(actualKey, Tag.STRING))
+            {
+                return subTag.getString(actualKey);
+            }
+        }
+        return null;
     }
 
     public NBTUtil setIntArray(String key, int[] value)
@@ -222,9 +271,16 @@ public class NBTUtil
 
     public int[] getIntArray(String key)
     {
-        NBTTagCompound subTag = getTagInternal(key);
-        String actualKey = getLastNode(key);
-        return subTag.hasKey(actualKey, Tag.INT_ARRAY) ? subTag.getIntArray(actualKey) : new int[0];
+        NBTTagCompound subTag = getTagInternal(key, false, true);
+        if (subTag != null)
+        {
+            String actualKey = getLastNode(key);
+            if (subTag.hasKey(actualKey, Tag.INT_ARRAY))
+            {
+                return subTag.getIntArray(actualKey);
+            }
+        }
+        return new int[0];
     }
 
     public NBTUtil setByteArray(String key, byte[] value)
@@ -235,9 +291,16 @@ public class NBTUtil
 
     public byte[] getByteArray(String key)
     {
-        NBTTagCompound subTag = getTagInternal(key);
-        String actualKey = getLastNode(key);
-        return subTag.hasKey(actualKey, Tag.BYTE_ARRAY) ? subTag.getByteArray(actualKey) : new byte[0];
+        NBTTagCompound subTag = getTagInternal(key, false, true);
+        if (subTag != null)
+        {
+            String actualKey = getLastNode(key);
+            if (subTag.hasKey(actualKey, Tag.BYTE_ARRAY))
+            {
+                return subTag.getByteArray(actualKey);
+            }
+        }
+        return new byte[0];
     }
 
     public NBTUtil setUUID(String key, UUID value)
@@ -249,22 +312,28 @@ public class NBTUtil
     @Nullable
     public UUID getUUID(String key)
     {
-        NBTTagCompound subTag = getTagInternal(key);
-        String actualKey = getLastNode(key);
-        if (!subTag.hasKey(actualKey + "Most", Tag.LONG) || !subTag.hasKey(actualKey + "Least", Tag.LONG))
+        NBTTagCompound subTag = getTagInternal(key, false, true);
+        if (subTag != null)
         {
-            return null;
+            String actualKey = getLastNode(key);
+            if (!subTag.hasKey(actualKey + "Most", Tag.LONG) || !subTag.hasKey(actualKey + "Least", Tag.LONG))
+            {
+                return subTag.getUniqueId(actualKey);
+            }
         }
-        return subTag.getUniqueId(actualKey);
+        return null;
     }
 
     public NBTTagList getTagList(String key, int type)
     {
-        NBTTagCompound subTag = getTagInternal(key);
-        String actualKey = getLastNode(key);
-        if (subTag.hasKey(actualKey, Tag.LIST))
+        NBTTagCompound subTag = getTagInternal(key, false, true);
+        if (subTag != null)
         {
-            return subTag.getTagList(actualKey, type);
+            String actualKey = getLastNode(key);
+            if (subTag.hasKey(actualKey, Tag.LIST))
+            {
+                return subTag.getTagList(actualKey, type);
+            }
         }
         return null;
     }
