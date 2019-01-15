@@ -4,13 +4,18 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import com.mojang.authlib.GameProfile;
+
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTUtil;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.util.Constants.NBT;
 
-public class NBTUtil
+public class NBTHelper
 {
     public static class Tag
     {
@@ -35,7 +40,7 @@ public class NBTUtil
     @Nullable
     private NBTTagCompound tag;
 
-    private NBTUtil(@Nullable NBTTagCompound tag, @Nullable ItemStack stack)
+    private NBTHelper(@Nullable NBTTagCompound tag, @Nullable ItemStack stack)
     {
         this.stack = stack;
         this.tag = tag;
@@ -116,13 +121,13 @@ public class NBTUtil
         }
     }
 
-    public NBTUtil setTag(String key, NBTBase value)
+    public NBTHelper setTag(String key, NBTBase value)
     {
         getTagInternal(key).setTag(getLastNode(key), value);
         return this;
     }
 
-    public NBTUtil setInt(String key, int value)
+    public NBTHelper setInt(String key, int value)
     {
         getTagInternal(key).setInteger(getLastNode(key), value);
         return this;
@@ -142,7 +147,7 @@ public class NBTUtil
         return 0;
     }
 
-    public NBTUtil setLong(String key, long value)
+    public NBTHelper setLong(String key, long value)
     {
         getTagInternal(key).setLong(getLastNode(key), value);
         return this;
@@ -162,7 +167,7 @@ public class NBTUtil
         return 0;
     }
 
-    public NBTUtil setShort(String key, short value)
+    public NBTHelper setShort(String key, short value)
     {
         getTagInternal(key).setShort(getLastNode(key), value);
         return this;
@@ -182,7 +187,7 @@ public class NBTUtil
         return 0;
     }
 
-    public NBTUtil setDouble(String key, double value)
+    public NBTHelper setDouble(String key, double value)
     {
         getTagInternal(key).setDouble(getLastNode(key), value);
         return this;
@@ -202,7 +207,7 @@ public class NBTUtil
         return 0;
     }
 
-    public NBTUtil setFloat(String key, float value)
+    public NBTHelper setFloat(String key, float value)
     {
         getTagInternal(key).setFloat(getLastNode(key), value);
         return this;
@@ -222,7 +227,7 @@ public class NBTUtil
         return 0;
     }
 
-    public NBTUtil setByte(String key, byte value)
+    public NBTHelper setByte(String key, byte value)
     {
         getTagInternal(key).setFloat(getLastNode(key), value);
         return this;
@@ -242,7 +247,7 @@ public class NBTUtil
         return 0;
     }
 
-    public NBTUtil setBoolean(String key, boolean value)
+    public NBTHelper setBoolean(String key, boolean value)
     {
         getTagInternal(key).setBoolean(getLastNode(key), value);
         return this;
@@ -262,7 +267,62 @@ public class NBTUtil
         return defaultValue;
     }
 
-    public NBTUtil setString(String key, String value)
+    public NBTHelper setPos(String key, BlockPos value)
+    {
+        getTagInternal(key).setTag(getLastNode(key), NBTUtil.createPosTag(value));
+        return this;
+    }
+
+    @Nullable
+    public BlockPos getPos(String key)
+    {
+        NBTTagCompound subTag = getTagInternal(key, false, true);
+        if (subTag != null)
+        {
+            String actualKey = getLastNode(key);
+            if (subTag.hasKey(actualKey, Tag.COMPOUND))
+            {
+                return NBTUtil.getPosFromTag(getTag(actualKey));
+            }
+        }
+        return null;
+    }
+
+    public NBTHelper setBlockState(String key, IBlockState value)
+    {
+        NBTUtil.writeBlockState(getTag(key), value);
+        return this;
+    }
+
+    @Nullable
+    public IBlockState getBlockState(String key)
+    {
+        NBTTagCompound subTag = getTagInternal(key, false, false);
+        if (subTag != null)
+        {
+            return NBTUtil.readBlockState(subTag);
+        }
+        return null;
+    }
+
+    public NBTHelper setGameProfile(String key, GameProfile value)
+    {
+        NBTUtil.writeGameProfile(getTag(key), value);
+        return this;
+    }
+
+    @Nullable
+    public GameProfile getGameProfile(String key)
+    {
+        NBTTagCompound subTag = getTagInternal(key, false, false);
+        if (subTag != null)
+        {
+            return NBTUtil.readGameProfileFromNBT(subTag);
+        }
+        return null;
+    }
+
+    public NBTHelper setString(String key, String value)
     {
         getTagInternal(key).setString(getLastNode(key), value);
         return this;
@@ -283,7 +343,7 @@ public class NBTUtil
         return null;
     }
 
-    public NBTUtil setIntArray(String key, int[] value)
+    public NBTHelper setIntArray(String key, int[] value)
     {
         getTagInternal(key).setIntArray(getLastNode(key), value);
         return this;
@@ -303,7 +363,7 @@ public class NBTUtil
         return new int[0];
     }
 
-    public NBTUtil setByteArray(String key, byte[] value)
+    public NBTHelper setByteArray(String key, byte[] value)
     {
         getTagInternal(key).setByteArray(getLastNode(key), value);
         return this;
@@ -323,7 +383,7 @@ public class NBTUtil
         return new byte[0];
     }
 
-    public NBTUtil setUUID(String key, UUID value)
+    public NBTHelper setUUID(String key, UUID value)
     {
         getTagInternal(key).setUniqueId(getLastNode(key), value);
         return this;
@@ -370,7 +430,7 @@ public class NBTUtil
     }
 
     // TODO: remove parent if empty?
-    public NBTUtil remove(String key)
+    public NBTHelper remove(String key)
     {
         NBTTagCompound subTag = getTagInternal(key, false, true);
         if (subTag != null)
@@ -392,19 +452,19 @@ public class NBTUtil
         return stack == null ? ItemStack.EMPTY : stack;
     }
 
-    public static NBTUtil of(ItemStack stack)
+    public static NBTHelper of(ItemStack stack)
     {
-        return new NBTUtil(stack.getTagCompound(), stack);
+        return new NBTHelper(stack.getTagCompound(), stack);
     }
 
-    public static NBTUtil of(NBTTagCompound tag)
+    public static NBTHelper of(NBTTagCompound tag)
     {
-        return new NBTUtil(tag, null);
+        return new NBTHelper(tag, null);
     }
 
-    public static NBTUtil of()
+    public static NBTHelper of()
     {
-        return new NBTUtil(null, null);
+        return new NBTHelper(null, null);
     }
 
 }
