@@ -180,9 +180,9 @@ public class AdvancedFontRenderer extends FontRenderer implements ISelectiveReso
                 }
 
                 float f = this.renderChar(c0, this.italicStyle);
-                if (c0 == '，')
+                if (isSpecialChar(c0))
                 {
-                    f = 5;
+                    f = getCharWidth(c0);
                 }
 
                 if (flag)
@@ -218,9 +218,30 @@ public class AdvancedFontRenderer extends FontRenderer implements ISelectiveReso
     }
 
     @Override
+    protected float renderChar(char ch, boolean italic)
+    {
+        boolean flag = ch == '（' || ch == '“' || ch == '｛' || ch == '［' || ch == '‘';
+        if (flag)
+        {
+            posX += 5;
+        }
+        float f = super.renderChar(ch, italic);
+        if (flag)
+        {
+            posX -= 5;
+        }
+        return f;
+    }
+
+    @Override
     public int getCharWidth(char character)
     {
-        return character == '，' ? 9 : super.getCharWidth(character);
+        return isSpecialChar(character) ? 9 : super.getCharWidth(character);
+    }
+
+    public static boolean isSpecialChar(char character)
+    {
+        return character == '，' || character == '；' || character == '：' || character == '（' || character == '）' || character == '“' || character == '”' || character == '？' || character == '！' || character == '｛' || character == '｝' || character == '［' || character == '］' || character == '‘' || character == '’';
     }
 
     private static final String COLOR_CODE = "0123456789abcdef";
@@ -266,10 +287,13 @@ public class AdvancedFontRenderer extends FontRenderer implements ISelectiveReso
                 }
                 else if (f == 'x')
                 {
-                    color = '\0';
-                    hexColor = str.substring(index, index + 7);
-                    index += 6;
-                    format = 'r';
+                    if (index + 7 < str.length())
+                    {
+                        color = '\0';
+                        hexColor = str.substring(index, index + 7);
+                        index += 6;
+                        format = 'r';
+                    }
                 }
                 else if (FORMATTING_CODE.indexOf(f) != -1)
                 {
@@ -385,11 +409,11 @@ public class AdvancedFontRenderer extends FontRenderer implements ISelectiveReso
             {
                 if (color == '\0')
                 {
-                    return new String(new char[] {'\u00A7', format});
+                    return new String(new char[] { '\u00A7', format });
                 }
                 else
                 {
-                    return new String(new char[]{'\u00A7', color, '\u00A7', format});
+                    return new String(new char[] { '\u00A7', color, '\u00A7', format });
                 }
             }
             else
