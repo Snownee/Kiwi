@@ -46,6 +46,13 @@ public class KiwiConfig
         @Config.Name("Tooltip Wrap Width")
         @Config.RangeInt(min = 50)
         public int tooltipWrapWidth = 100;
+
+        @Config.Comment(
+            "Use §x (almost) everywhere. Fix MC-109260. Do NOT enable this unless you know what you are doing"
+        )
+        @Config.Name("Replace Default Font Renderer")
+        @Config.RequiresMcRestart
+        public boolean replaceDefaultFontRenderer = false;
     }
 
     public static final class Modules

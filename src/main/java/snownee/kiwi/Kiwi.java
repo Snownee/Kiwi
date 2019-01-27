@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.apache.logging.log4j.Logger;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.ConfigManager;
@@ -19,7 +20,10 @@ import net.minecraftforge.fml.common.discovery.ASMDataTable.ASMData;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import snownee.kiwi.block.IModBlock;
+import snownee.kiwi.client.AdvancedFontRenderer;
 import snownee.kiwi.item.IModItem;
 import snownee.kiwi.potion.PotionMod;
 
@@ -138,6 +142,11 @@ public class Kiwi
     @Mod.EventHandler
     public void init(FMLInitializationEvent event)
     {
+        if (KiwiConfig.GENERAL.replaceDefaultFontRenderer && event.getSide() == Side.CLIENT)
+        {
+            replaceFontRenderer();
+        }
+
         Loader.instance().setActiveModContainer(null);
         KiwiManager.MODULES.values().forEach(IModule::init);
     }
@@ -163,5 +172,11 @@ public class Kiwi
     public static boolean isLoaded(ResourceLocation module)
     {
         return KiwiManager.ENABLED_MODULES.contains(module);
+    }
+
+    @SideOnly(Side.CLIENT)
+    private static void replaceFontRenderer()
+    {
+        Minecraft.getMinecraft().fontRenderer = AdvancedFontRenderer.INSTANCE;
     }
 }
