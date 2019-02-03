@@ -369,6 +369,9 @@ public class AdvancedFontRenderer extends FontRenderer implements ISelectiveReso
     @Override
     public int getStringWidth(String text)
     {
+        if (text == null) {
+            return 0;
+        }
         int len = 0;
         boolean bold = false;
         for (int index = 0; index < text.length(); index++)
