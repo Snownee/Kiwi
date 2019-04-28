@@ -221,6 +221,10 @@ public class AdvancedFontRenderer extends FontRenderer implements ISelectiveReso
     protected float renderChar(char ch, boolean italic)
     {
         boolean flag = ch == '（' || ch == '“' || ch == '｛' || ch == '［' || ch == '‘';
+        if (flag && super.getCharWidth(ch) == 9)
+        {
+            flag = false;
+        }
         if (flag)
         {
             posX += 5;
