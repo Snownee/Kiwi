@@ -1,71 +1,83 @@
 package snownee.kiwi;
 
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
-import net.minecraftforge.common.config.Config;
+import org.apache.commons.lang3.tuple.Pair;
 
-@Config(modid = Kiwi.MODID, name = Kiwi.MODID, category = "")
-@Config.LangKey("kiwi.config")
+import com.electronwill.nightconfig.core.UnmodifiableConfig;
+import com.google.common.collect.Maps;
+
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
+import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
+import net.minecraftforge.common.ForgeConfigSpec.IntValue;
+import net.minecraftforge.fml.LogicalSide;
+import net.minecraftforge.fml.common.thread.EffectiveSide;
+
 public class KiwiConfig
 {
-    private KiwiConfig()
+    static final ForgeConfigSpec spec;
+    static UnmodifiableConfig config;
+
+    public static ConfigValue<List<String>> orePreference;
+    public static BooleanValue tooltipRequiresShift;
+    public static IntValue tooltipWrapWidth;
+    public static BooleanValue replaceDefaultFontRenderer;
+    public static Map<ResourceLocation, BooleanValue> modules = Maps.newHashMap();
+
+    static
     {
-        // No-op, no instance for you
+        final Pair<KiwiConfig, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(KiwiConfig::new);
+        spec = specPair.getRight();
     }
 
-    @Config.Comment("General settings of Kiwi.")
-    @Config.LangKey("kiwi.config.general")
-    @Config.Name("General")
-    public static final General GENERAL = new General();
-
-    @Config.Comment("Toggle optional modules of Kiwi.")
-    @Config.LangKey("kiwi.config.modules")
-    @Config.Name("Modules")
-    public static final Modules MODULES = new Modules();
-
-    public static final class General
+    private KiwiConfig(ForgeConfigSpec.Builder builder)
     {
-        General()
+        /* off */
+        orePreference = builder
+                .comment("A list of preferred Mod IDs that results of processes should stem from")
+                .translation("kiwi.config.orePreference")
+                .define("orePreference", Collections.singletonList("minecraft"), o -> o instanceof String && isValidNamespace((String) o));
+        
+        builder.push("modules");
+        
+        for (Entry<ResourceLocation, Boolean> entry : Kiwi.defaultOptions.entrySet())
         {
-            // No-op. Package-level access.
+            ResourceLocation rl = entry.getKey();
+            modules.put(rl, builder.define(rl.getNamespace() + "." + rl.getPath(), entry.getValue().booleanValue()));
         }
-
-        @Config.Comment("A list of preferred Mod IDs that results of Cuisine processes should stem from")
-        @Config.LangKey("kiwi.config.general.oredict_preference")
-        @Config.Name("OreDict Preference")
-        public String[] orePreference = new String[] { "cuisine", "minecraft" };
-
-        @Config.Comment("Tooltips require pressing shift to be shown")
-        @Config.LangKey("kiwi.config.general.press_shift")
-        @Config.Name("Tooltip Requires Shift")
-        public boolean tooltipRequiresShift = false;
-
-        @Config.Comment("Max line width shown in description of tooltips")
-        @Config.LangKey("kiwi.config.general.tip_width")
-        @Config.Name("Tooltip Wrap Width")
-        @Config.RangeInt(min = 50)
-        public int tooltipWrapWidth = 100;
-
-        @Config.Comment(
-            "Use §x (almost) everywhere. Fix MC-109260. Do NOT enable this unless you know what you are doing"
-        )
-        @Config.Name("Replace Default Font Renderer")
-        @Config.RequiresMcRestart
-        public boolean replaceDefaultFontRenderer = false;
+        
+        builder.pop();
+        
+        if (EffectiveSide.get() == LogicalSide.SERVER) return;
+        
+        builder.push("client");
+        
+        tooltipRequiresShift = builder
+                .comment("Tooltips require pressing shift to be shown")
+                .translation("kiwi.config.tooltipRequiresShift")
+                .define("tooltipRequiresShift", false);
+        
+        tooltipWrapWidth = builder
+                .comment("Max line width shown in description of tooltips")
+                .translation("kiwi.config.tooltipWrapWidth")
+                .defineInRange("tooltipWrapWidth", 100, 50, Integer.MAX_VALUE);
+        
+        replaceDefaultFontRenderer = builder
+                .comment("Use §x (almost) everywhere. Fix MC-109260. Do NOT enable this unless you know what you are doing")
+                .translation("kiwi.config.replaceDefaultFontRenderer")
+                .define("replaceDefaultFontRenderer", false);
+        /* on */
     }
 
-    public static final class Modules
+    private static boolean isValidNamespace(String namespace)
     {
-        Modules()
-        {
-            // No-op. Package-level access.
-        }
-
-        @Config.Comment("You can set the value to false to force disable the optional module")
-        @Config.LangKey("kiwi.config.modules.optional_modules")
-        @Config.Name("Optional Modules")
-        @Config.RequiresMcRestart
-        public Map<String, Boolean> modules = new HashMap<>();
+        return namespace.chars().allMatch((c) -> {
+            return c == 95 || c == 45 || c >= 97 && c <= 122 || c >= 48 && c <= 57 || c == 46;
+        });
     }
 }

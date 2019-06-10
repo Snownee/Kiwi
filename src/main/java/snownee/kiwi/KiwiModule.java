@@ -13,9 +13,19 @@ public @interface KiwiModule
 
     String name() default "";
 
-    String dependency() default "";
+    String dependencies() default "";
 
-    boolean optional() default false;
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    public @interface Optional
+    {
+        boolean disabledByDefault() default false;
+    }
 
-    boolean disabledByDefault() default false;
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    public @interface Group
+    {
+        String value() default "";
+    }
 }

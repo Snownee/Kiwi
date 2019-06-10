@@ -1,73 +1,21 @@
 package snownee.kiwi.block;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.NonNullList;
+import net.minecraft.state.properties.BlockStateProperties;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
-import net.minecraftforge.client.model.ModelLoader;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.world.IBlockReader;
 
-public class BlockMod extends Block implements IModBlock
+public class ModBlock extends Block
 {
-    private final String name;
-
-    public BlockMod(String name, Material materialIn)
+    public ModBlock(Block.Properties builder)
     {
-        this(name, materialIn, deduceSoundType(materialIn));
-    }
-
-    public BlockMod(String name, Material materialIn, SoundType soundType)
-    {
-        super(materialIn);
-        this.name = name;
-        setSoundType(soundType);
-        setHardness(deduceHardness(materialIn));
-    }
-
-    @Override
-    public String getName()
-    {
-        return name;
-    }
-
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void mapModel()
-    {
-        for (int i = 0; i < getItemSubtypeAmount(); i++)
-        {
-            ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(this), i, new ModelResourceLocation(getRegistryName(), "inventory"));
-        }
-    }
-
-    @Override
-    public void register(String modid)
-    {
-        setRegistryName(modid, getName());
-        setTranslationKey(modid + "." + getName());
-    }
-
-    @Override
-    public Block cast()
-    {
-        return this;
-    }
-
-    @Override
-    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> items)
-    {
-        for (int i = 0; i < getItemSubtypeAmount(); i++)
-        {
-            items.add(new ItemStack(this, 1, i));
-        }
+        super(builder);
+        //        setSoundType(soundType);
+        //        setHardness(deduceHardness(materialIn));
     }
 
     public static SoundType deduceSoundType(final Material material)
@@ -76,11 +24,11 @@ public class BlockMod extends Block implements IModBlock
         {
             return SoundType.WOOD;
         }
-        if (material == Material.GROUND || material == Material.CLAY)
+        if (material == Material.EARTH || material == Material.CLAY)
         {
             return SoundType.GROUND;
         }
-        if (material == Material.PLANTS || material == Material.GRASS || material == Material.LEAVES || material == Material.VINE || material == Material.SPONGE || material == Material.TNT)
+        if (material == Material.PLANTS || material == Material.ORGANIC || material == Material.TALL_PLANTS || material == Material.LEAVES || material == Material.SPONGE || material == Material.TNT)
         {
             return SoundType.PLANT;
         }
@@ -92,7 +40,7 @@ public class BlockMod extends Block implements IModBlock
         {
             return SoundType.GLASS;
         }
-        if (material == Material.CLOTH || material == Material.CARPET || material == Material.CACTUS || material == Material.CAKE || material == Material.FIRE)
+        if (material == Material.WOOL || material == Material.CARPET || material == Material.CACTUS || material == Material.CAKE || material == Material.FIRE)
         {
             return SoundType.CLOTH;
         }
@@ -100,7 +48,7 @@ public class BlockMod extends Block implements IModBlock
         {
             return SoundType.SAND;
         }
-        if (material == Material.SNOW || material == Material.CRAFTED_SNOW)
+        if (material == Material.SNOW || material == Material.SNOW_BLOCK)
         {
             return SoundType.SNOW;
         }
@@ -113,7 +61,7 @@ public class BlockMod extends Block implements IModBlock
 
     public static float deduceHardness(final Material material)
     {
-        if (material == Material.PLANTS || material == Material.CIRCUITS || material == Material.AIR)
+        if (material == Material.PLANTS || material == Material.AIR)
         {
             return 0;
         }
@@ -125,11 +73,11 @@ public class BlockMod extends Block implements IModBlock
         {
             return 2;
         }
-        if (material == Material.GRASS)
+        if (material == Material.ORGANIC)
         {
             return 0.6F;
         }
-        if (material == Material.SAND || material == Material.GROUND || material == Material.CLAY)
+        if (material == Material.SAND || material == Material.EARTH || material == Material.CLAY)
         {
             return 0.5F;
         }
@@ -145,7 +93,7 @@ public class BlockMod extends Block implements IModBlock
         {
             return 4;
         }
-        if (material == Material.CLOTH)
+        if (material == Material.WOOL)
         {
             return 0.8F;
         }
@@ -157,8 +105,12 @@ public class BlockMod extends Block implements IModBlock
     }
 
     @Override
-    public int getFlammability(IBlockAccess world, BlockPos pos, EnumFacing face)
+    public int getFlammability(BlockState state, IBlockReader world, BlockPos pos, Direction face)
     {
+        if (state.has(BlockStateProperties.WATERLOGGED))
+        {
+            return 0;
+        }
         if (material == Material.WOOD)
         {
             return 20;
@@ -171,7 +123,7 @@ public class BlockMod extends Block implements IModBlock
         {
             return 20;
         }
-        if (material == Material.VINE)
+        if (material == Material.TALL_PLANTS)
         {
             return 100;
         }
@@ -179,7 +131,7 @@ public class BlockMod extends Block implements IModBlock
         {
             return 60;
         }
-        if (material == Material.CLOTH)
+        if (material == Material.WOOL)
         {
             return 60;
         }
@@ -187,8 +139,12 @@ public class BlockMod extends Block implements IModBlock
     }
 
     @Override
-    public int getFireSpreadSpeed(IBlockAccess world, BlockPos pos, EnumFacing face)
+    public int getFireSpreadSpeed(BlockState state, IBlockReader world, BlockPos pos, Direction face)
     {
+        if (state.has(BlockStateProperties.WATERLOGGED))
+        {
+            return 0;
+        }
         if (material == Material.WOOD)
         {
             return 5;
@@ -201,7 +157,7 @@ public class BlockMod extends Block implements IModBlock
         {
             return 60;
         }
-        if (material == Material.VINE)
+        if (material == Material.TALL_PLANTS)
         {
             return 15;
         }
@@ -209,7 +165,7 @@ public class BlockMod extends Block implements IModBlock
         {
             return 30;
         }
-        if (material == Material.CLOTH)
+        if (material == Material.WOOL)
         {
             return 30;
         }

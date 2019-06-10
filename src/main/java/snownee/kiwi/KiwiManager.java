@@ -1,39 +1,35 @@
 package snownee.kiwi;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
-import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionType;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.common.ModContainer;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import snownee.kiwi.block.IModBlock;
-import snownee.kiwi.item.IModItem;
-import snownee.kiwi.item.ItemModBlock;
-import snownee.kiwi.potion.PotionMod;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
+import snownee.kiwi.item.ModBlockItem;
 
-@EventBusSubscriber(modid = Kiwi.MODID)
+@EventBusSubscriber(modid = Kiwi.MODID, bus = Bus.MOD)
 public class KiwiManager
 {
-    public static final HashMap<ResourceLocation, IModule> MODULES = new HashMap<>();
-    public static final HashSet<ResourceLocation> ENABLED_MODULES = new HashSet<>();
-    public static Map<IModBlock, String> BLOCKS = new HashMap<>();
-    public static Map<IModItem, String> ITEMS = new HashMap<>();
-    public static Map<PotionMod, String> POTIONS = new HashMap<>();
+    public static final HashMap<ResourceLocation, ModuleInfo> MODULES = Maps.newHashMap();
+    public static final HashSet<ResourceLocation> ENABLED_MODULES = Sets.newHashSet();
+    static Map<String, ItemGroup> GROUPS = Maps.newHashMap();
 
     private KiwiManager()
     {
     }
 
-    public static void addInstance(ResourceLocation resourceLocation, IModule module)
+    public static void addInstance(ResourceLocation resourceLocation, AbstractModule module, ModContext context)
     {
         if (MODULES.containsKey(resourceLocation))
         {
@@ -41,69 +37,54 @@ public class KiwiManager
         }
         else
         {
-            MODULES.put(resourceLocation, module);
+            MODULES.put(resourceLocation, new ModuleInfo(resourceLocation, module, context));
             ENABLED_MODULES.add(resourceLocation);
         }
+    }
+
+    public static void addItemGroup(String modId, String name, ItemGroup group)
+    {
+        GROUPS.put(modId + ":" + name, group);
     }
 
     @SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event)
     {
-        Map<String, ModContainer> map = Loader.instance().getIndexedModList();
-        BLOCKS.forEach((block, modid) -> {
-            Loader.instance().setActiveModContainer(map.get(modid));
-            block.register(modid);
-            event.getRegistry().register(block.cast());
-        });
-        Loader.instance().setActiveModContainer(null);
+        MODULES.values().forEach(info -> info.registerBlocks(event));
+        ModLoadingContext.get().setActiveContainer(null, null);
     }
 
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> event)
     {
-        Map<String, ModContainer> map = Loader.instance().getIndexedModList();
-        ITEMS.forEach((item, modid) -> {
-            Loader.instance().setActiveModContainer(map.get(modid));
-            item.register(modid);
-            event.getRegistry().register(item.cast());
-        });
-        BLOCKS.forEach((block, modid) -> {
-            if (block.getItemSubtypeAmount() > 0)
-            {
-                Loader.instance().setActiveModContainer(map.get(modid));
-                ItemModBlock item = new ItemModBlock(block);
-                item.setRegistryName(block.getRegistryName());
-                event.getRegistry().register(item);
-            }
-        });
-        Loader.instance().setActiveModContainer(null);
+        MODULES.values().forEach(info -> info.registerItems(event));
+        ModLoadingContext.get().setActiveContainer(null, null);
     }
 
-    @SubscribeEvent
-    public static void registerPotions(RegistryEvent.Register<Potion> event)
-    {
-        Map<String, ModContainer> map = Loader.instance().getIndexedModList();
-        POTIONS.forEach((potion, modid) -> {
-            Loader.instance().setActiveModContainer(map.get(modid));
-            potion.register(modid);
-            event.getRegistry().register(potion);
-        });
-        Loader.instance().setActiveModContainer(null);
-    }
+    //    @SubscribeEvent
+    //    public static void registerPotions(RegistryEvent.Register<Potion> event)
+    //    {
+    //        POTIONS.forEach((potion, rl) -> {
+    //            CONTEXTS.get(rl.getNamespace()).setActiveContainer();
+    //            //potion.register(modid);
+    //            event.getRegistry().register(potion.setRegistryName(rl));
+    //        });
+    //        ModLoadingContext.get().setActiveContainer(null, null);
+    //    }
 
-    @SubscribeEvent
-    public static void registerPotionEffects(RegistryEvent.Register<PotionType> event)
-    {
-        Map<String, ModContainer> map = Loader.instance().getIndexedModList();
-        POTIONS.forEach((potion, modid) -> {
-            Loader.instance().setActiveModContainer(map.get(modid));
-            Collection<PotionType> types = potion.getPotionTypes();
-            for (PotionType type : types)
-            {
-                event.getRegistry().register(type.setRegistryName(modid, type.getNamePrefixed("")));
-            }
-        });
-        Loader.instance().setActiveModContainer(null);
-    }
+    //    @SubscribeEvent
+    //    public static void registerPotionEffects(RegistryEvent.Register<PotionType> event)
+    //    {
+    //        Map<String, ModContainer> map = Loader.instance().getIndexedModList();
+    //        POTIONS.forEach((potion, modid) -> {
+    //            Loader.instance().setActiveModContainer(map.get(modid));
+    //            Collection<PotionType> types = potion.getPotionTypes();
+    //            for (PotionType type : types)
+    //            {
+    //                event.getRegistry().register(type.setRegistryName(modid, type.getNamePrefixed("")));
+    //            }
+    //        });
+    //        Loader.instance().setActiveModContainer(null);
+    //    }
 
 }
