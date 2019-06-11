@@ -10,13 +10,18 @@ import com.google.common.collect.Sets;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.item.crafting.IRecipeSerializer;
+import net.minecraft.potion.Effect;
+import net.minecraft.potion.Potion;
+import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
-import snownee.kiwi.item.ModBlockItem;
+import snownee.kiwi.crafting.NoContainersShapedRecipe;
+import snownee.kiwi.crafting.NoContainersShapelessRecipe;
 
 @EventBusSubscriber(modid = Kiwi.MODID, bus = Bus.MOD)
 public class KiwiManager
@@ -61,30 +66,35 @@ public class KiwiManager
         ModLoadingContext.get().setActiveContainer(null, null);
     }
 
-    //    @SubscribeEvent
-    //    public static void registerPotions(RegistryEvent.Register<Potion> event)
-    //    {
-    //        POTIONS.forEach((potion, rl) -> {
-    //            CONTEXTS.get(rl.getNamespace()).setActiveContainer();
-    //            //potion.register(modid);
-    //            event.getRegistry().register(potion.setRegistryName(rl));
-    //        });
-    //        ModLoadingContext.get().setActiveContainer(null, null);
-    //    }
+    @SubscribeEvent
+    public static void registerEffects(RegistryEvent.Register<Effect> event)
+    {
+        MODULES.values().forEach(info -> info.registerEffects(event));
+        ModLoadingContext.get().setActiveContainer(null, null);
+    }
 
-    //    @SubscribeEvent
-    //    public static void registerPotionEffects(RegistryEvent.Register<PotionType> event)
-    //    {
-    //        Map<String, ModContainer> map = Loader.instance().getIndexedModList();
-    //        POTIONS.forEach((potion, modid) -> {
-    //            Loader.instance().setActiveModContainer(map.get(modid));
-    //            Collection<PotionType> types = potion.getPotionTypes();
-    //            for (PotionType type : types)
-    //            {
-    //                event.getRegistry().register(type.setRegistryName(modid, type.getNamePrefixed("")));
-    //            }
-    //        });
-    //        Loader.instance().setActiveModContainer(null);
-    //    }
+    @SubscribeEvent
+    public static void registerPotions(RegistryEvent.Register<Potion> event)
+    {
+        MODULES.values().forEach(info -> info.registerPotions(event));
+        ModLoadingContext.get().setActiveContainer(null, null);
+    }
+
+    @SubscribeEvent
+    public static void registerTiles(RegistryEvent.Register<TileEntityType<?>> event)
+    {
+        MODULES.values().forEach(info -> info.registerTiles(event));
+        ModLoadingContext.get().setActiveContainer(null, null);
+    }
+
+    @SubscribeEvent
+    public static void registerRecipeTypes(RegistryEvent.Register<IRecipeSerializer<?>> event)
+    {
+        event.getRegistry().register(new NoContainersShapedRecipe.Serializer().setRegistryName(Kiwi.MODID, "shaped_no_containers"));
+        event.getRegistry().register(new NoContainersShapelessRecipe.Serializer().setRegistryName(Kiwi.MODID, "shapeless_no_containers"));
+
+        MODULES.values().forEach(info -> info.registerRecipeTypes(event));
+        ModLoadingContext.get().setActiveContainer(null, null);
+    }
 
 }

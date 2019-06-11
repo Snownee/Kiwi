@@ -22,7 +22,12 @@ import com.google.common.collect.Maps;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.item.crafting.IRecipeSerializer;
+import net.minecraft.item.crafting.RecipeManager;
+import net.minecraft.potion.Effect;
+import net.minecraft.potion.Potion;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -31,13 +36,17 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.forgespi.language.ModFileScanData;
 import net.minecraftforge.forgespi.language.ModFileScanData.AnnotationData;
 import snownee.kiwi.KiwiModule.Group;
+import snownee.kiwi.crafting.ConditionModuleLoaded;
 
 @Mod(Kiwi.MODID)
 public class Kiwi
@@ -292,10 +301,14 @@ public class Kiwi
                 }
                 else if (o instanceof Block)
                 {
+                    if (field.getAnnotation(NoItem.class) != null)
+                    {
+                        info.noItems.add((Block) o);
+                    }
+                    checkNoGroup(info, field, o);
                     info.blocks.put((Block) o, regName);
                     if (tmpBuilder != null)
                     {
-                        checkNoGroup(info, field, o);
                         info.blockItemBuilders.put((Block) o, tmpBuilder);
                         try
                         {
@@ -320,10 +333,18 @@ public class Kiwi
                     info.items.put((Item) o, regName);
                     ++countItem;
                 }
-                //                else if (o instanceof PotionMod)
-                //                {
-                //                    info.POTIONS.put((PotionMod) o, rl);
-                //                }
+                else if (o instanceof Effect)
+                {
+                    info.effects.put((Effect) o, regName);
+                }
+                else if (o instanceof Potion)
+                {
+                    info.potions.put((Potion) o, regName);
+                }
+                else if (o instanceof IRecipeSerializer<?>)
+                {
+                    info.recipeTypes.put((IRecipeSerializer<?>) o, regName);
+                }
 
                 tmpBuilder = null;
                 tmpBuilderField = null;
@@ -331,9 +352,9 @@ public class Kiwi
 
             logger.info("[{}:{}]: Block: {}, Item: {}", modid, name, countBlock, countItem);
         }
-        ModLoadingContext.get().setActiveContainer(null, null);
 
         KiwiManager.MODULES.values().forEach(ModuleInfo::preInit);
+        ModLoadingContext.get().setActiveContainer(null, null);
     }
 
     private static void checkNoGroup(ModuleInfo info, Field field, Object o)
@@ -365,30 +386,41 @@ public class Kiwi
     //        return sb.toString();
     //    }
 
-    //
     @SubscribeEvent
     public void init(FMLCommonSetupEvent event)
     {
-        //        if (KiwiConfig.GENERAL.replaceDefaultFontRenderer && event.getSide() == Side.CLIENT)
-        //        {
-        //            replaceFontRenderer();
-        //        }
-        //
-        //        Loader.instance().setActiveModContainer(null);
-        //        KiwiManager.MODULES.values().forEach(IModule::init);
+        CraftingHelper.register(new ResourceLocation(MODID, "is_loaded"), new ConditionModuleLoaded());
+
+        KiwiManager.MODULES.values().forEach(m -> m.init(event));
+        ModLoadingContext.get().setActiveContainer(null, null);
+    }
+
+    @SubscribeEvent
+    public void clientInit(FMLClientSetupEvent event)
+    {
+        KiwiManager.MODULES.values().forEach(m -> m.clientInit(event));
+        ModLoadingContext.get().setActiveContainer(null, null);
+    }
+
+    @SubscribeEvent
+    public void serverInit(FMLDedicatedServerSetupEvent event)
+    {
+        KiwiManager.MODULES.values().forEach(m -> m.serverInit(event));
+        ModLoadingContext.get().setActiveContainer(null, null);
     }
 
     @SubscribeEvent
     public void postInit(InterModProcessEvent event)
     {
-        //        Loader.instance().setActiveModContainer(null);
-        //        KiwiManager.MODULES.values().forEach(IModule::postInit);
-        //        KiwiManager.BLOCKS.clear();
-        //        KiwiManager.BLOCKS = null;
-        //        KiwiManager.ITEMS.clear();
-        //        KiwiManager.ITEMS = null;
-        //        KiwiManager.POTIONS.clear();
-        //        KiwiManager.POTIONS = null;
+        KiwiManager.MODULES.values().forEach(ModuleInfo::postInit);
+        ModLoadingContext.get().setActiveContainer(null, null);
+    }
+
+    @SubscribeEvent
+    public void loadComplete(FMLLoadCompleteEvent event)
+    {
+        KiwiManager.MODULES.clear();
+        KiwiManager.GROUPS.clear();
     }
 
     public static boolean isLoaded(ResourceLocation module)

@@ -6,6 +6,7 @@ import net.minecraft.item.ItemStack;
 //import snownee.kiwi.client.AdvancedFontRenderer;
 import snownee.kiwi.item.ModItem;
 
+// Your class don't have to extends ModItem or ModBlock to be registered
 public class TestItem extends ModItem
 {
 
