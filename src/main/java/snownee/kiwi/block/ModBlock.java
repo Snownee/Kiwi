@@ -14,18 +14,24 @@ public class ModBlock extends Block
     public ModBlock(Block.Properties builder)
     {
         super(builder);
-        if (soundType == SoundType.STONE)
+        deduceSoundAndHardness(this);
+    }
+
+    public static Block deduceSoundAndHardness(Block block)
+    {
+        if (block.soundType == SoundType.STONE)
         {
-            soundType = deduceSoundType(material);
+            block.soundType = deduceSoundType(block.material);
         }
-        if (blockHardness == 0)
+        if (block.blockHardness == 0)
         {
-            blockHardness = deduceHardness(material);
-            if (blockHardness > 0)
+            block.blockHardness = deduceHardness(block.material);
+            if (block.blockHardness > 0)
             {
-                blockResistance = blockHardness;
+                block.blockResistance = block.blockHardness;
             }
         }
+        return block;
     }
 
     public static SoundType deduceSoundType(final Material material)

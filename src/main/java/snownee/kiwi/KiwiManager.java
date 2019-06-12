@@ -8,6 +8,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import net.minecraft.block.Block;
+import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.crafting.IRecipeSerializer;
@@ -94,6 +95,13 @@ public class KiwiManager
         event.getRegistry().register(new NoContainersShapelessRecipe.Serializer().setRegistryName(Kiwi.MODID, "shapeless_no_containers"));
 
         MODULES.values().forEach(info -> info.registerRecipeTypes(event));
+        ModLoadingContext.get().setActiveContainer(null, null);
+    }
+
+    @SubscribeEvent
+    public static void registerEntityTypes(RegistryEvent.Register<EntityType<?>> event)
+    {
+        MODULES.values().forEach(info -> info.registerEntityTypes(event));
         ModLoadingContext.get().setActiveContainer(null, null);
     }
 

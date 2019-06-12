@@ -7,6 +7,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import net.minecraft.block.Block;
+import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.crafting.IRecipeSerializer;
@@ -33,6 +34,7 @@ public class ModuleInfo
     final Map<Potion, String> potions = Maps.newLinkedHashMap();
     final Map<TileEntityType<?>, String> tileTypes = Maps.newLinkedHashMap();
     final Map<IRecipeSerializer<?>, String> recipeTypes = Maps.newLinkedHashMap();
+    final Map<EntityType<?>, String> entityTypes = Maps.newLinkedHashMap();
     final Map<Block, Item.Properties> blockItemBuilders = Maps.newHashMap();
     final Set<Object> noGroups = Sets.newHashSet();
     final Set<Block> noItems = Sets.newHashSet();
@@ -102,6 +104,14 @@ public class ModuleInfo
         context.setActiveContainer();
         recipeTypes.forEach((recipeType, name) -> {
             event.getRegistry().register(recipeType.setRegistryName(new ResourceLocation(rl.getNamespace(), name)));
+        });
+    }
+
+    public void registerEntityTypes(Register<EntityType<?>> event)
+    {
+        context.setActiveContainer();
+        entityTypes.forEach((entityType, name) -> {
+            event.getRegistry().register(entityType.setRegistryName(new ResourceLocation(rl.getNamespace(), name)));
         });
     }
 
