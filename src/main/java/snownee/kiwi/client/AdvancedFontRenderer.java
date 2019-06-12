@@ -34,12 +34,12 @@
 //    public AdvancedFontRenderer()
 //    {
 //        super(Minecraft.getInstance().gameSettings, new ResourceLocation("textures/font/ascii.png"), Minecraft.getInstance().renderEngine, Minecraft.getInstance().fontRenderer.getUnicodeFlag());
-//        if (Minecraft.getInstance().gameSettings.language != null)
-//        {
-//            this.setBidiFlag(Minecraft.getInstance().getLanguageManager().isCurrentLanguageBidirectional());
-//        }
-//        IReloadableResourceManager manager = (IReloadableResourceManager) Minecraft.getInstance().getResourceManager();
-//        manager.registerReloadListener(this);
+////        if (Minecraft.getInstance().gameSettings.language != null)
+////        {
+////            this.setBidiFlag(Minecraft.getInstance().getLanguageManager().isCurrentLanguageBidirectional());
+////        }
+////        IReloadableResourceManager manager = (IReloadableResourceManager) Minecraft.getInstance().getResourceManager();
+////        manager.registerReloadListener(this);
 //    }
 //
 //    // Copy of renderStringAtPos func_78255_a with changes
@@ -198,28 +198,28 @@
 //        }
 //    }
 //
-//    @Override
-//    protected float renderChar(char ch, boolean italic)
-//    {
-//        boolean flag = ch == '锛�' || ch == '鈥�' || ch == '锝�' || ch == '锛�' || ch == '鈥�';
-//        if (flag && super.getCharWidth(ch) == 9)
-//        {
-//            flag = false;
-//        }
-//        if (flag)
-//        {
-//            posX += 5;
-//        }
-//        float f = super.renderChar(ch, italic);
-//        if (flag)
-//        {
-//            posX -= 5;
-//        }
-//        return f;
-//    }
+////    @Override
+////    protected float renderChar(char ch, boolean italic)
+////    {
+////        boolean flag = ch == '锛�' || ch == '鈥�' || ch == '锝�' || ch == '锛�' || ch == '鈥�';
+////        if (flag && super.getCharWidth(ch) == 9)
+////        {
+////            flag = false;
+////        }
+////        if (flag)
+////        {
+////            posX += 5;
+////        }
+////        float f = super.renderChar(ch, italic);
+////        if (flag)
+////        {
+////            posX -= 5;
+////        }
+////        return f;
+////    }
 //
 //    @Override
-//    public int getCharWidth(char character)
+//    public float getCharWidth(char character)
 //    {
 //        return isSpecialChar(character) ? 9 : super.getCharWidth(character);
 //    }

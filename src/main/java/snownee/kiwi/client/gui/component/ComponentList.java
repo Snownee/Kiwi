@@ -1,13 +1,14 @@
 //package snownee.kiwi.client.gui.component;
 //
-//import org.lwjgl.input.Mouse;
 //import org.lwjgl.opengl.GL11;
 //
+//import com.mojang.blaze3d.platform.GlStateManager;
+//
+//import net.java.games.input.Mouse;
+//import net.minecraft.client.gui.AbstractGui;
 //import net.minecraft.client.gui.Gui;
-//import net.minecraft.client.gui.GuiButton;
 //import net.minecraft.client.gui.ScaledResolution;
 //import net.minecraft.client.renderer.BufferBuilder;
-//import net.minecraft.client.renderer.GlStateManager;
 //import net.minecraft.client.renderer.Tessellator;
 //import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 //import net.minecraftforge.fml.client.config.GuiUtils;
@@ -123,13 +124,6 @@
 //        if (this.scrollDistance > listHeight)
 //        {
 //            this.scrollDistance = listHeight;
-//        }
-//    }
-//
-//    public void actionPerformed(GuiButton button)
-//    {
-//        if (button.enabled)
-//        {
 //        }
 //    }
 //
@@ -277,8 +271,8 @@
 //            {
 //                GlStateManager.disableLighting();
 //                GlStateManager.disableFog();
-//                this.parent.mc.renderEngine.bindTexture(Gui.OPTIONS_BACKGROUND);
-//                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+//                this.parent.mc.textureManager.bindTexture(AbstractGui.BACKGROUND_LOCATION);
+//                GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 //                final float scale = 32.0F;
 //                worldr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
 //                worldr.pos(left, top + height, 0.0D).tex(left / scale, (top + height + scrollDistance) / scale)
@@ -352,7 +346,7 @@
 //        }
 //
 //        cacheContentHeight = contentHeight;
-//        GlStateManager.disableDepth();
+//        GlStateManager.disableDepthTest();
 //
 //        worldr.setTranslation(offsetX, offsetY, 0);
 //        if (drawScrollbar && extraHeight > 0) // Draw scroll bar
@@ -371,7 +365,7 @@
 //                barTop = top;
 //            }
 //
-//            GlStateManager.disableTexture2D();
+//            GlStateManager.disableTexture();
 //            if (drawBackground)
 //            {
 //                worldr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
@@ -401,9 +395,9 @@
 //        }
 //        worldr.setTranslation(0, 0, 0);
 //
-//        GlStateManager.enableTexture2D();
+//        GlStateManager.enableTexture();
 //        GlStateManager.shadeModel(GL11.GL_FLAT);
-//        GlStateManager.enableAlpha();
+//        GlStateManager.enableAlphaTest();
 //        GlStateManager.disableBlend();
 //        GL11.glDisable(GL11.GL_SCISSOR_TEST);
 //    }

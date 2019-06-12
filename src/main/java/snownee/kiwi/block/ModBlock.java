@@ -14,8 +14,18 @@ public class ModBlock extends Block
     public ModBlock(Block.Properties builder)
     {
         super(builder);
-        //        setSoundType(soundType);
-        //        setHardness(deduceHardness(materialIn));
+        if (soundType == SoundType.STONE)
+        {
+            soundType = deduceSoundType(material);
+        }
+        if (blockHardness == 0)
+        {
+            blockHardness = deduceHardness(material);
+            if (blockHardness > 0)
+            {
+                blockResistance = blockHardness;
+            }
+        }
     }
 
     public static SoundType deduceSoundType(final Material material)
@@ -31,6 +41,10 @@ public class ModBlock extends Block
         if (material == Material.PLANTS || material == Material.ORGANIC || material == Material.TALL_PLANTS || material == Material.LEAVES || material == Material.SPONGE || material == Material.TNT)
         {
             return SoundType.PLANT;
+        }
+        if (material == Material.SEA_GRASS || material == Material.OCEAN_PLANT)
+        {
+            return SoundType.WET_GRASS;
         }
         if (material == Material.IRON)
         {
@@ -61,7 +75,7 @@ public class ModBlock extends Block
 
     public static float deduceHardness(final Material material)
     {
-        if (material == Material.PLANTS || material == Material.AIR)
+        if (material == Material.PLANTS || material == Material.AIR || material == Material.FIRE)
         {
             return 0;
         }
@@ -84,6 +98,10 @@ public class ModBlock extends Block
         if (material == Material.GLASS)
         {
             return 0.3F;
+        }
+        if (material == Material.CACTUS)
+        {
+            return 0.4F;
         }
         if (material == Material.IRON || material == Material.ANVIL)
         {
