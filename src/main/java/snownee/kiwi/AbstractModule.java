@@ -6,6 +6,7 @@ import net.minecraft.item.Item;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
+import snownee.kiwi.block.ModBlock;
 
 public abstract class AbstractModule
 {
@@ -42,5 +43,10 @@ public abstract class AbstractModule
     protected static Block.Properties blockProp(Material material)
     {
         return Block.Properties.create(material);
+    }
+
+    protected static <T extends Block> T init(T block)
+    {
+        return ModBlock.deduceSoundAndHardness(block);
     }
 }

@@ -17,7 +17,7 @@ public class ModBlock extends Block
         deduceSoundAndHardness(this);
     }
 
-    public static Block deduceSoundAndHardness(Block block)
+    public static <T extends Block> T deduceSoundAndHardness(T block)
     {
         if (block.soundType == SoundType.STONE)
         {

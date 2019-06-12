@@ -1,8 +1,6 @@
 package snownee.kiwi.test;
 
-import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 //import snownee.kiwi.client.AdvancedFontRenderer;
 import snownee.kiwi.item.ModItem;
 
