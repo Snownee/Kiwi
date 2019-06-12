@@ -39,7 +39,7 @@ public class KiwiConfig
         for (Entry<ResourceLocation, Boolean> entry : Kiwi.defaultOptions.entrySet())
         {
             ResourceLocation rl = entry.getKey();
-            modules.put(rl, builder.define(rl.getNamespace() + "." + rl.getPath(), entry.getValue().booleanValue()));
+            modules.put(rl, builder.define(rl.getNamespace() + "." + rl.getPath(), !entry.getValue().booleanValue()));
         }
         
         builder.pop();

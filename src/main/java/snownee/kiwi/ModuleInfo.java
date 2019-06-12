@@ -58,7 +58,7 @@ public class ModuleInfo
     {
         context.setActiveContainer();
         items.forEach((item, name) -> {
-            if (item.group != null && !noGroups.contains(item))
+            if (group != null && item.group == null && !noGroups.contains(item))
                 item.group = group;
             event.getRegistry().register(item.setRegistryName(new ResourceLocation(rl.getNamespace(), name)));
         });
@@ -69,7 +69,7 @@ public class ModuleInfo
             if (builder == null)
                 builder = new Item.Properties();
             ModBlockItem item = new ModBlockItem(block, builder);
-            if (!noGroups.contains(item))
+            if (group != null && builder.group == null && !noGroups.contains(item))
                 item.group = group;
             event.getRegistry().register(item.setRegistryName(block.getRegistryName()));
         });
