@@ -1,26 +1,21 @@
 package snownee.kiwi.crafting;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.item.crafting.ShapedRecipe;
 import net.minecraft.item.crafting.ShapelessRecipe;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.JSONUtils;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
+import snownee.kiwi.KiwiManager;
 
 public class NoContainersShapelessRecipe extends ShapelessRecipe
 {
-
-    public NoContainersShapelessRecipe(ResourceLocation idIn, String groupIn, ItemStack recipeOutputIn, NonNullList<Ingredient> recipeItemsIn)
+    public NoContainersShapelessRecipe(ShapelessRecipe rawRecipe)
     {
-        super(idIn, groupIn, recipeOutputIn, recipeItemsIn);
+        super(rawRecipe.getId(), rawRecipe.getGroup(), rawRecipe.getRecipeOutput(), rawRecipe.getIngredients());
     }
 
     @Override
@@ -29,85 +24,30 @@ public class NoContainersShapelessRecipe extends ShapelessRecipe
         return NonNullList.withSize(inv.getSizeInventory(), ItemStack.EMPTY);
     }
 
+    @Override
+    public IRecipeSerializer<?> getSerializer()
+    {
+        return KiwiManager.shapelessSerializer;
+    }
+
     public static class Serializer extends net.minecraftforge.registries.ForgeRegistryEntry<IRecipeSerializer<?>> implements IRecipeSerializer<NoContainersShapelessRecipe>
     {
         @Override
         public NoContainersShapelessRecipe read(ResourceLocation recipeId, JsonObject json)
         {
-            int maxHeight = 3;
-            int maxWidth = 3;
-            try
-            {
-                maxHeight = (int) NoContainersShapedRecipe.HEIGHT.get(null);
-                maxWidth = (int) NoContainersShapedRecipe.WIDTH.get(null);
-            }
-            catch (NullPointerException | IllegalArgumentException | IllegalAccessException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-
-            String s = JSONUtils.getString(json, "group", "");
-            NonNullList<Ingredient> nonnulllist = readIngredients(JSONUtils.getJsonArray(json, "ingredients"));
-            if (nonnulllist.isEmpty())
-            {
-                throw new JsonParseException("No ingredients for shapeless recipe");
-            }
-            else if (nonnulllist.size() > maxWidth * maxHeight)
-            {
-                throw new JsonParseException("Too many ingredients for shapeless recipe the max is " + (maxWidth * maxHeight));
-            }
-            else
-            {
-                ItemStack itemstack = ShapedRecipe.deserializeItem(JSONUtils.getJsonObject(json, "result"));
-                return new NoContainersShapelessRecipe(recipeId, s, itemstack, nonnulllist);
-            }
-        }
-
-        private static NonNullList<Ingredient> readIngredients(JsonArray p_199568_0_)
-        {
-            NonNullList<Ingredient> nonnulllist = NonNullList.create();
-
-            for (int i = 0; i < p_199568_0_.size(); ++i)
-            {
-                Ingredient ingredient = Ingredient.deserialize(p_199568_0_.get(i));
-                if (!ingredient.hasNoMatchingItems())
-                {
-                    nonnulllist.add(ingredient);
-                }
-            }
-
-            return nonnulllist;
+            return new NoContainersShapelessRecipe(IRecipeSerializer.field_222158_b.read(recipeId, json));
         }
 
         @Override
         public NoContainersShapelessRecipe read(ResourceLocation recipeId, PacketBuffer buffer)
         {
-            String s = buffer.readString(32767);
-            int i = buffer.readVarInt();
-            NonNullList<Ingredient> nonnulllist = NonNullList.withSize(i, Ingredient.EMPTY);
-
-            for (int j = 0; j < nonnulllist.size(); ++j)
-            {
-                nonnulllist.set(j, Ingredient.read(buffer));
-            }
-
-            ItemStack itemstack = buffer.readItemStack();
-            return new NoContainersShapelessRecipe(recipeId, s, itemstack, nonnulllist);
+            return new NoContainersShapelessRecipe(IRecipeSerializer.field_222158_b.read(recipeId, buffer));
         }
 
         @Override
         public void write(PacketBuffer buffer, NoContainersShapelessRecipe recipe)
         {
-            buffer.writeString(recipe.getGroup());
-            buffer.writeVarInt(recipe.getIngredients().size());
-
-            for (Ingredient ingredient : recipe.getIngredients())
-            {
-                ingredient.write(buffer);
-            }
-
-            buffer.writeItemStack(recipe.getRecipeOutput());
+            IRecipeSerializer.field_222158_b.write(buffer, recipe);
         }
     }
 }

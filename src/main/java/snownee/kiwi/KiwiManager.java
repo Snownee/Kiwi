@@ -31,6 +31,9 @@ public class KiwiManager
     public static final HashSet<ResourceLocation> ENABLED_MODULES = Sets.newHashSet();
     static Map<String, ItemGroup> GROUPS = Maps.newHashMap();
 
+    public static IRecipeSerializer<?> shapedSerializer;
+    public static IRecipeSerializer<?> shapelessSerializer;
+
     private KiwiManager()
     {
     }
@@ -91,8 +94,8 @@ public class KiwiManager
     @SubscribeEvent
     public static void registerRecipeTypes(RegistryEvent.Register<IRecipeSerializer<?>> event)
     {
-        event.getRegistry().register(new NoContainersShapedRecipe.Serializer().setRegistryName(Kiwi.MODID, "shaped_no_containers"));
-        event.getRegistry().register(new NoContainersShapelessRecipe.Serializer().setRegistryName(Kiwi.MODID, "shapeless_no_containers"));
+        event.getRegistry().register(shapedSerializer = new NoContainersShapedRecipe.Serializer().setRegistryName(Kiwi.MODID, "shaped_no_containers"));
+        event.getRegistry().register(shapelessSerializer = new NoContainersShapelessRecipe.Serializer().setRegistryName(Kiwi.MODID, "shapeless_no_containers"));
 
         MODULES.values().forEach(info -> info.registerRecipeTypes(event));
         ModLoadingContext.get().setActiveContainer(null, null);

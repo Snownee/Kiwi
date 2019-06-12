@@ -20,12 +20,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
 import net.minecraft.block.Block;
+import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.RecipeManager;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.Potion;
+import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.event.RegistryEvent;
@@ -344,6 +345,14 @@ public class Kiwi
                 else if (o instanceof IRecipeSerializer<?>)
                 {
                     info.recipeTypes.put((IRecipeSerializer<?>) o, regName);
+                }
+                else if (o instanceof TileEntityType<?>)
+                {
+                    info.tileTypes.put((TileEntityType<?>) o, regName);
+                }
+                else if (o instanceof EntityType<?>)
+                {
+                    info.entityTypes.put((EntityType<?>) o, regName);
                 }
 
                 tmpBuilder = null;
