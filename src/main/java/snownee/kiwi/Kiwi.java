@@ -1,6 +1,5 @@
 package snownee.kiwi;
 
-import java.lang.annotation.ElementType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
@@ -73,56 +72,57 @@ public class Kiwi
         }
     }
 
-    private List<Class> allModules;
+    private static List<AnnotationData> moduleData;
     public static Map<ResourceLocation, Boolean> defaultOptions = Maps.newHashMap();
 
     public Kiwi()
     {
         /* off */
         final Type KIWI_MODULE = Type.getType(KiwiModule.class);
-        allModules = ModList.get().getAllScanData().stream()
+        final Type OPTIONAL_MODULE = Type.getType(KiwiModule.Optional.class);
+        
+        List<AnnotationData> data = ModList.get().getAllScanData().stream()
                 .map(ModFileScanData::getAnnotations)
                 .flatMap(Collection::stream)
-                .filter(a -> a.getTargetType() == ElementType.TYPE)
-                .filter(a -> KIWI_MODULE.equals(a.getAnnotationType()))
-                .map(AnnotationData::getClassType)
-                .map(Type::getClassName)
-                .map(s -> {
-                    try
-                    {
-                        return Class.forName(s);
-                    }
-                    catch (ClassNotFoundException e)
-                    {
-                        e.printStackTrace();
-                        return null;
-                    }
-                })
-                .filter(c -> AbstractModule.class.isAssignableFrom(c))
                 .collect(Collectors.toList());
+        
+        moduleData = data.stream()
+                .filter(a -> KIWI_MODULE.equals(a.getAnnotationType()))
+                .collect(Collectors.toList());
+
+        List<Type> moduleTypes = moduleData.stream()
+                .map(AnnotationData::getClassType)
+                .collect(Collectors.toList());
+
+        Map<Type, AnnotationData> moduleToOptional = Maps.newHashMap();
+        
+        data.stream()
+                .filter(a -> OPTIONAL_MODULE.equals(a.getAnnotationType()))
+                .filter(a -> moduleTypes.contains(a.getClassType()))
+                .forEach(a -> moduleToOptional.put(a.getClassType(), a));
         /* on */
 
-        logger.info("Processing " + allModules.size() + " KiwiModule annotations");
+        logger.info("Processing " + moduleTypes.size() + " KiwiModule annotations");
 
-        for (Class module : allModules)
+        for (AnnotationData module : moduleData)
         {
-            KiwiModule.Optional optionalAnnotation = (KiwiModule.Optional) module.getAnnotation(KiwiModule.Optional.class);
-            if (optionalAnnotation != null)
+            AnnotationData optional = moduleToOptional.get(module.getClassType());
+            if (optional != null)
             {
-                KiwiModule kiwiModule = (KiwiModule) module.getAnnotation(KiwiModule.class);
-                String modid = kiwiModule.modid();
+                String modid = module.getAnnotationData().get("modid").toString();
                 if (!ModList.get().isLoaded(modid))
                 {
                     continue;
                 }
 
-                String name = kiwiModule.name();
-                if (name.isEmpty())
+                String name = (String) module.getAnnotationData().get("name");
+                if (name == null || name.isEmpty())
                 {
                     name = modid;
                 }
 
-                defaultOptions.put(new ResourceLocation(modid, name), optionalAnnotation.disabledByDefault());
+                Boolean disabledByDefault = (Boolean) optional.getAnnotationData().get("disabledByDefault");
+                defaultOptions.put(new ResourceLocation(modid, name), disabledByDefault);
             }
         }
 
@@ -170,17 +170,16 @@ public class Kiwi
         .forEach(g -> KiwiManager.GROUPS.put(g.getTabLabel(), g));
         /* on */
 
-        for (Class module : allModules)
+        for (AnnotationData module : moduleData)
         {
-            KiwiModule kiwiModule = (KiwiModule) module.getAnnotation(KiwiModule.class);
-            String modid = kiwiModule.modid();
+            String modid = (String) module.getAnnotationData().get("modid");
             if (!ModList.get().isLoaded(modid))
             {
                 continue;
             }
 
-            String name = kiwiModule.name();
-            if (name.isEmpty())
+            String name = (String) module.getAnnotationData().get("name");
+            if (name == null || name.isEmpty())
             {
                 name = modid;
             }
@@ -192,7 +191,8 @@ public class Kiwi
             }
 
             /* off */
-            boolean shouldLoad = StringUtils.split(kiwiModule.dependencies(), ';').stream()
+            String dependencies = (String) module.getAnnotationData().get("dependencies");
+            boolean shouldLoad = dependencies == null || StringUtils.split(dependencies, ';').stream()
                     .filter(s -> !s.isEmpty())
                     .allMatch(s -> ModList.get().isLoaded(s));
             /* on */
@@ -207,10 +207,11 @@ public class Kiwi
 
             try
             {
-                AbstractModule instance = (AbstractModule) module.newInstance();
+                Class<?> clazz = Class.forName(module.getClassType().getClassName());
+                AbstractModule instance = (AbstractModule) clazz.newInstance();
                 KiwiManager.addInstance(new ResourceLocation(modid, name), instance, context);
             }
-            catch (InstantiationException | IllegalAccessException e)
+            catch (InstantiationException | IllegalAccessException | ClassCastException | ClassNotFoundException e)
             {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -220,8 +221,8 @@ public class Kiwi
             ModLoadingContext.get().setActiveContainer(null, null);
         }
 
-        allModules.clear();
-        allModules = null;
+        moduleData.clear();
+        moduleData = null;
         defaultOptions.clear();
         defaultOptions = null;
 

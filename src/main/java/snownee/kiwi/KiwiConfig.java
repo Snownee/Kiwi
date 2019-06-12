@@ -1,7 +1,5 @@
 package snownee.kiwi;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -13,7 +11,6 @@ import com.google.common.collect.Maps;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
-import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import net.minecraftforge.common.ForgeConfigSpec.IntValue;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.thread.EffectiveSide;
@@ -23,7 +20,6 @@ public class KiwiConfig
     static final ForgeConfigSpec spec;
     static UnmodifiableConfig config;
 
-    public static ConfigValue<List<String>> orePreference;
     public static BooleanValue tooltipRequiresShift;
     public static IntValue tooltipWrapWidth;
     public static BooleanValue replaceDefaultFontRenderer;
@@ -38,11 +34,6 @@ public class KiwiConfig
     private KiwiConfig(ForgeConfigSpec.Builder builder)
     {
         /* off */
-        orePreference = builder
-                .comment("A list of preferred Mod IDs that results of processes should stem from")
-                .translation("kiwi.config.orePreference")
-                .define("orePreference", Collections.singletonList("minecraft"), o -> o instanceof String && isValidNamespace((String) o));
-        
         builder.push("modules");
         
         for (Entry<ResourceLocation, Boolean> entry : Kiwi.defaultOptions.entrySet())
