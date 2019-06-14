@@ -129,6 +129,10 @@ public class Kiwi
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, KiwiConfig.spec, MODID + ".toml");
         final IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         modEventBus.addListener(this::preInit);
+        modEventBus.addListener(this::init);
+        modEventBus.addListener(this::clientInit);
+        modEventBus.addListener(this::serverInit);
+        modEventBus.addListener(this::postInit);
     }
 
     @SubscribeEvent
