@@ -280,7 +280,16 @@ public class Kiwi
                     continue;
                 }
 
-                String regName = field.getName().toLowerCase(Locale.ENGLISH);
+                String regName;
+                Name nameAnnotation = field.getAnnotation(Name.class);
+                if (nameAnnotation != null)
+                {
+                    regName = nameAnnotation.value();
+                }
+                else
+                {
+                    regName = field.getName().toLowerCase(Locale.ENGLISH);
+                }
                 Object o = null;
                 try
                 {
