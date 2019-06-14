@@ -8,9 +8,9 @@ import snownee.kiwi.network.Packet.PacketHandler;
 
 public final class NetworkChannel
 {
+    private static final String PROTOCOL_VERSION = Integer.toString(1);
     public static final NetworkChannel INSTANCE = new NetworkChannel();
 
-    private static final String PROTOCOL_VERSION = Integer.toString(1);
     private int nextIndex = 0;
     final SimpleChannel channel;
 
@@ -26,9 +26,9 @@ public final class NetworkChannel
         /* on */
     }
 
-    public <T extends Packet> void register(Class<T> klass, PacketHandler<T> handler)
+    public static <T extends Packet> void register(Class<T> klass, PacketHandler<T> handler)
     {
-        channel.registerMessage(nextIndex, klass, handler::encode, handler::decode, handler::handle);
-        nextIndex++;
+        INSTANCE.channel.registerMessage(INSTANCE.nextIndex, klass, handler::encode, handler::decode, handler::handle);
+        INSTANCE.nextIndex++;
     }
 }
