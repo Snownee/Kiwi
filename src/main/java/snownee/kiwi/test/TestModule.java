@@ -18,9 +18,12 @@ import snownee.kiwi.block.ModBlock;
 @KiwiModule.Group("buildingBlocks")
 public class TestModule extends AbstractModule
 {
+    // Keep your fields `public static final`
+
     // Register a simple item
     public static final TestItem FIRST_ITEM = new TestItem(itemProp().rarity(Rarity.EPIC));
 
+    // The next block will use this builder to build its BlockItem. After that this field will be null
     public static final Item.Properties FIRST_BLOCK_ITEM_BUILDER = itemProp().rarity(Rarity.RARE);
     // Register a simple block and its BlockItem
     public static final ModBlock FIRST_BLOCK = new ModBlock(blockProp(Material.WOOD));
