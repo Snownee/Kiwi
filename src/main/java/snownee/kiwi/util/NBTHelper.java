@@ -15,6 +15,12 @@ import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.util.Constants.NBT;
 
+/**
+ * 
+ * Simple NBT helper. Use 'a.b.c' to access to values
+ * @author Snownee
+ *
+ */
 public class NBTHelper
 {
     public static class Tag

@@ -8,6 +8,13 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import snownee.kiwi.block.ModBlock;
 
+/**
+ * 
+ * All your modules should extend {@code AbstractModule}
+ * 
+ * @author Snownee
+ *
+ */
 public abstract class AbstractModule
 {
     protected void preInit()
@@ -15,6 +22,10 @@ public abstract class AbstractModule
         // NO-OP
     }
 
+    /**
+     * @author Snownee
+     * @param event Note: this event's ModContainer is from Kiwi
+     */
     protected void init(FMLCommonSetupEvent event)
     {
         // NO-OP
@@ -35,6 +46,7 @@ public abstract class AbstractModule
         // NO-OP
     }
 
+    /// helper methods:
     protected static Item.Properties itemProp()
     {
         return new Item.Properties();

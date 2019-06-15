@@ -30,13 +30,4 @@ public class TestModule extends AbstractModule
 
     // And its potion
     public static final Potion FIRST_POTION = new Potion(new EffectInstance(FIRST_EFFECT, 1800));
-
-    //    @Override
-    //    public void init()
-    //    {
-    //        FIRST_BLOCK.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
-    //        FIRST_ITEM.setCreativeTab(CreativeTabs.MISC);
-    //        MISC.setCreativeTab(CreativeTabs.MISC);
-    //    }
-
 }

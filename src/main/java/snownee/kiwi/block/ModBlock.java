@@ -8,7 +8,18 @@ import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockReader;
+import snownee.kiwi.AbstractModule;
 
+/**
+ * 
+ * Simple base block. You do not have to set sound or hardness every time.
+ * 
+ * If you want to extends other vanilla class, simply use
+ * {@link AbstractModule#init(T block)} to automatically set properties
+ * 
+ * @author Snownee
+ * 
+ */
 public class ModBlock extends Block
 {
     public ModBlock(Block.Properties builder)

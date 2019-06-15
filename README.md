@@ -6,13 +6,14 @@ Make modding no longer cumbersome.
 
 ``` java
 @KiwiModule(modid = MyMod.MODID)
-public class ModRegistry implements IModule
+@KiwiModule.Group("buildingBlocks")
+public class MyModule extends AbstractModule
 {
-    // Register a simple item. Kiwi will automatically register and map models
-    public static final ItemMod FIRST_ITEM = new ItemMod("my_first_item");
+    // Register a simple item. Kiwi will automatically register it
+    public static final Item FIRST_ITEM = new Item(itemProp().rarity(Rarity.EPIC));
 
-    // Register a simple block and its ItemBlock
-    public static final BlockMod FIRST_BLOCK = new BlockMod("my_first_block", Material.ROCK);
+    // Register a simple block and its BlockItem
+    public static final Block FIRST_BLOCK = new Block(blockProp(Material.WOOD));
 }
 ```
 
@@ -20,15 +21,15 @@ public class ModRegistry implements IModule
 
 ``` java
 // This module will be loaded only when `dependency` mod is loaded
-@KiwiModule(modid = MyAddon.MODID, name = "dependency", dependency = "dependency")
-public class ModAddon implements IModule
+@KiwiModule(modid = MyAddon.MODID, name = "test", dependency = "dependency")
+@KiwiModule.Optional
+public class MyAddon extends AbstractModule
 {
     // This method is called in FMLInitializationEvent
     @Override
     public void init()
     {
         // Do something
-        OreDictionary.registerOre("exampleOre", exampleItem);
     }
 }
 ```
