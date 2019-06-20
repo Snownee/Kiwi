@@ -25,7 +25,7 @@ public class MyModule extends AbstractModule
 @KiwiModule.Optional
 public class MyAddon extends AbstractModule
 {
-    // This method is called in FMLInitializationEvent
+    // This method is called in FMLCommonSetupEvent
     @Override
     public void init()
     {
