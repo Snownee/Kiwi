@@ -29,7 +29,7 @@ public class LootDumper
             bytes = new byte[in.available()];
             in.read(bytes);
         }
-        catch (IOException e)
+        catch (IOException | NullPointerException e)
         {
             e.printStackTrace();
             return;
