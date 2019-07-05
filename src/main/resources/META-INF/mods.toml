@@ -2,9 +2,11 @@ modLoader="javafml"
 loaderVersion="[26,)"
 [[mods]]
 modId="kiwi"
-version="${file.jarVersion}" #mandatory
+version="${file.jarVersion}"
 displayName="Kiwi"
-credits="Thanks for this example mod goes to Java"
 authors="Snownee, 3TUSK"
-description='''
+displayURL="https://www.curseforge.com/minecraft/mc-mods/kiwi"
+description='''Huge thanks to my supporters:
+
+粉鱼 Lioness131 皮蛋 Cherls idyllic_bean 鱼加盐有点咸 洋葱菜菜子 面条公爵 车轮饼 mc00zhu
 '''

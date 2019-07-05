@@ -31,10 +31,12 @@ import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.thread.EffectiveSide;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -47,6 +49,7 @@ import net.minecraftforge.forgespi.language.ModFileScanData;
 import net.minecraftforge.forgespi.language.ModFileScanData.AnnotationData;
 import snownee.kiwi.KiwiModule.Group;
 import snownee.kiwi.crafting.ConditionModuleLoaded;
+import snownee.kiwi.util.LootDumper;
 
 @Mod(Kiwi.MODID)
 public class Kiwi
@@ -133,6 +136,7 @@ public class Kiwi
         modEventBus.addListener(this::clientInit);
         modEventBus.addListener(this::serverInit);
         modEventBus.addListener(this::postInit);
+        modEventBus.addListener(this::loadComplete);
     }
 
     @SubscribeEvent
@@ -444,6 +448,10 @@ public class Kiwi
     {
         KiwiManager.MODULES.clear();
         KiwiManager.GROUPS.clear();
+        if (EffectiveSide.get() == LogicalSide.CLIENT && !KiwiConfig.dumpLootsPattern.get().isEmpty())
+        {
+            LootDumper.dump(KiwiConfig.dumpLootsPattern.get());
+        }
     }
 
     public static boolean isLoaded(ResourceLocation module)
