@@ -175,7 +175,7 @@ public class Kiwi
                 ItemGroup.COMBAT,
                 ItemGroup.BREWING
                 )
-        .forEach(g -> KiwiManager.GROUPS.put(g.getTabLabel(), g));
+        .forEach(g -> KiwiManager.GROUPS.put(g.getPath(), g));
         /* on */
 
         for (AnnotationData module : moduleData)

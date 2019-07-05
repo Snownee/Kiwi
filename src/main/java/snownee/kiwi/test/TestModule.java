@@ -15,7 +15,7 @@ import snownee.kiwi.block.ModBlock;
 
 @KiwiModule(modid = Kiwi.MODID, name = "test")
 @KiwiModule.Optional(disabledByDefault = true)
-@KiwiModule.Group("buildingBlocks")
+@KiwiModule.Group("building_blocks")
 public class TestModule extends AbstractModule
 {
     // Keep your fields `public static final`

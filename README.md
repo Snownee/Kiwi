@@ -6,7 +6,7 @@ Make modding no longer cumbersome.
 
 ``` java
 @KiwiModule(modid = MyMod.MODID)
-@KiwiModule.Group("buildingBlocks")
+@KiwiModule.Group("building_blocks")
 public class MyModule extends AbstractModule
 {
     // Register a simple item. Kiwi will automatically register it
