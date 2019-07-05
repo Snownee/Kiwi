@@ -1,6 +1,6 @@
 {
   "parent": "block/cube_all",
   "textures": {
-    "all": "kiwi:block/log_top"
+    "all": "block/oak_log_top"
   }
 }

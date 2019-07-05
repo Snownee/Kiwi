@@ -35,19 +35,19 @@ public class NoContainersShapelessRecipe extends ShapelessRecipe
         @Override
         public NoContainersShapelessRecipe read(ResourceLocation recipeId, JsonObject json)
         {
-            return new NoContainersShapelessRecipe(IRecipeSerializer.field_222158_b.read(recipeId, json));
+            return new NoContainersShapelessRecipe(IRecipeSerializer.CRAFTING_SHAPELESS.read(recipeId, json));
         }
 
         @Override
         public NoContainersShapelessRecipe read(ResourceLocation recipeId, PacketBuffer buffer)
         {
-            return new NoContainersShapelessRecipe(IRecipeSerializer.field_222158_b.read(recipeId, buffer));
+            return new NoContainersShapelessRecipe(IRecipeSerializer.CRAFTING_SHAPELESS.read(recipeId, buffer));
         }
 
         @Override
         public void write(PacketBuffer buffer, NoContainersShapelessRecipe recipe)
         {
-            IRecipeSerializer.field_222158_b.write(buffer, recipe);
+            IRecipeSerializer.CRAFTING_SHAPELESS.write(buffer, recipe);
         }
     }
 }

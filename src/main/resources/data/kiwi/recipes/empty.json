@@ -1,0 +1,17 @@
+{
+  "type": "kiwi:shapeless_no_containers",
+  "conditions": [
+    {
+      "type": "kiwi:is_loaded",
+      "module": "kiwi:test"
+    }
+  ],
+  "ingredients": [
+    {
+      "item": "minecraft:lava_bucket"
+    }
+  ],
+  "result": {
+    "item": "minecraft:bucket"
+  }
+}
