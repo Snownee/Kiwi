@@ -139,7 +139,6 @@ public class Kiwi
         modEventBus.addListener(this::loadComplete);
     }
 
-    @SubscribeEvent
     public void preInit(RegistryEvent.NewRegistry event)
     {
         try
@@ -413,7 +412,6 @@ public class Kiwi
     //        return sb.toString();
     //    }
 
-    @SubscribeEvent
     public void init(FMLCommonSetupEvent event)
     {
         CraftingHelper.register(new ResourceLocation(MODID, "is_loaded"), new ConditionModuleLoaded());
@@ -422,28 +420,24 @@ public class Kiwi
         ModLoadingContext.get().setActiveContainer(null, null);
     }
 
-    @SubscribeEvent
     public void clientInit(FMLClientSetupEvent event)
     {
         KiwiManager.MODULES.values().forEach(m -> m.clientInit(event));
         ModLoadingContext.get().setActiveContainer(null, null);
     }
 
-    @SubscribeEvent
     public void serverInit(FMLDedicatedServerSetupEvent event)
     {
         KiwiManager.MODULES.values().forEach(m -> m.serverInit(event));
         ModLoadingContext.get().setActiveContainer(null, null);
     }
 
-    @SubscribeEvent
     public void postInit(InterModProcessEvent event)
     {
         KiwiManager.MODULES.values().forEach(ModuleInfo::postInit);
         ModLoadingContext.get().setActiveContainer(null, null);
     }
 
-    @SubscribeEvent
     public void loadComplete(FMLLoadCompleteEvent event)
     {
         KiwiManager.MODULES.clear();

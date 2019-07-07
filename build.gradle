@@ -33,7 +33,7 @@ minecraft {
     mappings channel: 'snapshot', version: '20190630-1.14.3'
     
     // accessTransformer = file('build/resources/main/META-INF/kiwi_at.cfg')
-    accessTransformer = file('src/main/resources/META-INF/kiwi_at.cfg')
+    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
     // Default run configurations.
     // These can be tweaked, removed, or duplicated as needed.
@@ -99,8 +99,6 @@ dependencies {
 
 // Example for how to get properties into the manifest for reading by the runtime..
 jar {
-    include "**/*"
-    
     manifest {
         attributes([
             "Implementation-Title": project.name,

@@ -37,5 +37,5 @@ public class MyAddon extends AbstractModule
 ## How to start
 
 1. Copy Kiwi's AT configuration to your own project
-2. Add `accessTransformer = file('src/main/resources/META-INF/kiwi_at.cfg')` to your `build.gradle`
+2. Add `accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')` to your `build.gradle`
 3. Follow the `Readme.txt` of MDK
