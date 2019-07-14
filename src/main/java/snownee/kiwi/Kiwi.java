@@ -7,6 +7,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -19,21 +20,19 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
 import net.minecraft.block.Block;
-import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.potion.Effect;
-import net.minecraft.potion.Potion;
-import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.LifecycleEventProvider;
+import net.minecraftforge.fml.LifecycleEventProvider.LifecycleEvent;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.ModLoadingStage;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.thread.EffectiveSide;
 import net.minecraftforge.fml.config.ModConfig;
@@ -46,6 +45,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.forgespi.language.ModFileScanData;
 import net.minecraftforge.forgespi.language.ModFileScanData.AnnotationData;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 import snownee.kiwi.KiwiModule.Group;
 import snownee.kiwi.crafting.ConditionModuleLoaded;
 import snownee.kiwi.util.LootDumper;
@@ -154,11 +154,20 @@ public class Kiwi
             fCfg.set(config, configData);
             config.getSpec().setConfig(configData);
             config.save();
+
+            Field fTriggers = ModContainer.class.getDeclaredField("triggerMap");
+            fTriggers.setAccessible(true);
+            Map<ModLoadingStage, Consumer<LifecycleEventProvider.LifecycleEvent>> triggerMap = (Map<ModLoadingStage, Consumer<LifecycleEvent>>) fTriggers.get(myContainer);
+            Consumer<LifecycleEvent> consumer = triggerMap.get(ModLoadingStage.LOAD_REGISTRIES).andThen(e -> {
+                KiwiManager.handleRegister((RegistryEvent.Register<?>) e.getOrBuildEvent(myContainer));
+            });
+            triggerMap.put(ModLoadingStage.LOAD_REGISTRIES, consumer);
         }
         catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error("Kiwi failed to load infrastructures. Please report to developer!");
+            logger.catching(e);
+            return;
         }
 
         /* off */
@@ -261,14 +270,12 @@ public class Kiwi
                 }
             }
 
-            int countBlock = 0;
-            int countItem = 0;
-
             String modid = info.rl.getNamespace();
             String name = info.rl.getPath();
 
             Item.Properties tmpBuilder = null;
             Field tmpBuilderField = null;
+            int count = 0;
             for (Field field : info.module.getClass().getFields())
             {
                 int mods = field.getModifiers();
@@ -323,7 +330,6 @@ public class Kiwi
                         info.noItems.add((Block) o);
                     }
                     checkNoGroup(info, field, o);
-                    info.blocks.put((Block) o, regName);
                     if (tmpBuilder != null)
                     {
                         info.blockItemBuilders.put((Block) o, tmpBuilder);
@@ -342,40 +348,22 @@ public class Kiwi
                             e.printStackTrace();
                         }
                     }
-                    ++countBlock;
                 }
                 else if (o instanceof Item)
                 {
                     checkNoGroup(info, field, o);
-                    info.items.put((Item) o, regName);
-                    ++countItem;
                 }
-                else if (o instanceof Effect)
+                if (o instanceof IForgeRegistryEntry<?>)
                 {
-                    info.effects.put((Effect) o, regName);
-                }
-                else if (o instanceof Potion)
-                {
-                    info.potions.put((Potion) o, regName);
-                }
-                else if (o instanceof IRecipeSerializer<?>)
-                {
-                    info.recipeTypes.put((IRecipeSerializer<?>) o, regName);
-                }
-                else if (o instanceof TileEntityType<?>)
-                {
-                    info.tileTypes.put((TileEntityType<?>) o, regName);
-                }
-                else if (o instanceof EntityType<?>)
-                {
-                    info.entityTypes.put((EntityType<?>) o, regName);
+                    info.register((IForgeRegistryEntry<?>) o, regName);
+                    ++count;
                 }
 
                 tmpBuilder = null;
                 tmpBuilderField = null;
             }
 
-            logger.info("[{}:{}]: Block: {}, Item: {}", modid, name, countBlock, countItem);
+            logger.info("[{}:{}]: Entries: {}", modid, name, count);
         }
 
         KiwiManager.MODULES.values().forEach(ModuleInfo::preInit);

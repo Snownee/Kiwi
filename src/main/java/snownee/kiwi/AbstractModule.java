@@ -1,11 +1,18 @@
 package snownee.kiwi;
 
+import java.util.Map;
+import java.util.function.BiConsumer;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.item.Item;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 import snownee.kiwi.block.ModBlock;
 
 /**
@@ -17,6 +24,16 @@ import snownee.kiwi.block.ModBlock;
  */
 public abstract class AbstractModule
 {
+    private static final BiConsumer<ModuleInfo, IForgeRegistryEntry<?>> ITEM_DECORATOR = (module, entry) -> {
+        Item item = (Item) entry;
+        if (module.group != null && item.group == null && !module.noGroups.contains(item))
+            item.group = module.group;
+    };
+
+    private static final Map<Class, BiConsumer<ModuleInfo, IForgeRegistryEntry<?>>> DEFAULT_DECORATORS = ImmutableMap.of(Item.class, ITEM_DECORATOR);
+
+    protected final Map<Class, BiConsumer<ModuleInfo, IForgeRegistryEntry<?>>> decorators = Maps.newHashMap(DEFAULT_DECORATORS);
+
     protected void preInit()
     {
         // NO-OP

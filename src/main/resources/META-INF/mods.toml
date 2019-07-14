@@ -4,7 +4,7 @@ loaderVersion="[26,)"
 modId="kiwi"
 version="${file.jarVersion}"
 displayName="Kiwi"
-authors="Snownee, 3TUSK"
+authors="Snownee"
 displayURL="https://www.curseforge.com/minecraft/mc-mods/kiwi"
 description='''Huge thanks to my supporters:
 

@@ -1,25 +1,24 @@
 package snownee.kiwi;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
+import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
 import net.minecraft.block.Block;
-import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.potion.Effect;
-import net.minecraft.potion.Potion;
-import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.event.RegistryEvent.Register;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 import snownee.kiwi.item.ModBlockItem;
 
 public class ModuleInfo
@@ -28,13 +27,7 @@ public class ModuleInfo
     public final AbstractModule module;
     public final ModContext context;
     public ItemGroup group;
-    final Map<Block, String> blocks = Maps.newLinkedHashMap();
-    final Map<Item, String> items = Maps.newLinkedHashMap();
-    final Map<Effect, String> effects = Maps.newLinkedHashMap();
-    final Map<Potion, String> potions = Maps.newLinkedHashMap();
-    final Map<TileEntityType<?>, String> tileTypes = Maps.newLinkedHashMap();
-    final Map<IRecipeSerializer<?>, String> recipeTypes = Maps.newLinkedHashMap();
-    final Map<EntityType<?>, String> entityTypes = Maps.newLinkedHashMap();
+    final Multimap<Class, NamedEntry> registries = LinkedListMultimap.create();
     final Map<Block, Item.Properties> blockItemBuilders = Maps.newHashMap();
     final Set<Object> noGroups = Sets.newHashSet();
     final Set<Block> noItems = Sets.newHashSet();
@@ -46,72 +39,35 @@ public class ModuleInfo
         this.context = context;
     }
 
-    public void registerBlocks(RegistryEvent.Register<Block> event)
+    public void register(IForgeRegistryEntry<?> entry, String name)
     {
-        context.setActiveContainer();
-        blocks.forEach((block, name) -> {
-            event.getRegistry().register(block.setRegistryName(new ResourceLocation(rl.getNamespace(), name)));
-        });
+        registries.put(entry.getRegistryType(), new NamedEntry(name, entry));
     }
 
-    public void registerItems(RegistryEvent.Register<Item> event)
+    public <T extends IForgeRegistryEntry<T>> void handleRegister(RegistryEvent.Register<T> event)
     {
         context.setActiveContainer();
-        items.forEach((item, name) -> {
-            if (group != null && item.group == null && !noGroups.contains(item))
-                item.group = group;
-            event.getRegistry().register(item.setRegistryName(new ResourceLocation(rl.getNamespace(), name)));
+        Class<?> clazz = event.getRegistry().getRegistrySuperType();
+        Collection<NamedEntry> entries = registries.get(clazz);
+        BiConsumer<ModuleInfo, IForgeRegistryEntry<?>> decorator = module.decorators.getOrDefault(clazz, (a, b) -> {
         });
-        blocks.forEach((block, name) -> {
-            if (noItems.contains(block))
-                return;
-            Item.Properties builder = blockItemBuilders.get(block);
-            if (builder == null)
-                builder = new Item.Properties();
-            ModBlockItem item = new ModBlockItem(block, builder);
-            if (group != null && builder.group == null && !noGroups.contains(item))
-                item.group = group;
-            event.getRegistry().register(item.setRegistryName(block.getRegistryName()));
-        });
-    }
-
-    public void registerEffects(RegistryEvent.Register<Effect> event)
-    {
-        context.setActiveContainer();
-        effects.forEach((effect, name) -> {
-            event.getRegistry().register(effect.setRegistryName(new ResourceLocation(rl.getNamespace(), name)));
-        });
-    }
-
-    public void registerPotions(RegistryEvent.Register<Potion> event)
-    {
-        context.setActiveContainer();
-        potions.forEach((potion, name) -> {
-            event.getRegistry().register(potion.setRegistryName(new ResourceLocation(rl.getNamespace(), name)));
-        });
-    }
-
-    public void registerTiles(RegistryEvent.Register<TileEntityType<?>> event)
-    {
-        context.setActiveContainer();
-        tileTypes.forEach((tileType, name) -> {
-            event.getRegistry().register(tileType.setRegistryName(new ResourceLocation(rl.getNamespace(), name)));
-        });
-    }
-
-    public void registerRecipeTypes(Register<IRecipeSerializer<?>> event)
-    {
-        context.setActiveContainer();
-        recipeTypes.forEach((recipeType, name) -> {
-            event.getRegistry().register(recipeType.setRegistryName(new ResourceLocation(rl.getNamespace(), name)));
-        });
-    }
-
-    public void registerEntityTypes(Register<EntityType<?>> event)
-    {
-        context.setActiveContainer();
-        entityTypes.forEach((entityType, name) -> {
-            event.getRegistry().register(entityType.setRegistryName(new ResourceLocation(rl.getNamespace(), name)));
+        if (clazz == Item.class)
+        {
+            registries.get(Block.class).forEach(e -> {
+                if (noItems.contains(e.entry))
+                    return;
+                Item.Properties builder = blockItemBuilders.get(e.entry);
+                if (builder == null)
+                    builder = new Item.Properties();
+                ModBlockItem item = new ModBlockItem((Block) e.entry, builder);
+                if (noGroups.contains(e.entry))
+                    noGroups.add(item);
+                entries.add(new NamedEntry(e.name, item));
+            });
+        }
+        entries.forEach(e -> {
+            decorator.accept(this, (T) e.entry.setRegistryName(new ResourceLocation(rl.getNamespace(), e.name)));
+            event.getRegistry().register((T) e.entry);
         });
     }
 

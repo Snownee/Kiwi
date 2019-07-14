@@ -7,14 +7,8 @@ import java.util.Map;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-import net.minecraft.block.Block;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.potion.Effect;
-import net.minecraft.potion.Potion;
-import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -56,38 +50,9 @@ public class KiwiManager
         GROUPS.put(modId + ":" + name, group);
     }
 
-    @SubscribeEvent
-    public static void registerBlocks(RegistryEvent.Register<Block> event)
+    public static void handleRegister(RegistryEvent.Register<?> event)
     {
-        MODULES.values().forEach(info -> info.registerBlocks(event));
-        ModLoadingContext.get().setActiveContainer(null, null);
-    }
-
-    @SubscribeEvent
-    public static void registerItems(RegistryEvent.Register<Item> event)
-    {
-        MODULES.values().forEach(info -> info.registerItems(event));
-        ModLoadingContext.get().setActiveContainer(null, null);
-    }
-
-    @SubscribeEvent
-    public static void registerEffects(RegistryEvent.Register<Effect> event)
-    {
-        MODULES.values().forEach(info -> info.registerEffects(event));
-        ModLoadingContext.get().setActiveContainer(null, null);
-    }
-
-    @SubscribeEvent
-    public static void registerPotions(RegistryEvent.Register<Potion> event)
-    {
-        MODULES.values().forEach(info -> info.registerPotions(event));
-        ModLoadingContext.get().setActiveContainer(null, null);
-    }
-
-    @SubscribeEvent
-    public static void registerTiles(RegistryEvent.Register<TileEntityType<?>> event)
-    {
-        MODULES.values().forEach(info -> info.registerTiles(event));
+        MODULES.values().forEach(info -> info.handleRegister(event));
         ModLoadingContext.get().setActiveContainer(null, null);
     }
 
@@ -96,16 +61,6 @@ public class KiwiManager
     {
         event.getRegistry().register(shapedSerializer = new NoContainersShapedRecipe.Serializer().setRegistryName(Kiwi.MODID, "shaped_no_containers"));
         event.getRegistry().register(shapelessSerializer = new NoContainersShapelessRecipe.Serializer().setRegistryName(Kiwi.MODID, "shapeless_no_containers"));
-
-        MODULES.values().forEach(info -> info.registerRecipeTypes(event));
-        ModLoadingContext.get().setActiveContainer(null, null);
-    }
-
-    @SubscribeEvent
-    public static void registerEntityTypes(RegistryEvent.Register<EntityType<?>> event)
-    {
-        MODULES.values().forEach(info -> info.registerEntityTypes(event));
-        ModLoadingContext.get().setActiveContainer(null, null);
     }
 
 }
