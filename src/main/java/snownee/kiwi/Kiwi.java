@@ -41,14 +41,15 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
+import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.forgespi.language.ModFileScanData;
 import net.minecraftforge.forgespi.language.ModFileScanData.AnnotationData;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import snownee.kiwi.KiwiModule.Group;
-import snownee.kiwi.crafting.ModuleLoadedCondition;
 import snownee.kiwi.crafting.FullBlockIngredient;
+import snownee.kiwi.crafting.ModuleLoadedCondition;
 import snownee.kiwi.util.LootDumper;
 
 @Mod(Kiwi.MODID)
@@ -135,6 +136,7 @@ public class Kiwi
         modEventBus.addListener(this::init);
         modEventBus.addListener(this::clientInit);
         modEventBus.addListener(this::serverInit);
+        modEventBus.addListener(this::onDedicatedServerSetup);
         modEventBus.addListener(this::postInit);
         modEventBus.addListener(this::loadComplete);
     }
@@ -415,7 +417,14 @@ public class Kiwi
         ModLoadingContext.get().setActiveContainer(null, null);
     }
 
-    public void serverInit(FMLDedicatedServerSetupEvent event)
+    public void serverInit(FMLServerStartingEvent event)
+    {
+        KiwiManager.MODULES.values().forEach(m -> m.serverInit(event));
+        ModLoadingContext.get().setActiveContainer(null, null);
+    }
+
+    @Deprecated
+    public void onDedicatedServerSetup(FMLDedicatedServerSetupEvent event)
     {
         KiwiManager.MODULES.values().forEach(m -> m.serverInit(event));
         ModLoadingContext.get().setActiveContainer(null, null);

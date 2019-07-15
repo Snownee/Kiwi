@@ -18,6 +18,7 @@ import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
+import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import snownee.kiwi.item.ModBlockItem;
 
@@ -89,6 +90,13 @@ public class ModuleInfo
         module.clientInit(event);
     }
 
+    public void serverInit(FMLServerStartingEvent event)
+    {
+        context.setActiveContainer();
+        module.serverInit(event);
+    }
+
+    @Deprecated
     public void serverInit(FMLDedicatedServerSetupEvent event)
     {
         context.setActiveContainer();

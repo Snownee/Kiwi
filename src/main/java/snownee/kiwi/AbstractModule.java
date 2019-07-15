@@ -12,6 +12,7 @@ import net.minecraft.item.Item;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
+import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import snownee.kiwi.block.ModBlock;
 
@@ -53,7 +54,13 @@ public abstract class AbstractModule
         // NO-OP
     }
 
+    @Deprecated
     protected void serverInit(FMLDedicatedServerSetupEvent event)
+    {
+        // NO-OP
+    }
+
+    protected void serverInit(FMLServerStartingEvent event)
     {
         // NO-OP
     }
