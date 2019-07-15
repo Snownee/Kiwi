@@ -19,7 +19,7 @@ abstract public class AbstractDynamicShapedRecipe extends IForgeRegistryEntry.Im
         {
             for (int y = 0; y <= inv.getHeight() - getRecipeHeight(); ++y)
             {
-                if (checkMatch(inv, x, y))
+                if (checkMatch(inv, x, y) && checkEmpty(inv, x, y))
                 {
                     return true;
                 }
