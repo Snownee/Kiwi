@@ -9,6 +9,7 @@ import net.minecraft.item.crafting.ShapedRecipe;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.registries.ForgeRegistryEntry;
 import snownee.kiwi.KiwiManager;
 
 public class NoContainersShapedRecipe extends ShapedRecipe
@@ -30,7 +31,7 @@ public class NoContainersShapedRecipe extends ShapedRecipe
         return KiwiManager.shapedSerializer;
     }
 
-    public static class Serializer extends net.minecraftforge.registries.ForgeRegistryEntry<IRecipeSerializer<?>> implements IRecipeSerializer<NoContainersShapedRecipe>
+    public static class Serializer extends ForgeRegistryEntry<IRecipeSerializer<?>> implements IRecipeSerializer<NoContainersShapedRecipe>
     {
         @Override
         public NoContainersShapedRecipe read(ResourceLocation recipeId, JsonObject json)

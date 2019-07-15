@@ -47,7 +47,8 @@ import net.minecraftforge.forgespi.language.ModFileScanData;
 import net.minecraftforge.forgespi.language.ModFileScanData.AnnotationData;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import snownee.kiwi.KiwiModule.Group;
-import snownee.kiwi.crafting.ConditionModuleLoaded;
+import snownee.kiwi.crafting.ModuleLoadedCondition;
+import snownee.kiwi.crafting.FullBlockIngredient;
 import snownee.kiwi.util.LootDumper;
 
 @Mod(Kiwi.MODID)
@@ -401,7 +402,8 @@ public class Kiwi
 
     public void init(FMLCommonSetupEvent event)
     {
-        CraftingHelper.register(new ResourceLocation(MODID, "is_loaded"), new ConditionModuleLoaded());
+        CraftingHelper.register(new ResourceLocation(MODID, "is_loaded"), new ModuleLoadedCondition());
+        CraftingHelper.register(new ResourceLocation(MODID, "full_block"), FullBlockIngredient.SERIALIZER);
 
         KiwiManager.MODULES.values().forEach(m -> m.init(event));
         ModLoadingContext.get().setActiveContainer(null, null);

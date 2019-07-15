@@ -4,11 +4,17 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.state.properties.BlockStateProperties;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockReader;
 import snownee.kiwi.AbstractModule;
+import snownee.kiwi.tile.BaseTile;
 
 /**
  * 
@@ -205,5 +211,27 @@ public class ModBlock extends Block
             return 30;
         }
         return 0;
+    }
+
+    @Override
+    public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player)
+    {
+        return pickBlock(state, target, world, pos, player);
+    }
+
+    public static ItemStack pickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player)
+    {
+        ItemStack stack = state.getBlock().getItem(world, pos, state);
+        TileEntity tile = world.getTileEntity(pos);
+        if (tile instanceof BaseTile && !tile.onlyOpsCanSetNbt() && ((BaseTile) tile).persistData)
+        {
+            CompoundNBT data = tile.write(new CompoundNBT());
+            data.remove("x");
+            data.remove("y");
+            data.remove("z");
+            data.remove("id");
+            stack.setTagInfo("BlockEntityTag", data);
+        }
+        return stack;
     }
 }

@@ -13,32 +13,33 @@ import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.common.util.Constants.NBT;
+import net.minecraftforge.common.util.Constants;
 
 /**
  * 
  * Simple NBT helper. Use 'a.b.c' to access to values
+ * 
  * @author Snownee
  *
  */
 public class NBTHelper
 {
-    public static class Tag
+    public static class NBT
     {
-        public static final int END = NBT.TAG_END;
-        public static final int BYTE = NBT.TAG_BYTE;
-        public static final int SHORT = NBT.TAG_SHORT;
-        public static final int INT = NBT.TAG_INT;
-        public static final int LONG = NBT.TAG_LONG;
-        public static final int FLOAT = NBT.TAG_FLOAT;
-        public static final int DOUBLE = NBT.TAG_DOUBLE;
-        public static final int BYTE_ARRAY = NBT.TAG_BYTE_ARRAY;
-        public static final int STRING = NBT.TAG_STRING;
-        public static final int LIST = NBT.TAG_LIST;
-        public static final int COMPOUND = NBT.TAG_COMPOUND;
-        public static final int INT_ARRAY = NBT.TAG_INT_ARRAY;
-        public static final int LONG_ARRAY = NBT.TAG_LONG_ARRAY;
-        public static final int ANY_NUMERIC = NBT.TAG_ANY_NUMERIC;
+        public static final int END = Constants.NBT.TAG_END;
+        public static final int BYTE = Constants.NBT.TAG_BYTE;
+        public static final int SHORT = Constants.NBT.TAG_SHORT;
+        public static final int INT = Constants.NBT.TAG_INT;
+        public static final int LONG = Constants.NBT.TAG_LONG;
+        public static final int FLOAT = Constants.NBT.TAG_FLOAT;
+        public static final int DOUBLE = Constants.NBT.TAG_DOUBLE;
+        public static final int BYTE_ARRAY = Constants.NBT.TAG_BYTE_ARRAY;
+        public static final int STRING = Constants.NBT.TAG_STRING;
+        public static final int LIST = Constants.NBT.TAG_LIST;
+        public static final int COMPOUND = Constants.NBT.TAG_COMPOUND;
+        public static final int INT_ARRAY = Constants.NBT.TAG_INT_ARRAY;
+        public static final int LONG_ARRAY = Constants.NBT.TAG_LONG_ARRAY;
+        public static final int ANY_NUMERIC = Constants.NBT.TAG_ANY_NUMERIC;
     }
 
     @Nullable
@@ -93,7 +94,7 @@ public class NBTHelper
         for (int i = 0; i < length; ++i)
         {
             // TODO: list support. e.g. a.b[2].c.d
-            if (!subTag.contains(parts[i], Tag.COMPOUND))
+            if (!subTag.contains(parts[i], NBT.COMPOUND))
             {
                 if (createIfNull)
                 {
@@ -150,7 +151,7 @@ public class NBTHelper
         if (subTag != null)
         {
             String actualKey = getLastNode(key);
-            if (subTag.contains(actualKey, Tag.INT))
+            if (subTag.contains(actualKey, NBT.INT))
             {
                 return subTag.getInt(actualKey);
             }
@@ -175,7 +176,7 @@ public class NBTHelper
         if (subTag != null)
         {
             String actualKey = getLastNode(key);
-            if (subTag.contains(actualKey, Tag.LONG))
+            if (subTag.contains(actualKey, NBT.LONG))
             {
                 return subTag.getLong(actualKey);
             }
@@ -200,7 +201,7 @@ public class NBTHelper
         if (subTag != null)
         {
             String actualKey = getLastNode(key);
-            if (subTag.contains(actualKey, Tag.SHORT))
+            if (subTag.contains(actualKey, NBT.SHORT))
             {
                 return subTag.getShort(actualKey);
             }
@@ -225,7 +226,7 @@ public class NBTHelper
         if (subTag != null)
         {
             String actualKey = getLastNode(key);
-            if (subTag.contains(actualKey, Tag.DOUBLE))
+            if (subTag.contains(actualKey, NBT.DOUBLE))
             {
                 return subTag.getDouble(actualKey);
             }
@@ -250,7 +251,7 @@ public class NBTHelper
         if (subTag != null)
         {
             String actualKey = getLastNode(key);
-            if (subTag.contains(actualKey, Tag.FLOAT))
+            if (subTag.contains(actualKey, NBT.FLOAT))
             {
                 return subTag.getFloat(actualKey);
             }
@@ -275,7 +276,7 @@ public class NBTHelper
         if (subTag != null)
         {
             String actualKey = getLastNode(key);
-            if (subTag.contains(actualKey, Tag.BYTE))
+            if (subTag.contains(actualKey, NBT.BYTE))
             {
                 return subTag.getByte(actualKey);
             }
@@ -300,7 +301,7 @@ public class NBTHelper
         if (subTag != null)
         {
             String actualKey = getLastNode(key);
-            if (subTag.contains(actualKey, Tag.BYTE))
+            if (subTag.contains(actualKey, NBT.BYTE))
             {
                 return subTag.getBoolean(actualKey);
             }
@@ -321,7 +322,7 @@ public class NBTHelper
         if (subTag != null)
         {
             String actualKey = getLastNode(key);
-            if (subTag.contains(actualKey, Tag.COMPOUND))
+            if (subTag.contains(actualKey, NBT.COMPOUND))
             {
                 return NBTUtil.readBlockPos(getTag(actualKey));
             }
@@ -380,7 +381,7 @@ public class NBTHelper
         if (subTag != null)
         {
             String actualKey = getLastNode(key);
-            if (subTag.contains(actualKey, Tag.STRING))
+            if (subTag.contains(actualKey, NBT.STRING))
             {
                 return subTag.getString(actualKey);
             }
@@ -400,7 +401,7 @@ public class NBTHelper
         if (subTag != null)
         {
             String actualKey = getLastNode(key);
-            if (subTag.contains(actualKey, Tag.INT_ARRAY))
+            if (subTag.contains(actualKey, NBT.INT_ARRAY))
             {
                 return subTag.getIntArray(actualKey);
             }
@@ -420,7 +421,7 @@ public class NBTHelper
         if (subTag != null)
         {
             String actualKey = getLastNode(key);
-            if (subTag.contains(actualKey, Tag.BYTE_ARRAY))
+            if (subTag.contains(actualKey, NBT.BYTE_ARRAY))
             {
                 return subTag.getByteArray(actualKey);
             }
@@ -441,7 +442,7 @@ public class NBTHelper
         if (subTag != null)
         {
             String actualKey = getLastNode(key);
-            if (!subTag.contains(actualKey + "Most", Tag.LONG) || !subTag.contains(actualKey + "Least", Tag.LONG))
+            if (!subTag.contains(actualKey + "Most", NBT.LONG) || !subTag.contains(actualKey + "Least", NBT.LONG))
             {
                 return subTag.getUniqueId(actualKey);
             }
@@ -455,7 +456,7 @@ public class NBTHelper
         if (subTag != null)
         {
             String actualKey = getLastNode(key);
-            if (subTag.contains(actualKey, Tag.LIST))
+            if (subTag.contains(actualKey, NBT.LIST))
             {
                 return subTag.getList(actualKey, type);
             }

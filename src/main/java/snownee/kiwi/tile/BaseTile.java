@@ -13,9 +13,11 @@ import net.minecraft.tileentity.TileEntityType;
  * Base TileEntity skeleton used by all TileEntity. It contains several standardized
  * implementations regarding networking.
  */
-public abstract class TileBase extends TileEntity
+public abstract class BaseTile extends TileEntity
 {
-    public TileBase(TileEntityType<?> tileEntityTypeIn)
+    public boolean persistData = false;
+
+    public BaseTile(TileEntityType<?> tileEntityTypeIn)
     {
         super(tileEntityTypeIn);
     }
@@ -49,13 +51,17 @@ public abstract class TileBase extends TileEntity
 
     /**
      * Read data for server-client syncing.
-     * @param data the data source
+     * 
+     * @param data
+     *            the data source
      */
     protected abstract void readPacketData(CompoundNBT data);
 
     /**
      * Write data for server-client syncing. ONLY write the necessary data!
-     * @param data the data sink
+     * 
+     * @param data
+     *            the data sink
      * @return the parameter, or delegate to super method
      */
     @Nonnull

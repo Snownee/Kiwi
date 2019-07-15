@@ -9,7 +9,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.crafting.IConditionSerializer;
 import snownee.kiwi.Kiwi;
 
-public class ConditionModuleLoaded implements IConditionSerializer
+public class ModuleLoadedCondition implements IConditionSerializer
 {
 
     @Override

@@ -10,6 +10,7 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.client.util.ITooltipFlag.TooltipFlags;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
@@ -32,11 +33,11 @@ public class ModItem extends Item
     @OnlyIn(Dist.CLIENT)
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn)
     {
-        addTip(stack, tooltip);
+        addTip(stack, worldIn, tooltip, flagIn);
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static void addTip(ItemStack stack, List<ITextComponent> tooltip)
+    public static void addTip(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn)
     {
         if (tooltip.size() > 0 && I18n.hasKey(stack.getTranslationKey() + ".tip"))
         {
@@ -60,6 +61,10 @@ public class ModItem extends Item
             {
                 tooltip.add(new TranslationTextComponent(Kiwi.MODID + ".tip.press_shift"));
             }
+        }
+        if (flagIn == TooltipFlags.ADVANCED && stack.hasTag() && Screen.hasShiftDown())
+        {
+            tooltip.add(new StringTextComponent(stack.getTag().toString()));
         }
     }
 }

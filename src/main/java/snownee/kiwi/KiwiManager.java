@@ -17,6 +17,7 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import snownee.kiwi.crafting.NoContainersShapedRecipe;
 import snownee.kiwi.crafting.NoContainersShapelessRecipe;
+import snownee.kiwi.crafting.TextureBlockRecipe;
 
 @EventBusSubscriber(modid = Kiwi.MODID, bus = Bus.MOD)
 public class KiwiManager
@@ -27,6 +28,7 @@ public class KiwiManager
 
     public static IRecipeSerializer<?> shapedSerializer;
     public static IRecipeSerializer<?> shapelessSerializer;
+    public static IRecipeSerializer<?> textureBlockSerializer;
 
     private KiwiManager()
     {
@@ -61,6 +63,7 @@ public class KiwiManager
     {
         event.getRegistry().register(shapedSerializer = new NoContainersShapedRecipe.Serializer().setRegistryName(Kiwi.MODID, "shaped_no_containers"));
         event.getRegistry().register(shapelessSerializer = new NoContainersShapelessRecipe.Serializer().setRegistryName(Kiwi.MODID, "shapeless_no_containers"));
+        event.getRegistry().register(textureBlockSerializer = new TextureBlockRecipe.Serializer().setRegistryName(Kiwi.MODID, "texture_block"));
     }
 
 }
