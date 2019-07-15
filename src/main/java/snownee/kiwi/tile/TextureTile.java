@@ -23,8 +23,8 @@ import snownee.kiwi.util.NBTHelper.NBT;
 
 public class TextureTile extends BaseTile
 {
-    private final Map<String, String> textures;
-    private final IModelData modelData;
+    protected Map<String, String> textures;
+    protected IModelData modelData;
 
     public TextureTile(TileEntityType<?> tileEntityTypeIn, String... textureKeys)
     {
@@ -37,10 +37,6 @@ public class TextureTile extends BaseTile
         if (EffectiveSide.get() == LogicalSide.CLIENT)
         {
             modelData = new ModelDataMap.Builder().withInitial(TextureModel.TEXTURES, textures).build();
-        }
-        else
-        {
-            modelData = null;
         }
     }
 
@@ -97,20 +93,6 @@ public class TextureTile extends BaseTile
         {
             world.notifyBlockUpdate(pos, getBlockState(), getBlockState(), 8);
         }
-    }
-
-    @Override
-    public void read(CompoundNBT compound)
-    {
-        readPacketData(compound);
-        super.read(compound);
-    }
-
-    @Override
-    public CompoundNBT write(CompoundNBT compound)
-    {
-        writePacketData(compound);
-        return super.write(compound);
     }
 
     @Override

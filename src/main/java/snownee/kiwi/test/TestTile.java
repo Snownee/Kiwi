@@ -1,5 +1,6 @@
 package snownee.kiwi.test;
 
+import net.minecraft.nbt.CompoundNBT;
 import snownee.kiwi.tile.TextureTile;
 
 public class TestTile extends TextureTile
@@ -9,6 +10,20 @@ public class TestTile extends TextureTile
     {
         super(TestModule.FIRST_TILE, "top", "side", "bottom");
         persistData = true;
+    }
+
+    @Override
+    public void read(CompoundNBT compound)
+    {
+        readPacketData(compound);
+        super.read(compound);
+    }
+
+    @Override
+    public CompoundNBT write(CompoundNBT compound)
+    {
+        writePacketData(compound);
+        return super.write(compound);
     }
 
 }
