@@ -17,22 +17,18 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiModule;
+import snownee.kiwi.KiwiModule.Subscriber.Bus;
 import snownee.kiwi.client.model.TextureModel;
 
 @KiwiModule(modid = Kiwi.MODID, name = "test")
 @KiwiModule.Optional(disabledByDefault = true)
 @KiwiModule.Group("building_blocks")
+@KiwiModule.Subscriber(Bus.MOD)
 public class TestModule extends AbstractModule
 {
-    public TestModule()
-    {
-        FMLJavaModLoadingContext.get().getModEventBus().register(this);
-    }
-
     // Keep your fields `public static final`
 
     // Register a simple item

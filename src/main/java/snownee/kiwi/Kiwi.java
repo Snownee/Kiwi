@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Type;
@@ -43,11 +44,14 @@ import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.forgespi.language.ModFileScanData;
 import net.minecraftforge.forgespi.language.ModFileScanData.AnnotationData;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import snownee.kiwi.KiwiModule.Group;
+import snownee.kiwi.KiwiModule.Subscriber;
+import snownee.kiwi.KiwiModule.Subscriber.Bus;
 import snownee.kiwi.crafting.FullBlockIngredient;
 import snownee.kiwi.crafting.ModuleLoadedCondition;
 
@@ -245,19 +249,26 @@ public class Kiwi
 
         for (ModuleInfo info : KiwiManager.MODULES.values())
         {
-            boolean useOwnGroup = info.group != null;
-            if (!useOwnGroup)
+            info.context.setActiveContainer();
+            Subscriber subscriber = info.module.getClass().getAnnotation(Subscriber.class);
+            if (ArrayUtils.contains(subscriber.side(), FMLEnvironment.dist))
+            {
+                for (Bus bus : subscriber.value())
+                {
+                    bus.bus().get().register(info.module);
+                }
+            }
+
+            boolean useOwnGroup = info.group == null;
+            if (useOwnGroup)
             {
                 Group group = info.module.getClass().getAnnotation(Group.class);
                 if (group != null)
                 {
                     String val = group.value();
-                    if (val.isEmpty())
+                    if (!val.isEmpty())
                     {
-                        useOwnGroup = true;
-                    }
-                    else
-                    {
+                        useOwnGroup = false;
                         if (!val.matches(":") && !KiwiManager.GROUPS.containsKey(val))
                         {
                             val = info.rl.getNamespace() + ":" + val;

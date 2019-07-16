@@ -4,6 +4,12 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.function.Supplier;
+
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
@@ -30,7 +36,7 @@ public @interface KiwiModule
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
-    public @interface Optional
+    @interface Optional
     {
         boolean disabledByDefault() default false;
     }
@@ -47,8 +53,55 @@ public @interface KiwiModule
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
-    public @interface Group
+    @interface Group
     {
         String value() default "";
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    @interface Subscriber
+    {
+        /**
+         * Specify targets to load this event subscriber on. Can be used to avoid loading Client specific events
+         * on a dedicated server, for example.
+         *
+         * @return an array of Dist to load this event subscriber on
+         */
+        Dist[] side() default { Dist.CLIENT, Dist.DEDICATED_SERVER };
+
+        /**
+         * Specify an alternative bus to listen to
+         *
+         * @return the bus you wish to listen to
+         */
+        Bus[] value() default Bus.FORGE;
+
+        enum Bus
+        {
+            /**
+             * The main Forge Event Bus.
+             * 
+             * @see MinecraftForge#EVENT_BUS
+             */
+            FORGE(() -> MinecraftForge.EVENT_BUS),
+            /**
+             * The mod specific Event bus.
+             * @see FMLJavaModLoadingContext#getModEventBus()
+             */
+            MOD(() -> FMLJavaModLoadingContext.get().getModEventBus());
+
+            private final Supplier<IEventBus> busSupplier;
+
+            Bus(final Supplier<IEventBus> eventBusSupplier)
+            {
+                this.busSupplier = eventBusSupplier;
+            }
+
+            public Supplier<IEventBus> bus()
+            {
+                return busSupplier;
+            }
+        }
     }
 }
