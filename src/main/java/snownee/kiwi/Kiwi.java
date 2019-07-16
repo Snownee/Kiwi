@@ -96,7 +96,7 @@ public class Kiwi
         List<Type> moduleTypes = moduleData.stream()
                 .map(AnnotationData::getClassType)
                 .collect(Collectors.toList());
-
+        
         Map<Type, AnnotationData> moduleToOptional = Maps.newHashMap();
         
         data.stream()
@@ -245,29 +245,28 @@ public class Kiwi
 
         for (ModuleInfo info : KiwiManager.MODULES.values())
         {
-            if (info.group != null)
+            boolean useOwnGroup = info.group != null;
+            if (!useOwnGroup)
             {
-                continue;
-            }
-            boolean useOwnGroup = false;
-            Group group = info.module.getClass().getAnnotation(Group.class);
-            if (group != null)
-            {
-                String val = group.value();
-                if (val.isEmpty())
+                Group group = info.module.getClass().getAnnotation(Group.class);
+                if (group != null)
                 {
-                    useOwnGroup = true;
-                }
-                else
-                {
-                    if (!val.matches(":") && !KiwiManager.GROUPS.containsKey(val))
+                    String val = group.value();
+                    if (val.isEmpty())
                     {
-                        val = info.rl.getNamespace() + ":" + val;
+                        useOwnGroup = true;
                     }
-                    ItemGroup itemGroup = KiwiManager.GROUPS.get(val);
-                    if (itemGroup != null)
+                    else
                     {
-                        info.group = itemGroup;
+                        if (!val.matches(":") && !KiwiManager.GROUPS.containsKey(val))
+                        {
+                            val = info.rl.getNamespace() + ":" + val;
+                        }
+                        ItemGroup itemGroup = KiwiManager.GROUPS.get(val);
+                        if (itemGroup != null)
+                        {
+                            info.group = itemGroup;
+                        }
                     }
                 }
             }
