@@ -22,19 +22,19 @@ import com.google.common.collect.Maps;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.LifecycleEventProvider;
 import net.minecraftforge.fml.LifecycleEventProvider.LifecycleEvent;
-import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.ModLoadingStage;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.thread.EffectiveSide;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -50,7 +50,6 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import snownee.kiwi.KiwiModule.Group;
 import snownee.kiwi.crafting.FullBlockIngredient;
 import snownee.kiwi.crafting.ModuleLoadedCondition;
-import snownee.kiwi.util.LootDumper;
 
 @Mod(Kiwi.MODID)
 public class Kiwi
@@ -135,7 +134,7 @@ public class Kiwi
         modEventBus.addListener(this::preInit);
         modEventBus.addListener(this::init);
         modEventBus.addListener(this::clientInit);
-        modEventBus.addListener(this::serverInit);
+        MinecraftForge.EVENT_BUS.addListener(this::serverInit);
         modEventBus.addListener(this::onDedicatedServerSetup);
         modEventBus.addListener(this::postInit);
         modEventBus.addListener(this::loadComplete);
@@ -419,6 +418,11 @@ public class Kiwi
 
     public void serverInit(FMLServerStartingEvent event)
     {
+        if (!(event.getServer() instanceof DedicatedServer))
+        {
+            KiwiCommand.register(event.getCommandDispatcher());
+        }
+
         KiwiManager.MODULES.values().forEach(m -> m.serverInit(event));
         ModLoadingContext.get().setActiveContainer(null, null);
     }
@@ -440,10 +444,6 @@ public class Kiwi
     {
         KiwiManager.MODULES.clear();
         KiwiManager.GROUPS.clear();
-        if (EffectiveSide.get() == LogicalSide.CLIENT && !KiwiConfig.dumpLootsPattern.get().isEmpty())
-        {
-            LootDumper.dump(KiwiConfig.dumpLootsPattern.get());
-        }
     }
 
     public static boolean isLoaded(ResourceLocation module)

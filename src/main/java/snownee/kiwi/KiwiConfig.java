@@ -11,7 +11,6 @@ import com.google.common.collect.Maps;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
-import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import net.minecraftforge.common.ForgeConfigSpec.IntValue;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.thread.EffectiveSide;
@@ -24,7 +23,6 @@ public class KiwiConfig
     public static BooleanValue tooltipRequiresShift;
     public static IntValue tooltipWrapWidth;
     public static BooleanValue replaceDefaultFontRenderer;
-    public static ConfigValue<String> dumpLootsPattern;
     public static Map<ResourceLocation, BooleanValue> modules = Maps.newHashMap();
 
     static
@@ -49,10 +47,6 @@ public class KiwiConfig
         if (EffectiveSide.get() == LogicalSide.SERVER) return;
         
         builder.push("client");
-        
-        dumpLootsPattern = builder
-                .comment("Reg. ex. to generate loot tables")
-                .define("dumpLootsPattern", "");
         
         tooltipRequiresShift = builder
                 .comment("Tooltips require pressing shift to be shown")

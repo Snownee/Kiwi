@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.function.Predicate;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -15,7 +15,7 @@ public class LootDumper
     {
     }
 
-    public static void dump(String regex)
+    public static int dump(Predicate<String> matcher, File dataDir)
     {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         if (classLoader == null)
@@ -32,15 +32,16 @@ public class LootDumper
         catch (IOException | NullPointerException e)
         {
             e.printStackTrace();
-            return;
+            return 0;
         }
         String sample = new String(bytes);
 
+        int count = 0;
         for (ResourceLocation rl : ForgeRegistries.BLOCKS.getKeys())
         {
-            if (ForgeRegistries.ITEMS.containsKey(rl) && rl.toString().matches(regex))
+            if (ForgeRegistries.ITEMS.containsKey(rl) && matcher.test(rl.toString()))
             {
-                File dir = new File(Minecraft.getInstance().gameDir, "dumps/data/" + rl.getNamespace() + "/loot_tables/blocks");
+                File dir = new File(dataDir, "dumps/data/" + rl.getNamespace() + "/loot_tables/blocks");
                 File file = new File(dir, rl.getPath() + ".json");
                 try
                 {
@@ -49,13 +50,15 @@ public class LootDumper
                     FileWriter writer = new FileWriter(file);
                     writer.write(String.format(sample, rl));
                     writer.close();
+                    ++count;
                 }
                 catch (IOException e)
                 {
                     e.printStackTrace();
-                    return;
+                    return count;
                 }
             }
         }
+        return count;
     }
 }
