@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "functions": [
+            {
+              "function": "minecraft:copy_nbt",
+              "source": "block_entity",
+              "ops": [
+                {
+                  "source": "Textures",
+                  "target": "BlockEntityTag.Textures",
+                  "op": "replace"
+                }
+              ]
+            }
+          ],
+          "name": "kiwi:first_block"
+        }
+      ]
+    }
+  ]
+}
