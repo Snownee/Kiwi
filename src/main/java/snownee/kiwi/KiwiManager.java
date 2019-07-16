@@ -38,7 +38,7 @@ public class KiwiManager
     {
         if (MODULES.containsKey(resourceLocation))
         {
-            Kiwi.logger.error("Found a duplicate module name, skipping.");
+            Kiwi.logger.error(Kiwi.MARKER, "Found a duplicate module name, skipping.");
         }
         else
         {

@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
 import org.objectweb.asm.Type;
 
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
@@ -20,6 +22,8 @@ import com.electronwill.nightconfig.core.utils.StringUtils;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
+import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -48,7 +52,9 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.forgespi.language.ModFileScanData;
 import net.minecraftforge.forgespi.language.ModFileScanData.AnnotationData;
+import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.minecraftforge.registries.RegistryManager;
 import snownee.kiwi.KiwiModule.Group;
 import snownee.kiwi.KiwiModule.Subscriber;
 import snownee.kiwi.KiwiModule.Subscriber.Bus;
@@ -62,6 +68,7 @@ public class Kiwi
     public static final String NAME = "Kiwi";
 
     public static Logger logger = LogManager.getLogger(Kiwi.NAME);
+    static final Marker MARKER = MarkerManager.getMarker("Init");
 
     public static Field FIELD_EXTENSION;
 
@@ -109,7 +116,7 @@ public class Kiwi
                 .forEach(a -> moduleToOptional.put(a.getClassType(), a));
         /* on */
 
-        logger.info("Processing " + moduleTypes.size() + " KiwiModule annotations");
+        logger.info(MARKER, "Processing " + moduleTypes.size() + " KiwiModule annotations");
 
         for (AnnotationData module : moduleData)
         {
@@ -171,7 +178,7 @@ public class Kiwi
         }
         catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e)
         {
-            logger.error("Kiwi failed to load infrastructures. Please report to developer!");
+            logger.error(MARKER, "Kiwi failed to load infrastructures. Please report to developer!");
             logger.catching(e);
             return;
         }
@@ -234,8 +241,8 @@ public class Kiwi
             }
             catch (InstantiationException | IllegalAccessException | ClassCastException | ClassNotFoundException e)
             {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                logger.error(MARKER, "Kiwi failed to initialize module class: {}", module.getClassType().getClassName());
+                logger.catching(e);
                 continue;
             }
 
@@ -247,8 +254,10 @@ public class Kiwi
         defaultOptions.clear();
         defaultOptions = null;
 
+        Object2IntMap<ResourceLocation> counter = new Object2IntArrayMap<>();
         for (ModuleInfo info : KiwiManager.MODULES.values())
         {
+            counter.clear();
             info.context.setActiveContainer();
             Subscriber subscriber = info.module.getClass().getAnnotation(Subscriber.class);
             if (ArrayUtils.contains(subscriber.side(), FMLEnvironment.dist))
@@ -287,7 +296,6 @@ public class Kiwi
 
             Item.Properties tmpBuilder = null;
             Field tmpBuilderField = null;
-            int count = 0;
             for (Field field : info.module.getClass().getFields())
             {
                 int mods = field.getModifiers();
@@ -318,8 +326,8 @@ public class Kiwi
                 }
                 catch (IllegalArgumentException | IllegalAccessException e)
                 {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    logger.error(MARKER, "Kiwi failed to catch game object: {}", field);
+                    logger.catching(e);
                 }
                 if (o == null)
                 {
@@ -356,8 +364,8 @@ public class Kiwi
                         }
                         catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e)
                         {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
+                            logger.error(MARKER, "Kiwi failed to clean used item builder: {}", tmpBuilderField);
+                            logger.catching(e);
                         }
                     }
                 }
@@ -367,15 +375,26 @@ public class Kiwi
                 }
                 if (o instanceof IForgeRegistryEntry<?>)
                 {
-                    info.register((IForgeRegistryEntry<?>) o, regName);
-                    ++count;
+                    IForgeRegistryEntry<?> entry = (IForgeRegistryEntry<?>) o;
+                    IForgeRegistry<?> registry = RegistryManager.ACTIVE.getRegistry(entry.getRegistryType());
+                    if (registry != null)
+                    {
+                        int i = counter.getOrDefault(registry.getRegistryName(), 0);
+                        counter.put(registry.getRegistryName(), i + 1);
+                    }
+                    info.register(entry, regName);
                 }
 
                 tmpBuilder = null;
                 tmpBuilderField = null;
             }
 
-            logger.info("[{}:{}]: Entries: {}", modid, name, count);
+            logger.info(MARKER, "Module [{}:{}] initialized", modid, name);
+            for (ResourceLocation key : counter.keySet())
+            {
+                String k = key.getNamespace().equals("minecraft") ? key.getPath() : key.toString();
+                logger.info(MARKER, "    {}: {}", k, counter.getInt(key));
+            }
         }
 
         KiwiManager.MODULES.values().forEach(ModuleInfo::preInit);
