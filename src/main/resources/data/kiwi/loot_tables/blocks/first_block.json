@@ -15,6 +15,11 @@
                   "source": "Textures",
                   "target": "BlockEntityTag.Textures",
                   "op": "replace"
+                },
+                {
+                  "source": "Textures",
+                  "target": "BlockEntityTag.Items",
+                  "op": "replace"
                 }
               ]
             }
