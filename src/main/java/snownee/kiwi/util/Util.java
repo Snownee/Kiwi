@@ -12,7 +12,7 @@ public class Util
 
     public static String color(int color)
     {
-        return String.format("§x%06x", color & 0x00FFFFFF);
+        return String.format("\u00A7x%06x", color & 0x00FFFFFF);
     }
 
     public static String formatComma(long number)

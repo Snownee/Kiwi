@@ -261,7 +261,7 @@
 //                cachedFormat = determineFormat(color, format, hexColor);
 //                continue;
 //            }
-//            else if (c == '\u00A7') // a.k.a. '搂'. Used by Minecraft to denote special format, don't count it
+//            else if (c == '\u00A7') // a.k.a. '§'. Used by Minecraft to denote special format, don't count it
 //            {
 //                index++;
 //                char f = Character.toLowerCase(str.charAt(index));

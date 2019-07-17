@@ -377,7 +377,7 @@ public class Kiwi
                 if (o instanceof IForgeRegistryEntry<?>)
                 {
                     IForgeRegistryEntry<?> entry = (IForgeRegistryEntry<?>) o;
-                    IForgeRegistry<?> registry = RegistryManager.ACTIVE.getRegistry(entry.getRegistryType());
+                    IForgeRegistry<?> registry = RegistryManager.ACTIVE.getRegistry((Class<IForgeRegistryEntry<?>>) entry.getRegistryType());
                     if (registry != null)
                     {
                         int i = counter.getOrDefault(registry.getRegistryName(), 0);
