@@ -259,7 +259,8 @@ public class Kiwi
         defaultOptions.clear();
         defaultOptions = null;
 
-        Object2IntMap<ResourceLocation> counter = new Object2IntArrayMap<>();
+        Util.class.hashCode();
+        Object2IntMap<Class<?>> counter = new Object2IntArrayMap<>();
         for (ModuleInfo info : KiwiManager.MODULES.values())
         {
             counter.clear();
@@ -381,12 +382,8 @@ public class Kiwi
                 if (o instanceof IForgeRegistryEntry<?>)
                 {
                     IForgeRegistryEntry<?> entry = (IForgeRegistryEntry<?>) o;
-                    IForgeRegistry<?> registry = RegistryManager.ACTIVE.getRegistry((Class<IForgeRegistryEntry<?>>) entry.getRegistryType());
-                    if (registry != null)
-                    {
-                        int i = counter.getOrDefault(registry.getRegistryName(), 0);
-                        counter.put(registry.getRegistryName(), i + 1);
-                    }
+                    int i = counter.getOrDefault(entry.getRegistryType(), 0);
+                    counter.put(entry.getRegistryType(), i + 1);
                     info.register(entry, regName);
                 }
 
@@ -395,10 +392,19 @@ public class Kiwi
             }
 
             logger.info(MARKER, "Module [{}:{}] initialized", modid, name);
-            for (ResourceLocation key : counter.keySet())
+            for (Class<?> clazz : counter.keySet())
             {
-                String k = Util.trimRL(key);
-                logger.info(MARKER, "    {}: {}", k, counter.getInt(key));
+                IForgeRegistry<?> registry = RegistryManager.ACTIVE.getRegistry((Class<IForgeRegistryEntry<?>>) clazz);
+                String k;
+                if (registry != null)
+                {
+                    k = Util.trimRL(registry.getRegistryName());
+                }
+                else
+                {
+                    k = "unknown";
+                }
+                logger.info(MARKER, "    {}: {}", k, counter.getInt(clazz));
             }
         }
 
