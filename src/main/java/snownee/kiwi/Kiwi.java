@@ -137,6 +137,10 @@ public class Kiwi
                 }
 
                 Boolean disabledByDefault = (Boolean) optional.getAnnotationData().get("disabledByDefault");
+                if (disabledByDefault == null)
+                {
+                    disabledByDefault = Boolean.FALSE;
+                }
                 defaultOptions.put(new ResourceLocation(modid, name), disabledByDefault);
             }
         }
