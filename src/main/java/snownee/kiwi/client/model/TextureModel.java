@@ -6,7 +6,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -15,6 +14,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -168,7 +168,7 @@ public class TextureModel implements IDynamicBakedModel
     private IBakedModel getModel(Map<String, String> overrides)
     {
         Map<String, String> textures = Maps.newHashMap();
-        resolveTextures(textures, originalUnbaked);
+        resolveTextures(textures, originalUnbaked, false);
         if (overrides == null)
         {
             return originalBaked;
@@ -192,32 +192,47 @@ public class TextureModel implements IDynamicBakedModel
         return model;
     }
 
-    private static void resolveTextures(Map<String, String> textures, BlockModel model)
+    private static void resolveTextures(Map<String, String> textures, BlockModel model, boolean sub)
     {
         if (model.parent != null)
         {
-            resolveTextures(textures, model.parent);
+            resolveTextures(textures, model.parent, true);
         }
         textures.putAll(model.textures);
-        Set<String> hashes = null;
-        do
+        if (!sub)
         {
-            hashes = model.textures.keySet().stream().filter(k -> k.startsWith("#")).collect(Collectors.toSet());
-            for (String k : hashes)
+            Set<String> hashes = Sets.newHashSet();
+            textures.forEach((k, v) -> {
+                if (v.startsWith("#"))
+                {
+                    hashes.add(k);
+                }
+            });
+            do
             {
-                String hash = k.substring(1);
-                String to = textures.get(hash);
-                if (to == null || to.equals(k))
-                {
-                    textures.put(k, MissingTextureSprite.getLocation().toString());
-                }
-                else
-                {
-                    textures.put(k, to);
-                }
+                hashes.removeIf(k -> {
+                    String v = textures.get(k);
+                    if (v == null || v.isEmpty())
+                    {
+                        textures.put(k, MissingTextureSprite.getLocation().toString());
+                        return true;
+                    }
+                    String hash = v.substring(1);
+                    String to = textures.get(hash);
+                    if (to == null || hash.equals(k) || to.equals(k))
+                    {
+                        textures.put(k, MissingTextureSprite.getLocation().toString());
+                        return true;
+                    }
+                    else
+                    {
+                        textures.put(k, to);
+                        return !to.startsWith("#");
+                    }
+                });
             }
+            while (!hashes.isEmpty());
         }
-        while (!hashes.isEmpty());
     }
 
     @Override

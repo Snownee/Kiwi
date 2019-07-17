@@ -138,11 +138,17 @@ public class TextureTile extends BaseTile
     }
 
     @Override
+    public void onLoad()
+    {
+    }
+
+    @Override
     public void requestModelDataUpdate()
     {
         super.requestModelDataUpdate();
         if (world != null && world.isRemote)
         {
+            System.out.println(123);
             world.notifyBlockUpdate(pos, getBlockState(), getBlockState(), 8);
         }
     }
@@ -154,7 +160,7 @@ public class TextureTile extends BaseTile
         {
             return;
         }
-        readTextures(textures, data.getCompound("Textures"));
+        boolean shouldRefresh = readTextures(textures, data.getCompound("Textures"));
         if (data.contains("Items", NBT.COMPOUND))
         {
             NBTHelper helper = NBTHelper.of(data.getCompound("Items"));
@@ -175,11 +181,15 @@ public class TextureTile extends BaseTile
                 }
             }
         }
-        refresh();
+        if (shouldRefresh)
+        {
+            refresh();
+        }
     }
 
-    public static void readTextures(Map<String, String> textures, CompoundNBT data)
+    public static boolean readTextures(Map<String, String> textures, CompoundNBT data)
     {
+        boolean shouldRefresh = false;
         NBTHelper helper = NBTHelper.of(data);
         for (String k : textures.keySet())
         {
@@ -192,7 +202,7 @@ public class TextureTile extends BaseTile
                 {
                     CompoundNBT stateNbt = JsonToNBT.getTagFromJson(v);
                     BlockState state = NBTUtil.readBlockState(stateNbt);
-                    textures.put(k, getTextureFromState(state));
+                    v = getTextureFromState(state);
                 }
                 catch (CommandSyntaxException e)
                 {
@@ -200,11 +210,13 @@ public class TextureTile extends BaseTile
                     continue;
                 }
             }
-            else
+            if (!textures.get(k).equals(v))
             {
+                shouldRefresh = true;
                 textures.put(k, v);
             }
         }
+        return shouldRefresh;
     }
 
     public boolean isMark(String key)
