@@ -148,7 +148,6 @@ public class TextureTile extends BaseTile
         super.requestModelDataUpdate();
         if (world != null && world.isRemote)
         {
-            System.out.println(123);
             world.notifyBlockUpdate(pos, getBlockState(), getBlockState(), 8);
         }
     }
