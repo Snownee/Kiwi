@@ -9,7 +9,6 @@ public class TestTile extends TextureTile
     public TestTile()
     {
         super(TestModule.FIRST_TILE, "top", "side", "bottom");
-        persistData = true;
     }
 
     @Override

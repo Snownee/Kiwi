@@ -204,16 +204,17 @@ public class TextureBlockRecipe extends DynamicShapedRecipe
             {
                 throw new JsonSyntaxException("Key defines symbols that aren't used in pattern: " + set);
             }
-            JsonArray array = JSONUtils.getJsonArray(json, "mark", null);
             List<String> marks;
-            if (array == null)
+            if (JSONUtils.isJsonArray(json, "mark"))
             {
-                marks = Collections.EMPTY_LIST;
+                JsonArray array = JSONUtils.getJsonArray(json, "mark");
+                marks = Lists.newArrayListWithCapacity(array.size());
+                array.forEach(e -> marks.add(e.getAsString()));
             }
             else
             {
-                marks = Lists.newArrayListWithCapacity(array.size());
-                array.forEach(e -> marks.add(e.getAsString()));
+                String mark = JSONUtils.getString(json, "mark", "");
+                marks = Collections.singletonList(mark);
             }
             return new TextureBlockRecipe(recipeId, group, width, height, nonnulllist, itemstack, keys, marks);
         }

@@ -6,6 +6,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -30,6 +31,7 @@ import net.minecraft.client.renderer.model.ItemOverrideList;
 import net.minecraft.client.renderer.model.ModelResourceLocation;
 import net.minecraft.client.renderer.model.Variant;
 import net.minecraft.client.renderer.model.VariantList;
+import net.minecraft.client.renderer.texture.MissingTextureSprite;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.LivingEntity;
@@ -49,7 +51,6 @@ import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.data.ModelProperty;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
-import snownee.kiwi.test.TestModule;
 import snownee.kiwi.tile.TextureTile;
 import snownee.kiwi.util.NBTHelper;
 
@@ -63,11 +64,11 @@ public class TextureModel implements IDynamicBakedModel
     {
         block.getStateContainer().getValidStates().forEach(s -> {
             ModelResourceLocation rl = BlockModelShapes.getModelLocation(s);
-            register(event, rl, s.equals(inventoryState));
+            register(event, block, rl, s.equals(inventoryState));
         });
     }
 
-    public static void register(ModelBakeEvent event, ModelResourceLocation rl, boolean inventory)
+    public static void register(ModelBakeEvent event, Block block, ModelResourceLocation rl, boolean inventory)
     {
         IUnbakedModel unbakedModel = ModelLoaderRegistry.getModelOrLogError(rl, "Kiwi failed to replace block model " + rl);
         IBakedModel bakedModel = event.getModelRegistry().get(rl);
@@ -95,12 +96,12 @@ public class TextureModel implements IDynamicBakedModel
                 }
             }
         }
-        if (textureModel != null)
+        if (textureModel != null && block != null && block.asItem() != null)
         {
             rl = new ModelResourceLocation(rl, "inventory");
             event.getModelRegistry().put(rl, textureModel);
             ItemModelMesher mesher = Minecraft.getInstance().getItemRenderer().getItemModelMesher();
-            mesher.register(TestModule.FIRST_BLOCK.asItem(), rl);
+            mesher.register(block.asItem(), rl);
         }
     }
 
@@ -166,7 +167,8 @@ public class TextureModel implements IDynamicBakedModel
 
     private IBakedModel getModel(Map<String, String> overrides)
     {
-        Map<String, String> textures = Maps.newHashMap(originalUnbaked.textures);
+        Map<String, String> textures = Maps.newHashMap();
+        resolveTextures(textures, originalUnbaked);
         if (overrides == null)
         {
             return originalBaked;
@@ -188,6 +190,34 @@ public class TextureModel implements IDynamicBakedModel
             return originalBaked;
         }
         return model;
+    }
+
+    private static void resolveTextures(Map<String, String> textures, BlockModel model)
+    {
+        if (model.parent != null)
+        {
+            resolveTextures(textures, model.parent);
+        }
+        textures.putAll(model.textures);
+        Set<String> hashes = null;
+        do
+        {
+            hashes = model.textures.keySet().stream().filter(k -> k.startsWith("#")).collect(Collectors.toSet());
+            for (String k : hashes)
+            {
+                String hash = k.substring(1);
+                String to = textures.get(hash);
+                if (to == null || to.equals(k))
+                {
+                    textures.put(k, MissingTextureSprite.getLocation().toString());
+                }
+                else
+                {
+                    textures.put(k, to);
+                }
+            }
+        }
+        while (!hashes.isEmpty());
     }
 
     @Override

@@ -35,6 +35,7 @@ public class TextureTile extends BaseTile
     public TextureTile(TileEntityType<?> tileEntityTypeIn, String... textureKeys)
     {
         super(tileEntityTypeIn);
+        persistData = true;
         textures = Maps.newHashMapWithExpectedSize(textureKeys.length);
         for (String key : textureKeys)
         {
