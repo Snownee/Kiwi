@@ -73,8 +73,41 @@ minecraft {
 }
 
 task deobfJar(type: Jar) {
+    exclude "/assets/kiwi/blockstates"
+    exclude "/assets/kiwi/models"
+    exclude "/snownee/kiwi/test"
+    exclude "/data"
+    manifest {
+        attributes([
+            "Specification-Title": 'kiwi',
+            "Specification-Vendor": 'Snownee',
+            "Specification-Version": '1',
+            "Implementation-Title": 'kiwi',
+            "Implementation-Version": "${project.version}",
+            "Implementation-Vendor" :'Snownee',
+            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
     from(sourceSets.main.output)
     archiveName = "${archivesBaseName}-${version}-deobf.${extension}"
+}
+
+jar {
+    exclude "/assets/kiwi/blockstates"
+    exclude "/assets/kiwi/models"
+    exclude "/snownee/kiwi/test"
+    exclude "/data"
+    manifest {
+        attributes([
+            "Specification-Title": 'kiwi',
+            "Specification-Vendor": 'Snownee',
+            "Specification-Version": '1',
+            "Implementation-Title": 'kiwi',
+            "Implementation-Version": "${project.version}",
+            "Implementation-Vendor" :'Snownee',
+            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
 }
 
 artifacts {
@@ -95,25 +128,6 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     compile fg.deobf("mezz.jei:jei-${minecraft_version}:${jei_version}")
-}
-
-// Example for how to get properties into the manifest for reading by the runtime..
-jar {
-    exclude "/assets/kiwi/blockstates"
-    exclude "/assets/kiwi/models"
-    exclude "/snownee/kiwi/test"
-    exclude "/data"
-    manifest {
-        attributes([
-            "Specification-Title": 'kiwi',
-            "Specification-Vendor": 'Snownee',
-            "Specification-Version": '1',
-            "Implementation-Title": 'kiwi',
-            "Implementation-Version": "${project.version}",
-            "Implementation-Vendor" :'Snownee',
-            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-        ])
-    }
 }
 
 processResources {
