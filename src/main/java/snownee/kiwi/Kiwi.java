@@ -261,7 +261,7 @@ public class Kiwi
             counter.clear();
             info.context.setActiveContainer();
             Subscriber subscriber = info.module.getClass().getAnnotation(Subscriber.class);
-            if (ArrayUtils.contains(subscriber.side(), FMLEnvironment.dist))
+            if (subscriber != null && ArrayUtils.contains(subscriber.side(), FMLEnvironment.dist))
             {
                 for (Bus bus : subscriber.value())
                 {
