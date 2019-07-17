@@ -76,6 +76,11 @@ public class TextureBlockRecipe extends DynamicShapedRecipe
                         result = Maps.newHashMapWithExpectedSize(keyCount);
                     }
                     ItemStack slotStack = inv.getStackInSlot(x + y * inv.getWidth());
+                    Ingredient ingredient = getIngredients().get(x + y * getRecipeWidth());
+                    if (!(ingredient instanceof FullBlockIngredient) && !FullBlockIngredient.isFullBlock(slotStack))
+                    {
+                        return null;
+                    }
                     ItemStack stack = result.getOrDefault(key, ItemStack.EMPTY);
                     if (stack.isEmpty())
                     {
