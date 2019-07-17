@@ -22,6 +22,7 @@ import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModule.Subscriber.Bus;
 import snownee.kiwi.client.model.TextureModel;
+import snownee.kiwi.item.ModBlockItem;
 
 @KiwiModule(modid = Kiwi.MODID, name = "test")
 @KiwiModule.Optional(disabledByDefault = true)
@@ -54,5 +55,6 @@ public class TestModule extends AbstractModule
         Block block = TestModule.FIRST_BLOCK;
         BlockState state = block.getDefaultState().with(StairsBlock.FACING, Direction.EAST);
         TextureModel.register(event, block, state);
+        ModBlockItem.INSTANT_UPDATE_TILES.add(FIRST_TILE);
     }
 }

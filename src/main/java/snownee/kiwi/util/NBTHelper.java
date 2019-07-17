@@ -1,5 +1,7 @@
 package snownee.kiwi.util;
 
+import java.util.Collections;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -469,10 +471,19 @@ public class NBTHelper
         CompoundNBT subTag = getTagInternal(key, false, true);
         if (subTag != null)
         {
+            if (key.isEmpty())
+            {
+                return true;
+            }
             String actualKey = getLastNode(key);
             return subTag.contains(actualKey, type);
         }
         return false;
+    }
+
+    public Set<String> keySet(String key)
+    {
+        return hasTag(key, NBT.COMPOUND) ? getTag(key).keySet() : Collections.EMPTY_SET;
     }
 
     // TODO: remove parent if empty?

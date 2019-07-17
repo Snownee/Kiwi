@@ -3,6 +3,8 @@ package snownee.kiwi.util;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
 
+import net.minecraft.util.ResourceLocation;
+
 public class Util
 {
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("###,###");
@@ -32,5 +34,22 @@ public class Util
             return MESSAGE_FORMAT.format(new Double[] { number / Math.pow(unit, exp) }) + pre;
         }
         return Long.toString(number);
+    }
+
+    public static String trimRL(ResourceLocation rl)
+    {
+        return rl.getNamespace().equals("minecraft") ? rl.getPath() : rl.toString();
+    }
+
+    public static String trimRL(String rl)
+    {
+        if (rl.startsWith("minecraft:"))
+        {
+            return rl.substring("minecraft:".length());
+        }
+        else
+        {
+            return rl;
+        }
     }
 }

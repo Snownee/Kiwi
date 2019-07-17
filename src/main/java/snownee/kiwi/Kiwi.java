@@ -60,6 +60,7 @@ import snownee.kiwi.KiwiModule.Subscriber;
 import snownee.kiwi.KiwiModule.Subscriber.Bus;
 import snownee.kiwi.crafting.FullBlockIngredient;
 import snownee.kiwi.crafting.ModuleLoadedCondition;
+import snownee.kiwi.util.Util;
 
 @Mod(Kiwi.MODID)
 public class Kiwi
@@ -392,7 +393,7 @@ public class Kiwi
             logger.info(MARKER, "Module [{}:{}] initialized", modid, name);
             for (ResourceLocation key : counter.keySet())
             {
-                String k = key.getNamespace().equals("minecraft") ? key.getPath() : key.toString();
+                String k = Util.trimRL(key);
                 logger.info(MARKER, "    {}: {}", k, counter.getInt(key));
             }
         }

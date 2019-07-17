@@ -1,8 +1,11 @@
 package snownee.kiwi.item;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Nullable;
+
+import com.google.common.collect.Sets;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -13,15 +16,18 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import snownee.kiwi.tile.TextureTile;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 
 public class ModBlockItem extends BlockItem
 {
+    public static final Set<TileEntityType<?>> INSTANT_UPDATE_TILES = FMLEnvironment.dist == Dist.CLIENT ? Sets.newHashSet() : null;
+
     public ModBlockItem(Block block, Item.Properties builder)
     {
         super(block, builder);
@@ -31,7 +37,7 @@ public class ModBlockItem extends BlockItem
     protected boolean onBlockPlaced(BlockPos pos, World worldIn, PlayerEntity player, ItemStack stack, BlockState state)
     {
         TileEntity tile = worldIn.getTileEntity(pos);
-        if (worldIn.isRemote && tile instanceof TextureTile)
+        if (worldIn.isRemote && tile != null && INSTANT_UPDATE_TILES.contains(tile.getType()))
         {
             CompoundNBT data = stack.getChildTag("BlockEntityTag");
             if (data != null)

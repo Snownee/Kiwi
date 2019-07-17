@@ -13,6 +13,12 @@ public class TestTile extends TextureTile
     }
 
     @Override
+    public boolean isMark(String k)
+    {
+        return k.equals("top");
+    }
+
+    @Override
     public void read(CompoundNBT compound)
     {
         readPacketData(compound);

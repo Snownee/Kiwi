@@ -1,5 +1,6 @@
 package snownee.kiwi.crafting;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -8,9 +9,11 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
@@ -35,12 +38,14 @@ import snownee.kiwi.util.NBTHelper;
 public class TextureBlockRecipe extends DynamicShapedRecipe
 {
     private final List<String> textureKeys;
+    private final List<String> marks;
     private int keyCount = -1;
 
-    public TextureBlockRecipe(ResourceLocation idIn, String groupIn, int recipeWidthIn, int recipeHeightIn, NonNullList<Ingredient> ingredients, ItemStack recipeOutputIn, List<String> textureKeys)
+    public TextureBlockRecipe(ResourceLocation idIn, String groupIn, int recipeWidthIn, int recipeHeightIn, NonNullList<Ingredient> ingredients, ItemStack recipeOutputIn, List<String> textureKeys, List<String> marks)
     {
         super(idIn, groupIn, recipeWidthIn, recipeHeightIn, ingredients, recipeOutputIn);
         this.textureKeys = textureKeys;
+        this.marks = marks;
     }
 
     @Override
@@ -118,6 +123,10 @@ public class TextureBlockRecipe extends DynamicShapedRecipe
                 for (String k : e.getKey().split(","))
                 {
                     data.setString("Textures." + k, NBTUtil.writeBlockState(state).toString());
+                    if (marks.contains(k))
+                    {
+                        data.setString("Items." + k, item.getRegistryName().toString());
+                    }
                 }
             }
             else
@@ -195,7 +204,18 @@ public class TextureBlockRecipe extends DynamicShapedRecipe
             {
                 throw new JsonSyntaxException("Key defines symbols that aren't used in pattern: " + set);
             }
-            return new TextureBlockRecipe(recipeId, group, width, height, nonnulllist, itemstack, keys);
+            JsonArray array = JSONUtils.getJsonArray(json, "mark", null);
+            List<String> marks;
+            if (array == null)
+            {
+                marks = Collections.EMPTY_LIST;
+            }
+            else
+            {
+                marks = Lists.newArrayListWithCapacity(array.size());
+                array.forEach(e -> marks.add(e.getAsString()));
+            }
+            return new TextureBlockRecipe(recipeId, group, width, height, nonnulllist, itemstack, keys, marks);
         }
 
         @Override
@@ -203,7 +223,7 @@ public class TextureBlockRecipe extends DynamicShapedRecipe
         {
             int width = buffer.readVarInt();
             int height = buffer.readVarInt();
-            String s = buffer.readString(32767);
+            String s = buffer.readString();
             NonNullList<Ingredient> nonnulllist = NonNullList.withSize(width * height, Ingredient.EMPTY);
             for (int k = 0; k < nonnulllist.size(); ++k)
             {
@@ -214,11 +234,11 @@ public class TextureBlockRecipe extends DynamicShapedRecipe
             List<String> keys = Lists.newArrayListWithExpectedSize(width * height);
             for (int i = 0; i < keys.size(); i++)
             {
-                String k = buffer.readString(32767);
+                String k = buffer.readString();
                 keys.add(k.isEmpty() ? null : k);
             }
-
-            return new TextureBlockRecipe(recipeId, s, width, height, nonnulllist, itemstack, keys);
+            List<String> marks = ImmutableList.copyOf(buffer.readString().split(","));
+            return new TextureBlockRecipe(recipeId, s, width, height, nonnulllist, itemstack, keys, marks);
         }
 
         @Override
@@ -238,6 +258,7 @@ public class TextureBlockRecipe extends DynamicShapedRecipe
                 String k = recipe.textureKeys.get(i);
                 buffer.writeString(k == null ? "" : k);
             }
+            buffer.writeString(StringUtils.join(recipe.marks), ',');
         }
     }
 }

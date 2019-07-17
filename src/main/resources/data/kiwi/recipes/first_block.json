@@ -19,6 +19,7 @@
   "texture": {
     "#": [ "top", "bottom", "side" ]
   },
+  "mark": [ "top" ],
   "result": {
     "item": "kiwi:first_block",
     "count": 4

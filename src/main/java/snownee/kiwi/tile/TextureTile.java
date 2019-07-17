@@ -5,25 +5,31 @@ import java.util.Map;
 import com.google.common.collect.Maps;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.item.Item;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.thread.EffectiveSide;
+import net.minecraftforge.registries.ForgeRegistries;
 import snownee.kiwi.client.model.TextureModel;
 import snownee.kiwi.util.NBTHelper;
 import snownee.kiwi.util.NBTHelper.NBT;
+import snownee.kiwi.util.Util;
 
 public class TextureTile extends BaseTile
 {
     protected Map<String, String> textures;
+    protected Map<String, Item> marks;
     protected IModelData modelData;
 
     public TextureTile(TileEntityType<?> tileEntityTypeIn, String... textureKeys)
@@ -42,6 +48,11 @@ public class TextureTile extends BaseTile
 
     public void setTexture(String key, String path)
     {
+        setTexture(textures, key, path);
+    }
+
+    public static void setTexture(Map<String, String> textures, String key, String path)
+    {
         if (!textures.containsKey(key))
         {
             return;
@@ -51,11 +62,29 @@ public class TextureTile extends BaseTile
 
     public void setTexture(String key, BlockState state)
     {
+        setTexture(textures, key, state);
+        if (isMark(key))
+        {
+            Item item = state.getBlock().asItem();
+            if (item == null)
+            {
+                return;
+            }
+            if (marks == null)
+            {
+                marks = Maps.newHashMap();
+            }
+            marks.put(key, item);
+        }
+    }
+
+    public static void setTexture(Map<String, String> textures, String key, BlockState state)
+    {
         if (!textures.containsKey(key))
         {
             return;
         }
-        if (!world.isRemote)
+        if (EffectiveSide.get() == LogicalSide.CLIENT)
         {
             String value = NBTUtil.writeBlockState(state).toString();
             textures.put(key, value);
@@ -66,10 +95,32 @@ public class TextureTile extends BaseTile
         }
     }
 
+    public void setTexture(String key, Item item)
+    {
+        setTexture(textures, key, item);
+        if (isMark(key))
+        {
+            if (marks == null)
+            {
+                marks = Maps.newHashMap();
+            }
+            marks.put(key, item);
+        }
+    }
+
+    public static void setTexture(Map<String, String> textures, String key, Item item)
+    {
+        Block block = Block.getBlockFromItem(item);
+        if (block != null)
+        {
+            setTexture(textures, key, block.getDefaultState());
+        }
+    }
+
     @OnlyIn(Dist.CLIENT)
     public static String getTextureFromState(BlockState state)
     {
-        return Minecraft.getInstance().getBlockRendererDispatcher().getBlockModelShapes().getTexture(state).getName().toString();
+        return Util.trimRL(Minecraft.getInstance().getBlockRendererDispatcher().getBlockModelShapes().getTexture(state).getName());
     }
 
     @Override
@@ -103,6 +154,26 @@ public class TextureTile extends BaseTile
             return;
         }
         readTextures(textures, data.getCompound("Textures"));
+        if (data.contains("Items", NBT.COMPOUND))
+        {
+            NBTHelper helper = NBTHelper.of(data.getCompound("Items"));
+            for (String k : helper.keySet(""))
+            {
+                if (!isMark(k))
+                {
+                    continue;
+                }
+                if (marks == null)
+                {
+                    marks = Maps.newHashMap();
+                }
+                Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(helper.getString(k)));
+                if (item != null)
+                {
+                    marks.put(k, item);
+                }
+            }
+        }
         refresh();
     }
 
@@ -135,8 +206,27 @@ public class TextureTile extends BaseTile
         }
     }
 
+    public boolean isMark(String key)
+    {
+        return false;
+    }
+
     @Override
     protected CompoundNBT writePacketData(CompoundNBT data)
+    {
+        writeTextures(textures, data);
+        if (marks != null)
+        {
+            NBTHelper helper = NBTHelper.of(data);
+            marks.forEach((k, v) -> {
+                if (isMark(k))
+                    helper.setString("Items." + k, Util.trimRL(v.getRegistryName()));
+            });
+        }
+        return data;
+    }
+
+    public static CompoundNBT writeTextures(Map<String, String> textures, CompoundNBT data)
     {
         NBTHelper tag = NBTHelper.of(data);
         textures.forEach((k, v) -> tag.setString("Textures." + k, v));
