@@ -59,6 +59,7 @@ import snownee.kiwi.util.NBTHelper;
 public class TextureModel implements IDynamicBakedModel
 {
     public static ModelProperty<Map<String, String>> TEXTURES = new ModelProperty<>();
+    private static Map<IUnbakedModel, TextureModel> caches = Maps.newHashMap();
 
     public static void register(ModelBakeEvent event, Block block, @Nullable BlockState inventoryState)
     {
@@ -66,37 +67,43 @@ public class TextureModel implements IDynamicBakedModel
             ModelResourceLocation rl = BlockModelShapes.getModelLocation(s);
             register(event, block, rl, s.equals(inventoryState));
         });
+        caches.clear();
     }
 
     public static void register(ModelBakeEvent event, Block block, ModelResourceLocation rl, boolean inventory)
     {
         IUnbakedModel unbakedModel = ModelLoaderRegistry.getModelOrLogError(rl, "Kiwi failed to replace block model " + rl);
-        IBakedModel bakedModel = event.getModelRegistry().get(rl);
         TextureModel textureModel = null;
 
-        if (bakedModel != null)
+        if (unbakedModel != null)
         {
-            if (unbakedModel instanceof VariantList)
+            if (caches.containsKey(unbakedModel))
             {
-                VariantList variantList = (VariantList) unbakedModel;
-                List<Variant> variants = variantList.getVariantList();
-                for (Variant variant : variants)
+                textureModel = caches.get(unbakedModel);
+            }
+            else
+            {
+                IBakedModel bakedModel = event.getModelRegistry().get(rl);
+                if (bakedModel != null && unbakedModel instanceof VariantList)
                 {
-                    IUnbakedModel unbakedModel2 = event.getModelLoader().getUnbakedModel(variant.getModelLocation());
-                    if (unbakedModel2 instanceof BlockModel)
+                    VariantList variantList = (VariantList) unbakedModel;
+                    List<Variant> variants = variantList.getVariantList();
+                    for (Variant variant : variants)
                     {
-                        TextureModel model = new TextureModel(event.getModelLoader(), (BlockModel) unbakedModel2, bakedModel, variant, inventory);
-                        event.getModelRegistry().put(rl, model);
-                        if (inventory)
+                        IUnbakedModel unbakedModel2 = event.getModelLoader().getUnbakedModel(variant.getModelLocation());
+                        if (unbakedModel2 instanceof BlockModel)
                         {
-                            textureModel = model;
-                            inventory = false;
+                            textureModel = new TextureModel(event.getModelLoader(), (BlockModel) unbakedModel2, bakedModel, variant, inventory);
                         }
                     }
                 }
             }
+            if (textureModel != null)
+            {
+                event.getModelRegistry().put(rl, textureModel);
+            }
         }
-        if (textureModel != null && block != null && block.asItem() != null)
+        if (inventory && textureModel != null && block != null && block.asItem() != null)
         {
             rl = new ModelResourceLocation(rl, "inventory");
             event.getModelRegistry().put(rl, textureModel);
