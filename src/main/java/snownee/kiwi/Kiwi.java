@@ -284,7 +284,7 @@ public class Kiwi
                     if (!val.isEmpty())
                     {
                         useOwnGroup = false;
-                        if (!val.matches(":") && !KiwiManager.GROUPS.containsKey(val))
+                        if (!org.apache.commons.lang3.StringUtils.contains(val, ':') && !KiwiManager.GROUPS.containsKey(val))
                         {
                             val = info.rl.getNamespace() + ":" + val;
                         }
