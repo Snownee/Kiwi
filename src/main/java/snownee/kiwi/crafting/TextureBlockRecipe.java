@@ -239,7 +239,7 @@ public class TextureBlockRecipe extends DynamicShapedRecipe
             ItemStack itemstack = buffer.readItemStack();
 
             List<String> keys = Lists.newArrayListWithExpectedSize(width * height);
-            for (int i = 0; i < keys.size(); i++)
+            for (int i = 0; i < width * height; i++)
             {
                 String k = buffer.readString();
                 keys.add(k.isEmpty() ? null : k);
