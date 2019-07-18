@@ -38,6 +38,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IEnviromentBlockReader;
 import net.minecraft.world.World;
@@ -59,7 +60,7 @@ import snownee.kiwi.util.NBTHelper;
 public class TextureModel implements IDynamicBakedModel
 {
     public static ModelProperty<Map<String, String>> TEXTURES = new ModelProperty<>();
-    private static Map<IUnbakedModel, TextureModel> caches = Maps.newHashMap();
+    public static Map<IBakedModel, TextureModel> CACHES = Maps.newHashMap();
 
     public static void register(ModelBakeEvent event, Block block, @Nullable BlockState inventoryState)
     {
@@ -67,7 +68,7 @@ public class TextureModel implements IDynamicBakedModel
             ModelResourceLocation rl = BlockModelShapes.getModelLocation(s);
             register(event, block, rl, s.equals(inventoryState));
         });
-        caches.clear();
+        CACHES.clear();
     }
 
     public static void register(ModelBakeEvent event, Block block, ModelResourceLocation rl, boolean inventory)
@@ -77,14 +78,18 @@ public class TextureModel implements IDynamicBakedModel
 
         if (unbakedModel != null)
         {
-            if (caches.containsKey(unbakedModel))
+            IBakedModel bakedModel = event.getModelRegistry().get(rl);
+            if (bakedModel != null && unbakedModel instanceof VariantList)
             {
-                textureModel = caches.get(unbakedModel);
-            }
-            else
-            {
-                IBakedModel bakedModel = event.getModelRegistry().get(rl);
-                if (bakedModel != null && unbakedModel instanceof VariantList)
+                if (CACHES.containsKey(bakedModel))
+                {
+                    textureModel = CACHES.get(bakedModel);
+                    if (inventory)
+                    {
+                        textureModel.setOverrides();
+                    }
+                }
+                else
                 {
                     VariantList variantList = (VariantList) unbakedModel;
                     List<Variant> variants = variantList.getVariantList();
@@ -94,18 +99,17 @@ public class TextureModel implements IDynamicBakedModel
                         if (unbakedModel2 instanceof BlockModel)
                         {
                             textureModel = new TextureModel(event.getModelLoader(), (BlockModel) unbakedModel2, bakedModel, variant, inventory);
+                            CACHES.put(bakedModel, textureModel);
+                            break;
                         }
                     }
                 }
-            }
-            if (textureModel != null)
-            {
                 event.getModelRegistry().put(rl, textureModel);
             }
         }
         if (inventory && textureModel != null && block != null && block.asItem() != null)
         {
-            rl = new ModelResourceLocation(rl, "inventory");
+            rl = new ModelResourceLocation(new ResourceLocation(rl.getNamespace(), rl.getPath()), "inventory");
             event.getModelRegistry().put(rl, textureModel);
             ItemModelMesher mesher = Minecraft.getInstance().getItemRenderer().getItemModelMesher();
             mesher.register(block.asItem(), rl);
@@ -116,7 +120,7 @@ public class TextureModel implements IDynamicBakedModel
     private final Variant variant;
     private final BlockModel originalUnbaked;
     private final IBakedModel originalBaked;
-    private final TextureOverrideList overrideList;
+    private TextureOverrideList overrideList;
     private final Cache<String, IBakedModel> baked = CacheBuilder.newBuilder().maximumSize(200L).expireAfterWrite(500L, TimeUnit.SECONDS).weakKeys().build();
 
     public TextureModel(ModelLoader modelLoader, BlockModel originalUnbaked, IBakedModel originalBaked, Variant variant, boolean inventory)
@@ -126,6 +130,14 @@ public class TextureModel implements IDynamicBakedModel
         this.originalBaked = originalBaked;
         this.variant = variant;
         overrideList = inventory ? new TextureOverrideList(this) : null;
+    }
+
+    public void setOverrides()
+    {
+        if (overrideList == null)
+        {
+            overrideList = new TextureOverrideList(this);
+        }
     }
 
     @Override
