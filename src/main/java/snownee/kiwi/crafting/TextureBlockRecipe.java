@@ -34,6 +34,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 import snownee.kiwi.KiwiManager;
 import snownee.kiwi.util.NBTHelper;
+import snownee.kiwi.util.Util;
 
 public class TextureBlockRecipe extends DynamicShapedRecipe
 {
@@ -130,7 +131,7 @@ public class TextureBlockRecipe extends DynamicShapedRecipe
                     data.setString("Textures." + k, NBTUtil.writeBlockState(state).toString());
                     if (marks.contains(k))
                     {
-                        data.setString("Items." + k, item.getRegistryName().toString());
+                        data.setString("Items." + k, Util.trimRL(item.getRegistryName()));
                     }
                 }
             }

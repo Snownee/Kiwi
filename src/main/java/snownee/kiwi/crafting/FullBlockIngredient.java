@@ -9,8 +9,6 @@ import com.google.gson.JsonSyntaxException;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.network.PacketBuffer;
@@ -34,29 +32,36 @@ public class FullBlockIngredient extends Ingredient
 
     public static boolean isFullBlock(ItemStack stack)
     {
-        if (stack == null)
+        if (isTextureBlock(stack))
         {
             return false;
         }
-        Item item = stack.getItem();
-        if (item instanceof BlockItem)
+        Block block = Block.getBlockFromItem(stack.getItem());
+        BlockState state = block.getDefaultState();
+        boolean flag = state.isSolid() && !state.func_215691_g();
+        if (flag)
         {
-            Block block = ((BlockItem) item).getBlock();
-            BlockState state = block.getDefaultState();
-            boolean flag = state.isSolid() && !state.func_215691_g() && state.getRenderType() == BlockRenderType.MODEL;
-            if (flag)
+            try
             {
-                try
-                {
-                    if (VoxelShapes.fullCube().equals(state.getCollisionShape(null, BlockPos.ZERO)))
-                        return true;
-                }
-                catch (Exception e)
-                {
-                }
+                if (VoxelShapes.fullCube().equals(state.getCollisionShape(null, BlockPos.ZERO)))
+                    return true;
+            }
+            catch (Exception e)
+            {
             }
         }
         return false;
+    }
+
+    public static boolean isTextureBlock(ItemStack stack)
+    {
+        if (stack == null || stack.isEmpty())
+        {
+            return false;
+        }
+        Block block = Block.getBlockFromItem(stack.getItem());
+        BlockState state = block.getDefaultState();
+        return state.getMaterial().isSolid() && state.getRenderType() == BlockRenderType.MODEL;
     }
 
     @Override
