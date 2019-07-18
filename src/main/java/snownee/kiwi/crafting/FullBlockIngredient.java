@@ -32,7 +32,7 @@ public class FullBlockIngredient extends Ingredient
 
     public static boolean isFullBlock(ItemStack stack)
     {
-        if (isTextureBlock(stack))
+        if (!isTextureBlock(stack))
         {
             return false;
         }
