@@ -23,7 +23,7 @@ public class KiwiCommand
         dispatcher.register(Commands.literal(Kiwi.MODID)
                 .then(Commands.literal("dumpLoots")
                         .executes(ctx -> dumpLoots(ctx.getSource(), ".+"))
-                        .then(Commands.argument("pattern", StringArgumentType.string())
+                        .then(Commands.argument("pattern", StringArgumentType.greedyString())
                                 .executes(ctx -> dumpLoots(ctx.getSource(), StringArgumentType.getString(ctx, "pattern"))))));
         /* on */
     }
@@ -33,7 +33,7 @@ public class KiwiCommand
         try
         {
             Pattern p = Pattern.compile(pattern);
-            int r = LootDumper.dump(p.asPredicate(), source.getServer().getDataDirectory());
+            int r = LootDumper.dump(p, source.getServer().getDataDirectory());
             if (r == 0)
             {
                 source.sendErrorMessage(new TranslationTextComponent("commands.kiwi.dumpLoots.noTargets"));

@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -15,7 +16,7 @@ public class LootDumper
     {
     }
 
-    public static int dump(Predicate<String> matcher, File dataDir)
+    public static int dump(Pattern p, File dataDir)
     {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         if (classLoader == null)
@@ -39,7 +40,7 @@ public class LootDumper
         int count = 0;
         for (ResourceLocation rl : ForgeRegistries.BLOCKS.getKeys())
         {
-            if (ForgeRegistries.ITEMS.containsKey(rl) && matcher.test(rl.toString()))
+            if (ForgeRegistries.ITEMS.containsKey(rl) && p.matcher(rl.toString()).find())
             {
                 File dir = new File(dataDir, "dumps/data/" + rl.getNamespace() + "/loot_tables/blocks");
                 File file = new File(dir, rl.getPath() + ".json");
