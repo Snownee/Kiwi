@@ -89,14 +89,14 @@ def b = [
 ]
 
 task sourcesJar(type: Jar) {
-    exclude(a)
+    //exclude(a)
     manifest { attributes(b) }
     from(sourceSets.main.output)
     archiveName = "${archivesBaseName}-${version}-sources.${extension}"
 }
 
 task deobfJar(type: Jar) {
-    exclude(a)
+    //exclude(a)
     manifest { attributes(b) }
     from(sourceSets.main.output)
     archiveName = "${archivesBaseName}-${version}-deobf.${extension}"
