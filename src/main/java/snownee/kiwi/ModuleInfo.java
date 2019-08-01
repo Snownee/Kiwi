@@ -19,6 +19,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.registries.GameData;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import snownee.kiwi.item.ModBlockItem;
 
@@ -67,7 +68,7 @@ public class ModuleInfo
             });
         }
         entries.forEach(e -> {
-            decorator.accept(this, (T) e.entry.setRegistryName(new ResourceLocation(rl.getNamespace(), e.name)));
+            decorator.accept(this, (T) e.entry.setRegistryName(GameData.checkPrefix(e.name, true)));
             event.getRegistry().register((T) e.entry);
         });
     }

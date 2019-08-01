@@ -323,7 +323,7 @@ public class Kiwi
                 }
                 else
                 {
-                    regName = field.getName().toLowerCase(Locale.ENGLISH);
+                    regName = field.getName().toLowerCase(Locale.US);
                 }
                 Object o = null;
                 try
