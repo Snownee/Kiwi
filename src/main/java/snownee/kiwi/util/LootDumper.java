@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import net.minecraft.util.ResourceLocation;

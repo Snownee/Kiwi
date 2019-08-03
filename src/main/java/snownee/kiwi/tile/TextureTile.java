@@ -140,6 +140,7 @@ public class TextureTile extends BaseTile
     @Override
     public void onLoad()
     {
+        super.requestModelDataUpdate();
     }
 
     @Override

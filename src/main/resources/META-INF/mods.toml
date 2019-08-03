@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[26,)"
+loaderVersion="[28,)"
 [[mods]]
 modId="kiwi"
 version="${file.jarVersion}"
@@ -8,5 +8,5 @@ authors="Snownee"
 displayURL="https://www.curseforge.com/minecraft/mc-mods/kiwi"
 description='''Huge thanks to my supporters:
 
-粉鱼 Lioness131 皮蛋 Cherls idyllic_bean 鱼加盐有点咸 洋葱菜菜子 面条公爵 车轮饼 mc00zhu
+粉鱼 Lioness131 皮蛋 Cherls idyllic_bean 鱼加盐有点咸 洋葱菜菜子 面条公爵 车轮饼 mc00zhu 洛华 纪华裕
 '''

@@ -64,14 +64,19 @@ public class TextureModel implements IDynamicBakedModel
 
     public static void register(ModelBakeEvent event, Block block, @Nullable BlockState inventoryState)
     {
+        register(event, block, inventoryState, null);
+    }
+
+    public static void register(ModelBakeEvent event, Block block, @Nullable BlockState inventoryState, @Nullable String particleKey)
+    {
         block.getStateContainer().getValidStates().forEach(s -> {
             ModelResourceLocation rl = BlockModelShapes.getModelLocation(s);
-            register(event, block, rl, s.equals(inventoryState));
+            register(event, block, rl, s.equals(inventoryState), particleKey);
         });
         CACHES.clear();
     }
 
-    public static void register(ModelBakeEvent event, Block block, ModelResourceLocation rl, boolean inventory)
+    public static void register(ModelBakeEvent event, Block block, ModelResourceLocation rl, boolean inventory, @Nullable String particleKey)
     {
         IUnbakedModel unbakedModel = ModelLoaderRegistry.getModelOrLogError(rl, "Kiwi failed to replace block model " + rl);
         TextureModel textureModel = null;
@@ -98,7 +103,7 @@ public class TextureModel implements IDynamicBakedModel
                         IUnbakedModel unbakedModel2 = event.getModelLoader().getUnbakedModel(variant.getModelLocation());
                         if (unbakedModel2 instanceof BlockModel)
                         {
-                            textureModel = new TextureModel(event.getModelLoader(), (BlockModel) unbakedModel2, bakedModel, variant, inventory);
+                            textureModel = new TextureModel(event.getModelLoader(), (BlockModel) unbakedModel2, bakedModel, variant, inventory, particleKey);
                             CACHES.put(bakedModel, textureModel);
                             break;
                         }
@@ -121,14 +126,16 @@ public class TextureModel implements IDynamicBakedModel
     private final BlockModel originalUnbaked;
     private final IBakedModel originalBaked;
     private TextureOverrideList overrideList;
+    private final String particleKey;
     private final Cache<String, IBakedModel> baked = CacheBuilder.newBuilder().maximumSize(200L).expireAfterWrite(500L, TimeUnit.SECONDS).weakKeys().build();
 
-    public TextureModel(ModelLoader modelLoader, BlockModel originalUnbaked, IBakedModel originalBaked, Variant variant, boolean inventory)
+    public TextureModel(ModelLoader modelLoader, BlockModel originalUnbaked, IBakedModel originalBaked, Variant variant, boolean inventory, @Nullable String particleKey)
     {
         this.modelLoader = modelLoader;
         this.originalUnbaked = originalUnbaked;
         this.originalBaked = originalBaked;
         this.variant = variant;
+        this.particleKey = particleKey;
         overrideList = inventory ? new TextureOverrideList(this) : null;
     }
 
@@ -159,6 +166,21 @@ public class TextureModel implements IDynamicBakedModel
     }
 
     @Override
+    public TextureAtlasSprite getParticleTexture(IModelData data)
+    {
+        if (particleKey != null && data.getData(TEXTURES) != null && data.getData(TEXTURES).containsKey(particleKey))
+        {
+            TextureAtlasSprite particle = ModelLoader.defaultTextureGetter().apply(new ResourceLocation(data.getData(TEXTURES).get(particleKey)));
+            if (particle.getClass() != MissingTextureSprite.class)
+            {
+                return particle;
+            }
+        }
+        return getParticleTexture();
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
     public TextureAtlasSprite getParticleTexture()
     {
         return originalBaked.getParticleTexture();

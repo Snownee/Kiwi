@@ -66,11 +66,4 @@ public class KiwiConfig
          */
         /* on */
     }
-
-    private static boolean isValidNamespace(String namespace)
-    {
-        return namespace.chars().allMatch((c) -> {
-            return c == 95 || c == 45 || c >= 97 && c <= 122 || c >= 48 && c <= 57 || c == 46;
-        });
-    }
 }

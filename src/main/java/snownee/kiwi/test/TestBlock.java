@@ -62,6 +62,16 @@ public class TestBlock extends StairsBlock
     }
 
     @Override
+    public void onReplaced(BlockState state, World worldIn, BlockPos pos, BlockState newState, boolean isMoving)
+    {
+        if (state.hasTileEntity() && state.getBlock() != newState.getBlock())
+        {
+            worldIn.removeTileEntity(pos);
+        }
+        super.onReplaced(state, worldIn, pos, newState, isMoving);
+    }
+
+    @Override
     public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player)
     {
         return ModBlock.pickBlock(state, target, world, pos, player);
