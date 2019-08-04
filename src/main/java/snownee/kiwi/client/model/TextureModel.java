@@ -6,8 +6,12 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -29,8 +33,13 @@ import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.model.ItemOverride;
 import net.minecraft.client.renderer.model.ItemOverrideList;
 import net.minecraft.client.renderer.model.ModelResourceLocation;
+import net.minecraft.client.renderer.model.ModelRotation;
+import net.minecraft.client.renderer.model.MultipartBakedModel;
 import net.minecraft.client.renderer.model.Variant;
 import net.minecraft.client.renderer.model.VariantList;
+import net.minecraft.client.renderer.model.multipart.Multipart;
+import net.minecraft.client.renderer.model.multipart.Selector;
+import net.minecraft.client.renderer.texture.ISprite;
 import net.minecraft.client.renderer.texture.MissingTextureSprite;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -38,6 +47,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
+import net.minecraft.util.IItemProvider;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IEnviromentBlockReader;
@@ -78,40 +88,7 @@ public class TextureModel implements IDynamicBakedModel
 
     public static void register(ModelBakeEvent event, Block block, ModelResourceLocation rl, boolean inventory, @Nullable String particleKey)
     {
-        IUnbakedModel unbakedModel = ModelLoaderRegistry.getModelOrLogError(rl, "Kiwi failed to replace block model " + rl);
-        TextureModel textureModel = null;
-
-        if (unbakedModel != null)
-        {
-            IBakedModel bakedModel = event.getModelRegistry().get(rl);
-            if (bakedModel != null && unbakedModel instanceof VariantList)
-            {
-                if (CACHES.containsKey(bakedModel))
-                {
-                    textureModel = CACHES.get(bakedModel);
-                    if (inventory)
-                    {
-                        textureModel.setOverrides();
-                    }
-                }
-                else
-                {
-                    VariantList variantList = (VariantList) unbakedModel;
-                    List<Variant> variants = variantList.getVariantList();
-                    for (Variant variant : variants)
-                    {
-                        IUnbakedModel unbakedModel2 = event.getModelLoader().getUnbakedModel(variant.getModelLocation());
-                        if (unbakedModel2 instanceof BlockModel)
-                        {
-                            textureModel = new TextureModel(event.getModelLoader(), (BlockModel) unbakedModel2, bakedModel, variant, inventory, particleKey);
-                            CACHES.put(bakedModel, textureModel);
-                            break;
-                        }
-                    }
-                }
-                event.getModelRegistry().put(rl, textureModel);
-            }
-        }
+        TextureModel textureModel = process(event, rl, inventory, particleKey);
         if (inventory && textureModel != null && block != null && block.asItem() != null)
         {
             rl = new ModelResourceLocation(new ResourceLocation(rl.getNamespace(), rl.getPath()), "inventory");
@@ -121,15 +98,91 @@ public class TextureModel implements IDynamicBakedModel
         }
     }
 
+    public static void registerInventory(ModelBakeEvent event, IItemProvider item, @Nullable String particleKey)
+    {
+        ResourceLocation rl = item.asItem().getRegistryName();
+        ModelResourceLocation modelRl = new ModelResourceLocation(new ResourceLocation(rl.getNamespace(), rl.getPath()), "inventory");
+        process(event, modelRl, true, particleKey);
+        ItemModelMesher mesher = Minecraft.getInstance().getItemRenderer().getItemModelMesher();
+        mesher.register(item.asItem(), modelRl);
+    }
+
+    private static TextureModel process(ModelBakeEvent event, ModelResourceLocation rl, boolean inventory, @Nullable String particleKey)
+    {
+        IUnbakedModel unbakedModel = ModelLoaderRegistry.getModelOrLogError(rl, "Kiwi failed to replace block model " + rl);
+        IBakedModel bakedModel = event.getModelRegistry().get(rl);
+        if (unbakedModel == null || bakedModel == null)
+        {
+            return null;
+        }
+        TextureModel textureModel = null;
+        if (unbakedModel instanceof Multipart && bakedModel instanceof MultipartBakedModel)
+        {
+            Multipart originalUnbaked = (Multipart) unbakedModel;
+            MultipartBakedModel originalBaked = (MultipartBakedModel) bakedModel;
+            List<Selector> selectors = originalUnbaked.getSelectors();
+            TextureMultipart.Builder builder = new TextureMultipart.Builder();
+            for (int i = 0; i < selectors.size(); i++)
+            {
+                Selector selector = selectors.get(i);
+                VariantList variantList = selector.getVariantList();
+                Pair<Predicate<BlockState>, IBakedModel> pair = originalBaked.selectors.get(i);
+                builder.putModel(pair.getLeft(), putModel(event, variantList, pair.getRight(), false, particleKey));
+            }
+            event.getModelRegistry().put(rl, builder.build());
+        }
+        else if (unbakedModel instanceof VariantList)
+        {
+            textureModel = putModel(event, (VariantList) unbakedModel, bakedModel, inventory, particleKey);
+        }
+        else if (unbakedModel instanceof BlockModel)
+        {
+            textureModel = new TextureModel(event.getModelLoader(), (BlockModel) unbakedModel, bakedModel, ModelRotation.X0_Y0, inventory, particleKey);
+        }
+        if (textureModel != null)
+        {
+            event.getModelRegistry().put(rl, textureModel);
+        }
+        return textureModel;
+    }
+
+    private static TextureModel putModel(ModelBakeEvent event, VariantList variantList, IBakedModel baked, boolean inventory, String particleKey)
+    {
+        TextureModel textureModel = null;
+        if (CACHES.containsKey(baked))
+        {
+            textureModel = CACHES.get(baked);
+            if (inventory)
+            {
+                textureModel.setOverrides();
+            }
+        }
+        else
+        {
+            List<Variant> variants = variantList.getVariantList();
+            for (Variant variant : variants)
+            {
+                IUnbakedModel unbakedModel2 = event.getModelLoader().getUnbakedModel(variant.getModelLocation());
+                if (unbakedModel2 instanceof BlockModel)
+                {
+                    textureModel = new TextureModel(event.getModelLoader(), (BlockModel) unbakedModel2, baked, variant, inventory, particleKey);
+                    CACHES.put(baked, textureModel);
+                    break;
+                }
+            }
+        }
+        return textureModel;
+    }
+
     private final ModelLoader modelLoader;
-    private final Variant variant;
+    private final ISprite variant;
     private final BlockModel originalUnbaked;
     private final IBakedModel originalBaked;
     private TextureOverrideList overrideList;
     private final String particleKey;
     private final Cache<String, IBakedModel> baked = CacheBuilder.newBuilder().maximumSize(200L).expireAfterWrite(500L, TimeUnit.SECONDS).weakKeys().build();
 
-    public TextureModel(ModelLoader modelLoader, BlockModel originalUnbaked, IBakedModel originalBaked, Variant variant, boolean inventory, @Nullable String particleKey)
+    public TextureModel(ModelLoader modelLoader, BlockModel originalUnbaked, IBakedModel originalBaked, ISprite variant, boolean inventory, @Nullable String particleKey)
     {
         this.modelLoader = modelLoader;
         this.originalUnbaked = originalUnbaked;
@@ -162,7 +215,7 @@ public class TextureModel implements IDynamicBakedModel
     @Override
     public boolean isBuiltInRenderer()
     {
-        return originalBaked.isBuiltInRenderer();
+        return false;
     }
 
     @Override
@@ -193,6 +246,7 @@ public class TextureModel implements IDynamicBakedModel
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public ItemCameraTransforms getItemCameraTransforms()
     {
         return originalBaked.getItemCameraTransforms();
@@ -218,12 +272,14 @@ public class TextureModel implements IDynamicBakedModel
             if (!v.isEmpty())
                 textures.put(k, v);
         });
-        BlockModel unbaked = new BlockModel(originalUnbaked.getParentLocation(), originalUnbaked.getElements(), textures, originalUnbaked.isAmbientOcclusion(), originalUnbaked.isGui3d(), originalUnbaked.getAllTransforms(), Lists.newArrayList(originalUnbaked.getOverrides()));
         String key = generateKey(overrides);
         IBakedModel model = null;
         try
         {
-            model = baked.get(key, () -> unbaked.bake(modelLoader, ModelLoader.defaultTextureGetter(), variant, DefaultVertexFormats.BLOCK));
+            model = baked.get(key, () -> {
+                BlockModel unbaked = new BlockModel(originalUnbaked.getParentLocation(), originalUnbaked.getElements(), textures, originalUnbaked.isAmbientOcclusion(), originalUnbaked.isGui3d(), originalUnbaked.getAllTransforms(), Lists.newArrayList(originalUnbaked.getOverrides()));
+                return unbaked.bake(modelLoader, ModelLoader.defaultTextureGetter(), variant, DefaultVertexFormats.BLOCK);
+            });
         }
         catch (ExecutionException e)
         {
@@ -290,8 +346,7 @@ public class TextureModel implements IDynamicBakedModel
         }
         else
         {
-            String str = textures.toString();
-            return str.substring(1, str.length() - 1);
+            return StringUtils.join(textures.entrySet(), ',');
         }
     }
 

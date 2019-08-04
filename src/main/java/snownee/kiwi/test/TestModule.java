@@ -54,7 +54,8 @@ public class TestModule extends AbstractModule
     {
         Block block = TestModule.FIRST_BLOCK;
         BlockState state = block.getDefaultState().with(StairsBlock.FACING, Direction.EAST);
-        TextureModel.register(event, block, state, "top");
+        TextureModel.register(event, block, null, "top");
+        TextureModel.registerInventory(event, block, "top");
         ModBlockItem.INSTANT_UPDATE_TILES.add(FIRST_TILE);
     }
 }
