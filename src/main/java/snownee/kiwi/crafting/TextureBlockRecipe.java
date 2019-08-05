@@ -77,8 +77,8 @@ public class TextureBlockRecipe extends DynamicShapedRecipe
                         result = Maps.newHashMapWithExpectedSize(keyCount);
                     }
                     ItemStack slotStack = inv.getStackInSlot(x + y * inv.getWidth());
-                    Ingredient ingredient = getIngredients().get(x + y * getRecipeWidth());
-                    if (!(ingredient instanceof FullBlockIngredient) && !FullBlockIngredient.isFullBlock(slotStack))
+                    Ingredient ingredient = getIngredients().get(x - startX + (y - startY) * getRecipeWidth());
+                    if (!(ingredient instanceof FullBlockIngredient) && !FullBlockIngredient.isTextureBlock(slotStack))
                     {
                         return null;
                     }
@@ -95,7 +95,7 @@ public class TextureBlockRecipe extends DynamicShapedRecipe
                         }
                     }
                 }
-                if (!matches(inv, x, y))
+                if (!matches(inv, x, y, x - startX, y - startY))
                 {
                     return null;
                 }

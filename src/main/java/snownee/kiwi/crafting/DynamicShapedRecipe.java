@@ -112,7 +112,7 @@ public abstract class DynamicShapedRecipe implements ICraftingRecipe, IShapedRec
         {
             for (int x = startX; x < startX + getRecipeWidth(); ++x)
             {
-                if (!matches(inv, x, y))
+                if (!matches(inv, x, y, x - startX, y - startY))
                 {
                     return false;
                 }
@@ -121,9 +121,9 @@ public abstract class DynamicShapedRecipe implements ICraftingRecipe, IShapedRec
         return true;
     }
 
-    public boolean matches(CraftingInventory inv, int x, int y)
+    public boolean matches(CraftingInventory inv, int x, int y, int ix, int iy)
     {
-        Ingredient ingredient = this.recipeItems.get(x + y * getRecipeWidth());
+        Ingredient ingredient = this.recipeItems.get(ix + iy * getRecipeWidth());
         return ingredient.test(inv.getStackInSlot(x + y * inv.getWidth()));
     }
 

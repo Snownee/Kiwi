@@ -3,7 +3,10 @@ package snownee.kiwi.util;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
 
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class Util
 {
@@ -51,5 +54,20 @@ public class Util
         {
             return rl;
         }
+    }
+
+    public static String getTextureItem(ItemStack stack, String mark)
+    {
+        NBTHelper data = NBTHelper.of(stack);
+        String rl = data.getString("BlockEntityTag.Items." + mark);
+        if (rl != null && ResourceLocation.func_217855_b(rl))
+        {
+            Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(rl));
+            if (item != null)
+            {
+                return item.getTranslationKey();
+            }
+        }
+        return "";
     }
 }

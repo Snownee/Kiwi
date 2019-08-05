@@ -9,6 +9,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.Item;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTUtil;
@@ -116,6 +117,11 @@ public class TextureTile extends BaseTile
         {
             setTexture(textures, key, block.getDefaultState());
         }
+    }
+
+    public Item getMark(String key)
+    {
+        return marks.getOrDefault(key, Items.AIR);
     }
 
     @OnlyIn(Dist.CLIENT)
