@@ -32,7 +32,6 @@ minecraft {
     // Simply re-run your setup task after changing the mappings to update your workspace.
     mappings channel: 'snapshot', version: '20190731-1.14.3'
     
-    // accessTransformer = file('build/resources/main/META-INF/kiwi_at.cfg')
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
     // Default run configurations.

@@ -77,6 +77,9 @@ public class TextureModel implements IDynamicBakedModel
         register(event, block, inventoryState, null);
     }
 
+    /**
+     * @since 2.3.0
+     */
     public static void register(ModelBakeEvent event, Block block, @Nullable BlockState inventoryState, @Nullable String particleKey)
     {
         block.getStateContainer().getValidStates().forEach(s -> {
@@ -86,6 +89,9 @@ public class TextureModel implements IDynamicBakedModel
         CACHES.clear();
     }
 
+    /**
+     * @since 2.3.0
+     */
     public static void register(ModelBakeEvent event, Block block, ModelResourceLocation rl, boolean inventory, @Nullable String particleKey)
     {
         TextureModel textureModel = process(event, rl, inventory, particleKey);
@@ -98,6 +104,9 @@ public class TextureModel implements IDynamicBakedModel
         }
     }
 
+    /**
+     * @since 2.3.0
+     */
     public static void registerInventory(ModelBakeEvent event, IItemProvider item, @Nullable String particleKey)
     {
         ResourceLocation rl = item.asItem().getRegistryName();

@@ -86,7 +86,7 @@ public class TextureTile extends BaseTile
         {
             return;
         }
-        if (EffectiveSide.get() == LogicalSide.CLIENT)
+        if (EffectiveSide.get() == LogicalSide.SERVER)
         {
             String value = NBTUtil.writeBlockState(state).toString();
             textures.put(key, value);
@@ -119,6 +119,9 @@ public class TextureTile extends BaseTile
         }
     }
 
+    /**
+     * @since 2.3.0
+     */
     public Item getMark(String key)
     {
         return marks.getOrDefault(key, Items.AIR);

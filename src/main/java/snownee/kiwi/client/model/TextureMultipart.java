@@ -27,6 +27,12 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.data.IDynamicBakedModel;
 import net.minecraftforge.client.model.data.IModelData;
 
+/**
+ * 
+ * @since 2.3.0
+ * @author Snownee
+ *
+ */
 @OnlyIn(Dist.CLIENT)
 public class TextureMultipart implements IDynamicBakedModel
 {
