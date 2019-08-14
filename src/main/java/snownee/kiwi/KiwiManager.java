@@ -1,8 +1,10 @@
 package snownee.kiwi;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -12,6 +14,7 @@ import net.minecraft.item.crafting.IRecipeSerializer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.CrashReportExtender;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
@@ -22,13 +25,20 @@ import snownee.kiwi.crafting.TextureBlockRecipe;
 @EventBusSubscriber(modid = Kiwi.MODID, bus = Bus.MOD)
 public class KiwiManager
 {
-    public static final HashMap<ResourceLocation, ModuleInfo> MODULES = Maps.newHashMap();
-    public static final HashSet<ResourceLocation> ENABLED_MODULES = Sets.newHashSet();
+    public static final Map<ResourceLocation, ModuleInfo> MODULES = Maps.newHashMap();
+    public static final Set<ResourceLocation> ENABLED_MODULES = Sets.newHashSet();
     static Map<String, ItemGroup> GROUPS = Maps.newHashMap();
 
     public static IRecipeSerializer<?> shapedSerializer;
     public static IRecipeSerializer<?> shapelessSerializer;
     public static IRecipeSerializer<?> textureBlockSerializer;
+
+    static
+    {
+        CrashReportExtender.registerCrashCallable("Kiwi Modules", () -> {
+            return "\n" + ENABLED_MODULES.stream().map(ResourceLocation::toString).sorted(StringUtils::compare).collect(Collectors.joining("\n\t\t", "\t\t", ""));
+        });
+    }
 
     private KiwiManager()
     {
