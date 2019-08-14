@@ -2,13 +2,11 @@ package snownee.kiwi;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Collection;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
@@ -19,8 +17,11 @@ import org.objectweb.asm.Type;
 
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.utils.StringUtils;
+import com.google.common.base.Strings;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -40,6 +41,7 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.ModLoadingStage;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -50,7 +52,8 @@ import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.forgespi.language.ModFileScanData;
+import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
+import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import net.minecraftforge.forgespi.language.ModFileScanData.AnnotationData;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
@@ -63,6 +66,7 @@ import snownee.kiwi.crafting.ModuleLoadedCondition;
 import snownee.kiwi.util.Util;
 
 @Mod(Kiwi.MODID)
+@EventBusSubscriber
 public class Kiwi
 {
     public static final String MODID = "kiwi";
@@ -87,51 +91,50 @@ public class Kiwi
         }
     }
 
-    private static List<AnnotationData> moduleData;
+    private static Multimap<String, AnnotationData> moduleData = ArrayListMultimap.create();
     public static Map<ResourceLocation, Boolean> defaultOptions = Maps.newHashMap();
 
     public Kiwi()
     {
-        /* off */
         final Type KIWI_MODULE = Type.getType(KiwiModule.class);
         final Type OPTIONAL_MODULE = Type.getType(KiwiModule.Optional.class);
-        
-        List<AnnotationData> data = ModList.get().getAllScanData().stream()
-                .map(ModFileScanData::getAnnotations)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
-        
-        moduleData = data.stream()
-                .filter(a -> KIWI_MODULE.equals(a.getAnnotationType()))
-                .collect(Collectors.toList());
 
-        List<Type> moduleTypes = moduleData.stream()
-                .map(AnnotationData::getClassType)
-                .collect(Collectors.toList());
-        
         Map<Type, AnnotationData> moduleToOptional = Maps.newHashMap();
-        
-        data.stream()
-                .filter(a -> OPTIONAL_MODULE.equals(a.getAnnotationType()))
-                .filter(a -> moduleTypes.contains(a.getClassType()))
-                .forEach(a -> moduleToOptional.put(a.getClassType(), a));
-        /* on */
-
-        logger.info(MARKER, "Processing " + moduleTypes.size() + " KiwiModule annotations");
-
-        for (AnnotationData module : moduleData)
+        for (ModInfo info : ModList.get().getMods())
         {
-            AnnotationData optional = moduleToOptional.get(module.getClassType());
+            ModFileInfo modFileInfo = info.getOwningFile();
+            if (modFileInfo != null)
+            {
+                for (AnnotationData annotationData : modFileInfo.getFile().getScanResult().getAnnotations())
+                {
+                    if (KIWI_MODULE.equals(annotationData.getAnnotationType()))
+                    {
+                        String modid = (String) annotationData.getAnnotationData().get("modid");
+                        moduleData.put(Strings.isNullOrEmpty(modid) ? info.getModId() : modid, annotationData);
+                    }
+                    else if (OPTIONAL_MODULE.equals(annotationData.getAnnotationType()))
+                    {
+                        moduleToOptional.put(annotationData.getClassType(), annotationData);
+                    }
+                }
+            }
+        }
+
+        logger.info(MARKER, "Processing " + moduleData.size() + " KiwiModule annotations");
+
+        for (Entry<String, AnnotationData> entry : moduleData.entries())
+        {
+            AnnotationData optional = moduleToOptional.get(entry.getValue().getClassType());
             if (optional != null)
             {
-                String modid = module.getAnnotationData().get("modid").toString();
+                String modid = entry.getKey();
                 if (!ModList.get().isLoaded(modid))
                 {
                     continue;
                 }
 
-                String name = (String) module.getAnnotationData().get("name");
-                if (name == null || name.isEmpty())
+                String name = (String) entry.getValue().getAnnotationData().get("name");
+                if (Strings.isNullOrEmpty(name))
                 {
                     name = modid;
                 }
@@ -203,16 +206,17 @@ public class Kiwi
         .forEach(g -> KiwiManager.GROUPS.put(g.getPath(), g));
         /* on */
 
-        for (AnnotationData module : moduleData)
+        for (Entry<String, AnnotationData> entry : moduleData.entries())
         {
-            String modid = (String) module.getAnnotationData().get("modid");
+            AnnotationData module = entry.getValue();
+            String modid = entry.getKey();
             if (!ModList.get().isLoaded(modid))
             {
                 continue;
             }
 
             String name = (String) module.getAnnotationData().get("name");
-            if (name == null || name.isEmpty())
+            if (Strings.isNullOrEmpty(name))
             {
                 name = modid;
             }

@@ -124,7 +124,7 @@ public class TextureTile extends BaseTile
      */
     public Item getMark(String key)
     {
-        return marks.getOrDefault(key, Items.AIR);
+        return marks == null ? Items.AIR : marks.getOrDefault(key, Items.AIR);
     }
 
     @OnlyIn(Dist.CLIENT)

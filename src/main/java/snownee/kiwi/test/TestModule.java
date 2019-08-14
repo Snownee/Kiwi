@@ -1,8 +1,6 @@
 package snownee.kiwi.test;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.StairsBlock;
 import net.minecraft.block.material.Material;
 import net.minecraft.item.Item;
 import net.minecraft.item.Rarity;
@@ -12,19 +10,17 @@ import net.minecraft.potion.EffectType;
 import net.minecraft.potion.HealthBoostEffect;
 import net.minecraft.potion.Potion;
 import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.Direction;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import snownee.kiwi.AbstractModule;
-import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModule.Subscriber.Bus;
 import snownee.kiwi.client.model.TextureModel;
 import snownee.kiwi.item.ModBlockItem;
 
-@KiwiModule(modid = Kiwi.MODID, name = "test")
+@KiwiModule(name = "test")
 @KiwiModule.Optional(disabledByDefault = true)
 @KiwiModule.Group("building_blocks")
 @KiwiModule.Subscriber(Bus.MOD)
@@ -53,7 +49,6 @@ public class TestModule extends AbstractModule
     public void onModelBake(ModelBakeEvent event)
     {
         Block block = TestModule.FIRST_BLOCK;
-        BlockState state = block.getDefaultState().with(StairsBlock.FACING, Direction.EAST);
         TextureModel.register(event, block, null, "top");
         TextureModel.registerInventory(event, block, "top");
         ModBlockItem.INSTANT_UPDATE_TILES.add(FIRST_TILE);

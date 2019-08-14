@@ -15,7 +15,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 @Target(ElementType.TYPE)
 public @interface KiwiModule
 {
-    String modid();
+    String modid() default "";
 
     /**
      * Unique id of module. Same as modid if empty
