@@ -183,10 +183,14 @@ public class TextureTile extends BaseTile
                 {
                     marks = Maps.newHashMap();
                 }
-                Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(helper.getString(k)));
-                if (item != null)
+                ResourceLocation locator = ResourceLocation.tryCreate(helper.getString(k));
+                if (locator != null)
                 {
-                    marks.put(k, item);
+                    Item item = ForgeRegistries.ITEMS.getValue(locator);
+                    if (item != null)
+                    {
+                        marks.put(k, item);
+                    }
                 }
             }
         }
