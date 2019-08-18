@@ -5,7 +5,7 @@ Make modding no longer cumbersome.
 ## Registration
 
 ``` java
-@KiwiModule(modid = MyMod.MODID)
+@KiwiModule
 @KiwiModule.Group("building_blocks")
 public class MyModule extends AbstractModule
 {
@@ -21,7 +21,7 @@ public class MyModule extends AbstractModule
 
 ``` java
 // This module will be loaded only when `dependency` mod is loaded
-@KiwiModule(modid = MyAddon.MODID, name = "test", dependency = "dependency")
+@KiwiModule(name = "test", dependency = "modid")
 @KiwiModule.Optional
 public class MyAddon extends AbstractModule
 {
@@ -36,6 +36,5 @@ public class MyAddon extends AbstractModule
 
 ## How to start
 
-1. Copy Kiwi's AT configuration to your own project
-2. Add `accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')` to your `build.gradle`
-3. Follow the `Readme.txt` of MDK
+1. Add Kiwi to your build path
+2. Follow the `Readme.txt` of MDK
