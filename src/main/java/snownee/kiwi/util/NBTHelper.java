@@ -332,6 +332,27 @@ public class NBTHelper
         return null;
     }
 
+    public NBTHelper setDimPos(String key, DimBlockPos value)
+    {
+        getTagInternal(key).put(getLastNode(key), DimBlockPos.write(value));
+        return this;
+    }
+
+    @Nullable
+    public DimBlockPos getDimPos(String key)
+    {
+        CompoundNBT subTag = getTagInternal(key, false, true);
+        if (subTag != null)
+        {
+            String actualKey = getLastNode(key);
+            if (subTag.contains(actualKey, NBT.COMPOUND))
+            {
+                return DimBlockPos.read(getTag(actualKey));
+            }
+        }
+        return null;
+    }
+
     public NBTHelper setBlockState(String key, BlockState value)
     {
         return setTag(key, NBTUtil.writeBlockState(value));
