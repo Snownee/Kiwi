@@ -2,6 +2,8 @@
 
 Make modding no longer cumbersome.
 
+[中文指南](https://snownee.gitbook.io/kiwi/)
+
 ## Registration
 
 ``` java
