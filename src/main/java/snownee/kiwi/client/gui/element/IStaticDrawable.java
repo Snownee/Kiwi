@@ -24,30 +24,13 @@ THE SOFTWARE.
 
 package snownee.kiwi.client.gui.element;
 
-import mezz.jei.api.gui.drawable.IDrawableAnimated;
-import mezz.jei.api.helpers.IGuiHelper;
-import mezz.jei.api.recipe.category.IRecipeCategory;
-
 /**
- * Represents something to be drawn on screen.
- * Useful for drawing miscellaneous things in {@link IRecipeCategory#draw(Object, double, double)}.
- * {@link IGuiHelper} has many functions to create IDrawables.
- *
- * @see IDrawableAnimated
- * @see IStaticDrawable
+ * An extension of {@link IDrawable} that allows masking parts of the image.
  */
-public interface IDrawable
+public interface IStaticDrawable extends IDrawable
 {
-
-    int getWidth();
-
-    int getHeight();
-
-    default void draw()
-    {
-        draw(0, 0);
-    }
-
-    void draw(int xOffset, int yOffset);
-
+    /**
+     * Draw only part of the image, by masking off parts of it
+     */
+    void draw(int xOffset, int yOffset, int maskTop, int maskBottom, int maskLeft, int maskRight);
 }

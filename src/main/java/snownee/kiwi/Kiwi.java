@@ -230,7 +230,7 @@ public class Kiwi
             /* off */
             String dependencies = (String) module.getAnnotationData().get("dependencies");
             boolean shouldLoad = dependencies == null || StringUtils.split(dependencies, ';').stream()
-                    .filter(s -> !s.isEmpty())
+                    .filter(s -> !Strings.isNullOrEmpty(s))
                     .allMatch(s -> ModList.get().isLoaded(s));
             /* on */
 
