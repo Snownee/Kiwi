@@ -65,9 +65,9 @@ public class MathUtil
             int signX = MathHelper.signum(subX);
             int signY = MathHelper.signum(subY);
             int signZ = MathHelper.signum(subZ);
-            double d9 = signX == 0 ? Double.MAX_VALUE : (double) signX / subX;
-            double d10 = signY == 0 ? Double.MAX_VALUE : (double) signY / subY;
-            double d11 = signZ == 0 ? Double.MAX_VALUE : (double) signZ / subZ;
+            double d9 = signX == 0 ? Double.MAX_VALUE : signX / subX;
+            double d10 = signY == 0 ? Double.MAX_VALUE : signY / subY;
+            double d11 = signZ == 0 ? Double.MAX_VALUE : signZ / subZ;
             double d12 = d9 * (signX > 0 ? 1.0D - MathHelper.frac(sx) : MathHelper.frac(sx));
             double d13 = d10 * (signY > 0 ? 1.0D - MathHelper.frac(sy) : MathHelper.frac(sy));
             double d14 = d11 * (signZ > 0 ? 1.0D - MathHelper.frac(sz) : MathHelper.frac(sz));

@@ -46,6 +46,7 @@ public class TextureMultipart implements IDynamicBakedModel
         originalBaked = p_i48273_1_.iterator().next().getRight();
     }
 
+    @Override
     public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, Random rand, IModelData extraData)
     {
         if (state == null)
@@ -86,21 +87,25 @@ public class TextureMultipart implements IDynamicBakedModel
         }
     }
 
+    @Override
     public boolean isAmbientOcclusion()
     {
         return originalBaked.isAmbientOcclusion();
     }
 
+    @Override
     public boolean isGui3d()
     {
         return originalBaked.isGui3d();
     }
 
+    @Override
     public boolean isBuiltInRenderer()
     {
         return false;
     }
 
+    @Override
     @SuppressWarnings("deprecation")
     public TextureAtlasSprite getParticleTexture()
     {
@@ -113,12 +118,14 @@ public class TextureMultipart implements IDynamicBakedModel
         return originalBaked.getParticleTexture(data);
     }
 
+    @Override
     @SuppressWarnings("deprecation")
     public ItemCameraTransforms getItemCameraTransforms()
     {
         return originalBaked.getItemCameraTransforms();
     }
 
+    @Override
     public ItemOverrideList getOverrides()
     {
         return originalBaked.getOverrides();

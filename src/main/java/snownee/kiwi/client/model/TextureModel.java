@@ -116,6 +116,7 @@ public class TextureModel implements IDynamicBakedModel
         mesher.register(item.asItem(), modelRl);
     }
 
+    @Nullable
     private static TextureModel process(ModelBakeEvent event, ModelResourceLocation rl, boolean inventory, @Nullable String particleKey)
     {
         IUnbakedModel unbakedModel = ModelLoaderRegistry.getModelOrLogError(rl, "Kiwi failed to replace block model " + rl);
@@ -155,6 +156,7 @@ public class TextureModel implements IDynamicBakedModel
         return textureModel;
     }
 
+    @Nullable
     private static TextureModel putModel(ModelBakeEvent event, VariantList variantList, IBakedModel baked, boolean inventory, String particleKey)
     {
         TextureModel textureModel = null;

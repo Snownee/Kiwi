@@ -2,6 +2,8 @@ package snownee.kiwi.crafting;
 
 import java.util.function.Predicate;
 
+import javax.annotation.Nullable;
+
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.ICraftingRecipe;
@@ -37,6 +39,7 @@ public abstract class DynamicShapedRecipe implements ICraftingRecipe, IShapedRec
         return getMatchPos(inv) != null;
     }
 
+    @Nullable
     public int[] getMatchPos(CraftingInventory inv)
     {
         for (int x = 0; x <= inv.getWidth() - getRecipeWidth(); ++x)
