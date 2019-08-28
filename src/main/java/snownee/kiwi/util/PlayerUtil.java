@@ -28,6 +28,7 @@ public final class PlayerUtil
     {
     }
 
+    @Nullable
     public static BlockPos tryPlace(World world, BlockPos pos, Direction side, @Nullable PlayerEntity player, Hand hand, BlockState state, @Nullable ItemStack stack, boolean playSound, boolean skipCollisionCheck)
     {
         BlockState worldState = world.getBlockState(pos);

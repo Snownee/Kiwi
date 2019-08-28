@@ -55,6 +55,7 @@ public class NBTHelper
         this.tag = tag;
     }
 
+    @Nullable
     public CompoundNBT getTag(String key)
     {
         return getTag(key, false);
