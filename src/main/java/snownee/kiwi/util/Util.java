@@ -3,6 +3,8 @@ package snownee.kiwi.util;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
 
+import javax.annotation.Nullable;
+
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -56,13 +58,26 @@ public class Util
         }
     }
 
+    @Nullable
+    public static ResourceLocation RL(@Nullable String string)
+    {
+        try
+        {
+            return ResourceLocation.tryCreate(string);
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
+    }
+
     public static String getTextureItem(ItemStack stack, String mark)
     {
         NBTHelper data = NBTHelper.of(stack);
-        String rl = data.getString("BlockEntityTag.Items." + mark);
-        if (rl != null && ResourceLocation.func_217855_b(rl))
+        ResourceLocation rl = RL(data.getString("BlockEntityTag.Items." + mark));
+        if (rl != null)
         {
-            Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(rl));
+            Item item = ForgeRegistries.ITEMS.getValue(rl);
             if (item != null)
             {
                 return item.getTranslationKey();
