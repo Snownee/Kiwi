@@ -8,7 +8,15 @@ import com.google.common.collect.Maps;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.entity.EntityType;
+import net.minecraft.fluid.Fluid;
 import net.minecraft.item.Item;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.Tag;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
@@ -25,6 +33,7 @@ import snownee.kiwi.block.ModBlock;
  */
 public abstract class AbstractModule
 {
+    protected ResourceLocation uid;
     private static final BiConsumer<ModuleInfo, IForgeRegistryEntry<?>> ITEM_DECORATOR = (module, entry) -> {
         Item item = (Item) entry;
         if (module.group != null && item.group == null && !module.noGroups.contains(item))
@@ -84,5 +93,25 @@ public abstract class AbstractModule
     protected static <T extends Block> T init(T block)
     {
         return ModBlock.deduceSoundAndHardness(block);
+    }
+
+    protected Tag<Item> itemTag(String id)
+    {
+        return new ItemTags.Wrapper(new ResourceLocation(uid.getNamespace(), id));
+    }
+
+    protected Tag<EntityType<?>> entityTag(String id)
+    {
+        return new EntityTypeTags.Wrapper(new ResourceLocation(uid.getNamespace(), id));
+    }
+
+    protected Tag<Block> blockTag(String id)
+    {
+        return new BlockTags.Wrapper(new ResourceLocation(uid.getNamespace(), id));
+    }
+
+    protected Tag<Fluid> fluidTag(String id)
+    {
+        return new FluidTags.Wrapper(new ResourceLocation(uid.getNamespace(), id));
     }
 }

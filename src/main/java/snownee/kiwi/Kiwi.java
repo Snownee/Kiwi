@@ -74,8 +74,7 @@ public class Kiwi
 
     public static Logger logger = LogManager.getLogger(Kiwi.NAME);
     static final Marker MARKER = MarkerManager.getMarker("Init");
-
-    public static Field FIELD_EXTENSION;
+    static Field FIELD_EXTENSION;
 
     static
     {
@@ -290,7 +289,7 @@ public class Kiwi
                         useOwnGroup = false;
                         if (!org.apache.commons.lang3.StringUtils.contains(val, ':') && !KiwiManager.GROUPS.containsKey(val))
                         {
-                            val = info.rl.getNamespace() + ":" + val;
+                            val = info.module.uid.getNamespace() + ":" + val;
                         }
                         ItemGroup itemGroup = KiwiManager.GROUPS.get(val);
                         if (itemGroup != null)
@@ -301,8 +300,8 @@ public class Kiwi
                 }
             }
 
-            String modid = info.rl.getNamespace();
-            String name = info.rl.getPath();
+            String modid = info.module.uid.getNamespace();
+            String name = info.module.uid.getPath();
 
             Item.Properties tmpBuilder = null;
             Field tmpBuilderField = null;

@@ -25,7 +25,6 @@ import snownee.kiwi.item.ModBlockItem;
 
 public class ModuleInfo
 {
-    public final ResourceLocation rl;
     public final AbstractModule module;
     public final ModContext context;
     public ItemGroup group;
@@ -36,9 +35,9 @@ public class ModuleInfo
 
     public ModuleInfo(ResourceLocation rl, AbstractModule module, ModContext context)
     {
-        this.rl = rl;
         this.module = module;
         this.context = context;
+        module.uid = rl;
     }
 
     public void register(IForgeRegistryEntry<?> entry, String name)
