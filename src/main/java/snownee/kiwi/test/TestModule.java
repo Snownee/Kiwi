@@ -14,18 +14,19 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModule.Subscriber.Bus;
 import snownee.kiwi.client.model.TextureModel;
 import snownee.kiwi.item.ModBlockItem;
+import snownee.kiwi.schedule.Scheduler;
 
 @KiwiModule(name = "test")
 @KiwiModule.Optional(disabledByDefault = true)
 @KiwiModule.Group("building_blocks")
 @KiwiModule.Subscriber(Bus.MOD)
-public class TestModule extends AbstractModule
-{
+public class TestModule extends AbstractModule {
     // Keep your fields `public static final`
 
     // Register a simple item
@@ -46,11 +47,15 @@ public class TestModule extends AbstractModule
 
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
-    public void onModelBake(ModelBakeEvent event)
-    {
+    public void onModelBake(ModelBakeEvent event) {
         Block block = TestModule.FIRST_BLOCK;
         TextureModel.register(event, block, null, "top");
         TextureModel.registerInventory(event, block, "top");
         ModBlockItem.INSTANT_UPDATE_TILES.add(FIRST_TILE);
+    }
+
+    @Override
+    protected void serverInit(FMLServerStartingEvent event) {
+        Scheduler.register(TestWorldTask.ID, TestWorldTask.class);
     }
 }

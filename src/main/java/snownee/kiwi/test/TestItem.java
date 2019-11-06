@@ -91,10 +91,11 @@ public class TestItem extends ModItem {
         //        {
         //            data.remove("pos");
         //        }
-        posList = Lists.newLinkedList();
+        List<BlockPos> list = Lists.newLinkedList();
         start = playerIn.getEyePosition(1);
         end = start.add(playerIn.getLookVec().scale(15));
-        MathUtil.posOnLine(start, end, posList);
+        MathUtil.posOnLine(start, end, list);
+        posList = list;
 
         return new ActionResult<>(ActionResultType.SUCCESS, stack);
     }

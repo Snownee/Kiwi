@@ -1,4 +1,4 @@
-package snownee.kiwi.schedule;
+package snownee.kiwi.schedule.impl;
 
 import com.google.common.base.Function;
 
@@ -9,6 +9,7 @@ import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
+import snownee.kiwi.schedule.Task;
 import snownee.kiwi.util.Util;
 
 public class SimpleWorldTask extends Task<WorldTicker> implements INBTSerializable<CompoundNBT> {

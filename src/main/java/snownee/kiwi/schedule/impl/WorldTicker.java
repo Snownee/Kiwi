@@ -1,4 +1,4 @@
-package snownee.kiwi.schedule;
+package snownee.kiwi.schedule.impl;
 
 import java.util.Map;
 
@@ -12,12 +12,12 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import snownee.kiwi.schedule.ITicker;
+import snownee.kiwi.schedule.Scheduler;
 import snownee.kiwi.util.MutablePair;
 
 public class WorldTicker implements ITicker {
     private static final Map<DimensionType, MutablePair<WorldTicker>> tickers = Maps.newHashMap();
-    @Nullable
-    private World world;
 
     public static WorldTicker get(World world, TickEvent.Phase phase) {
         return get(world.dimension.getType(), phase);
@@ -31,7 +31,7 @@ public class WorldTicker implements ITicker {
         }
         WorldTicker ticker = pair.get(phase.ordinal());
         if (ticker == null) {
-            ticker = new WorldTicker();
+            ticker = new WorldTicker(dimensionType);
             pair.set(phase.ordinal(), ticker);
         }
         return ticker;
@@ -62,14 +62,20 @@ public class WorldTicker implements ITicker {
             return;
         }
         if (pair.left != null) {
-            pair.left.destroy();
+            pair.left.world = null;
         }
         if (pair.right != null) {
-            pair.right.destroy();
+            pair.right.world = null;
         }
     }
 
-    private WorldTicker() {}
+    @Nullable
+    private World world;
+    private final DimensionType dimensionType;
+
+    private WorldTicker(DimensionType dimensionType) {
+        this.dimensionType = dimensionType;
+    }
 
     @Nullable
     public World getWorld() {
@@ -78,6 +84,15 @@ public class WorldTicker implements ITicker {
 
     @Override
     public void destroy() {
+        MutablePair<WorldTicker> pair = tickers.get(dimensionType);
+        if (pair != null) {
+            if (pair.left == this) {
+                pair.left = null;
+            }
+            if (pair.right == this) {
+                pair.left = null;
+            }
+        }
         world = null;
     }
 }
