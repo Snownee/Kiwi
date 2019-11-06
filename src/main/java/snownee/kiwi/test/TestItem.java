@@ -26,21 +26,21 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import snownee.kiwi.client.RenderUtil;
 //import snownee.kiwi.client.AdvancedFontRenderer;
 import snownee.kiwi.item.ModItem;
+import snownee.kiwi.schedule.Scheduler;
 import snownee.kiwi.util.MathUtil;
 
 // Your class don't have to extends ModItem or ModBlock to be registered
-public class TestItem extends ModItem
-{
-    public static List<BlockPos> posList = Lists.newLinkedList();
+public class TestItem extends ModItem {
+    public static List<BlockPos> posList;
     public static Vec3d start;
     public static Vec3d end;
 
-    public TestItem(Item.Properties builder)
-    {
+    public TestItem(Item.Properties builder) {
         super(builder);
         MinecraftForge.EVENT_BUS.register(this);
     }
@@ -52,9 +52,11 @@ public class TestItem extends ModItem
     //    }
 
     @Override
-    public ActionResultType onItemUse(ItemUseContext context)
-    {
-        return ActionResultType.PASS;
+    public ActionResultType onItemUse(ItemUseContext context) {
+        if (!context.getWorld().isRemote) {
+            Scheduler.add(new TestWorldTask(context.getWorld(), Phase.END));
+        }
+        return ActionResultType.SUCCESS;
         //        World world = context.getWorld();
         //        Hand hand = context.getHand();
         //        PlayerEntity player = context.getPlayer();
@@ -66,8 +68,7 @@ public class TestItem extends ModItem
     }
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn)
-    {
+    public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn) {
         //        if (worldIn.isRemote)
         //        {
         //            Vec3d start = playerIn.getEyePosition(1).add(playerIn.getLookVec().scale(3));
@@ -90,7 +91,7 @@ public class TestItem extends ModItem
         //        {
         //            data.remove("pos");
         //        }
-        posList.clear();
+        posList = Lists.newLinkedList();
         start = playerIn.getEyePosition(1);
         end = start.add(playerIn.getLookVec().scale(15));
         MathUtil.posOnLine(start, end, posList);
@@ -100,14 +101,12 @@ public class TestItem extends ModItem
 
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
-    public void render(RenderWorldLastEvent event)
-    {
+    public void render(RenderWorldLastEvent event) {
         Screen.fill(0, 0, 20, 20, 20);
         Minecraft mc = Minecraft.getInstance();
         PlayerEntity player = mc.player;
         ItemStack stack = player.getHeldItemMainhand();
-        if (stack.getItem() != TestModule.FIRST_ITEM)
-        {
+        if (posList == null || stack.getItem() != TestModule.FIRST_ITEM) {
             return;
         }
 
@@ -119,16 +118,13 @@ public class TestItem extends ModItem
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
         buffer.begin(3, DefaultVertexFormats.POSITION_COLOR);
-        if (start != null)
-        {
+        if (start != null) {
             buffer.pos(start.x, start.y, start.z).color(0.5f, 0, 0, 0.5f).endVertex();
         }
-        if (end != null)
-        {
+        if (end != null) {
             buffer.pos(end.x, end.y, end.z).color(0.5f, 0, 0, 0.5f).endVertex();
         }
-        for (BlockPos pos : posList)
-        {
+        for (BlockPos pos : posList) {
             AxisAlignedBB box = new AxisAlignedBB(pos);
             WorldRenderer.drawBoundingBox(buffer, box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, 0, 0, 0.5f, 0.5f);
         }

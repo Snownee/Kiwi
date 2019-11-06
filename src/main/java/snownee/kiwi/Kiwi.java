@@ -30,6 +30,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.event.RegistryEvent;
@@ -63,6 +64,7 @@ import snownee.kiwi.KiwiModule.Subscriber;
 import snownee.kiwi.KiwiModule.Subscriber.Bus;
 import snownee.kiwi.crafting.FullBlockIngredient;
 import snownee.kiwi.crafting.ModuleLoadedCondition;
+import snownee.kiwi.schedule.Scheduler;
 import snownee.kiwi.util.Util;
 
 @Mod(Kiwi.MODID)
@@ -467,6 +469,7 @@ public class Kiwi
         }
 
         KiwiManager.MODULES.values().forEach(m -> m.serverInit(event));
+        event.getServer().getWorld(DimensionType.OVERWORLD).getSavedData().getOrCreate(() -> Scheduler.INSTANCE, Scheduler.ID);
         ModLoadingContext.get().setActiveContainer(null, null);
     }
 
