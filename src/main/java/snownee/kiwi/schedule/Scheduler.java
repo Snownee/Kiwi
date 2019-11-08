@@ -11,6 +11,8 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.storage.WorldSavedData;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.INBTSerializable;
@@ -132,6 +134,7 @@ public final class Scheduler extends WorldSavedData {
         taskMap.clear();
     }
 
+    @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public static void clientLoggedOut(ClientPlayerNetworkEvent.LoggedOutEvent event) {
         clear();

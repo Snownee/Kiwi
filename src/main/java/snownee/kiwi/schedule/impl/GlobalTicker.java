@@ -3,8 +3,8 @@ package snownee.kiwi.schedule.impl;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
-import net.minecraftforge.event.TickEvent.Type;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.LogicalSide;
 import snownee.kiwi.schedule.ITicker;
 import snownee.kiwi.schedule.Scheduler;
 
@@ -25,7 +25,7 @@ public enum GlobalTicker implements ITicker {
         Scheduler.tick(event.phase == Phase.START ? PRE_CLIENT : POST_CLIENT);
     }
 
-    public static GlobalTicker get(TickEvent.Type side, TickEvent.Phase phase) {
-        return side == Type.SERVER ? (phase == Phase.START ? PRE_SERVER : POST_SERVER) : (phase == Phase.START ? PRE_CLIENT : POST_CLIENT);
+    public static GlobalTicker get(LogicalSide side, Phase phase) {
+        return side == LogicalSide.SERVER ? (phase == Phase.START ? PRE_SERVER : POST_SERVER) : (phase == Phase.START ? PRE_CLIENT : POST_CLIENT);
     }
 }

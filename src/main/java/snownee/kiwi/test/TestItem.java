@@ -28,6 +28,7 @@ import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.DistExecutor;
 import snownee.kiwi.client.RenderUtil;
 //import snownee.kiwi.client.AdvancedFontRenderer;
 import snownee.kiwi.item.ModItem;
@@ -42,7 +43,7 @@ public class TestItem extends ModItem {
 
     public TestItem(Item.Properties builder) {
         super(builder);
-        MinecraftForge.EVENT_BUS.register(this);
+        DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> MinecraftForge.EVENT_BUS.register(this));
     }
 
     //    @Override
@@ -100,8 +101,8 @@ public class TestItem extends ModItem {
         return new ActionResult<>(ActionResultType.SUCCESS, stack);
     }
 
-    @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
+    @OnlyIn(Dist.CLIENT)
     public void render(RenderWorldLastEvent event) {
         Screen.fill(0, 0, 20, 20, 20);
         Minecraft mc = Minecraft.getInstance();

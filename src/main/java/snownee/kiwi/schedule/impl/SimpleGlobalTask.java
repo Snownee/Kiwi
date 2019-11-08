@@ -5,19 +5,19 @@ import com.google.common.base.Function;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.event.TickEvent.Phase;
-import net.minecraftforge.event.TickEvent.Type;
+import net.minecraftforge.fml.LogicalSide;
 import snownee.kiwi.schedule.Task;
 
 public class SimpleGlobalTask extends Task<GlobalTicker> implements INBTSerializable<CompoundNBT> {
 
     protected int tick = 0;
-    protected Type side;
+    protected LogicalSide side;
     protected Phase phase;
     protected Function<Integer, Boolean> function;
 
     public SimpleGlobalTask() {}
 
-    public SimpleGlobalTask(Type side, Phase phase, Function<Integer, Boolean> function) {
+    public SimpleGlobalTask(LogicalSide side, Phase phase, Function<Integer, Boolean> function) {
         this.side = side;
         this.phase = phase;
         this.function = function;
@@ -42,7 +42,7 @@ public class SimpleGlobalTask extends Task<GlobalTicker> implements INBTSerializ
     public CompoundNBT serializeNBT() {
         CompoundNBT data = new CompoundNBT();
         data.putInt("tick", tick);
-        data.putBoolean("server", side == Type.SERVER);
+        data.putBoolean("client", side == LogicalSide.CLIENT);
         data.putBoolean("start", phase == Phase.START);
         return data;
     }
@@ -50,7 +50,7 @@ public class SimpleGlobalTask extends Task<GlobalTicker> implements INBTSerializ
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
         tick = nbt.getInt("tick");
-        side = nbt.getBoolean("server") ? Type.SERVER : Type.CLIENT;
+        side = nbt.getBoolean("client") ? LogicalSide.CLIENT : LogicalSide.SERVER;
         phase = nbt.getBoolean("start") ? Phase.START : Phase.END;
     }
 

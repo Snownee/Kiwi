@@ -31,8 +31,7 @@ import snownee.kiwi.block.ModBlock;
  * @author Snownee
  *
  */
-public abstract class AbstractModule
-{
+public abstract class AbstractModule {
     protected ResourceLocation uid;
     private static final BiConsumer<ModuleInfo, IForgeRegistryEntry<?>> ITEM_DECORATOR = (module, entry) -> {
         Item item = (Item) entry;
@@ -44,8 +43,7 @@ public abstract class AbstractModule
 
     protected final Map<Class, BiConsumer<ModuleInfo, IForgeRegistryEntry<?>>> decorators = Maps.newHashMap(DEFAULT_DECORATORS);
 
-    protected void preInit()
-    {
+    protected void preInit() {
         // NO-OP
     }
 
@@ -53,65 +51,53 @@ public abstract class AbstractModule
      * @author Snownee
      * @param event Note: this event's ModContainer is from Kiwi
      */
-    protected void init(FMLCommonSetupEvent event)
-    {
+    protected void init(FMLCommonSetupEvent event) {
         // NO-OP
     }
 
-    protected void clientInit(FMLClientSetupEvent event)
-    {
+    protected void clientInit(FMLClientSetupEvent event) {
         // NO-OP
     }
 
     @Deprecated
-    protected void serverInit(FMLDedicatedServerSetupEvent event)
-    {
+    protected void serverInit(FMLDedicatedServerSetupEvent event) {
         // NO-OP
     }
 
-    protected void serverInit(FMLServerStartingEvent event)
-    {
+    protected void serverInit(FMLServerStartingEvent event) {
         // NO-OP
     }
 
-    protected void postInit()
-    {
+    protected void postInit() {
         // NO-OP
     }
 
     /// helper methods:
-    protected static Item.Properties itemProp()
-    {
+    protected static Item.Properties itemProp() {
         return new Item.Properties();
     }
 
-    protected static Block.Properties blockProp(Material material)
-    {
+    protected static Block.Properties blockProp(Material material) {
         return Block.Properties.create(material);
     }
 
-    protected static <T extends Block> T init(T block)
-    {
+    protected static <T extends Block> T init(T block) {
         return ModBlock.deduceSoundAndHardness(block);
     }
 
-    protected Tag<Item> itemTag(String id)
-    {
-        return new ItemTags.Wrapper(new ResourceLocation(uid.getNamespace(), id));
+    public static Tag<Item> itemTag(String namespace, String path) {
+        return new ItemTags.Wrapper(new ResourceLocation(namespace, path));
     }
 
-    protected Tag<EntityType<?>> entityTag(String id)
-    {
-        return new EntityTypeTags.Wrapper(new ResourceLocation(uid.getNamespace(), id));
+    public static Tag<EntityType<?>> entityTag(String namespace, String path) {
+        return new EntityTypeTags.Wrapper(new ResourceLocation(namespace, path));
     }
 
-    protected Tag<Block> blockTag(String id)
-    {
-        return new BlockTags.Wrapper(new ResourceLocation(uid.getNamespace(), id));
+    public static Tag<Block> blockTag(String namespace, String path) {
+        return new BlockTags.Wrapper(new ResourceLocation(namespace, path));
     }
 
-    protected Tag<Fluid> fluidTag(String id)
-    {
-        return new FluidTags.Wrapper(new ResourceLocation(uid.getNamespace(), id));
+    public static Tag<Fluid> fluidTag(String namespace, String path) {
+        return new FluidTags.Wrapper(new ResourceLocation(namespace, path));
     }
 }
