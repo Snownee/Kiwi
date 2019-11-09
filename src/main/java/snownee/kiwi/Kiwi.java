@@ -3,10 +3,12 @@ package snownee.kiwi;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
@@ -20,8 +22,11 @@ import com.electronwill.nightconfig.core.utils.StringUtils;
 import com.google.common.base.Strings;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import com.google.common.graph.GraphBuilder;
+import com.google.common.graph.MutableGraph;
 
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -55,6 +60,7 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
+import net.minecraftforge.fml.loading.toposort.TopologicalSort;
 import net.minecraftforge.forgespi.language.ModFileScanData.AnnotationData;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
@@ -69,8 +75,7 @@ import snownee.kiwi.util.Util;
 
 @Mod(Kiwi.MODID)
 @EventBusSubscriber
-public class Kiwi
-{
+public class Kiwi {
     public static final String MODID = "kiwi";
     public static final String NAME = "Kiwi";
 
@@ -78,15 +83,22 @@ public class Kiwi
     static final Marker MARKER = MarkerManager.getMarker("Init");
     static Field FIELD_EXTENSION;
 
-    static
-    {
-        try
-        {
+    private static final class Info {
+        final ResourceLocation id;
+        final String className;
+        final List<ResourceLocation> moduleRules = Lists.newLinkedList();
+
+        public Info(ResourceLocation id, String className) {
+            this.id = id;
+            this.className = className;
+        }
+    }
+
+    static {
+        try {
             FIELD_EXTENSION = ModContainer.class.getDeclaredField("contextExtension");
             FIELD_EXTENSION.setAccessible(true);
-        }
-        catch (NoSuchFieldException | SecurityException e)
-        {
+        } catch (NoSuchFieldException | SecurityException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -95,26 +107,19 @@ public class Kiwi
     private static Multimap<String, AnnotationData> moduleData = ArrayListMultimap.create();
     public static Map<ResourceLocation, Boolean> defaultOptions = Maps.newHashMap();
 
-    public Kiwi()
-    {
+    public Kiwi() {
         final Type KIWI_MODULE = Type.getType(KiwiModule.class);
         final Type OPTIONAL_MODULE = Type.getType(KiwiModule.Optional.class);
 
         Map<Type, AnnotationData> moduleToOptional = Maps.newHashMap();
-        for (ModInfo info : ModList.get().getMods())
-        {
+        for (ModInfo info : ModList.get().getMods()) {
             ModFileInfo modFileInfo = info.getOwningFile();
-            if (modFileInfo != null)
-            {
-                for (AnnotationData annotationData : modFileInfo.getFile().getScanResult().getAnnotations())
-                {
-                    if (KIWI_MODULE.equals(annotationData.getAnnotationType()))
-                    {
+            if (modFileInfo != null) {
+                for (AnnotationData annotationData : modFileInfo.getFile().getScanResult().getAnnotations()) {
+                    if (KIWI_MODULE.equals(annotationData.getAnnotationType())) {
                         String modid = (String) annotationData.getAnnotationData().get("modid");
                         moduleData.put(Strings.isNullOrEmpty(modid) ? info.getModId() : modid, annotationData);
-                    }
-                    else if (OPTIONAL_MODULE.equals(annotationData.getAnnotationType()))
-                    {
+                    } else if (OPTIONAL_MODULE.equals(annotationData.getAnnotationType())) {
                         moduleToOptional.put(annotationData.getClassType(), annotationData);
                     }
                 }
@@ -123,26 +128,21 @@ public class Kiwi
 
         logger.info(MARKER, "Processing " + moduleData.size() + " KiwiModule annotations");
 
-        for (Entry<String, AnnotationData> entry : moduleData.entries())
-        {
+        for (Entry<String, AnnotationData> entry : moduleData.entries()) {
             AnnotationData optional = moduleToOptional.get(entry.getValue().getClassType());
-            if (optional != null)
-            {
+            if (optional != null) {
                 String modid = entry.getKey();
-                if (!ModList.get().isLoaded(modid))
-                {
+                if (!ModList.get().isLoaded(modid)) {
                     continue;
                 }
 
                 String name = (String) entry.getValue().getAnnotationData().get("name");
-                if (Strings.isNullOrEmpty(name))
-                {
+                if (Strings.isNullOrEmpty(name)) {
                     name = modid;
                 }
 
                 Boolean disabledByDefault = (Boolean) optional.getAnnotationData().get("disabledByDefault");
-                if (disabledByDefault == null)
-                {
+                if (disabledByDefault == null) {
                     disabledByDefault = Boolean.FALSE;
                 }
                 defaultOptions.put(new ResourceLocation(modid, name), disabledByDefault);
@@ -160,10 +160,8 @@ public class Kiwi
         modEventBus.addListener(this::loadComplete);
     }
 
-    public void preInit(RegistryEvent.NewRegistry event)
-    {
-        try
-        {
+    public void preInit(RegistryEvent.NewRegistry event) {
+        try {
             ModContainer myContainer = ModLoadingContext.get().getActiveContainer();
             Field fMap = ModContainer.class.getDeclaredField("configs");
             fMap.setAccessible(true);
@@ -184,9 +182,7 @@ public class Kiwi
                 KiwiManager.handleRegister((RegistryEvent.Register<?>) e.getOrBuildEvent(myContainer));
             });
             triggerMap.put(ModLoadingStage.LOAD_REGISTRIES, consumer);
-        }
-        catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e)
-        {
+        } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
             logger.error(MARKER, "Kiwi failed to load infrastructures. Please report to developer!");
             logger.catching(e);
             return;
@@ -203,55 +199,75 @@ public class Kiwi
                 ItemGroup.TOOLS,
                 ItemGroup.COMBAT,
                 ItemGroup.BREWING
-                )
+        )
         .forEach(g -> KiwiManager.GROUPS.put(g.getPath(), g));
         /* on */
 
-        for (Entry<String, AnnotationData> entry : moduleData.entries())
-        {
+        final Map<ResourceLocation, Info> infos = Maps.newHashMap();
+        boolean checkDep = false;
+
+        load:
+        for (Entry<String, AnnotationData> entry : moduleData.entries()) {
             AnnotationData module = entry.getValue();
             String modid = entry.getKey();
-            if (!ModList.get().isLoaded(modid))
-            {
+            if (!ModList.get().isLoaded(modid)) {
                 continue;
             }
 
             String name = (String) module.getAnnotationData().get("name");
-            if (Strings.isNullOrEmpty(name))
-            {
+            if (Strings.isNullOrEmpty(name)) {
                 name = modid;
             }
 
             ResourceLocation rl = new ResourceLocation(modid, name);
-            if (KiwiConfig.modules.containsKey(rl) && !KiwiConfig.modules.get(rl).get())
-            {
+            if (KiwiConfig.modules.containsKey(rl) && !KiwiConfig.modules.get(rl).get()) {
                 continue;
             }
 
-            /* off */
+            Info info = new Info(rl, module.getClassType().getClassName());
+
             String dependencies = (String) module.getAnnotationData().get("dependencies");
-            boolean shouldLoad = dependencies == null || StringUtils.split(dependencies, ';').stream()
+            /* off */
+            List<String> rules = StringUtils.split(Strings.nullToEmpty(dependencies), ';').stream()
                     .filter(s -> !Strings.isNullOrEmpty(s))
-                    .allMatch(s -> ModList.get().isLoaded(s));
+                    .collect(Collectors.toList());
             /* on */
 
-            if (!shouldLoad)
-            {
-                continue;
+            for (String rule : rules) {
+                if (rule.startsWith("@")) {
+                    info.moduleRules.add(Util.RL(rule.substring(1), modid));
+                    checkDep = true;
+                } else if (!ModList.get().isLoaded(rule)) {
+                    continue load;
+                }
             }
+            infos.put(rl, info);
+        }
 
-            ModContext context = new ModContext(modid);
+        List<ResourceLocation> list = null;
+        if (checkDep) {
+            infos.values().removeIf(i -> !i.moduleRules.stream().allMatch(infos::containsKey));
+            MutableGraph<ResourceLocation> graph = GraphBuilder.directed().allowsSelfLoops(false).expectedNodeCount(infos.size()).build();
+            infos.keySet().forEach(graph::addNode);
+            infos.values().forEach($ -> {
+                $.moduleRules.forEach(r -> graph.putEdge(r, $.id));
+            });
+            list = TopologicalSort.topologicalSort(graph, null);
+        } else {
+            list = ImmutableList.copyOf(infos.keySet());
+        }
+
+        for (ResourceLocation id : list) {
+            Info info = infos.get(id);
+            ModContext context = new ModContext(id.getNamespace());
             context.setActiveContainer();
 
-            try
-            {
-                Class<?> clazz = Class.forName(module.getClassType().getClassName());
+            try {
+                Class<?> clazz = Class.forName(info.className);
                 AbstractModule instance = (AbstractModule) clazz.newInstance();
-                KiwiManager.addInstance(new ResourceLocation(modid, name), instance, context);
-            }
-            catch (InstantiationException | IllegalAccessException | ClassCastException | ClassNotFoundException e)
-            {
-                logger.error(MARKER, "Kiwi failed to initialize module class: {}", module.getClassType().getClassName());
+                KiwiManager.addInstance(id, instance, context);
+            } catch (InstantiationException | IllegalAccessException | ClassCastException | ClassNotFoundException e) {
+                logger.error(MARKER, "Kiwi failed to initialize module class: {}", info.className);
                 logger.catching(e);
                 continue;
             }
@@ -266,36 +282,28 @@ public class Kiwi
 
         Util.class.hashCode();
         Object2IntMap<Class<?>> counter = new Object2IntArrayMap<>();
-        for (ModuleInfo info : KiwiManager.MODULES.values())
-        {
+        for (ModuleInfo info : KiwiManager.MODULES.values()) {
             counter.clear();
             info.context.setActiveContainer();
             Subscriber subscriber = info.module.getClass().getAnnotation(Subscriber.class);
-            if (subscriber != null && ArrayUtils.contains(subscriber.side(), FMLEnvironment.dist))
-            {
-                for (Bus bus : subscriber.value())
-                {
+            if (subscriber != null && ArrayUtils.contains(subscriber.side(), FMLEnvironment.dist)) {
+                for (Bus bus : subscriber.value()) {
                     bus.bus().get().register(info.module);
                 }
             }
 
             boolean useOwnGroup = info.group == null;
-            if (useOwnGroup)
-            {
+            if (useOwnGroup) {
                 Group group = info.module.getClass().getAnnotation(Group.class);
-                if (group != null)
-                {
+                if (group != null) {
                     String val = group.value();
-                    if (!val.isEmpty())
-                    {
+                    if (!val.isEmpty()) {
                         useOwnGroup = false;
-                        if (!org.apache.commons.lang3.StringUtils.contains(val, ':') && !KiwiManager.GROUPS.containsKey(val))
-                        {
+                        if (!org.apache.commons.lang3.StringUtils.contains(val, ':') && !KiwiManager.GROUPS.containsKey(val)) {
                             val = info.module.uid.getNamespace() + ":" + val;
                         }
                         ItemGroup itemGroup = KiwiManager.GROUPS.get(val);
-                        if (itemGroup != null)
-                        {
+                        if (itemGroup != null) {
                             info.group = itemGroup;
                         }
                     }
@@ -307,85 +315,62 @@ public class Kiwi
 
             Item.Properties tmpBuilder = null;
             Field tmpBuilderField = null;
-            for (Field field : info.module.getClass().getFields())
-            {
+            for (Field field : info.module.getClass().getFields()) {
                 int mods = field.getModifiers();
-                if (!Modifier.isPublic(mods) || !Modifier.isStatic(mods) || !Modifier.isFinal(mods))
-                {
+                if (!Modifier.isPublic(mods) || !Modifier.isStatic(mods) || !Modifier.isFinal(mods)) {
                     continue;
                 }
 
-                if (field.getAnnotation(Skip.class) != null)
-                {
+                if (field.getAnnotation(Skip.class) != null) {
                     continue;
                 }
 
                 String regName;
                 Name nameAnnotation = field.getAnnotation(Name.class);
-                if (nameAnnotation != null)
-                {
+                if (nameAnnotation != null) {
                     regName = nameAnnotation.value();
-                }
-                else
-                {
+                } else {
                     regName = field.getName().toLowerCase(Locale.US);
                 }
                 Object o = null;
-                try
-                {
+                try {
                     o = field.get(null);
-                }
-                catch (IllegalArgumentException | IllegalAccessException e)
-                {
+                } catch (IllegalArgumentException | IllegalAccessException e) {
                     logger.error(MARKER, "Kiwi failed to catch game object: {}", field);
                     logger.catching(e);
                 }
-                if (o == null)
-                {
+                if (o == null) {
                     continue;
                 }
-                if (useOwnGroup && info.group == null && o instanceof ItemGroup)
-                {
+                if (useOwnGroup && info.group == null && o instanceof ItemGroup) {
                     info.group = (ItemGroup) o;
-                }
-                else if (o instanceof Item.Properties)
-                {
+                } else if (o instanceof Item.Properties) {
                     tmpBuilder = (Item.Properties) o;
                     tmpBuilderField = field;
                     continue;
-                }
-                else if (o instanceof Block)
-                {
-                    if (field.getAnnotation(NoItem.class) != null)
-                    {
+                } else if (o instanceof Block) {
+                    if (field.getAnnotation(NoItem.class) != null) {
                         info.noItems.add((Block) o);
                     }
                     checkNoGroup(info, field, o);
-                    if (tmpBuilder != null)
-                    {
+                    if (tmpBuilder != null) {
                         info.blockItemBuilders.put((Block) o, tmpBuilder);
-                        try
-                        {
+                        try {
                             tmpBuilderField.setAccessible(true);
                             Field modifiers = tmpBuilderField.getClass().getDeclaredField("modifiers");
                             modifiers.setAccessible(true);
                             modifiers.setInt(tmpBuilderField, tmpBuilderField.getModifiers() & ~Modifier.FINAL);
                             tmpBuilderField.set(info.module, null);
                             modifiers.setInt(tmpBuilderField, tmpBuilderField.getModifiers() & ~Modifier.FINAL);
-                        }
-                        catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e)
-                        {
+                        } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
                             logger.error(MARKER, "Kiwi failed to clean used item builder: {}", tmpBuilderField);
                             logger.catching(e);
                         }
                     }
-                }
-                else if (o instanceof Item)
-                {
+                } else if (o instanceof Item) {
                     checkNoGroup(info, field, o);
                 }
-                if (o instanceof IForgeRegistryEntry<?>)
-                {
+                if (o instanceof IForgeRegistryEntry<?>) {
                     IForgeRegistryEntry<?> entry = (IForgeRegistryEntry<?>) o;
                     int i = counter.getOrDefault(entry.getRegistryType(), 0);
                     counter.put(entry.getRegistryType(), i + 1);
@@ -397,16 +382,12 @@ public class Kiwi
             }
 
             logger.info(MARKER, "Module [{}:{}] initialized", modid, name);
-            for (Class<?> clazz : counter.keySet())
-            {
+            for (Class<?> clazz : counter.keySet()) {
                 IForgeRegistry<?> registry = RegistryManager.ACTIVE.getRegistry((Class<IForgeRegistryEntry<?>>) clazz);
                 String k;
-                if (registry != null)
-                {
+                if (registry != null) {
                     k = Util.trimRL(registry.getRegistryName());
-                }
-                else
-                {
+                } else {
                     k = "unknown";
                 }
                 logger.info(MARKER, "    {}: {}", k, counter.getInt(clazz));
@@ -417,10 +398,8 @@ public class Kiwi
         ModLoadingContext.get().setActiveContainer(null, null);
     }
 
-    private static void checkNoGroup(ModuleInfo info, Field field, Object o)
-    {
-        if (field.getAnnotation(NoGroup.class) != null)
-        {
+    private static void checkNoGroup(ModuleInfo info, Field field, Object o) {
+        if (field.getAnnotation(NoGroup.class) != null) {
             info.noGroups.add(o);
         }
     }
@@ -446,8 +425,7 @@ public class Kiwi
     //        return sb.toString();
     //    }
 
-    public void init(FMLCommonSetupEvent event)
-    {
+    public void init(FMLCommonSetupEvent event) {
         CraftingHelper.register(new ModuleLoadedCondition.Serializer());
         CraftingHelper.register(new ResourceLocation(MODID, "full_block"), FullBlockIngredient.SERIALIZER);
 
@@ -455,16 +433,13 @@ public class Kiwi
         ModLoadingContext.get().setActiveContainer(null, null);
     }
 
-    public void clientInit(FMLClientSetupEvent event)
-    {
+    public void clientInit(FMLClientSetupEvent event) {
         KiwiManager.MODULES.values().forEach(m -> m.clientInit(event));
         ModLoadingContext.get().setActiveContainer(null, null);
     }
 
-    public void serverInit(FMLServerStartingEvent event)
-    {
-        if (!(event.getServer() instanceof DedicatedServer))
-        {
+    public void serverInit(FMLServerStartingEvent event) {
+        if (!(event.getServer() instanceof DedicatedServer)) {
             KiwiCommand.register(event.getCommandDispatcher());
         }
 
@@ -474,26 +449,22 @@ public class Kiwi
     }
 
     @Deprecated
-    public void onDedicatedServerSetup(FMLDedicatedServerSetupEvent event)
-    {
+    public void onDedicatedServerSetup(FMLDedicatedServerSetupEvent event) {
         KiwiManager.MODULES.values().forEach(m -> m.serverInit(event));
         ModLoadingContext.get().setActiveContainer(null, null);
     }
 
-    public void postInit(InterModProcessEvent event)
-    {
+    public void postInit(InterModProcessEvent event) {
         KiwiManager.MODULES.values().forEach(ModuleInfo::postInit);
         ModLoadingContext.get().setActiveContainer(null, null);
     }
 
-    public void loadComplete(FMLLoadCompleteEvent event)
-    {
+    public void loadComplete(FMLLoadCompleteEvent event) {
         KiwiManager.MODULES.clear();
         KiwiManager.GROUPS.clear();
     }
 
-    public static boolean isLoaded(ResourceLocation module)
-    {
+    public static boolean isLoaded(ResourceLocation module) {
         return KiwiManager.ENABLED_MODULES.contains(module);
     }
 
