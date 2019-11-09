@@ -9,25 +9,20 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
-public class MathUtil
-{
-    private MathUtil()
-    {
-    }
+public class MathUtil {
+    private MathUtil() {}
 
-    /**
+    /*
      * https://stackoverflow.com/questions/9600801/evenly-distributing-n-points-on-a-sphere/26127012#26127012
      */
-    public static List<Vec3d> fibonacciSphere(Vec3d start, double radius, int samples, boolean randomize)
-    {
+    public static List<Vec3d> fibonacciSphere(Vec3d start, double radius, int samples, boolean randomize) {
         double rnd = 1;
         if (randomize)
             rnd = Math.random() * samples;
         double offset = 2d / samples;
         double increment = Math.PI * (3 - Math.sqrt(5));
         List<Vec3d> points = Lists.newArrayListWithCapacity(samples);
-        for (int i = 0; i < samples; i++)
-        {
+        for (int i = 0; i < samples; i++) {
             double y = ((i * offset) - 1) + (offset / 2);
             double r = Math.sqrt(1 - y * y) * radius;
             double phi = ((i + rnd) % samples) * increment;
@@ -38,15 +33,11 @@ public class MathUtil
         return points;
     }
 
-    public static int posOnLine(Vec3d start, Vec3d end, Collection<BlockPos> list)
-    {
+    public static int posOnLine(Vec3d start, Vec3d end, Collection<BlockPos> list) {
         list.add(new BlockPos(start));
-        if (start.equals(end))
-        {
+        if (start.equals(end)) {
             return 1;
-        }
-        else
-        {
+        } else {
             int c = 1;
             double ex = MathHelper.lerp(-1.0E-7D, end.x, start.x);
             double ey = MathHelper.lerp(-1.0E-7D, end.y, start.y);
@@ -72,28 +63,19 @@ public class MathUtil
             double d13 = d10 * (signY > 0 ? 1.0D - MathHelper.frac(sy) : MathHelper.frac(sy));
             double d14 = d11 * (signZ > 0 ? 1.0D - MathHelper.frac(sz) : MathHelper.frac(sz));
 
-            while (d12 <= 1.0D || d13 <= 1.0D || d14 <= 1.0D)
-            {
-                if (d12 < d13)
-                {
-                    if (d12 < d14)
-                    {
+            while (d12 <= 1.0D || d13 <= 1.0D || d14 <= 1.0D) {
+                if (d12 < d13) {
+                    if (d12 < d14) {
                         x += signX;
                         d12 += d9;
-                    }
-                    else
-                    {
+                    } else {
                         z += signZ;
                         d14 += d11;
                     }
-                }
-                else if (d13 < d14)
-                {
+                } else if (d13 < d14) {
                     y += signY;
                     d13 += d10;
-                }
-                else
-                {
+                } else {
                     z += signZ;
                     d14 += d11;
                 }

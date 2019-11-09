@@ -33,6 +33,7 @@ import snownee.kiwi.client.RenderUtil;
 //import snownee.kiwi.client.AdvancedFontRenderer;
 import snownee.kiwi.item.ModItem;
 import snownee.kiwi.schedule.Scheduler;
+import snownee.kiwi.schedule.impl.SimpleWorldTask;
 import snownee.kiwi.util.MathUtil;
 
 // Your class don't have to extends ModItem or ModBlock to be registered
@@ -55,8 +56,17 @@ public class TestItem extends ModItem {
     @Override
     public ActionResultType onItemUse(ItemUseContext context) {
         if (!context.getWorld().isRemote) {
-            Scheduler.add(new TestWorldTask(context.getWorld(), Phase.END));
+            Scheduler.add(new MyTask(context.getWorld(), Phase.END, "?"));
         }
+        World world = context.getWorld();
+        Scheduler.add(new SimpleWorldTask(world, Phase.END, tick -> {
+            if (tick >= 50) {
+                System.out.println("五十已到");
+                return true;
+            } else {
+                return false;
+            }
+        }));
         return ActionResultType.SUCCESS;
         //        World world = context.getWorld();
         //        Hand hand = context.getHand();

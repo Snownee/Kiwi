@@ -56,6 +56,9 @@ public class Util {
         }
     }
 
+    /**
+     * @since 2.4.2
+     */
     @Nullable
     public static ResourceLocation RL(@Nullable String string, String defaultNamespace) {
         if (!string.contains(":")) {

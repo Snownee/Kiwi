@@ -21,6 +21,9 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
 import snownee.kiwi.Kiwi;
 
+/**
+ * @since 2.4
+ */
 @EventBusSubscriber
 public final class Scheduler extends WorldSavedData {
     public static final String ID = Kiwi.MODID + "-schedule";
