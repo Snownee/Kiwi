@@ -36,7 +36,7 @@ import snownee.kiwi.schedule.Scheduler;
 import snownee.kiwi.schedule.impl.SimpleWorldTask;
 import snownee.kiwi.util.MathUtil;
 
-// Your class don't have to extends ModItem or ModBlock to be registered
+// Your class don't have to extend ModItem or ModBlock to be registered
 public class TestItem extends ModItem {
     public static List<BlockPos> posList;
     public static Vec3d start;

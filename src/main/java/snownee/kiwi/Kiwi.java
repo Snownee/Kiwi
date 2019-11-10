@@ -44,8 +44,10 @@ import net.minecraftforge.fml.LifecycleEventProvider;
 import net.minecraftforge.fml.LifecycleEventProvider.LifecycleEvent;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.ModLoader;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.ModLoadingStage;
+import net.minecraftforge.fml.ModLoadingWarning;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.config.ModConfig;
@@ -61,6 +63,7 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import net.minecraftforge.fml.loading.toposort.TopologicalSort;
+import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.forgespi.language.ModFileScanData.AnnotationData;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
@@ -246,7 +249,23 @@ public class Kiwi {
 
         List<ResourceLocation> list = null;
         if (checkDep) {
-            infos.values().removeIf(i -> !i.moduleRules.stream().allMatch(infos::containsKey));
+            List<Info> errorList = Lists.newLinkedList();
+            for (Info i : infos.values()) {
+                for (ResourceLocation id : i.moduleRules) {
+                    if (!infos.containsKey(id)) {
+                        errorList.add(i);
+                        break;
+                    }
+                }
+            }
+            for (Info i : errorList) {
+                IModInfo modInfo = ModList.get().getModContainerById(i.id.getNamespace()).get().getModInfo();
+                String dependencies = org.apache.commons.lang3.StringUtils.join(i.moduleRules, ", ");
+                ModLoader.get().addWarning(new ModLoadingWarning(modInfo, ModLoadingStage.ERROR, "msg.kiwi.no_dependencies", i.id, dependencies));
+            }
+            if (!errorList.isEmpty()) {
+                return;
+            }
             MutableGraph<ResourceLocation> graph = GraphBuilder.directed().allowsSelfLoops(false).expectedNodeCount(infos.size()).build();
             infos.keySet().forEach(graph::addNode);
             infos.values().forEach($ -> {

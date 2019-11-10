@@ -56,6 +56,6 @@ public class TestModule extends AbstractModule {
 
     @Override
     protected void serverInit(FMLServerStartingEvent event) {
-        Scheduler.register(TestWorldTask.ID, TestWorldTask.class);
+        Scheduler.register(MyTask.ID, MyTask.class);
     }
 }

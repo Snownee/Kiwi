@@ -19,33 +19,25 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiConfig;
 
-public class ModItem extends Item
-{
-    public ModItem(Item.Properties builder)
-    {
+public class ModItem extends Item {
+    public ModItem(Item.Properties builder) {
         super(builder);
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn)
-    {
+    public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
         addTip(stack, worldIn, tooltip, flagIn);
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static void addTip(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn)
-    {
-        if (tooltip.size() > 0 && I18n.hasKey(stack.getTranslationKey() + ".tip"))
-        {
-            if (!KiwiConfig.tooltipRequiresShift.get() || Screen.hasShiftDown())
-            {
+    public static void addTip(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
+        if (tooltip.size() > 0 && I18n.hasKey(stack.getTranslationKey() + ".tip")) {
+            if (!KiwiConfig.tooltipRequiresShift.get() || Screen.hasShiftDown()) {
                 FontRenderer fontRenderer = stack.getItem().getFontRenderer(stack);
-                if (fontRenderer == null)
-                {
+                if (fontRenderer == null) {
                     fontRenderer = Minecraft.getInstance().fontRenderer;
                 }
                 int width = fontRenderer.getStringWidth(tooltip.get(0).getFormattedText());
@@ -56,14 +48,11 @@ public class ModItem extends Item
                         .map(StringTextComponent::new)
                         .collect(Collectors.toList()));
                 /* on */
-            }
-            else if (KiwiConfig.tooltipRequiresShift.get())
-            {
-                tooltip.add(new TranslationTextComponent(Kiwi.MODID + ".tip.press_shift"));
+            } else if (KiwiConfig.tooltipRequiresShift.get()) {
+                tooltip.add(new TranslationTextComponent("tip.kiwi.press_shift"));
             }
         }
-        if (flagIn == TooltipFlags.ADVANCED && stack.hasTag() && Screen.hasShiftDown())
-        {
+        if (flagIn == TooltipFlags.ADVANCED && stack.hasTag() && Screen.hasShiftDown()) {
             tooltip.add(new StringTextComponent(stack.getTag().toString()));
         }
     }
