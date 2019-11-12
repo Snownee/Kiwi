@@ -12,7 +12,7 @@ public final class NetworkChannel
     public static final NetworkChannel INSTANCE = new NetworkChannel();
 
     private int nextIndex = 0;
-    final SimpleChannel channel;
+    public final SimpleChannel channel;
 
     private NetworkChannel()
     {

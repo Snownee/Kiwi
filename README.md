@@ -29,7 +29,7 @@ public class MyAddon extends AbstractModule
 {
     // This method is called in FMLCommonSetupEvent
     @Override
-    public void init()
+    public void init(FMLCommonSetupEvent event)
     {
         // Do something
     }
