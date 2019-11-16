@@ -18,11 +18,10 @@ import net.minecraftforge.fml.common.thread.EffectiveSide;
 public class KiwiConfig
 {
     static final ForgeConfigSpec spec;
-    static UnmodifiableConfig config;
 
     public static BooleanValue tooltipRequiresShift;
     public static IntValue tooltipWrapWidth;
-    public static BooleanValue replaceDefaultFontRenderer;
+    //public static BooleanValue replaceDefaultFontRenderer;
     public static Map<ResourceLocation, BooleanValue> modules = Maps.newHashMap();
 
     static

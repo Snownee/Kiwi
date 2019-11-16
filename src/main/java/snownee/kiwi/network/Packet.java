@@ -28,6 +28,6 @@ public abstract class Packet
 
         public abstract T decode(PacketBuffer buffer);
 
-        public abstract void handle(T message, Supplier<NetworkEvent.Context> ctx);
+        public abstract void handle(T msg, Supplier<NetworkEvent.Context> ctx);
     }
 }
