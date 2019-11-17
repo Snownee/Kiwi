@@ -45,6 +45,8 @@ public class TestModule extends AbstractModule {
 
     public static final TileEntityType<?> FIRST_TILE = TileEntityType.Builder.create(TestTile::new, FIRST_BLOCK).build(null);
 
+    public static TestModule INSTANCE;
+
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public void onModelBake(ModelBakeEvent event) {

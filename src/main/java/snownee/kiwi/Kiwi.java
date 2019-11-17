@@ -335,12 +335,12 @@ public class Kiwi {
             Item.Properties tmpBuilder = null;
             Field tmpBuilderField = null;
             for (Field field : info.module.getClass().getFields()) {
-                int mods = field.getModifiers();
-                if (!Modifier.isPublic(mods) || !Modifier.isStatic(mods) || !Modifier.isFinal(mods)) {
+                if (field.getAnnotation(Skip.class) != null) {
                     continue;
                 }
 
-                if (field.getAnnotation(Skip.class) != null) {
+                int mods = field.getModifiers();
+                if (!Modifier.isPublic(mods) || !Modifier.isStatic(mods)) {
                     continue;
                 }
 
@@ -351,6 +351,19 @@ public class Kiwi {
                 } else {
                     regName = field.getName().toLowerCase(Locale.US);
                 }
+
+                if (!Modifier.isFinal(mods)) {
+                    if (field.getType() == info.module.getClass() && regName.equals("instance")) {
+                        try {
+                            field.set(null, info.module);
+                        } catch (IllegalArgumentException | IllegalAccessException e) {
+                            logger.error(MARKER, "Kiwi failed to inject module instance to module class: {}", info.module.uid);
+                            logger.catching(e);
+                        }
+                    }
+                    continue;
+                }
+
                 Object o = null;
                 try {
                     o = field.get(null);
@@ -484,7 +497,11 @@ public class Kiwi {
     }
 
     public static boolean isLoaded(ResourceLocation module) {
-        return KiwiManager.ENABLED_MODULES.contains(module);
+        return KiwiManager.MODULES.containsKey(module);
+    }
+
+    public static boolean isLoaded(AbstractModule module) {
+        return KiwiManager.MODULES.values().stream().map($ -> $.module).anyMatch(module::equals);
     }
 
     //    @SideOnly(Side.CLIENT)

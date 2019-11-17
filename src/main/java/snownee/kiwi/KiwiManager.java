@@ -26,7 +26,6 @@ import snownee.kiwi.crafting.TextureBlockRecipe;
 public class KiwiManager
 {
     public static final Map<ResourceLocation, ModuleInfo> MODULES = Maps.newHashMap();
-    public static final Set<ResourceLocation> ENABLED_MODULES = Sets.newHashSet();
     static Map<String, ItemGroup> GROUPS = Maps.newHashMap();
 
     public static IRecipeSerializer<?> shapedSerializer;
@@ -36,7 +35,7 @@ public class KiwiManager
     static
     {
         CrashReportExtender.registerCrashCallable("Kiwi Modules", () -> {
-            return "\n" + ENABLED_MODULES.stream().map(ResourceLocation::toString).sorted(StringUtils::compare).collect(Collectors.joining("\n\t\t", "\t\t", ""));
+            return "\n" + MODULES.keySet().stream().map(ResourceLocation::toString).sorted(StringUtils::compare).collect(Collectors.joining("\n\t\t", "\t\t", ""));
         });
     }
 
@@ -53,7 +52,6 @@ public class KiwiManager
         else
         {
             MODULES.put(resourceLocation, new ModuleInfo(resourceLocation, module, context));
-            ENABLED_MODULES.add(resourceLocation);
         }
     }
 
