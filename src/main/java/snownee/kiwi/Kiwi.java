@@ -492,7 +492,6 @@ public class Kiwi {
     }
 
     public void loadComplete(FMLLoadCompleteEvent event) {
-        KiwiManager.MODULES.clear();
         KiwiManager.GROUPS.clear();
     }
 
