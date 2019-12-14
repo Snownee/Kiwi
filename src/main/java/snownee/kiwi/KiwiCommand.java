@@ -8,6 +8,7 @@ import java.util.regex.PatternSyntaxException;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -25,19 +26,23 @@ import snownee.kiwi.util.LootDumper;
 public class KiwiCommand {
     private static final SimpleCommandExceptionType WRONG_PATTERN_EXCEPTION = new SimpleCommandExceptionType(new TranslationTextComponent("commands.kiwi.dumpLoots.wrongPattern"));
 
-    public static void register(CommandDispatcher<CommandSource> dispatcher) {
+    public static void register(CommandDispatcher<CommandSource> dispatcher, boolean integrated) {
+        LiteralArgumentBuilder<CommandSource> builder = Commands.literal(Kiwi.MODID);
         /* off */
-        dispatcher.register(Commands.literal(Kiwi.MODID)
-                .then(Commands.literal("dumpLoots")
-                        .executes(ctx -> dumpLoots(ctx.getSource(), ".+"))
-                        .then(Commands.argument("pattern", StringArgumentType.greedyString())
-                                .executes(ctx -> dumpLoots(ctx.getSource(), StringArgumentType.getString(ctx, "pattern")))))
-                .then(Commands.argument("gamemode", IntegerArgumentType.integer(0, GameType.values().length - 1))
-                        .requires(ctx -> ctx.hasPermissionLevel(2))
-                        .executes(ctx -> setGameMode(ctx, Collections.singleton(ctx.getSource().asPlayer()), IntegerArgumentType.getInteger(ctx, "gamemode")))
-                        .then(Commands.argument("target", EntityArgument.players())
-                                .executes(ctx -> setGameMode(ctx, EntityArgument.getPlayers(ctx, "target"), IntegerArgumentType.getInteger(ctx, "gamemode"))))));
+        if (integrated) {
+            builder.then(Commands.literal("dumpLoots")
+                    .executes(ctx -> dumpLoots(ctx.getSource(), ".+"))
+                    .then(Commands.argument("pattern", StringArgumentType.greedyString())
+                            .executes(ctx -> dumpLoots(ctx.getSource(), StringArgumentType.getString(ctx, "pattern")))));
+        }
+
+        builder.then(Commands.argument("gamemode", IntegerArgumentType.integer(0, GameType.values().length - 1))
+                .requires(ctx -> ctx.hasPermissionLevel(2))
+                .executes(ctx -> setGameMode(ctx, Collections.singleton(ctx.getSource().asPlayer()), IntegerArgumentType.getInteger(ctx, "gamemode")))
+                .then(Commands.argument("target", EntityArgument.players())
+                        .executes(ctx -> setGameMode(ctx, EntityArgument.getPlayers(ctx, "target"), IntegerArgumentType.getInteger(ctx, "gamemode")))));
         /* on */
+        dispatcher.register(builder);
     }
 
     public static int dumpLoots(CommandSource source, String pattern) throws CommandSyntaxException {

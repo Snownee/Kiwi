@@ -33,7 +33,6 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
-import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.common.MinecraftForge;
@@ -471,9 +470,7 @@ public class Kiwi {
     }
 
     public void serverInit(FMLServerStartingEvent event) {
-        if (!(event.getServer() instanceof DedicatedServer)) {
-            KiwiCommand.register(event.getCommandDispatcher());
-        }
+        KiwiCommand.register(event.getCommandDispatcher(), !event.getServer().isDedicatedServer());
 
         KiwiManager.MODULES.values().forEach(m -> m.serverInit(event));
         event.getServer().getWorld(DimensionType.OVERWORLD).getSavedData().getOrCreate(() -> Scheduler.INSTANCE, Scheduler.ID);
