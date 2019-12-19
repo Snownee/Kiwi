@@ -19,19 +19,23 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.mojang.datafixers.util.Either;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.pattern.BlockMaterialMatcher;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockModelShapes;
 import net.minecraft.client.renderer.ItemModelMesher;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.model.BlockModel;
 import net.minecraft.client.renderer.model.IBakedModel;
+import net.minecraft.client.renderer.model.IModelTransform;
 import net.minecraft.client.renderer.model.IUnbakedModel;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.model.ItemOverride;
 import net.minecraft.client.renderer.model.ItemOverrideList;
+import net.minecraft.client.renderer.model.Material;
 import net.minecraft.client.renderer.model.ModelResourceLocation;
 import net.minecraft.client.renderer.model.ModelRotation;
 import net.minecraft.client.renderer.model.MultipartBakedModel;
@@ -39,7 +43,6 @@ import net.minecraft.client.renderer.model.Variant;
 import net.minecraft.client.renderer.model.VariantList;
 import net.minecraft.client.renderer.model.multipart.Multipart;
 import net.minecraft.client.renderer.model.multipart.Selector;
-import net.minecraft.client.renderer.texture.ISprite;
 import net.minecraft.client.renderer.texture.MissingTextureSprite;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -50,7 +53,7 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.IItemProvider;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IEnviromentBlockReader;
+import net.minecraft.world.ILightReader;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -119,7 +122,7 @@ public class TextureModel implements IDynamicBakedModel
     @Nullable
     private static TextureModel process(ModelBakeEvent event, ModelResourceLocation rl, boolean inventory, @Nullable String particleKey)
     {
-        IUnbakedModel unbakedModel = ModelLoaderRegistry.getModelOrLogError(rl, "Kiwi failed to replace block model " + rl);
+        IUnbakedModel unbakedModel = event.getModelLoader().getModelOrLogError(rl, "Kiwi failed to replace block model " + rl);
         IBakedModel bakedModel = event.getModelRegistry().get(rl);
         if (unbakedModel == null || bakedModel == null)
         {
@@ -186,14 +189,14 @@ public class TextureModel implements IDynamicBakedModel
     }
 
     private final ModelLoader modelLoader;
-    private final ISprite variant;
+    private final IModelTransform variant;
     private final BlockModel originalUnbaked;
     private final IBakedModel originalBaked;
     private TextureOverrideList overrideList;
     private final String particleKey;
     private final Cache<String, IBakedModel> baked = CacheBuilder.newBuilder().maximumSize(200L).expireAfterWrite(500L, TimeUnit.SECONDS).weakKeys().build();
 
-    public TextureModel(ModelLoader modelLoader, BlockModel originalUnbaked, IBakedModel originalBaked, ISprite variant, boolean inventory, @Nullable String particleKey)
+    public TextureModel(ModelLoader modelLoader, BlockModel originalUnbaked, IBakedModel originalBaked, IModelTransform variant, boolean inventory, @Nullable String particleKey)
     {
         this.modelLoader = modelLoader;
         this.originalUnbaked = originalUnbaked;
@@ -234,7 +237,8 @@ public class TextureModel implements IDynamicBakedModel
     {
         if (particleKey != null && data.getData(TEXTURES) != null && data.getData(TEXTURES).containsKey(particleKey))
         {
-            TextureAtlasSprite particle = ModelLoader.defaultTextureGetter().apply(new ResourceLocation(data.getData(TEXTURES).get(particleKey)));
+            Material material = ModelLoaderRegistry.blockMaterial(data.getData(TEXTURES).get(particleKey));
+            TextureAtlasSprite particle = ModelLoader.defaultTextureGetter().apply(material);
             if (particle.getClass() != MissingTextureSprite.class)
             {
                 return particle;
@@ -273,23 +277,24 @@ public class TextureModel implements IDynamicBakedModel
 
     private IBakedModel getModel(Map<String, String> overrides)
     {
-        Map<String, String> textures = Maps.newHashMap();
-        resolveTextures(textures, originalUnbaked, false);
         if (overrides == null)
         {
             return originalBaked;
         }
+        Map<String, Either<Material, String>> textures = Maps.newHashMap();
+        resolveTextures(textures, originalUnbaked, false);
         overrides.forEach((k, v) -> {
             if (!v.isEmpty())
-                textures.put(k, v);
+                textures.put(k, Either.left(ModelLoaderRegistry.blockMaterial(v)));
         });
         String key = generateKey(overrides);
         IBakedModel model = null;
+        ResourceLocation loaderId = new ResourceLocation("minecraft:elements");
         try
         {
             model = baked.get(key, () -> {
                 BlockModel unbaked = new BlockModel(originalUnbaked.getParentLocation(), originalUnbaked.getElements(), textures, originalUnbaked.isAmbientOcclusion(), originalUnbaked.isGui3d(), originalUnbaked.getAllTransforms(), Lists.newArrayList(originalUnbaked.getOverrides()));
-                return unbaked.bake(modelLoader, ModelLoader.defaultTextureGetter(), variant, DefaultVertexFormats.BLOCK);
+                return unbaked.func_225613_a_(modelLoader, ModelLoader.defaultTextureGetter(), variant, loaderId);
             });
         }
         catch (ExecutionException e)
@@ -300,42 +305,41 @@ public class TextureModel implements IDynamicBakedModel
         return model;
     }
 
-    private static void resolveTextures(Map<String, String> textures, BlockModel model, boolean sub)
+    private static void resolveTextures(Map<String, Either<Material, String>> textures2, BlockModel model, boolean sub)
     {
         if (model.parent != null)
         {
-            resolveTextures(textures, model.parent, true);
+            resolveTextures(textures2, model.parent, true);
         }
-        textures.putAll(model.textures);
+        textures2.putAll(model.textures);
         if (!sub)
         {
             Set<String> hashes = Sets.newHashSet();
-            textures.forEach((k, v) -> {
-                if (v.startsWith("#"))
-                {
+            textures2.forEach((k, v) -> {
+                v.ifRight(s -> {
                     hashes.add(k);
-                }
+                });
             });
             do
             {
                 hashes.removeIf(k -> {
-                    String v = textures.get(k);
-                    if (v == null || v.isEmpty())
+                    Either<Material, String> v = textures2.get(k);
+                    if (v == null)
                     {
-                        textures.put(k, MissingTextureSprite.getLocation().toString());
+                        textures2.put(k, Either.left(ModelLoaderRegistry.blockMaterial(MissingTextureSprite.getLocation())));
                         return true;
                     }
-                    String hash = v.substring(1);
-                    String to = textures.get(hash);
-                    if (to == null || hash.equals(k) || to.equals(k))
+                    String hash = v.right().get();
+                    Either<Material, String> to = textures2.get(hash);
+                    if (to == null || hash.equals(k) || to.right().isPresent() && to.right().get().equals(k))
                     {
-                        textures.put(k, MissingTextureSprite.getLocation().toString());
+                        textures2.put(k, Either.left(ModelLoaderRegistry.blockMaterial(MissingTextureSprite.getLocation())));
                         return true;
                     }
                     else
                     {
-                        textures.put(k, to);
-                        return !to.startsWith("#");
+                        textures2.put(k, to);
+                        return to.left().isPresent();
                     }
                 });
             }
@@ -344,7 +348,7 @@ public class TextureModel implements IDynamicBakedModel
     }
 
     @Override
-    public IModelData getModelData(IEnviromentBlockReader world, BlockPos pos, BlockState state, IModelData tileData)
+    public IModelData getModelData(ILightReader world, BlockPos pos, BlockState state, IModelData tileData)
     {
         return tileData;
     }

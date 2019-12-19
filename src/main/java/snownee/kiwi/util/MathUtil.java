@@ -48,7 +48,7 @@ public final class MathUtil {
             int x = MathHelper.floor(sx);
             int y = MathHelper.floor(sy);
             int z = MathHelper.floor(sz);
-            BlockPos.MutableBlockPos mutableblockpos = new BlockPos.MutableBlockPos(x, y, z);
+            BlockPos.Mutable mutableblockpos = new BlockPos.Mutable(x, y, z);
 
             double subX = ex - sx;
             double subY = ey - sy;

@@ -44,7 +44,7 @@ public final class PlayerUtil
             return tryPlace(world, pos, side.getOpposite(), player, hand, state, stack, playSound) ? pos : null;
         }
         ISelectionContext iselectioncontext = player == null ? ISelectionContext.dummy() : ISelectionContext.forEntity(player);
-        if (world.func_217350_a(state, pos, iselectioncontext))
+        if (world.func_226663_a_(state, pos, iselectioncontext))
         {
             return tryPlace(world, pos, side.getOpposite(), player, hand, state, stack, playSound) ? pos : null;
         }

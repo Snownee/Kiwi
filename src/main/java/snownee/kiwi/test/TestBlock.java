@@ -7,6 +7,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
@@ -38,11 +39,11 @@ public class TestBlock extends StairsBlock
     }
 
     @Override
-    public boolean onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit)
+    public ActionResultType func_225533_a_(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit)
     {
         if (worldIn.isRemote)
         {
-            return true;
+            return ActionResultType.SUCCESS;
         }
         TileEntity tile = worldIn.getTileEntity(pos);
         ItemStack stack = player.getHeldItem(handIn);
@@ -58,7 +59,7 @@ public class TestBlock extends StairsBlock
                 textureTile.refresh();
             }
         }
-        return true;
+        return ActionResultType.SUCCESS;
     }
 
     @Override

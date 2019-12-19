@@ -1,6 +1,6 @@
 package snownee.kiwi.util;
 
-import javax.vecmath.Point2d;
+import java.awt.geom.Point2D;
 
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -16,8 +16,8 @@ public final class VoxelUtil
 
     public static AxisAlignedBB rotate(AxisAlignedBB aabb, Direction facing)
     {
-        Point2d pointMin = rotate(new Point2d(aabb.minX, aabb.minZ), facing);
-        Point2d pointMax = rotate(new Point2d(aabb.maxX, aabb.maxZ), facing);
+        Point2D.Double pointMin = rotate(new Point2D.Double(aabb.minX, aabb.minZ), facing);
+        Point2D.Double pointMax = rotate(new Point2D.Double(aabb.maxX, aabb.maxZ), facing);
         return new AxisAlignedBB(pointMin.x, aabb.minY, pointMin.y, pointMax.x, aabb.maxY, pointMax.y);
     }
 
@@ -25,18 +25,18 @@ public final class VoxelUtil
     {
         VSBuilder builder = new VSBuilder();
         shape.forEachBox((x1, y1, z1, x2, y2, z2) -> {
-            Point2d pointMin = rotate(new Point2d(Math.min(x1, x2), Math.min(z1, z2)), facing);
-            Point2d pointMax = rotate(new Point2d(Math.max(x1, x2), Math.max(z1, z2)), facing);
+            Point2D.Double pointMin = rotate(new Point2D.Double(Math.min(x1, x2), Math.min(z1, z2)), facing);
+            Point2D.Double pointMax = rotate(new Point2D.Double(Math.max(x1, x2), Math.max(z1, z2)), facing);
             builder.add(VoxelShapes.create(pointMin.x, Math.min(y1, y2), pointMin.y, pointMax.x, Math.max(y1, y2), pointMax.y));
         });
         return builder.get();
     }
 
-    public static Point2d rotate(Point2d point, Direction facing)
+    public static Point2D.Double rotate(Point2D.Double point, Direction facing)
     {
         double x = point.x - 0.5;
         double y = point.y - 0.5;
-        Point2d pointNew = new Point2d();
+        Point2D.Double pointNew = new Point2D.Double();
         pointNew.x = facing.getHorizontalIndex() % 2 == 0 ? x : y;
         if (facing.getHorizontalIndex() < 2)
         {

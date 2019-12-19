@@ -27,6 +27,7 @@ package snownee.kiwi.client;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.SpriteUploader;
@@ -55,9 +56,9 @@ public class KiwiSpriteUploader extends SpriteUploader
     }
 
     @Override
-    public Iterable<ResourceLocation> getKnownKeys()
+    public Stream<ResourceLocation> func_225640_a_()
     {
-        return Collections.unmodifiableSet(registeredSprites);
+        return Collections.unmodifiableCollection(registeredSprites).stream();
     }
 
     /**

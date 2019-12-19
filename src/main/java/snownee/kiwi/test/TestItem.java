@@ -114,37 +114,37 @@ public class TestItem extends ModItem {
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
     public void render(RenderWorldLastEvent event) {
-        Screen.fill(0, 0, 20, 20, 20);
-        Minecraft mc = Minecraft.getInstance();
-        PlayerEntity player = mc.player;
-        ItemStack stack = player.getHeldItemMainhand();
-        if (posList == null || stack.getItem() != TestModule.FIRST_ITEM) {
-            return;
-        }
-
-        RenderUtil.beginWorld();
-        GlStateManager.disableDepthTest();
-        GlStateManager.disableTexture();
-        GlStateManager.lineWidth(5);
-
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuffer();
-        buffer.begin(3, DefaultVertexFormats.POSITION_COLOR);
-        if (start != null) {
-            buffer.pos(start.x, start.y, start.z).color(0.5f, 0, 0, 0.5f).endVertex();
-        }
-        if (end != null) {
-            buffer.pos(end.x, end.y, end.z).color(0.5f, 0, 0, 0.5f).endVertex();
-        }
-        for (BlockPos pos : posList) {
-            AxisAlignedBB box = new AxisAlignedBB(pos);
-            WorldRenderer.drawBoundingBox(buffer, box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, 0, 0, 0.5f, 0.5f);
-        }
-        tessellator.draw();
-        RenderUtil.endWorld();
-
-        GlStateManager.enableTexture();
-        GlStateManager.enableDepthTest();
-        //RenderUtil.drawPos(pos);
+//        Screen.fill(0, 0, 20, 20, 20);
+//        Minecraft mc = Minecraft.getInstance();
+//        PlayerEntity player = mc.player;
+//        ItemStack stack = player.getHeldItemMainhand();
+//        if (posList == null || stack.getItem() != TestModule.FIRST_ITEM) {
+//            return;
+//        }
+//
+//        RenderUtil.beginWorld();
+//        GlStateManager.disableDepthTest();
+//        GlStateManager.disableTexture();
+//        GlStateManager.lineWidth(5);
+//
+//        Tessellator tessellator = Tessellator.getInstance();
+//        BufferBuilder buffer = tessellator.getBuffer();
+//        buffer.begin(3, DefaultVertexFormats.POSITION_COLOR);
+//        if (start != null) {
+//            buffer.pos(start.x, start.y, start.z).color(0.5f, 0, 0, 0.5f).endVertex();
+//        }
+//        if (end != null) {
+//            buffer.pos(end.x, end.y, end.z).color(0.5f, 0, 0, 0.5f).endVertex();
+//        }
+//        for (BlockPos pos : posList) {
+//            AxisAlignedBB box = new AxisAlignedBB(pos);
+//            WorldRenderer.drawBoundingBox(buffer, box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, 0, 0, 0.5f, 0.5f);
+//        }
+//        tessellator.draw();
+//        RenderUtil.endWorld();
+//
+//        GlStateManager.enableTexture();
+//        GlStateManager.enableDepthTest();
+//        //RenderUtil.drawPos(pos);
     }
 }

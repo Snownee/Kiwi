@@ -24,10 +24,6 @@ THE SOFTWARE.
 
 package snownee.kiwi.client.gui.element;
 
-import mezz.jei.api.gui.drawable.IDrawableAnimated;
-import mezz.jei.api.helpers.IGuiHelper;
-import mezz.jei.api.recipe.category.IRecipeCategory;
-
 /**
  * Represents something to be drawn on screen.
  * Useful for drawing miscellaneous things in {@link IRecipeCategory#draw(Object, double, double)}.
@@ -36,15 +32,13 @@ import mezz.jei.api.recipe.category.IRecipeCategory;
  * @see IDrawableAnimated
  * @see IStaticDrawable
  */
-public interface IDrawable
-{
+public interface IDrawable {
 
     int getWidth();
 
     int getHeight();
 
-    default void draw()
-    {
+    default void draw() {
         draw(0, 0);
     }
 
