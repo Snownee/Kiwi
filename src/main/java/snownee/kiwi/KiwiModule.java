@@ -93,7 +93,7 @@ public @interface KiwiModule
 
             private final Supplier<IEventBus> busSupplier;
 
-            Bus(final Supplier<IEventBus> eventBusSupplier)
+            Bus(Supplier<IEventBus> eventBusSupplier)
             {
                 this.busSupplier = eventBusSupplier;
             }

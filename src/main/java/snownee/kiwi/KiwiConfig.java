@@ -5,7 +5,6 @@ import java.util.Map.Entry;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import com.electronwill.nightconfig.core.UnmodifiableConfig;
 import com.google.common.collect.Maps;
 
 import net.minecraft.util.ResourceLocation;

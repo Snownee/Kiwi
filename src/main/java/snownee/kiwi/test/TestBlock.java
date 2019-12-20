@@ -14,10 +14,13 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
+import snownee.kiwi.RenderLayer;
+import snownee.kiwi.RenderLayer.Layer;
 import snownee.kiwi.block.ModBlock;
 import snownee.kiwi.crafting.FullBlockIngredient;
 import snownee.kiwi.tile.TextureTile;
 
+@RenderLayer(Layer.CUTOUT)
 public class TestBlock extends StairsBlock
 {
 

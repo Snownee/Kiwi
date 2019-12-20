@@ -1,14 +1,11 @@
 package snownee.kiwi;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.crafting.IRecipeSerializer;
 import net.minecraft.util.ResourceLocation;

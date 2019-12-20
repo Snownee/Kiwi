@@ -33,15 +33,14 @@ import snownee.kiwi.block.ModBlock;
  */
 public abstract class AbstractModule {
     protected ResourceLocation uid;
-    private static final BiConsumer<ModuleInfo, IForgeRegistryEntry<?>> ITEM_DECORATOR = (module, entry) -> {
-        Item item = (Item) entry;
+    private static final BiConsumer<ModuleInfo, Item> ITEM_DECORATOR = (module, item) -> {
         if (module.group != null && item.group == null && !module.noGroups.contains(item))
             item.group = module.group;
     };
 
-    private static final Map<Class, BiConsumer<ModuleInfo, IForgeRegistryEntry<?>>> DEFAULT_DECORATORS = ImmutableMap.of(Item.class, ITEM_DECORATOR);
+    private static final Map<Class, BiConsumer<ModuleInfo, ? extends IForgeRegistryEntry<?>>> DEFAULT_DECORATORS = ImmutableMap.of(Item.class, ITEM_DECORATOR);
 
-    protected final Map<Class, BiConsumer<ModuleInfo, IForgeRegistryEntry<?>>> decorators = Maps.newHashMap(DEFAULT_DECORATORS);
+    protected final Map<Class, BiConsumer<ModuleInfo, ? extends IForgeRegistryEntry<?>>> decorators = Maps.newHashMap(DEFAULT_DECORATORS);
 
     protected void preInit() {
         // NO-OP
