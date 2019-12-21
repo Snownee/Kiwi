@@ -52,7 +52,7 @@ public @interface KiwiModule
      *
      */
     @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.TYPE)
+    @Target({ElementType.TYPE, ElementType.FIELD})
     @interface Group
     {
         String value() default "";

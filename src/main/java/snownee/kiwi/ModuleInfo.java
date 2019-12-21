@@ -1,10 +1,13 @@
 package snownee.kiwi;
 
+import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
 
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Maps;
@@ -24,6 +27,7 @@ import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.GameData;
 import net.minecraftforge.registries.IForgeRegistryEntry;
+import snownee.kiwi.KiwiModule.Group;
 import snownee.kiwi.item.ModBlockItem;
 
 public class ModuleInfo
@@ -55,9 +59,12 @@ public class ModuleInfo
         module.uid = rl;
     }
 
-    public void register(IForgeRegistryEntry<?> entry, String name)
+    /**
+     * @since 2.5.2
+     */
+    public void register(IForgeRegistryEntry<?> entry, String name, @Nullable Field field)
     {
-        registries.put(new NamedEntry(name, entry));
+        registries.put(new NamedEntry(name, entry, field));
     }
 
     public <T extends IForgeRegistryEntry<T>> void handleRegister(RegistryEvent.Register<T> event)
@@ -76,14 +83,34 @@ public class ModuleInfo
                 if (builder == null)
                     builder = new Item.Properties();
                 ModBlockItem item = new ModBlockItem(e.entry, builder);
-                if (noGroups.contains(e.entry))
+                if (noGroups.contains(e.entry)) {
                     noGroups.add(item);
+                } else if (e.field != null) {
+                    Group group = e.field.getAnnotation(Group.class);
+                    if (group != null && !group.value().isEmpty()) {
+                        ItemGroup itemGroup = KiwiManager.GROUPS.get(group.value());
+                        if (itemGroup != null) {
+                            item.group = itemGroup;
+                        }
+                    }
+                }
                 entries.add(new NamedEntry(e.name, item));
             });
         } else if (clazz == Block.class && FMLEnvironment.dist.isClient()) {
             final RenderType solid = RenderType.func_228639_c_();
             Map<Class<?>, RenderType> cache = Maps.newHashMap();
-            entries.stream().map(e -> (Block) e.entry).forEach(block -> {
+            entries.stream().forEach(e -> {
+                Block block = (Block) e.entry;
+                if (e.field != null) {
+                    RenderLayer layer = e.field.getAnnotation(RenderLayer.class);
+                    if (layer != null) {
+                        RenderType type = layer.value().get();
+                        if (type != solid && type != null) {
+                            RenderTypeLookup.setRenderLayer(block, type);
+                            return;
+                        }
+                    }
+                }
                 Class<?> klass = block.getClass();
                 RenderType type = cache.computeIfAbsent(klass, k -> {
                     RenderLayer layer = null;

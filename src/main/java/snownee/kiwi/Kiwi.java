@@ -403,7 +403,7 @@ public class Kiwi {
                     IForgeRegistryEntry<?> entry = (IForgeRegistryEntry<?>) o;
                     int i = counter.getOrDefault(entry.getRegistryType(), 0);
                     counter.put(entry.getRegistryType(), i + 1);
-                    info.register(entry, regName);
+                    info.register(entry, regName, field);
                 }
 
                 tmpBuilder = null;
