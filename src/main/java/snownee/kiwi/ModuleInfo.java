@@ -20,7 +20,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.GameData;
@@ -127,13 +126,6 @@ public class ModuleInfo
     }
 
     public void serverInit(FMLServerStartingEvent event)
-    {
-        context.setActiveContainer();
-        module.serverInit(event);
-    }
-
-    @Deprecated
-    public void serverInit(FMLDedicatedServerSetupEvent event)
     {
         context.setActiveContainer();
         module.serverInit(event);

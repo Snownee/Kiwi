@@ -52,7 +52,6 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
@@ -157,7 +156,6 @@ public class Kiwi {
         modEventBus.addListener(this::init);
         modEventBus.addListener(this::clientInit);
         MinecraftForge.EVENT_BUS.addListener(this::serverInit);
-        modEventBus.addListener(this::onDedicatedServerSetup);
         modEventBus.addListener(this::postInit);
         modEventBus.addListener(this::loadComplete);
     }
@@ -474,12 +472,6 @@ public class Kiwi {
 
         KiwiManager.MODULES.values().forEach(m -> m.serverInit(event));
         event.getServer().getWorld(DimensionType.OVERWORLD).getSavedData().getOrCreate(() -> Scheduler.INSTANCE, Scheduler.ID);
-        ModLoadingContext.get().setActiveContainer(null, null);
-    }
-
-    @Deprecated
-    public void onDedicatedServerSetup(FMLDedicatedServerSetupEvent event) {
-        KiwiManager.MODULES.values().forEach(m -> m.serverInit(event));
         ModLoadingContext.get().setActiveContainer(null, null);
     }
 

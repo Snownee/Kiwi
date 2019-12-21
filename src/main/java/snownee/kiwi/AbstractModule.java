@@ -19,7 +19,6 @@ import net.minecraft.tags.Tag;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import snownee.kiwi.block.ModBlock;
@@ -55,11 +54,6 @@ public abstract class AbstractModule {
     }
 
     protected void clientInit(FMLClientSetupEvent event) {
-        // NO-OP
-    }
-
-    @Deprecated
-    protected void serverInit(FMLDedicatedServerSetupEvent event) {
         // NO-OP
     }
 
