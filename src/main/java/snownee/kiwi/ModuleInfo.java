@@ -12,6 +12,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
 import net.minecraft.block.Block;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -81,15 +82,23 @@ public class ModuleInfo
                 entries.add(new NamedEntry(e.name, item));
             });
         } else if (clazz == Block.class && FMLEnvironment.dist.isClient()) {
+            final RenderType solid = RenderType.func_228639_c_();
+            Map<Class<?>, RenderType> cache = Maps.newHashMap();
             entries.stream().map(e -> (Block) e.entry).forEach(block -> {
-                RenderLayer layer = null;
                 Class<?> klass = block.getClass();
-                while (layer == null && klass != Block.class) {
-                    layer = klass.getAnnotation(RenderLayer.class);
-                    klass = klass.getSuperclass();
-                }
-                if (layer != null) {
-                    RenderTypeLookup.setRenderLayer(block, layer.value().get());
+                RenderType type = cache.computeIfAbsent(klass, k -> {
+                    RenderLayer layer = null;
+                    while (k != Block.class) {
+                        layer = k.getAnnotation(RenderLayer.class);
+                        if (layer != null) {
+                            return layer.value().get();
+                        }
+                        k = k.getSuperclass();
+                    }
+                    return solid;
+                });
+                if (type != solid && type != null) {
+                    RenderTypeLookup.setRenderLayer(block, type);
                 }
             });
         }
