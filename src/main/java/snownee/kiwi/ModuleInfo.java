@@ -91,6 +91,8 @@ public class ModuleInfo
                         ItemGroup itemGroup = KiwiManager.GROUPS.get(group.value());
                         if (itemGroup != null) {
                             item.group = itemGroup;
+                        } else {
+                            item.group = this.group;
                         }
                     }
                 }
