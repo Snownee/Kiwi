@@ -455,6 +455,7 @@ public class Kiwi {
     //    }
 
     public void init(FMLCommonSetupEvent event) {
+        KiwiConfig.refresh();
         CraftingHelper.register(new ModuleLoadedCondition.Serializer());
         CraftingHelper.register(new ResourceLocation(MODID, "full_block"), FullBlockIngredient.SERIALIZER);
 
