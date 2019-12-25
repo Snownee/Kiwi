@@ -81,6 +81,13 @@ public abstract class AbstractModule {
         return Block.Properties.create(material);
     }
 
+    /**
+     * @since 2.4.6
+     */
+    protected static Block.Properties blockProp(Block block) {
+        return Block.Properties.from(block);
+    }
+
     protected static <T extends Block> T init(T block) {
         return ModBlock.deduceSoundAndHardness(block);
     }
