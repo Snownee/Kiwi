@@ -61,7 +61,7 @@ public class Util {
      */
     @Nullable
     public static ResourceLocation RL(@Nullable String string, String defaultNamespace) {
-        if (!string.contains(":")) {
+        if (string != null && !string.contains(":")) {
             string = defaultNamespace + ":" + string;
         }
         return RL(string);
