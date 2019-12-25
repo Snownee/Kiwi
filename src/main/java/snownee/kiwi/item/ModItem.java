@@ -10,7 +10,6 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.client.util.ITooltipFlag.TooltipFlags;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
@@ -35,7 +34,7 @@ public class ModItem extends Item {
     @OnlyIn(Dist.CLIENT)
     public static void addTip(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
         if (tooltip.size() > 0 && I18n.hasKey(stack.getTranslationKey() + ".tip")) {
-            if (!KiwiConfig.tooltipRequiresShift.get() || Screen.hasShiftDown()) {
+            if (!KiwiConfig.tooltipRequiresShift || Screen.hasShiftDown()) {
                 FontRenderer fontRenderer = stack.getItem().getFontRenderer(stack);
                 if (fontRenderer == null) {
                     fontRenderer = Minecraft.getInstance().fontRenderer;
@@ -43,17 +42,14 @@ public class ModItem extends Item {
                 int width = fontRenderer.getStringWidth(tooltip.get(0).getFormattedText());
                 /* off */
                 tooltip.addAll(
-                        fontRenderer.listFormattedStringToWidth(I18n.format(stack.getTranslationKey() + ".tip"), Math.max(width, KiwiConfig.tooltipWrapWidth.get()))
+                        fontRenderer.listFormattedStringToWidth(I18n.format(stack.getTranslationKey() + ".tip"), Math.max(width, KiwiConfig.tooltipWrapWidth))
                         .stream()
                         .map(StringTextComponent::new)
                         .collect(Collectors.toList()));
                 /* on */
-            } else if (KiwiConfig.tooltipRequiresShift.get()) {
+            } else if (KiwiConfig.tooltipRequiresShift) {
                 tooltip.add(new TranslationTextComponent("tip.kiwi.press_shift"));
             }
-        }
-        if (flagIn == TooltipFlags.ADVANCED && stack.hasTag() && Screen.hasShiftDown()) {
-            tooltip.add(new StringTextComponent(stack.getTag().toString()));
         }
     }
 }
