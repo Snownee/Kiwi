@@ -2,7 +2,7 @@
 
 Make modding no longer cumbersome.
 
-[中文指南](https://snownee.gitbook.io/kiwi/)
+[中文指南](https://moddingwithkiwi.readthedocs.io/zh_CN/1.15/)
 
 ## Registration
 
