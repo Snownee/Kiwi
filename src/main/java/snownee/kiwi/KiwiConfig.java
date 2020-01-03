@@ -79,6 +79,7 @@ public final class KiwiConfig {
     }
 
     public static void refresh() {
+        if (EffectiveSide.get() == LogicalSide.SERVER) return;
         tooltipRequiresShift = tooltipRequiresShiftCfg.get();
         tooltipWrapWidth = tooltipWrapWidthCfg.get();
         debugTooltip = debugTooltipCfg.get();
