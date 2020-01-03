@@ -11,24 +11,24 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE, ElementType.FIELD})
+@Target({ ElementType.TYPE, ElementType.FIELD })
 public @interface RenderLayer {
     Layer value();
 
     enum Layer {
-        CUTOUT_MIPPED(() -> RenderType.func_228641_d_()),
-        CUTOUT(() -> RenderType.func_228643_e_()),
-        TRANSLUCENT(() -> RenderType.func_228645_f_());
+        CUTOUT_MIPPED(() -> () -> RenderType.func_228641_d_()),
+        CUTOUT(() -> () -> RenderType.func_228643_e_()),
+        TRANSLUCENT(() -> () -> RenderType.func_228645_f_());
 
-        private final Supplier<RenderType> supplier;
+        private final Supplier<Supplier<RenderType>> supplier;
 
-        Layer(Supplier<RenderType> supplier) {
+        Layer(Supplier<Supplier<RenderType>> supplier) {
             this.supplier = supplier;
         }
 
         @OnlyIn(Dist.CLIENT)
         public RenderType get() {
-            return supplier.get();
+            return supplier.get().get();
         }
     }
 }

@@ -454,7 +454,7 @@ public class Kiwi {
     //        return sb.toString();
     //    }
 
-    public void init(FMLCommonSetupEvent event) {
+    private void init(FMLCommonSetupEvent event) {
         KiwiConfig.refresh();
         CraftingHelper.register(new ModuleLoadedCondition.Serializer());
         CraftingHelper.register(new ResourceLocation(MODID, "full_block"), FullBlockIngredient.SERIALIZER);
@@ -463,12 +463,12 @@ public class Kiwi {
         ModLoadingContext.get().setActiveContainer(null, null);
     }
 
-    public void clientInit(FMLClientSetupEvent event) {
+    private void clientInit(FMLClientSetupEvent event) {
         KiwiManager.MODULES.values().forEach(m -> m.clientInit(event));
         ModLoadingContext.get().setActiveContainer(null, null);
     }
 
-    public void serverInit(FMLServerStartingEvent event) {
+    private void serverInit(FMLServerStartingEvent event) {
         KiwiCommand.register(event.getCommandDispatcher(), !event.getServer().isDedicatedServer());
 
         KiwiManager.MODULES.values().forEach(m -> m.serverInit(event));
@@ -476,12 +476,12 @@ public class Kiwi {
         ModLoadingContext.get().setActiveContainer(null, null);
     }
 
-    public void postInit(InterModProcessEvent event) {
+    private void postInit(InterModProcessEvent event) {
         KiwiManager.MODULES.values().forEach(ModuleInfo::postInit);
         ModLoadingContext.get().setActiveContainer(null, null);
     }
 
-    public void loadComplete(FMLLoadCompleteEvent event) {
+    private void loadComplete(FMLLoadCompleteEvent event) {
         KiwiManager.GROUPS.clear();
     }
 
