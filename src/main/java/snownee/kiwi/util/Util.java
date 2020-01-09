@@ -10,7 +10,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistries;
 
-public class Util {
+public final class Util {
+    private Util() {}
+
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("###,###");
     public static final MessageFormat MESSAGE_FORMAT = new MessageFormat("{0,number,#.#}");
 

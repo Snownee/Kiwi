@@ -6,7 +6,7 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
@@ -30,6 +30,7 @@ import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import snownee.kiwi.client.RenderUtil;
+import snownee.kiwi.contributor.Contributors;
 //import snownee.kiwi.client.AdvancedFontRenderer;
 import snownee.kiwi.item.ModItem;
 import snownee.kiwi.schedule.Scheduler;
@@ -67,6 +68,7 @@ public class TestItem extends ModItem {
                 return false;
             }
         }));
+        System.out.println(TestModule.FIRST_ITEM == TestModule2.FIRST_ITEM);
         return ActionResultType.SUCCESS;
         //        World world = context.getWorld();
         //        Hand hand = context.getHand();
@@ -89,6 +91,10 @@ public class TestItem extends ModItem {
         //                worldIn.addParticle(ParticleTypes.FIREWORK, point.x, point.y, point.z, 0, 0, 0);
         //            }
         //        }
+
+        if (worldIn.isRemote && handIn == Hand.MAIN_HAND) {
+            Contributors.changeEffect();
+        }
 
         ItemStack stack = playerIn.getHeldItem(handIn);
         //        NBTHelper data = NBTHelper.of(stack);
@@ -114,7 +120,7 @@ public class TestItem extends ModItem {
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
     public void render(RenderWorldLastEvent event) {
-        Screen.fill(0, 0, 20, 20, 20);
+        AbstractGui.fill(0, 0, 20, 20, 20);
         Minecraft mc = Minecraft.getInstance();
         PlayerEntity player = mc.player;
         ItemStack stack = player.getHeldItemMainhand();
