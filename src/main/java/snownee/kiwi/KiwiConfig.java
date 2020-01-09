@@ -1,5 +1,6 @@
 package snownee.kiwi;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -29,11 +30,13 @@ public final class KiwiConfig {
     public static boolean tooltipRequiresShift = false;
     public static int tooltipWrapWidth = 100;
     public static boolean debugTooltip = true;
+    public static String debugTooltipNBTFormatter = "vanilla";
 
     private static ConfigValue<String> contributorEffectCfg;
     private static BooleanValue tooltipRequiresShiftCfg;
     private static IntValue tooltipWrapWidthCfg;
     private static BooleanValue debugTooltipCfg;
+    private static ConfigValue<String> debugTooltipNBTFormatterCfg;
     //public static BooleanValue replaceDefaultFontRendererCfg;
     public static Map<ResourceLocation, BooleanValue> modules = Maps.newHashMap();
 
@@ -75,6 +78,11 @@ public final class KiwiConfig {
                 .translation("kiwi.config.debugTooltip")
                 .define("debugTooltip", debugTooltip);
 
+        debugTooltipNBTFormatterCfg = builder
+                .comment("Allowed values: vanilla, kiwi")
+                .translation("kiwi.config.tooltipNBTFormatter")
+                .define("debugTooltipNBTFormatter", debugTooltipNBTFormatter);
+
         /*
         replaceDefaultFontRendererCfg = builder
                 .comment("Use §x (almost) everywhere. Fix MC-109260. Do NOT enable this unless you know what you are doing")
@@ -91,6 +99,7 @@ public final class KiwiConfig {
         tooltipRequiresShift = tooltipRequiresShiftCfg.get();
         tooltipWrapWidth = tooltipWrapWidthCfg.get();
         debugTooltip = debugTooltipCfg.get();
+        debugTooltipNBTFormatter = debugTooltipNBTFormatterCfg.get().toLowerCase(Locale.ENGLISH);
     }
 
     @SubscribeEvent
