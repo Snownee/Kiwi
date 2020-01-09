@@ -11,6 +11,7 @@ import com.google.common.collect.Maps;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
+import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import net.minecraftforge.common.ForgeConfigSpec.IntValue;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
@@ -18,15 +19,18 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.fml.common.thread.EffectiveSide;
 import net.minecraftforge.fml.config.ModConfig;
+import snownee.kiwi.util.Util;
 
 @EventBusSubscriber(bus = Bus.MOD)
 public final class KiwiConfig {
     static final ForgeConfigSpec spec;
 
+    public static ResourceLocation contributorEffect = null;
     public static boolean tooltipRequiresShift = false;
     public static int tooltipWrapWidth = 100;
     public static boolean debugTooltip = true;
 
+    private static ConfigValue<String> contributorEffectCfg;
     private static BooleanValue tooltipRequiresShiftCfg;
     private static IntValue tooltipWrapWidthCfg;
     private static BooleanValue debugTooltipCfg;
@@ -54,6 +58,8 @@ public final class KiwiConfig {
 
         builder.push("client");
 
+        contributorEffectCfg = builder.define("contributorEffect", "");
+
         tooltipRequiresShiftCfg = builder
                 .comment("Tooltips require pressing shift to be shown")
                 .translation("kiwi.config.tooltipRequiresShift")
@@ -79,7 +85,9 @@ public final class KiwiConfig {
     }
 
     public static void refresh() {
-        if (EffectiveSide.get() == LogicalSide.SERVER) return;
+        if (EffectiveSide.get() == LogicalSide.SERVER)
+            return;
+        contributorEffect = Util.RL(contributorEffectCfg.get());
         tooltipRequiresShift = tooltipRequiresShiftCfg.get();
         tooltipWrapWidth = tooltipWrapWidthCfg.get();
         debugTooltip = debugTooltipCfg.get();
