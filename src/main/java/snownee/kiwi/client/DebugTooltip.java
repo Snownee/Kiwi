@@ -3,6 +3,8 @@ package snownee.kiwi.client;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.google.common.base.Function;
+
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -22,7 +24,8 @@ public final class DebugTooltip {
     private DebugTooltip() {}
 
     private static CompoundNBT lastNBT;
-    private static StringTextComponent lastFormatted;
+    private static ITextComponent lastFormatted;
+    private static Function<CompoundNBT, ITextComponent> formatter;
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onTooltip(ItemTooltipEvent event) {
@@ -35,50 +38,64 @@ public final class DebugTooltip {
         if (Screen.hasShiftDown() && stack.hasTag()) {
             tooltip.removeIf(c -> c.getClass() == TranslationTextComponent.class && ((TranslationTextComponent) c).getKey().equals("item.nbt_tags"));
             if (lastNBT != stack.getTag()) {
-                TextFormatting[] colors = { TextFormatting.LIGHT_PURPLE, TextFormatting.RED, TextFormatting.GOLD, TextFormatting.YELLOW, TextFormatting.GREEN, TextFormatting.AQUA };
-                String s = stack.getTag().toString();
-                StringBuilder sb = new StringBuilder();
-                int i = 0;
-                boolean quoted = false;
-                for (int ch : s.chars().boxed().collect(Collectors.toList())) {
-                    boolean special = false;
-                    if (quoted) {
-                        if (ch == '"') {
-                            quoted = false;
+                switch (KiwiConfig.debugTooltipNBTFormatter) {
+                case "kiwi":
+                    formatter = tag -> {
+                        TextFormatting[] colors = { TextFormatting.LIGHT_PURPLE, TextFormatting.RED, TextFormatting.GOLD, TextFormatting.YELLOW, TextFormatting.GREEN, TextFormatting.AQUA };
+                        String s = tag.toString();
+                        StringBuilder sb = new StringBuilder();
+                        int i = 0;
+                        boolean quoted = false;
+                        for (int ch : s.chars().boxed().collect(Collectors.toList())) {
+                            boolean special = false;
+                            if (quoted) {
+                                if (ch == '"') {
+                                    quoted = false;
+                                    sb.appendCodePoint(ch);
+                                    sb.append(TextFormatting.WHITE);
+                                    continue;
+                                }
+                            } else {
+                                if (ch == ':' || ch == ',') {
+                                    sb.append(TextFormatting.GRAY);
+                                    sb.appendCodePoint(ch);
+                                    sb.append(TextFormatting.WHITE);
+                                    continue;
+                                } else if (ch == '"') {
+                                    quoted = true;
+                                    sb.append(TextFormatting.GRAY);
+                                } else if (ch == '{' || ch == '[') {
+                                    ++i;
+                                    special = true;
+                                } else if (ch == '}' || ch == ']') {
+                                    special = true;
+                                }
+                            }
+                            if (special) {
+                                int colotIndex = i % colors.length;
+                                sb.append(colors[colotIndex]);
+                            }
                             sb.appendCodePoint(ch);
-                            sb.append(TextFormatting.WHITE);
-                            continue;
+                            if (special) {
+                                sb.append(TextFormatting.WHITE);
+                                if (ch == '}' || ch == ']') {
+                                    --i;
+                                }
+                            }
                         }
-                    } else {
-                        if (ch == ':' || ch == ',') {
-                            sb.append(TextFormatting.GRAY);
-                            sb.appendCodePoint(ch);
-                            sb.append(TextFormatting.WHITE);
-                            continue;
-                        } else if (ch == '"') {
-                            quoted = true;
-                            sb.append(TextFormatting.GRAY);
-                        } else if (ch == '{' || ch == '[') {
-                            ++i;
-                            special = true;
-                        } else if (ch == '}' || ch == ']') {
-                            special = true;
-                        }
-                    }
-                    if (special) {
-                        int colotIndex = i % colors.length;
-                        sb.append(colors[colotIndex]);
-                    }
-                    sb.appendCodePoint(ch);
-                    if (special) {
-                        sb.append(TextFormatting.WHITE);
-                        if (ch == '}' || ch == ']') {
-                            --i;
-                        }
-                    }
+                        return new StringTextComponent(sb.toString());
+                    };
+                    break;
+                case "vanilla":
+                    formatter = tag -> stack.getTag().toFormattedComponent();
+                    break;
+                default:
+                    formatter = tag -> new StringTextComponent(tag.toString());
+                    break;
                 }
+
                 lastNBT = stack.getTag();
-                lastFormatted = new StringTextComponent(sb.toString());
+                lastFormatted = formatter.apply(lastNBT);
             }
             tooltip.add(lastFormatted);
         } else {
