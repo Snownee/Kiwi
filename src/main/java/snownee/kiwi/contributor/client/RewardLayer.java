@@ -1,11 +1,13 @@
 package snownee.kiwi.contributor.client;
 
+import java.util.Collection;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
@@ -22,14 +24,15 @@ import snownee.kiwi.contributor.Contributors;
 @OnlyIn(Dist.CLIENT)
 public class RewardLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> {
 
+    public static final Collection<RewardLayer> ALL_LAYERS = Lists.newLinkedList();
     private final Cache<ResourceLocation, LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>> rewardId2renderer;
-    private final Cache<AbstractClientPlayerEntity, LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>> player2renderer;
+    private final Cache<String, LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>> player2renderer;
 
     public RewardLayer(IEntityRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> entityRendererIn) {
         super(entityRendererIn);
         if (getClass() == RewardLayer.class) {
             rewardId2renderer = CacheBuilder.newBuilder().expireAfterAccess(10, TimeUnit.MINUTES).build();
-            player2renderer = CacheBuilder.newBuilder().weakKeys().build();
+            player2renderer = CacheBuilder.newBuilder().build();
         } else {
             rewardId2renderer = null;
             player2renderer = null;
@@ -39,7 +42,7 @@ public class RewardLayer extends LayerRenderer<AbstractClientPlayerEntity, Playe
     @Override
     public void func_225628_a_(MatrixStack matrix, IRenderTypeBuffer buffer, int p_225628_3_, AbstractClientPlayerEntity entityIn, float p_225628_5_, float p_225628_6_, float p_225628_7_, float p_225628_8_, float p_225628_9_, float p_225628_10_) {
         try {
-            LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> renderer = player2renderer.get(entityIn, () -> {
+            LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> renderer = player2renderer.get(entityIn.getGameProfile().getName(), () -> {
                 ResourceLocation id = Contributors.PLAYER_EFFECTS.get(entityIn.getGameProfile().getName());
                 return rewardId2renderer.get(id, () -> {
                     return Contributors.REWARD_PROVIDERS.get(id.getNamespace().toLowerCase(Locale.ENGLISH)).createRenderer(entityRenderer, id.getPath());
@@ -52,4 +55,9 @@ public class RewardLayer extends LayerRenderer<AbstractClientPlayerEntity, Playe
             Kiwi.logger.catching(e);
         }
     }
+
+    public Cache<String, LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>> getCache() {
+        return player2renderer;
+    }
+
 }

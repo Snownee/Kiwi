@@ -11,9 +11,10 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.network.NetworkEvent.Context;
-import net.minecraftforge.fml.network.PacketDistributor;
 import snownee.kiwi.contributor.Contributors;
+import snownee.kiwi.network.NetworkChannel;
 import snownee.kiwi.network.Packet;
+import snownee.kiwi.util.Util;
 
 public class SSyncEffectPacket extends Packet {
 
@@ -23,8 +24,8 @@ public class SSyncEffectPacket extends Packet {
         this.map = map;
     }
 
-    public void send(ServerPlayerEntity player) {
-        send(PacketDistributor.PLAYER.with(() -> player));
+    public void sendExcept(ServerPlayerEntity player) {
+        NetworkChannel.sendToAllExcept(player, this);
     }
 
     public static class Handler extends PacketHandler<SSyncEffectPacket> {
@@ -43,7 +44,9 @@ public class SSyncEffectPacket extends Packet {
             ImmutableMap.Builder<String, ResourceLocation> builder = ImmutableMap.builder();
             int size = buffer.readVarInt();
             for (int i = 0; i < size; i++) {
-                builder.put(buffer.readString(), buffer.readResourceLocation());
+                String k = buffer.readString();
+                String v = buffer.readString();
+                builder.put(k, Util.RL(v));
             }
             return new SSyncEffectPacket(builder.build());
         }
@@ -52,7 +55,7 @@ public class SSyncEffectPacket extends Packet {
         @OnlyIn(Dist.CLIENT)
         public void handle(SSyncEffectPacket msg, Supplier<Context> ctx) {
             ctx.get().enqueueWork(() -> {
-                Contributors.PLAYER_EFFECTS.putAll(msg.map);
+                Contributors.changeEffect(msg.map);
             });
             ctx.get().setPacketHandled(true);
         }
