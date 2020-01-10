@@ -3,14 +3,7 @@ package snownee.kiwi.test;
 import java.util.List;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.GlStateManager;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -18,7 +11,6 @@ import net.minecraft.item.ItemUseContext;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -29,8 +21,6 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
-import snownee.kiwi.client.RenderUtil;
-//import snownee.kiwi.client.AdvancedFontRenderer;
 import snownee.kiwi.item.ModItem;
 import snownee.kiwi.schedule.Scheduler;
 import snownee.kiwi.schedule.impl.SimpleWorldTask;
@@ -67,6 +57,7 @@ public class TestItem extends ModItem {
                 return false;
             }
         }));
+        System.out.println(TestModule.FIRST_ITEM == TestModule2.FIRST_ITEM);
         return ActionResultType.SUCCESS;
         //        World world = context.getWorld();
         //        Hand hand = context.getHand();
@@ -114,37 +105,37 @@ public class TestItem extends ModItem {
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
     public void render(RenderWorldLastEvent event) {
-//        Screen.fill(0, 0, 20, 20, 20);
-//        Minecraft mc = Minecraft.getInstance();
-//        PlayerEntity player = mc.player;
-//        ItemStack stack = player.getHeldItemMainhand();
-//        if (posList == null || stack.getItem() != TestModule.FIRST_ITEM) {
-//            return;
-//        }
-//
-//        RenderUtil.beginWorld();
-//        GlStateManager.disableDepthTest();
-//        GlStateManager.disableTexture();
-//        GlStateManager.lineWidth(5);
-//
-//        Tessellator tessellator = Tessellator.getInstance();
-//        BufferBuilder buffer = tessellator.getBuffer();
-//        buffer.begin(3, DefaultVertexFormats.POSITION_COLOR);
-//        if (start != null) {
-//            buffer.pos(start.x, start.y, start.z).color(0.5f, 0, 0, 0.5f).endVertex();
-//        }
-//        if (end != null) {
-//            buffer.pos(end.x, end.y, end.z).color(0.5f, 0, 0, 0.5f).endVertex();
-//        }
-//        for (BlockPos pos : posList) {
-//            AxisAlignedBB box = new AxisAlignedBB(pos);
-//            WorldRenderer.drawBoundingBox(buffer, box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, 0, 0, 0.5f, 0.5f);
-//        }
-//        tessellator.draw();
-//        RenderUtil.endWorld();
-//
-//        GlStateManager.enableTexture();
-//        GlStateManager.enableDepthTest();
-//        //RenderUtil.drawPos(pos);
+        //        Screen.fill(0, 0, 20, 20, 20);
+        //        Minecraft mc = Minecraft.getInstance();
+        //        PlayerEntity player = mc.player;
+        //        ItemStack stack = player.getHeldItemMainhand();
+        //        if (posList == null || stack.getItem() != TestModule.FIRST_ITEM) {
+        //            return;
+        //        }
+        //
+        //        RenderUtil.beginWorld();
+        //        GlStateManager.disableDepthTest();
+        //        GlStateManager.disableTexture();
+        //        GlStateManager.lineWidth(5);
+        //
+        //        Tessellator tessellator = Tessellator.getInstance();
+        //        BufferBuilder buffer = tessellator.getBuffer();
+        //        buffer.begin(3, DefaultVertexFormats.POSITION_COLOR);
+        //        if (start != null) {
+        //            buffer.pos(start.x, start.y, start.z).color(0.5f, 0, 0, 0.5f).endVertex();
+        //        }
+        //        if (end != null) {
+        //            buffer.pos(end.x, end.y, end.z).color(0.5f, 0, 0, 0.5f).endVertex();
+        //        }
+        //        for (BlockPos pos : posList) {
+        //            AxisAlignedBB box = new AxisAlignedBB(pos);
+        //            WorldRenderer.drawBoundingBox(buffer, box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, 0, 0, 0.5f, 0.5f);
+        //        }
+        //        tessellator.draw();
+        //        RenderUtil.endWorld();
+        //
+        //        GlStateManager.enableTexture();
+        //        GlStateManager.enableDepthTest();
+        //        //RenderUtil.drawPos(pos);
     }
 }

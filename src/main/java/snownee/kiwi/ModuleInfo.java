@@ -25,13 +25,11 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.registries.GameData;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import snownee.kiwi.KiwiModule.Group;
 import snownee.kiwi.item.ModBlockItem;
 
-public class ModuleInfo
-{
+public class ModuleInfo {
     static final class RegistryHolder {
         final Multimap<Class, NamedEntry<?>> registries = LinkedListMultimap.create();
 
@@ -52,8 +50,7 @@ public class ModuleInfo
     final Set<Object> noGroups = Sets.newHashSet();
     final Set<Block> noItems = Sets.newHashSet();
 
-    public ModuleInfo(ResourceLocation rl, AbstractModule module, ModContext context)
-    {
+    public ModuleInfo(ResourceLocation rl, AbstractModule module, ModContext context) {
         this.module = module;
         this.context = context;
         module.uid = rl;
@@ -62,20 +59,16 @@ public class ModuleInfo
     /**
      * @since 2.5.2
      */
-    public void register(IForgeRegistryEntry<?> entry, String name, @Nullable Field field)
-    {
+    public void register(IForgeRegistryEntry<?> entry, ResourceLocation name, @Nullable Field field) {
         registries.put(new NamedEntry(name, entry, field));
     }
 
-    public <T extends IForgeRegistryEntry<T>> void handleRegister(RegistryEvent.Register<T> event)
-    {
+    public <T extends IForgeRegistryEntry<T>> void handleRegister(RegistryEvent.Register<T> event) {
         context.setActiveContainer();
         Class<T> clazz = event.getRegistry().getRegistrySuperType();
         Collection<NamedEntry<T>> entries = registries.get(clazz);
-        BiConsumer<ModuleInfo, T> decorator = (BiConsumer<ModuleInfo, T>) module.decorators.getOrDefault(clazz, (a, b) -> {
-        });
-        if (clazz == Item.class)
-        {
+        BiConsumer<ModuleInfo, T> decorator = (BiConsumer<ModuleInfo, T>) module.decorators.getOrDefault(clazz, (a, b) -> {});
+        if (clazz == Item.class) {
             registries.get(Block.class).forEach(e -> {
                 if (noItems.contains(e.entry))
                     return;
@@ -131,37 +124,32 @@ public class ModuleInfo
             });
         }
         entries.forEach(e -> {
-            decorator.accept(this, e.entry.setRegistryName(GameData.checkPrefix(e.name, true)));
+            decorator.accept(this, e.entry.setRegistryName(e.name));
             event.getRegistry().register(e.entry);
         });
     }
 
-    public void preInit()
-    {
+    public void preInit() {
         context.setActiveContainer();
         module.preInit();
     }
 
-    public void init(FMLCommonSetupEvent event)
-    {
+    public void init(FMLCommonSetupEvent event) {
         context.setActiveContainer();
         module.init(event);
     }
 
-    public void clientInit(FMLClientSetupEvent event)
-    {
+    public void clientInit(FMLClientSetupEvent event) {
         context.setActiveContainer();
         module.clientInit(event);
     }
 
-    public void serverInit(FMLServerStartingEvent event)
-    {
+    public void serverInit(FMLServerStartingEvent event) {
         context.setActiveContainer();
         module.serverInit(event);
     }
 
-    public void postInit()
-    {
+    public void postInit() {
         context.setActiveContainer();
         module.postInit();
     }

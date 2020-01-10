@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.Consumer;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -21,10 +21,12 @@ import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.utils.StringUtils;
 import com.google.common.base.Strings;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.SetMultimap;
 import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.MutableGraph;
 
@@ -38,9 +40,8 @@ import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.LifecycleEventProvider;
-import net.minecraftforge.fml.LifecycleEventProvider.LifecycleEvent;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoader;
@@ -65,6 +66,7 @@ import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.forgespi.language.ModFileScanData.AnnotationData;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.minecraftforge.registries.ObjectHolderRegistry;
 import net.minecraftforge.registries.RegistryManager;
 import snownee.kiwi.KiwiModule.Group;
 import snownee.kiwi.KiwiModule.Subscriber;
@@ -72,6 +74,7 @@ import snownee.kiwi.KiwiModule.Subscriber.Bus;
 import snownee.kiwi.crafting.FullBlockIngredient;
 import snownee.kiwi.crafting.ModuleLoadedCondition;
 import snownee.kiwi.schedule.Scheduler;
+import snownee.kiwi.util.ReflectionUtil;
 import snownee.kiwi.util.Util;
 
 @Mod(Kiwi.MODID)
@@ -107,6 +110,7 @@ public class Kiwi {
 
     private static Multimap<String, AnnotationData> moduleData = ArrayListMultimap.create();
     public static Map<ResourceLocation, Boolean> defaultOptions = Maps.newHashMap();
+    private static SetMultimap<ResourceLocation, KiwiObjectHolderRef> holderRefs = HashMultimap.create();
 
     public Kiwi() {
         final Type KIWI_MODULE = Type.getType(KiwiModule.class);
@@ -152,12 +156,13 @@ public class Kiwi {
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, KiwiConfig.spec, MODID + ".toml");
         final IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        modEventBus.addListener(this::preInit);
+        modEventBus.addListener(EventPriority.LOWEST, this::preInit);
         modEventBus.addListener(this::init);
         modEventBus.addListener(this::clientInit);
         MinecraftForge.EVENT_BUS.addListener(this::serverInit);
         modEventBus.addListener(this::postInit);
         modEventBus.addListener(this::loadComplete);
+        modEventBus.addListener(KiwiManager::handleRegister);
     }
 
     public void preInit(RegistryEvent.NewRegistry event) {
@@ -174,14 +179,6 @@ public class Kiwi {
             fCfg.set(config, configData);
             config.getSpec().setConfig(configData);
             config.save();
-
-            Field fTriggers = ModContainer.class.getDeclaredField("triggerMap");
-            fTriggers.setAccessible(true);
-            Map<ModLoadingStage, Consumer<LifecycleEventProvider.LifecycleEvent>> triggerMap = (Map<ModLoadingStage, Consumer<LifecycleEvent>>) fTriggers.get(myContainer);
-            Consumer<LifecycleEvent> consumer = triggerMap.get(ModLoadingStage.LOAD_REGISTRIES).andThen(e -> {
-                KiwiManager.handleRegister((RegistryEvent.Register<?>) e.getOrBuildEvent(myContainer));
-            });
-            triggerMap.put(ModLoadingStage.LOAD_REGISTRIES, consumer);
         } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
             logger.error(MARKER, "Kiwi failed to load infrastructures. Please report to developer!");
             logger.catching(e);
@@ -341,12 +338,12 @@ public class Kiwi {
                     continue;
                 }
 
-                String regName;
+                ResourceLocation regName;
                 Name nameAnnotation = field.getAnnotation(Name.class);
                 if (nameAnnotation != null) {
-                    regName = nameAnnotation.value();
+                    regName = checkPrefix(nameAnnotation.value(), modid);
                 } else {
-                    regName = field.getName().toLowerCase(Locale.US);
+                    regName = checkPrefix(field.getName().toLowerCase(Locale.ENGLISH), modid);
                 }
 
                 if (!Modifier.isFinal(mods)) {
@@ -385,12 +382,7 @@ public class Kiwi {
                     if (tmpBuilder != null) {
                         info.blockItemBuilders.put((Block) o, tmpBuilder);
                         try {
-                            tmpBuilderField.setAccessible(true);
-                            Field modifiers = tmpBuilderField.getClass().getDeclaredField("modifiers");
-                            modifiers.setAccessible(true);
-                            modifiers.setInt(tmpBuilderField, tmpBuilderField.getModifiers() & ~Modifier.FINAL);
-                            tmpBuilderField.set(info.module, null);
-                            modifiers.setInt(tmpBuilderField, tmpBuilderField.getModifiers() & ~Modifier.FINAL);
+                            ReflectionUtil.setFinalValue(tmpBuilderField, info.module, null);
                         } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
                             logger.error(MARKER, "Kiwi failed to clean used item builder: {}", tmpBuilderField);
                             logger.catching(e);
@@ -401,9 +393,14 @@ public class Kiwi {
                 }
                 if (o instanceof IForgeRegistryEntry<?>) {
                     IForgeRegistryEntry<?> entry = (IForgeRegistryEntry<?>) o;
-                    int i = counter.getOrDefault(entry.getRegistryType(), 0);
-                    counter.put(entry.getRegistryType(), i + 1);
+                    Class<?> superType = entry.getRegistryType();
+                    int i = counter.getOrDefault(superType, 0);
+                    counter.put(superType, i + 1);
                     info.register(entry, regName, field);
+                    Optional<KiwiObjectHolderRef> optional = holderRefs.get(regName).stream().filter(ref -> superType.equals(ref.getRegistryType())).findAny();
+                    if (optional.isPresent()) {
+                        ObjectHolderRegistry.addHandler(optional.get().withField(field));
+                    }
                 }
 
                 tmpBuilder = null;
@@ -425,6 +422,8 @@ public class Kiwi {
 
         KiwiManager.MODULES.values().forEach(ModuleInfo::preInit);
         ModLoadingContext.get().setActiveContainer(null, null);
+        holderRefs.clear();
+        holderRefs = null;
     }
 
     private static void checkNoGroup(ModuleInfo info, Field field, Object o) {
@@ -491,6 +490,25 @@ public class Kiwi {
 
     public static boolean isLoaded(AbstractModule module) {
         return KiwiManager.MODULES.values().stream().map($ -> $.module).anyMatch(module::equals);
+    }
+
+    /**
+     * @since 2.6.0
+     */
+    public static void applyObjectHolder(IForgeRegistry<?> registry, ResourceLocation registryName) {
+        if (holderRefs == null) {
+            logger.warn(MARKER, "Adding object holder too late. {}: {}", registry, registryName);
+            return;
+        }
+        holderRefs.put(registryName, new KiwiObjectHolderRef(null, registryName, registry));
+    }
+
+    private static ResourceLocation checkPrefix(String name, String defaultModid) {
+        if (name.contains(":")) {
+            return new ResourceLocation(name);
+        } else {
+            return new ResourceLocation(defaultModid, name);
+        }
     }
 
     //    @SideOnly(Side.CLIENT)

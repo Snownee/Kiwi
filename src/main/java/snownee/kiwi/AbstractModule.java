@@ -100,4 +100,11 @@ public abstract class AbstractModule {
     public static Tag<Fluid> fluidTag(String namespace, String path) {
         return new FluidTags.Wrapper(new ResourceLocation(namespace, path));
     }
+
+    /**
+     * @since 2.6.0
+     */
+    public ResourceLocation RL(String path) {
+        return new ResourceLocation(uid.getNamespace(), path);
+    }
 }
