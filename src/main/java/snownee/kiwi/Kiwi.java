@@ -154,7 +154,7 @@ public class Kiwi {
             }
         }
 
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, KiwiConfig.spec, MODID + ".toml");
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, KiwiConfig.spec, MODID + (FMLEnvironment.dist.isDedicatedServer() ? "-server.toml" : ".toml"));
         final IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         modEventBus.addListener(EventPriority.LOWEST, this::preInit);
         modEventBus.addListener(this::init);
