@@ -10,6 +10,7 @@ import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.google.common.collect.Maps;
 
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
@@ -20,6 +21,7 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.fml.common.thread.EffectiveSide;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import snownee.kiwi.util.Util;
 
 @EventBusSubscriber(bus = Bus.MOD)
@@ -57,7 +59,7 @@ public final class KiwiConfig {
 
         builder.pop();
 
-        if (EffectiveSide.get() == LogicalSide.SERVER) return;
+        if (FMLEnvironment.dist == Dist.DEDICATED_SERVER || EffectiveSide.get() == LogicalSide.SERVER) return;
 
         builder.push("client");
 
@@ -93,7 +95,7 @@ public final class KiwiConfig {
     }
 
     public static void refresh() {
-        if (EffectiveSide.get() == LogicalSide.SERVER)
+        if (FMLEnvironment.dist == Dist.DEDICATED_SERVER || EffectiveSide.get() == LogicalSide.SERVER)
             return;
         contributorEffect = Util.RL(contributorEffectCfg.get());
         tooltipRequiresShift = tooltipRequiresShiftCfg.get();
