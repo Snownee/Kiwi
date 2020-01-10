@@ -7,11 +7,17 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.Maps;
 
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.LogicalSide;
+import net.minecraftforge.fml.LogicalSidedProvider;
 import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkRegistry;
+import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.fml.network.PacketDistributor.PacketTarget;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 import snownee.kiwi.network.Packet.PacketHandler;
@@ -22,19 +28,27 @@ public enum NetworkChannel {
     private static final String PROTOCOL_VERSION = Integer.toString(1);
 
     private final Map<Class<?>, SimpleChannel> packet2channel = Maps.newConcurrentMap();
-    private final Map<String, Pair<SimpleChannel, AtomicInteger>> channels = Maps.newConcurrentMap();
+    private final Map<ResourceLocation, Pair<SimpleChannel, AtomicInteger>> channels = Maps.newConcurrentMap();
 
     private NetworkChannel() {}
 
     public static <T extends Packet> void register(Class<T> klass, PacketHandler<T> handler) {
+        register(klass, handler, "main");
+    }
+
+    /**
+     * @since 2.6.0
+     */
+    public static <T extends Packet> void register(Class<T> klass, PacketHandler<T> handler, String channelName) {
         final String modid = ModLoadingContext.get().getActiveNamespace();
         if ("minecraft".equals(modid)) {
             throw new IllegalStateException("ModLoadingContext cannot detect modid while registering packet: " + klass);
         }
-        Pair<SimpleChannel, AtomicInteger> pair = INSTANCE.channels.computeIfAbsent(modid, k -> {
+        ResourceLocation id = new ResourceLocation(modid, channelName);
+        Pair<SimpleChannel, AtomicInteger> pair = INSTANCE.channels.computeIfAbsent(id, $ -> {
             /* off */
             SimpleChannel channel = NetworkRegistry.ChannelBuilder
-                    .named(new ResourceLocation(k, "main"))
+                    .named(id)
                     .clientAcceptedVersions(PROTOCOL_VERSION::equals)
                     .serverAcceptedVersions(PROTOCOL_VERSION::equals)
                     .networkProtocolVersion(() -> PROTOCOL_VERSION)
@@ -57,5 +71,21 @@ public enum NetworkChannel {
     @OnlyIn(Dist.CLIENT)
     public static void sendToServer(Packet packet) {
         channel(packet.getClass()).sendToServer(packet);
+    }
+
+    public static final PacketDistributor<ServerPlayerEntity> ALL_EXCEPT = new PacketDistributor<>((dist, player) -> {
+        return p -> getServer().getPlayerList().getPlayers().forEach(player2 -> {
+            if (player.get() != player2) {
+                player2.connection.netManager.sendPacket(p);
+            }
+        });
+    }, NetworkDirection.PLAY_TO_CLIENT);
+
+    private static MinecraftServer getServer() {
+        return LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+    }
+
+    public static void sendToAllExcept(ServerPlayerEntity player, Packet packet) {
+        send(ALL_EXCEPT.with(() -> player), packet);
     }
 }

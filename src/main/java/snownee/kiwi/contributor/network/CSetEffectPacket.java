@@ -4,10 +4,10 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.network.NetworkEvent.Context;
+import snownee.kiwi.contributor.Contributors;
 import snownee.kiwi.network.ClientPacket;
 import snownee.kiwi.util.Util;
 
@@ -18,7 +18,6 @@ public class CSetEffectPacket extends ClientPacket {
 
     public CSetEffectPacket(@Nullable ResourceLocation id) {
         this.id = id;
-        System.out.println(id);
     }
 
     public static class Handler extends PacketHandler<CSetEffectPacket> {
@@ -34,19 +33,14 @@ public class CSetEffectPacket extends ClientPacket {
 
         @Override
         public CSetEffectPacket decode(PacketBuffer buffer) {
-            ResourceLocation id = Util.RL(buffer.readString());
+            ResourceLocation id = Util.RL(buffer.readString(32767));
             return new CSetEffectPacket(id);
         }
 
         @Override
         public void handle(CSetEffectPacket msg, Supplier<Context> ctx) {
             ctx.get().enqueueWork(() -> {
-                CompoundNBT data = ctx.get().getSender().getPersistentData();
-                if (msg.id == null) {
-                    data.remove("kiwiReward");
-                } else {
-                    data.putString("kiwiReward", msg.id.toString());
-                }
+                Contributors.changeEffect(ctx.get().getSender(), msg.id);
             });
             ctx.get().setPacketHandled(true);
         }

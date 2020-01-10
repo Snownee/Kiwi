@@ -55,6 +55,7 @@ public class JsonRewardProvider implements IRewardProvider {
                 users.forEach(user -> builder.put(user, reward));
             });
             contributors = builder.build();
+            Kiwi.logger.debug("Successfully loaded {} contributors.", contributors.keySet().size());
             return true;
         } catch (Exception e) {
             Kiwi.logger.catching(e);
