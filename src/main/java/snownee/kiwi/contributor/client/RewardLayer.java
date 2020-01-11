@@ -41,13 +41,20 @@ public class RewardLayer extends LayerRenderer<AbstractClientPlayerEntity, Playe
 
     @Override
     public void func_225628_a_(MatrixStack matrix, IRenderTypeBuffer buffer, int p_225628_3_, AbstractClientPlayerEntity entityIn, float p_225628_5_, float p_225628_6_, float p_225628_7_, float p_225628_8_, float p_225628_9_, float p_225628_10_) {
+        if (player2renderer == null || rewardId2renderer == null) {
+            return;
+        }
         try {
-            LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> renderer = player2renderer.get(entityIn.getGameProfile().getName(), () -> {
+            LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> renderer = player2renderer.getIfPresent(entityIn.getGameProfile().getName());
+            if (renderer == null) {
                 ResourceLocation id = Contributors.PLAYER_EFFECTS.get(entityIn.getGameProfile().getName());
-                return rewardId2renderer.get(id, () -> {
-                    return Contributors.REWARD_PROVIDERS.get(id.getNamespace().toLowerCase(Locale.ENGLISH)).createRenderer(entityRenderer, id.getPath());
-                });
-            });
+                if (id != null) {
+                    renderer = rewardId2renderer.get(id, () -> {
+                        return Contributors.REWARD_PROVIDERS.get(id.getNamespace().toLowerCase(Locale.ENGLISH)).createRenderer(entityRenderer, id.getPath());
+                    });
+                    player2renderer.put(entityIn.getGameProfile().getName(), renderer);
+                }
+            }
             if (renderer != null) {
                 renderer.func_225628_a_(matrix, buffer, p_225628_3_, entityIn, p_225628_5_, p_225628_6_, p_225628_7_, p_225628_8_, p_225628_9_, p_225628_10_);
             }
