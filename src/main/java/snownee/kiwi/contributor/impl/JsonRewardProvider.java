@@ -45,7 +45,7 @@ public class JsonRewardProvider implements IRewardProvider {
             InputStreamReader reader = new InputStreamReader(new URL(url).openStream());
             Map<String, Collection<String>> map = GSON.fromJson(reader, Map.class);
             final Collection<String> superUsers = map.containsKey("*") ? map.get("*") : Collections.singleton(getAuthor());
-            superUsers.add("Dev");
+            //superUsers.add("Dev");
             Builder<String, String> builder = ImmutableSetMultimap.builder();
             map.forEach((reward, users) -> {
                 if (reward.equals("*")) {

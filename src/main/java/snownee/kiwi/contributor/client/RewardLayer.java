@@ -39,13 +39,20 @@ public class RewardLayer extends LayerRenderer<AbstractClientPlayerEntity, Playe
 
     @Override
     public void render(AbstractClientPlayerEntity entityIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scaleIn) {
+        if (player2renderer == null || rewardId2renderer == null) {
+            return;
+        }
         try {
-            LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> renderer = player2renderer.get(entityIn.getGameProfile().getName(), () -> {
+            LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> renderer = player2renderer.getIfPresent(entityIn.getGameProfile().getName());
+            if (renderer == null) {
                 ResourceLocation id = Contributors.PLAYER_EFFECTS.get(entityIn.getGameProfile().getName());
-                return rewardId2renderer.get(id, () -> {
-                    return Contributors.REWARD_PROVIDERS.get(id.getNamespace().toLowerCase(Locale.ENGLISH)).createRenderer(entityRenderer, id.getPath());
-                });
-            });
+                if (id != null) {
+                    renderer = rewardId2renderer.get(id, () -> {
+                        return Contributors.REWARD_PROVIDERS.get(id.getNamespace().toLowerCase(Locale.ENGLISH)).createRenderer(entityRenderer, id.getPath());
+                    });
+                    player2renderer.put(entityIn.getGameProfile().getName(), renderer);
+                }
+            }
             if (renderer != null) {
                 renderer.render(entityIn, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, scaleIn);
             }
