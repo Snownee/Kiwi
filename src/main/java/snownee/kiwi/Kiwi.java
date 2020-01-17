@@ -35,7 +35,9 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.item.crafting.IRecipeType;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.CraftingHelper;
@@ -165,7 +167,7 @@ public class Kiwi {
         modEventBus.addListener(KiwiManager::handleRegister);
     }
 
-    public void preInit(RegistryEvent.NewRegistry event) {
+    private void preInit(RegistryEvent.NewRegistry event) {
         try {
             ModContainer myContainer = ModLoadingContext.get().getActiveContainer();
             Field fMap = ModContainer.class.getDeclaredField("configs");
@@ -347,7 +349,7 @@ public class Kiwi {
                 }
 
                 if (!Modifier.isFinal(mods)) {
-                    if (field.getType() == info.module.getClass() && regName.equals("instance")) {
+                    if (field.getType() == info.module.getClass() && regName.getPath().equals("instance") && regName.getNamespace().equals(modid)) {
                         try {
                             field.set(null, info.module);
                         } catch (IllegalArgumentException | IllegalAccessException e) {
@@ -370,6 +372,9 @@ public class Kiwi {
                 }
                 if (useOwnGroup && info.group == null && o instanceof ItemGroup) {
                     info.group = (ItemGroup) o;
+                } else if (o instanceof IRecipeType) {
+                    Registry.register(Registry.RECIPE_TYPE, regName, (IRecipeType<?>) o);
+                    continue;
                 } else if (o instanceof Item.Properties) {
                     tmpBuilder = (Item.Properties) o;
                     tmpBuilderField = field;
