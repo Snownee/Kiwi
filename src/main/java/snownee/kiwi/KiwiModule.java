@@ -13,8 +13,8 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface KiwiModule
-{
+public @interface KiwiModule {
+
     String modid() default "";
 
     /**
@@ -36,8 +36,7 @@ public @interface KiwiModule
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
-    @interface Optional
-    {
+    @interface Optional {
         boolean disabledByDefault() default false;
     }
 
@@ -52,16 +51,14 @@ public @interface KiwiModule
      *
      */
     @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.TYPE, ElementType.FIELD})
-    @interface Group
-    {
+    @Target({ ElementType.TYPE, ElementType.FIELD })
+    @interface Group {
         String value() default "";
     }
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
-    @interface Subscriber
-    {
+    @interface Subscriber {
         /**
          * Specify targets to load this event subscriber on. Can be used to avoid loading Client specific events
          * on a dedicated server, for example.
@@ -77,8 +74,7 @@ public @interface KiwiModule
          */
         Bus[] value() default Bus.FORGE;
 
-        enum Bus
-        {
+        enum Bus {
             /**
              * The main Forge Event Bus.
              * 
@@ -93,15 +89,19 @@ public @interface KiwiModule
 
             private final Supplier<IEventBus> busSupplier;
 
-            Bus(Supplier<IEventBus> eventBusSupplier)
-            {
+            Bus(Supplier<IEventBus> eventBusSupplier) {
                 this.busSupplier = eventBusSupplier;
             }
 
-            public Supplier<IEventBus> bus()
-            {
+            public Supplier<IEventBus> bus() {
                 return busSupplier;
             }
         }
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    @interface LoadingCondition {
+        String[] value() default "";
     }
 }
