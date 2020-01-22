@@ -13,8 +13,8 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface KiwiModule
-{
+public @interface KiwiModule {
+
     String modid() default "";
 
     /**
@@ -29,24 +29,23 @@ public @interface KiwiModule
     String dependencies() default "";
 
     /**
-     * 
+     *
      * Optional module can be disabled in Kiwi's configuration
      * @author Snownee
      *
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
-    @interface Optional
-    {
+    @interface Optional {
         boolean disabledByDefault() default false;
     }
 
     /**
-     * 
+     *
      * Item group this module belongs to.
      * You can input vanilla group id, such as 'buildingBlocks', 'misc'
      * If empty, Kiwi will catch the first ItemGroup in this module.
-     * 
+     *
      * @see KiwiManager#addItemGroup(String, String, net.minecraft.item.ItemGroup)
      * @author Snownee
      *
@@ -60,8 +59,7 @@ public @interface KiwiModule
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
-    @interface Subscriber
-    {
+    @interface Subscriber {
         /**
          * Specify targets to load this event subscriber on. Can be used to avoid loading Client specific events
          * on a dedicated server, for example.
@@ -77,11 +75,10 @@ public @interface KiwiModule
          */
         Bus[] value() default Bus.FORGE;
 
-        enum Bus
-        {
+        enum Bus {
             /**
              * The main Forge Event Bus.
-             * 
+             *
              * @see MinecraftForge#EVENT_BUS
              */
             FORGE(() -> MinecraftForge.EVENT_BUS),
@@ -93,15 +90,20 @@ public @interface KiwiModule
 
             private final Supplier<IEventBus> busSupplier;
 
-            Bus(final Supplier<IEventBus> eventBusSupplier)
+            Bus(Supplier<IEventBus> eventBusSupplier)
             {
                 this.busSupplier = eventBusSupplier;
             }
 
-            public Supplier<IEventBus> bus()
-            {
+            public Supplier<IEventBus> bus() {
                 return busSupplier;
             }
         }
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    @interface LoadingCondition {
+        String[] value() default "";
     }
 }

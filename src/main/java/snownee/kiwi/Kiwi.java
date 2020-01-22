@@ -1,16 +1,20 @@
 package snownee.kiwi;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.reflect.MethodUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
@@ -27,6 +31,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.SetMultimap;
+import com.google.common.collect.Sets;
 import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.MutableGraph;
 
@@ -114,10 +119,12 @@ public class Kiwi {
     private static Multimap<String, AnnotationData> moduleData = ArrayListMultimap.create();
     public static Map<ResourceLocation, Boolean> defaultOptions = Maps.newHashMap();
     private static SetMultimap<ResourceLocation, KiwiObjectHolderRef> holderRefs = HashMultimap.create();
+    private static Map<AnnotationData, String> conditions = Maps.newHashMap();
 
     public Kiwi() {
         final Type KIWI_MODULE = Type.getType(KiwiModule.class);
         final Type OPTIONAL_MODULE = Type.getType(KiwiModule.Optional.class);
+        final Type LOADING_CONDITION = Type.getType(KiwiModule.LoadingCondition.class);
 
         Map<Type, AnnotationData> moduleToOptional = Maps.newHashMap();
         for (ModInfo info : ModList.get().getMods()) {
@@ -129,6 +136,8 @@ public class Kiwi {
                         moduleData.put(Strings.isNullOrEmpty(modid) ? info.getModId() : modid, annotationData);
                     } else if (OPTIONAL_MODULE.equals(annotationData.getAnnotationType())) {
                         moduleToOptional.put(annotationData.getClassType(), annotationData);
+                    } else if (LOADING_CONDITION.equals(annotationData.getAnnotationType())) {
+                        conditions.put(annotationData, info.getModId());
                     }
                 }
             }
@@ -189,6 +198,32 @@ public class Kiwi {
             return;
         }
 
+        Set<ResourceLocation> disabledModules = Sets.newHashSet();
+        conditions.forEach((k, v) -> {
+            try {
+                Class clazz = Class.forName(k.getClassType().getClassName());
+                int p = k.getMemberName().indexOf('(');
+                if (p <= 0) {
+                    throw new IllegalArgumentException();
+                }
+                String methodName = k.getMemberName().substring(0, p);
+                List<String> values = (List<String>) k.getAnnotationData().get("value");
+                if (values == null) {
+                    values = Arrays.asList(v);
+                }
+                List<ResourceLocation> ids = values.stream().map(s -> checkPrefix(s, v)).collect(Collectors.toList());
+                for (ResourceLocation id : ids) {
+                    LoadingContext context = new LoadingContext(id);
+                    Boolean bl = (Boolean) MethodUtils.invokeExactStaticMethod(clazz, methodName, context);
+                    if (!bl) {
+                        disabledModules.add(id);
+                    }
+                }
+            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | ClassNotFoundException e) {
+                logger.error(MARKER, "Failed to access to LoadingCondition: {}", k);
+                logger.catching(e);
+            }
+        });
         /* off */
         ImmutableList.of(
                 ItemGroup.BUILDING_BLOCKS,
@@ -221,7 +256,7 @@ public class Kiwi {
             }
 
             ResourceLocation rl = new ResourceLocation(modid, name);
-            if (KiwiConfig.modules.containsKey(rl) && !KiwiConfig.modules.get(rl).get()) {
+            if (disabledModules.contains(rl) || KiwiConfig.modules.containsKey(rl) && !KiwiConfig.modules.get(rl).get()) {
                 continue;
             }
 
@@ -296,6 +331,8 @@ public class Kiwi {
         moduleData = null;
         defaultOptions.clear();
         defaultOptions = null;
+        conditions.clear();
+        conditions = null;
 
         Util.class.hashCode();
         Object2IntMap<Class<?>> counter = new Object2IntArrayMap<>();
