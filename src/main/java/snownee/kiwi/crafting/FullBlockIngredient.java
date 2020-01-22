@@ -38,7 +38,7 @@ public class FullBlockIngredient extends Ingredient
         }
         Block block = Block.getBlockFromItem(stack.getItem());
         BlockState state = block.getDefaultState();
-        boolean flag = state.isSolid() && !state.func_215691_g();
+        boolean flag = state.isSolid() && !state.isTransparent();
         if (flag)
         {
             try

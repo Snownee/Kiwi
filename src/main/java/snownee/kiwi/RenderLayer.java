@@ -16,9 +16,9 @@ public @interface RenderLayer {
     Layer value();
 
     enum Layer {
-        CUTOUT_MIPPED(() -> () -> RenderType.func_228641_d_()),
-        CUTOUT(() -> () -> RenderType.func_228643_e_()),
-        TRANSLUCENT(() -> () -> RenderType.func_228645_f_());
+        CUTOUT_MIPPED(() -> () -> RenderType.cutoutMipped()),
+        CUTOUT(() -> () -> RenderType.cutout()),
+        TRANSLUCENT(() -> () -> RenderType.translucent());
 
         private final Supplier<Supplier<RenderType>> supplier;
 

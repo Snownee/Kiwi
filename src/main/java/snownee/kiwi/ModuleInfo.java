@@ -92,7 +92,7 @@ public class ModuleInfo {
                 entries.add(new NamedEntry(e.name, item));
             });
         } else if (clazz == Block.class && FMLEnvironment.dist.isClient()) {
-            final RenderType solid = RenderType.func_228639_c_();
+            final RenderType solid = RenderType.solid();
             Map<Class<?>, RenderType> cache = Maps.newHashMap();
             entries.stream().forEach(e -> {
                 Block block = (Block) e.entry;
