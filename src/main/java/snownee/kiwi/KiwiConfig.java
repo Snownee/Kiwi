@@ -105,7 +105,7 @@ public final class KiwiConfig {
     }
 
     @SubscribeEvent
-    public static void onFileChange(ModConfig.ConfigReloading event) {
+    public static void onFileChange(ModConfig.Reloading event) {
         ((CommentedFileConfig) event.getConfig().getConfigData()).load();
         refresh();
     }

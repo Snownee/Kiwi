@@ -56,7 +56,7 @@ public class KiwiSpriteUploader extends SpriteUploader
     }
 
     @Override
-    public Stream<ResourceLocation> func_225640_a_()
+    public Stream<ResourceLocation> getResourceLocations()
     {
         return Collections.unmodifiableCollection(registeredSprites).stream();
     }
@@ -74,4 +74,5 @@ public class KiwiSpriteUploader extends SpriteUploader
     {
         return atlasLocation;
     }
+
 }

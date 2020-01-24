@@ -146,4 +146,9 @@ public class TextureMultipart implements IDynamicBakedModel
             return new TextureMultipart(this.selectors);
         }
     }
+
+    @Override
+    public boolean func_230044_c_() {
+        return originalBaked.func_230044_c_();
+    }
 }

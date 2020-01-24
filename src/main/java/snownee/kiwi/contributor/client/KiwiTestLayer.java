@@ -17,7 +17,7 @@ public class KiwiTestLayer extends RewardLayer {
     }
 
     @Override
-    public void func_225628_a_(MatrixStack matrix, IRenderTypeBuffer buffer, int p_225628_3_, AbstractClientPlayerEntity entityIn, float p_225628_5_, float p_225628_6_, float p_225628_7_, float p_225628_8_, float p_225628_9_, float p_225628_10_) {
+    public void render(MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, AbstractClientPlayerEntity entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
         //        GlStateManager.pushMatrix();
         //        GlStateManager.enableBlend();
         //        GlStateManager.normal3f(0.0F, 1.0F, 0.0F);

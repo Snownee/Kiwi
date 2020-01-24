@@ -291,8 +291,8 @@ public class TextureModel implements IDynamicBakedModel
         try
         {
             model = baked.get(key, () -> {
-                BlockModel unbaked = new BlockModel(originalUnbaked.getParentLocation(), originalUnbaked.getElements(), textures, originalUnbaked.isAmbientOcclusion(), originalUnbaked.isGui3d(), originalUnbaked.getAllTransforms(), Lists.newArrayList(originalUnbaked.getOverrides()));
-                return unbaked.func_225613_a_(modelLoader, ModelLoader.defaultTextureGetter(), variant, loaderId);
+                BlockModel unbaked = new BlockModel(originalUnbaked.getParentLocation(), originalUnbaked.getElements(), textures, originalUnbaked.isAmbientOcclusion(), originalUnbaked.func_230176_c_(), originalUnbaked.getAllTransforms(), Lists.newArrayList(originalUnbaked.getOverrides()));
+                return unbaked.bakeModel(modelLoader, ModelLoader.defaultTextureGetter(), variant, loaderId);
             });
         }
         catch (ExecutionException e)
@@ -406,5 +406,10 @@ public class TextureModel implements IDynamicBakedModel
         {
             return ImmutableList.of();
         }
+    }
+
+    @Override
+    public boolean func_230044_c_() {
+        return originalBaked.func_230044_c_();
     }
 }

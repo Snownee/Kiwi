@@ -40,23 +40,23 @@ public class RewardLayer extends LayerRenderer<AbstractClientPlayerEntity, Playe
     }
 
     @Override
-    public void func_225628_a_(MatrixStack matrix, IRenderTypeBuffer buffer, int p_225628_3_, AbstractClientPlayerEntity entityIn, float p_225628_5_, float p_225628_6_, float p_225628_7_, float p_225628_8_, float p_225628_9_, float p_225628_10_) {
+    public void render(MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, AbstractClientPlayerEntity entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
         if (player2renderer == null || rewardId2renderer == null) {
             return;
         }
         try {
-            LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> renderer = player2renderer.getIfPresent(entityIn.getGameProfile().getName());
+            LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> renderer = player2renderer.getIfPresent(entitylivingbaseIn.getGameProfile().getName());
             if (renderer == null) {
-                ResourceLocation id = Contributors.PLAYER_EFFECTS.get(entityIn.getGameProfile().getName());
+                ResourceLocation id = Contributors.PLAYER_EFFECTS.get(entitylivingbaseIn.getGameProfile().getName());
                 if (id != null) {
                     renderer = rewardId2renderer.get(id, () -> {
                         return Contributors.REWARD_PROVIDERS.get(id.getNamespace().toLowerCase(Locale.ENGLISH)).createRenderer(entityRenderer, id.getPath());
                     });
-                    player2renderer.put(entityIn.getGameProfile().getName(), renderer);
+                    player2renderer.put(entitylivingbaseIn.getGameProfile().getName(), renderer);
                 }
             }
             if (renderer != null) {
-                renderer.func_225628_a_(matrix, buffer, p_225628_3_, entityIn, p_225628_5_, p_225628_6_, p_225628_7_, p_225628_8_, p_225628_9_, p_225628_10_);
+                renderer.render(matrixStackIn, bufferIn, packedLightIn, entitylivingbaseIn, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch);
             }
         } catch (ExecutionException e) {
             Kiwi.logger.catching(e);
