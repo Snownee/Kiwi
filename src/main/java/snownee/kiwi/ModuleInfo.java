@@ -91,7 +91,12 @@ public class ModuleInfo {
                 }
                 entries.add(new NamedEntry(e.name, item));
             });
-        } else if (clazz == Block.class && FMLEnvironment.dist.isClient()) {
+        }
+        entries.forEach(e -> {
+            decorator.accept(this, e.entry.setRegistryName(e.name));
+            event.getRegistry().register(e.entry);
+        });
+        if (clazz == Block.class && FMLEnvironment.dist.isClient()) {
             final RenderType solid = RenderType.solid();
             Map<Class<?>, RenderType> cache = Maps.newHashMap();
             entries.stream().forEach(e -> {
@@ -123,10 +128,6 @@ public class ModuleInfo {
                 }
             });
         }
-        entries.forEach(e -> {
-            decorator.accept(this, e.entry.setRegistryName(e.name));
-            event.getRegistry().register(e.entry);
-        });
     }
 
     public void preInit() {

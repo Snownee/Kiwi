@@ -7,6 +7,6 @@ public class TestCondition {
 
     @LoadingCondition("test")
     public static boolean test(LoadingContext ctx) {
-        return false;
+        return true;
     }
 }

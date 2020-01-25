@@ -37,7 +37,7 @@ public class TestModule extends AbstractModule {
     // The next block will use this builder to build its BlockItem. After that this field will be null
     public static final Item.Properties FIRST_BLOCK_ITEM_BUILDER = itemProp().rarity(Rarity.RARE);
     // Register a simple block and its BlockItem
-    @RenderLayer(Layer.CUTOUT)
+    //@RenderLayer(Layer.CUTOUT)
     public static final TestBlock FIRST_BLOCK = init(new TestBlock2(blockProp(Material.WOOD)));
 
     // Register a simple effect
