@@ -212,9 +212,14 @@ public class Kiwi {
                 List<ResourceLocation> ids = values.stream().map(s -> checkPrefix(s, v)).collect(Collectors.toList());
                 for (ResourceLocation id : ids) {
                     LoadingContext context = new LoadingContext(id);
-                    Boolean bl = (Boolean) MethodUtils.invokeExactStaticMethod(clazz, methodName, context);
-                    if (!bl) {
+                    try {
+                        Boolean bl = (Boolean) MethodUtils.invokeExactStaticMethod(clazz, methodName, context);
+                        if (!bl) {
+                            disabledModules.add(id);
+                        }
+                    } catch (Exception e) {
                         disabledModules.add(id);
+                        throw e;
                     }
                 }
             } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | ClassNotFoundException e) {
