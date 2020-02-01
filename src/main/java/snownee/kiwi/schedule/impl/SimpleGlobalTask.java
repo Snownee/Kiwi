@@ -42,7 +42,7 @@ public class SimpleGlobalTask extends Task<GlobalTicker> implements INBTSerializ
     public CompoundNBT serializeNBT() {
         CompoundNBT data = new CompoundNBT();
         data.putInt("tick", tick);
-        data.putBoolean("client", side == LogicalSide.CLIENT);
+        data.putBoolean("client", side.isClient());
         data.putBoolean("start", phase == Phase.START);
         return data;
     }
