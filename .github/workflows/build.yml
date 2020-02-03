@@ -17,6 +17,7 @@ jobs:
       run: ./gradlew build
     - id: getfilename
       run: |
+        cd build\libs
         $file =  Get-ChildItem -Path . -Recurse -ErrorAction SilentlyContinue |
           Where-Object { $_.BaseName -match 'Kiwi-[0-9.]+-[0-9.]+' }
         $file_name = $file.name
