@@ -31,14 +31,14 @@ jobs:
       uses: actions/upload-artifact@v1.0.0
       with:
         name: ${{steps.getfilename.outputs.file0 }}
-        path: build/libs
+        path: build/libs/${{steps.getfilename.outputs.file0 }}
     - name: Upload artifact
       uses: actions/upload-artifact@v1.0.0
       with:
         name: ${{steps.getfilename.outputs.file1 }}
-        path: build/libs
+        path: build/libs/${{steps.getfilename.outputs.file1 }}
     - name: Upload artifact
       uses: actions/upload-artifact@v1.0.0
       with:
         name: ${{steps.getfilename.outputs.file2 }}
-        path: build/libs
+        path: build/libs/${{steps.getfilename.outputs.file2 }}
