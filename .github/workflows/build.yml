@@ -15,30 +15,8 @@ jobs:
         java-version: 1.8
     - name: Build with Gradle
       run: ./gradlew build
-    - id: getfilename
-      run: |
-        cd build/libs
-        $file =  Get-ChildItem -Path . -Recurse -ErrorAction SilentlyContinue |
-        Where-Object { $_.BaseName -match 'Kiwi-[0-9.]+-[0-9.]+' }
-        $file_name = $file.name[0]
-        echo "::set-output name=file0::$file_name"
-        $file_name = $file.name[1]
-        echo "::set-output name=file1::$file_name"
-        $file_name = $file.name[2]
-        echo "::set-output name=file2::$file_name"
-        cd ../..
     - name: Upload artifact
       uses: actions/upload-artifact@v1.0.0
       with:
-        name: ${{steps.getfilename.outputs.file0 }}
-        path: build/libs/${{steps.getfilename.outputs.file0 }}
-    - name: Upload artifact
-      uses: actions/upload-artifact@v1.0.0
-      with:
-        name: ${{steps.getfilename.outputs.file1 }}
-        path: build/libs/${{steps.getfilename.outputs.file1 }}
-    - name: Upload artifact
-      uses: actions/upload-artifact@v1.0.0
-      with:
-        name: ${{steps.getfilename.outputs.file2 }}
-        path: build/libs/${{steps.getfilename.outputs.file2 }}
+        name: kiwi
+        path: build/libs
