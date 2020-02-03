@@ -37,7 +37,7 @@ public abstract class BaseTile extends TileEntity
     // Used for syncing data at the time when the chunk is loaded
     @Nonnull
     @Override
-    public final CompoundNBT getUpdateTag()
+    public CompoundNBT getUpdateTag()
     {
         return this.write(new CompoundNBT());
     }
