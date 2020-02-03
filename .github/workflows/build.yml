@@ -23,7 +23,7 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v1.0.0
       with:
-        name: ${{steps.getfilename.outputs.file0 }}
+        name: ${{steps.getfilename.outputs.file0[0] }}
         path: build/libs
     - name: Upload artifact
       uses: actions/upload-artifact@v1.0.0
