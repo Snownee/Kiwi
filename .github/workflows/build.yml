@@ -17,9 +17,18 @@ jobs:
       run: ./gradlew build
     - id: getfilename
       run: |
-        echo "::set-output name=file0::$(ls build/libs/Kiwi-*.jar)"
-        echo "::set-output name=file1::$(ls build/libs/Kiwi-*-deobf.jar)"
-        echo "::set-output name=file2::$(ls build/libs/Kiwi-*-sources.jar)"
+        $file =  Get-ChildItem -Path . -Recurse -ErrorAction SilentlyContinue |
+          Where-Object { $_.BaseName -match 'Kiwi-[0-9.]+-[0-9.]+' }
+        $file_name = $file.name
+        echo "::set-output name=file0::$file_name"
+        $file =  Get-ChildItem -Path . -Recurse -ErrorAction SilentlyContinue |
+          Where-Object { $_.BaseName -match 'Kiwi-[0-9.]+-[0-9.]+-deobf' }
+        $file_name = $file.name
+        echo "::set-output name=file1::$file_name"
+        $file =  Get-ChildItem -Path . -Recurse -ErrorAction SilentlyContinue |
+          Where-Object { $_.BaseName -match 'Kiwi-[0-9.]+-[0-9.]+-sources' }
+        $file_name = $file.name
+        echo "::set-output name=file2::$file_name"
     - name: Upload artifact
       uses: actions/upload-artifact@v1.0.0
       with:
