@@ -33,6 +33,7 @@ import net.minecraftforge.client.model.data.IModelData;
  * @author Snownee
  *
  */
+@SuppressWarnings("deprecation")
 @OnlyIn(Dist.CLIENT)
 public class TextureMultipart implements IDynamicBakedModel
 {
@@ -106,7 +107,6 @@ public class TextureMultipart implements IDynamicBakedModel
     }
 
     @Override
-    @SuppressWarnings("deprecation")
     public TextureAtlasSprite getParticleTexture()
     {
         return originalBaked.getParticleTexture();
@@ -119,7 +119,6 @@ public class TextureMultipart implements IDynamicBakedModel
     }
 
     @Override
-    @SuppressWarnings("deprecation")
     public ItemCameraTransforms getItemCameraTransforms()
     {
         return originalBaked.getItemCameraTransforms();

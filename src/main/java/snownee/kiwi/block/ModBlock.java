@@ -149,6 +149,7 @@ public class ModBlock extends Block {
         return pickBlock(state, target, world, pos, player);
     }
 
+    @SuppressWarnings("deprecation")
     public static ItemStack pickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
         ItemStack stack = state.getBlock().getItem(world, pos, state);
         TileEntity tile = world.getTileEntity(pos);

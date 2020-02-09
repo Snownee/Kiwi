@@ -109,6 +109,7 @@ public class TextureTile extends BaseTile {
         return marks == null ? Items.AIR : marks.getOrDefault(key, Items.AIR);
     }
 
+    @SuppressWarnings("deprecation")
     @OnlyIn(Dist.CLIENT)
     public static String getTextureFromState(BlockState state) {
         return Util.trimRL(Minecraft.getInstance().getBlockRendererDispatcher().getBlockModelShapes().getTexture(state).getName());

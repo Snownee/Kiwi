@@ -24,6 +24,7 @@ import snownee.kiwi.tile.TextureTile;
 public class TestBlock extends StairsBlock
 {
 
+    @SuppressWarnings("deprecation")
     public TestBlock(Properties builder)
     {
         super(Blocks.STONE.getDefaultState(), builder);

@@ -259,7 +259,14 @@ public class Kiwi {
             }
 
             ResourceLocation rl = new ResourceLocation(modid, name);
-            if (disabledModules.contains(rl) || KiwiConfig.modules.containsKey(rl) && !KiwiConfig.modules.get(rl).get()) {
+            if (disabledModules.contains(rl)) {
+                if (KiwiConfig.modules.containsKey(rl)) { // module is optional
+                    continue;
+                } else {
+                    throw new RuntimeException("Cannot load mandatory module: " + rl);
+                }
+            }
+            if (KiwiConfig.modules.containsKey(rl) && !KiwiConfig.modules.get(rl).get()) {
                 continue;
             }
 

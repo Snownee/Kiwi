@@ -66,6 +66,7 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import snownee.kiwi.tile.TextureTile;
 import snownee.kiwi.util.NBTHelper;
 
+@SuppressWarnings("deprecation")
 @EventBusSubscriber(bus = Bus.MOD, value = Dist.CLIENT)
 @OnlyIn(Dist.CLIENT)
 public class TextureModel implements IDynamicBakedModel
@@ -246,7 +247,6 @@ public class TextureModel implements IDynamicBakedModel
     }
 
     @Override
-    @SuppressWarnings("deprecation")
     public TextureAtlasSprite getParticleTexture()
     {
         return originalBaked.getParticleTexture();
@@ -259,7 +259,6 @@ public class TextureModel implements IDynamicBakedModel
     }
 
     @Override
-    @SuppressWarnings("deprecation")
     public ItemCameraTransforms getItemCameraTransforms()
     {
         return originalBaked.getItemCameraTransforms();
@@ -292,7 +291,7 @@ public class TextureModel implements IDynamicBakedModel
         {
             model = baked.get(key, () -> {
                 BlockModel unbaked = new BlockModel(originalUnbaked.getParentLocation(), originalUnbaked.getElements(), textures, originalUnbaked.isAmbientOcclusion(), originalUnbaked.func_230176_c_(), originalUnbaked.getAllTransforms(), Lists.newArrayList(originalUnbaked.getOverrides()));
-                return unbaked.bakeModel(modelLoader, ModelLoader.defaultTextureGetter(), variant, loaderId);
+                return unbaked.bakeModel(modelLoader, unbaked, ModelLoader.defaultTextureGetter(), variant, loaderId, true);
             });
         }
         catch (ExecutionException e)
