@@ -2,6 +2,7 @@ package snownee.kiwi.contributor.impl;
 
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -59,7 +60,7 @@ public class JsonRewardProvider implements IRewardProvider {
             return true;
         } catch (Exception e) {
             Kiwi.logger.catching(e);
-            return false;
+            return e instanceof UnknownHostException;
         }
     }
 
