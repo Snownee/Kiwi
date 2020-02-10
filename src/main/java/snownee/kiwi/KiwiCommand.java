@@ -30,17 +30,31 @@ public class KiwiCommand {
         LiteralArgumentBuilder<CommandSource> builder = Commands.literal(Kiwi.MODID);
         /* off */
         if (integrated) {
-            builder.then(Commands.literal("dumpLoots")
+            builder.then(Commands
+                    .literal("dumpLoots")
                     .executes(ctx -> dumpLoots(ctx.getSource(), ".+"))
-                    .then(Commands.argument("pattern", StringArgumentType.greedyString())
-                            .executes(ctx -> dumpLoots(ctx.getSource(), StringArgumentType.getString(ctx, "pattern")))));
+                    .then(Commands
+                            .argument("pattern", StringArgumentType.greedyString())
+                            .executes(ctx -> dumpLoots(ctx.getSource(), StringArgumentType.getString(ctx, "pattern")))
+                    )
+            );
         }
 
-        builder.then(Commands.argument("gamemode", IntegerArgumentType.integer(0, GameType.values().length - 1))
+        builder.then(Commands
+                .argument("gamemode", IntegerArgumentType.integer(0, GameType.values().length - 1))
                 .requires(ctx -> ctx.hasPermissionLevel(2))
                 .executes(ctx -> setGameMode(ctx, Collections.singleton(ctx.getSource().asPlayer()), IntegerArgumentType.getInteger(ctx, "gamemode")))
-                .then(Commands.argument("target", EntityArgument.players())
-                        .executes(ctx -> setGameMode(ctx, EntityArgument.getPlayers(ctx, "target"), IntegerArgumentType.getInteger(ctx, "gamemode")))));
+                .then(Commands
+                        .argument("target", EntityArgument.players())
+                        .executes(ctx -> setGameMode(ctx, EntityArgument.getPlayers(ctx, "target"), IntegerArgumentType.getInteger(ctx, "gamemode")))
+                )
+        );
+
+        builder.then(Commands
+                .literal("cleanWorld")
+                .requires(ctx -> ctx.hasPermissionLevel(2))
+                .executes(ctx -> cleanWorld(ctx.getSource()))
+        );
         /* on */
         dispatcher.register(builder);
     }
@@ -83,5 +97,19 @@ public class KiwiCommand {
             }
             source.sendFeedback(new TranslationTextComponent("commands.gamemode.success.other", player.getDisplayName(), itextcomponent), true);
         }
+    }
+
+    private static int cleanWorld(CommandSource source) {
+        Commands commands = source.getServer().getCommandManager();
+        commands.handleCommand(source, "gamerule doDaylightCycle false");
+        commands.handleCommand(source, "gamerule doWeatherCycle false");
+        commands.handleCommand(source, "gamerule doMobLoot false");
+        commands.handleCommand(source, "gamerule doMobSpawning false");
+        commands.handleCommand(source, "difficulty peaceful");
+        commands.handleCommand(source, "kill @e[type=!minecraft:player]");
+        commands.handleCommand(source, "time set day");
+        commands.handleCommand(source, "weather clear");
+        commands.handleCommand(source, "gamerule doMobLoot true");
+        return 1;
     }
 }
