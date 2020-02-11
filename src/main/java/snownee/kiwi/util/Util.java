@@ -38,12 +38,20 @@ public final class Util {
     }
 
     public static String trimRL(ResourceLocation rl) {
-        return rl.getNamespace().equals("minecraft") ? rl.getPath() : rl.toString();
+        return trimRL(rl, "minecraft");
     }
 
     public static String trimRL(String rl) {
-        if (rl.startsWith("minecraft:")) {
-            return rl.substring("minecraft:".length());
+        return trimRL(rl, "minecraft");
+    }
+
+    public static String trimRL(ResourceLocation rl, String defaultNamespace) {
+        return rl.getNamespace().equals(defaultNamespace) ? rl.getPath() : rl.toString();
+    }
+
+    public static String trimRL(String rl, String defaultNamespace) {
+        if (rl.startsWith(defaultNamespace + ":")) {
+            return rl.substring(defaultNamespace.length() + 1);
         } else {
             return rl;
         }
