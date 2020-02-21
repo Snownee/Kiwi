@@ -227,20 +227,6 @@ public class Kiwi {
                 logger.catching(e);
             }
         });
-        /* off */
-        ImmutableList.of(
-                ItemGroup.BUILDING_BLOCKS,
-                ItemGroup.DECORATIONS,
-                ItemGroup.REDSTONE,
-                ItemGroup.TRANSPORTATION,
-                ItemGroup.MISC,
-                ItemGroup.FOOD,
-                ItemGroup.TOOLS,
-                ItemGroup.COMBAT,
-                ItemGroup.BREWING
-        )
-        .forEach(g -> KiwiManager.GROUPS.put(g.getPath(), g));
-        /* on */
 
         final Map<ResourceLocation, Info> infos = Maps.newHashMap();
         boolean checkDep = false;
@@ -363,10 +349,7 @@ public class Kiwi {
                     String val = group.value();
                     if (!val.isEmpty()) {
                         useOwnGroup = false;
-                        if (!org.apache.commons.lang3.StringUtils.contains(val, ':') && !KiwiManager.GROUPS.containsKey(val)) {
-                            val = info.module.uid.getNamespace() + ":" + val;
-                        }
-                        ItemGroup itemGroup = KiwiManager.GROUPS.get(val);
+                        ItemGroup itemGroup = getGroup(val);
                         if (itemGroup != null) {
                             info.group = itemGroup;
                         }
@@ -480,6 +463,22 @@ public class Kiwi {
         holderRefs = null;
     }
 
+    private static Map<String, ItemGroup> GROUP_CACHE = Maps.newHashMap();
+
+    static ItemGroup getGroup(String path) {
+        if (GROUP_CACHE == null) {
+            return null;
+        }
+        return GROUP_CACHE.computeIfAbsent(path, $ -> {
+            for (ItemGroup group : ItemGroup.GROUPS) {
+                if (path.equals(group.getPath())) {
+                    return group;
+                }
+            }
+            return null;
+        });
+    }
+
     private static void checkNoGroup(ModuleInfo info, Field field, Object o) {
         if (field.getAnnotation(NoGroup.class) != null) {
             info.noGroups.add(o);
@@ -535,7 +534,8 @@ public class Kiwi {
     }
 
     private void loadComplete(FMLLoadCompleteEvent event) {
-        KiwiManager.GROUPS.clear();
+        GROUP_CACHE.clear();
+        GROUP_CACHE = null;
     }
 
     public static boolean isLoaded(ResourceLocation module) {

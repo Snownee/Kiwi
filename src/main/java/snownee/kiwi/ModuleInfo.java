@@ -81,7 +81,7 @@ public class ModuleInfo {
                 } else if (e.field != null) {
                     Group group = e.field.getAnnotation(Group.class);
                     if (group != null && !group.value().isEmpty()) {
-                        ItemGroup itemGroup = KiwiManager.GROUPS.get(group.value());
+                        ItemGroup itemGroup = Kiwi.getGroup(group.value());
                         if (itemGroup != null) {
                             item.group = itemGroup;
                         } else {

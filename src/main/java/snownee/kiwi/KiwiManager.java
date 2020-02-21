@@ -21,7 +21,6 @@ import snownee.kiwi.crafting.TextureBlockRecipe;
 
 public class KiwiManager {
     public static final Map<ResourceLocation, ModuleInfo> MODULES = Maps.newLinkedHashMap();
-    static Map<String, ItemGroup> GROUPS = Maps.newHashMap();
 
     public static IRecipeSerializer<?> shapedSerializer;
     public static IRecipeSerializer<?> shapelessSerializer;
@@ -43,9 +42,8 @@ public class KiwiManager {
         }
     }
 
-    public static void addItemGroup(String modId, String name, ItemGroup group) {
-        GROUPS.put(modId + ":" + name, group);
-    }
+    @Deprecated
+    public static void addItemGroup(String modId, String name, ItemGroup group) {}
 
     static void handleRegister(RegistryEvent.Register<?> event) {
         if (event.getRegistry() == ForgeRegistries.RECIPE_SERIALIZERS) {
