@@ -1,0 +1,7 @@
+{
+  "commands.kiwi.dumpLoots.wrongPattern": "Modelo é ilegal",
+  "commands.kiwi.dumpLoots.noTargets": "Não foi possível encontrar os blocos correspondentes",
+  "commands.kiwi.dumpLoots.success": "Despejado com sucesso %d tabelas de loot",
+  "tip.kiwi.press_shift": "<Pressione §f§oShift§r§7..>",
+  "msg.kiwi.no_dependencies": "{1}: Módulo §e{2}§r requer que os seguintes módulos sejam ativados: §e{3}"
+}
