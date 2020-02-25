@@ -45,10 +45,16 @@ public final class Util {
         return trimRL(rl, "minecraft");
     }
 
+    /**
+     * @since 2.7.0
+     */
     public static String trimRL(ResourceLocation rl, String defaultNamespace) {
         return rl.getNamespace().equals(defaultNamespace) ? rl.getPath() : rl.toString();
     }
 
+    /**
+     * @since 2.7.0
+     */
     public static String trimRL(String rl, String defaultNamespace) {
         if (rl.startsWith(defaultNamespace + ":")) {
             return rl.substring(defaultNamespace.length() + 1);
