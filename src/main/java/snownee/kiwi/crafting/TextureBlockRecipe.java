@@ -128,7 +128,11 @@ public class TextureBlockRecipe extends DynamicShapedRecipe
                 BlockState state = ((BlockItem) item).getBlock().getDefaultState();
                 for (String k : e.getKey().split(","))
                 {
-                    data.setString("Textures." + k, NBTUtil.writeBlockState(state).toString());
+                    String texture = NBTHelper.of(e.getValue()).getString("BlockEntityTag.Textures." + k);
+                    if (texture == null) {
+                        texture = NBTUtil.writeBlockState(state).toString();
+                    }
+                    data.setString("Textures." + k, texture);
                     if (marks.contains(k))
                     {
                         data.setString("Items." + k, Util.trimRL(item.getRegistryName()));
