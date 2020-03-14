@@ -18,8 +18,6 @@ import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModule.Subscriber.Bus;
-import snownee.kiwi.RenderLayer;
-import snownee.kiwi.RenderLayer.Layer;
 import snownee.kiwi.client.model.TextureModel;
 import snownee.kiwi.item.ModBlockItem;
 import snownee.kiwi.schedule.Scheduler;

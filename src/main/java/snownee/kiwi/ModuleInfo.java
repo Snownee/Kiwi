@@ -97,7 +97,7 @@ public class ModuleInfo {
             event.getRegistry().register(e.entry);
         });
         if (clazz == Block.class && FMLEnvironment.dist.isClient()) {
-            final RenderType solid = RenderType.solid();
+            final RenderType solid = RenderType.getSolid();
             Map<Class<?>, RenderType> cache = Maps.newHashMap();
             entries.stream().forEach(e -> {
                 Block block = (Block) e.entry;
