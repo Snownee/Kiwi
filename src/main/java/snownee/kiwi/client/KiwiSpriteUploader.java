@@ -24,7 +24,6 @@ THE SOFTWARE.
 
 package snownee.kiwi.client;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -36,42 +35,40 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.ResourceLocation;
 import snownee.kiwi.Kiwi;
 
-public class KiwiSpriteUploader extends SpriteUploader
-{
+public class KiwiSpriteUploader extends SpriteUploader {
     public static final ResourceLocation LOCATION_GUI_TEXTURE = new ResourceLocation(Kiwi.MODID, "textures/atlas/gui.png");
     public static final KiwiSpriteUploader GUI_ATLAS = new KiwiSpriteUploader(Minecraft.getInstance().textureManager, LOCATION_GUI_TEXTURE);
 
     private final Set<ResourceLocation> registeredSprites = new HashSet<>();
     private final ResourceLocation atlasLocation;
 
-    public KiwiSpriteUploader(TextureManager textureManager, ResourceLocation atlasLocation)
-    {
-        super(textureManager, atlasLocation, "textures");
+    public KiwiSpriteUploader(TextureManager textureManager, ResourceLocation atlasLocation, String prefixIn) {
+        super(textureManager, atlasLocation, prefixIn);
         this.atlasLocation = atlasLocation;
     }
 
-    public void registerSprite(ResourceLocation location)
-    {
+    public KiwiSpriteUploader(TextureManager textureManager, ResourceLocation atlasLocation) {
+        this(textureManager, atlasLocation, "gui");
+    }
+
+    public void registerSprite(ResourceLocation location) {
         registeredSprites.add(location);
     }
 
     @Override
-    public Stream<ResourceLocation> getResourceLocations()
-    {
-        return Collections.unmodifiableCollection(registeredSprites).stream();
+    public Stream<ResourceLocation> getResourceLocations() {
+        return registeredSprites.stream();
     }
 
     /**
      * Overridden to make it public
      */
     @Override
-    public TextureAtlasSprite getSprite(ResourceLocation location)
-    {
+    public TextureAtlasSprite getSprite(ResourceLocation location) {
         return super.getSprite(location);
     }
 
-    public ResourceLocation getLocation()
-    {
+    public ResourceLocation getLocation() {
         return atlasLocation;
     }
 
