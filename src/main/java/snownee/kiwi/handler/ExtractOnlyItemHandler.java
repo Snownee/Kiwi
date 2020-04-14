@@ -5,6 +5,9 @@ import java.util.function.Supplier;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
 
+/**
+ * @since 2.7.0
+ */
 public class ExtractOnlyItemHandler<T extends IItemHandler> implements IItemHandler, Supplier<T> {
 
     private final T handler;

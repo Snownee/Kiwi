@@ -15,6 +15,9 @@ public abstract class Packet {
         NetworkChannel.send(target, this);
     }
 
+    /**
+     * @since 2.7.0
+     */
     public void send(ServerPlayerEntity player) {
         send(PacketDistributor.PLAYER.with(() -> player));
     }

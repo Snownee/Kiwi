@@ -24,6 +24,9 @@ import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryManager;
 
+/**
+ * @since 2.7.0
+ */
 public class ForgeRegistryArgument<T extends IForgeRegistryEntry<T>> implements ArgumentType<T> {
 
     public static final DynamicCommandExceptionType BAD_ID = new DynamicCommandExceptionType(pair -> {

@@ -5,6 +5,9 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandlerModifiable;
 
+/**
+ * @since 2.7.0
+ */
 public class InvHandlerWrapper implements IInventory {
 
     protected final IItemHandlerModifiable handler;
