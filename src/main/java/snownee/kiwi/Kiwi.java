@@ -310,6 +310,7 @@ public class Kiwi {
             ModContext context = new ModContext(id.getNamespace());
             context.setActiveContainer();
 
+            // Instantiate modules
             try {
                 Class<?> clazz = Class.forName(info.className);
                 AbstractModule instance = (AbstractModule) clazz.newInstance();
