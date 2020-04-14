@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
+import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -85,5 +86,39 @@ public final class MathUtil {
 
             return c;
         }
+    }
+
+    /**
+     * HSV to RGB: MathHelper
+     * @since 2.7.0
+     * @return h: 0-360 s: 0-1 v: 0-255
+     */
+    public static Vector3f RGBtoHSV(int rgb) {
+        int r = (rgb >> 16) & 255;
+        int g = (rgb >> 8) & 255;
+        int b = rgb & 255;
+        int max = Math.max(r, Math.max(g, b));
+        int min = Math.min(r, Math.min(g, b));
+        float v = max;
+        float delta = max - min;
+        float h, s;
+        if (max != 0)
+            s = delta / max; // s
+        else {
+            // r = g = b = 0        // s = 0, v is undefined
+            s = 0;
+            h = -1;
+            return new Vector3f(h, s, 0 /*Float.NaN*/);
+        }
+        if (r == max)
+            h = (g - b) / delta; // between yellow & magenta
+        else if (g == max)
+            h = 2 + (b - r) / delta; // between cyan & yellow
+        else
+            h = 4 + (r - g) / delta; // between magenta & cyan
+        h *= 60; // degrees
+        if (h < 0)
+            h += 360;
+        return new Vector3f(h, s, v);
     }
 }
