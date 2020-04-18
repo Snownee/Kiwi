@@ -407,6 +407,8 @@ public class Kiwi {
                     info.group = (ItemGroup) o;
                 } else if (o instanceof IRecipeType) {
                     Registry.register(Registry.RECIPE_TYPE, regName, (IRecipeType<?>) o);
+                    tmpBuilder = null;
+                    tmpBuilderField = null;
                     continue;
                 } else if (o instanceof Item.Properties) {
                     tmpBuilder = (Item.Properties) o;
@@ -429,7 +431,7 @@ public class Kiwi {
                 } else if (o instanceof Item) {
                     checkNoGroup(info, field, o);
                 }
-                if (o instanceof IForgeRegistryEntry<?>) {
+                if (o instanceof IForgeRegistryEntry) {
                     IForgeRegistryEntry<?> entry = (IForgeRegistryEntry<?>) o;
                     Class<?> superType = entry.getRegistryType();
                     int i = counter.getOrDefault(superType, 0);

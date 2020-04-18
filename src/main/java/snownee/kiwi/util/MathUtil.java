@@ -91,7 +91,6 @@ public final class MathUtil {
     /**
      * HSV to RGB: MathHelper
      * @since 2.7.0
-     * @return h: 0-360 s: 0-1 v: 0-255
      */
     public static Vector3f RGBtoHSV(int rgb) {
         int r = (rgb >> 16) & 255;
@@ -116,9 +115,9 @@ public final class MathUtil {
             h = 2 + (b - r) / delta; // between cyan & yellow
         else
             h = 4 + (r - g) / delta; // between magenta & cyan
-        h *= 60; // degrees
+        h /= 6; // degrees
         if (h < 0)
-            h += 360;
-        return new Vector3f(h, s, v);
+            h += 1;
+        return new Vector3f(h, s, v / 255);
     }
 }
