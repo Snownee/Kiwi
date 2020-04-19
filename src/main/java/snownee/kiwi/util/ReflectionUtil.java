@@ -2,6 +2,15 @@ package snownee.kiwi.util;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Map;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.item.crafting.IRecipeType;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.loading.FMLEnvironment;
+import snownee.kiwi.Kiwi;
 
 public final class ReflectionUtil {
     private ReflectionUtil() {}
@@ -13,5 +22,13 @@ public final class ReflectionUtil {
         modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
         field.set(obj, null);
         modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+    }
+
+    public static <C extends IInventory, T extends IRecipe<C>> Map<ResourceLocation, IRecipe<C>> getRecipes(IRecipeType<T> recipeTypeIn) {
+        if (FMLEnvironment.dist.isClient()) {
+            return Minecraft.getInstance().world.getRecipeManager().getRecipes(recipeTypeIn);
+        } else {
+            return Kiwi.getServer().getRecipeManager().getRecipes(recipeTypeIn);
+        }
     }
 }

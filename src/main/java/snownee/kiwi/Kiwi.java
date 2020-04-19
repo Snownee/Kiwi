@@ -41,9 +41,11 @@ import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.crafting.IRecipeType;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.storage.loot.conditions.LootConditionManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.event.RegistryEvent;
@@ -62,7 +64,9 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
+import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
@@ -80,6 +84,7 @@ import snownee.kiwi.KiwiModule.Subscriber;
 import snownee.kiwi.KiwiModule.Subscriber.Bus;
 import snownee.kiwi.crafting.FullBlockIngredient;
 import snownee.kiwi.crafting.ModuleLoadedCondition;
+import snownee.kiwi.data.loot.HasLootTable;
 import snownee.kiwi.schedule.Scheduler;
 import snownee.kiwi.util.ReflectionUtil;
 import snownee.kiwi.util.Util;
@@ -171,9 +176,13 @@ public class Kiwi {
         modEventBus.addListener(this::init);
         modEventBus.addListener(this::clientInit);
         MinecraftForge.EVENT_BUS.addListener(this::serverInit);
+        MinecraftForge.EVENT_BUS.addListener(this::serverStarted);
+        MinecraftForge.EVENT_BUS.addListener(this::serverStopped);
         modEventBus.addListener(this::postInit);
         modEventBus.addListener(this::loadComplete);
         modEventBus.addListener(KiwiManager::handleRegister);
+
+        LootConditionManager.registerCondition(new HasLootTable.Serializer());
     }
 
     private void preInit(RegistryEvent.NewRegistry event) {
@@ -529,6 +538,20 @@ public class Kiwi {
         KiwiManager.MODULES.values().forEach(m -> m.serverInit(event));
         event.getServer().getWorld(DimensionType.OVERWORLD).getSavedData().getOrCreate(() -> Scheduler.INSTANCE, Scheduler.ID);
         ModLoadingContext.get().setActiveContainer(null, null);
+    }
+
+    private static MinecraftServer server;
+
+    public static MinecraftServer getServer() {
+        return server;
+    }
+
+    private void serverStarted(FMLServerStartedEvent event) {
+        server = event.getServer();
+    }
+
+    private void serverStopped(FMLServerStoppedEvent event) {
+        server = null;
     }
 
     private void postInit(InterModProcessEvent event) {
