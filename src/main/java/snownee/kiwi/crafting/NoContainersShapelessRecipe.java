@@ -10,7 +10,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistryEntry;
-import snownee.kiwi.KiwiManager;
+import snownee.kiwi.data.DataModule;
 
 public class NoContainersShapelessRecipe extends ShapelessRecipe
 {
@@ -28,7 +28,7 @@ public class NoContainersShapelessRecipe extends ShapelessRecipe
     @Override
     public IRecipeSerializer<?> getSerializer()
     {
-        return KiwiManager.shapelessSerializer;
+        return DataModule.SHAPELESS_NO_CONTAINERS;
     }
 
     public static class Serializer extends ForgeRegistryEntry<IRecipeSerializer<?>> implements IRecipeSerializer<NoContainersShapelessRecipe>
