@@ -11,6 +11,6 @@ description=""
 [[dependencies.kiwi]]
    modId="forge"
    mandatory=true
-   versionRange="[31.1.46,)"
+   versionRange="[31.1.18,)"
    ordering="NONE"
    side="BOTH"
