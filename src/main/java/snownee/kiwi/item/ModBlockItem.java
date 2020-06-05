@@ -23,25 +23,21 @@ import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import snownee.kiwi.KiwiConfig;
 
-public class ModBlockItem extends BlockItem
-{
+public class ModBlockItem extends BlockItem {
     public static final Set<TileEntityType<?>> INSTANT_UPDATE_TILES = FMLEnvironment.dist == Dist.CLIENT ? Sets.newHashSet() : null;
 
-    public ModBlockItem(Block block, Item.Properties builder)
-    {
+    public ModBlockItem(Block block, Item.Properties builder) {
         super(block, builder);
     }
 
     @Override
-    protected boolean onBlockPlaced(BlockPos pos, World worldIn, PlayerEntity player, ItemStack stack, BlockState state)
-    {
+    protected boolean onBlockPlaced(BlockPos pos, World worldIn, PlayerEntity player, ItemStack stack, BlockState state) {
         TileEntity tile = worldIn.getTileEntity(pos);
-        if (worldIn.isRemote && tile != null && INSTANT_UPDATE_TILES.contains(tile.getType()))
-        {
+        if (worldIn.isRemote && tile != null && INSTANT_UPDATE_TILES.contains(tile.getType())) {
             CompoundNBT data = stack.getChildTag("BlockEntityTag");
-            if (data != null)
-            {
+            if (data != null) {
                 data = data.copy();
                 data.putInt("x", pos.getX());
                 data.putInt("y", pos.getY());
@@ -54,9 +50,9 @@ public class ModBlockItem extends BlockItem
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn)
-    {
+    public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
-        ModItem.addTip(stack, worldIn, tooltip, flagIn);
+        if (!KiwiConfig.globalTooltip)
+            ModItem.addTip(stack, tooltip, flagIn);
     }
 }

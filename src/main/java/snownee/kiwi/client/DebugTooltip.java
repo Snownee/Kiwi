@@ -18,6 +18,7 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import snownee.kiwi.KiwiConfig;
+import snownee.kiwi.item.ModItem;
 
 @EventBusSubscriber(Dist.CLIENT)
 public final class DebugTooltip {
@@ -29,6 +30,8 @@ public final class DebugTooltip {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onTooltip(ItemTooltipEvent event) {
+        if (KiwiConfig.globalTooltip)
+            ModItem.addTip(event.getItemStack(), event.getToolTip(), event.getFlags());
         if (!KiwiConfig.debugTooltip || !event.getFlags().isAdvanced()) {
             return;
         }
@@ -95,7 +98,7 @@ public final class DebugTooltip {
                 }
 
                 lastNBT = stack.getTag();
-                lastFormatted = formatter.apply(lastNBT);
+                lastFormatted = formatter.apply(lastNBT).applyTextStyle(TextFormatting.RESET);
             }
             tooltip.add(lastFormatted);
         } else {

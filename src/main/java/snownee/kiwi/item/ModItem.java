@@ -1,9 +1,12 @@
 package snownee.kiwi.item;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
+
+import com.google.common.collect.Lists;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -28,27 +31,57 @@ public class ModItem extends Item {
     @Override
     @OnlyIn(Dist.CLIENT)
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
-        addTip(stack, worldIn, tooltip, flagIn);
+        if (!KiwiConfig.globalTooltip)
+            addTip(stack, tooltip, flagIn);
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static void addTip(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
-        if (tooltip.size() > 0 && I18n.hasKey(stack.getTranslationKey() + ".tip")) {
-            if (!KiwiConfig.tooltipRequiresShift || Screen.hasShiftDown()) {
-                FontRenderer fontRenderer = stack.getItem().getFontRenderer(stack);
-                if (fontRenderer == null) {
-                    fontRenderer = Minecraft.getInstance().fontRenderer;
-                }
-                int width = fontRenderer.getStringWidth(tooltip.get(0).getFormattedText());
-                /* off */
-                tooltip.addAll(
-                        fontRenderer.listFormattedStringToWidth(I18n.format(stack.getTranslationKey() + ".tip"), Math.max(width, KiwiConfig.tooltipWrapWidth))
-                        .stream()
-                        .map(StringTextComponent::new)
-                        .collect(Collectors.toList()));
-                /* on */
-            } else if (KiwiConfig.tooltipRequiresShift) {
+    public static void addTip(ItemStack stack, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
+        if (tooltip.isEmpty()) {
+            return;
+        }
+        String key;
+        boolean shift = Screen.hasShiftDown();
+        boolean ctrl = Screen.hasControlDown();
+        if (shift == ctrl) {
+            key = stack.getTranslationKey() + ".tip";
+        } else if (shift) {
+            key = stack.getTranslationKey() + ".tip.shift";
+        } else { // ctrl
+            key = stack.getTranslationKey() + ".tip.ctrl";
+        }
+        boolean hasKey = I18n.hasKey(key);
+        if (!hasKey && (shift != ctrl)) {
+            return;
+        }
+        if (hasKey) {
+            List<String> lines = Lists.newArrayList(I18n.format(key).split("\n"));
+
+            FontRenderer fontRenderer = stack.getItem().getFontRenderer(stack);
+            if (fontRenderer == null) {
+                fontRenderer = Minecraft.getInstance().fontRenderer;
+            }
+            FontRenderer fontRenderer2 = fontRenderer;
+            int width = Math.max(fontRenderer.getStringWidth(tooltip.get(0).getFormattedText()), KiwiConfig.tooltipWrapWidth);
+            /* off */
+            tooltip.addAll(
+                    lines.stream()
+                    .map(s -> fontRenderer2.listFormattedStringToWidth(s, width))
+                    .flatMap(Collection::stream)
+                    .map(StringTextComponent::new)
+                    .collect(Collectors.toList())
+            );
+            /* on */
+        }
+        if (shift == ctrl) {
+            boolean hasShiftKey = I18n.hasKey(key + ".shift");
+            boolean hasCtrlKey = I18n.hasKey(key + ".ctrl");
+            if (hasShiftKey && hasCtrlKey) {
+                tooltip.add(new TranslationTextComponent("tip.kiwi.press_shift_or_ctrl"));
+            } else if (hasShiftKey) {
                 tooltip.add(new TranslationTextComponent("tip.kiwi.press_shift"));
+            } else if (hasCtrlKey) {
+                tooltip.add(new TranslationTextComponent("tip.kiwi.press_ctrl"));
             }
         }
     }

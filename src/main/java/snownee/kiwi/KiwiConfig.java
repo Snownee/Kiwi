@@ -29,13 +29,13 @@ public final class KiwiConfig {
     static final ForgeConfigSpec spec;
 
     public static ResourceLocation contributorEffect = null;
-    public static boolean tooltipRequiresShift = false;
-    public static int tooltipWrapWidth = 100;
+    public static boolean globalTooltip = false;
+    public static int tooltipWrapWidth = 500;
     public static boolean debugTooltip = true;
     public static String debugTooltipNBTFormatter = "vanilla";
 
     private static ConfigValue<String> contributorEffectCfg;
-    private static BooleanValue tooltipRequiresShiftCfg;
+    private static BooleanValue globalTooltipCfg;
     private static IntValue tooltipWrapWidthCfg;
     private static BooleanValue debugTooltipCfg;
     private static ConfigValue<String> debugTooltipNBTFormatterCfg;
@@ -65,10 +65,10 @@ public final class KiwiConfig {
 
         contributorEffectCfg = builder.define("contributorEffect", "");
 
-        tooltipRequiresShiftCfg = builder
-                .comment("Tooltips require pressing shift to be shown")
-                .translation("kiwi.config.tooltipRequiresShift")
-                .define("tooltipRequiresShift", tooltipRequiresShift);
+        globalTooltipCfg = builder
+                .comment("Show customized tooltips from any item. Mainly for pack devs")
+                .translation("kiwi.config.globalTooltip")
+                .define("globalTooltip", globalTooltip);
 
         tooltipWrapWidthCfg = builder
                 .comment("Max line width shown in description of tooltips")
@@ -98,7 +98,7 @@ public final class KiwiConfig {
         if (FMLEnvironment.dist == Dist.DEDICATED_SERVER || EffectiveSide.get() == LogicalSide.SERVER)
             return;
         contributorEffect = Util.RL(contributorEffectCfg.get());
-        tooltipRequiresShift = tooltipRequiresShiftCfg.get();
+        globalTooltip = globalTooltipCfg.get();
         tooltipWrapWidth = tooltipWrapWidthCfg.get();
         debugTooltip = debugTooltipCfg.get();
         debugTooltipNBTFormatter = debugTooltipNBTFormatterCfg.get().toLowerCase(Locale.ENGLISH);
