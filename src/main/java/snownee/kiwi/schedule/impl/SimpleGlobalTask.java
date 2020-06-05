@@ -1,6 +1,6 @@
 package snownee.kiwi.schedule.impl;
 
-import com.google.common.base.Function;
+import java.util.function.IntPredicate;
 
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.common.util.INBTSerializable;
@@ -13,11 +13,11 @@ public class SimpleGlobalTask extends Task<GlobalTicker> implements INBTSerializ
     protected int tick = 0;
     protected LogicalSide side;
     protected Phase phase;
-    protected Function<Integer, Boolean> function;
+    protected IntPredicate function;
 
     public SimpleGlobalTask() {}
 
-    public SimpleGlobalTask(LogicalSide side, Phase phase, Function<Integer, Boolean> function) {
+    public SimpleGlobalTask(LogicalSide side, Phase phase, IntPredicate function) {
         this.side = side;
         this.phase = phase;
         this.function = function;
@@ -25,7 +25,7 @@ public class SimpleGlobalTask extends Task<GlobalTicker> implements INBTSerializ
 
     @Override
     public boolean tick(GlobalTicker ticker) {
-        return function.apply(++tick);
+        return function.test(++tick);
     }
 
     @Override

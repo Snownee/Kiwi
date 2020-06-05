@@ -1,6 +1,6 @@
 package snownee.kiwi.schedule.impl;
 
-import com.google.common.base.Function;
+import java.util.function.IntPredicate;
 
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
@@ -17,15 +17,15 @@ public class SimpleWorldTask extends Task<WorldTicker> implements INBTSerializab
     protected int tick = 0;
     protected DimensionType dimensionType;
     protected TickEvent.Phase phase;
-    protected Function<Integer, Boolean> function;
+    protected IntPredicate function;
 
     public SimpleWorldTask() {}
 
-    public SimpleWorldTask(World world, TickEvent.Phase phase, Function<Integer, Boolean> function) {
+    public SimpleWorldTask(World world, TickEvent.Phase phase, IntPredicate function) {
         this(world.dimension.getType(), phase, function);
     }
 
-    public SimpleWorldTask(DimensionType dimensionType, TickEvent.Phase phase, Function<Integer, Boolean> function) {
+    public SimpleWorldTask(DimensionType dimensionType, TickEvent.Phase phase, IntPredicate function) {
         this.dimensionType = dimensionType;
         this.phase = phase;
         this.function = function;
@@ -33,7 +33,7 @@ public class SimpleWorldTask extends Task<WorldTicker> implements INBTSerializab
 
     @Override
     public boolean tick(WorldTicker ticker) {
-        return function.apply(++tick);
+        return function.test(++tick);
     }
 
     @Override
