@@ -25,7 +25,7 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 import snownee.kiwi.util.Util;
 
 @EventBusSubscriber(bus = Bus.MOD)
-public final class KiwiConfig {
+public final class KiwiModConfig {
     static final ForgeConfigSpec spec;
 
     public static ResourceLocation contributorEffect = null;
@@ -43,11 +43,11 @@ public final class KiwiConfig {
     public static Map<ResourceLocation, BooleanValue> modules = Maps.newHashMap();
 
     static {
-        final Pair<KiwiConfig, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(KiwiConfig::new);
+        final Pair<KiwiModConfig, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(KiwiModConfig::new);
         spec = specPair.getRight();
     }
 
-    private KiwiConfig(ForgeConfigSpec.Builder builder) {
+    private KiwiModConfig(ForgeConfigSpec.Builder builder) {
         /* off */
         builder.push("modules");
 

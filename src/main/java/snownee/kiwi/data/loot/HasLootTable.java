@@ -11,6 +11,7 @@ import net.minecraft.world.storage.loot.LootTable;
 import net.minecraft.world.storage.loot.conditions.ILootCondition;
 import snownee.kiwi.Kiwi;
 
+@Deprecated
 public class HasLootTable implements ILootCondition {
 
     private final ResourceLocation lootTable;

@@ -170,7 +170,7 @@ public class Kiwi {
             }
         }
 
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, KiwiConfig.spec, MODID + (FMLEnvironment.dist.isDedicatedServer() ? "-server.toml" : ".toml"));
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, KiwiModConfig.spec, MODID + (FMLEnvironment.dist.isDedicatedServer() ? "-server.toml" : ".toml"));
         final IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         modEventBus.addListener(EventPriority.LOWEST, this::preInit);
         modEventBus.addListener(this::init);
@@ -255,13 +255,13 @@ public class Kiwi {
 
             ResourceLocation rl = new ResourceLocation(modid, name);
             if (disabledModules.contains(rl)) {
-                if (KiwiConfig.modules.containsKey(rl)) { // module is optional
+                if (KiwiModConfig.modules.containsKey(rl)) { // module is optional
                     continue;
                 } else {
                     throw new RuntimeException("Cannot load mandatory module: " + rl);
                 }
             }
-            if (KiwiConfig.modules.containsKey(rl) && !KiwiConfig.modules.get(rl).get()) {
+            if (KiwiModConfig.modules.containsKey(rl) && !KiwiModConfig.modules.get(rl).get()) {
                 continue;
             }
 
@@ -519,7 +519,7 @@ public class Kiwi {
     //    }
 
     private void init(FMLCommonSetupEvent event) {
-        KiwiConfig.refresh();
+        KiwiModConfig.refresh();
         CraftingHelper.register(new ModuleLoadedCondition.Serializer());
         CraftingHelper.register(new ResourceLocation(MODID, "full_block"), FullBlockIngredient.SERIALIZER);
 

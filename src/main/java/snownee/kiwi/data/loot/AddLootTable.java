@@ -13,6 +13,7 @@ import net.minecraft.world.storage.loot.conditions.ILootCondition;
 import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
 import net.minecraftforge.common.loot.LootModifier;
 
+@Deprecated
 public class AddLootTable extends LootModifier {
 
     private final ResourceLocation lootTable;

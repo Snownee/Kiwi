@@ -22,7 +22,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.network.PacketDistributor;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.Kiwi;
-import snownee.kiwi.KiwiConfig;
+import snownee.kiwi.KiwiModConfig;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.contributor.client.RewardLayer;
 import snownee.kiwi.contributor.impl.KiwiRewardProvider;
@@ -114,16 +114,16 @@ public class Contributors extends AbstractModule {
 
     @OnlyIn(Dist.CLIENT)
     public static void changeEffect() {
-        if (!canPlayerUseEffect(getUserName(), KiwiConfig.contributorEffect)) {
+        if (!canPlayerUseEffect(getUserName(), KiwiModConfig.contributorEffect)) {
             return;
         }
-        new CSetEffectPacket(KiwiConfig.contributorEffect).send();
-        if (KiwiConfig.contributorEffect == null) {
+        new CSetEffectPacket(KiwiModConfig.contributorEffect).send();
+        if (KiwiModConfig.contributorEffect == null) {
             PLAYER_EFFECTS.remove(getUserName());
         } else {
             RewardLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidate(getUserName()));
-            PLAYER_EFFECTS.put(getUserName(), KiwiConfig.contributorEffect);
-            Kiwi.logger.info("Enabled contributor effect: {}", KiwiConfig.contributorEffect);
+            PLAYER_EFFECTS.put(getUserName(), KiwiModConfig.contributorEffect);
+            Kiwi.logger.info("Enabled contributor effect: {}", KiwiModConfig.contributorEffect);
         }
         RewardLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidate(getUserName()));
     }
