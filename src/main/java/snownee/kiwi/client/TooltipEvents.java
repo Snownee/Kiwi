@@ -21,17 +21,21 @@ import snownee.kiwi.KiwiConfig;
 import snownee.kiwi.item.ModItem;
 
 @EventBusSubscriber(Dist.CLIENT)
-public final class DebugTooltip {
-    private DebugTooltip() {}
+public final class TooltipEvents {
+    private TooltipEvents() {}
 
     private static CompoundNBT lastNBT;
     private static ITextComponent lastFormatted;
     private static Function<CompoundNBT, ITextComponent> formatter;
 
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void onTooltip(ItemTooltipEvent event) {
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void globalTooltip(ItemTooltipEvent event) {
         if (KiwiConfig.globalTooltip)
             ModItem.addTip(event.getItemStack(), event.getToolTip(), event.getFlags());
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void debugTooltip(ItemTooltipEvent event) {
         if (!KiwiConfig.debugTooltip || !event.getFlags().isAdvanced()) {
             return;
         }
