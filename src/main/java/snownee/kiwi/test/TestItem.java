@@ -12,7 +12,7 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -29,8 +29,8 @@ import snownee.kiwi.util.MathUtil;
 // Your class don't have to extend ModItem or ModBlock to be registered
 public class TestItem extends ModItem {
     public static List<BlockPos> posList;
-    public static Vec3d start;
-    public static Vec3d end;
+    public static Vector3d start;
+    public static Vector3d end;
 
     public TestItem(Item.Properties builder) {
         super(builder);
@@ -73,9 +73,9 @@ public class TestItem extends ModItem {
     public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn) {
         //        if (worldIn.isRemote)
         //        {
-        //            Vec3d start = playerIn.getEyePosition(1).add(playerIn.getLookVec().scale(3));
-        //            List<Vec3d> points = MathUtil.fibonacciSphere(start, 2, 100, true);
-        //            for (Vec3d point : points)
+        //            Vector3d start = playerIn.getEyePosition(1).add(playerIn.getLookVec().scale(3));
+        //            List<Vector3d> points = MathUtil.fibonacciSphere(start, 2, 100, true);
+        //            for (Vector3d point : points)
         //            {
         //                worldIn.addParticle(ParticleTypes.FIREWORK, point.x, point.y, point.z, 0, 0, 0);
         //            }

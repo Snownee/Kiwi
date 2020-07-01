@@ -3,30 +3,30 @@ package snownee.kiwi.schedule.impl;
 import java.util.function.IntPredicate;
 
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.NBTDynamicOps;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.world.World;
-import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
+import snownee.kiwi.Kiwi;
 import snownee.kiwi.schedule.Task;
-import snownee.kiwi.util.Util;
 
 public class SimpleWorldTask extends Task<WorldTicker> implements INBTSerializable<CompoundNBT> {
 
     protected int tick = 0;
-    protected DimensionType dimensionType;
+    protected RegistryKey<World> dimension;
     protected TickEvent.Phase phase;
     protected IntPredicate function;
 
     public SimpleWorldTask() {}
 
     public SimpleWorldTask(World world, TickEvent.Phase phase, IntPredicate function) {
-        this(world.dimension.getType(), phase, function);
+        this(world./*getDimension*/func_234923_W_(), phase, function);
     }
 
-    public SimpleWorldTask(DimensionType dimensionType, TickEvent.Phase phase, IntPredicate function) {
-        this.dimensionType = dimensionType;
+    public SimpleWorldTask(RegistryKey<World> dimensionType, TickEvent.Phase phase, IntPredicate function) {
+        this.dimension = dimensionType;
         this.phase = phase;
         this.function = function;
     }
@@ -38,7 +38,7 @@ public class SimpleWorldTask extends Task<WorldTicker> implements INBTSerializab
 
     @Override
     public WorldTicker ticker() {
-        return WorldTicker.get(dimensionType, phase);
+        return WorldTicker.get(dimension, phase);
     }
 
     @Override
@@ -50,18 +50,16 @@ public class SimpleWorldTask extends Task<WorldTicker> implements INBTSerializab
     public CompoundNBT serializeNBT() {
         CompoundNBT data = new CompoundNBT();
         data.putInt("tick", tick);
-        data.putString("world", Util.trimRL(dimensionType.getRegistryName()));
+        World.field_234917_f_.encodeStart(NBTDynamicOps.INSTANCE, dimension).resultOrPartial(Kiwi.logger::error).ifPresent(nbt -> {
+            data.put("world", nbt);
+        });
         data.putBoolean("start", phase == Phase.START);
         return data;
     }
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
-        ResourceLocation rl = Util.RL(nbt.getString("world"));
-        dimensionType = DimensionType.byName(rl);
-        if (dimensionType == null) {
-            throw new NullPointerException("Task cannot find dimension " + rl);
-        }
+        dimension = World.field_234917_f_.parse(NBTDynamicOps.INSTANCE, nbt.get("world")).resultOrPartial(Kiwi.logger::error).orElse(World.field_234918_g_);
         tick = nbt.getInt("tick");
         phase = nbt.getBoolean("start") ? Phase.START : Phase.END;
     }

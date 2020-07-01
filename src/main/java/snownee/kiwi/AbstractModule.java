@@ -6,6 +6,7 @@ import java.util.function.BiConsumer;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityType;
@@ -14,8 +15,8 @@ import net.minecraft.item.Item;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.tags.ITag.INamedTag;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.Tag;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -70,35 +71,34 @@ public abstract class AbstractModule {
         return new Item.Properties();
     }
 
-    protected static Block.Properties blockProp(Material material) {
-        return Block.Properties.create(material);
+    protected static AbstractBlock.Properties blockProp(Material material) {
+        AbstractBlock.Properties properties = AbstractBlock.Properties.create(material);
+        properties.sound(ModBlock.deduceSoundType(material));
+        properties.hardnessAndResistance(ModBlock.deduceHardness(material));
+        return properties;
     }
 
     /**
      * @since 2.5.2
      */
-    protected static Block.Properties blockProp(Block block) {
-        return Block.Properties.from(block);
+    protected static AbstractBlock.Properties blockProp(AbstractBlock block) {
+        return AbstractBlock.Properties.from(block);
     }
 
-    protected static <T extends Block> T init(T block) {
-        return ModBlock.deduceSoundAndHardness(block);
+    public static INamedTag<Item> itemTag(String namespace, String path) {
+        return ItemTags.makeWrapperTag(namespace + ":" + path);
     }
 
-    public static Tag<Item> itemTag(String namespace, String path) {
-        return new ItemTags.Wrapper(new ResourceLocation(namespace, path));
+    public static INamedTag<EntityType<?>> entityTag(String namespace, String path) {
+        return EntityTypeTags.func_232896_a_(namespace + ":" + path);
     }
 
-    public static Tag<EntityType<?>> entityTag(String namespace, String path) {
-        return new EntityTypeTags.Wrapper(new ResourceLocation(namespace, path));
+    public static INamedTag<Block> blockTag(String namespace, String path) {
+        return BlockTags.makeWrapperTag(namespace + ":" + path);
     }
 
-    public static Tag<Block> blockTag(String namespace, String path) {
-        return new BlockTags.Wrapper(new ResourceLocation(namespace, path));
-    }
-
-    public static Tag<Fluid> fluidTag(String namespace, String path) {
-        return new FluidTags.Wrapper(new ResourceLocation(namespace, path));
+    public static INamedTag<Fluid> fluidTag(String namespace, String path) {
+        return FluidTags.makeWrapperTag(namespace + ":" + path);
     }
 
     /**

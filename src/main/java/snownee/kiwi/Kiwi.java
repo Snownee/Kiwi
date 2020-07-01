@@ -44,8 +44,7 @@ import net.minecraft.item.crafting.IRecipeType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.world.dimension.DimensionType;
-import net.minecraft.world.storage.loot.conditions.LootConditionManager;
+import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.event.RegistryEvent;
@@ -84,7 +83,6 @@ import snownee.kiwi.KiwiModule.Subscriber;
 import snownee.kiwi.KiwiModule.Subscriber.Bus;
 import snownee.kiwi.crafting.FullBlockIngredient;
 import snownee.kiwi.crafting.ModuleLoadedCondition;
-import snownee.kiwi.data.loot.HasLootTable;
 import snownee.kiwi.schedule.Scheduler;
 import snownee.kiwi.util.ReflectionUtil;
 import snownee.kiwi.util.Util;
@@ -182,7 +180,7 @@ public class Kiwi {
         modEventBus.addListener(this::loadComplete);
         modEventBus.addListener(KiwiManager::handleRegister);
 
-        LootConditionManager.registerCondition(new HasLootTable.Serializer());
+        //LootConditionManager.registerCondition(new HasLootTable.Serializer());
     }
 
     private void preInit(RegistryEvent.NewRegistry event) {
@@ -536,7 +534,7 @@ public class Kiwi {
         KiwiCommand.register(event.getCommandDispatcher(), !event.getServer().isDedicatedServer());
 
         KiwiManager.MODULES.values().forEach(m -> m.serverInit(event));
-        event.getServer().getWorld(DimensionType.OVERWORLD).getSavedData().getOrCreate(() -> Scheduler.INSTANCE, Scheduler.ID);
+        event.getServer().getWorld(World./*OVERWORLD*/field_234918_g_).getSavedData().getOrCreate(() -> Scheduler.INSTANCE, Scheduler.ID);
         ModLoadingContext.get().setActiveContainer(null, null);
     }
 

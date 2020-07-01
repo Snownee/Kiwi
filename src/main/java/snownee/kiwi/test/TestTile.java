@@ -1,32 +1,28 @@
 package snownee.kiwi.test;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
 import snownee.kiwi.tile.TextureTile;
 
-public class TestTile extends TextureTile
-{
+public class TestTile extends TextureTile {
 
-    public TestTile()
-    {
+    public TestTile() {
         super(TestModule.FIRST_TILE, "top", "side", "bottom");
     }
 
     @Override
-    public boolean isMark(String k)
-    {
+    public boolean isMark(String k) {
         return k.equals("top");
     }
 
     @Override
-    public void read(CompoundNBT compound)
-    {
+    public void /*read*/ func_230337_a_(BlockState state, CompoundNBT compound) {
         readPacketData(compound);
-        super.read(compound);
+        super./*read*/func_230337_a_(state, compound);
     }
 
     @Override
-    public CompoundNBT write(CompoundNBT compound)
-    {
+    public CompoundNBT write(CompoundNBT compound) {
         writePacketData(compound);
         return super.write(compound);
     }

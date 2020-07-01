@@ -16,6 +16,7 @@ import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.ITextProperties;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
@@ -41,8 +42,8 @@ public class ModItem extends Item {
             return;
         }
         String key;
-        boolean shift = Screen.hasShiftDown();
-        boolean ctrl = Screen.hasControlDown();
+        boolean shift = Screen./*hasShiftDown*/func_231173_s_();
+        boolean ctrl = Screen./*hasControlDown*/func_231172_r_();
         if (shift == ctrl) {
             key = stack.getTranslationKey() + ".tip";
         } else if (shift) {
@@ -62,12 +63,14 @@ public class ModItem extends Item {
                 fontRenderer = Minecraft.getInstance().fontRenderer;
             }
             FontRenderer fontRenderer2 = fontRenderer;
-            int width = Math.max(fontRenderer.getStringWidth(tooltip.get(0).getFormattedText()), KiwiModConfig.tooltipWrapWidth);
+            int width = Math.max(fontRenderer.getStringWidth(tooltip.get(0).getString()), KiwiModConfig.tooltipWrapWidth);
             /* off */
             tooltip.addAll(
                     lines.stream()
-                    .map(s -> fontRenderer2.listFormattedStringToWidth(s, width))
+                    .map(StringTextComponent::new)
+                    .map(s -> fontRenderer2.func_238425_b_(s, width))
                     .flatMap(Collection::stream)
+                    .map(ITextProperties::getString)
                     .map(StringTextComponent::new)
                     .collect(Collectors.toList())
             );

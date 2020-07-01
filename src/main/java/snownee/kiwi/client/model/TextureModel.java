@@ -34,16 +34,17 @@ import net.minecraft.client.renderer.model.IUnbakedModel;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.model.ItemOverride;
 import net.minecraft.client.renderer.model.ItemOverrideList;
-import net.minecraft.client.renderer.model.Material;
 import net.minecraft.client.renderer.model.ModelResourceLocation;
 import net.minecraft.client.renderer.model.ModelRotation;
 import net.minecraft.client.renderer.model.MultipartBakedModel;
+import net.minecraft.client.renderer.model.RenderMaterial;
 import net.minecraft.client.renderer.model.Variant;
 import net.minecraft.client.renderer.model.VariantList;
 import net.minecraft.client.renderer.model.multipart.Multipart;
 import net.minecraft.client.renderer.model.multipart.Selector;
 import net.minecraft.client.renderer.texture.MissingTextureSprite;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -51,8 +52,7 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.IItemProvider;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.ILightReader;
-import net.minecraft.world.World;
+import net.minecraft.world.IBlockDisplayReader;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ModelBakeEvent;
@@ -69,21 +69,18 @@ import snownee.kiwi.util.NBTHelper;
 @SuppressWarnings("deprecation")
 @EventBusSubscriber(bus = Bus.MOD, value = Dist.CLIENT)
 @OnlyIn(Dist.CLIENT)
-public class TextureModel implements IDynamicBakedModel
-{
+public class TextureModel implements IDynamicBakedModel {
     public static ModelProperty<Map<String, String>> TEXTURES = new ModelProperty<>();
     public static Map<IBakedModel, TextureModel> CACHES = Maps.newHashMap();
 
-    public static void register(ModelBakeEvent event, Block block, @Nullable BlockState inventoryState)
-    {
+    public static void register(ModelBakeEvent event, Block block, @Nullable BlockState inventoryState) {
         register(event, block, inventoryState, null);
     }
 
     /**
      * @since 2.3.0
      */
-    public static void register(ModelBakeEvent event, Block block, @Nullable BlockState inventoryState, @Nullable String particleKey)
-    {
+    public static void register(ModelBakeEvent event, Block block, @Nullable BlockState inventoryState, @Nullable String particleKey) {
         block.getStateContainer().getValidStates().forEach(s -> {
             ModelResourceLocation rl = BlockModelShapes.getModelLocation(s);
             register(event, block, rl, s.equals(inventoryState), particleKey);
@@ -94,11 +91,9 @@ public class TextureModel implements IDynamicBakedModel
     /**
      * @since 2.3.0
      */
-    public static void register(ModelBakeEvent event, Block block, ModelResourceLocation rl, boolean inventory, @Nullable String particleKey)
-    {
+    public static void register(ModelBakeEvent event, Block block, ModelResourceLocation rl, boolean inventory, @Nullable String particleKey) {
         TextureModel textureModel = process(event, rl, inventory, particleKey);
-        if (inventory && textureModel != null && block != null && block.asItem() != null)
-        {
+        if (inventory && textureModel != null && block != null && block.asItem() != null) {
             rl = new ModelResourceLocation(new ResourceLocation(rl.getNamespace(), rl.getPath()), "inventory");
             event.getModelRegistry().put(rl, textureModel);
             ItemModelMesher mesher = Minecraft.getInstance().getItemRenderer().getItemModelMesher();
@@ -109,8 +104,7 @@ public class TextureModel implements IDynamicBakedModel
     /**
      * @since 2.3.0
      */
-    public static void registerInventory(ModelBakeEvent event, IItemProvider item, @Nullable String particleKey)
-    {
+    public static void registerInventory(ModelBakeEvent event, IItemProvider item, @Nullable String particleKey) {
         ResourceLocation rl = item.asItem().getRegistryName();
         ModelResourceLocation modelRl = new ModelResourceLocation(new ResourceLocation(rl.getNamespace(), rl.getPath()), "inventory");
         process(event, modelRl, true, particleKey);
@@ -119,65 +113,49 @@ public class TextureModel implements IDynamicBakedModel
     }
 
     @Nullable
-    private static TextureModel process(ModelBakeEvent event, ModelResourceLocation rl, boolean inventory, @Nullable String particleKey)
-    {
+    private static TextureModel process(ModelBakeEvent event, ModelResourceLocation rl, boolean inventory, @Nullable String particleKey) {
         IUnbakedModel unbakedModel = event.getModelLoader().getModelOrLogError(rl, "Kiwi failed to replace block model " + rl);
         IBakedModel bakedModel = event.getModelRegistry().get(rl);
-        if (unbakedModel == null || bakedModel == null)
-        {
+        if (unbakedModel == null || bakedModel == null) {
             return null;
         }
         TextureModel textureModel = null;
-        if (unbakedModel instanceof Multipart && bakedModel instanceof MultipartBakedModel)
-        {
+        if (unbakedModel instanceof Multipart && bakedModel instanceof MultipartBakedModel) {
             Multipart originalUnbaked = (Multipart) unbakedModel;
             MultipartBakedModel originalBaked = (MultipartBakedModel) bakedModel;
             List<Selector> selectors = originalUnbaked.getSelectors();
             TextureMultipart.Builder builder = new TextureMultipart.Builder();
-            for (int i = 0; i < selectors.size(); i++)
-            {
+            for (int i = 0; i < selectors.size(); i++) {
                 Selector selector = selectors.get(i);
                 VariantList variantList = selector.getVariantList();
                 Pair<Predicate<BlockState>, IBakedModel> pair = originalBaked.selectors.get(i);
                 builder.putModel(pair.getLeft(), putModel(event, variantList, pair.getRight(), false, particleKey));
             }
             event.getModelRegistry().put(rl, builder.build());
-        }
-        else if (unbakedModel instanceof VariantList)
-        {
+        } else if (unbakedModel instanceof VariantList) {
             textureModel = putModel(event, (VariantList) unbakedModel, bakedModel, inventory, particleKey);
-        }
-        else if (unbakedModel instanceof BlockModel)
-        {
+        } else if (unbakedModel instanceof BlockModel) {
             textureModel = new TextureModel(event.getModelLoader(), (BlockModel) unbakedModel, bakedModel, ModelRotation.X0_Y0, inventory, particleKey);
         }
-        if (textureModel != null)
-        {
+        if (textureModel != null) {
             event.getModelRegistry().put(rl, textureModel);
         }
         return textureModel;
     }
 
     @Nullable
-    private static TextureModel putModel(ModelBakeEvent event, VariantList variantList, IBakedModel baked, boolean inventory, String particleKey)
-    {
+    private static TextureModel putModel(ModelBakeEvent event, VariantList variantList, IBakedModel baked, boolean inventory, String particleKey) {
         TextureModel textureModel = null;
-        if (CACHES.containsKey(baked))
-        {
+        if (CACHES.containsKey(baked)) {
             textureModel = CACHES.get(baked);
-            if (inventory)
-            {
+            if (inventory) {
                 textureModel.setOverrides();
             }
-        }
-        else
-        {
+        } else {
             List<Variant> variants = variantList.getVariantList();
-            for (Variant variant : variants)
-            {
+            for (Variant variant : variants) {
                 IUnbakedModel unbakedModel2 = event.getModelLoader().getUnbakedModel(variant.getModelLocation());
-                if (unbakedModel2 instanceof BlockModel)
-                {
+                if (unbakedModel2 instanceof BlockModel) {
                     textureModel = new TextureModel(event.getModelLoader(), (BlockModel) unbakedModel2, baked, variant, inventory, particleKey);
                     CACHES.put(baked, textureModel);
                     break;
@@ -195,8 +173,7 @@ public class TextureModel implements IDynamicBakedModel
     private final String particleKey;
     private final Cache<String, IBakedModel> baked = CacheBuilder.newBuilder().maximumSize(200L).expireAfterWrite(500L, TimeUnit.SECONDS).weakKeys().build();
 
-    public TextureModel(ModelLoader modelLoader, BlockModel originalUnbaked, IBakedModel originalBaked, IModelTransform variant, boolean inventory, @Nullable String particleKey)
-    {
+    public TextureModel(ModelLoader modelLoader, BlockModel originalUnbaked, IBakedModel originalBaked, IModelTransform variant, boolean inventory, @Nullable String particleKey) {
         this.modelLoader = modelLoader;
         this.originalUnbaked = originalUnbaked;
         this.originalBaked = originalBaked;
@@ -205,41 +182,33 @@ public class TextureModel implements IDynamicBakedModel
         overrideList = inventory ? new TextureOverrideList(this) : null;
     }
 
-    public void setOverrides()
-    {
-        if (overrideList == null)
-        {
+    public void setOverrides() {
+        if (overrideList == null) {
             overrideList = new TextureOverrideList(this);
         }
     }
 
     @Override
-    public boolean isAmbientOcclusion()
-    {
+    public boolean isAmbientOcclusion() {
         return originalBaked.isAmbientOcclusion();
     }
 
     @Override
-    public boolean isGui3d()
-    {
+    public boolean isGui3d() {
         return originalBaked.isGui3d();
     }
 
     @Override
-    public boolean isBuiltInRenderer()
-    {
+    public boolean isBuiltInRenderer() {
         return false;
     }
 
     @Override
-    public TextureAtlasSprite getParticleTexture(IModelData data)
-    {
-        if (particleKey != null && data.getData(TEXTURES) != null && data.getData(TEXTURES).containsKey(particleKey))
-        {
-            Material material = ModelLoaderRegistry.blockMaterial(data.getData(TEXTURES).get(particleKey));
+    public TextureAtlasSprite getParticleTexture(IModelData data) {
+        if (particleKey != null && data.getData(TEXTURES) != null && data.getData(TEXTURES).containsKey(particleKey)) {
+            RenderMaterial material = ModelLoaderRegistry.blockMaterial(data.getData(TEXTURES).get(particleKey));
             TextureAtlasSprite particle = ModelLoader.defaultTextureGetter().apply(material);
-            if (particle.getClass() != MissingTextureSprite.class)
-            {
+            if (particle.getClass() != MissingTextureSprite.class) {
                 return particle;
             }
         }
@@ -247,38 +216,32 @@ public class TextureModel implements IDynamicBakedModel
     }
 
     @Override
-    public TextureAtlasSprite getParticleTexture()
-    {
+    public TextureAtlasSprite getParticleTexture() {
         return originalBaked.getParticleTexture();
     }
 
     @Override
-    public ItemOverrideList getOverrides()
-    {
+    public ItemOverrideList getOverrides() {
         return overrideList == null ? originalBaked.getOverrides() : overrideList;
     }
 
     @Override
-    public ItemCameraTransforms getItemCameraTransforms()
-    {
+    public ItemCameraTransforms getItemCameraTransforms() {
         return originalBaked.getItemCameraTransforms();
     }
 
     @Override
-    public List<BakedQuad> getQuads(BlockState state, Direction side, Random rand, IModelData extraData)
-    {
+    public List<BakedQuad> getQuads(BlockState state, Direction side, Random rand, IModelData extraData) {
         Map<String, String> overrides = extraData.getData(TEXTURES);
         IBakedModel model = getModel(overrides);
         return model.getQuads(state, side, rand);
     }
 
-    private IBakedModel getModel(Map<String, String> overrides)
-    {
-        if (overrides == null)
-        {
+    private IBakedModel getModel(Map<String, String> overrides) {
+        if (overrides == null) {
             return originalBaked;
         }
-        Map<String, Either<Material, String>> textures = Maps.newHashMap();
+        Map<String, Either<RenderMaterial, String>> textures = Maps.newHashMap();
         resolveTextures(textures, originalUnbaked, false);
         overrides.forEach((k, v) -> {
             if (!v.isEmpty())
@@ -287,54 +250,43 @@ public class TextureModel implements IDynamicBakedModel
         String key = generateKey(overrides);
         IBakedModel model = null;
         ResourceLocation loaderId = new ResourceLocation("minecraft:elements");
-        try
-        {
+        try {
             model = baked.get(key, () -> {
                 BlockModel unbaked = new BlockModel(originalUnbaked.getParentLocation(), originalUnbaked.getElements(), textures, originalUnbaked.isAmbientOcclusion(), originalUnbaked.func_230176_c_(), originalUnbaked.getAllTransforms(), Lists.newArrayList(originalUnbaked.getOverrides()));
                 return unbaked.bakeModel(modelLoader, unbaked, ModelLoader.defaultTextureGetter(), variant, loaderId, true);
             });
-        }
-        catch (ExecutionException e)
-        {
+        } catch (ExecutionException e) {
             e.printStackTrace();
             return originalBaked;
         }
         return model;
     }
 
-    private static void resolveTextures(Map<String, Either<Material, String>> textures2, BlockModel model, boolean sub)
-    {
-        if (model.parent != null)
-        {
+    private static void resolveTextures(Map<String, Either<RenderMaterial, String>> textures2, BlockModel model, boolean sub) {
+        if (model.parent != null) {
             resolveTextures(textures2, model.parent, true);
         }
         textures2.putAll(model.textures);
-        if (!sub)
-        {
+        if (!sub) {
             Set<String> hashes = Sets.newHashSet();
             textures2.forEach((k, v) -> {
                 v.ifRight(s -> {
                     hashes.add(k);
                 });
             });
-            do
-            {
+            do {
                 hashes.removeIf(k -> {
-                    Either<Material, String> v = textures2.get(k);
-                    if (v == null)
-                    {
+                    Either<RenderMaterial, String> v = textures2.get(k);
+                    if (v == null) {
                         textures2.put(k, Either.left(ModelLoaderRegistry.blockMaterial(MissingTextureSprite.getLocation())));
                         return true;
                     }
                     String hash = v.right().get();
-                    Either<Material, String> to = textures2.get(hash);
-                    if (to == null || hash.equals(k) || to.right().isPresent() && to.right().get().equals(k))
-                    {
+                    Either<RenderMaterial, String> to = textures2.get(hash);
+                    if (to == null || hash.equals(k) || to.right().isPresent() && to.right().get().equals(k)) {
                         textures2.put(k, Either.left(ModelLoaderRegistry.blockMaterial(MissingTextureSprite.getLocation())));
                         return true;
-                    }
-                    else
-                    {
+                    } else {
                         textures2.put(k, to);
                         return to.left().isPresent();
                     }
@@ -345,44 +297,33 @@ public class TextureModel implements IDynamicBakedModel
     }
 
     @Override
-    public IModelData getModelData(ILightReader world, BlockPos pos, BlockState state, IModelData tileData)
-    {
+    public IModelData getModelData(IBlockDisplayReader world, BlockPos pos, BlockState state, IModelData tileData) {
         return tileData;
     }
 
-    private static String generateKey(Map<String, String> textures)
-    {
-        if (textures == null)
-        {
+    private static String generateKey(Map<String, String> textures) {
+        if (textures == null) {
             return "";
-        }
-        else
-        {
+        } else {
             return StringUtils.join(textures.entrySet(), ',');
         }
     }
 
-    public static class TextureOverrideList extends ItemOverrideList
-    {
+    public static class TextureOverrideList extends ItemOverrideList {
         private final TextureModel baked;
         private final Cache<ItemStack, IBakedModel> cache = CacheBuilder.newBuilder().maximumSize(100L).expireAfterWrite(300L, TimeUnit.SECONDS).weakKeys().build();
 
-        public TextureOverrideList(TextureModel model)
-        {
+        public TextureOverrideList(TextureModel model) {
             this.baked = model;
         }
 
         @Override
-        public IBakedModel getModelWithOverrides(IBakedModel model, ItemStack stack, World worldIn, LivingEntity entityIn)
-        {
-            if (model instanceof TextureModel)
-            {
-                try
-                {
+        public IBakedModel func_239290_a_/*getModelWithOverrides*/(IBakedModel model, ItemStack stack, ClientWorld worldIn, LivingEntity entityIn) {
+            if (model instanceof TextureModel) {
+                try {
                     model = cache.get(stack, () -> {
                         CompoundNBT data = NBTHelper.of(stack).getTag("BlockEntityTag.Textures");
-                        if (data == null)
-                        {
+                        if (data == null) {
                             return baked.originalBaked;
                         }
                         Set<String> keySet = data.keySet();
@@ -391,9 +332,7 @@ public class TextureModel implements IDynamicBakedModel
                         TextureTile.readTextures(overrides, data);
                         return baked.getModel(overrides);
                     });
-                }
-                catch (ExecutionException e)
-                {
+                } catch (ExecutionException e) {
                     e.printStackTrace();
                 }
             }
@@ -401,8 +340,7 @@ public class TextureModel implements IDynamicBakedModel
         }
 
         @Override
-        public ImmutableList<ItemOverride> getOverrides()
-        {
+        public ImmutableList<ItemOverride> getOverrides() {
             return ImmutableList.of();
         }
     }

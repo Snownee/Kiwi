@@ -13,40 +13,34 @@ import net.minecraft.tileentity.TileEntityType;
  * Base TileEntity skeleton used by all TileEntity. It contains several standardized
  * implementations regarding networking.
  */
-public abstract class BaseTile extends TileEntity
-{
+public abstract class BaseTile extends TileEntity {
     public boolean persistData = false;
 
-    public BaseTile(TileEntityType<?> tileEntityTypeIn)
-    {
+    public BaseTile(TileEntityType<?> tileEntityTypeIn) {
         super(tileEntityTypeIn);
     }
 
     @Override
-    public final SUpdateTileEntityPacket getUpdatePacket()
-    {
+    public final SUpdateTileEntityPacket getUpdatePacket() {
         return new SUpdateTileEntityPacket(this.pos, -1, this.writePacketData(new CompoundNBT()));
     }
 
     @Override
-    public final void onDataPacket(NetworkManager manager, SUpdateTileEntityPacket packet)
-    {
+    public final void onDataPacket(NetworkManager manager, SUpdateTileEntityPacket packet) {
         this.readPacketData(packet.getNbtCompound());
     }
 
     // Used for syncing data at the time when the chunk is loaded
     @Nonnull
     @Override
-    public CompoundNBT getUpdateTag()
-    {
+    public CompoundNBT getUpdateTag() {
         return this.write(new CompoundNBT());
     }
 
     // Used for syncing data at the time when the chunk is loaded
     @Override
-    public final void handleUpdateTag(CompoundNBT tag)
-    {
-        this.read(tag);
+    public void handleUpdateTag(BlockState state, CompoundNBT tag) {
+        this./*read*/func_230337_a_(state, tag);
     }
 
     /**
@@ -67,12 +61,10 @@ public abstract class BaseTile extends TileEntity
     @Nonnull
     protected abstract CompoundNBT writePacketData(CompoundNBT data);
 
-    protected void refresh()
-    {
-        if (hasWorld() && !world.isRemote)
-        {
+    protected void refresh() {
+        if (hasWorld() && !world.isRemote) {
             BlockState state = world.getBlockState(pos);
-            world.markAndNotifyBlock(pos, null, state, state, 11);
+            world.markAndNotifyBlock(pos, world.getChunkAt(pos), state, state, 11, 512 /* TODO whats this? */);
         }
     }
 

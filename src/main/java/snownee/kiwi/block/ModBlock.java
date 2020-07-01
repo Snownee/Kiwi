@@ -2,9 +2,7 @@ package snownee.kiwi.block;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.block.DoorBlock;
-import net.minecraft.block.FireBlock;
 import net.minecraft.block.PressurePlateBlock;
 import net.minecraft.block.SaplingBlock;
 import net.minecraft.block.SoundType;
@@ -14,7 +12,9 @@ import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockReader;
@@ -32,23 +32,12 @@ import snownee.kiwi.tile.BaseTile;
  * 
  */
 public class ModBlock extends Block {
+
+    protected final ExtraInfo extraInfo;
+
     public ModBlock(Block.Properties builder) {
         super(builder);
-        deduceSoundAndHardness(this);
-    }
-
-    public static <T extends Block> T deduceSoundAndHardness(T block) {
-        if (block.soundType == SoundType.STONE) {
-            block.soundType = deduceSoundType(block.material);
-        }
-        if (block.blockHardness == 0) {
-            block.blockHardness = deduceHardness(block.material);
-            if (block.blockHardness > 0) {
-                block.blockResistance = block.blockHardness;
-            }
-        }
-        setFlammability(block);
-        return block;
+        extraInfo = new ExtraInfo(this);
     }
 
     public static SoundType deduceSoundType(final Material material) {
@@ -122,28 +111,6 @@ public class ModBlock extends Block {
         return 1;
     }
 
-    public static void setFlammability(Block block) {
-        Material material = block.material;
-        FireBlock fire = (FireBlock) Blocks.FIRE;
-        if (material == Material.WOOD) {
-            if (block instanceof DoorBlock || block instanceof TrapDoorBlock || block instanceof WoodButtonBlock || block instanceof PressurePlateBlock) {
-                return;
-            }
-            fire.setFireInfo(block, 5, 20);
-        } else if (material == Material.PLANTS || material == Material.TALL_PLANTS) {
-            if (block instanceof SaplingBlock) {
-                return;
-            }
-            fire.setFireInfo(block, 30, 100);
-        } else if (material == Material.CARPET) {
-            fire.setFireInfo(block, 60, 20);
-        } else if (material == Material.LEAVES) {
-            fire.setFireInfo(block, 30, 60);
-        } else if (material == Material.WOOL) {
-            fire.setFireInfo(block, 30, 60);
-        }
-    }
-
     @Override
     public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
         return pickBlock(state, target, world, pos, player);
@@ -163,4 +130,45 @@ public class ModBlock extends Block {
         }
         return stack;
     }
+
+    @Override
+    public int getFireSpreadSpeed(BlockState state, IBlockReader world, BlockPos pos, Direction face) {
+        return state.func_235901_b_(BlockStateProperties.WATERLOGGED) && state.get(BlockStateProperties.WATERLOGGED) ? 0 : extraInfo.fireSpreadSpeed;
+    }
+
+    @Override
+    public int getFlammability(BlockState state, IBlockReader world, BlockPos pos, Direction face) {
+        return state.func_235901_b_(BlockStateProperties.WATERLOGGED) && state.get(BlockStateProperties.WATERLOGGED) ? 0 : extraInfo.flammability;
+    }
+
+    public static final class ExtraInfo {
+        public int fireSpreadSpeed;
+        public int flammability;
+
+        public ExtraInfo(Block block) {
+            Material material = block.material;
+            if (material == Material.WOOD) {
+                if (!(block instanceof DoorBlock || block instanceof TrapDoorBlock || block instanceof WoodButtonBlock || block instanceof PressurePlateBlock)) {
+                    fireSpreadSpeed = 5;
+                    flammability = 20;
+                }
+            } else if (material == Material.PLANTS || material == Material.TALL_PLANTS) {
+                if (!(block instanceof SaplingBlock)) {
+                    fireSpreadSpeed = 30;
+                    flammability = 100;
+                }
+            } else if (material == Material.CARPET) {
+                fireSpreadSpeed = 60;
+                flammability = 20;
+            } else if (material == Material.LEAVES) {
+                fireSpreadSpeed = 30;
+                flammability = 60;
+            } else if (material == Material.WOOL) {
+                fireSpreadSpeed = 30;
+                flammability = 60;
+            }
+        }
+
+    }
+
 }

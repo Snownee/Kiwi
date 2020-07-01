@@ -19,55 +19,41 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.event.ForgeEventFactory;
 
-public final class PlayerUtil
-{
-    private PlayerUtil()
-    {
-    }
+public final class PlayerUtil {
+    private PlayerUtil() {}
 
     @Nullable
-    public static BlockPos tryPlace(World world, BlockPos pos, Direction side, @Nullable PlayerEntity player, Hand hand, BlockState state, @Nullable ItemStack stack, boolean playSound, boolean skipCollisionCheck)
-    {
+    public static BlockPos tryPlace(World world, BlockPos pos, Direction side, @Nullable PlayerEntity player, Hand hand, BlockState state, @Nullable ItemStack stack, boolean playSound, boolean skipCollisionCheck) {
         BlockState worldState = world.getBlockState(pos);
-        if (worldState.getBlock() == Blocks.SNOW && worldState.has(SnowBlock.LAYERS) && worldState.get(SnowBlock.LAYERS) < 8)
-        {
-        }
-        else if (!state.isReplaceable(new DirectionalPlaceContext(world, pos, side.getOpposite(), stack == null ? ItemStack.EMPTY : stack, side.getOpposite())))
-        {
+        if (worldState.getBlock() == Blocks.SNOW && worldState./*has*/func_235901_b_(SnowBlock.LAYERS) && worldState.get(SnowBlock.LAYERS) < 8) {} else if (!state.isReplaceable(new DirectionalPlaceContext(world, pos, side.getOpposite(), stack == null ? ItemStack.EMPTY : stack, side.getOpposite()))) {
             pos = pos.offset(side);
         }
-        if (skipCollisionCheck)
-        {
+        if (skipCollisionCheck) {
             return tryPlace(world, pos, side.getOpposite(), player, hand, state, stack, playSound) ? pos : null;
         }
         ISelectionContext iselectioncontext = player == null ? ISelectionContext.dummy() : ISelectionContext.forEntity(player);
-        if (world.func_226663_a_(state, pos, iselectioncontext))
-        {
+        if (world.func_226663_a_(state, pos, iselectioncontext)) {
             return tryPlace(world, pos, side.getOpposite(), player, hand, state, stack, playSound) ? pos : null;
         }
         return null;
     }
 
-    public static boolean tryPlace(World world, BlockPos pos, Direction direction, @Nullable PlayerEntity player, Hand hand, BlockState state, @Nullable ItemStack stack, boolean playSound)
-    {
-        if (!world.isBlockModifiable(player, pos))
-        {
+    public static boolean tryPlace(World world, BlockPos pos, Direction direction, @Nullable PlayerEntity player, Hand hand, BlockState state, @Nullable ItemStack stack, boolean playSound) {
+        if (!world.isBlockModifiable(player, pos)) {
             return false;
         }
-        if (player != null && !player.canPlayerEdit(pos, direction, stack))
-        {
+        if (player != null && !player.canPlayerEdit(pos, direction, stack)) {
             return false;
         }
-        BlockSnapshot blocksnapshot = BlockSnapshot.getBlockSnapshot(world, pos);
-        if (!world.setBlockState(pos, state))
-        {
+        BlockSnapshot blocksnapshot = BlockSnapshot.create(world, pos);
+        if (!world.setBlockState(pos, state)) {
             return false;
         }
-        if (ForgeEventFactory.onBlockPlace(player, blocksnapshot, direction))
-        {
+        if (ForgeEventFactory.onBlockPlace(player, blocksnapshot, direction)) {
             blocksnapshot.restore(true, false);
             return false;
         }
@@ -75,28 +61,23 @@ public final class PlayerUtil
 
         BlockState actualState = world.getBlockState(pos);
 
-        if (stack != null)
-        {
+        if (stack != null) {
             BlockItem.setTileEntityNBT(world, player, pos, stack);
 
-            if (player != null)
-            {
+            if (player != null) {
                 player.addStat(Stats.ITEM_USED.get(stack.getItem()));
-                if (player instanceof ServerPlayerEntity)
-                {
+                if (player instanceof ServerPlayerEntity) {
                     CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayerEntity) player, pos, stack);
                 }
                 actualState.getBlock().onBlockPlacedBy(world, pos, state, player, stack);
             }
 
-            if (player == null || !player.abilities.isCreativeMode)
-            {
+            if (player == null || !player.abilities.isCreativeMode) {
                 stack.shrink(1);
             }
         }
 
-        if (playSound)
-        {
+        if (playSound) {
             SoundType soundtype = actualState.getBlock().getSoundType(actualState, world, pos, player);
             world.playSound(player, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
         }
@@ -104,9 +85,8 @@ public final class PlayerUtil
         return true;
     }
 
-    public static boolean canTouch(PlayerEntity player, BlockPos pos)
-    {
-        double reach = player.getAttribute(PlayerEntity.REACH_DISTANCE).getValue();
+    public static boolean canTouch(PlayerEntity player, BlockPos pos) {
+        double reach = player.getAttribute(ForgeMod.REACH_DISTANCE.get()).getValue();
         return player.getDistanceSq(pos.getX() + 0.5d, pos.getY() + 0.5d, pos.getZ() + 0.5d) <= reach * reach;
     }
 }

@@ -36,7 +36,7 @@ public class TestModule extends AbstractModule {
     public static final Item.Properties FIRST_BLOCK_ITEM_BUILDER = itemProp().rarity(Rarity.RARE);
     // Register a simple block and its BlockItem
     //@RenderLayer(Layer.CUTOUT)
-    public static final TestBlock FIRST_BLOCK = init(new TestBlock2(blockProp(Material.WOOD)));
+    public static final TestBlock FIRST_BLOCK = new TestBlock2(blockProp(Material.WOOD));
 
     // Register a simple effect
     public static final Effect FIRST_EFFECT = new HealthBoostEffect(EffectType.BENEFICIAL, 0xFF0000);

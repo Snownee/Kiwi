@@ -38,7 +38,7 @@ public final class DebugTooltip {
         ItemStack stack = event.getItemStack();
         List<ITextComponent> tooltip = event.getToolTip();
 
-        if (Screen.hasShiftDown() && stack.hasTag()) {
+        if (Screen./*hasShiftDown*/func_231173_s_() && stack.hasTag()) {
             tooltip.removeIf(c -> c.getClass() == TranslationTextComponent.class && ((TranslationTextComponent) c).getKey().equals("item.nbt_tags"));
             if (lastNBT != stack.getTag()) {
                 switch (KiwiModConfig.debugTooltipNBTFormatter) {
@@ -98,12 +98,12 @@ public final class DebugTooltip {
                 }
 
                 lastNBT = stack.getTag();
-                lastFormatted = formatter.apply(lastNBT).applyTextStyle(TextFormatting.RESET);
+                lastFormatted = formatter.apply(lastNBT).func_230532_e_()./*applyTextStyle*/func_240699_a_(TextFormatting.RESET);
             }
             tooltip.add(lastFormatted);
         } else {
             stack.getItem().getTags().stream().map(Object::toString).forEach(id -> {
-                tooltip.add(new StringTextComponent("#" + id).applyTextStyle(TextFormatting.DARK_GRAY));
+                tooltip.add(new StringTextComponent("#" + id)./*applyTextStyle*/func_240699_a_(TextFormatting.DARK_GRAY));
             });
         }
     }

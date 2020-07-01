@@ -31,7 +31,7 @@ minecraft {
     // Use non-default mappings at your own risk. they may not always work.
     // Simply re-run your setup task after changing the mappings to update your workspace.
 
-    mappings channel: 'snapshot', version: '20200304-1.15.1'
+    mappings channel: 'snapshot', version: '20200514-1.16'
 
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
@@ -76,7 +76,8 @@ def a = [
     "/assets/kiwi/blockstates",
     "/assets/kiwi/models",
     "/snownee/kiwi/test",
-    "/data"
+    "/data",
+    "/third_party"
 ]
 def b = [
     "Specification-Title": 'kiwi',

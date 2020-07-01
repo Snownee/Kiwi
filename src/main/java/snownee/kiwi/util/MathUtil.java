@@ -5,10 +5,10 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
-import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3f;
 
 public final class MathUtil {
     private MathUtil() {}
@@ -16,25 +16,25 @@ public final class MathUtil {
     /*
      * https://stackoverflow.com/questions/9600801/evenly-distributing-n-points-on-a-sphere/26127012#26127012
      */
-    public static List<Vec3d> fibonacciSphere(Vec3d start, double radius, int samples, boolean randomize) {
+    public static List<Vector3d> fibonacciSphere(Vector3d start, double radius, int samples, boolean randomize) {
         double rnd = 1;
         if (randomize)
             rnd = Math.random() * samples;
         double offset = 2d / samples;
         double increment = Math.PI * (3 - Math.sqrt(5));
-        List<Vec3d> points = Lists.newArrayListWithCapacity(samples);
+        List<Vector3d> points = Lists.newArrayListWithCapacity(samples);
         for (int i = 0; i < samples; i++) {
             double y = ((i * offset) - 1) + (offset / 2);
             double r = Math.sqrt(1 - y * y) * radius;
             double phi = ((i + rnd) % samples) * increment;
             double x = Math.cos(phi) * r;
             double z = Math.sin(phi) * r;
-            points.add(new Vec3d(start.x + x, start.y + y * radius, start.z + z));
+            points.add(new Vector3d(start.x + x, start.y + y * radius, start.z + z));
         }
         return points;
     }
 
-    public static int posOnLine(Vec3d start, Vec3d end, Collection<BlockPos> list) {
+    public static int posOnLine(Vector3d start, net.minecraft.util.math.vector.Vector3d end, Collection<BlockPos> list) {
         list.add(new BlockPos(start));
         if (start.equals(end)) {
             return 1;

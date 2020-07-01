@@ -3,6 +3,8 @@ package snownee.kiwi.test;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Util;
+import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextComponent;
 import net.minecraft.world.World;
@@ -27,7 +29,7 @@ public class MyTask extends SimpleWorldTask {
             MinecraftServer server = ticker.getWorld().getServer();
             if (server != null) {
                 TextComponent text = new StringTextComponent(words);
-                server.getPlayerList().sendMessage(text);
+                server.getPlayerList()./*sendMessage*/func_232641_a_(text, ChatType.SYSTEM, Util.field_240973_b_);
             }
             return true;
         } else {

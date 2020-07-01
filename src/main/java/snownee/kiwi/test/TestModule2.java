@@ -3,7 +3,7 @@ package snownee.kiwi.test;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Rarity;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.ITag.INamedTag;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -15,7 +15,7 @@ import snownee.kiwi.Name;
 @KiwiModule(modid = "forge", name = "sub", dependencies = "forge;@kiwi:test")
 @KiwiModule.Optional(disabledByDefault = true)
 public class TestModule2 extends AbstractModule {
-    public static final Tag<EntityType<?>> BAT = entityTag(Kiwi.MODID, "bat");
+    public static final INamedTag<EntityType<?>> BAT = entityTag(Kiwi.MODID, "bat");
 
     @Name("kiwi:first_item")
     public static final TestItem FIRST_ITEM = new TestItem(itemProp().rarity(Rarity.EPIC)) {

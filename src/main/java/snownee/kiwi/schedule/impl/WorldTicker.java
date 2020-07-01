@@ -6,8 +6,8 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.Maps;
 
+import net.minecraft.util.RegistryKey;
 import net.minecraft.world.World;
-import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.world.WorldEvent;
@@ -17,21 +17,21 @@ import snownee.kiwi.schedule.Scheduler;
 import snownee.kiwi.util.MutablePair;
 
 public class WorldTicker implements ITicker {
-    private static final Map<DimensionType, MutablePair<WorldTicker>> tickers = Maps.newHashMap();
+    private static final Map<RegistryKey<World>, MutablePair<WorldTicker>> tickers = Maps.newHashMap();
 
     public static WorldTicker get(World world, TickEvent.Phase phase) {
-        return get(world.dimension.getType(), phase);
+        return get(world./*getDimension*/func_234923_W_(), phase);
     }
 
-    public static WorldTicker get(DimensionType dimensionType, TickEvent.Phase phase) {
-        MutablePair<WorldTicker> pair = tickers.get(dimensionType);
+    public static WorldTicker get(RegistryKey<World> dimension, TickEvent.Phase phase) {
+        MutablePair<WorldTicker> pair = tickers.get(dimension);
         if (pair == null) {
             pair = new MutablePair();
-            tickers.put(dimensionType, pair);
+            tickers.put(dimension, pair);
         }
         WorldTicker ticker = pair.get(phase.ordinal());
         if (ticker == null) {
-            ticker = new WorldTicker(dimensionType);
+            ticker = new WorldTicker(dimension);
             pair.set(phase.ordinal(), ticker);
         }
         return ticker;
@@ -43,7 +43,7 @@ public class WorldTicker implements ITicker {
 
     @SubscribeEvent
     public static void onTick(TickEvent.WorldTickEvent event) {
-        MutablePair<WorldTicker> pair = tickers.get(event.world.dimension.getType());
+        MutablePair<WorldTicker> pair = tickers.get(event.world./*getDimension*/func_234923_W_());
         if (pair == null) {
             return;
         }
@@ -57,7 +57,7 @@ public class WorldTicker implements ITicker {
 
     @SubscribeEvent
     public static void unloadWorld(WorldEvent.Unload event) {
-        MutablePair<WorldTicker> pair = tickers.get(event.getWorld().getWorld().dimension.getType());
+        MutablePair<WorldTicker> pair = tickers.get(event.getWorld().getWorld()./*getDimension*/func_234923_W_());
         if (pair == null) {
             return;
         }
@@ -71,10 +71,10 @@ public class WorldTicker implements ITicker {
 
     @Nullable
     private World world;
-    private final DimensionType dimensionType;
+    private final RegistryKey<World> dimension;
 
-    private WorldTicker(DimensionType dimensionType) {
-        this.dimensionType = dimensionType;
+    private WorldTicker(RegistryKey<World> dimension) {
+        this.dimension = dimension;
     }
 
     @Nullable
@@ -84,7 +84,7 @@ public class WorldTicker implements ITicker {
 
     @Override
     public void destroy() {
-        MutablePair<WorldTicker> pair = tickers.get(dimensionType);
+        MutablePair<WorldTicker> pair = tickers.get(dimension);
         if (pair != null) {
             if (pair.left == this) {
                 pair.left = null;
