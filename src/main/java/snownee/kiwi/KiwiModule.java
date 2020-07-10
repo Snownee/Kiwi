@@ -18,13 +18,14 @@ public @interface KiwiModule {
     String modid() default "";
 
     /**
-     * Unique id of module. Same as modid if empty
+     * Unique id of module. "core" by default
      */
-    String name() default "";
+    String value() default "core";
 
     /**
-     * Module will be registered only if dependent mods are loaded.
-     * You can use ';' to separate multiple mod ids.
+     * Module will be registered only if dependent mods or modules are loaded.
+     * You can use ";" to separate multiple mod ids.
+     * You can use "@mod:module" to announce a dependent module
      */
     String dependencies() default "";
 

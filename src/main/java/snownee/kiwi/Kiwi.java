@@ -81,6 +81,9 @@ import net.minecraftforge.registries.RegistryManager;
 import snownee.kiwi.KiwiModule.Group;
 import snownee.kiwi.KiwiModule.Subscriber;
 import snownee.kiwi.KiwiModule.Subscriber.Bus;
+import snownee.kiwi.config.ConfigHandler;
+import snownee.kiwi.config.KiwiConfig;
+import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.crafting.FullBlockIngredient;
 import snownee.kiwi.crafting.ModuleLoadedCondition;
 import snownee.kiwi.schedule.Scheduler;
@@ -113,8 +116,7 @@ public class Kiwi {
             FIELD_EXTENSION = ModContainer.class.getDeclaredField("contextExtension");
             FIELD_EXTENSION.setAccessible(true);
         } catch (NoSuchFieldException | SecurityException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Kiwi.logger.catching(e);
         }
     }
 
@@ -125,6 +127,7 @@ public class Kiwi {
 
     public Kiwi() {
         final Type KIWI_MODULE = Type.getType(KiwiModule.class);
+        final Type KIWI_CONFIG = Type.getType(KiwiConfig.class);
         final Type OPTIONAL_MODULE = Type.getType(KiwiModule.Optional.class);
         final Type LOADING_CONDITION = Type.getType(KiwiModule.LoadingCondition.class);
 
@@ -136,6 +139,24 @@ public class Kiwi {
                     if (KIWI_MODULE.equals(annotationData.getAnnotationType())) {
                         String modid = (String) annotationData.getAnnotationData().get("modid");
                         moduleData.put(Strings.isNullOrEmpty(modid) ? info.getModId() : modid, annotationData);
+                    } else if (KIWI_CONFIG.equals(annotationData.getAnnotationType())) {
+                        ModConfig.Type type = (ModConfig.Type) annotationData.getAnnotationData().get("type");
+                        type = type == null ? ModConfig.Type.COMMON : type;
+                        if (!(type == ModConfig.Type.CLIENT && FMLEnvironment.dist.isDedicatedServer())) {
+                            try {
+                                Class<?> clazz = Class.forName(annotationData.getClassType().getClassName());
+                                KiwiConfig kiwiConfig = clazz.getAnnotation(KiwiConfig.class);
+                                String fileName = kiwiConfig.value();
+                                boolean master = type == ModConfig.Type.COMMON && Strings.isNullOrEmpty(fileName);
+                                if (Strings.isNullOrEmpty(fileName)) {
+                                    fileName = String.format("%s-%s", info.getModId(), type.extension());
+                                }
+                                ConfigHandler configHandler = new ConfigHandler(info.getModId(), fileName + ".toml", type, clazz, master);
+                                KiwiConfigManager.register(configHandler);
+                            } catch (ClassNotFoundException e) {
+                                logger.catching(e);
+                            }
+                        }
                     } else if (OPTIONAL_MODULE.equals(annotationData.getAnnotationType())) {
                         moduleToOptional.put(annotationData.getClassType(), annotationData);
                     } else if (LOADING_CONDITION.equals(annotationData.getAnnotationType())) {
@@ -155,9 +176,9 @@ public class Kiwi {
                     continue;
                 }
 
-                String name = (String) entry.getValue().getAnnotationData().get("name");
+                String name = (String) entry.getValue().getAnnotationData().get("value");
                 if (Strings.isNullOrEmpty(name)) {
-                    name = modid;
+                    name = "core";
                 }
 
                 Boolean disabledByDefault = (Boolean) optional.getAnnotationData().get("disabledByDefault");
@@ -168,7 +189,8 @@ public class Kiwi {
             }
         }
 
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, KiwiModConfig.spec, MODID + (FMLEnvironment.dist.isDedicatedServer() ? "-server.toml" : ".toml"));
+        KiwiConfigManager.init();
+        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, KiwiModConfig.spec);
         final IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         modEventBus.addListener(EventPriority.LOWEST, this::preInit);
         modEventBus.addListener(this::init);
@@ -246,20 +268,20 @@ public class Kiwi {
                 continue;
             }
 
-            String name = (String) module.getAnnotationData().get("name");
+            String name = (String) module.getAnnotationData().get("value");
             if (Strings.isNullOrEmpty(name)) {
-                name = modid;
+                name = "core";
             }
 
             ResourceLocation rl = new ResourceLocation(modid, name);
             if (disabledModules.contains(rl)) {
-                if (KiwiModConfig.modules.containsKey(rl)) { // module is optional
+                if (KiwiConfigManager.modules.containsKey(rl)) { // module is optional
                     continue;
                 } else {
                     throw new RuntimeException("Cannot load mandatory module: " + rl);
                 }
             }
-            if (KiwiModConfig.modules.containsKey(rl) && !KiwiModConfig.modules.get(rl).get()) {
+            if (KiwiConfigManager.modules.containsKey(rl) && !KiwiConfigManager.modules.get(rl).get()) {
                 continue;
             }
 
@@ -314,7 +336,7 @@ public class Kiwi {
 
         for (ResourceLocation id : list) {
             Info info = infos.get(id);
-            ModContext context = new ModContext(id.getNamespace());
+            ModContext context = ModContext.get(id.getNamespace());
             context.setActiveContainer();
 
             // Instantiate modules
@@ -589,9 +611,4 @@ public class Kiwi {
         }
     }
 
-    //    @SideOnly(Side.CLIENT)
-    //    private static void replaceFontRenderer()
-    //    {
-    //        Minecraft.getMinecraft().fontRenderer = AdvancedFontRenderer.INSTANCE;
-    //    }
 }

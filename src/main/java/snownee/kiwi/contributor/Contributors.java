@@ -30,7 +30,7 @@ import snownee.kiwi.contributor.network.CSetEffectPacket;
 import snownee.kiwi.contributor.network.SSyncEffectPacket;
 import snownee.kiwi.network.NetworkChannel;
 
-@KiwiModule(name = "contributors")
+@KiwiModule("contributors")
 @KiwiModule.Subscriber
 public class Contributors extends AbstractModule {
 

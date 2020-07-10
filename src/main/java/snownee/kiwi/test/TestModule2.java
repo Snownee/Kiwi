@@ -12,7 +12,7 @@ import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.Name;
 
-@KiwiModule(modid = "forge", name = "sub", dependencies = "forge;@kiwi:test")
+@KiwiModule(value = "test2", dependencies = "forge;@kiwi:test")
 @KiwiModule.Optional(disabledByDefault = true)
 public class TestModule2 extends AbstractModule {
     public static final INamedTag<EntityType<?>> BAT = entityTag(Kiwi.MODID, "bat");

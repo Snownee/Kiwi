@@ -22,7 +22,7 @@ import snownee.kiwi.client.model.TextureModel;
 import snownee.kiwi.item.ModBlockItem;
 import snownee.kiwi.schedule.Scheduler;
 
-@KiwiModule(name = "test")
+@KiwiModule("test")
 @KiwiModule.Optional(disabledByDefault = true)
 @KiwiModule.Group("building_blocks")
 @KiwiModule.Subscriber(Bus.MOD)

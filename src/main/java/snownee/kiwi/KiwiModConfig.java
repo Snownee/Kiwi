@@ -1,27 +1,20 @@
 package snownee.kiwi;
 
 import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
-import com.google.common.collect.Maps;
 
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import net.minecraftforge.common.ForgeConfigSpec.IntValue;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
-import net.minecraftforge.fml.common.thread.EffectiveSide;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 import snownee.kiwi.util.Util;
 
 @EventBusSubscriber(bus = Bus.MOD)
@@ -39,8 +32,6 @@ public final class KiwiModConfig {
     private static IntValue tooltipWrapWidthCfg;
     private static BooleanValue debugTooltipCfg;
     private static ConfigValue<String> debugTooltipNBTFormatterCfg;
-    //public static BooleanValue replaceDefaultFontRendererCfg;
-    public static Map<ResourceLocation, BooleanValue> modules = Maps.newHashMap();
 
     static {
         final Pair<KiwiModConfig, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(KiwiModConfig::new);
@@ -49,19 +40,6 @@ public final class KiwiModConfig {
 
     private KiwiModConfig(ForgeConfigSpec.Builder builder) {
         /* off */
-        builder.push("modules");
-
-        for (Entry<ResourceLocation, Boolean> entry : Kiwi.defaultOptions.entrySet())
-        {
-            ResourceLocation rl = entry.getKey();
-            modules.put(rl, builder.define(rl.getNamespace() + "." + rl.getPath(), !entry.getValue().booleanValue()));
-        }
-
-        builder.pop();
-
-        if (FMLEnvironment.dist == Dist.DEDICATED_SERVER || EffectiveSide.get() == LogicalSide.SERVER) return;
-
-        builder.push("client");
 
         contributorEffectCfg = builder.define("contributorEffect", "");
 
@@ -85,18 +63,10 @@ public final class KiwiModConfig {
                 .translation("kiwi.config.tooltipNBTFormatter")
                 .define("debugTooltipNBTFormatter", debugTooltipNBTFormatter);
 
-        /*
-        replaceDefaultFontRendererCfg = builder
-                .comment("Use §x (almost) everywhere. Fix MC-109260. Do NOT enable this unless you know what you are doing")
-                .translation("kiwi.config.replaceDefaultFontRenderer")
-                .define("replaceDefaultFontRenderer", false);
-         */
         /* on */
     }
 
     public static void refresh() {
-        if (FMLEnvironment.dist == Dist.DEDICATED_SERVER || EffectiveSide.get() == LogicalSide.SERVER)
-            return;
         contributorEffect = Util.RL(contributorEffectCfg.get());
         globalTooltip = globalTooltipCfg.get();
         tooltipWrapWidth = tooltipWrapWidthCfg.get();

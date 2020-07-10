@@ -7,7 +7,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.collect.Maps;
 
-import net.minecraft.item.ItemGroup;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.CrashReportExtender;
@@ -31,9 +30,6 @@ public final class KiwiManager {
             MODULES.put(resourceLocation, new ModuleInfo(resourceLocation, module, context));
         }
     }
-
-    @Deprecated
-    public static void addItemGroup(String modId, String name, ItemGroup group) {}
 
     static void handleRegister(RegistryEvent.Register<?> event) {
         MODULES.values().forEach(info -> info.handleRegister(event));

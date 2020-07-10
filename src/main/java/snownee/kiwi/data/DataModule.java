@@ -7,7 +7,7 @@ import snownee.kiwi.crafting.NoContainersShapedRecipe;
 import snownee.kiwi.crafting.NoContainersShapelessRecipe;
 import snownee.kiwi.crafting.TextureBlockRecipe;
 
-@KiwiModule(name = "data")
+@KiwiModule("data")
 public final class DataModule extends AbstractModule {
 
     //public static final AddLootTable.Serializer ADD_LOOT = new AddLootTable.Serializer();
