@@ -84,7 +84,7 @@ public class ConfigHandler {
             }
             Translation translation = field.getAnnotation(Translation.class);
             if (translation != null) {
-                builder.translation(translation.value());
+                builder.translation(modId + ".config." + translation.value());
             }
             String path;
             Path pathAnnotation = field.getAnnotation(Path.class);

@@ -66,6 +66,7 @@ import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fml.loading.moddiscovery.ModAnnotation;
 import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import net.minecraftforge.fml.loading.toposort.TopologicalSort;
@@ -138,7 +139,11 @@ public class Kiwi {
                         String modid = (String) annotationData.getAnnotationData().get("modid");
                         moduleData.put(Strings.isNullOrEmpty(modid) ? info.getModId() : modid, annotationData);
                     } else if (KIWI_CONFIG.equals(annotationData.getAnnotationType())) {
-                        ModConfig.Type type = (ModConfig.Type) annotationData.getAnnotationData().get("type");
+                        ModAnnotation.EnumHolder typeHolder = (ModAnnotation.EnumHolder) annotationData.getAnnotationData().get("type");
+                        ModConfig.Type type = null;
+                        if (typeHolder != null) {
+                            type = ModConfig.Type.valueOf(typeHolder.getValue());
+                        }
                         type = type == null ? ModConfig.Type.COMMON : type;
                         if (!(type == ModConfig.Type.CLIENT && FMLEnvironment.dist.isDedicatedServer())) {
                             try {
@@ -187,7 +192,6 @@ public class Kiwi {
         }
 
         KiwiConfigManager.init();
-        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, KiwiModConfig.spec);
         final IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         modEventBus.addListener(EventPriority.LOWEST, this::preInit);
         modEventBus.addListener(this::init);
@@ -525,7 +529,6 @@ public class Kiwi {
     //    }
 
     private void init(FMLCommonSetupEvent event) {
-        KiwiModConfig.refresh();
         KiwiConfigManager.refresh();
         CraftingHelper.register(new ModuleLoadedCondition.Serializer());
         CraftingHelper.register(new ResourceLocation(MODID, "full_block"), FullBlockIngredient.SERIALIZER);

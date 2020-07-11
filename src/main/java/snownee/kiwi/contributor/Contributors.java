@@ -22,13 +22,14 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.network.PacketDistributor;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.Kiwi;
-import snownee.kiwi.KiwiModConfig;
+import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.contributor.client.RewardLayer;
 import snownee.kiwi.contributor.impl.KiwiRewardProvider;
 import snownee.kiwi.contributor.network.CSetEffectPacket;
 import snownee.kiwi.contributor.network.SSyncEffectPacket;
 import snownee.kiwi.network.NetworkChannel;
+import snownee.kiwi.util.Util;
 
 @KiwiModule("contributors")
 @KiwiModule.Subscriber
@@ -114,16 +115,17 @@ public class Contributors extends AbstractModule {
 
     @OnlyIn(Dist.CLIENT)
     public static void changeEffect() {
-        if (!canPlayerUseEffect(getUserName(), KiwiModConfig.contributorEffect)) {
+        ResourceLocation id = Util.RL(KiwiClientConfig.contributorEffect);
+        if (!canPlayerUseEffect(getUserName(), id)) {
             return;
         }
-        new CSetEffectPacket(KiwiModConfig.contributorEffect).send();
-        if (KiwiModConfig.contributorEffect == null) {
+        new CSetEffectPacket(id).send();
+        if (KiwiClientConfig.contributorEffect == null) {
             PLAYER_EFFECTS.remove(getUserName());
         } else {
             RewardLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidate(getUserName()));
-            PLAYER_EFFECTS.put(getUserName(), KiwiModConfig.contributorEffect);
-            Kiwi.logger.info("Enabled contributor effect: {}", KiwiModConfig.contributorEffect);
+            PLAYER_EFFECTS.put(getUserName(), id);
+            Kiwi.logger.info("Enabled contributor effect: {}", KiwiClientConfig.contributorEffect);
         }
         RewardLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidate(getUserName()));
     }

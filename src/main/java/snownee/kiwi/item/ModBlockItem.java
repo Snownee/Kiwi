@@ -23,7 +23,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import snownee.kiwi.KiwiModConfig;
+import snownee.kiwi.KiwiClientConfig;
 
 public class ModBlockItem extends BlockItem {
     public static final Set<TileEntityType<?>> INSTANT_UPDATE_TILES = FMLEnvironment.dist == Dist.CLIENT ? Sets.newHashSet() : null;
@@ -52,7 +52,7 @@ public class ModBlockItem extends BlockItem {
     @OnlyIn(Dist.CLIENT)
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
-        if (!KiwiModConfig.globalTooltip)
+        if (!KiwiClientConfig.globalTooltip)
             ModItem.addTip(stack, tooltip, flagIn);
     }
 }

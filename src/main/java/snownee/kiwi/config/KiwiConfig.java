@@ -21,19 +21,19 @@ public @interface KiwiConfig {
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
     @interface Path {
-        String value() default "";
+        String value();
     }
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
     @interface Comment {
-        String[] value() default "";
+        String[] value();
     }
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
     @interface Translation {
-        String value() default "";
+        String value();
     }
 
     @Retention(RetentionPolicy.RUNTIME)

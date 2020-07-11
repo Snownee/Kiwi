@@ -22,7 +22,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import snownee.kiwi.KiwiModConfig;
+import snownee.kiwi.KiwiClientConfig;
 
 public class ModItem extends Item {
     public ModItem(Item.Properties builder) {
@@ -32,7 +32,7 @@ public class ModItem extends Item {
     @Override
     @OnlyIn(Dist.CLIENT)
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
-        if (!KiwiModConfig.globalTooltip)
+        if (!KiwiClientConfig.globalTooltip)
             addTip(stack, tooltip, flagIn);
     }
 
@@ -63,7 +63,7 @@ public class ModItem extends Item {
                 fontRenderer = Minecraft.getInstance().fontRenderer;
             }
             FontRenderer fontRenderer2 = fontRenderer;
-            int width = Math.max(fontRenderer.getStringWidth(tooltip.get(0).getString()), KiwiModConfig.tooltipWrapWidth);
+            int width = Math.max(fontRenderer.getStringWidth(tooltip.get(0).getString()), KiwiClientConfig.tooltipWrapWidth);
             /* off */
             tooltip.addAll(
                     lines.stream()

@@ -17,7 +17,7 @@ import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import snownee.kiwi.KiwiModConfig;
+import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.item.ModItem;
 
 @EventBusSubscriber(Dist.CLIENT)
@@ -30,9 +30,9 @@ public final class DebugTooltip {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onTooltip(ItemTooltipEvent event) {
-        if (KiwiModConfig.globalTooltip)
+        if (KiwiClientConfig.globalTooltip)
             ModItem.addTip(event.getItemStack(), event.getToolTip(), event.getFlags());
-        if (!KiwiModConfig.debugTooltip || !event.getFlags().isAdvanced()) {
+        if (!KiwiClientConfig.debugTooltip || !event.getFlags().isAdvanced()) {
             return;
         }
         ItemStack stack = event.getItemStack();
@@ -41,7 +41,7 @@ public final class DebugTooltip {
         if (Screen./*hasShiftDown*/func_231173_s_() && stack.hasTag()) {
             tooltip.removeIf(c -> c.getClass() == TranslationTextComponent.class && ((TranslationTextComponent) c).getKey().equals("item.nbt_tags"));
             if (lastNBT != stack.getTag()) {
-                switch (KiwiModConfig.debugTooltipNBTFormatter) {
+                switch (KiwiClientConfig.debugTooltipNBTFormatter) {
                 case "kiwi":
                     formatter = tag -> {
                         TextFormatting[] colors = { TextFormatting.LIGHT_PURPLE, TextFormatting.RED, TextFormatting.GOLD, TextFormatting.YELLOW, TextFormatting.GREEN, TextFormatting.AQUA };
