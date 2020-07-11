@@ -56,4 +56,8 @@ public class KiwiConfigManager {
         builder.pop();
     }
 
+    public static void refresh() {
+        allConfigs.forEach(ConfigHandler::refresh);
+    }
+
 }

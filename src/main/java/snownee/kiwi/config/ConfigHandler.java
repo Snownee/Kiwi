@@ -124,7 +124,14 @@ public class ConfigHandler {
     }
 
     public void refresh() {
-        //TODO
+        valueMap.forEach((field, value) -> {
+            try {
+                Kiwi.logger.debug("Set " + field.getName() + " to " + value.get());
+                field.set(null, value.get());
+            } catch (IllegalArgumentException | IllegalAccessException e) {
+                Kiwi.logger.catching(e);
+            }
+        });
     }
 
     @SubscribeEvent
