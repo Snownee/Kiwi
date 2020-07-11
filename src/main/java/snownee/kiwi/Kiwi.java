@@ -4,7 +4,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -21,7 +20,6 @@ import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 import org.objectweb.asm.Type;
 
-import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.utils.StringUtils;
 import com.google.common.base.Strings;
 import com.google.common.collect.ArrayListMultimap;
@@ -68,7 +66,6 @@ import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import net.minecraftforge.fml.loading.toposort.TopologicalSort;
@@ -125,6 +122,7 @@ public class Kiwi {
     private static SetMultimap<ResourceLocation, KiwiObjectHolderRef> holderRefs = HashMultimap.create();
     private static Map<AnnotationData, String> conditions = Maps.newHashMap();
 
+    @SuppressWarnings("unused")
     public Kiwi() {
         final Type KIWI_MODULE = Type.getType(KiwiModule.class);
         final Type KIWI_CONFIG = Type.getType(KiwiConfig.class);
@@ -151,8 +149,7 @@ public class Kiwi {
                                 if (Strings.isNullOrEmpty(fileName)) {
                                     fileName = String.format("%s-%s", info.getModId(), type.extension());
                                 }
-                                ConfigHandler configHandler = new ConfigHandler(info.getModId(), fileName + ".toml", type, clazz, master);
-                                KiwiConfigManager.register(configHandler);
+                                new ConfigHandler(info.getModId(), fileName + ".toml", type, clazz, master);
                             } catch (ClassNotFoundException e) {
                                 logger.catching(e);
                             }
@@ -207,18 +204,7 @@ public class Kiwi {
 
     private void preInit(RegistryEvent.NewRegistry event) {
         try {
-            ModContainer myContainer = ModLoadingContext.get().getActiveContainer();
-            Field fMap = ModContainer.class.getDeclaredField("configs");
-            fMap.setAccessible(true);
-            EnumMap<ModConfig.Type, ModConfig> map = (EnumMap<ModConfig.Type, ModConfig>) fMap.get(myContainer);
-            ModConfig config = map.get(ModConfig.Type.COMMON);
-
-            CommentedFileConfig configData = config.getHandler().reader(FMLPaths.CONFIGDIR.get()).apply(config);
-            Field fCfg = ModConfig.class.getDeclaredField("configData");
-            fCfg.setAccessible(true);
-            fCfg.set(config, configData);
-            config.getSpec().setConfig(configData);
-            config.save();
+            KiwiConfigManager.preload();
         } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
             logger.error(MARKER, "Kiwi failed to load infrastructures. Please report to developer!");
             logger.catching(e);

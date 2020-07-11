@@ -10,6 +10,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.electronwill.nightconfig.core.conversion.Path;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
+import com.google.common.base.Joiner;
 import com.google.common.base.Predicates;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -21,6 +22,7 @@ import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLModContainer;
+import net.minecraftforge.fml.loading.FMLPaths;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.config.KiwiConfig.Comment;
 import snownee.kiwi.config.KiwiConfig.Range;
@@ -33,6 +35,7 @@ public class ConfigHandler {
     private final String modId;
     private final String fileName;
     private final ModConfig.Type type;
+    private ModConfig config;
     @Nullable
     private final Class<?> clazz;
     private final BiMap<Field, ConfigValue<?>> valueMap = HashBiMap.create();
@@ -43,13 +46,14 @@ public class ConfigHandler {
         this.clazz = clazz;
         this.fileName = fileName;
         this.type = type;
+        KiwiConfigManager.register(this);
     }
 
     public void init() {
         Pair<ConfigHandler, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(this::build);
         ModContainer modContainer = ModList.get().getModContainerById(modId).orElseThrow(NullPointerException::new);
-        ModConfig modConfig = new ModConfig(type, specPair.getRight(), modContainer, fileName);
-        modContainer.addConfig(modConfig);
+        config = new ModConfig(type, specPair.getRight(), modContainer, fileName);
+        modContainer.addConfig(config);
         if (modContainer instanceof FMLModContainer) {
             ((FMLModContainer) modContainer).getEventBus().addListener(this::onFileChange);
         }
@@ -134,6 +138,15 @@ public class ConfigHandler {
         });
     }
 
+    public void forceLoad() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+        CommentedFileConfig configData = config.getHandler().reader(FMLPaths.CONFIGDIR.get()).apply(config);
+        Field fCfg = ModConfig.class.getDeclaredField("configData");
+        fCfg.setAccessible(true);
+        fCfg.set(config, configData);
+        config.getSpec().setConfig(configData);
+        config.save();
+    }
+
     @SubscribeEvent
     protected void onFileChange(ModConfig.Reloading event) {
         ((CommentedFileConfig) event.getConfig().getConfigData()).load();
@@ -158,5 +171,19 @@ public class ConfigHandler {
 
     public String getFileName() {
         return fileName;
+    }
+
+    public ModConfig getConfig() {
+        return config;
+    }
+
+    public ConfigValue<?> getValueByPath(String path) {
+        Joiner joiner = Joiner.on(".");
+        for (ConfigValue<?> value : valueMap.values()) {
+            if (path.equals(joiner.join(value.getPath()))) {
+                return value;
+            }
+        }
+        return null;
     }
 }

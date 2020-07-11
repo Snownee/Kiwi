@@ -11,7 +11,7 @@ import snownee.kiwi.config.KiwiConfig.Comment;
 import snownee.kiwi.config.KiwiConfig.Range;
 import snownee.kiwi.config.KiwiConfig.WorldRestart;
 
-@KiwiConfig("test")
+//@KiwiConfig("test")
 public class TestConfig {
 
     public static int intValue = 5;

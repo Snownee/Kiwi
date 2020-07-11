@@ -17,7 +17,7 @@ import snownee.kiwi.Name;
 public class TestModule2 extends AbstractModule {
     public static final INamedTag<EntityType<?>> BAT = entityTag(Kiwi.MODID, "bat");
 
-    @Name("kiwi:first_item")
+    @Name("kiwi:test_item")
     public static final TestItem FIRST_ITEM = new TestItem(itemProp().rarity(Rarity.EPIC)) {
         @Override
         public boolean hasEffect(ItemStack stack) {
