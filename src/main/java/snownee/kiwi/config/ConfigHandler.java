@@ -8,7 +8,6 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import com.electronwill.nightconfig.core.conversion.Path;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicates;
@@ -25,6 +24,7 @@ import net.minecraftforge.fml.javafmlmod.FMLModContainer;
 import net.minecraftforge.fml.loading.FMLPaths;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.config.KiwiConfig.Comment;
+import snownee.kiwi.config.KiwiConfig.Path;
 import snownee.kiwi.config.KiwiConfig.Range;
 import snownee.kiwi.config.KiwiConfig.Translation;
 import snownee.kiwi.config.KiwiConfig.WorldRestart;
@@ -63,7 +63,7 @@ public class ConfigHandler {
         if (master) {
             KiwiConfigManager.defineModules(modId, builder);
         }
-        if (clazz == null) { //TODO config that only contains module toggles
+        if (clazz == null) {
             return this;
         }
         for (Field field : clazz.getFields()) {
