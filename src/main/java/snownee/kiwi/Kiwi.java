@@ -47,6 +47,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -545,14 +546,13 @@ public class Kiwi {
     }
 
     private void serverInit(FMLServerStartingEvent event) {
-
         KiwiManager.MODULES.values().forEach(m -> m.serverInit(event));
         event.getServer().getWorld(World./*OVERWORLD*/field_234918_g_).getSavedData().getOrCreate(() -> Scheduler.INSTANCE, Scheduler.ID);
         ModLoadingContext.get().setActiveContainer(null, null);
     }
 
     @SubscribeEvent
-    public static void onCommandsRegister(RegisterCommandsEvent event) {
+    protected static void onCommandsRegister(RegisterCommandsEvent event) {
         KiwiCommand.register(event.getDispatcher(), event.getEnvironment());
     }
 
@@ -605,6 +605,20 @@ public class Kiwi {
         } else {
             return new ResourceLocation(defaultModid, name);
         }
+    }
+
+    private static boolean tagsUpdated;
+
+    @SubscribeEvent
+    protected static void onTagsUpdated(TagsUpdatedEvent event) {
+        tagsUpdated = true;
+    }
+
+    /**
+     * @since 3.1.3
+     */
+    public static boolean isTagsUpdated() {
+        return tagsUpdated;
     }
 
 }
