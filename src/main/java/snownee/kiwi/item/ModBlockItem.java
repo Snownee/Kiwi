@@ -42,7 +42,7 @@ public class ModBlockItem extends BlockItem {
                 data.putInt("x", pos.getX());
                 data.putInt("y", pos.getY());
                 data.putInt("z", pos.getZ());
-                tile./*read*/func_230337_a_(state, data);
+                tile.read(state, data);
             }
         }
         return super.onBlockPlaced(pos, worldIn, player, stack, state);

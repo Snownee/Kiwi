@@ -40,7 +40,7 @@ public abstract class BaseTile extends TileEntity {
     // Used for syncing data at the time when the chunk is loaded
     @Override
     public void handleUpdateTag(BlockState state, CompoundNBT tag) {
-        this./*read*/func_230337_a_(state, tag);
+        this.read(state, tag);
     }
 
     /**

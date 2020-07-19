@@ -45,9 +45,11 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.CraftingHelper;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoader;
@@ -543,11 +545,15 @@ public class Kiwi {
     }
 
     private void serverInit(FMLServerStartingEvent event) {
-        KiwiCommand.register(event.getCommandDispatcher(), !event.getServer().isDedicatedServer());
 
         KiwiManager.MODULES.values().forEach(m -> m.serverInit(event));
         event.getServer().getWorld(World./*OVERWORLD*/field_234918_g_).getSavedData().getOrCreate(() -> Scheduler.INSTANCE, Scheduler.ID);
         ModLoadingContext.get().setActiveContainer(null, null);
+    }
+
+    @SubscribeEvent
+    public void onCommandsRegister(RegisterCommandsEvent event) {
+        KiwiCommand.register(event.getDispatcher(), event.getEnvironment());
     }
 
     private static MinecraftServer server;

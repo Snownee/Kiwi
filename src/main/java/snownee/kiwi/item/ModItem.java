@@ -42,8 +42,8 @@ public class ModItem extends Item {
             return;
         }
         String key;
-        boolean shift = Screen./*hasShiftDown*/func_231173_s_();
-        boolean ctrl = Screen./*hasControlDown*/func_231172_r_();
+        boolean shift = Screen.hasShiftDown();
+        boolean ctrl = Screen.hasControlDown();
         if (shift == ctrl) {
             key = stack.getTranslationKey() + ".tip";
         } else if (shift) {

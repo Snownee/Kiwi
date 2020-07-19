@@ -38,7 +38,7 @@ public final class DebugTooltip {
         ItemStack stack = event.getItemStack();
         List<ITextComponent> tooltip = event.getToolTip();
 
-        if (Screen./*hasShiftDown*/func_231173_s_() && stack.hasTag()) {
+        if (Screen.hasShiftDown() && stack.hasTag()) {
             tooltip.removeIf(c -> c.getClass() == TranslationTextComponent.class && ((TranslationTextComponent) c).getKey().equals("item.nbt_tags"));
             if (lastNBT != stack.getTag()) {
                 switch (KiwiClientConfig.debugTooltipNBTFormatter) {
@@ -98,7 +98,7 @@ public final class DebugTooltip {
                 }
 
                 lastNBT = stack.getTag();
-                lastFormatted = formatter.apply(lastNBT).func_230532_e_()./*applyTextStyle*/func_240699_a_(TextFormatting.RESET);
+                lastFormatted = formatter.apply(lastNBT).copyRaw()./*applyTextStyle*/func_240699_a_(TextFormatting.RESET);
             }
             tooltip.add(lastFormatted);
         } else {

@@ -11,16 +11,17 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
+import net.minecraft.command.Commands.EnvironmentType;
 import net.minecraft.util.text.TranslationTextComponent;
 import snownee.kiwi.util.LootDumper;
 
 public class KiwiCommand {
     private static final SimpleCommandExceptionType WRONG_PATTERN_EXCEPTION = new SimpleCommandExceptionType(new TranslationTextComponent("commands.kiwi.dumpLoots.wrongPattern"));
 
-    public static void register(CommandDispatcher<CommandSource> dispatcher, boolean integrated) {
+    public static void register(CommandDispatcher<CommandSource> dispatcher, EnvironmentType environmentType) {
         LiteralArgumentBuilder<CommandSource> builder = Commands.literal(Kiwi.MODID);
         /* off */
-        if (integrated) {
+        if (environmentType != EnvironmentType.DEDICATED) {
             builder.then(Commands
                     .literal("dumpLoots")
                     .executes(ctx -> dumpLoots(ctx.getSource(), ".+"))
