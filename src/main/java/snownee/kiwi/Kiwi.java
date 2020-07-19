@@ -552,7 +552,7 @@ public class Kiwi {
     }
 
     @SubscribeEvent
-    public void onCommandsRegister(RegisterCommandsEvent event) {
+    public static void onCommandsRegister(RegisterCommandsEvent event) {
         KiwiCommand.register(event.getDispatcher(), event.getEnvironment());
     }
 
