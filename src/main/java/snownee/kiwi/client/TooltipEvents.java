@@ -21,17 +21,21 @@ import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.item.ModItem;
 
 @EventBusSubscriber(Dist.CLIENT)
-public final class DebugTooltip {
-    private DebugTooltip() {}
+public final class TooltipEvents {
+    private TooltipEvents() {}
 
     private static CompoundNBT lastNBT;
     private static ITextComponent lastFormatted;
     private static Function<CompoundNBT, ITextComponent> formatter;
 
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void onTooltip(ItemTooltipEvent event) {
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void globalTooltip(ItemTooltipEvent event) {
         if (KiwiClientConfig.globalTooltip)
             ModItem.addTip(event.getItemStack(), event.getToolTip(), event.getFlags());
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void debugTooltip(ItemTooltipEvent event) {
         if (!KiwiClientConfig.debugTooltip || !event.getFlags().isAdvanced()) {
             return;
         }
@@ -98,7 +102,7 @@ public final class DebugTooltip {
                 }
 
                 lastNBT = stack.getTag();
-                lastFormatted = formatter.apply(lastNBT).copyRaw()./*applyTextStyle*/func_240699_a_(TextFormatting.RESET);
+                lastFormatted = formatter.apply(lastNBT).deepCopy()./*applyTextStyle*/func_240699_a_(TextFormatting.RESET);
             }
             tooltip.add(lastFormatted);
         } else {
