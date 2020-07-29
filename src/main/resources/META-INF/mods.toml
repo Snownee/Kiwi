@@ -7,6 +7,7 @@ displayName="Kiwi"
 authors="Snownee"
 displayURL="https://www.curseforge.com/minecraft/mc-mods/kiwi"
 description=""
+license="MIT"
 
 [[dependencies.kiwi]]
    modId="forge"
