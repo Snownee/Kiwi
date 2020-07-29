@@ -41,14 +41,19 @@ public class RewardScreen extends Screen {
         list.setLeftPos(20);
         list.addEntry(selectedEntry = new Entry(this, null));
         String playerName = getPlayerName();
+        boolean added = false;
         for (ResourceLocation tier : Contributors.getRenderableTiers()) {
             if (Contributors.isContributor(tier.getNamespace(), playerName, tier.getPath())) {
                 Entry entry = new Entry(this, tier);
                 list.addEntry(entry);
+                added = true;
                 if (tier.equals(currentReward)) {
                     selectedEntry = entry;
                 }
             }
+        }
+        if (!added) {
+            minecraft.displayGuiScreen(null);
         }
     }
 
