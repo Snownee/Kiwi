@@ -34,7 +34,7 @@ public final class KiwiConfig {
     public static boolean debugTooltip = true;
     public static String debugTooltipNBTFormatter = "vanilla";
 
-    private static ConfigValue<String> contributorEffectCfg;
+    public static ConfigValue<String> contributorEffectCfg;
     private static BooleanValue globalTooltipCfg;
     private static IntValue tooltipWrapWidthCfg;
     private static BooleanValue debugTooltipCfg;

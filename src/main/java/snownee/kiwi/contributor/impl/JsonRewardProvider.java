@@ -5,8 +5,10 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.ImmutableSetMultimap.Builder;
@@ -19,22 +21,24 @@ import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.kiwi.Kiwi;
-import snownee.kiwi.contributor.IRewardProvider;
+import snownee.kiwi.contributor.ITierProvider;
 import snownee.kiwi.contributor.client.RewardLayer;
 
-public class JsonRewardProvider implements IRewardProvider {
+public class JsonRewardProvider implements ITierProvider {
 
     private static final Gson GSON = new GsonBuilder().disableHtmlEscaping()/*.registerTypeAdapter(type, typeAdapter)*/.create();
     private final String author;
     private ImmutableSetMultimap<String, String> contributors = ImmutableSetMultimap.of();
 
-    public JsonRewardProvider(String author, String url) {
+    public JsonRewardProvider(String author, Supplier<List<String>> urlProvider) {
         this.author = author;
         Thread thread = new Thread(() -> {
             int tried = 0;
-            while (++tried <= 3) {
-                if (load(url))
+            List<String> url = urlProvider.get();
+            while (tried < url.size()) {
+                if (load(url.get(tried)))
                     break;
+                ++tried;
             }
         }, String.format("[Kiwi > %s] Loading Contributors", author));
         thread.setDaemon(true);
@@ -46,7 +50,6 @@ public class JsonRewardProvider implements IRewardProvider {
             InputStreamReader reader = new InputStreamReader(new URL(url).openStream());
             Map<String, Collection<String>> map = GSON.fromJson(reader, Map.class);
             final Collection<String> superUsers = map.containsKey("*") ? map.get("*") : Collections.singleton(getAuthor());
-            //superUsers.add("Dev");
             Builder<String, String> builder = ImmutableSetMultimap.builder();
             map.forEach((reward, users) -> {
                 if (reward.equals("*")) {
@@ -70,23 +73,18 @@ public class JsonRewardProvider implements IRewardProvider {
     }
 
     @Override
-    public boolean isContributor(String playerName) {
-        return contributors.containsKey(playerName);
-    }
-
-    @Override
-    public boolean isContributor(String playerName, String tier) {
-        return contributors.containsKey(playerName) && contributors.get(playerName).contains(tier);
-    }
-
-    @Override
-    public Set<String> getRewards(String playerName) {
+    public Set<String> getPlayerTiers(String playerName) {
         return contributors.containsKey(playerName) ? contributors.get(playerName) : Collections.EMPTY_SET;
     }
 
     @Override
-    public boolean hasRenderer(String tier) {
-        return false;
+    public Set<String> getTiers() {
+        return contributors.keySet();
+    }
+
+    @Override
+    public List<String> getRenderableTiers() {
+        return Collections.EMPTY_LIST;
     }
 
     @OnlyIn(Dist.CLIENT)
