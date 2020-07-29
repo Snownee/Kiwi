@@ -371,7 +371,9 @@ public class Kiwi {
             info.context.setActiveContainer();
             Subscriber subscriber = info.module.getClass().getAnnotation(Subscriber.class);
             if (subscriber != null && ArrayUtils.contains(subscriber.side(), FMLEnvironment.dist)) {
-                subscriber.value().bus().get().register(info.module);
+                for (Bus bus : subscriber.value()) {
+                    bus.bus().get().register(info.module);
+                }
             }
 
             boolean useOwnGroup = info.group == null;
