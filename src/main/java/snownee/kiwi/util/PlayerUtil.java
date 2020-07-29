@@ -29,7 +29,7 @@ public final class PlayerUtil {
     @Nullable
     public static BlockPos tryPlace(World world, BlockPos pos, Direction side, @Nullable PlayerEntity player, Hand hand, BlockState state, @Nullable ItemStack stack, boolean playSound, boolean skipCollisionCheck) {
         BlockState worldState = world.getBlockState(pos);
-        if (worldState.getBlock() == Blocks.SNOW && worldState./*has*/func_235901_b_(SnowBlock.LAYERS) && worldState.get(SnowBlock.LAYERS) < 8) {} else if (!state.isReplaceable(new DirectionalPlaceContext(world, pos, side.getOpposite(), stack == null ? ItemStack.EMPTY : stack, side.getOpposite()))) {
+        if (worldState.getBlock() == Blocks.SNOW && worldState.hasProperty(SnowBlock.LAYERS) && worldState.get(SnowBlock.LAYERS) < 8) {} else if (!state.isReplaceable(new DirectionalPlaceContext(world, pos, side.getOpposite(), stack == null ? ItemStack.EMPTY : stack, side.getOpposite()))) {
             pos = pos.offset(side);
         }
         if (skipCollisionCheck) {

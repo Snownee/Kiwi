@@ -2,6 +2,7 @@ package snownee.kiwi;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
@@ -10,6 +11,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -21,6 +24,7 @@ import org.apache.logging.log4j.MarkerManager;
 import org.objectweb.asm.Type;
 
 import com.electronwill.nightconfig.core.utils.StringUtils;
+import com.google.common.base.Predicates;
 import com.google.common.base.Strings;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
@@ -127,7 +131,7 @@ public class Kiwi {
     private static Map<AnnotationData, String> conditions = Maps.newHashMap();
 
     @SuppressWarnings("unused")
-    public Kiwi() {
+    public Kiwi() throws Exception {
         final Type KIWI_MODULE = Type.getType(KiwiModule.class);
         final Type KIWI_CONFIG = Type.getType(KiwiConfig.class);
         final Type OPTIONAL_MODULE = Type.getType(KiwiModule.Optional.class);
@@ -204,7 +208,14 @@ public class Kiwi {
         MinecraftForge.EVENT_BUS.addListener(this::serverStopped);
         modEventBus.addListener(this::postInit);
         modEventBus.addListener(this::loadComplete);
-        modEventBus.addListener(KiwiManager::handleRegister);
+        try {
+            Method method = modEventBus.getClass().getDeclaredMethod("addListener", EventPriority.class, Predicate.class, Consumer.class);
+            method.setAccessible(true);
+            method.invoke(modEventBus, EventPriority.NORMAL, Predicates.alwaysTrue(), (Consumer<RegistryEvent.Register<?>>) KiwiManager::handleRegister);
+        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            logger.fatal("Kiwi failed to start up. Please report this to developer!");
+            throw e;
+        }
 
         //LootConditionManager.registerCondition(new HasLootTable.Serializer());
     }
@@ -213,7 +224,7 @@ public class Kiwi {
         try {
             KiwiConfigManager.preload();
         } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
-            logger.error(MARKER, "Kiwi failed to load infrastructures. Please report to developer!");
+            logger.fatal(MARKER, "Kiwi failed to start up. Please report this to developer!");
             logger.catching(e);
             return;
         }

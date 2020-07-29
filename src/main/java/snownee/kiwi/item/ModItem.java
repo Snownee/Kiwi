@@ -18,6 +18,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.ITextProperties;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
@@ -72,6 +73,7 @@ public class ModItem extends Item {
                     .flatMap(Collection::stream)
                     .map(ITextProperties::getString)
                     .map(StringTextComponent::new)
+                    .peek(c -> c.mergeStyle(TextFormatting.GRAY))
                     .collect(Collectors.toList())
             );
             /* on */

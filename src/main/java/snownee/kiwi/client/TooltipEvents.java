@@ -102,12 +102,12 @@ public final class TooltipEvents {
                 }
 
                 lastNBT = stack.getTag();
-                lastFormatted = formatter.apply(lastNBT).deepCopy()./*applyTextStyle*/func_240699_a_(TextFormatting.RESET);
+                lastFormatted = formatter.apply(lastNBT).deepCopy().mergeStyle(TextFormatting.RESET);
             }
             tooltip.add(lastFormatted);
         } else {
             stack.getItem().getTags().stream().map(Object::toString).forEach(id -> {
-                tooltip.add(new StringTextComponent("#" + id)./*applyTextStyle*/func_240699_a_(TextFormatting.DARK_GRAY));
+                tooltip.add(new StringTextComponent("#" + id).mergeStyle(TextFormatting.DARK_GRAY));
             });
         }
     }
