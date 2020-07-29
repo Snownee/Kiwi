@@ -1,6 +1,7 @@
 package snownee.kiwi.contributor;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
@@ -10,21 +11,27 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.kiwi.contributor.client.RewardLayer;
 
-public interface IRewardProvider {
+public interface ITierProvider {
     String getAuthor();
 
-    boolean hasRenderer(String tier);
+    Set<String> getTiers();
+
+    List<String> getRenderableTiers();
+
+    Set<String> getPlayerTiers(String playerName);
 
     @OnlyIn(Dist.CLIENT)
     RewardLayer createRenderer(IEntityRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> entityRenderer, String tier);
 
-    boolean isContributor(String playerName);
+    default boolean isContributor(String playerName) {
+        return !getPlayerTiers(playerName).isEmpty();
+    }
 
-    boolean isContributor(String playerName, String tier);
+    default boolean isContributor(String playerName, String tier) {
+        return getPlayerTiers(playerName).contains(tier);
+    }
 
-    Set<String> getRewards(String playerName);
-
-    public static enum Empty implements IRewardProvider {
+    public static enum Empty implements ITierProvider {
         INSTANCE;
 
         @Override
@@ -33,23 +40,18 @@ public interface IRewardProvider {
         }
 
         @Override
-        public boolean isContributor(String playerName) {
-            return false;
-        }
-
-        @Override
-        public boolean isContributor(String playerName, String tier) {
-            return false;
-        }
-
-        @Override
-        public Set<String> getRewards(String playerName) {
+        public Set<String> getTiers() {
             return Collections.EMPTY_SET;
         }
 
         @Override
-        public boolean hasRenderer(String tier) {
-            return false;
+        public Set<String> getPlayerTiers(String playerName) {
+            return Collections.EMPTY_SET;
+        }
+
+        @Override
+        public List<String> getRenderableTiers() {
+            return Collections.EMPTY_LIST;
         }
 
         @OnlyIn(Dist.CLIENT)

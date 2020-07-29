@@ -1,5 +1,6 @@
 package snownee.kiwi.contributor;
 
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -7,14 +8,18 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.util.InputMappings;
+import net.minecraft.client.util.InputMappings.Input;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
+import net.minecraftforge.client.event.InputEvent.KeyInputEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -25,6 +30,7 @@ import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.contributor.client.RewardLayer;
+import snownee.kiwi.contributor.client.gui.RewardScreen;
 import snownee.kiwi.contributor.impl.KiwiRewardProvider;
 import snownee.kiwi.contributor.network.CSetEffectPacket;
 import snownee.kiwi.contributor.network.SSyncEffectPacket;
@@ -35,8 +41,9 @@ import snownee.kiwi.util.Util;
 @KiwiModule.Subscriber
 public class Contributors extends AbstractModule {
 
-    public static final Map<String, IRewardProvider> REWARD_PROVIDERS = Maps.newConcurrentMap();
+    public static final Map<String, ITierProvider> REWARD_PROVIDERS = Maps.newConcurrentMap();
     public static final Map<String, ResourceLocation> PLAYER_EFFECTS = Maps.newConcurrentMap();
+    private static final Set<ResourceLocation> RENDERABLES = Sets.newLinkedHashSet();
 
     @Override
     protected void preInit() {
@@ -46,15 +53,15 @@ public class Contributors extends AbstractModule {
 
     @Override
     protected void init(FMLCommonSetupEvent event) {
-        registerRewardProvider(new KiwiRewardProvider());
+        registerTierProvider(new KiwiRewardProvider());
     }
 
     public static boolean isContributor(String author, String playerName) {
-        return REWARD_PROVIDERS.getOrDefault(author.toLowerCase(Locale.ENGLISH), IRewardProvider.Empty.INSTANCE).isContributor(playerName);
+        return REWARD_PROVIDERS.getOrDefault(author.toLowerCase(Locale.ENGLISH), ITierProvider.Empty.INSTANCE).isContributor(playerName);
     }
 
     public static boolean isContributor(String author, String playerName, String tier) {
-        return REWARD_PROVIDERS.getOrDefault(author.toLowerCase(Locale.ENGLISH), IRewardProvider.Empty.INSTANCE).isContributor(playerName, tier);
+        return REWARD_PROVIDERS.getOrDefault(author.toLowerCase(Locale.ENGLISH), ITierProvider.Empty.INSTANCE).isContributor(playerName, tier);
     }
 
     public static boolean isContributor(String author, PlayerEntity player) {
@@ -65,17 +72,30 @@ public class Contributors extends AbstractModule {
         return isContributor(author, player.getGameProfile().getName(), tier);
     }
 
-    public static Set<ResourceLocation> getRewards(String playerName) {
+    public static Set<ResourceLocation> getPlayerTiers(String playerName) {
         /* off */
         return REWARD_PROVIDERS.values().stream()
-                .flatMap(rp -> rp.getRewards(playerName).stream()
-                        .map(s -> new ResourceLocation(rp.getAuthor().toLowerCase(Locale.ENGLISH), s)))
+                .flatMap(tp -> tp.getPlayerTiers(playerName).stream()
+                        .map(s -> new ResourceLocation(tp.getAuthor().toLowerCase(Locale.ENGLISH), s)))
                 .collect(Collectors.toSet());
         /* on */
     }
 
-    public static void registerRewardProvider(IRewardProvider rewardProvider) {
-        REWARD_PROVIDERS.put(rewardProvider.getAuthor().toLowerCase(Locale.ENGLISH), rewardProvider);
+    public static Set<ResourceLocation> getTiers() {
+        /* off */
+        return REWARD_PROVIDERS.values().stream()
+                .flatMap(tp -> tp.getTiers().stream()
+                        .map(s -> new ResourceLocation(tp.getAuthor().toLowerCase(Locale.ENGLISH), s)))
+                .collect(Collectors.toSet());
+        /* on */
+    }
+
+    public static void registerTierProvider(ITierProvider rewardProvider) {
+        String namespace = rewardProvider.getAuthor().toLowerCase(Locale.ENGLISH);
+        REWARD_PROVIDERS.put(namespace, rewardProvider);
+        for (String tier : rewardProvider.getRenderableTiers()) {
+            RENDERABLES.add(new ResourceLocation(namespace, tier));
+        }
     }
 
     @OnlyIn(Dist.DEDICATED_SERVER)
@@ -116,18 +136,20 @@ public class Contributors extends AbstractModule {
     @OnlyIn(Dist.CLIENT)
     public static void changeEffect() {
         ResourceLocation id = Util.RL(KiwiClientConfig.contributorEffect);
-        if (!canPlayerUseEffect(getUserName(), id)) {
+        if (id != null && id.getPath().isEmpty()) {
+            id = null;
+        }
+        if (!canPlayerUseEffect(getPlayerName(), id)) {
             return;
         }
         new CSetEffectPacket(id).send();
-        if (KiwiClientConfig.contributorEffect == null) {
-            PLAYER_EFFECTS.remove(getUserName());
+        if (id == null) {
+            PLAYER_EFFECTS.remove(getPlayerName());
         } else {
-            RewardLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidate(getUserName()));
-            PLAYER_EFFECTS.put(getUserName(), id);
-            Kiwi.logger.info("Enabled contributor effect: {}", KiwiClientConfig.contributorEffect);
+            PLAYER_EFFECTS.put(getPlayerName(), id);
+            Kiwi.logger.info("Enabled contributor effect: {}", id);
         }
-        RewardLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidate(getUserName()));
+        RewardLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidate(getPlayerName()));
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -155,22 +177,51 @@ public class Contributors extends AbstractModule {
         new SSyncEffectPacket(ImmutableMap.of(playerName, effect)).sendExcept(player);
     }
 
-    public static boolean isValidEffect(ResourceLocation id) {
-        return REWARD_PROVIDERS.containsKey(id.getNamespace()) && REWARD_PROVIDERS.get(id.getNamespace()).hasRenderer(id.getPath());
+    public static boolean isRenderable(ResourceLocation id) {
+        return RENDERABLES.contains(id);
+    }
+
+    public static Set<ResourceLocation> getRenderableTiers() {
+        return Collections.unmodifiableSet(RENDERABLES);
     }
 
     public static boolean canPlayerUseEffect(String playerName, ResourceLocation effect) {
-        if (effect == null) {
+        if (effect == null || effect.getPath().isEmpty()) {
             return true;
         }
         if (!isContributor(effect.getNamespace(), playerName, effect.getPath())) {
             return false;
         }
-        return isValidEffect(effect);
+        return isRenderable(effect);
     }
 
     @OnlyIn(Dist.CLIENT)
-    private static String getUserName() {
+    private static String getPlayerName() {
         return Minecraft.getInstance().getSession().getUsername();
     }
+
+    private int hold;
+
+    @SubscribeEvent
+    @OnlyIn(Dist.CLIENT)
+    public void onKeyInput(KeyInputEvent event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.currentScreen != null || mc.player == null || !mc.isGameFocused()) {
+            return;
+        }
+        if (event.getModifiers() != 0) {
+            return;
+        }
+        Input input = InputMappings.getInputByCode(event.getKey(), event.getScanCode());
+        if (input.getKeyCode() != 75) {
+            return;
+        }
+        if (event.getAction() != 2) {
+            hold = 0;
+        } else if (++hold == 30) {
+            RewardScreen screen = new RewardScreen();
+            mc.displayGuiScreen(screen);
+        }
+    }
+
 }

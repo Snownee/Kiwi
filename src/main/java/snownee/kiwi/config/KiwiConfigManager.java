@@ -19,14 +19,14 @@ import snownee.kiwi.Kiwi;
 public class KiwiConfigManager {
 
     private static final List<ConfigHandler> allConfigs = Lists.newLinkedList();
-    //private static final Map<String, ConfigHandler> masterConfigs = Maps.newHashMap();
+    private static final Map<Class<?>, ConfigHandler> clazz2Configs = Maps.newHashMap();
     public static final Map<ResourceLocation, BooleanValue> modules = Maps.newHashMap();
 
-    public static void register(ConfigHandler configHandler) {
+    public static synchronized void register(ConfigHandler configHandler) {
         allConfigs.add(configHandler);
-        //        if (configHandler.isMaster()) {
-        //            masterConfigs.put(configHandler.getModId(), configHandler);
-        //        }
+        if (configHandler.getClass() != null) {
+            clazz2Configs.put(configHandler.getClazz(), configHandler);
+        }
     }
 
     public static void init() {
@@ -75,6 +75,10 @@ public class KiwiConfigManager {
 
     public static void refresh() {
         allConfigs.forEach(ConfigHandler::refresh);
+    }
+
+    public static ConfigHandler getHandler(Class<?> clazz) {
+        return clazz2Configs.get(clazz);
     }
 
 }

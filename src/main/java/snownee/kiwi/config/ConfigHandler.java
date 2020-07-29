@@ -177,6 +177,10 @@ public class ConfigHandler {
         return config;
     }
 
+    public Class<?> getClazz() {
+        return clazz;
+    }
+
     public ConfigValue<?> getValueByPath(String path) {
         Joiner joiner = Joiner.on(".");
         for (ConfigValue<?> value : valueMap.values()) {
