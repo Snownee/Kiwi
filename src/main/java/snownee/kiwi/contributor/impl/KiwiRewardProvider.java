@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.entity.IEntityRenderer;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import snownee.kiwi.Kiwi;
 import snownee.kiwi.contributor.client.RewardLayer;
 import snownee.kiwi.contributor.impl.client.layer.FoxTailLayer;
 import snownee.kiwi.contributor.impl.client.layer.PlanetLayer;
@@ -25,8 +26,10 @@ public class KiwiRewardProvider extends JsonRewardProvider {
         String coding = "https://snownee.coding.net/p/test/d/test/git/raw/master/contributors.json";
         Locale locale = Locale.getDefault();
         if (locale.getCountry().equals("CN") && Calendar.getInstance().get(Calendar.ZONE_OFFSET) == 28800000) {
+            Kiwi.logger.debug("Use fetching strategy 1");
             return ImmutableList.of(coding, github);
         } else {
+            Kiwi.logger.debug("Use fetching strategy 2");
             return ImmutableList.of(github, github);
         }
     }

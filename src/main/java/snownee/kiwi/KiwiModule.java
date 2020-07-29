@@ -73,7 +73,7 @@ public @interface KiwiModule {
          *
          * @return the bus you wish to listen to
          */
-        Bus[] value() default Bus.FORGE;
+        Bus value() default Bus.FORGE;
 
         enum Bus {
             /**
