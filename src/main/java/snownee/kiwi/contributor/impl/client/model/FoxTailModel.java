@@ -1,8 +1,6 @@
 package snownee.kiwi.contributor.impl.client.model;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.entity.model.AgeableModel;
@@ -61,16 +59,6 @@ public class FoxTailModel<T extends LivingEntity> extends AgeableModel<T> {
             this.tail.rotateAngleX = 0.85F + delta;
         }
 
-    }
-
-    @Override
-    public void render(MatrixStack matrixStackIn, IVertexBuilder bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
-        this.getHeadParts().forEach((p_228228_8_) -> {
-            p_228228_8_.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
-        });
-        this.getBodyParts().forEach((p_228227_8_) -> {
-            p_228227_8_.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
-        });
     }
 
 }

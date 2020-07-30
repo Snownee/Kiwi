@@ -10,5 +10,6 @@
   "item.kiwi.first_item.tip.shift": "§2Curabitur pretium tincidunt lacus. Nulla gravida orci a odio.\n\nNullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris.\n\nInteger in mauris eu nibh euismod gravida.",
   "gui.kiwi.reward": "Choose a reward effect",
   "reward.snownee.2020q3": "Planets",
-  "reward.snownee.2020q4": "Fox"
+  "reward.snownee.2020q4": "Fox",
+  "reward.snownee.xmas": "Santa Hat"
 }

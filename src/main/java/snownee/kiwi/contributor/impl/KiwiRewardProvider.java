@@ -3,8 +3,11 @@ package snownee.kiwi.contributor.impl;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.entity.IEntityRenderer;
@@ -15,6 +18,7 @@ import snownee.kiwi.Kiwi;
 import snownee.kiwi.contributor.client.RewardLayer;
 import snownee.kiwi.contributor.impl.client.layer.FoxTailLayer;
 import snownee.kiwi.contributor.impl.client.layer.PlanetLayer;
+import snownee.kiwi.contributor.impl.client.layer.SantaHatLayer;
 
 public class KiwiRewardProvider extends JsonRewardProvider {
     public KiwiRewardProvider() {
@@ -37,9 +41,29 @@ public class KiwiRewardProvider extends JsonRewardProvider {
 
     private final List<String> renderableTiers = ImmutableList.of("2020q3", "2020q4");
 
+    private static boolean isInXmas() {
+        Calendar calendar = Calendar.getInstance();
+        return calendar.get(Calendar.MONTH) == Calendar.DECEMBER && calendar.get(Calendar.DAY_OF_MONTH) >= 20;
+    }
+
+    @Override
+    public Set<String> getPlayerTiers(String playerName) {
+        Set<String> ret = super.getPlayerTiers(playerName);
+        if (isInXmas()) {
+            ret = Sets.newHashSet(ret);
+            ret.add("xmas");
+        }
+        return ret;
+    }
+
     @Override
     public List<String> getRenderableTiers() {
-        return renderableTiers;
+        List<String> ret = renderableTiers;
+        if (isInXmas()) {
+            ret = Lists.newArrayList(ret);
+            ret.add("xmas");
+        }
+        return ret;
     }
 
     @Override
@@ -50,6 +74,8 @@ public class KiwiRewardProvider extends JsonRewardProvider {
             return new PlanetLayer(entityRenderer);
         case "2020q4":
             return new FoxTailLayer(entityRenderer);
+        case "xmas":
+            return new SantaHatLayer(entityRenderer);
         default:
             return null;
         }

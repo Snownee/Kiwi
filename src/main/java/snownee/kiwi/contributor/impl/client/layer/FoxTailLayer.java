@@ -44,9 +44,10 @@ public class FoxTailLayer extends RewardLayer {
         String name = entitylivingbaseIn.getName().getString().toLowerCase(Locale.ENGLISH);
         ResourceLocation texture = name.startsWith("snow") || name.startsWith("xue") ? SNOW_FOX : FOX;
         matrixStackIn.push();
-        this.modelFoxTail.setRotationAngles(entitylivingbaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-        IVertexBuilder ivertexbuilder = ItemRenderer.getBuffer(bufferIn, RenderType.getEntityTranslucent(texture), false, false);
-        this.modelFoxTail.render(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+        modelFoxTail.isChild = entitylivingbaseIn.isChild();
+        modelFoxTail.setRotationAngles(entitylivingbaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
+        IVertexBuilder ivertexbuilder = ItemRenderer.getBuffer(bufferIn, RenderType.getEntitySolid(texture), false, false);
+        modelFoxTail.render(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
         matrixStackIn.pop();
     }
 
