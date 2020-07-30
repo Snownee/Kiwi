@@ -39,7 +39,6 @@ public final class KiwiConfig {
     private static IntValue tooltipWrapWidthCfg;
     private static BooleanValue debugTooltipCfg;
     private static ConfigValue<String> debugTooltipNBTFormatterCfg;
-    //public static BooleanValue replaceDefaultFontRendererCfg;
     public static Map<ResourceLocation, BooleanValue> modules = Maps.newHashMap();
 
     static {
@@ -84,13 +83,6 @@ public final class KiwiConfig {
                 .comment("Allowed values: vanilla, kiwi")
                 .translation("kiwi.config.tooltipNBTFormatter")
                 .define("debugTooltipNBTFormatter", debugTooltipNBTFormatter);
-
-        /*
-        replaceDefaultFontRendererCfg = builder
-                .comment("Use §x (almost) everywhere. Fix MC-109260. Do NOT enable this unless you know what you are doing")
-                .translation("kiwi.config.replaceDefaultFontRenderer")
-                .define("replaceDefaultFontRenderer", false);
-         */
         /* on */
     }
 
