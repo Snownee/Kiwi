@@ -22,15 +22,16 @@ public class KiwiRewardProvider extends JsonRewardProvider {
     }
 
     private static List<String> getURLs() {
+        String cdn = "https://cdn.jsdelivr.net/gh/Snownee/Kiwi@master/contributors.json";
         String github = "https://raw.githubusercontent.com/Snownee/Kiwi/master/contributors.json";
         String coding = "https://snownee.coding.net/p/test/d/test/git/raw/master/contributors.json";
         Locale locale = Locale.getDefault();
         if (locale.getCountry().equals("CN") && Calendar.getInstance().get(Calendar.ZONE_OFFSET) == 28800000) {
             Kiwi.logger.debug("Use fetching strategy 1");
-            return ImmutableList.of(coding, github);
+            return ImmutableList.of(cdn, coding);
         } else {
             Kiwi.logger.debug("Use fetching strategy 2");
-            return ImmutableList.of(github, github);
+            return ImmutableList.of(cdn, github);
         }
     }
 
