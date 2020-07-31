@@ -18,6 +18,7 @@ import net.minecraft.client.util.InputMappings.Input;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
@@ -104,10 +105,15 @@ public class Contributors extends AbstractModule {
         }
     }
 
-    @OnlyIn(Dist.DEDICATED_SERVER)
     @SubscribeEvent
     public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-        new SSyncEffectPacket(PLAYER_EFFECTS).send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) event.getPlayer()));
+        if (!(event.getEntity().world instanceof ServerWorld)) {
+            return;
+        }
+        PlayerEntity player = event.getPlayer();
+        if (!((ServerWorld) event.getEntity().world).getServer().isServerOwner(player.getGameProfile())) {
+            new SSyncEffectPacket(PLAYER_EFFECTS).send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player));
+        }
     }
 
     @OnlyIn(Dist.CLIENT)
