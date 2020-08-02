@@ -23,6 +23,7 @@ import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.fml.common.thread.EffectiveSide;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.ForgeRegistries;
 import snownee.kiwi.client.model.TextureModel;
 import snownee.kiwi.util.NBTHelper;
@@ -43,7 +44,7 @@ public class TextureTile extends BaseTile {
         for (String key : textureKeys) {
             textures.put(key, "");
         }
-        if (EffectiveSide.get().isClient()) {
+        if (FMLEnvironment.dist.isClient()) {
             modelData = textures == null ? EmptyModelData.INSTANCE : new ModelDataMap.Builder().withInitial(TextureModel.TEXTURES, textures).build();
         }
     }
