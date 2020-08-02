@@ -24,6 +24,7 @@ import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.item.ModItem;
 
@@ -45,7 +46,7 @@ public final class TooltipEvents {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void debugTooltip(ItemTooltipEvent event) {
-        if (!KiwiClientConfig.debugTooltip || !event.getFlags().isAdvanced()) {
+        if (!Kiwi.areTagsUpdated() || !KiwiClientConfig.debugTooltip || !event.getFlags().isAdvanced()) {
             return;
         }
 
