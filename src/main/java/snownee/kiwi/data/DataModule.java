@@ -6,12 +6,11 @@ import snownee.kiwi.KiwiModule;
 import snownee.kiwi.crafting.NoContainersShapedRecipe;
 import snownee.kiwi.crafting.NoContainersShapelessRecipe;
 import snownee.kiwi.crafting.TextureBlockRecipe;
-import snownee.kiwi.data.loot.AddLootTable;
 
 @KiwiModule(name = "data")
 public final class DataModule extends AbstractModule {
 
-    public static final AddLootTable.Serializer ADD_LOOT = new AddLootTable.Serializer();
+    //public static final AddLootTable.Serializer ADD_LOOT = new AddLootTable.Serializer();
 
     public static final IRecipeSerializer<?> SHAPED_NO_CONTAINERS = new NoContainersShapedRecipe.Serializer();
     public static final IRecipeSerializer<?> SHAPELESS_NO_CONTAINERS = new NoContainersShapelessRecipe.Serializer();
