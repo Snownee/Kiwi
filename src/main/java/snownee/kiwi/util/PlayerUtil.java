@@ -49,7 +49,7 @@ public final class PlayerUtil {
         if (player != null && !player.canPlayerEdit(pos, direction, stack)) {
             return false;
         }
-        BlockSnapshot blocksnapshot = BlockSnapshot.create(world, pos);
+        BlockSnapshot blocksnapshot = BlockSnapshot.create(world.func_234923_W_(), world, pos);
         if (!world.setBlockState(pos, state)) {
             return false;
         }

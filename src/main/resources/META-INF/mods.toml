@@ -1,5 +1,7 @@
 modLoader="javafml"
-loaderVersion="[32,)"
+loaderVersion="[33,)"
+license="MIT"
+
 [[mods]]
 modId="kiwi"
 version="${file.jarVersion}"
@@ -7,11 +9,10 @@ displayName="Kiwi"
 authors="Snownee"
 displayURL="https://www.curseforge.com/minecraft/mc-mods/kiwi"
 description=""
-license="MIT"
 
 [[dependencies.kiwi]]
    modId="forge"
    mandatory=true
-   versionRange="[32.0.70,)"
+   versionRange="[33,)"
    ordering="NONE"
    side="BOTH"

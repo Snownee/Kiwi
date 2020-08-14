@@ -57,7 +57,10 @@ public class WorldTicker implements ITicker {
 
     @SubscribeEvent
     public static void unloadWorld(WorldEvent.Unload event) {
-        MutablePair<WorldTicker> pair = tickers.get(event.getWorld().getWorld()./*getDimension*/func_234923_W_());
+        if (!(event.getWorld() instanceof World)) {
+            return;
+        }
+        MutablePair<WorldTicker> pair = tickers.get(((World) event.getWorld())./*getDimension*/func_234923_W_());
         if (pair == null) {
             return;
         }

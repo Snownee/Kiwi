@@ -18,6 +18,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.ITextProperties;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
@@ -64,12 +65,11 @@ public class ModItem extends Item {
                 fontRenderer = Minecraft.getInstance().fontRenderer;
             }
             FontRenderer fontRenderer2 = fontRenderer;
-            int width = Math.max(fontRenderer.getStringWidth(tooltip.get(0).getString()), KiwiClientConfig.tooltipWrapWidth);
+            int width = Math.max(fontRenderer.getStringWidth(tooltip.get(0).getString()), KiwiClientConfig.tooltipWrapWidth1);
             /* off */
             tooltip.addAll(
                     lines.stream()
-                    .map(StringTextComponent::new)
-                    .map(s -> fontRenderer2.func_238425_b_(s, width))
+                    .map(s -> fontRenderer2.func_238420_b_().func_238365_g_(s, width, Style.EMPTY))
                     .flatMap(Collection::stream)
                     .map(ITextProperties::getString)
                     .map(StringTextComponent::new)
