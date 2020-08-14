@@ -68,7 +68,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
+import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -204,8 +204,8 @@ public class Kiwi {
         modEventBus.addListener(this::init);
         modEventBus.addListener(this::clientInit);
         MinecraftForge.EVENT_BUS.addListener(this::serverInit);
-        MinecraftForge.EVENT_BUS.addListener(this::serverStarted);
-        MinecraftForge.EVENT_BUS.addListener(this::serverStopped);
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGH, this::serverStarting);
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.LOW, this::serverStopped);
         modEventBus.addListener(this::postInit);
         modEventBus.addListener(this::loadComplete);
         try {
@@ -573,7 +573,7 @@ public class Kiwi {
         return server;
     }
 
-    private void serverStarted(FMLServerStartedEvent event) {
+    private void serverStarting(FMLServerAboutToStartEvent event) {
         server = event.getServer();
     }
 
