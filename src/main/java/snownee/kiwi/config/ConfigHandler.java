@@ -72,7 +72,7 @@ public class ConfigHandler {
                 continue;
             }
             Class<?> type = field.getType();
-            if (type != int.class && type != long.class && type != double.class && type != boolean.class && type != String.class && !Enum.class.isAssignableFrom(type) && !List.class.isAssignableFrom(type)) {
+            if (type != int.class && type != long.class && type != double.class && type != float.class && type != boolean.class && type != String.class && !Enum.class.isAssignableFrom(type) && !List.class.isAssignableFrom(type)) {
                 continue;
             }
             if (field.getAnnotation(WorldRestart.class) != null) {
@@ -95,7 +95,7 @@ public class ConfigHandler {
             }
             ConfigValue<?> value = null;
             try {
-                if (type == int.class || type == long.class || type == double.class) {
+                if (type == int.class || type == long.class || type == double.class || type == float.class) {
                     double min = Double.NaN;
                     double max = Double.NaN;
                     Range range = field.getAnnotation(Range.class);
@@ -109,6 +109,8 @@ public class ConfigHandler {
                         value = builder.defineInRange(path, field.getLong(null), Double.isNaN(min) ? Long.MIN_VALUE : (long) min, Double.isNaN(max) ? Long.MAX_VALUE : (long) max);
                     } else if (type == double.class) {
                         value = builder.defineInRange(path, field.getDouble(null), Double.isNaN(min) ? Double.MIN_VALUE : min, Double.isNaN(max) ? Double.MAX_VALUE : max);
+                    } else if (type == float.class) {
+                        value = builder.defineInRange(path, field.getFloat(null), Double.isNaN(min) ? Double.MIN_VALUE : min, Double.isNaN(max) ? Double.MAX_VALUE : max);
                     }
                 } else if (type == String.class) {
                     value = builder.define(path, field.get(null));
@@ -131,7 +133,11 @@ public class ConfigHandler {
         valueMap.forEach((field, value) -> {
             try {
                 Kiwi.logger.debug("Set " + field.getName() + " to " + value.get());
-                field.set(null, value.get());
+                if (field.getType() == float.class) {
+                    field.setFloat(null, ((Double) value.get()).floatValue());
+                } else {
+                    field.set(null, value.get());
+                }
             } catch (IllegalArgumentException | IllegalAccessException e) {
                 Kiwi.logger.catching(e);
             }

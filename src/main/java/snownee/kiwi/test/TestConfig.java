@@ -20,7 +20,7 @@ public class TestConfig {
     public static long longValue = 6;
 
     @Range(min = 0, max = 10.5)
-    public static double doubleValue = 7.5;
+    public static float floatValue = 7.5f;
 
     @Path("Malay.P")
     @Comment("\\ MalayP /")
