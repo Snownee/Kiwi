@@ -85,7 +85,6 @@ import net.minecraftforge.registries.ObjectHolderRegistry;
 import net.minecraftforge.registries.RegistryManager;
 import snownee.kiwi.KiwiModule.Group;
 import snownee.kiwi.KiwiModule.Subscriber;
-import snownee.kiwi.KiwiModule.Subscriber.Bus;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfig;
 import snownee.kiwi.config.KiwiConfigManager;
@@ -371,9 +370,8 @@ public class Kiwi {
             info.context.setActiveContainer();
             Subscriber subscriber = info.module.getClass().getAnnotation(Subscriber.class);
             if (subscriber != null && ArrayUtils.contains(subscriber.side(), FMLEnvironment.dist)) {
-                for (Bus bus : subscriber.value()) {
-                    bus.bus().get().register(info.module);
-                }
+                // processEvents(info.module);
+                subscriber.value().bus().get().register(info.module);
             }
 
             boolean useOwnGroup = info.group == null;
@@ -499,6 +497,13 @@ public class Kiwi {
         holderRefs = null;
     }
 
+    //    private static void processEvents(Object object) {
+    //        for (Method method : object.getClass().getMethods()) {
+    //            
+    //        }
+    //        //IModBusEvent
+    //    }
+
     private static Map<String, ItemGroup> GROUP_CACHE = Maps.newHashMap();
 
     static ItemGroup getGroup(String path) {
@@ -520,27 +525,6 @@ public class Kiwi {
             info.noGroups.add(o);
         }
     }
-    //    private static String getRegistryName(String name)
-    //    {
-    //        StringBuilder sb = new StringBuilder();
-    //        for (int i = 0; i < name.length(); i++)
-    //        {
-    //            char c = name.charAt(i);
-    //            if (c >= 'A' && c <= 'Z')
-    //            {
-    //                if (i > 0)
-    //                {
-    //                    sb.append('_');
-    //                }
-    //                sb.append(Character.toLowerCase(c));
-    //            }
-    //            else
-    //            {
-    //                sb.append(c);
-    //            }
-    //        }
-    //        return sb.toString();
-    //    }
 
     private void init(FMLCommonSetupEvent event) {
         KiwiConfigManager.refresh();

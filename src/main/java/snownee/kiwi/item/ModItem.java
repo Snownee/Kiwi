@@ -73,7 +73,7 @@ public class ModItem extends Item {
                     .flatMap(Collection::stream)
                     .map(ITextProperties::getString)
                     .map(StringTextComponent::new)
-                    .peek(c -> c.mergeStyle(TextFormatting.GRAY))
+                    .peek(c -> c.mergeStyle(TextFormatting.GRAY)) //FIXME: Style is empty after wrapping line
                     .collect(Collectors.toList())
             );
             /* on */
