@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
 import com.google.common.collect.ImmutableSetMultimap;
@@ -29,20 +30,12 @@ public class JsonRewardProvider implements ITierProvider {
     private static final Gson GSON = new GsonBuilder().disableHtmlEscaping()/*.registerTypeAdapter(type, typeAdapter)*/.create();
     private final String author;
     private ImmutableSetMultimap<String, String> contributors = ImmutableSetMultimap.of();
+    private final Supplier<List<String>> urlProvider;
 
     public JsonRewardProvider(String author, Supplier<List<String>> urlProvider) {
         this.author = author;
-        Thread thread = new Thread(() -> {
-            int tried = 0;
-            List<String> url = urlProvider.get();
-            while (tried < url.size()) {
-                if (load(url.get(tried)))
-                    break;
-                ++tried;
-            }
-        }, String.format("[Kiwi > %s] Loading Contributors", author));
-        thread.setDaemon(true);
-        thread.start();
+        this.urlProvider = urlProvider;
+        refresh();
     }
 
     public boolean load(String url) {
@@ -65,6 +58,24 @@ public class JsonRewardProvider implements ITierProvider {
             Kiwi.logger.catching(e);
             return e instanceof UnknownHostException;
         }
+    }
+
+    @Override
+    public CompletableFuture<Void> refresh() {
+        CompletableFuture<Void> cf = new CompletableFuture<>();
+        Thread thread = new Thread(() -> {
+            int tried = 0;
+            List<String> url = urlProvider.get();
+            while (tried < url.size()) {
+                if (load(url.get(tried)))
+                    break;
+                ++tried;
+            }
+            cf.complete(null);
+        }, String.format("[Kiwi > %s] Loading Contributors", author));
+        thread.setDaemon(true);
+        thread.start();
+        return cf;
     }
 
     @Override

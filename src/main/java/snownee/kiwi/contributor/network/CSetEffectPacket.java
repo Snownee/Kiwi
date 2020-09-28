@@ -39,9 +39,9 @@ public class CSetEffectPacket extends ClientPacket {
 
         @Override
         public void handle(CSetEffectPacket msg, Supplier<Context> ctx) {
-            ctx.get().enqueueWork(() -> {
-                Contributors.changeEffect(ctx.get().getSender(), msg.id);
-            });
+            //            ctx.get().enqueueWork(() -> {
+            Contributors.changeEffect(ctx.get().getSender(), msg.id);
+            //            });
             ctx.get().setPacketHandled(true);
         }
     }

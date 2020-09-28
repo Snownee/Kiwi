@@ -3,6 +3,7 @@ package snownee.kiwi.contributor;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.entity.IEntityRenderer;
@@ -19,6 +20,10 @@ public interface ITierProvider {
     List<String> getRenderableTiers();
 
     Set<String> getPlayerTiers(String playerName);
+
+    default CompletableFuture<Void> refresh() {
+        return CompletableFuture.completedFuture(null);
+    }
 
     @OnlyIn(Dist.CLIENT)
     RewardLayer createRenderer(IEntityRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> entityRenderer, String tier);

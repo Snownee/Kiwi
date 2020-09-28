@@ -6,6 +6,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableMap;
@@ -28,6 +29,7 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.network.PacketDistributor;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.Kiwi;
@@ -151,21 +153,24 @@ public class Contributors extends AbstractModule {
         if (id != null && id.getPath().isEmpty()) {
             id = null;
         }
-        if (!canPlayerUseEffect(getPlayerName(), id)) {
-            ConfigHandler cfg = KiwiConfigManager.getHandler(KiwiClientConfig.class);
-            ConfigValue<String> val = (ConfigValue<String>) cfg.getValueByPath("contributorEffect");
-            val.set("");
-            cfg.refresh();
-            return;
-        }
-        new CSetEffectPacket(id).send();
-        if (id == null) {
-            PLAYER_EFFECTS.remove(getPlayerName());
-        } else {
-            PLAYER_EFFECTS.put(getPlayerName(), id);
-            Kiwi.logger.info("Enabled contributor effect: {}", id);
-        }
-        RewardLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidate(getPlayerName()));
+        ResourceLocation effect = id;
+        canPlayerUseEffect(getPlayerName(), effect).thenAccept(bl -> {
+            if (!bl) {
+                ConfigHandler cfg = KiwiConfigManager.getHandler(KiwiClientConfig.class);
+                ConfigValue<String> val = (ConfigValue<String>) cfg.getValueByPath("contributorEffect");
+                val.set("");
+                cfg.refresh();
+                return;
+            }
+            new CSetEffectPacket(effect).send();
+            if (effect == null) {
+                PLAYER_EFFECTS.remove(getPlayerName());
+            } else {
+                PLAYER_EFFECTS.put(getPlayerName(), effect);
+                Kiwi.logger.info("Enabled contributor effect: {}", effect);
+            }
+            RewardLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidate(getPlayerName()));
+        });
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -182,15 +187,16 @@ public class Contributors extends AbstractModule {
 
     public static void changeEffect(ServerPlayerEntity player, ResourceLocation effect) {
         String playerName = player.getGameProfile().getName();
-        if (!canPlayerUseEffect(playerName, effect)) {
-            return;
-        }
-        if (effect == null) {
-            PLAYER_EFFECTS.remove(playerName);
-        } else {
-            PLAYER_EFFECTS.put(playerName, effect);
-        }
-        new SSyncEffectPacket(ImmutableMap.of(playerName, effect)).sendExcept(player);
+        canPlayerUseEffect(playerName, effect).thenAccept(bl -> {
+            if (bl) {
+                if (effect == null) {
+                    PLAYER_EFFECTS.remove(playerName);
+                } else {
+                    PLAYER_EFFECTS.put(playerName, effect);
+                }
+                new SSyncEffectPacket(ImmutableMap.of(playerName, effect)).sendExcept(player);
+            }
+        });
     }
 
     public static boolean isRenderable(ResourceLocation id) {
@@ -217,14 +223,24 @@ public class Contributors extends AbstractModule {
         }
     }
 
-    public static boolean canPlayerUseEffect(String playerName, ResourceLocation effect) {
-        if (effect == null || effect.getPath().isEmpty()) {
-            return true;
+    public static CompletableFuture<Boolean> canPlayerUseEffect(String playerName, ResourceLocation effect) {
+        if (effect == null || effect.getPath().isEmpty()) { // Set to empty
+            return CompletableFuture.completedFuture(Boolean.TRUE);
         }
-        if (!isContributor(effect.getNamespace(), playerName, effect.getPath())) {
-            return false;
+        if (!isRenderable(effect)) {
+            return CompletableFuture.completedFuture(Boolean.FALSE);
         }
-        return isRenderable(effect);
+        ITierProvider provider = REWARD_PROVIDERS.getOrDefault(effect.getNamespace().toLowerCase(Locale.ENGLISH), ITierProvider.Empty.INSTANCE);
+        if (!provider.isContributor(playerName, effect.getPath())) {
+            if (FMLEnvironment.dist.isDedicatedServer()) {
+                return provider.refresh().thenApply($ -> {
+                    return provider.isContributor(playerName, effect.getPath());
+                });
+            } else {
+                return CompletableFuture.completedFuture(Boolean.FALSE);
+            }
+        }
+        return CompletableFuture.completedFuture(Boolean.TRUE);
     }
 
     @OnlyIn(Dist.CLIENT)
