@@ -419,7 +419,16 @@ public class NBTHelper {
         CompoundNBT subTag = getTagInternal(key, false, true);
         if (subTag != null) {
             String actualKey = getLastNode(key);
-            subTag.contains(actualKey);
+            subTag.remove(actualKey);
+        }
+        return this;
+    }
+
+    public NBTHelper removeUUID(String key) {
+        CompoundNBT subTag = getTagInternal(key, false, true);
+        if (subTag != null) {
+            String actualKey = getLastNode(key);
+            subTag.removeUniqueId(actualKey);
         }
         return this;
     }
