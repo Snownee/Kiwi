@@ -270,22 +270,22 @@ public class NBTHelper {
         return null;
     }
 
-//    public NBTHelper setGlobalPos(String key, GlobalPos value) {
-//        getTagInternal(key).put(getLastNode(key), GlobalPos.field_239645_a_.encodeStart(NBTDynamicOps.INSTANCE, value).getOrThrow(allowPartial, onError));
-//        return this;
-//    }
-//
-//    @Nullable
-//    public GlobalPos getGlobalPos(String key) {
-//        CompoundNBT subTag = getTagInternal(key, false, true);
-//        if (subTag != null) {
-//            String actualKey = getLastNode(key);
-//            if (subTag.contains(actualKey, NBT.COMPOUND)) {
-//                return GlobalPos.deserialize(new Dynamic<>(NBTDynamicOps.INSTANCE, getTag(actualKey)));
-//            }
-//        }
-//        return null;
-//    }
+    //    public NBTHelper setGlobalPos(String key, GlobalPos value) {
+    //        getTagInternal(key).put(getLastNode(key), GlobalPos.field_239645_a_.encodeStart(NBTDynamicOps.INSTANCE, value).getOrThrow(allowPartial, onError));
+    //        return this;
+    //    }
+    //
+    //    @Nullable
+    //    public GlobalPos getGlobalPos(String key) {
+    //        CompoundNBT subTag = getTagInternal(key, false, true);
+    //        if (subTag != null) {
+    //            String actualKey = getLastNode(key);
+    //            if (subTag.contains(actualKey, NBT.COMPOUND)) {
+    //                return GlobalPos.deserialize(new Dynamic<>(NBTDynamicOps.INSTANCE, getTag(actualKey)));
+    //            }
+    //        }
+    //        return null;
+    //    }
 
     public NBTHelper setBlockState(String key, BlockState value) {
         return setTag(key, NBTUtil.writeBlockState(value));
@@ -416,7 +416,7 @@ public class NBTHelper {
         CompoundNBT subTag = getTagInternal(key, false, true);
         if (subTag != null) {
             String actualKey = getLastNode(key);
-            subTag.contains(actualKey);
+            subTag.remove(actualKey);
         }
         return this;
     }
