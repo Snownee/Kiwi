@@ -3,6 +3,7 @@ package snownee.kiwi.config;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.List;
+import java.util.Objects;
 
 import javax.annotation.Nullable;
 
@@ -132,12 +133,18 @@ public class ConfigHandler {
     public void refresh() {
         valueMap.forEach((field, value) -> {
             try {
-                Kiwi.logger.debug("Set " + field.getName() + " to " + value.get());
                 if (field.getType() == float.class) {
+                    if (Objects.equals(((Double) value.get()).floatValue(), field.get(null))) {
+                        return;
+                    }
                     field.setFloat(null, ((Double) value.get()).floatValue());
                 } else {
+                    if (Objects.equals(value.get(), field.get(null))) {
+                        return;
+                    }
                     field.set(null, value.get());
                 }
+                Kiwi.logger.debug("Set " + field.getName() + " to " + value.get());
             } catch (IllegalArgumentException | IllegalAccessException e) {
                 Kiwi.logger.catching(e);
             }
