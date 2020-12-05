@@ -1,4 +1,4 @@
-package snownee.kiwi;
+package snownee.kiwi.command;
 
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -13,6 +13,7 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.Commands.EnvironmentType;
 import net.minecraft.util.text.TranslationTextComponent;
+import snownee.kiwi.Kiwi;
 import snownee.kiwi.util.LootDumper;
 
 public class KiwiCommand {
@@ -33,7 +34,7 @@ public class KiwiCommand {
         }
 
         builder.then(Commands
-                .literal("cleanWorld")
+                .literal("debugWorldRules")
                 .requires(ctx -> ctx.hasPermissionLevel(2))
                 .executes(ctx -> cleanWorld(ctx.getSource()))
         );

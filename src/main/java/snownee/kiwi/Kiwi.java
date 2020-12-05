@@ -85,6 +85,7 @@ import net.minecraftforge.registries.ObjectHolderRegistry;
 import net.minecraftforge.registries.RegistryManager;
 import snownee.kiwi.KiwiModule.Group;
 import snownee.kiwi.KiwiModule.Subscriber;
+import snownee.kiwi.command.KiwiCommand;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfig;
 import snownee.kiwi.config.KiwiConfigManager;
