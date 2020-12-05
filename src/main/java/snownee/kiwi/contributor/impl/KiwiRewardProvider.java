@@ -6,6 +6,7 @@ import java.util.Locale;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -19,10 +20,11 @@ import snownee.kiwi.contributor.client.RewardLayer;
 import snownee.kiwi.contributor.impl.client.layer.FoxTailLayer;
 import snownee.kiwi.contributor.impl.client.layer.PlanetLayer;
 import snownee.kiwi.contributor.impl.client.layer.SantaHatLayer;
+import snownee.kiwi.contributor.impl.client.layer.SunnyMilkLayer;
 
 public class KiwiRewardProvider extends JsonRewardProvider {
     public KiwiRewardProvider() {
-        super("Snownee", () -> getURLs());
+        super("Snownee", KiwiRewardProvider::getURLs);
     }
 
     private static List<String> getURLs() {
@@ -39,7 +41,7 @@ public class KiwiRewardProvider extends JsonRewardProvider {
         }
     }
 
-    private final List<String> renderableTiers = ImmutableList.of("2020q3", "2020q4");
+    private final List<String> renderableTiers = ImmutableList.of("2020q3", "2020q4", "sunny_milk");
 
     private static boolean isInXmas() {
         Calendar calendar = Calendar.getInstance();
@@ -54,6 +56,11 @@ public class KiwiRewardProvider extends JsonRewardProvider {
             ret.add("xmas");
         }
         return ret;
+    }
+
+    @Override
+    public Set<String> getTiers() {
+        return ImmutableSet.copyOf(getRenderableTiers());
     }
 
     @Override
@@ -76,6 +83,8 @@ public class KiwiRewardProvider extends JsonRewardProvider {
             return new FoxTailLayer(entityRenderer);
         case "xmas":
             return new SantaHatLayer(entityRenderer);
+        case "sunny_milk":
+            return new SunnyMilkLayer(entityRenderer);
         default:
             return null;
         }
