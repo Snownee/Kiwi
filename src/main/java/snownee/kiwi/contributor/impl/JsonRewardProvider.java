@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.ImmutableSetMultimap.Builder;
 import com.google.gson.Gson;
@@ -30,6 +31,7 @@ public class JsonRewardProvider implements ITierProvider {
     private static final Gson GSON = new GsonBuilder().disableHtmlEscaping()/*.registerTypeAdapter(type, typeAdapter)*/.create();
     private final String author;
     private ImmutableSetMultimap<String, String> contributors = ImmutableSetMultimap.of();
+    protected ImmutableSet<String> superusers = ImmutableSet.of();
     private final Supplier<List<String>> urlProvider;
 
     public JsonRewardProvider(String author, Supplier<List<String>> urlProvider) {
@@ -42,13 +44,16 @@ public class JsonRewardProvider implements ITierProvider {
         try {
             InputStreamReader reader = new InputStreamReader(new URL(url).openStream());
             Map<String, Collection<String>> map = GSON.fromJson(reader, Map.class);
-            final Collection<String> superUsers = map.containsKey("*") ? map.get("*") : Collections.singleton(getAuthor());
+            if (map.containsKey("*")) {
+                superusers = ImmutableSet.copyOf(map.get("*"));
+            } else {
+                superusers = ImmutableSet.of(getAuthor());
+            }
             Builder<String, String> builder = ImmutableSetMultimap.builder();
             map.forEach((reward, users) -> {
                 if (reward.equals("*")) {
                     return;
                 }
-                superUsers.forEach(user -> builder.put(user, reward));
                 users.forEach(user -> builder.put(user, reward));
             });
             contributors = builder.build();
@@ -85,7 +90,7 @@ public class JsonRewardProvider implements ITierProvider {
 
     @Override
     public Set<String> getPlayerTiers(String playerName) {
-        return contributors.containsKey(playerName) ? contributors.get(playerName) : Collections.EMPTY_SET;
+        return superusers.contains(playerName) ? getTiers() : contributors.get(playerName);
     }
 
     @Override
