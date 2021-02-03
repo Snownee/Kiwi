@@ -38,9 +38,9 @@ public abstract class AbstractModule {
             item.group = module.group;
     };
 
-    private static final Map<Class, BiConsumer<ModuleInfo, ? extends IForgeRegistryEntry<?>>> DEFAULT_DECORATORS = ImmutableMap.of(Item.class, ITEM_DECORATOR);
+    private static final Map<Class<?>, BiConsumer<ModuleInfo, ? extends IForgeRegistryEntry<?>>> DEFAULT_DECORATORS = ImmutableMap.of(Item.class, ITEM_DECORATOR);
 
-    protected final Map<Class, BiConsumer<ModuleInfo, ? extends IForgeRegistryEntry<?>>> decorators = Maps.newHashMap(DEFAULT_DECORATORS);
+    protected final Map<Class<?>, BiConsumer<ModuleInfo, ? extends IForgeRegistryEntry<?>>> decorators = Maps.newHashMap(DEFAULT_DECORATORS);
 
     protected void preInit() {
         // NO-OP
@@ -90,7 +90,7 @@ public abstract class AbstractModule {
     }
 
     public static INamedTag<EntityType<?>> entityTag(String namespace, String path) {
-        return EntityTypeTags.func_232896_a_(namespace + ":" + path);
+        return EntityTypeTags.getTagById(namespace + ":" + path);
     }
 
     public static INamedTag<Block> blockTag(String namespace, String path) {

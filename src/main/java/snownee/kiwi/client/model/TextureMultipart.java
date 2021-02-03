@@ -147,7 +147,7 @@ public class TextureMultipart implements IDynamicBakedModel
     }
 
     @Override
-    public boolean func_230044_c_() {
-        return originalBaked.func_230044_c_();
+    public boolean isSideLit() {
+        return originalBaked.isSideLit();
     }
 }

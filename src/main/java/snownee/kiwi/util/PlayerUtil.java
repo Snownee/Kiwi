@@ -36,7 +36,7 @@ public final class PlayerUtil {
             return tryPlace(world, pos, side.getOpposite(), player, hand, state, stack, playSound) ? pos : null;
         }
         ISelectionContext iselectioncontext = player == null ? ISelectionContext.dummy() : ISelectionContext.forEntity(player);
-        if (world.func_226663_a_(state, pos, iselectioncontext)) {
+        if (world.placedBlockCollides(state, pos, iselectioncontext)) {
             return tryPlace(world, pos, side.getOpposite(), player, hand, state, stack, playSound) ? pos : null;
         }
         return null;
@@ -49,7 +49,7 @@ public final class PlayerUtil {
         if (player != null && !player.canPlayerEdit(pos, direction, stack)) {
             return false;
         }
-        BlockSnapshot blocksnapshot = BlockSnapshot.create(world.func_234923_W_(), world, pos);
+        BlockSnapshot blocksnapshot = BlockSnapshot.create(world.getDimensionKey(), world, pos);
         if (!world.setBlockState(pos, state)) {
             return false;
         }

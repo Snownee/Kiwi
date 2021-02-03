@@ -252,7 +252,7 @@ public class TextureModel implements IDynamicBakedModel {
         ResourceLocation loaderId = new ResourceLocation("minecraft:elements");
         try {
             model = baked.get(key, () -> {
-                BlockModel unbaked = new BlockModel(originalUnbaked.getParentLocation(), originalUnbaked.getElements(), textures, originalUnbaked.isAmbientOcclusion(), originalUnbaked.func_230176_c_(), originalUnbaked.getAllTransforms(), Lists.newArrayList(originalUnbaked.getOverrides()));
+                BlockModel unbaked = new BlockModel(originalUnbaked.getParentLocation(), originalUnbaked.getElements(), textures, originalUnbaked.isAmbientOcclusion(), originalUnbaked.getGuiLight(), originalUnbaked.getAllTransforms(), Lists.newArrayList(originalUnbaked.getOverrides()));
                 return unbaked.bakeModel(modelLoader, unbaked, ModelLoader.defaultTextureGetter(), variant, loaderId, true);
             });
         } catch (ExecutionException e) {
@@ -318,7 +318,7 @@ public class TextureModel implements IDynamicBakedModel {
         }
 
         @Override
-        public IBakedModel func_239290_a_/*getModelWithOverrides*/(IBakedModel model, ItemStack stack, ClientWorld worldIn, LivingEntity entityIn) {
+        public IBakedModel getOverrideModel(IBakedModel model, ItemStack stack, ClientWorld worldIn, LivingEntity entityIn) {
             if (model instanceof TextureModel) {
                 try {
                     model = cache.get(stack, () -> {
@@ -346,7 +346,7 @@ public class TextureModel implements IDynamicBakedModel {
     }
 
     @Override
-    public boolean func_230044_c_() {
-        return originalBaked.func_230044_c_();
+    public boolean isSideLit() {
+        return originalBaked.isSideLit();
     }
 }

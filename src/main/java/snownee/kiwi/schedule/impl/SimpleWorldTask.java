@@ -22,7 +22,7 @@ public class SimpleWorldTask extends Task<WorldTicker> implements INBTSerializab
     public SimpleWorldTask() {}
 
     public SimpleWorldTask(World world, TickEvent.Phase phase, IntPredicate function) {
-        this(world./*getDimension*/func_234923_W_(), phase, function);
+        this(world.getDimensionKey(), phase, function);
     }
 
     public SimpleWorldTask(RegistryKey<World> dimensionType, TickEvent.Phase phase, IntPredicate function) {
@@ -50,7 +50,7 @@ public class SimpleWorldTask extends Task<WorldTicker> implements INBTSerializab
     public CompoundNBT serializeNBT() {
         CompoundNBT data = new CompoundNBT();
         data.putInt("tick", tick);
-        World.field_234917_f_.encodeStart(NBTDynamicOps.INSTANCE, dimension).resultOrPartial(Kiwi.logger::error).ifPresent(nbt -> {
+        World.CODEC.encodeStart(NBTDynamicOps.INSTANCE, dimension).resultOrPartial(Kiwi.logger::error).ifPresent(nbt -> {
             data.put("world", nbt);
         });
         data.putBoolean("start", phase == Phase.START);
@@ -59,7 +59,7 @@ public class SimpleWorldTask extends Task<WorldTicker> implements INBTSerializab
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
-        dimension = World.field_234917_f_.parse(NBTDynamicOps.INSTANCE, nbt.get("world")).resultOrPartial(Kiwi.logger::error).orElse(World.field_234918_g_);
+        dimension = World.CODEC.parse(NBTDynamicOps.INSTANCE, nbt.get("world")).resultOrPartial(Kiwi.logger::error).orElse(World.OVERWORLD);
         tick = nbt.getInt("tick");
         phase = nbt.getBoolean("start") ? Phase.START : Phase.END;
     }

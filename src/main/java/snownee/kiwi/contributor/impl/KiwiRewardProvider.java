@@ -7,7 +7,6 @@ import java.util.Set;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
@@ -17,6 +16,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.contributor.client.RewardLayer;
+import snownee.kiwi.contributor.impl.client.layer.ElectronicatLayer;
 import snownee.kiwi.contributor.impl.client.layer.FoxTailLayer;
 import snownee.kiwi.contributor.impl.client.layer.PlanetLayer;
 import snownee.kiwi.contributor.impl.client.layer.SantaHatLayer;
@@ -41,7 +41,7 @@ public class KiwiRewardProvider extends JsonRewardProvider {
         }
     }
 
-    private final List<String> renderableTiers = ImmutableList.of("2020q3", "2020q4", "sunny_milk");
+    private final List<String> renderableTiers = ImmutableList.of("2020q3", "2020q4"/*, "2021q1"*/, "sunny_milk");
 
     private static boolean isInXmas() {
         Calendar calendar = Calendar.getInstance();
@@ -65,12 +65,7 @@ public class KiwiRewardProvider extends JsonRewardProvider {
 
     @Override
     public List<String> getRenderableTiers() {
-        List<String> ret = renderableTiers;
-        if (isInXmas()) {
-            ret = Lists.newArrayList(ret);
-            ret.add("xmas");
-        }
-        return ret;
+        return renderableTiers;
     }
 
     @Override
@@ -81,6 +76,8 @@ public class KiwiRewardProvider extends JsonRewardProvider {
             return new PlanetLayer(entityRenderer);
         case "2020q4":
             return new FoxTailLayer(entityRenderer);
+        case "2021q1":
+            return new ElectronicatLayer(entityRenderer);
         case "xmas":
             return new SantaHatLayer(entityRenderer);
         case "sunny_milk":

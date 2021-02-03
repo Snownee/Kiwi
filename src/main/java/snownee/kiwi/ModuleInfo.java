@@ -31,7 +31,7 @@ import snownee.kiwi.item.ModBlockItem;
 
 public class ModuleInfo {
     static final class RegistryHolder {
-        final Multimap<Class, NamedEntry<?>> registries = LinkedListMultimap.create();
+        final Multimap<Class<?>, NamedEntry<?>> registries = LinkedListMultimap.create();
 
         <T extends IForgeRegistryEntry<T>> void put(NamedEntry<T> entry) {
             registries.put(entry.entry.getRegistryType(), entry);

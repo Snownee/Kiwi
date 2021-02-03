@@ -29,7 +29,7 @@ public class FoxTailLayer extends RewardLayer {
 
     public FoxTailLayer(IEntityRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> entityRendererIn) {
         super(entityRendererIn);
-        modelFoxTail = new FoxTailModel<AbstractClientPlayerEntity>(entityRendererIn.getEntityModel());
+        modelFoxTail = new FoxTailModel<>(entityRendererIn.getEntityModel());
     }
 
     @Override
@@ -42,7 +42,7 @@ public class FoxTailLayer extends RewardLayer {
             return;
         }
         String name = entitylivingbaseIn.getName().getString().toLowerCase(Locale.ENGLISH);
-        ResourceLocation texture = name.startsWith("snow") || name.startsWith("xue") ? SNOW_FOX : FOX;
+        ResourceLocation texture = name.contains("snow") || name.contains("xue") || name.contains("yuki") ? SNOW_FOX : FOX;
         matrixStackIn.push();
         modelFoxTail.isChild = entitylivingbaseIn.isChild();
         modelFoxTail.setRotationAngles(entitylivingbaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);

@@ -44,7 +44,7 @@ public class KiwiObjectHolderRef implements Consumer<Predicate<ResourceLocation>
         return new KiwiObjectHolderRef(field, injectedObject, registry);
     }
 
-    public Class getRegistryType() {
+    public Class<?> getRegistryType() {
         return registry.getRegistrySuperType();
     }
 

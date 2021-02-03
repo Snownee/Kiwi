@@ -69,7 +69,7 @@ public class ModItem extends Item {
             /* off */
             tooltip.addAll(
                     lines.stream()
-                    .map(s -> fontRenderer2.func_238420_b_().func_238365_g_(s, width, Style.EMPTY))
+                    .map(s -> fontRenderer2.getCharacterManager().func_238365_g_(s, width, Style.EMPTY))
                     .flatMap(Collection::stream)
                     .map(ITextProperties::getString)
                     .map(StringTextComponent::new)

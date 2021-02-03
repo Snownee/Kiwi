@@ -27,7 +27,7 @@ public class SunnyMilkLayer extends RewardLayer {
 
     public SunnyMilkLayer(IEntityRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> entityRendererIn) {
         super(entityRendererIn);
-        model = new SunnyMilkModel<AbstractClientPlayerEntity>(entityRendererIn.getEntityModel());
+        model = new SunnyMilkModel<>(entityRendererIn.getEntityModel());
     }
 
     @Override

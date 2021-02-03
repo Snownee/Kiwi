@@ -26,7 +26,7 @@ public class SantaHatLayer extends RewardLayer {
 
     public SantaHatLayer(IEntityRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> entityRendererIn) {
         super(entityRendererIn);
-        modelSantaHat = new SantaHatModel<AbstractClientPlayerEntity>(entityRendererIn.getEntityModel());
+        modelSantaHat = new SantaHatModel<>(entityRendererIn.getEntityModel());
     }
 
     @Override

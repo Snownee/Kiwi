@@ -20,13 +20,13 @@ public class WorldTicker implements ITicker {
     private static final Map<RegistryKey<World>, MutablePair<WorldTicker>> tickers = Maps.newHashMap();
 
     public static WorldTicker get(World world, TickEvent.Phase phase) {
-        return get(world./*getDimension*/func_234923_W_(), phase);
+        return get(world.getDimensionKey(), phase);
     }
 
     public static WorldTicker get(RegistryKey<World> dimension, TickEvent.Phase phase) {
         MutablePair<WorldTicker> pair = tickers.get(dimension);
         if (pair == null) {
-            pair = new MutablePair();
+            pair = new MutablePair<>();
             tickers.put(dimension, pair);
         }
         WorldTicker ticker = pair.get(phase.ordinal());
@@ -43,7 +43,7 @@ public class WorldTicker implements ITicker {
 
     @SubscribeEvent
     public static void onTick(TickEvent.WorldTickEvent event) {
-        MutablePair<WorldTicker> pair = tickers.get(event.world./*getDimension*/func_234923_W_());
+        MutablePair<WorldTicker> pair = tickers.get(event.world.getDimensionKey());
         if (pair == null) {
             return;
         }
@@ -60,7 +60,7 @@ public class WorldTicker implements ITicker {
         if (!(event.getWorld() instanceof World)) {
             return;
         }
-        MutablePair<WorldTicker> pair = tickers.get(((World) event.getWorld())./*getDimension*/func_234923_W_());
+        MutablePair<WorldTicker> pair = tickers.get(((World) event.getWorld()).getDimensionKey());
         if (pair == null) {
             return;
         }

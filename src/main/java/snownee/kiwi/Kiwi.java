@@ -232,7 +232,7 @@ public class Kiwi {
         Set<ResourceLocation> disabledModules = Sets.newHashSet();
         conditions.forEach((k, v) -> {
             try {
-                Class clazz = Class.forName(k.getClassType().getClassName());
+                Class<?> clazz = Class.forName(k.getClassType().getClassName());
                 int p = k.getMemberName().indexOf('(');
                 if (p <= 0) {
                     throw new IllegalArgumentException();
@@ -543,7 +543,7 @@ public class Kiwi {
 
     private void serverInit(FMLServerStartingEvent event) {
         KiwiManager.MODULES.values().forEach(m -> m.serverInit(event));
-        event.getServer().getWorld(World./*OVERWORLD*/field_234918_g_).getSavedData().getOrCreate(() -> Scheduler.INSTANCE, Scheduler.ID);
+        event.getServer().getWorld(World.OVERWORLD).getSavedData().getOrCreate(() -> Scheduler.INSTANCE, Scheduler.ID);
         ModLoadingContext.get().setActiveContainer(null, null);
     }
 
