@@ -76,8 +76,8 @@ public class KiwiRewardProvider extends JsonRewardProvider {
             return new PlanetLayer(entityRenderer);
         case "2020q4":
             return new FoxTailLayer(entityRenderer);
-        case "2021q1":
-            return new ElectronicatLayer(entityRenderer);
+//        case "2021q1":
+//            return new ElectronicatLayer(entityRenderer);
         case "xmas":
             return new SantaHatLayer(entityRenderer);
         case "sunny_milk":
