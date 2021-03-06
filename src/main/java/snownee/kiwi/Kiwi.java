@@ -138,7 +138,8 @@ public class Kiwi {
         final Type LOADING_CONDITION = Type.getType(KiwiModule.LoadingCondition.class);
 
         Map<Type, AnnotationData> moduleToOptional = Maps.newHashMap();
-        for (ModInfo info : ModList.get().getMods()) {
+        List<ModInfo> mods = ImmutableList.copyOf(ModList.get().getMods());
+        for (ModInfo info : mods) {
             ModFileInfo modFileInfo = info.getOwningFile();
             if (modFileInfo != null) {
                 for (AnnotationData annotationData : modFileInfo.getFile().getScanResult().getAnnotations()) {

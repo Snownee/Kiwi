@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 import com.mojang.authlib.GameProfile;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
@@ -291,13 +292,12 @@ public class NBTHelper {
         return setTag(key, NBTUtil.writeBlockState(value));
     }
 
-    @Nullable
     public BlockState getBlockState(String key) {
         CompoundNBT subTag = getTagInternal(key, false, false);
         if (subTag != null) {
             return NBTUtil.readBlockState(subTag);
         }
-        return null;
+        return Blocks.AIR.getDefaultState();
     }
 
     public NBTHelper setGameProfile(String key, GameProfile value) {
