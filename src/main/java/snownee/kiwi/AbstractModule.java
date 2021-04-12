@@ -37,8 +37,11 @@ public abstract class AbstractModule {
         if (module.group != null && item.group == null && !module.noGroups.contains(item))
             item.group = module.group;
     };
+    private static final BiConsumer<ModuleInfo, Block> BLOCK_DECORATOR = (module, block) -> {
+        ModBlock.setFireInfo(block);
+    };
 
-    private static final Map<Class<?>, BiConsumer<ModuleInfo, ? extends IForgeRegistryEntry<?>>> DEFAULT_DECORATORS = ImmutableMap.of(Item.class, ITEM_DECORATOR);
+    private static final Map<Class<?>, BiConsumer<ModuleInfo, ? extends IForgeRegistryEntry<?>>> DEFAULT_DECORATORS = ImmutableMap.of(Item.class, ITEM_DECORATOR, Block.class, BLOCK_DECORATOR);
 
     protected final Map<Class<?>, BiConsumer<ModuleInfo, ? extends IForgeRegistryEntry<?>>> decorators = Maps.newHashMap(DEFAULT_DECORATORS);
 

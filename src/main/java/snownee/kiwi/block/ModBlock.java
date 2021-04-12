@@ -12,32 +12,22 @@ import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockReader;
-import snownee.kiwi.AbstractModule;
 import snownee.kiwi.tile.BaseTile;
+import snownee.kiwi.util.DeferredActions;
 
 /**
- * 
- * Simple base block. You do not have to set sound or hardness every time.
- * 
- * If you want to extends other vanilla class, simply use
- * {@link AbstractModule#init(T block)} to automatically set properties
  * 
  * @author Snownee
  * 
  */
 public class ModBlock extends Block {
 
-    protected final ExtraInfo extraInfo;
-
     public ModBlock(Block.Properties builder) {
         super(builder);
-        extraInfo = new ExtraInfo(this);
     }
 
     public static SoundType deduceSoundType(final Material material) {
@@ -131,44 +121,36 @@ public class ModBlock extends Block {
         return stack;
     }
 
-    @Override
-    public int getFireSpreadSpeed(BlockState state, IBlockReader world, BlockPos pos, Direction face) {
-        return state.hasProperty(BlockStateProperties.WATERLOGGED) && state.get(BlockStateProperties.WATERLOGGED) ? 0 : extraInfo.fireSpreadSpeed;
-    }
-
-    @Override
-    public int getFlammability(BlockState state, IBlockReader world, BlockPos pos, Direction face) {
-        return state.hasProperty(BlockStateProperties.WATERLOGGED) && state.get(BlockStateProperties.WATERLOGGED) ? 0 : extraInfo.flammability;
-    }
-
-    public static final class ExtraInfo {
-        public int fireSpreadSpeed;
-        public int flammability;
-
-        public ExtraInfo(Block block) {
-            Material material = block.material;
-            if (material == Material.WOOD) {
-                if (!(block instanceof DoorBlock || block instanceof TrapDoorBlock || block instanceof WoodButtonBlock || block instanceof PressurePlateBlock)) {
-                    fireSpreadSpeed = 5;
-                    flammability = 20;
-                }
-            } else if (material == Material.PLANTS || material == Material.TALL_PLANTS) {
-                if (!(block instanceof SaplingBlock)) {
-                    fireSpreadSpeed = 30;
-                    flammability = 100;
-                }
-            } else if (material == Material.CARPET) {
-                fireSpreadSpeed = 60;
+    /**
+     * @since 3.5.0
+     */
+    public static void setFireInfo(Block block) {
+        Material material = block.material;
+        int fireSpreadSpeed = 0;
+        int flammability = 0;
+        if (material == Material.WOOD) {
+            if (!(block instanceof DoorBlock || block instanceof TrapDoorBlock || block instanceof WoodButtonBlock || block instanceof PressurePlateBlock)) {
+                fireSpreadSpeed = 5;
                 flammability = 20;
-            } else if (material == Material.LEAVES) {
-                fireSpreadSpeed = 30;
-                flammability = 60;
-            } else if (material == Material.WOOL) {
-                fireSpreadSpeed = 30;
-                flammability = 60;
             }
+        } else if (material == Material.PLANTS || material == Material.TALL_PLANTS) {
+            if (!(block instanceof SaplingBlock)) {
+                fireSpreadSpeed = 30;
+                flammability = 100;
+            }
+        } else if (material == Material.CARPET) {
+            fireSpreadSpeed = 60;
+            flammability = 20;
+        } else if (material == Material.LEAVES) {
+            fireSpreadSpeed = 30;
+            flammability = 60;
+        } else if (material == Material.WOOL) {
+            fireSpreadSpeed = 30;
+            flammability = 60;
         }
-
+        if (fireSpreadSpeed != 0) {
+            DeferredActions.setFireInfo(block, fireSpreadSpeed, flammability);
+        }
     }
 
 }

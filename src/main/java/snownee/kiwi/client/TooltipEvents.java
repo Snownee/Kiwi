@@ -31,7 +31,8 @@ import snownee.kiwi.item.ModItem;
 @OnlyIn(Dist.CLIENT)
 @EventBusSubscriber(Dist.CLIENT)
 public final class TooltipEvents {
-    private TooltipEvents() {}
+    private TooltipEvents() {
+    }
 
     private static ItemStack lastStack;
     private static CompoundNBT lastNBT;
@@ -56,6 +57,9 @@ public final class TooltipEvents {
             lastStack = stack;
             CompoundNBT data = stack.getTag();
             IFormattableTextComponent itextcomponent = new StringTextComponent(stack.getItem().getRegistryName().toString());
+            if (minecraft.keyboardListener != null) {
+                minecraft.keyboardListener.setClipboardString(itextcomponent.getString());
+            }
             if (data != null) {
                 itextcomponent.append(data.toFormattedComponent());
             }

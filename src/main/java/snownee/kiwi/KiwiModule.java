@@ -47,7 +47,6 @@ public @interface KiwiModule {
      * You can input vanilla group id, such as 'buildingBlocks', 'misc'
      * If empty, Kiwi will catch the first ItemGroup in this module.
      * 
-     * @see KiwiManager#addItemGroup(String, String, net.minecraft.item.ItemGroup)
      * @author Snownee
      *
      */

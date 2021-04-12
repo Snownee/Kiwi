@@ -63,7 +63,7 @@ public abstract class BaseTile extends TileEntity {
 
     protected void refresh() {
         if (hasWorld() && !world.isRemote) {
-            BlockState state = world.getBlockState(pos);
+            BlockState state = getBlockState();
             world.markAndNotifyBlock(pos, world.getChunkAt(pos), state, state, 11, 512 /* TODO whats this? */);
         }
     }
