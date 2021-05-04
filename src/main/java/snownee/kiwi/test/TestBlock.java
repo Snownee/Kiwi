@@ -20,6 +20,7 @@ import snownee.kiwi.block.ModBlock;
 import snownee.kiwi.crafting.FullBlockIngredient;
 import snownee.kiwi.tile.TextureTile;
 
+// fill ~-40 ~ ~-40 ~40 ~ ~40 kiwi:tex_block
 @RenderLayer(Layer.CUTOUT)
 public class TestBlock extends StairsBlock
 {

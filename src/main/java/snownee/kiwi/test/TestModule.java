@@ -27,38 +27,45 @@ import snownee.kiwi.schedule.Scheduler;
 @KiwiModule.Group("building_blocks")
 @KiwiModule.Subscriber(Bus.MOD)
 public class TestModule extends AbstractModule {
-    // Keep your fields `public static final`
+	// Keep your fields `public static final`
 
-    // Register a simple item
-    public static final TestItem FIRST_ITEM = new TestItem(itemProp().rarity(Rarity.EPIC));
+	// Register a simple item
+	public static final TestItem FIRST_ITEM = new TestItem(itemProp().rarity(Rarity.EPIC));
 
-    // The next block will use this builder to build its BlockItem. After that this field will be null
-    public static final Item.Properties FIRST_BLOCK_ITEM_BUILDER = itemProp().rarity(Rarity.RARE);
-    // Register a simple block and its BlockItem
-    //@RenderLayer(Layer.CUTOUT)
-    public static final TestBlock FIRST_BLOCK = new TestBlock2(blockProp(Material.WOOD));
+	// The next block will use this builder to build its BlockItem. After that this field will be null
+	public static final Item.Properties FIRST_BLOCK_ITEM_BUILDER = itemProp().rarity(Rarity.RARE);
+	// Register a simple block and its BlockItem
+	//@RenderLayer(Layer.CUTOUT)
+	public static final TestBlock FIRST_BLOCK = new TestBlock2(blockProp(Material.WOOD));
 
-    // Register a simple effect
-    public static final Effect FIRST_EFFECT = new HealthBoostEffect(EffectType.BENEFICIAL, 0xFF0000);
+	// Register a simple effect
+	public static final Effect FIRST_EFFECT = new HealthBoostEffect(EffectType.BENEFICIAL, 0xFF0000);
 
-    // And its potion
-    public static final Potion FIRST_POTION = new Potion(new EffectInstance(FIRST_EFFECT, 1800));
+	// And its potion
+	public static final Potion FIRST_POTION = new Potion(new EffectInstance(FIRST_EFFECT, 1800));
 
-    public static final TileEntityType<?> FIRST_TILE = TileEntityType.Builder.create(TestTile::new, FIRST_BLOCK).build(null);
+	public static final TileEntityType<?> FIRST_TILE = TileEntityType.Builder.create(TestTile::new, FIRST_BLOCK).build(null);
 
-    public static TestModule INSTANCE;
+	public static final TexBlock TEX_BLOCK = new TexBlock(blockProp(Material.WOOD));
+	public static final TileEntityType<?> TEX_TILE = TileEntityType.Builder.create(TexTile::new, TEX_BLOCK).build(null);
 
-    @OnlyIn(Dist.CLIENT)
-    @SubscribeEvent
-    public void onModelBake(ModelBakeEvent event) {
-        Block block = TestModule.FIRST_BLOCK;
-        TextureModel.register(event, block, null, "top");
-        TextureModel.registerInventory(event, block, "top");
-        ModBlockItem.INSTANT_UPDATE_TILES.add(FIRST_TILE);
-    }
+	public static TestModule INSTANCE;
 
-    @Override
-    protected void serverInit(FMLServerStartingEvent event) {
-        Scheduler.register(MyTask.ID, MyTask.class);
-    }
+	@OnlyIn(Dist.CLIENT)
+	@SubscribeEvent
+	public void onModelBake(ModelBakeEvent event) {
+		Block block = TestModule.FIRST_BLOCK;
+		TextureModel.register(event, block, null, "top");
+		TextureModel.registerInventory(event, block, "top");
+		ModBlockItem.INSTANT_UPDATE_TILES.add(FIRST_TILE);
+		block = TestModule.TEX_BLOCK;
+		TextureModel.register(event, block, null, "wool");
+		TextureModel.registerInventory(event, block, "wool");
+		ModBlockItem.INSTANT_UPDATE_TILES.add(TEX_TILE);
+	}
+
+	@Override
+	protected void serverInit(FMLServerStartingEvent event) {
+		Scheduler.register(MyTask.ID, MyTask.class);
+	}
 }

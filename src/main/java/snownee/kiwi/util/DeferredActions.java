@@ -27,71 +27,74 @@ import snownee.kiwi.Kiwi;
 /**
  * @since 3.5.0
  */
-public class DeferredActions {
-    private static boolean executed;
-    private static final Queue<Runnable> actions = new ConcurrentLinkedQueue<>();
+public final class DeferredActions { //TODO brewing
+	private static boolean executed;
+	private static final Queue<Runnable> actions = new ConcurrentLinkedQueue<>();
 
-    static {
-        MinecraftForge.EVENT_BUS.addListener(DeferredActions::execute);
-    }
+	private DeferredActions() {
+	}
 
-    public static void add(Runnable action) {
-        actions.add(action);
-    }
+	static {
+		MinecraftForge.EVENT_BUS.addListener(DeferredActions::execute);
+	}
 
-    public static void setFireInfo(Block blockIn, int encouragement, int flammability) {
-        add(() -> {
-            ((FireBlock) Blocks.FIRE).setFireInfo(blockIn, encouragement, flammability);
-        });
-    }
+	public static void add(Runnable action) {
+		actions.add(action);
+	}
 
-    public static void registerHoeConversion(Block k, BlockState v) {
-        add(() -> {
-            HoeItem.HOE_LOOKUP.put(k, v);
-        });
-    }
+	public static void setFireInfo(Block blockIn, int encouragement, int flammability) {
+		add(() -> {
+			((FireBlock) Blocks.FIRE).setFireInfo(blockIn, encouragement, flammability);
+		});
+	}
 
-    public static void registerAxeConversion(Block k, Block v) {
-        add(() -> {
-            if (AxeItem.BLOCK_STRIPPING_MAP instanceof ImmutableMap) {
-                AxeItem.BLOCK_STRIPPING_MAP = Maps.newHashMap(AxeItem.BLOCK_STRIPPING_MAP);
-            }
-            AxeItem.BLOCK_STRIPPING_MAP.put(k, v);
-        });
-    }
+	public static void registerHoeConversion(Block k, BlockState v) {
+		add(() -> {
+			HoeItem.HOE_LOOKUP.put(k, v);
+		});
+	}
 
-    public static void registerCompostable(float chance, IItemProvider itemIn) {
-        add(() -> {
-            ComposterBlock.CHANCES.put(itemIn.asItem(), chance);
-        });
-    }
+	public static void registerAxeConversion(Block k, Block v) {
+		add(() -> {
+			if (AxeItem.BLOCK_STRIPPING_MAP instanceof ImmutableMap) {
+				AxeItem.BLOCK_STRIPPING_MAP = Maps.newHashMap(AxeItem.BLOCK_STRIPPING_MAP);
+			}
+			AxeItem.BLOCK_STRIPPING_MAP.put(k, v);
+		});
+	}
 
-    public static void registerVillagerPickupable(IItemProvider item) {
-        add(() -> {
-            if (VillagerEntity.ALLOWED_INVENTORY_ITEMS instanceof ImmutableSet) {
-                VillagerEntity.ALLOWED_INVENTORY_ITEMS = Sets.newHashSet(VillagerEntity.ALLOWED_INVENTORY_ITEMS);
-            }
-            VillagerEntity.ALLOWED_INVENTORY_ITEMS.add(item.asItem());
-        });
-    }
+	public static void registerCompostable(float chance, IItemProvider itemIn) {
+		add(() -> {
+			ComposterBlock.CHANCES.put(itemIn.asItem(), chance);
+		});
+	}
 
-    public static void registerVillagerCompostable(IItemProvider item) {
-        add(() -> {
-            if (FarmerWorkTask.field_234014_b_ instanceof ImmutableList) {
-                FarmerWorkTask.field_234014_b_ = Lists.newArrayList(FarmerWorkTask.field_234014_b_);
-            }
-            FarmerWorkTask.field_234014_b_.add(item.asItem());
-        });
-    }
+	public static void registerVillagerPickupable(IItemProvider item) {
+		add(() -> {
+			if (VillagerEntity.ALLOWED_INVENTORY_ITEMS instanceof ImmutableSet) {
+				VillagerEntity.ALLOWED_INVENTORY_ITEMS = Sets.newHashSet(VillagerEntity.ALLOWED_INVENTORY_ITEMS);
+			}
+			VillagerEntity.ALLOWED_INVENTORY_ITEMS.add(item.asItem());
+		});
+	}
 
-    public static void execute(FMLModIdMappingEvent event) {
-        if (executed)
-            return;
-        executed = true;
-        if (actions.isEmpty())
-            return;
-        Kiwi.logger.debug("Executing {} deferred actions", actions.size());
-        actions.forEach(Runnable::run);
-        actions.clear();
-    }
+	public static void registerVillagerCompostable(IItemProvider item) {
+		add(() -> {
+			if (FarmerWorkTask.field_234014_b_ instanceof ImmutableList) {
+				FarmerWorkTask.field_234014_b_ = Lists.newArrayList(FarmerWorkTask.field_234014_b_);
+			}
+			FarmerWorkTask.field_234014_b_.add(item.asItem());
+		});
+	}
+
+	private static void execute(FMLModIdMappingEvent event) {
+		if (executed)
+			return;
+		executed = true;
+		if (actions.isEmpty())
+			return;
+		Kiwi.logger.debug("Executing {} deferred actions", actions.size());
+		actions.forEach(Runnable::run);
+		actions.clear();
+	}
 }

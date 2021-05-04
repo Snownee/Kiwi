@@ -1,19 +1,18 @@
 package snownee.kiwi.test;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.nbt.CompoundNBT;
 import snownee.kiwi.tile.TextureTile;
 
-public class TestTile extends TextureTile {
+public class TexTile extends TextureTile {
 
-	public TestTile() {
-		super(TestModule.FIRST_TILE, "top", "side", "bottom");
+	public TexTile() {
+		super(TestModule.TEX_TILE, "wool");
 	}
 
 	@Override
 	public boolean isMark(String k) {
-		return k.equals("top");
+		return k.equals("wool");
 	}
 
 	@Override
