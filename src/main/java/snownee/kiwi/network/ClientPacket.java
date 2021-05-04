@@ -1,12 +1,10 @@
 package snownee.kiwi.network;
 
-public class ClientPacket extends Packet
-{
+public class ClientPacket extends Packet {
 
-    @Override
-    public void send()
-    {
-        NetworkChannel.sendToServer(this);
-    }
+	@Override
+	public void send() {
+		NetworkChannel.sendToServer(this);
+	}
 
 }

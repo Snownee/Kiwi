@@ -5,8 +5,8 @@ import snownee.kiwi.LoadingContext;
 
 public class TestCondition {
 
-    @LoadingCondition("test")
-    public static boolean test(LoadingContext ctx) {
-        return true;
-    }
+	@LoadingCondition("test")
+	public static boolean test(LoadingContext ctx) {
+		return true;
+	}
 }

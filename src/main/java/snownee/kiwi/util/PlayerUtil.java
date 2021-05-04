@@ -24,69 +24,71 @@ import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.event.ForgeEventFactory;
 
 public final class PlayerUtil {
-    private PlayerUtil() {}
+	private PlayerUtil() {
+	}
 
-    @Nullable
-    public static BlockPos tryPlace(World world, BlockPos pos, Direction side, @Nullable PlayerEntity player, Hand hand, BlockState state, @Nullable ItemStack stack, boolean playSound, boolean skipCollisionCheck) {
-        BlockState worldState = world.getBlockState(pos);
-        if (worldState.getBlock() == Blocks.SNOW && worldState.hasProperty(SnowBlock.LAYERS) && worldState.get(SnowBlock.LAYERS) < 8) {} else if (!state.isReplaceable(new DirectionalPlaceContext(world, pos, side.getOpposite(), stack == null ? ItemStack.EMPTY : stack, side.getOpposite()))) {
-            pos = pos.offset(side);
-        }
-        if (skipCollisionCheck) {
-            return tryPlace(world, pos, side.getOpposite(), player, hand, state, stack, playSound) ? pos : null;
-        }
-        ISelectionContext iselectioncontext = player == null ? ISelectionContext.dummy() : ISelectionContext.forEntity(player);
-        if (world.placedBlockCollides(state, pos, iselectioncontext)) {
-            return tryPlace(world, pos, side.getOpposite(), player, hand, state, stack, playSound) ? pos : null;
-        }
-        return null;
-    }
+	@Nullable
+	public static BlockPos tryPlace(World world, BlockPos pos, Direction side, @Nullable PlayerEntity player, Hand hand, BlockState state, @Nullable ItemStack stack, boolean playSound, boolean skipCollisionCheck) {
+		BlockState worldState = world.getBlockState(pos);
+		if (worldState.getBlock() == Blocks.SNOW && worldState.hasProperty(SnowBlock.LAYERS) && worldState.get(SnowBlock.LAYERS) < 8) {
+		} else if (!state.isReplaceable(new DirectionalPlaceContext(world, pos, side.getOpposite(), stack == null ? ItemStack.EMPTY : stack, side.getOpposite()))) {
+			pos = pos.offset(side);
+		}
+		if (skipCollisionCheck) {
+			return tryPlace(world, pos, side.getOpposite(), player, hand, state, stack, playSound) ? pos : null;
+		}
+		ISelectionContext iselectioncontext = player == null ? ISelectionContext.dummy() : ISelectionContext.forEntity(player);
+		if (world.placedBlockCollides(state, pos, iselectioncontext)) {
+			return tryPlace(world, pos, side.getOpposite(), player, hand, state, stack, playSound) ? pos : null;
+		}
+		return null;
+	}
 
-    public static boolean tryPlace(World world, BlockPos pos, Direction direction, @Nullable PlayerEntity player, Hand hand, BlockState state, @Nullable ItemStack stack, boolean playSound) {
-        if (!world.isBlockModifiable(player, pos)) {
-            return false;
-        }
-        if (player != null && !player.canPlayerEdit(pos, direction, stack)) {
-            return false;
-        }
-        BlockSnapshot blocksnapshot = BlockSnapshot.create(world.getDimensionKey(), world, pos);
-        if (!world.setBlockState(pos, state)) {
-            return false;
-        }
-        if (ForgeEventFactory.onBlockPlace(player, blocksnapshot, direction)) {
-            blocksnapshot.restore(true, false);
-            return false;
-        }
-        world.setBlockState(pos, state, 11);
+	public static boolean tryPlace(World world, BlockPos pos, Direction direction, @Nullable PlayerEntity player, Hand hand, BlockState state, @Nullable ItemStack stack, boolean playSound) {
+		if (!world.isBlockModifiable(player, pos)) {
+			return false;
+		}
+		if (player != null && !player.canPlayerEdit(pos, direction, stack)) {
+			return false;
+		}
+		BlockSnapshot blocksnapshot = BlockSnapshot.create(world.getDimensionKey(), world, pos);
+		if (!world.setBlockState(pos, state)) {
+			return false;
+		}
+		if (ForgeEventFactory.onBlockPlace(player, blocksnapshot, direction)) {
+			blocksnapshot.restore(true, false);
+			return false;
+		}
+		world.setBlockState(pos, state, 11);
 
-        BlockState actualState = world.getBlockState(pos);
+		BlockState actualState = world.getBlockState(pos);
 
-        if (stack != null) {
-            BlockItem.setTileEntityNBT(world, player, pos, stack);
+		if (stack != null) {
+			BlockItem.setTileEntityNBT(world, player, pos, stack);
 
-            if (player != null) {
-                player.addStat(Stats.ITEM_USED.get(stack.getItem()));
-                if (player instanceof ServerPlayerEntity) {
-                    CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayerEntity) player, pos, stack);
-                }
-                actualState.getBlock().onBlockPlacedBy(world, pos, state, player, stack);
-            }
+			if (player != null) {
+				player.addStat(Stats.ITEM_USED.get(stack.getItem()));
+				if (player instanceof ServerPlayerEntity) {
+					CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayerEntity) player, pos, stack);
+				}
+				actualState.getBlock().onBlockPlacedBy(world, pos, state, player, stack);
+			}
 
-            if (player == null || !player.abilities.isCreativeMode) {
-                stack.shrink(1);
-            }
-        }
+			if (player == null || !player.abilities.isCreativeMode) {
+				stack.shrink(1);
+			}
+		}
 
-        if (playSound) {
-            SoundType soundtype = actualState.getBlock().getSoundType(actualState, world, pos, player);
-            world.playSound(player, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
-        }
+		if (playSound) {
+			SoundType soundtype = actualState.getBlock().getSoundType(actualState, world, pos, player);
+			world.playSound(player, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
+		}
 
-        return true;
-    }
+		return true;
+	}
 
-    public static boolean canTouch(PlayerEntity player, BlockPos pos) {
-        double reach = player.getAttribute(ForgeMod.REACH_DISTANCE.get()).getValue();
-        return player.getDistanceSq(pos.getX() + 0.5d, pos.getY() + 0.5d, pos.getZ() + 0.5d) <= reach * reach;
-    }
+	public static boolean canTouch(PlayerEntity player, BlockPos pos) {
+		double reach = player.getAttribute(ForgeMod.REACH_DISTANCE.get()).getValue();
+		return player.getDistanceSq(pos.getX() + 0.5d, pos.getY() + 0.5d, pos.getZ() + 0.5d) <= reach * reach;
+	}
 }

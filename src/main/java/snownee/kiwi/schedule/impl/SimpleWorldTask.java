@@ -14,54 +14,55 @@ import snownee.kiwi.schedule.Task;
 
 public class SimpleWorldTask extends Task<WorldTicker> implements INBTSerializable<CompoundNBT> {
 
-    protected int tick = 0;
-    protected RegistryKey<World> dimension;
-    protected TickEvent.Phase phase;
-    protected IntPredicate function;
+	protected int tick = 0;
+	protected RegistryKey<World> dimension;
+	protected TickEvent.Phase phase;
+	protected IntPredicate function;
 
-    public SimpleWorldTask() {}
+	public SimpleWorldTask() {
+	}
 
-    public SimpleWorldTask(World world, TickEvent.Phase phase, IntPredicate function) {
-        this(world.getDimensionKey(), phase, function);
-    }
+	public SimpleWorldTask(World world, TickEvent.Phase phase, IntPredicate function) {
+		this(world.getDimensionKey(), phase, function);
+	}
 
-    public SimpleWorldTask(RegistryKey<World> dimensionType, TickEvent.Phase phase, IntPredicate function) {
-        this.dimension = dimensionType;
-        this.phase = phase;
-        this.function = function;
-    }
+	public SimpleWorldTask(RegistryKey<World> dimensionType, TickEvent.Phase phase, IntPredicate function) {
+		this.dimension = dimensionType;
+		this.phase = phase;
+		this.function = function;
+	}
 
-    @Override
-    public boolean tick(WorldTicker ticker) {
-        return function.test(++tick);
-    }
+	@Override
+	public boolean tick(WorldTicker ticker) {
+		return function.test(++tick);
+	}
 
-    @Override
-    public WorldTicker ticker() {
-        return WorldTicker.get(dimension, phase);
-    }
+	@Override
+	public WorldTicker ticker() {
+		return WorldTicker.get(dimension, phase);
+	}
 
-    @Override
-    public boolean shouldSave() {
-        return getClass() != SimpleWorldTask.class;
-    }
+	@Override
+	public boolean shouldSave() {
+		return getClass() != SimpleWorldTask.class;
+	}
 
-    @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT data = new CompoundNBT();
-        data.putInt("tick", tick);
-        World.CODEC.encodeStart(NBTDynamicOps.INSTANCE, dimension).resultOrPartial(Kiwi.logger::error).ifPresent(nbt -> {
-            data.put("world", nbt);
-        });
-        data.putBoolean("start", phase == Phase.START);
-        return data;
-    }
+	@Override
+	public CompoundNBT serializeNBT() {
+		CompoundNBT data = new CompoundNBT();
+		data.putInt("tick", tick);
+		World.CODEC.encodeStart(NBTDynamicOps.INSTANCE, dimension).resultOrPartial(Kiwi.logger::error).ifPresent(nbt -> {
+			data.put("world", nbt);
+		});
+		data.putBoolean("start", phase == Phase.START);
+		return data;
+	}
 
-    @Override
-    public void deserializeNBT(CompoundNBT nbt) {
-        dimension = World.CODEC.parse(NBTDynamicOps.INSTANCE, nbt.get("world")).resultOrPartial(Kiwi.logger::error).orElse(World.OVERWORLD);
-        tick = nbt.getInt("tick");
-        phase = nbt.getBoolean("start") ? Phase.START : Phase.END;
-    }
+	@Override
+	public void deserializeNBT(CompoundNBT nbt) {
+		dimension = World.CODEC.parse(NBTDynamicOps.INSTANCE, nbt.get("world")).resultOrPartial(Kiwi.logger::error).orElse(World.OVERWORLD);
+		tick = nbt.getInt("tick");
+		phase = nbt.getBoolean("start") ? Phase.START : Phase.END;
+	}
 
 }

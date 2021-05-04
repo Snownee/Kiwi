@@ -11,40 +11,41 @@ import net.minecraftforge.fml.config.ModConfig;
 @Target(ElementType.TYPE)
 public @interface KiwiConfig {
 
-    /**
+	/**
      * File name of this config. modid-type.toml by default
      */
-    String value() default "";
+	String value() default "";
 
-    ModConfig.Type type() default ModConfig.Type.COMMON;
+	ModConfig.Type type() default ModConfig.Type.COMMON;
 
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.FIELD)
-    @interface Path {
-        String value();
-    }
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.FIELD)
+	@interface Path {
+		String value();
+	}
 
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.FIELD)
-    @interface Comment {
-        String[] value();
-    }
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.FIELD)
+	@interface Comment {
+		String[] value();
+	}
 
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.FIELD)
-    @interface Translation {
-        String value();
-    }
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.FIELD)
+	@interface Translation {
+		String value();
+	}
 
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.FIELD)
-    @interface Range {
-        double min() default Double.NaN;
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.FIELD)
+	@interface Range {
+		double min() default Double.NaN;
 
-        double max() default Double.NaN;
-    }
+		double max() default Double.NaN;
+	}
 
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.FIELD)
-    @interface WorldRestart {}
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.FIELD)
+	@interface WorldRestart {
+	}
 }

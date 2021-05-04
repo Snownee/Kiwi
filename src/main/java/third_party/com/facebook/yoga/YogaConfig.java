@@ -14,31 +14,32 @@ import third_party.com.facebook.yoga.YogaDelegates.YogaNodeCloned;
 
 public class YogaConfig {
 
-    public boolean[] ExperimentalFeatures = new boolean[] { false };
-    public boolean UseWebDefaults;
-    public boolean UseLegacyStretchBehaviour;
-    public boolean ShouldDiffLayoutWithoutLegacyStretchBehaviour;
-    public float PointScaleFactor = 1.0F;
-    public YogaNodeCloned OnNodeCloned;
+	public boolean[] ExperimentalFeatures = new boolean[] { false };
+	public boolean UseWebDefaults;
+	public boolean UseLegacyStretchBehaviour;
+	public boolean ShouldDiffLayoutWithoutLegacyStretchBehaviour;
+	public float PointScaleFactor = 1.0F;
+	public YogaNodeCloned OnNodeCloned;
 
-    public YogaConfig() {}
+	public YogaConfig() {
+	}
 
-    public YogaConfig(YogaConfig oldConfig) {
-        ExperimentalFeatures = new boolean[oldConfig.ExperimentalFeatures.length];
+	public YogaConfig(YogaConfig oldConfig) {
+		ExperimentalFeatures = new boolean[oldConfig.ExperimentalFeatures.length];
 
-        ExperimentalFeatures = Arrays.copyOf(oldConfig.ExperimentalFeatures, ExperimentalFeatures.length);
-        UseWebDefaults = oldConfig.UseWebDefaults;
-        UseLegacyStretchBehaviour = oldConfig.UseLegacyStretchBehaviour;
-        ShouldDiffLayoutWithoutLegacyStretchBehaviour = oldConfig.ShouldDiffLayoutWithoutLegacyStretchBehaviour;
-        PointScaleFactor = oldConfig.PointScaleFactor;
-        OnNodeCloned = oldConfig.OnNodeCloned;
-    }
+		ExperimentalFeatures = Arrays.copyOf(oldConfig.ExperimentalFeatures, ExperimentalFeatures.length);
+		UseWebDefaults = oldConfig.UseWebDefaults;
+		UseLegacyStretchBehaviour = oldConfig.UseLegacyStretchBehaviour;
+		ShouldDiffLayoutWithoutLegacyStretchBehaviour = oldConfig.ShouldDiffLayoutWithoutLegacyStretchBehaviour;
+		PointScaleFactor = oldConfig.PointScaleFactor;
+		OnNodeCloned = oldConfig.OnNodeCloned;
+	}
 
-    public boolean IsExperimentalFeatureEnabled(YogaExperimentalFeature feature) {
-        return ExperimentalFeatures[feature.ordinal()];
-    }
+	public boolean IsExperimentalFeatureEnabled(YogaExperimentalFeature feature) {
+		return ExperimentalFeatures[feature.ordinal()];
+	}
 
-    public YogaConfig DeepClone() {
-        return new YogaConfig(this);
-    }
+	public YogaConfig DeepClone() {
+		return new YogaConfig(this);
+	}
 }

@@ -36,40 +36,40 @@ import net.minecraft.util.ResourceLocation;
 import snownee.kiwi.Kiwi;
 
 public class KiwiSpriteUploader extends SpriteUploader {
-    public static final ResourceLocation LOCATION_GUI_TEXTURE = new ResourceLocation(Kiwi.MODID, "textures/atlas/gui.png");
-    public static final KiwiSpriteUploader GUI_ATLAS = new KiwiSpriteUploader(Minecraft.getInstance().textureManager, LOCATION_GUI_TEXTURE);
+	public static final ResourceLocation LOCATION_GUI_TEXTURE = new ResourceLocation(Kiwi.MODID, "textures/atlas/gui.png");
+	public static final KiwiSpriteUploader GUI_ATLAS = new KiwiSpriteUploader(Minecraft.getInstance().textureManager, LOCATION_GUI_TEXTURE);
 
-    private final Set<ResourceLocation> registeredSprites = new HashSet<>();
-    private final ResourceLocation atlasLocation;
+	private final Set<ResourceLocation> registeredSprites = new HashSet<>();
+	private final ResourceLocation atlasLocation;
 
-    public KiwiSpriteUploader(TextureManager textureManager, ResourceLocation atlasLocation, String prefixIn) {
-        super(textureManager, atlasLocation, prefixIn);
-        this.atlasLocation = atlasLocation;
-    }
+	public KiwiSpriteUploader(TextureManager textureManager, ResourceLocation atlasLocation, String prefixIn) {
+		super(textureManager, atlasLocation, prefixIn);
+		this.atlasLocation = atlasLocation;
+	}
 
-    public KiwiSpriteUploader(TextureManager textureManager, ResourceLocation atlasLocation) {
-        this(textureManager, atlasLocation, "gui");
-    }
+	public KiwiSpriteUploader(TextureManager textureManager, ResourceLocation atlasLocation) {
+		this(textureManager, atlasLocation, "gui");
+	}
 
-    public void registerSprite(ResourceLocation location) {
-        registeredSprites.add(location);
-    }
+	public void registerSprite(ResourceLocation location) {
+		registeredSprites.add(location);
+	}
 
-    @Override
-    public Stream<ResourceLocation> getResourceLocations() {
-        return registeredSprites.stream();
-    }
+	@Override
+	public Stream<ResourceLocation> getResourceLocations() {
+		return registeredSprites.stream();
+	}
 
-    /**
-     * Overridden to make it public
-     */
-    @Override
-    public TextureAtlasSprite getSprite(ResourceLocation location) {
-        return super.getSprite(location);
-    }
+	/**
+	 * Overridden to make it public
+	 */
+	@Override
+	public TextureAtlasSprite getSprite(ResourceLocation location) {
+		return super.getSprite(location);
+	}
 
-    public ResourceLocation getLocation() {
-        return atlasLocation;
-    }
+	public ResourceLocation getLocation() {
+		return atlasLocation;
+	}
 
 }

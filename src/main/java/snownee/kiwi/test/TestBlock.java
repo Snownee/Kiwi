@@ -22,64 +22,53 @@ import snownee.kiwi.tile.TextureTile;
 
 // fill ~-40 ~ ~-40 ~40 ~ ~40 kiwi:tex_block
 @RenderLayer(Layer.CUTOUT)
-public class TestBlock extends StairsBlock
-{
+public class TestBlock extends StairsBlock {
 
-    @SuppressWarnings("deprecation")
-    public TestBlock(Properties builder)
-    {
-        super(Blocks.STONE.getDefaultState(), builder);
-    }
+	@SuppressWarnings("deprecation")
+	public TestBlock(Properties builder) {
+		super(Blocks.STONE.getDefaultState(), builder);
+	}
 
-    @Override
-    public boolean hasTileEntity(BlockState state)
-    {
-        return true;
-    }
+	@Override
+	public boolean hasTileEntity(BlockState state) {
+		return true;
+	}
 
-    @Override
-    public TileEntity createTileEntity(BlockState state, IBlockReader world)
-    {
-        return new TestTile();
-    }
+	@Override
+	public TileEntity createTileEntity(BlockState state, IBlockReader world) {
+		return new TestTile();
+	}
 
-    @Override
-    public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit)
-    {
-        if (worldIn.isRemote)
-        {
-            return ActionResultType.SUCCESS;
-        }
-        TileEntity tile = worldIn.getTileEntity(pos);
-        ItemStack stack = player.getHeldItem(handIn);
-        if (tile instanceof TextureTile && !stack.isEmpty())
-        {
-            if (FullBlockIngredient.isFullBlock(stack))
-            {
-                TextureTile textureTile = (TextureTile) tile;
-                BlockState state2 = ((BlockItem) stack.getItem()).getBlock().getDefaultState();
-                textureTile.setTexture("top", state2);
-                textureTile.setTexture("side", state2);
-                textureTile.setTexture("bottom", state2);
-                textureTile.refresh();
-            }
-        }
-        return ActionResultType.SUCCESS;
-    }
+	@Override
+	public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
+		if (worldIn.isRemote) {
+			return ActionResultType.SUCCESS;
+		}
+		TileEntity tile = worldIn.getTileEntity(pos);
+		ItemStack stack = player.getHeldItem(handIn);
+		if (tile instanceof TextureTile && !stack.isEmpty()) {
+			if (FullBlockIngredient.isFullBlock(stack)) {
+				TextureTile textureTile = (TextureTile) tile;
+				BlockState state2 = ((BlockItem) stack.getItem()).getBlock().getDefaultState();
+				textureTile.setTexture("top", state2);
+				textureTile.setTexture("side", state2);
+				textureTile.setTexture("bottom", state2);
+				textureTile.refresh();
+			}
+		}
+		return ActionResultType.SUCCESS;
+	}
 
-    @Override
-    public void onReplaced(BlockState state, World worldIn, BlockPos pos, BlockState newState, boolean isMoving)
-    {
-        if (state.hasTileEntity() && state.getBlock() != newState.getBlock())
-        {
-            worldIn.removeTileEntity(pos);
-        }
-        super.onReplaced(state, worldIn, pos, newState, isMoving);
-    }
+	@Override
+	public void onReplaced(BlockState state, World worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
+		if (state.hasTileEntity() && state.getBlock() != newState.getBlock()) {
+			worldIn.removeTileEntity(pos);
+		}
+		super.onReplaced(state, worldIn, pos, newState, isMoving);
+	}
 
-    @Override
-    public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player)
-    {
-        return ModBlock.pickBlock(state, target, world, pos, player);
-    }
+	@Override
+	public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
+		return ModBlock.pickBlock(state, target, world, pos, player);
+	}
 }

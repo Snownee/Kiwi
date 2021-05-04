@@ -9,13 +9,5 @@ package third_party.com.facebook.yoga;
  */
 
 public enum YogaEdge {
-    Left,
-    Top,
-    Right,
-    Bottom,
-    Start,
-    End,
-    Horizontal,
-    Vertical,
-    All,
+	Left, Top, Right, Bottom, Start, End, Horizontal, Vertical, All,
 }

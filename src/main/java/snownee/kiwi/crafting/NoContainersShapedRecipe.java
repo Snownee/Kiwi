@@ -13,34 +13,34 @@ import net.minecraftforge.registries.ForgeRegistryEntry;
 import snownee.kiwi.data.DataModule;
 
 public class NoContainersShapedRecipe extends ShapedRecipe {
-    public NoContainersShapedRecipe(ShapedRecipe rawRecipe) {
-        super(rawRecipe.getId(), rawRecipe.getGroup(), rawRecipe.getRecipeWidth(), rawRecipe.getRecipeHeight(), rawRecipe.getIngredients(), rawRecipe.getRecipeOutput());
-    }
+	public NoContainersShapedRecipe(ShapedRecipe rawRecipe) {
+		super(rawRecipe.getId(), rawRecipe.getGroup(), rawRecipe.getRecipeWidth(), rawRecipe.getRecipeHeight(), rawRecipe.getIngredients(), rawRecipe.getRecipeOutput());
+	}
 
-    @Override
-    public NonNullList<ItemStack> getRemainingItems(CraftingInventory inv) {
-        return NonNullList.create();
-    }
+	@Override
+	public NonNullList<ItemStack> getRemainingItems(CraftingInventory inv) {
+		return NonNullList.create();
+	}
 
-    @Override
-    public IRecipeSerializer<?> getSerializer() {
-        return DataModule.SHAPED_NO_CONTAINERS;
-    }
+	@Override
+	public IRecipeSerializer<?> getSerializer() {
+		return DataModule.SHAPED_NO_CONTAINERS;
+	}
 
-    public static class Serializer extends ForgeRegistryEntry<IRecipeSerializer<?>> implements IRecipeSerializer<NoContainersShapedRecipe> {
-        @Override
-        public NoContainersShapedRecipe read(ResourceLocation recipeId, JsonObject json) {
-            return new NoContainersShapedRecipe(IRecipeSerializer.CRAFTING_SHAPED.read(recipeId, json));
-        }
+	public static class Serializer extends ForgeRegistryEntry<IRecipeSerializer<?>> implements IRecipeSerializer<NoContainersShapedRecipe> {
+		@Override
+		public NoContainersShapedRecipe read(ResourceLocation recipeId, JsonObject json) {
+			return new NoContainersShapedRecipe(IRecipeSerializer.CRAFTING_SHAPED.read(recipeId, json));
+		}
 
-        @Override
-        public NoContainersShapedRecipe read(ResourceLocation recipeId, PacketBuffer buffer) {
-            return new NoContainersShapedRecipe(IRecipeSerializer.CRAFTING_SHAPED.read(recipeId, buffer));
-        }
+		@Override
+		public NoContainersShapedRecipe read(ResourceLocation recipeId, PacketBuffer buffer) {
+			return new NoContainersShapedRecipe(IRecipeSerializer.CRAFTING_SHAPED.read(recipeId, buffer));
+		}
 
-        @Override
-        public void write(PacketBuffer buffer, NoContainersShapedRecipe recipe) {
-            IRecipeSerializer.CRAFTING_SHAPED.write(buffer, recipe);
-        }
-    }
+		@Override
+		public void write(PacketBuffer buffer, NoContainersShapedRecipe recipe) {
+			IRecipeSerializer.CRAFTING_SHAPED.write(buffer, recipe);
+		}
+	}
 }

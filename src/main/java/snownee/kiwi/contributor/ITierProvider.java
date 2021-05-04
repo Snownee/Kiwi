@@ -13,57 +13,57 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.kiwi.contributor.client.RewardLayer;
 
 public interface ITierProvider {
-    String getAuthor();
+	String getAuthor();
 
-    Set<String> getTiers();
+	Set<String> getTiers();
 
-    List<String> getRenderableTiers();
+	List<String> getRenderableTiers();
 
-    Set<String> getPlayerTiers(String playerName);
+	Set<String> getPlayerTiers(String playerName);
 
-    default CompletableFuture<Void> refresh() {
-        return CompletableFuture.completedFuture(null);
-    }
+	default CompletableFuture<Void> refresh() {
+		return CompletableFuture.completedFuture(null);
+	}
 
-    @OnlyIn(Dist.CLIENT)
-    RewardLayer createRenderer(IEntityRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> entityRenderer, String tier);
+	@OnlyIn(Dist.CLIENT)
+	RewardLayer createRenderer(IEntityRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> entityRenderer, String tier);
 
-    default boolean isContributor(String playerName) {
-        return !getPlayerTiers(playerName).isEmpty();
-    }
+	default boolean isContributor(String playerName) {
+		return !getPlayerTiers(playerName).isEmpty();
+	}
 
-    default boolean isContributor(String playerName, String tier) {
-        return getPlayerTiers(playerName).contains(tier);
-    }
+	default boolean isContributor(String playerName, String tier) {
+		return getPlayerTiers(playerName).contains(tier);
+	}
 
-    public static enum Empty implements ITierProvider {
-        INSTANCE;
+	public static enum Empty implements ITierProvider {
+		INSTANCE;
 
-        @Override
-        public String getAuthor() {
-            return "";
-        }
+		@Override
+		public String getAuthor() {
+			return "";
+		}
 
-        @Override
-        public Set<String> getTiers() {
-            return Collections.EMPTY_SET;
-        }
+		@Override
+		public Set<String> getTiers() {
+			return Collections.EMPTY_SET;
+		}
 
-        @Override
-        public Set<String> getPlayerTiers(String playerName) {
-            return Collections.EMPTY_SET;
-        }
+		@Override
+		public Set<String> getPlayerTiers(String playerName) {
+			return Collections.EMPTY_SET;
+		}
 
-        @Override
-        public List<String> getRenderableTiers() {
-            return Collections.EMPTY_LIST;
-        }
+		@Override
+		public List<String> getRenderableTiers() {
+			return Collections.EMPTY_LIST;
+		}
 
-        @OnlyIn(Dist.CLIENT)
-        @Override
-        public RewardLayer createRenderer(IEntityRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> entityRenderer, String tier) {
-            return null;
-        }
+		@OnlyIn(Dist.CLIENT)
+		@Override
+		public RewardLayer createRenderer(IEntityRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> entityRenderer, String tier) {
+			return null;
+		}
 
-    }
+	}
 }

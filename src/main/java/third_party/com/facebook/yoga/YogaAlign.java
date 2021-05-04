@@ -9,12 +9,5 @@ package third_party.com.facebook.yoga;
  */
 
 public enum YogaAlign {
-    Auto,
-    FlexStart,
-    Center,
-    FlexEnd,
-    Stretch,
-    Baseline,
-    SpaceBetween,
-    SpaceAround,
+	Auto, FlexStart, Center, FlexEnd, Stretch, Baseline, SpaceBetween, SpaceAround,
 }

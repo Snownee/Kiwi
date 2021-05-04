@@ -9,18 +9,18 @@ package third_party.com.facebook.yoga;
  */
 
 public final class YogaDelegates {
-    @FunctionalInterface
-    public interface YogaMeasure {
-        YogaSize apply(YogaNode node, float width, YogaMeasureMode widthMode, float height, YogaMeasureMode heightMode);
-    }
+	@FunctionalInterface
+	public interface YogaMeasure {
+		YogaSize apply(YogaNode node, float width, YogaMeasureMode widthMode, float height, YogaMeasureMode heightMode);
+	}
 
-    @FunctionalInterface
-    public interface YogaBaseline {
-        float apply(YogaNode node, float width, float height);
-    }
+	@FunctionalInterface
+	public interface YogaBaseline {
+		float apply(YogaNode node, float width, float height);
+	}
 
-    @FunctionalInterface
-    public interface YogaNodeCloned {
-        void apply(YogaNode oldNode, YogaNode newNode, YogaNode owner, int childIndex);
-    }
+	@FunctionalInterface
+	public interface YogaNodeCloned {
+		void apply(YogaNode oldNode, YogaNode newNode, YogaNode owner, int childIndex);
+	}
 }

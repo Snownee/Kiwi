@@ -9,7 +9,5 @@ package third_party.com.facebook.yoga;
  */
 
 public enum YogaDirection {
-    Inherit,
-    LeftToRight,
-    RightToLeft,
+	Inherit, LeftToRight, RightToLeft,
 }

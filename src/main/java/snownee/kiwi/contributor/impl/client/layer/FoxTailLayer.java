@@ -23,32 +23,32 @@ import snownee.kiwi.contributor.impl.client.model.FoxTailModel;
 
 @OnlyIn(Dist.CLIENT)
 public class FoxTailLayer extends RewardLayer {
-    private static final ResourceLocation FOX = new ResourceLocation("textures/entity/fox/fox.png");
-    private static final ResourceLocation SNOW_FOX = new ResourceLocation("textures/entity/fox/snow_fox.png");
-    private final FoxTailModel<AbstractClientPlayerEntity> modelFoxTail;
+	private static final ResourceLocation FOX = new ResourceLocation("textures/entity/fox/fox.png");
+	private static final ResourceLocation SNOW_FOX = new ResourceLocation("textures/entity/fox/snow_fox.png");
+	private final FoxTailModel<AbstractClientPlayerEntity> modelFoxTail;
 
-    public FoxTailLayer(IEntityRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> entityRendererIn) {
-        super(entityRendererIn);
-        modelFoxTail = new FoxTailModel<>(entityRendererIn.getEntityModel());
-    }
+	public FoxTailLayer(IEntityRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> entityRendererIn) {
+		super(entityRendererIn);
+		modelFoxTail = new FoxTailModel<>(entityRendererIn.getEntityModel());
+	}
 
-    @Override
-    public void render(MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, AbstractClientPlayerEntity entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
-        if (entitylivingbaseIn.isInvisible() || entitylivingbaseIn.isSleeping()) {
-            return;
-        }
-        ItemStack itemstack = entitylivingbaseIn.getItemStackFromSlot(EquipmentSlotType.CHEST);
-        if (itemstack.getItem() instanceof ElytraItem) {
-            return;
-        }
-        String name = entitylivingbaseIn.getName().getString().toLowerCase(Locale.ENGLISH);
-        ResourceLocation texture = name.contains("snow") || name.contains("xue") || name.contains("yuki") ? SNOW_FOX : FOX;
-        matrixStackIn.push();
-        modelFoxTail.isChild = entitylivingbaseIn.isChild();
-        modelFoxTail.setRotationAngles(entitylivingbaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-        IVertexBuilder ivertexbuilder = ItemRenderer.getBuffer(bufferIn, RenderType.getEntitySolid(texture), false, false);
-        modelFoxTail.render(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
-        matrixStackIn.pop();
-    }
+	@Override
+	public void render(MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, AbstractClientPlayerEntity entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
+		if (entitylivingbaseIn.isInvisible() || entitylivingbaseIn.isSleeping()) {
+			return;
+		}
+		ItemStack itemstack = entitylivingbaseIn.getItemStackFromSlot(EquipmentSlotType.CHEST);
+		if (itemstack.getItem() instanceof ElytraItem) {
+			return;
+		}
+		String name = entitylivingbaseIn.getName().getString().toLowerCase(Locale.ENGLISH);
+		ResourceLocation texture = name.contains("snow") || name.contains("xue") || name.contains("yuki") ? SNOW_FOX : FOX;
+		matrixStackIn.push();
+		modelFoxTail.isChild = entitylivingbaseIn.isChild();
+		modelFoxTail.setRotationAngles(entitylivingbaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
+		IVertexBuilder ivertexbuilder = ItemRenderer.getBuffer(bufferIn, RenderType.getEntitySolid(texture), false, false);
+		modelFoxTail.render(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+		matrixStackIn.pop();
+	}
 
 }

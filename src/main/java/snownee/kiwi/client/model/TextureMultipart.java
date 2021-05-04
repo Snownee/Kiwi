@@ -35,119 +35,98 @@ import net.minecraftforge.client.model.data.IModelData;
  */
 @SuppressWarnings("deprecation")
 @OnlyIn(Dist.CLIENT)
-public class TextureMultipart implements IDynamicBakedModel
-{
-    private final List<Pair<Predicate<BlockState>, IBakedModel>> selectors;
-    private final IBakedModel originalBaked;
-    private final Map<BlockState, BitSet> field_210277_g = new Object2ObjectOpenCustomHashMap<>(Util.identityHashStrategy());
+public class TextureMultipart implements IDynamicBakedModel {
+	private final List<Pair<Predicate<BlockState>, IBakedModel>> selectors;
+	private final IBakedModel originalBaked;
+	private final Map<BlockState, BitSet> field_210277_g = new Object2ObjectOpenCustomHashMap<>(Util.identityHashStrategy());
 
-    public TextureMultipart(List<Pair<Predicate<BlockState>, IBakedModel>> p_i48273_1_)
-    {
-        this.selectors = p_i48273_1_;
-        originalBaked = p_i48273_1_.iterator().next().getRight();
-    }
+	public TextureMultipart(List<Pair<Predicate<BlockState>, IBakedModel>> p_i48273_1_) {
+		this.selectors = p_i48273_1_;
+		originalBaked = p_i48273_1_.iterator().next().getRight();
+	}
 
-    @Override
-    public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, Random rand, IModelData extraData)
-    {
-        if (state == null)
-        {
-            return Collections.emptyList();
-        }
-        else
-        {
-            BitSet bitset = this.field_210277_g.get(state);
-            if (bitset == null)
-            {
-                bitset = new BitSet();
+	@Override
+	public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, Random rand, IModelData extraData) {
+		if (state == null) {
+			return Collections.emptyList();
+		} else {
+			BitSet bitset = this.field_210277_g.get(state);
+			if (bitset == null) {
+				bitset = new BitSet();
 
-                for (int i = 0; i < this.selectors.size(); ++i)
-                {
-                    Pair<Predicate<BlockState>, IBakedModel> pair = this.selectors.get(i);
-                    if (pair.getLeft().test(state))
-                    {
-                        bitset.set(i);
-                    }
-                }
+				for (int i = 0; i < this.selectors.size(); ++i) {
+					Pair<Predicate<BlockState>, IBakedModel> pair = this.selectors.get(i);
+					if (pair.getLeft().test(state)) {
+						bitset.set(i);
+					}
+				}
 
-                this.field_210277_g.put(state, bitset);
-            }
+				this.field_210277_g.put(state, bitset);
+			}
 
-            List<BakedQuad> list = Lists.newArrayList();
-            long k = rand.nextLong();
+			List<BakedQuad> list = Lists.newArrayList();
+			long k = rand.nextLong();
 
-            for (int j = 0; j < bitset.length(); ++j)
-            {
-                if (bitset.get(j))
-                {
-                    list.addAll(this.selectors.get(j).getRight().getQuads(state, side, new Random(k), extraData));
-                }
-            }
+			for (int j = 0; j < bitset.length(); ++j) {
+				if (bitset.get(j)) {
+					list.addAll(this.selectors.get(j).getRight().getQuads(state, side, new Random(k), extraData));
+				}
+			}
 
-            return list;
-        }
-    }
+			return list;
+		}
+	}
 
-    @Override
-    public boolean isAmbientOcclusion()
-    {
-        return originalBaked.isAmbientOcclusion();
-    }
+	@Override
+	public boolean isAmbientOcclusion() {
+		return originalBaked.isAmbientOcclusion();
+	}
 
-    @Override
-    public boolean isGui3d()
-    {
-        return originalBaked.isGui3d();
-    }
+	@Override
+	public boolean isGui3d() {
+		return originalBaked.isGui3d();
+	}
 
-    @Override
-    public boolean isBuiltInRenderer()
-    {
-        return false;
-    }
+	@Override
+	public boolean isBuiltInRenderer() {
+		return false;
+	}
 
-    @Override
-    public TextureAtlasSprite getParticleTexture()
-    {
-        return originalBaked.getParticleTexture();
-    }
+	@Override
+	public TextureAtlasSprite getParticleTexture() {
+		return originalBaked.getParticleTexture();
+	}
 
-    @Override
-    public TextureAtlasSprite getParticleTexture(IModelData data)
-    {
-        return originalBaked.getParticleTexture(data);
-    }
+	@Override
+	public TextureAtlasSprite getParticleTexture(IModelData data) {
+		return originalBaked.getParticleTexture(data);
+	}
 
-    @Override
-    public ItemCameraTransforms getItemCameraTransforms()
-    {
-        return originalBaked.getItemCameraTransforms();
-    }
+	@Override
+	public ItemCameraTransforms getItemCameraTransforms() {
+		return originalBaked.getItemCameraTransforms();
+	}
 
-    @Override
-    public ItemOverrideList getOverrides()
-    {
-        return originalBaked.getOverrides();
-    }
+	@Override
+	public ItemOverrideList getOverrides() {
+		return originalBaked.getOverrides();
+	}
 
-    @OnlyIn(Dist.CLIENT)
-    public static class Builder
-    {
-        private final List<Pair<Predicate<BlockState>, IBakedModel>> selectors = Lists.newArrayList();
+	@OnlyIn(Dist.CLIENT)
+	public static class Builder {
+		private final List<Pair<Predicate<BlockState>, IBakedModel>> selectors = Lists.newArrayList();
 
-        public void putModel(Predicate<BlockState> predicate, IBakedModel model)
-        {
-            this.selectors.add(Pair.of(predicate, model));
-        }
+		public void putModel(Predicate<BlockState> predicate, IBakedModel model) {
+			this.selectors.add(Pair.of(predicate, model));
+		}
 
-        public IBakedModel build()
-        {
-            return new TextureMultipart(this.selectors);
-        }
-    }
+		public IBakedModel build() {
+			return new TextureMultipart(this.selectors);
+		}
+	}
 
-    @Override
-    public boolean isSideLit() {
-        return originalBaked.isSideLit();
-    }
+	@Override
+	public boolean isSideLit() {
+		return originalBaked.isSideLit();
+	}
 }

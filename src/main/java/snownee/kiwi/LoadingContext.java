@@ -4,9 +4,9 @@ import net.minecraft.util.ResourceLocation;
 
 public class LoadingContext {
 
-    public final ResourceLocation id;
+	public final ResourceLocation id;
 
-    public LoadingContext(ResourceLocation id) {
-        this.id = id;
-    }
+	public LoadingContext(ResourceLocation id) {
+		this.id = id;
+	}
 }

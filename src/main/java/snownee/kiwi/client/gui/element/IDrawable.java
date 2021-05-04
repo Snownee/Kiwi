@@ -34,14 +34,14 @@ package snownee.kiwi.client.gui.element;
  */
 public interface IDrawable {
 
-    int getWidth();
+	int getWidth();
 
-    int getHeight();
+	int getHeight();
 
-    default void draw() {
-        draw(0, 0);
-    }
+	default void draw() {
+		draw(0, 0);
+	}
 
-    void draw(int xOffset, int yOffset);
+	void draw(int xOffset, int yOffset);
 
 }

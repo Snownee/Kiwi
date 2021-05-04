@@ -15,22 +15,22 @@ import snownee.kiwi.Name;
 @KiwiModule(value = "test2", dependencies = "forge;@kiwi:test")
 @KiwiModule.Optional(disabledByDefault = true)
 public class TestModule2 extends AbstractModule {
-    public static final INamedTag<EntityType<?>> BAT = entityTag(Kiwi.MODID, "bat");
+	public static final INamedTag<EntityType<?>> BAT = entityTag(Kiwi.MODID, "bat");
 
-    @Name("kiwi:test_item")
-    public static final TestItem FIRST_ITEM = new TestItem(itemProp().rarity(Rarity.EPIC)) {
-        @Override
-        public boolean hasEffect(ItemStack stack) {
-            return true;
-        }
-    };
+	@Name("kiwi:test_item")
+	public static final TestItem FIRST_ITEM = new TestItem(itemProp().rarity(Rarity.EPIC)) {
+		@Override
+		public boolean hasEffect(ItemStack stack) {
+			return true;
+		}
+	};
 
-    static {
-        Kiwi.applyObjectHolder(ForgeRegistries.ITEMS, new ResourceLocation(Kiwi.MODID, "first_item"));
-    }
+	static {
+		Kiwi.applyObjectHolder(ForgeRegistries.ITEMS, new ResourceLocation(Kiwi.MODID, "first_item"));
+	}
 
-    @Override
-    protected void init(FMLCommonSetupEvent event) {
-        System.out.println(1);
-    }
+	@Override
+	protected void init(FMLCommonSetupEvent event) {
+		System.out.println(1);
+	}
 }

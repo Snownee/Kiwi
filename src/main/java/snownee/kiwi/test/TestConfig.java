@@ -13,23 +13,23 @@ import snownee.kiwi.config.KiwiConfig.WorldRestart;
 //@KiwiConfig(type = ModConfig.Type.COMMON)
 public class TestConfig {
 
-    public static int intValue = 5;
+	public static int intValue = 5;
 
-    @Range(min = 0, max = 114514)
-    public static long longValue = 6;
+	@Range(min = 0, max = 114514)
+	public static long longValue = 6;
 
-    @Range(min = 0, max = 10.5)
-    public static float floatValue = 7.5f;
+	@Range(min = 0, max = 10.5)
+	public static float floatValue = 7.5f;
 
-    @Path("Malay.P")
-    @Comment("\\ MalayP /")
-    public static String strValue = "MalayP";
+	@Path("Malay.P")
+	@Comment("\\ MalayP /")
+	public static String strValue = "MalayP";
 
-    public static boolean booleanValue = true;
+	public static boolean booleanValue = true;
 
-    public static List<String> listValue = Arrays.asList("test");
+	public static List<String> listValue = Arrays.asList("test");
 
-    @WorldRestart
-    public static ModConfig.Type enumValue = ModConfig.Type.COMMON;
+	@WorldRestart
+	public static ModConfig.Type enumValue = ModConfig.Type.COMMON;
 
 }

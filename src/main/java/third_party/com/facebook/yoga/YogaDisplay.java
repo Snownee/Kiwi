@@ -9,6 +9,5 @@ package third_party.com.facebook.yoga;
  */
 
 public enum YogaDisplay {
-    Flex,
-    None,
+	Flex, None,
 }

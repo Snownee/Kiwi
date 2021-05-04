@@ -26,33 +26,33 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 import snownee.kiwi.KiwiClientConfig;
 
 public class ModBlockItem extends BlockItem {
-    public static final Set<TileEntityType<?>> INSTANT_UPDATE_TILES = FMLEnvironment.dist == Dist.CLIENT ? Sets.newHashSet() : null;
+	public static final Set<TileEntityType<?>> INSTANT_UPDATE_TILES = FMLEnvironment.dist == Dist.CLIENT ? Sets.newHashSet() : null;
 
-    public ModBlockItem(Block block, Item.Properties builder) {
-        super(block, builder);
-    }
+	public ModBlockItem(Block block, Item.Properties builder) {
+		super(block, builder);
+	}
 
-    @Override
-    protected boolean onBlockPlaced(BlockPos pos, World worldIn, PlayerEntity player, ItemStack stack, BlockState state) {
-        TileEntity tile = worldIn.getTileEntity(pos);
-        if (worldIn.isRemote && tile != null && INSTANT_UPDATE_TILES.contains(tile.getType())) {
-            CompoundNBT data = stack.getChildTag("BlockEntityTag");
-            if (data != null) {
-                data = data.copy();
-                data.putInt("x", pos.getX());
-                data.putInt("y", pos.getY());
-                data.putInt("z", pos.getZ());
-                tile.read(state, data);
-            }
-        }
-        return super.onBlockPlaced(pos, worldIn, player, stack, state);
-    }
+	@Override
+	protected boolean onBlockPlaced(BlockPos pos, World worldIn, PlayerEntity player, ItemStack stack, BlockState state) {
+		TileEntity tile = worldIn.getTileEntity(pos);
+		if (worldIn.isRemote && tile != null && INSTANT_UPDATE_TILES.contains(tile.getType())) {
+			CompoundNBT data = stack.getChildTag("BlockEntityTag");
+			if (data != null) {
+				data = data.copy();
+				data.putInt("x", pos.getX());
+				data.putInt("y", pos.getY());
+				data.putInt("z", pos.getZ());
+				tile.read(state, data);
+			}
+		}
+		return super.onBlockPlaced(pos, worldIn, player, stack, state);
+	}
 
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
-        super.addInformation(stack, worldIn, tooltip, flagIn);
-        if (!KiwiClientConfig.globalTooltip)
-            ModItem.addTip(stack, tooltip, flagIn);
-    }
+	@Override
+	@OnlyIn(Dist.CLIENT)
+	public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
+		super.addInformation(stack, worldIn, tooltip, flagIn);
+		if (!KiwiClientConfig.globalTooltip)
+			ModItem.addTip(stack, tooltip, flagIn);
+	}
 }

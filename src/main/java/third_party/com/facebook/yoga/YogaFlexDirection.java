@@ -9,30 +9,27 @@ package third_party.com.facebook.yoga;
  */
 
 public enum YogaFlexDirection {
-    Column,
-    ColumnReverse,
-    Row,
-    RowReverse;
+	Column, ColumnReverse, Row, RowReverse;
 
-    public boolean IsRow() {
-        return this == Row || this == RowReverse;
-    }
+	public boolean IsRow() {
+		return this == Row || this == RowReverse;
+	}
 
-    public boolean IsColumn() {
-        return this == Column || this == ColumnReverse;
-    }
+	public boolean IsColumn() {
+		return this == Column || this == ColumnReverse;
+	}
 
-    public YogaFlexDirection ResolveFlexDirection(YogaDirection direction) {
-        if (direction == YogaDirection.RightToLeft) {
-            if (this == Row)
-                return RowReverse;
-            else if (this == RowReverse)
-                return Row;
-        }
-        return this;
-    }
+	public YogaFlexDirection ResolveFlexDirection(YogaDirection direction) {
+		if (direction == YogaDirection.RightToLeft) {
+			if (this == Row)
+				return RowReverse;
+			else if (this == RowReverse)
+				return Row;
+		}
+		return this;
+	}
 
-    public YogaFlexDirection FlexDirectionCross(YogaDirection direction) {
-        return this.IsColumn() ? Row.ResolveFlexDirection(direction) : Column;
-    }
+	public YogaFlexDirection FlexDirectionCross(YogaDirection direction) {
+		return this.IsColumn() ? Row.ResolveFlexDirection(direction) : Column;
+	}
 }

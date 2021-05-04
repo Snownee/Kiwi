@@ -26,131 +26,131 @@ import snownee.kiwi.util.DeferredActions;
  */
 public class ModBlock extends Block {
 
-    public ModBlock(Block.Properties builder) {
-        super(builder);
-    }
+	public ModBlock(Block.Properties builder) {
+		super(builder);
+	}
 
-    public static SoundType deduceSoundType(final Material material) {
-        if (material == Material.WOOD || material == Material.GOURD) {
-            return SoundType.WOOD;
-        }
-        if (material == Material.EARTH || material == Material.CLAY) {
-            return SoundType.GROUND;
-        }
-        if (material == Material.PLANTS || material == Material.ORGANIC || material == Material.TALL_PLANTS || material == Material.LEAVES || material == Material.SPONGE || material == Material.TNT) {
-            return SoundType.PLANT;
-        }
-        if (material == Material.SEA_GRASS || material == Material.OCEAN_PLANT) {
-            return SoundType.WET_GRASS;
-        }
-        if (material == Material.IRON) {
-            return SoundType.METAL;
-        }
-        if (material == Material.GLASS || material == Material.PORTAL || material == Material.ICE || material == Material.PACKED_ICE || material == Material.REDSTONE_LIGHT) {
-            return SoundType.GLASS;
-        }
-        if (material == Material.WOOL || material == Material.CARPET || material == Material.CACTUS || material == Material.CAKE || material == Material.FIRE) {
-            return SoundType.CLOTH;
-        }
-        if (material == Material.SAND) {
-            return SoundType.SAND;
-        }
-        if (material == Material.SNOW || material == Material.SNOW_BLOCK) {
-            return SoundType.SNOW;
-        }
-        if (material == Material.ANVIL) {
-            return SoundType.ANVIL;
-        }
-        return SoundType.STONE;
-    }
+	public static SoundType deduceSoundType(final Material material) {
+		if (material == Material.WOOD || material == Material.GOURD) {
+			return SoundType.WOOD;
+		}
+		if (material == Material.EARTH || material == Material.CLAY) {
+			return SoundType.GROUND;
+		}
+		if (material == Material.PLANTS || material == Material.ORGANIC || material == Material.TALL_PLANTS || material == Material.LEAVES || material == Material.SPONGE || material == Material.TNT) {
+			return SoundType.PLANT;
+		}
+		if (material == Material.SEA_GRASS || material == Material.OCEAN_PLANT) {
+			return SoundType.WET_GRASS;
+		}
+		if (material == Material.IRON) {
+			return SoundType.METAL;
+		}
+		if (material == Material.GLASS || material == Material.PORTAL || material == Material.ICE || material == Material.PACKED_ICE || material == Material.REDSTONE_LIGHT) {
+			return SoundType.GLASS;
+		}
+		if (material == Material.WOOL || material == Material.CARPET || material == Material.CACTUS || material == Material.CAKE || material == Material.FIRE) {
+			return SoundType.CLOTH;
+		}
+		if (material == Material.SAND) {
+			return SoundType.SAND;
+		}
+		if (material == Material.SNOW || material == Material.SNOW_BLOCK) {
+			return SoundType.SNOW;
+		}
+		if (material == Material.ANVIL) {
+			return SoundType.ANVIL;
+		}
+		return SoundType.STONE;
+	}
 
-    public static float deduceHardness(final Material material) {
-        if (material == Material.PLANTS || material == Material.AIR || material == Material.FIRE) {
-            return 0;
-        }
-        if (material == Material.ROCK) {
-            return 2.5F;
-        }
-        if (material == Material.WOOD) {
-            return 2;
-        }
-        if (material == Material.ORGANIC) {
-            return 0.6F;
-        }
-        if (material == Material.SAND || material == Material.EARTH || material == Material.CLAY) {
-            return 0.5F;
-        }
-        if (material == Material.GLASS) {
-            return 0.3F;
-        }
-        if (material == Material.CACTUS) {
-            return 0.4F;
-        }
-        if (material == Material.IRON || material == Material.ANVIL) {
-            return 5;
-        }
-        if (material == Material.WEB) {
-            return 4;
-        }
-        if (material == Material.WOOL) {
-            return 0.8F;
-        }
-        if (material == Material.WATER || material == Material.LAVA) {
-            return 100;
-        }
-        return 1;
-    }
+	public static float deduceHardness(final Material material) {
+		if (material == Material.PLANTS || material == Material.AIR || material == Material.FIRE) {
+			return 0;
+		}
+		if (material == Material.ROCK) {
+			return 2.5F;
+		}
+		if (material == Material.WOOD) {
+			return 2;
+		}
+		if (material == Material.ORGANIC) {
+			return 0.6F;
+		}
+		if (material == Material.SAND || material == Material.EARTH || material == Material.CLAY) {
+			return 0.5F;
+		}
+		if (material == Material.GLASS) {
+			return 0.3F;
+		}
+		if (material == Material.CACTUS) {
+			return 0.4F;
+		}
+		if (material == Material.IRON || material == Material.ANVIL) {
+			return 5;
+		}
+		if (material == Material.WEB) {
+			return 4;
+		}
+		if (material == Material.WOOL) {
+			return 0.8F;
+		}
+		if (material == Material.WATER || material == Material.LAVA) {
+			return 100;
+		}
+		return 1;
+	}
 
-    @Override
-    public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
-        return pickBlock(state, target, world, pos, player);
-    }
+	@Override
+	public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
+		return pickBlock(state, target, world, pos, player);
+	}
 
-    @SuppressWarnings("deprecation")
-    public static ItemStack pickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
-        ItemStack stack = state.getBlock().getItem(world, pos, state);
-        TileEntity tile = world.getTileEntity(pos);
-        if (tile instanceof BaseTile && !tile.onlyOpsCanSetNbt() && ((BaseTile) tile).persistData) {
-            CompoundNBT data = tile.write(new CompoundNBT());
-            data.remove("x");
-            data.remove("y");
-            data.remove("z");
-            data.remove("id");
-            stack.setTagInfo("BlockEntityTag", data);
-        }
-        return stack;
-    }
+	@SuppressWarnings("deprecation")
+	public static ItemStack pickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
+		ItemStack stack = state.getBlock().getItem(world, pos, state);
+		TileEntity tile = world.getTileEntity(pos);
+		if (tile instanceof BaseTile && !tile.onlyOpsCanSetNbt() && ((BaseTile) tile).persistData) {
+			CompoundNBT data = tile.write(new CompoundNBT());
+			data.remove("x");
+			data.remove("y");
+			data.remove("z");
+			data.remove("id");
+			stack.setTagInfo("BlockEntityTag", data);
+		}
+		return stack;
+	}
 
-    /**
-     * @since 3.5.0
-     */
-    public static void setFireInfo(Block block) {
-        Material material = block.material;
-        int fireSpreadSpeed = 0;
-        int flammability = 0;
-        if (material == Material.WOOD) {
-            if (!(block instanceof DoorBlock || block instanceof TrapDoorBlock || block instanceof WoodButtonBlock || block instanceof PressurePlateBlock)) {
-                fireSpreadSpeed = 5;
-                flammability = 20;
-            }
-        } else if (material == Material.PLANTS || material == Material.TALL_PLANTS) {
-            if (!(block instanceof SaplingBlock)) {
-                fireSpreadSpeed = 30;
-                flammability = 100;
-            }
-        } else if (material == Material.CARPET) {
-            fireSpreadSpeed = 60;
-            flammability = 20;
-        } else if (material == Material.LEAVES) {
-            fireSpreadSpeed = 30;
-            flammability = 60;
-        } else if (material == Material.WOOL) {
-            fireSpreadSpeed = 30;
-            flammability = 60;
-        }
-        if (fireSpreadSpeed != 0) {
-            DeferredActions.setFireInfo(block, fireSpreadSpeed, flammability);
-        }
-    }
+	/**
+	 * @since 3.5.0
+	 */
+	public static void setFireInfo(Block block) {
+		Material material = block.material;
+		int fireSpreadSpeed = 0;
+		int flammability = 0;
+		if (material == Material.WOOD) {
+			if (!(block instanceof DoorBlock || block instanceof TrapDoorBlock || block instanceof WoodButtonBlock || block instanceof PressurePlateBlock)) {
+				fireSpreadSpeed = 5;
+				flammability = 20;
+			}
+		} else if (material == Material.PLANTS || material == Material.TALL_PLANTS) {
+			if (!(block instanceof SaplingBlock)) {
+				fireSpreadSpeed = 30;
+				flammability = 100;
+			}
+		} else if (material == Material.CARPET) {
+			fireSpreadSpeed = 60;
+			flammability = 20;
+		} else if (material == Material.LEAVES) {
+			fireSpreadSpeed = 30;
+			flammability = 60;
+		} else if (material == Material.WOOL) {
+			fireSpreadSpeed = 30;
+			flammability = 60;
+		}
+		if (fireSpreadSpeed != 0) {
+			DeferredActions.setFireInfo(block, fireSpreadSpeed, flammability);
+		}
+	}
 
 }

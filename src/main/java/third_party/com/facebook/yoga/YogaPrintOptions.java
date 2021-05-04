@@ -10,13 +10,11 @@ package third_party.com.facebook.yoga;
 
 public enum YogaPrintOptions {
 
-    Layout(1),
-    Style(2),
-    Children(4);
+	Layout(1), Style(2), Children(4);
 
-    public final int bit;
+	public final int bit;
 
-    private YogaPrintOptions(int bit) {
-        this.bit = bit;
-    }
+	private YogaPrintOptions(int bit) {
+		this.bit = bit;
+	}
 }

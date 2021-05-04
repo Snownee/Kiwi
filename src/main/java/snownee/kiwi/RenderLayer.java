@@ -13,22 +13,22 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE, ElementType.FIELD })
 public @interface RenderLayer {
-    Layer value();
+	Layer value();
 
-    enum Layer {
-        CUTOUT_MIPPED(() -> () -> RenderType.getCutoutMipped()),
-        CUTOUT(() -> () -> RenderType.getCutout()),
-        TRANSLUCENT(() -> () -> RenderType.getTranslucent());
+	enum Layer {
+		CUTOUT_MIPPED(() -> () -> RenderType.getCutoutMipped()),
+		CUTOUT(() -> () -> RenderType.getCutout()),
+		TRANSLUCENT(() -> () -> RenderType.getTranslucent());
 
-        private final Supplier<Supplier<RenderType>> supplier;
+		private final Supplier<Supplier<RenderType>> supplier;
 
-        Layer(Supplier<Supplier<RenderType>> supplier) {
-            this.supplier = supplier;
-        }
+		Layer(Supplier<Supplier<RenderType>> supplier) {
+			this.supplier = supplier;
+		}
 
-        @OnlyIn(Dist.CLIENT)
-        public RenderType get() {
-            return supplier.get().get();
-        }
-    }
+		@OnlyIn(Dist.CLIENT)
+		public RenderType get() {
+			return supplier.get().get();
+		}
+	}
 }

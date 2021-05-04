@@ -9,7 +9,5 @@ package third_party.com.facebook.yoga;
  */
 
 public enum YogaMeasureMode {
-    Undefined,
-    Exactly,
-    AtMost,
+	Undefined, Exactly, AtMost,
 }

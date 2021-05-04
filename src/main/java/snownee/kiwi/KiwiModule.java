@@ -15,33 +15,33 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 @Target(ElementType.TYPE)
 public @interface KiwiModule {
 
-    String modid() default "";
+	String modid() default "";
 
-    /**
-     * Unique id of module. "core" by default
-     */
-    String value() default "core";
+	/**
+	 * Unique id of module. "core" by default
+	 */
+	String value() default "core";
 
-    /**
+	/**
      * Module will be registered only if dependent mods or modules are loaded.
      * You can use ";" to separate multiple mod ids.
      * You can use "@mod:module" to announce a dependent module
      */
-    String dependencies() default "";
+	String dependencies() default "";
 
-    /**
+	/**
      * 
      * Optional module can be disabled in Kiwi's configuration
      * @author Snownee
      *
      */
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.TYPE)
-    @interface Optional {
-        boolean disabledByDefault() default false;
-    }
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	@interface Optional {
+		boolean disabledByDefault() default false;
+	}
 
-    /**
+	/**
      * 
      * Item group this module belongs to.
      * You can input vanilla group id, such as 'buildingBlocks', 'misc'
@@ -50,58 +50,58 @@ public @interface KiwiModule {
      * @author Snownee
      *
      */
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ ElementType.TYPE, ElementType.FIELD })
-    @interface Group {
-        String value() default "";
-    }
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.TYPE, ElementType.FIELD })
+	@interface Group {
+		String value() default "";
+	}
 
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.TYPE)
-    @interface Subscriber {
-        /**
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	@interface Subscriber {
+		/**
          * Specify targets to load this event subscriber on. Can be used to avoid loading Client specific events
          * on a dedicated server, for example.
          *
          * @return an array of Dist to load this event subscriber on
          */
-        Dist[] side() default { Dist.CLIENT, Dist.DEDICATED_SERVER };
+		Dist[] side() default { Dist.CLIENT, Dist.DEDICATED_SERVER };
 
-        /**
-         * Specify an alternative bus to listen to
-         *
-         * @return the bus you wish to listen to
-         */
-        Bus value() default Bus.FORGE;
+		/**
+		 * Specify an alternative bus to listen to
+		 *
+		 * @return the bus you wish to listen to
+		 */
+		Bus value() default Bus.FORGE;
 
-        enum Bus {
-            /**
-             * The main Forge Event Bus.
-             * 
-             * @see MinecraftForge#EVENT_BUS
-             */
-            FORGE(() -> MinecraftForge.EVENT_BUS),
-            /**
+		enum Bus {
+			/**
+			 * The main Forge Event Bus.
+			 * 
+			 * @see MinecraftForge#EVENT_BUS
+			 */
+			FORGE(() -> MinecraftForge.EVENT_BUS),
+			/**
              * The mod specific Event bus.
              * @see FMLJavaModLoadingContext#getModEventBus()
              */
-            MOD(() -> FMLJavaModLoadingContext.get().getModEventBus());
+			MOD(() -> FMLJavaModLoadingContext.get().getModEventBus());
 
-            private final Supplier<IEventBus> busSupplier;
+			private final Supplier<IEventBus> busSupplier;
 
-            Bus(Supplier<IEventBus> eventBusSupplier) {
-                this.busSupplier = eventBusSupplier;
-            }
+			Bus(Supplier<IEventBus> eventBusSupplier) {
+				this.busSupplier = eventBusSupplier;
+			}
 
-            public Supplier<IEventBus> bus() {
-                return busSupplier;
-            }
-        }
-    }
+			public Supplier<IEventBus> bus() {
+				return busSupplier;
+			}
+		}
+	}
 
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.METHOD)
-    @interface LoadingCondition {
-        String[] value() default "";
-    }
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.METHOD)
+	@interface LoadingCondition {
+		String[] value() default "";
+	}
 }

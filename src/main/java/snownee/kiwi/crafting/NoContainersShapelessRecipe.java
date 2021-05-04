@@ -13,34 +13,34 @@ import net.minecraftforge.registries.ForgeRegistryEntry;
 import snownee.kiwi.data.DataModule;
 
 public class NoContainersShapelessRecipe extends ShapelessRecipe {
-    public NoContainersShapelessRecipe(ShapelessRecipe rawRecipe) {
-        super(rawRecipe.getId(), rawRecipe.getGroup(), rawRecipe.getRecipeOutput(), rawRecipe.getIngredients());
-    }
+	public NoContainersShapelessRecipe(ShapelessRecipe rawRecipe) {
+		super(rawRecipe.getId(), rawRecipe.getGroup(), rawRecipe.getRecipeOutput(), rawRecipe.getIngredients());
+	}
 
-    @Override
-    public NonNullList<ItemStack> getRemainingItems(CraftingInventory inv) {
-        return NonNullList.create();
-    }
+	@Override
+	public NonNullList<ItemStack> getRemainingItems(CraftingInventory inv) {
+		return NonNullList.create();
+	}
 
-    @Override
-    public IRecipeSerializer<?> getSerializer() {
-        return DataModule.SHAPELESS_NO_CONTAINERS;
-    }
+	@Override
+	public IRecipeSerializer<?> getSerializer() {
+		return DataModule.SHAPELESS_NO_CONTAINERS;
+	}
 
-    public static class Serializer extends ForgeRegistryEntry<IRecipeSerializer<?>> implements IRecipeSerializer<NoContainersShapelessRecipe> {
-        @Override
-        public NoContainersShapelessRecipe read(ResourceLocation recipeId, JsonObject json) {
-            return new NoContainersShapelessRecipe(IRecipeSerializer.CRAFTING_SHAPELESS.read(recipeId, json));
-        }
+	public static class Serializer extends ForgeRegistryEntry<IRecipeSerializer<?>> implements IRecipeSerializer<NoContainersShapelessRecipe> {
+		@Override
+		public NoContainersShapelessRecipe read(ResourceLocation recipeId, JsonObject json) {
+			return new NoContainersShapelessRecipe(IRecipeSerializer.CRAFTING_SHAPELESS.read(recipeId, json));
+		}
 
-        @Override
-        public NoContainersShapelessRecipe read(ResourceLocation recipeId, PacketBuffer buffer) {
-            return new NoContainersShapelessRecipe(IRecipeSerializer.CRAFTING_SHAPELESS.read(recipeId, buffer));
-        }
+		@Override
+		public NoContainersShapelessRecipe read(ResourceLocation recipeId, PacketBuffer buffer) {
+			return new NoContainersShapelessRecipe(IRecipeSerializer.CRAFTING_SHAPELESS.read(recipeId, buffer));
+		}
 
-        @Override
-        public void write(PacketBuffer buffer, NoContainersShapelessRecipe recipe) {
-            IRecipeSerializer.CRAFTING_SHAPELESS.write(buffer, recipe);
-        }
-    }
+		@Override
+		public void write(PacketBuffer buffer, NoContainersShapelessRecipe recipe) {
+			IRecipeSerializer.CRAFTING_SHAPELESS.write(buffer, recipe);
+		}
+	}
 }

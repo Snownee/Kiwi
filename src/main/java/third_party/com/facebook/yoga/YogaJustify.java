@@ -9,10 +9,5 @@ package third_party.com.facebook.yoga;
  */
 
 public enum YogaJustify {
-    FlexStart,
-    Center,
-    FlexEnd,
-    SpaceBetween,
-    SpaceAround,
-    SpaceEvenly,
+	FlexStart, Center, FlexEnd, SpaceBetween, SpaceAround, SpaceEvenly,
 }

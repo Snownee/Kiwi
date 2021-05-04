@@ -21,29 +21,29 @@ import snownee.kiwi.contributor.impl.client.model.SantaHatModel;
 
 @OnlyIn(Dist.CLIENT)
 public class SantaHatLayer extends RewardLayer {
-    private static final ResourceLocation TEXTURE = new ResourceLocation(Kiwi.MODID, "textures/reward/santa.png");
-    private final SantaHatModel<AbstractClientPlayerEntity> modelSantaHat;
+	private static final ResourceLocation TEXTURE = new ResourceLocation(Kiwi.MODID, "textures/reward/santa.png");
+	private final SantaHatModel<AbstractClientPlayerEntity> modelSantaHat;
 
-    public SantaHatLayer(IEntityRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> entityRendererIn) {
-        super(entityRendererIn);
-        modelSantaHat = new SantaHatModel<>(entityRendererIn.getEntityModel());
-    }
+	public SantaHatLayer(IEntityRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> entityRendererIn) {
+		super(entityRendererIn);
+		modelSantaHat = new SantaHatModel<>(entityRendererIn.getEntityModel());
+	}
 
-    @Override
-    public void render(MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, AbstractClientPlayerEntity entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
-        if (entitylivingbaseIn.isInvisible()) {
-            return;
-        }
-        ItemStack itemstack = entitylivingbaseIn.getItemStackFromSlot(EquipmentSlotType.HEAD);
-        if (!itemstack.isEmpty()) {
-            return;
-        }
-        matrixStackIn.push();
-        modelSantaHat.isChild = entitylivingbaseIn.isChild();
-        modelSantaHat.setRotationAngles(entitylivingbaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-        IVertexBuilder ivertexbuilder = ItemRenderer.getBuffer(bufferIn, RenderType.getEntitySolid(TEXTURE), false, false);
-        modelSantaHat.render(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
-        matrixStackIn.pop();
-    }
+	@Override
+	public void render(MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, AbstractClientPlayerEntity entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
+		if (entitylivingbaseIn.isInvisible()) {
+			return;
+		}
+		ItemStack itemstack = entitylivingbaseIn.getItemStackFromSlot(EquipmentSlotType.HEAD);
+		if (!itemstack.isEmpty()) {
+			return;
+		}
+		matrixStackIn.push();
+		modelSantaHat.isChild = entitylivingbaseIn.isChild();
+		modelSantaHat.setRotationAngles(entitylivingbaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
+		IVertexBuilder ivertexbuilder = ItemRenderer.getBuffer(bufferIn, RenderType.getEntitySolid(TEXTURE), false, false);
+		modelSantaHat.render(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+		matrixStackIn.pop();
+	}
 
 }

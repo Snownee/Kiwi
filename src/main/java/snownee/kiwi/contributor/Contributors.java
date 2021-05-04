@@ -49,227 +49,227 @@ import snownee.kiwi.util.Util;
 @KiwiModule.Subscriber
 public class Contributors extends AbstractModule {
 
-    public static final Map<String, ITierProvider> REWARD_PROVIDERS = Maps.newConcurrentMap();
-    public static final Map<String, ResourceLocation> PLAYER_EFFECTS = Maps.newConcurrentMap();
-    private static final Set<ResourceLocation> RENDERABLES = Sets.newLinkedHashSet();
-    private static int DAY = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+	public static final Map<String, ITierProvider> REWARD_PROVIDERS = Maps.newConcurrentMap();
+	public static final Map<String, ResourceLocation> PLAYER_EFFECTS = Maps.newConcurrentMap();
+	private static final Set<ResourceLocation> RENDERABLES = Sets.newLinkedHashSet();
+	private static int DAY = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
 
-    @Override
-    protected void preInit() {
-        NetworkChannel.register(CSetEffectPacket.class, new CSetEffectPacket.Handler());
-        NetworkChannel.register(SSyncEffectPacket.class, new SSyncEffectPacket.Handler());
-    }
+	@Override
+	protected void preInit() {
+		NetworkChannel.register(CSetEffectPacket.class, new CSetEffectPacket.Handler());
+		NetworkChannel.register(SSyncEffectPacket.class, new SSyncEffectPacket.Handler());
+	}
 
-    @Override
-    protected void init(FMLCommonSetupEvent event) {
-        registerTierProvider(new KiwiRewardProvider());
-    }
+	@Override
+	protected void init(FMLCommonSetupEvent event) {
+		registerTierProvider(new KiwiRewardProvider());
+	}
 
-    public static boolean isContributor(String author, String playerName) {
-        return REWARD_PROVIDERS.getOrDefault(author.toLowerCase(Locale.ENGLISH), ITierProvider.Empty.INSTANCE).isContributor(playerName);
-    }
+	public static boolean isContributor(String author, String playerName) {
+		return REWARD_PROVIDERS.getOrDefault(author.toLowerCase(Locale.ENGLISH), ITierProvider.Empty.INSTANCE).isContributor(playerName);
+	}
 
-    public static boolean isContributor(String author, String playerName, String tier) {
-        return REWARD_PROVIDERS.getOrDefault(author.toLowerCase(Locale.ENGLISH), ITierProvider.Empty.INSTANCE).isContributor(playerName, tier);
-    }
+	public static boolean isContributor(String author, String playerName, String tier) {
+		return REWARD_PROVIDERS.getOrDefault(author.toLowerCase(Locale.ENGLISH), ITierProvider.Empty.INSTANCE).isContributor(playerName, tier);
+	}
 
-    public static boolean isContributor(String author, PlayerEntity player) {
-        return isContributor(author, player.getGameProfile().getName());
-    }
+	public static boolean isContributor(String author, PlayerEntity player) {
+		return isContributor(author, player.getGameProfile().getName());
+	}
 
-    public static boolean isContributor(String author, PlayerEntity player, String tier) {
-        return isContributor(author, player.getGameProfile().getName(), tier);
-    }
+	public static boolean isContributor(String author, PlayerEntity player, String tier) {
+		return isContributor(author, player.getGameProfile().getName(), tier);
+	}
 
-    public static Set<ResourceLocation> getPlayerTiers(String playerName) {
-        /* off */
+	public static Set<ResourceLocation> getPlayerTiers(String playerName) {
+		/* off */
         return REWARD_PROVIDERS.values().stream()
                 .flatMap(tp -> tp.getPlayerTiers(playerName).stream()
                         .map(s -> new ResourceLocation(tp.getAuthor().toLowerCase(Locale.ENGLISH), s)))
                 .collect(Collectors.toSet());
         /* on */
-    }
+	}
 
-    public static Set<ResourceLocation> getTiers() {
-        /* off */
+	public static Set<ResourceLocation> getTiers() {
+		/* off */
         return REWARD_PROVIDERS.values().stream()
                 .flatMap(tp -> tp.getTiers().stream()
                         .map(s -> new ResourceLocation(tp.getAuthor().toLowerCase(Locale.ENGLISH), s)))
                 .collect(Collectors.toSet());
         /* on */
-    }
+	}
 
-    public static void registerTierProvider(ITierProvider rewardProvider) {
-        String namespace = rewardProvider.getAuthor().toLowerCase(Locale.ENGLISH);
-        REWARD_PROVIDERS.put(namespace, rewardProvider);
-        for (String tier : rewardProvider.getRenderableTiers()) {
-            RENDERABLES.add(new ResourceLocation(namespace, tier));
-        }
-    }
+	public static void registerTierProvider(ITierProvider rewardProvider) {
+		String namespace = rewardProvider.getAuthor().toLowerCase(Locale.ENGLISH);
+		REWARD_PROVIDERS.put(namespace, rewardProvider);
+		for (String tier : rewardProvider.getRenderableTiers()) {
+			RENDERABLES.add(new ResourceLocation(namespace, tier));
+		}
+	}
 
-    @SubscribeEvent
-    public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-        if (!(event.getEntity().world instanceof ServerWorld)) {
-            return;
-        }
-        PlayerEntity player = event.getPlayer();
-        if (!((ServerWorld) event.getEntity().world).getServer().isServerOwner(player.getGameProfile())) {
-            new SSyncEffectPacket(PLAYER_EFFECTS).send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player));
-        }
-    }
+	@SubscribeEvent
+	public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
+		if (!(event.getEntity().world instanceof ServerWorld)) {
+			return;
+		}
+		PlayerEntity player = event.getPlayer();
+		if (!((ServerWorld) event.getEntity().world).getServer().isServerOwner(player.getGameProfile())) {
+			new SSyncEffectPacket(PLAYER_EFFECTS).send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player));
+		}
+	}
 
-    @OnlyIn(Dist.CLIENT)
-    @SubscribeEvent
-    public void onClientPlayerLoggedIn(ClientPlayerNetworkEvent.LoggedInEvent event) {
-        changeEffect();
-    }
+	@OnlyIn(Dist.CLIENT)
+	@SubscribeEvent
+	public void onClientPlayerLoggedIn(ClientPlayerNetworkEvent.LoggedInEvent event) {
+		changeEffect();
+	}
 
-    @OnlyIn(Dist.DEDICATED_SERVER)
-    @SubscribeEvent
-    public void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
-        PLAYER_EFFECTS.remove(event.getPlayer().getGameProfile().getName());
-    }
+	@OnlyIn(Dist.DEDICATED_SERVER)
+	@SubscribeEvent
+	public void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
+		PLAYER_EFFECTS.remove(event.getPlayer().getGameProfile().getName());
+	}
 
-    @OnlyIn(Dist.CLIENT)
-    @SubscribeEvent
-    public void onClientPlayerLoggedOut(ClientPlayerNetworkEvent.LoggedOutEvent event) {
-        PLAYER_EFFECTS.clear();
-        RewardLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidateAll());
-    }
+	@OnlyIn(Dist.CLIENT)
+	@SubscribeEvent
+	public void onClientPlayerLoggedOut(ClientPlayerNetworkEvent.LoggedOutEvent event) {
+		PLAYER_EFFECTS.clear();
+		RewardLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidateAll());
+	}
 
-    @OnlyIn(Dist.CLIENT)
-    @Override
-    protected void clientInit(FMLClientSetupEvent event) {
-        Minecraft.getInstance().getRenderManager().getSkinMap().values().forEach(renderer -> {
-            RewardLayer layer = new RewardLayer(renderer);
-            RewardLayer.ALL_LAYERS.add(layer);
-            renderer.addLayer(layer);
-        });
-    }
+	@OnlyIn(Dist.CLIENT)
+	@Override
+	protected void clientInit(FMLClientSetupEvent event) {
+		Minecraft.getInstance().getRenderManager().getSkinMap().values().forEach(renderer -> {
+			RewardLayer layer = new RewardLayer(renderer);
+			RewardLayer.ALL_LAYERS.add(layer);
+			renderer.addLayer(layer);
+		});
+	}
 
-    @OnlyIn(Dist.CLIENT)
-    public static void changeEffect() {
-        ResourceLocation id = Util.RL(KiwiClientConfig.contributorEffect);
-        if (id != null && id.getPath().isEmpty()) {
-            id = null;
-        }
-        ResourceLocation effect = id;
-        canPlayerUseEffect(getPlayerName(), effect).thenAccept(bl -> {
-            if (!bl) {
-                ConfigHandler cfg = KiwiConfigManager.getHandler(KiwiClientConfig.class);
-                ConfigValue<String> val = (ConfigValue<String>) cfg.getValueByPath("contributorEffect");
-                val.set("");
-                cfg.refresh();
-                return;
-            }
-            new CSetEffectPacket(effect).send();
-            if (effect == null) {
-                PLAYER_EFFECTS.remove(getPlayerName());
-            } else {
-                PLAYER_EFFECTS.put(getPlayerName(), effect);
-                Kiwi.logger.info("Enabled contributor effect: {}", effect);
-            }
-            RewardLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidate(getPlayerName()));
-        });
-    }
+	@OnlyIn(Dist.CLIENT)
+	public static void changeEffect() {
+		ResourceLocation id = Util.RL(KiwiClientConfig.contributorEffect);
+		if (id != null && id.getPath().isEmpty()) {
+			id = null;
+		}
+		ResourceLocation effect = id;
+		canPlayerUseEffect(getPlayerName(), effect).thenAccept(bl -> {
+			if (!bl) {
+				ConfigHandler cfg = KiwiConfigManager.getHandler(KiwiClientConfig.class);
+				ConfigValue<String> val = (ConfigValue<String>) cfg.getValueByPath("contributorEffect");
+				val.set("");
+				cfg.refresh();
+				return;
+			}
+			new CSetEffectPacket(effect).send();
+			if (effect == null) {
+				PLAYER_EFFECTS.remove(getPlayerName());
+			} else {
+				PLAYER_EFFECTS.put(getPlayerName(), effect);
+				Kiwi.logger.info("Enabled contributor effect: {}", effect);
+			}
+			RewardLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidate(getPlayerName()));
+		});
+	}
 
-    @OnlyIn(Dist.CLIENT)
-    public static void changeEffect(Map<String, ResourceLocation> changes) {
-        changes.forEach((k, v) -> {
-            if (v == null) {
-                PLAYER_EFFECTS.remove(k);
-            } else {
-                PLAYER_EFFECTS.put(k, v);
-            }
-        });
-        RewardLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidateAll(changes.keySet()));
-    }
+	@OnlyIn(Dist.CLIENT)
+	public static void changeEffect(Map<String, ResourceLocation> changes) {
+		changes.forEach((k, v) -> {
+			if (v == null) {
+				PLAYER_EFFECTS.remove(k);
+			} else {
+				PLAYER_EFFECTS.put(k, v);
+			}
+		});
+		RewardLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidateAll(changes.keySet()));
+	}
 
-    public static void changeEffect(ServerPlayerEntity player, ResourceLocation effect) {
-        String playerName = player.getGameProfile().getName();
-        canPlayerUseEffect(playerName, effect).thenAccept(bl -> {
-            if (bl) {
-                if (effect == null) {
-                    PLAYER_EFFECTS.remove(playerName);
-                } else {
-                    PLAYER_EFFECTS.put(playerName, effect);
-                }
-                new SSyncEffectPacket(ImmutableMap.of(playerName, effect)).sendExcept(player);
-            }
-        });
-    }
+	public static void changeEffect(ServerPlayerEntity player, ResourceLocation effect) {
+		String playerName = player.getGameProfile().getName();
+		canPlayerUseEffect(playerName, effect).thenAccept(bl -> {
+			if (bl) {
+				if (effect == null) {
+					PLAYER_EFFECTS.remove(playerName);
+				} else {
+					PLAYER_EFFECTS.put(playerName, effect);
+				}
+				new SSyncEffectPacket(ImmutableMap.of(playerName, effect)).sendExcept(player);
+			}
+		});
+	}
 
-    public static boolean isRenderable(ResourceLocation id) {
-        refreshRenderables();
-        return RENDERABLES.contains(id);
-    }
+	public static boolean isRenderable(ResourceLocation id) {
+		refreshRenderables();
+		return RENDERABLES.contains(id);
+	}
 
-    public static Set<ResourceLocation> getRenderableTiers() {
-        refreshRenderables();
-        return Collections.unmodifiableSet(RENDERABLES);
-    }
+	public static Set<ResourceLocation> getRenderableTiers() {
+		refreshRenderables();
+		return Collections.unmodifiableSet(RENDERABLES);
+	}
 
-    private static void refreshRenderables() {
-        int current = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
-        if (current != DAY) {
-            DAY = current;
-            RENDERABLES.clear();
-            for (Entry<String, ITierProvider> entry : REWARD_PROVIDERS.entrySet()) {
-                String namespace = entry.getKey();
-                for (String tier : entry.getValue().getRenderableTiers()) {
-                    RENDERABLES.add(new ResourceLocation(namespace, tier));
-                }
-            }
-        }
-    }
+	private static void refreshRenderables() {
+		int current = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+		if (current != DAY) {
+			DAY = current;
+			RENDERABLES.clear();
+			for (Entry<String, ITierProvider> entry : REWARD_PROVIDERS.entrySet()) {
+				String namespace = entry.getKey();
+				for (String tier : entry.getValue().getRenderableTiers()) {
+					RENDERABLES.add(new ResourceLocation(namespace, tier));
+				}
+			}
+		}
+	}
 
-    public static CompletableFuture<Boolean> canPlayerUseEffect(String playerName, ResourceLocation effect) {
-        if (effect == null || effect.getPath().isEmpty()) { // Set to empty
-            return CompletableFuture.completedFuture(Boolean.TRUE);
-        }
-        if (!isRenderable(effect)) {
-            return CompletableFuture.completedFuture(Boolean.FALSE);
-        }
-        ITierProvider provider = REWARD_PROVIDERS.getOrDefault(effect.getNamespace().toLowerCase(Locale.ENGLISH), ITierProvider.Empty.INSTANCE);
-        if (!provider.isContributor(playerName, effect.getPath())) {
-            if (FMLEnvironment.dist.isDedicatedServer()) {
-                return provider.refresh().thenApply($ -> {
-                    return provider.isContributor(playerName, effect.getPath());
-                });
-            } else {
-                return CompletableFuture.completedFuture(Boolean.FALSE);
-            }
-        }
-        return CompletableFuture.completedFuture(Boolean.TRUE);
-    }
+	public static CompletableFuture<Boolean> canPlayerUseEffect(String playerName, ResourceLocation effect) {
+		if (effect == null || effect.getPath().isEmpty()) { // Set to empty
+			return CompletableFuture.completedFuture(Boolean.TRUE);
+		}
+		if (!isRenderable(effect)) {
+			return CompletableFuture.completedFuture(Boolean.FALSE);
+		}
+		ITierProvider provider = REWARD_PROVIDERS.getOrDefault(effect.getNamespace().toLowerCase(Locale.ENGLISH), ITierProvider.Empty.INSTANCE);
+		if (!provider.isContributor(playerName, effect.getPath())) {
+			if (FMLEnvironment.dist.isDedicatedServer()) {
+				return provider.refresh().thenApply($ -> {
+					return provider.isContributor(playerName, effect.getPath());
+				});
+			} else {
+				return CompletableFuture.completedFuture(Boolean.FALSE);
+			}
+		}
+		return CompletableFuture.completedFuture(Boolean.TRUE);
+	}
 
-    @OnlyIn(Dist.CLIENT)
-    private static String getPlayerName() {
-        return Minecraft.getInstance().getSession().getUsername();
-    }
+	@OnlyIn(Dist.CLIENT)
+	private static String getPlayerName() {
+		return Minecraft.getInstance().getSession().getUsername();
+	}
 
-    private int hold;
+	private int hold;
 
-    @SubscribeEvent
-    @OnlyIn(Dist.CLIENT)
-    public void onKeyInput(KeyInputEvent event) {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.currentScreen != null || mc.player == null || !mc.isGameFocused()) {
-            return;
-        }
-        if (event.getModifiers() != 0) {
-            return;
-        }
-        Input input = InputMappings.getInputByCode(event.getKey(), event.getScanCode());
-        if (input.getKeyCode() != 75) {
-            return;
-        }
-        if (event.getAction() != 2) {
-            hold = 0;
-        } else if (++hold == 30) {
-            RewardScreen screen = new RewardScreen();
-            mc.displayGuiScreen(screen);
-        }
-    }
+	@SubscribeEvent
+	@OnlyIn(Dist.CLIENT)
+	public void onKeyInput(KeyInputEvent event) {
+		Minecraft mc = Minecraft.getInstance();
+		if (mc.currentScreen != null || mc.player == null || !mc.isGameFocused()) {
+			return;
+		}
+		if (event.getModifiers() != 0) {
+			return;
+		}
+		Input input = InputMappings.getInputByCode(event.getKey(), event.getScanCode());
+		if (input.getKeyCode() != 75) {
+			return;
+		}
+		if (event.getAction() != 2) {
+			hold = 0;
+		} else if (++hold == 30) {
+			RewardScreen screen = new RewardScreen();
+			mc.displayGuiScreen(screen);
+		}
+	}
 
 }

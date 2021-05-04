@@ -13,37 +13,37 @@ import snownee.kiwi.util.Util;
 
 public class CSetEffectPacket extends ClientPacket {
 
-    @Nullable
-    private final ResourceLocation id;
+	@Nullable
+	private final ResourceLocation id;
 
-    public CSetEffectPacket(@Nullable ResourceLocation id) {
-        this.id = id;
-    }
+	public CSetEffectPacket(@Nullable ResourceLocation id) {
+		this.id = id;
+	}
 
-    public static class Handler extends PacketHandler<CSetEffectPacket> {
+	public static class Handler extends PacketHandler<CSetEffectPacket> {
 
-        @Override
-        public void encode(CSetEffectPacket msg, PacketBuffer buffer) {
-            if (msg.id == null) {
-                buffer.writeString("");
-            } else {
-                buffer.writeString(msg.id.toString());
-            }
-        }
+		@Override
+		public void encode(CSetEffectPacket msg, PacketBuffer buffer) {
+			if (msg.id == null) {
+				buffer.writeString("");
+			} else {
+				buffer.writeString(msg.id.toString());
+			}
+		}
 
-        @Override
-        public CSetEffectPacket decode(PacketBuffer buffer) {
-            ResourceLocation id = Util.RL(buffer.readString(32767));
-            return new CSetEffectPacket(id);
-        }
+		@Override
+		public CSetEffectPacket decode(PacketBuffer buffer) {
+			ResourceLocation id = Util.RL(buffer.readString(32767));
+			return new CSetEffectPacket(id);
+		}
 
-        @Override
-        public void handle(CSetEffectPacket msg, Supplier<Context> ctx) {
-            //            ctx.get().enqueueWork(() -> {
-            Contributors.changeEffect(ctx.get().getSender(), msg.id);
-            //            });
-            ctx.get().setPacketHandled(true);
-        }
-    }
+		@Override
+		public void handle(CSetEffectPacket msg, Supplier<Context> ctx) {
+			//            ctx.get().enqueueWork(() -> {
+			Contributors.changeEffect(ctx.get().getSender(), msg.id);
+			//            });
+			ctx.get().setPacketHandled(true);
+		}
+	}
 
 }

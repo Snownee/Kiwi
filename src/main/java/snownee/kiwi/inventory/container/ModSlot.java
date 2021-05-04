@@ -9,13 +9,13 @@ import net.minecraft.item.ItemStack;
  */
 public class ModSlot extends Slot {
 
-    public ModSlot(IInventory inventoryIn, int index, int xPosition, int yPosition) {
-        super(inventoryIn, index, xPosition, yPosition);
-    }
+	public ModSlot(IInventory inventoryIn, int index, int xPosition, int yPosition) {
+		super(inventoryIn, index, xPosition, yPosition);
+	}
 
-    @Override
-    public boolean isItemValid(ItemStack stack) {
-        return inventory.isItemValidForSlot(slotNumber, stack);
-    }
+	@Override
+	public boolean isItemValid(ItemStack stack) {
+		return inventory.isItemValidForSlot(slotNumber, stack);
+	}
 
 }

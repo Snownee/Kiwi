@@ -9,8 +9,5 @@ package third_party.com.facebook.yoga;
  */
 
 public enum YogaUnit {
-    Undefined,
-    Point,
-    Percent,
-    Auto,
+	Undefined, Point, Percent, Auto,
 }

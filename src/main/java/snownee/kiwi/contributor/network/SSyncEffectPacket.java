@@ -18,47 +18,47 @@ import snownee.kiwi.util.Util;
 
 public class SSyncEffectPacket extends Packet {
 
-    private final Map<String, ResourceLocation> map;
+	private final Map<String, ResourceLocation> map;
 
-    public SSyncEffectPacket(Map<String, ResourceLocation> map) {
-        this.map = map;
-    }
+	public SSyncEffectPacket(Map<String, ResourceLocation> map) {
+		this.map = map;
+	}
 
-    public void sendExcept(ServerPlayerEntity player) {
-        NetworkChannel.sendToAllExcept(player, this);
-    }
+	public void sendExcept(ServerPlayerEntity player) {
+		NetworkChannel.sendToAllExcept(player, this);
+	}
 
-    public static class Handler extends PacketHandler<SSyncEffectPacket> {
+	public static class Handler extends PacketHandler<SSyncEffectPacket> {
 
-        @Override
-        public void encode(SSyncEffectPacket msg, PacketBuffer buffer) {
-            buffer.writeVarInt(msg.map.size());
-            msg.map.forEach((k, v) -> {
-                buffer.writeString(k);
-                buffer.writeResourceLocation(v);
-            });
-        }
+		@Override
+		public void encode(SSyncEffectPacket msg, PacketBuffer buffer) {
+			buffer.writeVarInt(msg.map.size());
+			msg.map.forEach((k, v) -> {
+				buffer.writeString(k);
+				buffer.writeResourceLocation(v);
+			});
+		}
 
-        @Override
-        public SSyncEffectPacket decode(PacketBuffer buffer) {
-            ImmutableMap.Builder<String, ResourceLocation> builder = ImmutableMap.builder();
-            int size = buffer.readVarInt();
-            for (int i = 0; i < size; i++) {
-                String k = buffer.readString();
-                String v = buffer.readString();
-                builder.put(k, Util.RL(v));
-            }
-            return new SSyncEffectPacket(builder.build());
-        }
+		@Override
+		public SSyncEffectPacket decode(PacketBuffer buffer) {
+			ImmutableMap.Builder<String, ResourceLocation> builder = ImmutableMap.builder();
+			int size = buffer.readVarInt();
+			for (int i = 0; i < size; i++) {
+				String k = buffer.readString();
+				String v = buffer.readString();
+				builder.put(k, Util.RL(v));
+			}
+			return new SSyncEffectPacket(builder.build());
+		}
 
-        @Override
-        @OnlyIn(Dist.CLIENT)
-        public void handle(SSyncEffectPacket msg, Supplier<Context> ctx) {
-            ctx.get().enqueueWork(() -> {
-                Contributors.changeEffect(msg.map);
-            });
-            ctx.get().setPacketHandled(true);
-        }
+		@Override
+		@OnlyIn(Dist.CLIENT)
+		public void handle(SSyncEffectPacket msg, Supplier<Context> ctx) {
+			ctx.get().enqueueWork(() -> {
+				Contributors.changeEffect(msg.map);
+			});
+			ctx.get().setPacketHandled(true);
+		}
 
-    }
+	}
 }
