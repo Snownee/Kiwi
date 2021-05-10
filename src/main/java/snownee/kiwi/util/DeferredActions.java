@@ -19,6 +19,7 @@ import net.minecraft.entity.ai.brain.task.FarmerWorkTask;
 import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.HoeItem;
+import net.minecraft.item.ShovelItem;
 import net.minecraft.util.IItemProvider;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.event.lifecycle.FMLModIdMappingEvent;
@@ -60,6 +61,18 @@ public final class DeferredActions { //TODO brewing
 				AxeItem.BLOCK_STRIPPING_MAP = Maps.newHashMap(AxeItem.BLOCK_STRIPPING_MAP);
 			}
 			AxeItem.BLOCK_STRIPPING_MAP.put(k, v);
+		});
+	}
+
+	/**
+	 * @since 3.5.2
+	 */
+	public static void registerShovelConversion(Block k, BlockState v) {
+		add(() -> {
+			if (ShovelItem.SHOVEL_LOOKUP instanceof ImmutableMap) {
+				ShovelItem.SHOVEL_LOOKUP = Maps.newHashMap(ShovelItem.SHOVEL_LOOKUP);
+			}
+			ShovelItem.SHOVEL_LOOKUP.put(k, v);
 		});
 	}
 

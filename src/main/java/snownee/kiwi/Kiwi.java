@@ -365,7 +365,7 @@ public class Kiwi {
 		conditions.clear();
 		conditions = null;
 
-		Util.class.hashCode();
+		//Util.class.hashCode();
 		Object2IntMap<Class<?>> counter = new Object2IntArrayMap<>();
 		for (ModuleInfo info : KiwiManager.MODULES.values()) {
 			counter.clear();
