@@ -157,7 +157,7 @@ public class ConfigHandler {
 		fCfg.setAccessible(true);
 		fCfg.set(config, configData);
 		config.getSpec().setConfig(configData);
-		config.save();
+		//config.save();
 	}
 
 	@SubscribeEvent
