@@ -3,6 +3,7 @@ package snownee.kiwi;
 import net.minecraftforge.fml.config.ModConfig.Type;
 import snownee.kiwi.config.KiwiConfig;
 import snownee.kiwi.config.KiwiConfig.Comment;
+import snownee.kiwi.config.KiwiConfig.Path;
 import snownee.kiwi.config.KiwiConfig.Range;
 import snownee.kiwi.config.KiwiConfig.Translation;
 
@@ -20,12 +21,19 @@ public final class KiwiClientConfig {
 	@Range(min = 50)
 	public static int tooltipWrapWidth1 = 200;
 
-	@Comment("Show item tags and nbt in advanced tooltips")
-	@Translation("debugTooltip")
-	public static boolean debugTooltip = true;
+	@Comment("Show item tags in advanced tooltips")
+	@Translation("tagsTooltip")
+	@Path("debug.tagsTooltip")
+	public static boolean tagsTooltip = true;
+
+	@Comment("Show item nbt in advanced tooltips while holding shift")
+	@Translation("nbtTooltip")
+	@Path("debug.nbtTooltip")
+	public static boolean nbtTooltip = true;
 
 	@Comment("Allowed values: vanilla, kiwi")
 	@Translation("tooltipNBTFormatter")
+	@Path("debug.tooltipNBTFormatter")
 	public static String debugTooltipNBTFormatter = "vanilla";
 
 }

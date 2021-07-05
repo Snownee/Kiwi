@@ -47,7 +47,7 @@ public final class TooltipEvents {
 
 	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public static void debugTooltip(ItemTooltipEvent event) {
-		if (!Kiwi.areTagsUpdated() || !KiwiClientConfig.debugTooltip || !event.getFlags().isAdvanced()) {
+		if (!Kiwi.areTagsUpdated() || !event.getFlags().isAdvanced()) {
 			return;
 		}
 
@@ -72,7 +72,7 @@ public final class TooltipEvents {
 
 		List<ITextComponent> tooltip = event.getToolTip();
 
-		if (Screen.hasShiftDown() && stack.hasTag()) {
+		if (KiwiClientConfig.nbtTooltip && Screen.hasShiftDown() && stack.hasTag()) {
 			tooltip.removeIf(c -> c.getClass() == TranslationTextComponent.class && ((TranslationTextComponent) c).getKey().equals("item.nbt_tags"));
 			if (lastNBT != stack.getTag()) {
 				switch (KiwiClientConfig.debugTooltipNBTFormatter) {
@@ -135,8 +135,8 @@ public final class TooltipEvents {
 				lastFormatted = formatter.apply(lastNBT).deepCopy().mergeStyle(TextFormatting.RESET);
 			}
 			tooltip.add(lastFormatted);
-		} else {
-			stack.getItem().getTags().stream().map(Object::toString).forEach(id -> {
+		} else if (KiwiClientConfig.tagsTooltip) {
+			stack.getItem().getTags().stream().map(Object::toString).sorted().forEach(id -> {
 				tooltip.add(new StringTextComponent("#" + id).mergeStyle(TextFormatting.DARK_GRAY));
 			});
 		}

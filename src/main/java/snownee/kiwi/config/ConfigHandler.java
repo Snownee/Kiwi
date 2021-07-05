@@ -17,7 +17,6 @@ import com.google.common.collect.HashBiMap;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.config.ModConfig;
@@ -160,7 +159,6 @@ public class ConfigHandler {
 		//config.save();
 	}
 
-	@SubscribeEvent
 	protected void onFileChange(ModConfig.Reloading event) {
 		((CommentedFileConfig) event.getConfig().getConfigData()).load();
 		refresh();
