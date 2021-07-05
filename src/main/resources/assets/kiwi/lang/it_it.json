@@ -1,0 +1,17 @@
+{
+  "commands.kiwi.dumpLoots.wrongPattern": "Modulo incorretto",
+  "commands.kiwi.dumpLoots.noTargets": "Incapace di trovare blocchi corrispondenti",
+  "commands.kiwi.dumpLoots.success": "%d loot table scaricati con successo",
+  "tip.kiwi.press_shift": "§r§7<Premere §f§oShift§r§7..>",
+  "tip.kiwi.press_ctrl": "§r§7<Premere §f§oCtrl§r§7..>",
+  "tip.kiwi.press_shift_or_ctrl": "§r§7<Premere §f§oShift§r§7 o §f§oCtrl§r§7..>",
+  "msg.kiwi.no_dependencies": "{1}: Modulo §e{2}§r richiede i seguenti moduli per essere attivato: §e{3}",
+  "item.kiwi.first_item.tip": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\nUt enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.\n\nExcepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+  "item.kiwi.first_item.tip.shift": "§2Curabitur pretium tincidunt lacus. Nulla gravida orci a odio.\n\nNullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris.\n\nInteger in mauris eu nibh euismod gravida.",
+  "gui.kiwi.reward": "Scegli un effetto ricompensa",
+  "reward.snownee.2020q3": "Pianeti",
+  "reward.snownee.2020q4": "Volpe",
+  "reward.snownee.2021q1": "Gatto elettronico",
+  "reward.snownee.xmas": "Cappello di Babbo Natale",
+  "reward.snownee.sunny_milk": "Latte assolato"
+}
