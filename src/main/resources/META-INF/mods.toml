@@ -16,3 +16,6 @@ description=""
    versionRange="[34,)"
    ordering="NONE"
    side="BOTH"
+
+[modproperties.kiwi]
+    catalogueItemIcon="minecraft:bookshelf" #Support for Catalogue mod
