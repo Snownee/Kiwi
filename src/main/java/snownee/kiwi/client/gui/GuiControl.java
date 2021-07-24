@@ -132,23 +132,23 @@ public class GuiControl implements IMessageHandler {
 			c.onDestroy();
 		}
 		components.clear();
-		this.mc = null;
-		this.messageHandler = null;
+		mc = null;
+		messageHandler = null;
 	}
 
 	@Override
 	public int messageReceived(GuiControl control, Component component, int param1, int param2) {
-		return this.messageHandler.messageReceived(control, component, param1, param2);
+		return messageHandler.messageReceived(control, component, param1, param2);
 	}
 
 	@Override
 	public int messageReceived(GuiControl control, Component component, CompoundNBT data) {
-		return this.messageHandler.messageReceived(control, component, data);
+		return messageHandler.messageReceived(control, component, data);
 	}
 
 	@Override
 	public void setTooltip(GuiControl control, Component component, List<String> tooltip, FontRenderer fontRenderer) {
-		this.messageHandler.setTooltip(control, component, tooltip, fontRenderer);
+		messageHandler.setTooltip(control, component, tooltip, fontRenderer);
 	}
 
 }

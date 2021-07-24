@@ -16,9 +16,9 @@ public @interface RenderLayer {
 	Layer value();
 
 	enum Layer {
-		CUTOUT_MIPPED(() -> () -> RenderType.getCutoutMipped()),
-		CUTOUT(() -> () -> RenderType.getCutout()),
-		TRANSLUCENT(() -> () -> RenderType.getTranslucent());
+		CUTOUT_MIPPED(() -> () -> RenderType.cutoutMipped()),
+		CUTOUT(() -> () -> RenderType.cutout()),
+		TRANSLUCENT(() -> () -> RenderType.translucent());
 
 		private final Supplier<Supplier<RenderType>> supplier;
 

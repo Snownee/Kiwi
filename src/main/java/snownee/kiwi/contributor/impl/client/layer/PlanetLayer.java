@@ -33,14 +33,14 @@ public class PlanetLayer extends RewardLayer {
 		if (entitylivingbaseIn.isInvisible()) {
 			return;
 		}
-		matrixStackIn.push();
+		matrixStackIn.pushPose();
 		matrixStackIn.translate(0, -0.6, 0);
-		matrixStackIn.rotate(Vector3f.YP.rotationDegrees(-ageInTicks));
+		matrixStackIn.mulPose(Vector3f.YP.rotationDegrees(-ageInTicks));
 		matrixStackIn.scale(1.2f, 1.2f, 1.2f);
-		this.modelPlanet.setRotationAngles(entitylivingbaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-		IVertexBuilder ivertexbuilder = ItemRenderer.getBuffer(bufferIn, RenderType.getEntityTranslucent(TEXTURE), false, false);
-		this.modelPlanet.render(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
-		matrixStackIn.pop();
+		modelPlanet.setupAnim(entitylivingbaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
+		IVertexBuilder ivertexbuilder = ItemRenderer.getFoilBuffer(bufferIn, RenderType.entityTranslucent(TEXTURE), false, false);
+		modelPlanet.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+		matrixStackIn.popPose();
 	}
 
 }

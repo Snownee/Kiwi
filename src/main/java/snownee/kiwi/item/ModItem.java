@@ -33,7 +33,7 @@ public class ModItem extends Item {
 
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
+	public void appendHoverText(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
 		if (!KiwiClientConfig.globalTooltip)
 			addTip(stack, tooltip, flagIn);
 	}
@@ -47,40 +47,40 @@ public class ModItem extends Item {
 		boolean shift = Screen.hasShiftDown();
 		boolean ctrl = Screen.hasControlDown();
 		if (shift == ctrl) {
-			key = stack.getTranslationKey() + ".tip";
+			key = stack.getDescriptionId() + ".tip";
 		} else if (shift) {
-			key = stack.getTranslationKey() + ".tip.shift";
+			key = stack.getDescriptionId() + ".tip.shift";
 		} else { // ctrl
-			key = stack.getTranslationKey() + ".tip.ctrl";
+			key = stack.getDescriptionId() + ".tip.ctrl";
 		}
-		boolean hasKey = I18n.hasKey(key);
+		boolean hasKey = I18n.exists(key);
 		if (!hasKey && (shift != ctrl)) {
 			return;
 		}
 		if (hasKey) {
-			List<String> lines = Lists.newArrayList(I18n.format(key).split("\n"));
+			List<String> lines = Lists.newArrayList(I18n.get(key).split("\n"));
 
 			FontRenderer fontRenderer = stack.getItem().getFontRenderer(stack);
 			if (fontRenderer == null) {
-				fontRenderer = Minecraft.getInstance().fontRenderer;
+				fontRenderer = Minecraft.getInstance().font;
 			}
 			FontRenderer fontRenderer2 = fontRenderer;
-			int width = Math.max(fontRenderer.getStringWidth(tooltip.get(0).getString()), KiwiClientConfig.tooltipWrapWidth1);
+			int width = Math.max(fontRenderer.width(tooltip.get(0).getString()), KiwiClientConfig.tooltipWrapWidth1);
 			/* off */
             tooltip.addAll(
                     lines.stream()
-                    .map(s -> fontRenderer2.getCharacterManager().func_238365_g_(s, width, Style.EMPTY))
+                    .map(s -> fontRenderer2.getSplitter().splitLines(s, width, Style.EMPTY))
                     .flatMap(Collection::stream)
                     .map(ITextProperties::getString)
                     .map(StringTextComponent::new)
-                    .peek(c -> c.mergeStyle(TextFormatting.GRAY)) //FIXME: Style is empty after wrapping line
+                    .peek(c -> c.withStyle(TextFormatting.GRAY)) //FIXME: Style is empty after wrapping line
                     .collect(Collectors.toList())
             );
             /* on */
 		}
 		if (shift == ctrl) {
-			boolean hasShiftKey = I18n.hasKey(key + ".shift");
-			boolean hasCtrlKey = I18n.hasKey(key + ".ctrl");
+			boolean hasShiftKey = I18n.exists(key + ".shift");
+			boolean hasCtrlKey = I18n.exists(key + ".ctrl");
 			if (hasShiftKey && hasCtrlKey) {
 				tooltip.add(new TranslationTextComponent("tip.kiwi.press_shift_or_ctrl"));
 			} else if (hasShiftKey) {

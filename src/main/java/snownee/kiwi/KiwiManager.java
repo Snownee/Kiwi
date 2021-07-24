@@ -16,9 +16,7 @@ public final class KiwiManager {
 	public static final Map<ResourceLocation, ModuleInfo> MODULES = Maps.newLinkedHashMap();
 
 	static {
-		CrashReportExtender.registerCrashCallable("Kiwi Modules", () -> {
-			return "\n" + MODULES.keySet().stream().map(ResourceLocation::toString).sorted(StringUtils::compare).collect(Collectors.joining("\n\t\t", "\t\t", ""));
-		});
+		CrashReportExtender.registerCrashCallable("Kiwi Modules", () -> ("\n" + MODULES.keySet().stream().map(ResourceLocation::toString).sorted(StringUtils::compare).collect(Collectors.joining("\n\t\t", "\t\t", ""))));
 	}
 
 	private KiwiManager() {

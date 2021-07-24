@@ -97,9 +97,9 @@ public class TextureTile extends BaseTile {
 	}
 
 	public static void setTexture(Map<String, String> textures, String key, Item item) {
-		Block block = Block.getBlockFromItem(item);
+		Block block = Block.byItem(item);
 		if (block != null) {
-			setTexture(textures, key, block.getDefaultState());
+			setTexture(textures, key, block.defaultBlockState());
 		}
 	}
 
@@ -113,12 +113,12 @@ public class TextureTile extends BaseTile {
 	@SuppressWarnings("deprecation")
 	@OnlyIn(Dist.CLIENT)
 	public static String getTextureFromState(BlockState state) {
-		return Util.trimRL(Minecraft.getInstance().getBlockRendererDispatcher().getBlockModelShapes().getTexture(state).getName());
+		return Util.trimRL(Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getParticleIcon(state).getName());
 	}
 
 	@Override
 	public void refresh() {
-		if (world != null && world.isRemote) {
+		if (level != null && level.isClientSide) {
 			requestModelDataUpdate();
 		} else {
 			super.refresh();
@@ -127,7 +127,7 @@ public class TextureTile extends BaseTile {
 
 	@Override
 	public void onLoad() {
-		setTexture("top", Blocks.DIAMOND_BLOCK.getDefaultState());
+		setTexture("top", Blocks.DIAMOND_BLOCK.defaultBlockState());
 		super.requestModelDataUpdate();
 	}
 
@@ -137,8 +137,8 @@ public class TextureTile extends BaseTile {
 			return;
 		}
 		super.requestModelDataUpdate();
-		if (world != null && world.isRemote) {
-			world.notifyBlockUpdate(pos, getBlockState(), getBlockState(), 8);
+		if (level != null && level.isClientSide) {
+			level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 8);
 		}
 	}
 
@@ -157,7 +157,7 @@ public class TextureTile extends BaseTile {
 				if (marks == null) {
 					marks = Maps.newHashMap();
 				}
-				ResourceLocation locator = ResourceLocation.tryCreate(helper.getString(k));
+				ResourceLocation locator = ResourceLocation.tryParse(helper.getString(k));
 				if (locator != null) {
 					Item item = ForgeRegistries.ITEMS.getValue(locator);
 					if (item != null) {
@@ -183,7 +183,7 @@ public class TextureTile extends BaseTile {
 				continue;
 			if (EffectiveSide.get().isClient() && v.startsWith("{")) {
 				try {
-					CompoundNBT stateNbt = JsonToNBT.getTagFromJson(v);
+					CompoundNBT stateNbt = JsonToNBT.parseTag(v);
 					BlockState state = NBTUtil.readBlockState(stateNbt);
 					v = getTextureFromState(state);
 				} catch (CommandSyntaxException e) {

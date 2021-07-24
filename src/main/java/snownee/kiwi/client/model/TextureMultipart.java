@@ -28,7 +28,7 @@ import net.minecraftforge.client.model.data.IDynamicBakedModel;
 import net.minecraftforge.client.model.data.IModelData;
 
 /**
- * 
+ *
  * @since 2.3.0
  * @author Snownee
  *
@@ -38,10 +38,10 @@ import net.minecraftforge.client.model.data.IModelData;
 public class TextureMultipart implements IDynamicBakedModel {
 	private final List<Pair<Predicate<BlockState>, IBakedModel>> selectors;
 	private final IBakedModel originalBaked;
-	private final Map<BlockState, BitSet> field_210277_g = new Object2ObjectOpenCustomHashMap<>(Util.identityHashStrategy());
+	private final Map<BlockState, BitSet> field_210277_g = new Object2ObjectOpenCustomHashMap<>(Util.identityStrategy());
 
 	public TextureMultipart(List<Pair<Predicate<BlockState>, IBakedModel>> p_i48273_1_) {
-		this.selectors = p_i48273_1_;
+		selectors = p_i48273_1_;
 		originalBaked = p_i48273_1_.iterator().next().getRight();
 	}
 
@@ -50,18 +50,18 @@ public class TextureMultipart implements IDynamicBakedModel {
 		if (state == null) {
 			return Collections.emptyList();
 		} else {
-			BitSet bitset = this.field_210277_g.get(state);
+			BitSet bitset = field_210277_g.get(state);
 			if (bitset == null) {
 				bitset = new BitSet();
 
-				for (int i = 0; i < this.selectors.size(); ++i) {
-					Pair<Predicate<BlockState>, IBakedModel> pair = this.selectors.get(i);
+				for (int i = 0; i < selectors.size(); ++i) {
+					Pair<Predicate<BlockState>, IBakedModel> pair = selectors.get(i);
 					if (pair.getLeft().test(state)) {
 						bitset.set(i);
 					}
 				}
 
-				this.field_210277_g.put(state, bitset);
+				field_210277_g.put(state, bitset);
 			}
 
 			List<BakedQuad> list = Lists.newArrayList();
@@ -69,7 +69,7 @@ public class TextureMultipart implements IDynamicBakedModel {
 
 			for (int j = 0; j < bitset.length(); ++j) {
 				if (bitset.get(j)) {
-					list.addAll(this.selectors.get(j).getRight().getQuads(state, side, new Random(k), extraData));
+					list.addAll(selectors.get(j).getRight().getQuads(state, side, new Random(k), extraData));
 				}
 			}
 
@@ -78,8 +78,8 @@ public class TextureMultipart implements IDynamicBakedModel {
 	}
 
 	@Override
-	public boolean isAmbientOcclusion() {
-		return originalBaked.isAmbientOcclusion();
+	public boolean useAmbientOcclusion() {
+		return originalBaked.useAmbientOcclusion();
 	}
 
 	@Override
@@ -88,13 +88,13 @@ public class TextureMultipart implements IDynamicBakedModel {
 	}
 
 	@Override
-	public boolean isBuiltInRenderer() {
+	public boolean isCustomRenderer() {
 		return false;
 	}
 
 	@Override
-	public TextureAtlasSprite getParticleTexture() {
-		return originalBaked.getParticleTexture();
+	public TextureAtlasSprite getParticleIcon() {
+		return originalBaked.getParticleIcon();
 	}
 
 	@Override
@@ -103,8 +103,8 @@ public class TextureMultipart implements IDynamicBakedModel {
 	}
 
 	@Override
-	public ItemCameraTransforms getItemCameraTransforms() {
-		return originalBaked.getItemCameraTransforms();
+	public ItemCameraTransforms getTransforms() {
+		return originalBaked.getTransforms();
 	}
 
 	@Override
@@ -117,16 +117,16 @@ public class TextureMultipart implements IDynamicBakedModel {
 		private final List<Pair<Predicate<BlockState>, IBakedModel>> selectors = Lists.newArrayList();
 
 		public void putModel(Predicate<BlockState> predicate, IBakedModel model) {
-			this.selectors.add(Pair.of(predicate, model));
+			selectors.add(Pair.of(predicate, model));
 		}
 
 		public IBakedModel build() {
-			return new TextureMultipart(this.selectors);
+			return new TextureMultipart(selectors);
 		}
 	}
 
 	@Override
-	public boolean isSideLit() {
-		return originalBaked.isSideLit();
+	public boolean usesBlockLight() {
+		return originalBaked.usesBlockLight();
 	}
 }

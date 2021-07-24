@@ -17,23 +17,23 @@ public class InvHandlerWrapper implements IInventory {
 	}
 
 	@Override
-	public void clear() {
-		int size = getSizeInventory();
+	public void clearContent() {
+		int size = getContainerSize();
 		for (int i = 0; i < size; i++) {
-			removeStackFromSlot(i);
+			removeItemNoUpdate(i);
 		}
 	}
 
 	@Override
-	public int getSizeInventory() {
+	public int getContainerSize() {
 		return handler.getSlots();
 	}
 
 	@Override
 	public boolean isEmpty() {
-		int size = getSizeInventory();
+		int size = getContainerSize();
 		for (int i = 0; i < size; i++) {
-			if (!getStackInSlot(i).isEmpty()) {
+			if (!getItem(i).isEmpty()) {
 				return false;
 			}
 		}
@@ -41,44 +41,44 @@ public class InvHandlerWrapper implements IInventory {
 	}
 
 	@Override
-	public ItemStack getStackInSlot(int index) {
+	public ItemStack getItem(int index) {
 		return handler.getStackInSlot(index);
 	}
 
 	@Override
-	public ItemStack decrStackSize(int index, int count) {
-		ItemStack stack = getStackInSlot(index);
+	public ItemStack removeItem(int index, int count) {
+		ItemStack stack = getItem(index);
 		if (stack.isEmpty()) {
 			return ItemStack.EMPTY;
 		}
 		ItemStack ret = stack.split(count);
-		setInventorySlotContents(index, stack);
+		setItem(index, stack);
 		return ret;
 	}
 
 	@Override
-	public ItemStack removeStackFromSlot(int index) {
-		ItemStack stack = getStackInSlot(index);
-		setInventorySlotContents(index, ItemStack.EMPTY);
+	public ItemStack removeItemNoUpdate(int index) {
+		ItemStack stack = getItem(index);
+		setItem(index, ItemStack.EMPTY);
 		return stack;
 	}
 
 	@Override
-	public void setInventorySlotContents(int index, ItemStack stack) {
+	public void setItem(int index, ItemStack stack) {
 		handler.setStackInSlot(index, stack);
 	}
 
 	@Override
-	public void markDirty() {
+	public void setChanged() {
 	}
 
 	@Override
-	public boolean isUsableByPlayer(PlayerEntity player) {
+	public boolean stillValid(PlayerEntity player) {
 		return true;
 	}
 
 	@Override
-	public boolean isItemValidForSlot(int index, ItemStack stack) {
+	public boolean canPlaceItem(int index, ItemStack stack) {
 		return handler.isItemValid(index, stack);
 	}
 

@@ -44,11 +44,11 @@ public class TestItem extends ModItem {
 	//    }
 
 	@Override
-	public ActionResultType onItemUse(ItemUseContext context) {
-		if (!context.getWorld().isRemote) {
-			Scheduler.add(new MyTask(context.getWorld(), Phase.END, "?"));
+	public ActionResultType useOn(ItemUseContext context) {
+		if (!context.getLevel().isClientSide) {
+			Scheduler.add(new MyTask(context.getLevel(), Phase.END, "?"));
 		}
-		World world = context.getWorld();
+		World world = context.getLevel();
 		Scheduler.add(new SimpleWorldTask(world, Phase.END, tick -> {
 			if (tick >= 50) {
 				System.out.println("五十已到");
@@ -70,7 +70,7 @@ public class TestItem extends ModItem {
 	}
 
 	@Override
-	public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn) {
+	public ActionResult<ItemStack> use(World worldIn, PlayerEntity playerIn, Hand handIn) {
 		//        if (worldIn.isRemote)
 		//        {
 		//            Vector3d start = playerIn.getEyePosition(1).add(playerIn.getLookVec().scale(3));
@@ -81,7 +81,7 @@ public class TestItem extends ModItem {
 		//            }
 		//        }
 
-		ItemStack stack = playerIn.getHeldItem(handIn);
+		ItemStack stack = playerIn.getItemInHand(handIn);
 		//        NBTHelper data = NBTHelper.of(stack);
 		//        RayTraceResult result = rayTrace(worldIn, playerIn, FluidMode.ANY);
 		//        if (result != null && result.getType() == Type.BLOCK)
@@ -95,7 +95,7 @@ public class TestItem extends ModItem {
 		//        }
 		List<BlockPos> list = Lists.newLinkedList();
 		start = playerIn.getEyePosition(1);
-		end = start.add(playerIn.getLookVec().scale(15));
+		end = start.add(playerIn.getLookAngle().scale(15));
 		MathUtil.posOnLine(start, end, list);
 		posList = list;
 

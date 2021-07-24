@@ -107,7 +107,7 @@ public final class Scheduler extends WorldSavedData {
 	}
 
 	@Override
-	public void read(CompoundNBT nbt) {
+	public void load(CompoundNBT nbt) {
 		ListNBT list = nbt.getList("tasks", Constants.NBT.TAG_COMPOUND);
 		for (int i = 0; i < list.size(); i++) {
 			Task task = deserialize(list.getCompound(i));
@@ -118,7 +118,7 @@ public final class Scheduler extends WorldSavedData {
 	}
 
 	@Override
-	public CompoundNBT write(CompoundNBT data) {
+	public CompoundNBT save(CompoundNBT data) {
 		ListNBT list = new ListNBT();
 		for (Task task : taskMap.values()) {
 			CompoundNBT nbt = serialize(task);

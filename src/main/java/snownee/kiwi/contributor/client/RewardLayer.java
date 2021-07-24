@@ -48,7 +48,7 @@ public class RewardLayer extends LayerRenderer<AbstractClientPlayerEntity, Playe
 				if (provider == null) {
 					Contributors.PLAYER_EFFECTS.remove(name);
 				} else {
-					renderer = provider.createRenderer(entityRenderer, id.getPath());
+					renderer = provider.createRenderer(this.renderer, id.getPath());
 					player2renderer.put(name, renderer);
 				}
 			}

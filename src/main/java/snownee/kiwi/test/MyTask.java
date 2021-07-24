@@ -30,7 +30,7 @@ public class MyTask extends SimpleWorldTask {
 			MinecraftServer server = ticker.getWorld().getServer();
 			if (server != null) {
 				TextComponent text = new StringTextComponent(words);
-				server.getPlayerList()./*sendMessage*/func_232641_a_(text, ChatType.SYSTEM, Util.DUMMY_UUID);
+				server.getPlayerList().broadcastMessage(text, ChatType.SYSTEM, Util.NIL_UUID);
 			}
 			return true;
 		} else {

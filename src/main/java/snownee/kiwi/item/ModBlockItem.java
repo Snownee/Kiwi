@@ -33,25 +33,25 @@ public class ModBlockItem extends BlockItem {
 	}
 
 	@Override
-	protected boolean onBlockPlaced(BlockPos pos, World worldIn, PlayerEntity player, ItemStack stack, BlockState state) {
-		TileEntity tile = worldIn.getTileEntity(pos);
-		if (worldIn.isRemote && tile != null && INSTANT_UPDATE_TILES.contains(tile.getType())) {
-			CompoundNBT data = stack.getChildTag("BlockEntityTag");
+	protected boolean updateCustomBlockEntityTag(BlockPos pos, World worldIn, PlayerEntity player, ItemStack stack, BlockState state) {
+		TileEntity tile = worldIn.getBlockEntity(pos);
+		if (worldIn.isClientSide && tile != null && INSTANT_UPDATE_TILES.contains(tile.getType())) {
+			CompoundNBT data = stack.getTagElement("BlockEntityTag");
 			if (data != null) {
 				data = data.copy();
 				data.putInt("x", pos.getX());
 				data.putInt("y", pos.getY());
 				data.putInt("z", pos.getZ());
-				tile.read(state, data);
+				tile.load(state, data);
 			}
 		}
-		return super.onBlockPlaced(pos, worldIn, player, stack, state);
+		return super.updateCustomBlockEntityTag(pos, worldIn, player, stack, state);
 	}
 
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
-		super.addInformation(stack, worldIn, tooltip, flagIn);
+	public void appendHoverText(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
+		super.appendHoverText(stack, worldIn, tooltip, flagIn);
 		if (!KiwiClientConfig.globalTooltip)
 			ModItem.addTip(stack, tooltip, flagIn);
 	}

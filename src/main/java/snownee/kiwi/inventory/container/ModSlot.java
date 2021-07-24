@@ -14,8 +14,8 @@ public class ModSlot extends Slot {
 	}
 
 	@Override
-	public boolean isItemValid(ItemStack stack) {
-		return inventory.isItemValidForSlot(slotNumber, stack);
+	public boolean mayPlace(ItemStack stack) {
+		return container.canPlaceItem(index, stack);
 	}
 
 }

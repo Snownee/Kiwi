@@ -29,9 +29,7 @@ import net.minecraftforge.registries.RegistryManager;
  */
 public class ForgeRegistryArgument<T extends IForgeRegistryEntry<T>> implements ArgumentType<T> {
 
-	public static final DynamicCommandExceptionType BAD_ID = new DynamicCommandExceptionType(pair -> {
-		return new TranslationTextComponent("argument.cuisine.registry.id.invalid", ((Pair) pair).getLeft(), ((Pair) pair).getRight());
-	});
+	public static final DynamicCommandExceptionType BAD_ID = new DynamicCommandExceptionType(pair -> new TranslationTextComponent("argument.cuisine.registry.id.invalid", ((Pair) pair).getLeft(), ((Pair) pair).getRight()));
 
 	private final IForgeRegistry<T> registry;
 	private Collection<String> examples;
@@ -53,7 +51,7 @@ public class ForgeRegistryArgument<T extends IForgeRegistryEntry<T>> implements 
 
 	@Override
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-		return ISuggestionProvider.suggestIterable(registry.getKeys(), builder);
+		return ISuggestionProvider.suggestResource(registry.getKeys(), builder);
 	}
 
 	@Override
@@ -75,17 +73,17 @@ public class ForgeRegistryArgument<T extends IForgeRegistryEntry<T>> implements 
 	public static class Serializer implements IArgumentSerializer<ForgeRegistryArgument<? extends IForgeRegistryEntry>> {
 
 		@Override
-		public void write(ForgeRegistryArgument<? extends IForgeRegistryEntry> argument, PacketBuffer buffer) {
+		public void serializeToNetwork(ForgeRegistryArgument<? extends IForgeRegistryEntry> argument, PacketBuffer buffer) {
 			buffer.writeResourceLocation(argument.registry.getRegistryName());
 		}
 
 		@Override
-		public ForgeRegistryArgument<? extends IForgeRegistryEntry> read(PacketBuffer buffer) {
+		public ForgeRegistryArgument<? extends IForgeRegistryEntry> deserializeFromNetwork(PacketBuffer buffer) {
 			return new ForgeRegistryArgument(RegistryManager.ACTIVE.getRegistry(buffer.readResourceLocation()));
 		}
 
 		@Override
-		public void write(ForgeRegistryArgument<? extends IForgeRegistryEntry> argument, JsonObject json) {
+		public void serializeToJson(ForgeRegistryArgument<? extends IForgeRegistryEntry> argument, JsonObject json) {
 			json.addProperty("registry", argument.registry.getRegistryName().toString());
 		}
 

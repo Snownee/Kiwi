@@ -19,17 +19,17 @@ public abstract class Recipe<C extends IInventory> implements IRecipe<C> {
 	}
 
 	@Override
-	public boolean canFit(int width, int height) {
+	public boolean canCraftInDimensions(int width, int height) {
 		return true;
 	}
 
 	@Override
-	public ItemStack getCraftingResult(C inv) {
+	public ItemStack assemble(C inv) {
 		return ItemStack.EMPTY;
 	}
 
 	@Override
-	public ItemStack getRecipeOutput() {
+	public ItemStack getResultItem() {
 		return ItemStack.EMPTY;
 	}
 

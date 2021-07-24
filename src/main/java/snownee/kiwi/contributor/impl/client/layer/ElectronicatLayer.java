@@ -28,8 +28,8 @@ public class ElectronicatLayer extends RewardLayer {
 
 	public ElectronicatLayer(IEntityRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> entityRendererIn) {
 		super(entityRendererIn);
-		model = new ElectronicatModel<>(entityRendererIn.getEntityModel());
-		emissive = new ElectronicatModel.Emissive<>(entityRendererIn.getEntityModel());
+		model = new ElectronicatModel<>(entityRendererIn.getModel());
+		emissive = new ElectronicatModel.Emissive<>(entityRendererIn.getModel());
 	}
 
 	@Override
@@ -41,21 +41,21 @@ public class ElectronicatLayer extends RewardLayer {
 		//        if (itemstack.getItem() instanceof ElytraItem) {
 		//            return;
 		//        }
-		ItemStack itemstack = entitylivingbaseIn.getItemStackFromSlot(EquipmentSlotType.HEAD);
+		ItemStack itemstack = entitylivingbaseIn.getItemBySlot(EquipmentSlotType.HEAD);
 		if (!itemstack.isEmpty()) {
 			return;
 		}
-		matrixStackIn.push();
-		model.isChild = entitylivingbaseIn.isChild();
-		emissive.isChild = entitylivingbaseIn.isChild();
-		model.setRotationAngles(entitylivingbaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-		emissive.setRotationAngles(entitylivingbaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-		entityRenderer.getEntityModel().bipedHead.translateRotate(matrixStackIn);
-		IVertexBuilder ivertexbuilder = ItemRenderer.getBuffer(bufferIn, RenderType.getEntityCutout(TEXTURE), false, false);
-		model.render(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
-		ivertexbuilder = ItemRenderer.getBuffer(bufferIn, RenderType.getEntityCutout(TEXTURE), false, false);
-		emissive.render(matrixStackIn, ivertexbuilder, 15728880, OverlayTexture.NO_OVERLAY, 0.75F + MathHelper.sin(ageInTicks * 0.05F) * 0.25F, 1.0F, 1.0F, 1.0F);
-		matrixStackIn.pop();
+		matrixStackIn.pushPose();
+		model.young = entitylivingbaseIn.isBaby();
+		emissive.young = entitylivingbaseIn.isBaby();
+		model.setupAnim(entitylivingbaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
+		emissive.setupAnim(entitylivingbaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
+		renderer.getModel().head.translateAndRotate(matrixStackIn);
+		IVertexBuilder ivertexbuilder = ItemRenderer.getFoilBuffer(bufferIn, RenderType.entityCutout(TEXTURE), false, false);
+		model.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+		ivertexbuilder = ItemRenderer.getFoilBuffer(bufferIn, RenderType.entityCutout(TEXTURE), false, false);
+		emissive.renderToBuffer(matrixStackIn, ivertexbuilder, 15728880, OverlayTexture.NO_OVERLAY, 0.75F + MathHelper.sin(ageInTicks * 0.05F) * 0.25F, 1.0F, 1.0F, 1.0F);
+		matrixStackIn.popPose();
 	}
 
 }

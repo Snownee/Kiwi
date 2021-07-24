@@ -22,7 +22,7 @@ public abstract class Component {
 		this.parent = parent;
 		this.width = width;
 		this.height = height;
-		this.visible = true;
+		visible = true;
 	}
 
 	public int getZLevel() {

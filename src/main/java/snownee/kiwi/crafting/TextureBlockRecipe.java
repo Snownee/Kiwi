@@ -67,7 +67,7 @@ public class TextureBlockRecipe extends DynamicShapedRecipe {
 						}
 						result = Maps.newHashMapWithExpectedSize(keyCount);
 					}
-					ItemStack slotStack = inv.getStackInSlot(x + y * inv.getWidth());
+					ItemStack slotStack = inv.getItem(x + y * inv.getWidth());
 					Ingredient ingredient = getIngredients().get(x - startX + (y - startY) * getRecipeWidth());
 					if (!(ingredient instanceof FullBlockIngredient) && !FullBlockIngredient.isTextureBlock(slotStack)) {
 						return null;
@@ -76,7 +76,7 @@ public class TextureBlockRecipe extends DynamicShapedRecipe {
 					if (stack.isEmpty()) {
 						result.put(key, slotStack);
 					} else {
-						if (!stack.isItemEqual(slotStack)) {
+						if (!stack.sameItem(slotStack)) {
 							return null;
 						}
 					}
@@ -91,7 +91,7 @@ public class TextureBlockRecipe extends DynamicShapedRecipe {
 	}
 
 	@Override
-	public ItemStack getCraftingResult(CraftingInventory inv) {
+	public ItemStack assemble(CraftingInventory inv) {
 		int[] pos = getMatchPos(inv);
 		if (pos == null) {
 			return ItemStack.EMPTY;
@@ -100,12 +100,12 @@ public class TextureBlockRecipe extends DynamicShapedRecipe {
 		if (result == null) {
 			return ItemStack.EMPTY;
 		}
-		ItemStack stack = getRecipeOutput().copy();
-		NBTHelper data = NBTHelper.of(stack.getOrCreateChildTag("BlockEntityTag"));
+		ItemStack stack = getResultItem().copy();
+		NBTHelper data = NBTHelper.of(stack.getOrCreateTagElement("BlockEntityTag"));
 		for (Entry<String, ItemStack> e : result.entrySet()) {
 			Item item = e.getValue().getItem();
 			if (item instanceof BlockItem) {
-				BlockState state = ((BlockItem) item).getBlock().getDefaultState();
+				BlockState state = ((BlockItem) item).getBlock().defaultBlockState();
 				for (String k : e.getKey().split(",")) {
 					String texture = NBTHelper.of(e.getValue()).getString("BlockEntityTag.Textures." + k);
 					if (texture == null) {
@@ -130,17 +130,17 @@ public class TextureBlockRecipe extends DynamicShapedRecipe {
 
 	public static class Serializer extends ForgeRegistryEntry<IRecipeSerializer<?>> implements IRecipeSerializer<TextureBlockRecipe> {
 		@Override
-		public TextureBlockRecipe read(ResourceLocation recipeId, JsonObject json) {
-			String group = JSONUtils.getString(json, "group", "");
-			Map<String, Ingredient> ingredientMap = ShapedRecipe.deserializeKey(JSONUtils.getJsonObject(json, "key"));
-			String[] pattern = ShapedRecipe.shrink(ShapedRecipe.patternFromJson(JSONUtils.getJsonArray(json, "pattern")));
+		public TextureBlockRecipe fromJson(ResourceLocation recipeId, JsonObject json) {
+			String group = JSONUtils.getAsString(json, "group", "");
+			Map<String, Ingredient> ingredientMap = ShapedRecipe.keyFromJson(JSONUtils.getAsJsonObject(json, "key"));
+			String[] pattern = ShapedRecipe.shrink(ShapedRecipe.patternFromJson(JSONUtils.getAsJsonArray(json, "pattern")));
 			int width = pattern[0].length();
 			int height = pattern.length;
-			NonNullList<Ingredient> nonnulllist = ShapedRecipe.deserializeIngredients(pattern, ingredientMap, width, height);
-			ItemStack itemstack = ShapedRecipe.deserializeItem(JSONUtils.getJsonObject(json, "result"));
+			NonNullList<Ingredient> nonnulllist = ShapedRecipe.dissolvePattern(pattern, ingredientMap, width, height);
+			ItemStack itemstack = ShapedRecipe.itemFromJson(JSONUtils.getAsJsonObject(json, "result"));
 
 			Map<String, String> texMap = Maps.newHashMap();
-			for (Entry<String, JsonElement> entry : JSONUtils.getJsonObject(json, "texture").entrySet()) {
+			for (Entry<String, JsonElement> entry : JSONUtils.getAsJsonObject(json, "texture").entrySet()) {
 				if (entry.getKey().length() != 1) {
 					throw new JsonSyntaxException("Invalid key entry: '" + entry.getKey() + "' is an invalid symbol (must be 1 character only).");
 				}
@@ -161,9 +161,9 @@ public class TextureBlockRecipe extends DynamicShapedRecipe {
 			}
 			List<String> keys = Lists.newArrayListWithExpectedSize(width * height);
 			Set<String> set = Sets.newHashSet(texMap.keySet());
-			for (int i = 0; i < pattern.length; ++i) {
-				for (int j = 0; j < pattern[i].length(); ++j) {
-					String s = pattern[i].substring(j, j + 1);
+			for (String element : pattern) {
+				for (int j = 0; j < element.length(); ++j) {
+					String s = element.substring(j, j + 1);
 					if (texMap.containsKey(s)) {
 						keys.add(texMap.get(s));
 						set.remove(s);
@@ -176,52 +176,52 @@ public class TextureBlockRecipe extends DynamicShapedRecipe {
 				throw new JsonSyntaxException("Key defines symbols that aren't used in pattern: " + set);
 			}
 			List<String> marks;
-			if (JSONUtils.isJsonArray(json, "mark")) {
-				JsonArray array = JSONUtils.getJsonArray(json, "mark");
+			if (JSONUtils.isArrayNode(json, "mark")) {
+				JsonArray array = JSONUtils.getAsJsonArray(json, "mark");
 				marks = Lists.newArrayListWithCapacity(array.size());
 				array.forEach(e -> marks.add(e.getAsString()));
 			} else {
-				String mark = JSONUtils.getString(json, "mark", "");
+				String mark = JSONUtils.getAsString(json, "mark", "");
 				marks = Collections.singletonList(mark);
 			}
 			return new TextureBlockRecipe(recipeId, group, width, height, nonnulllist, itemstack, keys, marks);
 		}
 
 		@Override
-		public TextureBlockRecipe read(ResourceLocation recipeId, PacketBuffer buffer) {
+		public TextureBlockRecipe fromNetwork(ResourceLocation recipeId, PacketBuffer buffer) {
 			int width = buffer.readVarInt();
 			int height = buffer.readVarInt();
-			String s = buffer.readString();
+			String s = buffer.readUtf(256);
 			NonNullList<Ingredient> nonnulllist = NonNullList.withSize(width * height, Ingredient.EMPTY);
 			for (int k = 0; k < nonnulllist.size(); ++k) {
-				nonnulllist.set(k, Ingredient.read(buffer));
+				nonnulllist.set(k, Ingredient.fromNetwork(buffer));
 			}
-			ItemStack itemstack = buffer.readItemStack();
+			ItemStack itemstack = buffer.readItem();
 
 			List<String> keys = Lists.newArrayListWithExpectedSize(width * height);
 			for (int i = 0; i < width * height; i++) {
-				String k = buffer.readString();
+				String k = buffer.readUtf(16);
 				keys.add(k.isEmpty() ? null : k);
 			}
-			List<String> marks = ImmutableList.copyOf(buffer.readString().split(","));
+			List<String> marks = ImmutableList.copyOf(buffer.readUtf(256).split(","));
 			return new TextureBlockRecipe(recipeId, s, width, height, nonnulllist, itemstack, keys, marks);
 		}
 
 		@Override
-		public void write(PacketBuffer buffer, TextureBlockRecipe recipe) {
+		public void toNetwork(PacketBuffer buffer, TextureBlockRecipe recipe) {
 			buffer.writeVarInt(recipe.getRecipeWidth());
 			buffer.writeVarInt(recipe.getRecipeHeight());
-			buffer.writeString(recipe.getGroup());
+			buffer.writeUtf(recipe.getGroup());
 			for (Ingredient ingredient : recipe.getIngredients()) {
-				ingredient.write(buffer);
+				ingredient.toNetwork(buffer);
 			}
-			buffer.writeItemStack(recipe.getRecipeOutput());
+			buffer.writeItem(recipe.getResultItem());
 
 			for (int i = 0; i < recipe.getRecipeWidth() * recipe.getRecipeHeight(); i++) {
 				String k = recipe.textureKeys.get(i);
-				buffer.writeString(k == null ? "" : k);
+				buffer.writeUtf(k == null ? "" : k);
 			}
-			buffer.writeString(StringUtils.join(recipe.marks), ',');
+			buffer.writeUtf(StringUtils.join(recipe.marks), ',');
 		}
 	}
 }

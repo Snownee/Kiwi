@@ -45,22 +45,22 @@ public final class DeferredActions { //TODO brewing
 
 	public static void setFireInfo(Block blockIn, int encouragement, int flammability) {
 		add(() -> {
-			((FireBlock) Blocks.FIRE).setFireInfo(blockIn, encouragement, flammability);
+			((FireBlock) Blocks.FIRE).setFlammable(blockIn, encouragement, flammability);
 		});
 	}
 
 	public static void registerHoeConversion(Block k, BlockState v) {
 		add(() -> {
-			HoeItem.HOE_LOOKUP.put(k, v);
+			HoeItem.TILLABLES.put(k, v);
 		});
 	}
 
 	public static void registerAxeConversion(Block k, Block v) {
 		add(() -> {
-			if (AxeItem.BLOCK_STRIPPING_MAP instanceof ImmutableMap) {
-				AxeItem.BLOCK_STRIPPING_MAP = Maps.newHashMap(AxeItem.BLOCK_STRIPPING_MAP);
+			if (AxeItem.STRIPABLES instanceof ImmutableMap) {
+				AxeItem.STRIPABLES = Maps.newHashMap(AxeItem.STRIPABLES);
 			}
-			AxeItem.BLOCK_STRIPPING_MAP.put(k, v);
+			AxeItem.STRIPABLES.put(k, v);
 		});
 	}
 
@@ -69,34 +69,34 @@ public final class DeferredActions { //TODO brewing
 	 */
 	public static void registerShovelConversion(Block k, BlockState v) {
 		add(() -> {
-			if (ShovelItem.SHOVEL_LOOKUP instanceof ImmutableMap) {
-				ShovelItem.SHOVEL_LOOKUP = Maps.newHashMap(ShovelItem.SHOVEL_LOOKUP);
+			if (ShovelItem.FLATTENABLES instanceof ImmutableMap) {
+				ShovelItem.FLATTENABLES = Maps.newHashMap(ShovelItem.FLATTENABLES);
 			}
-			ShovelItem.SHOVEL_LOOKUP.put(k, v);
+			ShovelItem.FLATTENABLES.put(k, v);
 		});
 	}
 
 	public static void registerCompostable(float chance, IItemProvider itemIn) {
 		add(() -> {
-			ComposterBlock.CHANCES.put(itemIn.asItem(), chance);
+			ComposterBlock.COMPOSTABLES.put(itemIn.asItem(), chance);
 		});
 	}
 
 	public static void registerVillagerPickupable(IItemProvider item) {
 		add(() -> {
-			if (VillagerEntity.ALLOWED_INVENTORY_ITEMS instanceof ImmutableSet) {
-				VillagerEntity.ALLOWED_INVENTORY_ITEMS = Sets.newHashSet(VillagerEntity.ALLOWED_INVENTORY_ITEMS);
+			if (VillagerEntity.WANTED_ITEMS instanceof ImmutableSet) {
+				VillagerEntity.WANTED_ITEMS = Sets.newHashSet(VillagerEntity.WANTED_ITEMS);
 			}
-			VillagerEntity.ALLOWED_INVENTORY_ITEMS.add(item.asItem());
+			VillagerEntity.WANTED_ITEMS.add(item.asItem());
 		});
 	}
 
 	public static void registerVillagerCompostable(IItemProvider item) {
 		add(() -> {
-			if (FarmerWorkTask.field_234014_b_ instanceof ImmutableList) {
-				FarmerWorkTask.field_234014_b_ = Lists.newArrayList(FarmerWorkTask.field_234014_b_);
+			if (FarmerWorkTask.COMPOSTABLE_ITEMS instanceof ImmutableList) {
+				FarmerWorkTask.COMPOSTABLE_ITEMS = Lists.newArrayList(FarmerWorkTask.COMPOSTABLE_ITEMS);
 			}
-			FarmerWorkTask.field_234014_b_.add(item.asItem());
+			FarmerWorkTask.COMPOSTABLE_ITEMS.add(item.asItem());
 		});
 	}
 

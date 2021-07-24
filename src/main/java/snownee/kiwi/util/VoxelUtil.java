@@ -4,7 +4,6 @@ import java.awt.geom.Point2D;
 
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.shapes.IBooleanFunction;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
 
@@ -20,10 +19,10 @@ public final class VoxelUtil {
 
 	public static VoxelShape rotate(VoxelShape shape, Direction facing) {
 		VSBuilder builder = new VSBuilder();
-		shape.forEachBox((x1, y1, z1, x2, y2, z2) -> {
+		shape.forAllBoxes((x1, y1, z1, x2, y2, z2) -> {
 			Point2D.Double pointMin = rotate(new Point2D.Double(Math.min(x1, x2), Math.min(z1, z2)), facing);
 			Point2D.Double pointMax = rotate(new Point2D.Double(Math.max(x1, x2), Math.max(z1, z2)), facing);
-			builder.add(VoxelShapes.create(pointMin.x, Math.min(y1, y2), pointMin.y, pointMax.x, Math.max(y1, y2), pointMax.y));
+			builder.add(VoxelShapes.box(pointMin.x, Math.min(y1, y2), pointMin.y, pointMax.x, Math.max(y1, y2), pointMax.y));
 		});
 		return builder.get();
 	}
@@ -32,12 +31,12 @@ public final class VoxelUtil {
 		double x = point.x - 0.5;
 		double y = point.y - 0.5;
 		Point2D.Double pointNew = new Point2D.Double();
-		pointNew.x = facing.getHorizontalIndex() % 2 == 0 ? x : y;
-		if (facing.getHorizontalIndex() < 2) {
+		pointNew.x = facing.get2DDataValue() % 2 == 0 ? x : y;
+		if (facing.get2DDataValue() < 2) {
 			pointNew.x *= -1;
 		}
-		pointNew.y = facing.getHorizontalIndex() % 2 == 0 ? y : x;
-		if (facing.getHorizontalIndex() == 1 || facing.getHorizontalIndex() == 2) {
+		pointNew.y = facing.get2DDataValue() % 2 == 0 ? y : x;
+		if (facing.get2DDataValue() == 1 || facing.get2DDataValue() == 2) {
 			pointNew.y *= -1;
 		}
 		pointNew.x += 0.5;
@@ -55,12 +54,12 @@ public final class VoxelUtil {
 			if (shape == null) {
 				shape = newShape;
 			} else {
-				shape = VoxelShapes.combine(shape, newShape, IBooleanFunction.OR);
+				shape = VoxelShapes.or(shape, newShape);
 			}
 		}
 
 		public VoxelShape get() {
-			return shape.simplify();
+			return shape.optimize();
 		}
 	}
 

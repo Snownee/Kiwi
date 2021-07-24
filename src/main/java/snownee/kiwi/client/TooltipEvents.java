@@ -53,21 +53,19 @@ public final class TooltipEvents {
 
 		ItemStack stack = event.getItemStack();
 		Minecraft minecraft = Minecraft.getInstance();
-		if (stack != lastStack && minecraft.player != null && InputMappings.isKeyDown(Minecraft.getInstance().getMainWindow().getHandle(), 292/*F3*/)) {
+		if (stack != lastStack && minecraft.player != null && InputMappings.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 292/*F3*/)) {
 			lastStack = stack;
 			CompoundNBT data = stack.getTag();
 			IFormattableTextComponent itextcomponent = new StringTextComponent(stack.getItem().getRegistryName().toString());
-			if (minecraft.keyboardListener != null) {
-				minecraft.keyboardListener.setClipboardString(itextcomponent.getString());
+			if (minecraft.keyboardHandler != null) {
+				minecraft.keyboardHandler.setClipboard(itextcomponent.getString());
 			}
 			if (data != null) {
-				itextcomponent.append(data.toFormattedComponent());
+				itextcomponent.append(data.getPrettyDisplay());
 			}
-			itextcomponent.modifyStyle(style -> {
-				return style.setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, itextcomponent.getString())).setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslationTextComponent("chat.copy.click"))).setInsertion(itextcomponent.getString());
-			});
-			minecraft.player.sendMessage(itextcomponent, Util.DUMMY_UUID);
-			minecraft.gameSettings.showDebugInfo = !minecraft.gameSettings.showDebugInfo;
+			itextcomponent.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, itextcomponent.getString())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslationTextComponent("chat.copy.click"))).withInsertion(itextcomponent.getString()));
+			minecraft.player.sendMessage(itextcomponent, Util.NIL_UUID);
+			minecraft.options.renderDebug = !minecraft.options.renderDebug;
 		}
 
 		List<ITextComponent> tooltip = event.getToolTip();
@@ -124,7 +122,7 @@ public final class TooltipEvents {
 					};
 					break;
 				case "vanilla":
-					formatter = tag -> stack.getTag().toFormattedComponent();
+					formatter = tag -> stack.getTag().getPrettyDisplay();
 					break;
 				default:
 					formatter = tag -> new StringTextComponent(tag.toString());
@@ -132,12 +130,12 @@ public final class TooltipEvents {
 				}
 
 				lastNBT = stack.getTag();
-				lastFormatted = formatter.apply(lastNBT).deepCopy().mergeStyle(TextFormatting.RESET);
+				lastFormatted = formatter.apply(lastNBT).copy().withStyle(TextFormatting.RESET);
 			}
 			tooltip.add(lastFormatted);
 		} else if (KiwiClientConfig.tagsTooltip) {
 			stack.getItem().getTags().stream().map(Object::toString).sorted().forEach(id -> {
-				tooltip.add(new StringTextComponent("#" + id).mergeStyle(TextFormatting.DARK_GRAY));
+				tooltip.add(new StringTextComponent("#" + id).withStyle(TextFormatting.DARK_GRAY));
 			});
 		}
 	}

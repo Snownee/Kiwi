@@ -25,17 +25,17 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import snownee.kiwi.block.ModBlock;
 
 /**
- * 
+ *
  * All your modules should extend {@code AbstractModule}
- * 
+ *
  * @author Snownee
  *
  */
 public abstract class AbstractModule {
 	protected ResourceLocation uid;
 	private static final BiConsumer<ModuleInfo, Item> ITEM_DECORATOR = (module, item) -> {
-		if (module.group != null && item.group == null && !module.noGroups.contains(item))
-			item.group = module.group;
+		if (module.category != null && item.category == null && !module.noCategories.contains(item))
+			item.category = module.category;
 	};
 	private static final BiConsumer<ModuleInfo, Block> BLOCK_DECORATOR = (module, block) -> {
 		ModBlock.setFireInfo(block);
@@ -75,9 +75,9 @@ public abstract class AbstractModule {
 	}
 
 	protected static AbstractBlock.Properties blockProp(Material material) {
-		AbstractBlock.Properties properties = AbstractBlock.Properties.create(material);
+		AbstractBlock.Properties properties = AbstractBlock.Properties.of(material);
 		properties.sound(ModBlock.deduceSoundType(material));
-		properties.hardnessAndResistance(ModBlock.deduceHardness(material));
+		properties.strength(ModBlock.deduceHardness(material));
 		return properties;
 	}
 
@@ -85,23 +85,23 @@ public abstract class AbstractModule {
 	 * @since 2.5.2
 	 */
 	protected static AbstractBlock.Properties blockProp(AbstractBlock block) {
-		return AbstractBlock.Properties.from(block);
+		return AbstractBlock.Properties.copy(block);
 	}
 
 	public static INamedTag<Item> itemTag(String namespace, String path) {
-		return ItemTags.makeWrapperTag(namespace + ":" + path);
+		return ItemTags.bind(namespace + ":" + path);
 	}
 
 	public static INamedTag<EntityType<?>> entityTag(String namespace, String path) {
-		return EntityTypeTags.getTagById(namespace + ":" + path);
+		return EntityTypeTags.bind(namespace + ":" + path);
 	}
 
 	public static INamedTag<Block> blockTag(String namespace, String path) {
-		return BlockTags.makeWrapperTag(namespace + ":" + path);
+		return BlockTags.bind(namespace + ":" + path);
 	}
 
 	public static INamedTag<Fluid> fluidTag(String namespace, String path) {
-		return FluidTags.makeWrapperTag(namespace + ":" + path);
+		return FluidTags.bind(namespace + ":" + path);
 	}
 
 	/**

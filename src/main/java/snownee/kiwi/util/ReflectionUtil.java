@@ -27,9 +27,9 @@ public final class ReflectionUtil {
 
 	public static <C extends IInventory, T extends IRecipe<C>> Map<ResourceLocation, IRecipe<C>> getRecipes(IRecipeType<T> recipeTypeIn) {
 		if (FMLEnvironment.dist.isClient()) {
-			return Minecraft.getInstance().world.getRecipeManager().getRecipes(recipeTypeIn);
+			return Minecraft.getInstance().level.getRecipeManager().byType(recipeTypeIn);
 		} else {
-			return Kiwi.getServer().getRecipeManager().getRecipes(recipeTypeIn);
+			return Kiwi.getServer().getRecipeManager().byType(recipeTypeIn);
 		}
 	}
 }

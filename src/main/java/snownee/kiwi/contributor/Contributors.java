@@ -109,11 +109,11 @@ public class Contributors extends AbstractModule {
 
 	@SubscribeEvent
 	public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-		if (!(event.getEntity().world instanceof ServerWorld)) {
+		if (!(event.getEntity().level instanceof ServerWorld)) {
 			return;
 		}
 		PlayerEntity player = event.getPlayer();
-		if (!((ServerWorld) event.getEntity().world).getServer().isServerOwner(player.getGameProfile())) {
+		if (!((ServerWorld) event.getEntity().level).getServer().isSingleplayerOwner(player.getGameProfile())) {
 			new SSyncEffectPacket(PLAYER_EFFECTS).send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player));
 		}
 	}
@@ -140,7 +140,7 @@ public class Contributors extends AbstractModule {
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	protected void clientInit(FMLClientSetupEvent event) {
-		Minecraft.getInstance().getRenderManager().getSkinMap().values().forEach(renderer -> {
+		Minecraft.getInstance().getEntityRenderDispatcher().getSkinMap().values().forEach(renderer -> {
 			RewardLayer layer = new RewardLayer(renderer);
 			RewardLayer.ALL_LAYERS.add(layer);
 			renderer.addLayer(layer);
@@ -233,9 +233,7 @@ public class Contributors extends AbstractModule {
 		ITierProvider provider = REWARD_PROVIDERS.getOrDefault(effect.getNamespace().toLowerCase(Locale.ENGLISH), ITierProvider.Empty.INSTANCE);
 		if (!provider.isContributor(playerName, effect.getPath())) {
 			if (FMLEnvironment.dist.isDedicatedServer()) {
-				return provider.refresh().thenApply($ -> {
-					return provider.isContributor(playerName, effect.getPath());
-				});
+				return provider.refresh().thenApply($ -> provider.isContributor(playerName, effect.getPath()));
 			} else {
 				return CompletableFuture.completedFuture(Boolean.FALSE);
 			}
@@ -245,7 +243,7 @@ public class Contributors extends AbstractModule {
 
 	@OnlyIn(Dist.CLIENT)
 	private static String getPlayerName() {
-		return Minecraft.getInstance().getSession().getUsername();
+		return Minecraft.getInstance().getUser().getName();
 	}
 
 	private int hold;
@@ -254,21 +252,21 @@ public class Contributors extends AbstractModule {
 	@OnlyIn(Dist.CLIENT)
 	public void onKeyInput(KeyInputEvent event) {
 		Minecraft mc = Minecraft.getInstance();
-		if (mc.currentScreen != null || mc.player == null || !mc.isGameFocused()) {
+		if (mc.screen != null || mc.player == null || !mc.isWindowActive()) {
 			return;
 		}
 		if (event.getModifiers() != 0) {
 			return;
 		}
-		Input input = InputMappings.getInputByCode(event.getKey(), event.getScanCode());
-		if (input.getKeyCode() != 75) {
+		Input input = InputMappings.getKey(event.getKey(), event.getScanCode());
+		if (input.getValue() != 75) {
 			return;
 		}
 		if (event.getAction() != 2) {
 			hold = 0;
 		} else if (++hold == 30) {
 			RewardScreen screen = new RewardScreen();
-			mc.displayGuiScreen(screen);
+			mc.setScreen(screen);
 		}
 	}
 

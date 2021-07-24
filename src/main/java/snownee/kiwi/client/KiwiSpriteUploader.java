@@ -56,7 +56,7 @@ public class KiwiSpriteUploader extends SpriteUploader {
 	}
 
 	@Override
-	public Stream<ResourceLocation> getResourceLocations() {
+	public Stream<ResourceLocation> getResourcesToLoad() {
 		return registeredSprites.stream();
 	}
 

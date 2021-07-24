@@ -26,7 +26,7 @@ public class SantaHatLayer extends RewardLayer {
 
 	public SantaHatLayer(IEntityRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> entityRendererIn) {
 		super(entityRendererIn);
-		modelSantaHat = new SantaHatModel<>(entityRendererIn.getEntityModel());
+		modelSantaHat = new SantaHatModel<>(entityRendererIn.getModel());
 	}
 
 	@Override
@@ -34,16 +34,16 @@ public class SantaHatLayer extends RewardLayer {
 		if (entitylivingbaseIn.isInvisible()) {
 			return;
 		}
-		ItemStack itemstack = entitylivingbaseIn.getItemStackFromSlot(EquipmentSlotType.HEAD);
+		ItemStack itemstack = entitylivingbaseIn.getItemBySlot(EquipmentSlotType.HEAD);
 		if (!itemstack.isEmpty()) {
 			return;
 		}
-		matrixStackIn.push();
-		modelSantaHat.isChild = entitylivingbaseIn.isChild();
-		modelSantaHat.setRotationAngles(entitylivingbaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-		IVertexBuilder ivertexbuilder = ItemRenderer.getBuffer(bufferIn, RenderType.getEntitySolid(TEXTURE), false, false);
-		modelSantaHat.render(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
-		matrixStackIn.pop();
+		matrixStackIn.pushPose();
+		modelSantaHat.young = entitylivingbaseIn.isBaby();
+		modelSantaHat.setupAnim(entitylivingbaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
+		IVertexBuilder ivertexbuilder = ItemRenderer.getFoilBuffer(bufferIn, RenderType.entitySolid(TEXTURE), false, false);
+		modelSantaHat.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+		matrixStackIn.popPose();
 	}
 
 }

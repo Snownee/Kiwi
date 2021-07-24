@@ -21,8 +21,8 @@ public class FoxTailModel<T extends LivingEntity> extends AgeableModel<T> {
 
 	public FoxTailModel(PlayerModel<AbstractClientPlayerEntity> playerModel) {
 		this.playerModel = playerModel;
-		textureWidth = 48;
-		textureHeight = 32;
+		texWidth = 48;
+		texHeight = 32;
 
 		this.ear1 = new ModelRenderer(this, 8, 1);
 		this.ear1.addBox(-4.0F, -10.0F, -4.0F, 2.0F, 2.0F, 1.0F);
@@ -33,30 +33,30 @@ public class FoxTailModel<T extends LivingEntity> extends AgeableModel<T> {
 	}
 
 	@Override
-	protected Iterable<ModelRenderer> getHeadParts() {
+	protected Iterable<ModelRenderer> headParts() {
 		return ImmutableList.of(ear1, ear2);
 	}
 
 	@Override
-	protected Iterable<ModelRenderer> getBodyParts() {
+	protected Iterable<ModelRenderer> bodyParts() {
 		return ImmutableList.of(tail);
 	}
 
 	@Override
-	public void setRotationAngles(T entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-		ear1.copyModelAngles(playerModel.bipedHead);
-		ear2.copyModelAngles(playerModel.bipedHead);
+	public void setupAnim(T entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+		ear1.copyFrom(playerModel.head);
+		ear2.copyFrom(playerModel.head);
 		if (ageInTicks % 60 < 2) {
-			ear1.rotateAngleY += 0.05f;
-			ear2.rotateAngleY -= 0.05f;
+			ear1.yRot += 0.05f;
+			ear2.yRot -= 0.05f;
 		}
 		float delta = MathHelper.cos(ageInTicks * 0.09F) * 0.05F + 0.05F;
 		if (entityIn.isCrouching()) {
-			this.tail.setRotationPoint(-2.0F, 14.0F, 5.5F);
-			this.tail.rotateAngleX = 1.25F + delta;
+			this.tail.setPos(-2.0F, 14.0F, 5.5F);
+			this.tail.xRot = 1.25F + delta;
 		} else {
-			this.tail.setRotationPoint(-2.0F, 10.0F, .5F);
-			this.tail.rotateAngleX = 0.85F + delta;
+			this.tail.setPos(-2.0F, 10.0F, .5F);
+			this.tail.xRot = 0.85F + delta;
 		}
 
 	}

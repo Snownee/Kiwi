@@ -35,7 +35,7 @@ public class KiwiCommand {
 
         builder.then(Commands
                 .literal("debugWorldRules")
-                .requires(ctx -> ctx.hasPermissionLevel(2))
+                .requires(ctx -> ctx.hasPermission(2))
                 .executes(ctx -> cleanWorld(ctx.getSource()))
         );
         /* on */
@@ -45,11 +45,11 @@ public class KiwiCommand {
 	public static int dumpLoots(CommandSource source, String pattern) throws CommandSyntaxException {
 		try {
 			Pattern p = Pattern.compile(pattern);
-			int r = LootDumper.dump(p, source.getServer().getDataDirectory());
+			int r = LootDumper.dump(p, source.getServer().getServerDirectory());
 			if (r == 0) {
-				source.sendErrorMessage(new TranslationTextComponent("commands.kiwi.dumpLoots.noTargets"));
+				source.sendFailure(new TranslationTextComponent("commands.kiwi.dumpLoots.noTargets"));
 			} else {
-				source.sendFeedback(new TranslationTextComponent("commands.kiwi.dumpLoots.success", r), true);
+				source.sendSuccess(new TranslationTextComponent("commands.kiwi.dumpLoots.success", r), true);
 			}
 			return r;
 		} catch (PatternSyntaxException e) {
@@ -58,16 +58,16 @@ public class KiwiCommand {
 	}
 
 	private static int cleanWorld(CommandSource source) {
-		Commands commands = source.getServer().getCommandManager();
-		commands.handleCommand(source, "gamerule doDaylightCycle false");
-		commands.handleCommand(source, "gamerule doWeatherCycle false");
-		commands.handleCommand(source, "gamerule doMobLoot false");
-		commands.handleCommand(source, "gamerule doMobSpawning false");
-		commands.handleCommand(source, "difficulty peaceful");
-		commands.handleCommand(source, "kill @e[type=!minecraft:player]");
-		commands.handleCommand(source, "time set day");
-		commands.handleCommand(source, "weather clear");
-		commands.handleCommand(source, "gamerule doMobLoot true");
+		Commands commands = source.getServer().getCommands();
+		commands.performCommand(source, "gamerule doDaylightCycle false");
+		commands.performCommand(source, "gamerule doWeatherCycle false");
+		commands.performCommand(source, "gamerule doMobLoot false");
+		commands.performCommand(source, "gamerule doMobSpawning false");
+		commands.performCommand(source, "difficulty peaceful");
+		commands.performCommand(source, "kill @e[type=!minecraft:player]");
+		commands.performCommand(source, "time set day");
+		commands.performCommand(source, "weather clear");
+		commands.performCommand(source, "gamerule doMobLoot true");
 		return 1;
 	}
 }

@@ -54,9 +54,9 @@ public final class MathUtil {
 			double subX = ex - sx;
 			double subY = ey - sy;
 			double subZ = ez - sz;
-			int signX = MathHelper.signum(subX);
-			int signY = MathHelper.signum(subY);
-			int signZ = MathHelper.signum(subZ);
+			int signX = MathHelper.sign(subX);
+			int signY = MathHelper.sign(subY);
+			int signZ = MathHelper.sign(subZ);
 			double d9 = signX == 0 ? Double.MAX_VALUE : signX / subX;
 			double d10 = signY == 0 ? Double.MAX_VALUE : signY / subY;
 			double d11 = signZ == 0 ? Double.MAX_VALUE : signZ / subZ;

@@ -14,7 +14,7 @@ import snownee.kiwi.data.DataModule;
 
 public class NoContainersShapedRecipe extends ShapedRecipe {
 	public NoContainersShapedRecipe(ShapedRecipe rawRecipe) {
-		super(rawRecipe.getId(), rawRecipe.getGroup(), rawRecipe.getRecipeWidth(), rawRecipe.getRecipeHeight(), rawRecipe.getIngredients(), rawRecipe.getRecipeOutput());
+		super(rawRecipe.getId(), rawRecipe.getGroup(), rawRecipe.getRecipeWidth(), rawRecipe.getRecipeHeight(), rawRecipe.getIngredients(), rawRecipe.getResultItem());
 	}
 
 	@Override
@@ -29,18 +29,18 @@ public class NoContainersShapedRecipe extends ShapedRecipe {
 
 	public static class Serializer extends ForgeRegistryEntry<IRecipeSerializer<?>> implements IRecipeSerializer<NoContainersShapedRecipe> {
 		@Override
-		public NoContainersShapedRecipe read(ResourceLocation recipeId, JsonObject json) {
-			return new NoContainersShapedRecipe(IRecipeSerializer.CRAFTING_SHAPED.read(recipeId, json));
+		public NoContainersShapedRecipe fromJson(ResourceLocation recipeId, JsonObject json) {
+			return new NoContainersShapedRecipe(IRecipeSerializer.SHAPED_RECIPE.fromJson(recipeId, json));
 		}
 
 		@Override
-		public NoContainersShapedRecipe read(ResourceLocation recipeId, PacketBuffer buffer) {
-			return new NoContainersShapedRecipe(IRecipeSerializer.CRAFTING_SHAPED.read(recipeId, buffer));
+		public NoContainersShapedRecipe fromNetwork(ResourceLocation recipeId, PacketBuffer buffer) {
+			return new NoContainersShapedRecipe(IRecipeSerializer.SHAPED_RECIPE.fromNetwork(recipeId, buffer));
 		}
 
 		@Override
-		public void write(PacketBuffer buffer, NoContainersShapedRecipe recipe) {
-			IRecipeSerializer.CRAFTING_SHAPED.write(buffer, recipe);
+		public void toNetwork(PacketBuffer buffer, NoContainersShapedRecipe recipe) {
+			IRecipeSerializer.SHAPED_RECIPE.toNetwork(buffer, recipe);
 		}
 	}
 }

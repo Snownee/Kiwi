@@ -25,15 +25,15 @@ public class CSetEffectPacket extends ClientPacket {
 		@Override
 		public void encode(CSetEffectPacket msg, PacketBuffer buffer) {
 			if (msg.id == null) {
-				buffer.writeString("");
+				buffer.writeUtf("");
 			} else {
-				buffer.writeString(msg.id.toString());
+				buffer.writeUtf(msg.id.toString());
 			}
 		}
 
 		@Override
 		public CSetEffectPacket decode(PacketBuffer buffer) {
-			ResourceLocation id = Util.RL(buffer.readString(32767));
+			ResourceLocation id = Util.RL(buffer.readUtf(32767));
 			return new CSetEffectPacket(id);
 		}
 

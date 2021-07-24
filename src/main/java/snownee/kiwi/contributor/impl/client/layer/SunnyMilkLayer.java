@@ -27,7 +27,7 @@ public class SunnyMilkLayer extends RewardLayer {
 
 	public SunnyMilkLayer(IEntityRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> entityRendererIn) {
 		super(entityRendererIn);
-		model = new SunnyMilkModel<>(entityRendererIn.getEntityModel());
+		model = new SunnyMilkModel<>(entityRendererIn.getModel());
 	}
 
 	@Override
@@ -35,17 +35,17 @@ public class SunnyMilkLayer extends RewardLayer {
 		if (entitylivingbaseIn.isInvisible() || entitylivingbaseIn.isSleeping()) {
 			return;
 		}
-		ItemStack itemstack = entitylivingbaseIn.getItemStackFromSlot(EquipmentSlotType.CHEST);
+		ItemStack itemstack = entitylivingbaseIn.getItemBySlot(EquipmentSlotType.CHEST);
 		if (itemstack.getItem() instanceof ElytraItem) {
 			return;
 		}
-		matrixStackIn.push();
-		model.isChild = entitylivingbaseIn.isChild();
-		model.setRotationAngles(entitylivingbaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-		IVertexBuilder ivertexbuilder = ItemRenderer.getBuffer(bufferIn, RenderType.getEntityTranslucent(TEXTURE), false, false);
-		entityRenderer.getEntityModel().bipedBody.translateRotate(matrixStackIn);
-		model.render(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
-		matrixStackIn.pop();
+		matrixStackIn.pushPose();
+		model.young = entitylivingbaseIn.isBaby();
+		model.setupAnim(entitylivingbaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
+		IVertexBuilder ivertexbuilder = ItemRenderer.getFoilBuffer(bufferIn, RenderType.entityTranslucent(TEXTURE), false, false);
+		renderer.getModel().body.translateAndRotate(matrixStackIn);
+		model.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+		matrixStackIn.popPose();
 	}
 
 }

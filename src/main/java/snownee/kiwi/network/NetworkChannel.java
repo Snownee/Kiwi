@@ -30,7 +30,7 @@ public enum NetworkChannel {
 	private final Map<Class<?>, SimpleChannel> packet2channel = Maps.newConcurrentMap();
 	private final Map<ResourceLocation, Pair<SimpleChannel, AtomicInteger>> channels = Maps.newConcurrentMap();
 
-	private NetworkChannel() {
+	NetworkChannel() {
 	}
 
 	public static <T extends Packet> void register(Class<T> klass, PacketHandler<T> handler) {
@@ -74,13 +74,11 @@ public enum NetworkChannel {
 		channel(packet.getClass()).sendToServer(packet);
 	}
 
-	public static final PacketDistributor<ServerPlayerEntity> ALL_EXCEPT = new PacketDistributor<>((dist, player) -> {
-		return p -> getServer().getPlayerList().getPlayers().forEach(player2 -> {
-			if (player.get() != player2) {
-				player2.connection.netManager.sendPacket(p);
-			}
-		});
-	}, NetworkDirection.PLAY_TO_CLIENT);
+	public static final PacketDistributor<ServerPlayerEntity> ALL_EXCEPT = new PacketDistributor<>((dist, player) -> (p -> getServer().getPlayerList().getPlayers().forEach(player2 -> {
+		if (player.get() != player2) {
+			player2.connection.connection.send(p);
+		}
+	})), NetworkDirection.PLAY_TO_CLIENT);
 
 	private static MinecraftServer getServer() {
 		return LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);

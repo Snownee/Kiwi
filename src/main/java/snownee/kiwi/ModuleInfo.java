@@ -44,10 +44,10 @@ public class ModuleInfo {
 
 	public final AbstractModule module;
 	public final ModContext context;
-	public ItemGroup group;
+	public ItemGroup category;
 	final RegistryHolder registries = new RegistryHolder();
 	final Map<Block, Item.Properties> blockItemBuilders = Maps.newHashMap();
-	final Set<Object> noGroups = Sets.newHashSet();
+	final Set<Object> noCategories = Sets.newHashSet();
 	final Set<Block> noItems = Sets.newHashSet();
 
 	public ModuleInfo(ResourceLocation rl, AbstractModule module, ModContext context) {
@@ -77,16 +77,16 @@ public class ModuleInfo {
 				if (builder == null)
 					builder = new Item.Properties();
 				ModBlockItem item = new ModBlockItem(e.entry, builder);
-				if (noGroups.contains(e.entry)) {
-					noGroups.add(item);
+				if (noCategories.contains(e.entry)) {
+					noCategories.add(item);
 				} else if (e.field != null) {
 					Group group = e.field.getAnnotation(Group.class);
 					if (group != null && !group.value().isEmpty()) {
-						ItemGroup itemGroup = Kiwi.getGroup(group.value());
-						if (itemGroup != null) {
-							item.group = itemGroup;
+						ItemGroup category = Kiwi.getGroup(group.value());
+						if (category != null) {
+							item.category = category;
 						} else {
-							item.group = this.group;
+							item.category = this.category;
 						}
 					}
 				}
@@ -98,7 +98,7 @@ public class ModuleInfo {
 			event.getRegistry().register(e.entry);
 		});
 		if (clazz == Block.class && FMLEnvironment.dist.isClient()) {
-			final RenderType solid = RenderType.getSolid();
+			final RenderType solid = RenderType.solid();
 			Map<Class<?>, RenderType> cache = Maps.newHashMap();
 			entries.stream().forEach(e -> {
 				Block block = (Block) e.entry;

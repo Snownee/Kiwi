@@ -34,16 +34,16 @@ public class TexBlock extends Block {
 	}
 
 	@Override
-	public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
-		if (worldIn.isRemote) {
+	public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
+		if (worldIn.isClientSide) {
 			return ActionResultType.SUCCESS;
 		}
-		TileEntity tile = worldIn.getTileEntity(pos);
-		ItemStack stack = player.getHeldItem(handIn);
+		TileEntity tile = worldIn.getBlockEntity(pos);
+		ItemStack stack = player.getItemInHand(handIn);
 		if (tile instanceof TextureTile && !stack.isEmpty()) {
 			if (FullBlockIngredient.isFullBlock(stack)) {
 				TextureTile textureTile = (TextureTile) tile;
-				BlockState state2 = ((BlockItem) stack.getItem()).getBlock().getDefaultState();
+				BlockState state2 = ((BlockItem) stack.getItem()).getBlock().defaultBlockState();
 				textureTile.setTexture("wool", state2);
 				textureTile.refresh();
 			}
@@ -51,12 +51,13 @@ public class TexBlock extends Block {
 		return ActionResultType.SUCCESS;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
-	public void onReplaced(BlockState state, World worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
+	public void onRemove(BlockState state, World worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
 		if (state.hasTileEntity() && state.getBlock() != newState.getBlock()) {
-			worldIn.removeTileEntity(pos);
+			worldIn.removeBlockEntity(pos);
 		}
-		super.onReplaced(state, worldIn, pos, newState, isMoving);
+		super.onRemove(state, worldIn, pos, newState, isMoving);
 	}
 
 	@Override

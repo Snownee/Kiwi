@@ -53,7 +53,7 @@ public class RewardScreen extends Screen {
 			}
 		}
 		if (!added) {
-			minecraft.displayGuiScreen(null);
+			minecraft.setScreen(null);
 		}
 	}
 
@@ -112,7 +112,7 @@ public class RewardScreen extends Screen {
 	}
 
 	private static String getPlayerName() {
-		return Minecraft.getInstance().getSession().getUsername();
+		return Minecraft.getInstance().getUser().getName();
 	}
 
 	private static class List extends ExtendedList<Entry> {
@@ -138,7 +138,7 @@ public class RewardScreen extends Screen {
 		public Entry(RewardScreen parent, ResourceLocation id) {
 			this.parent = parent;
 			this.id = id;
-			this.name = id == null ? "-" : I18n.format(Util.makeTranslationKey("reward", id));
+			name = id == null ? "-" : I18n.get(Util.makeDescriptionId("reward", id));
 		}
 
 		@Override
@@ -147,7 +147,7 @@ public class RewardScreen extends Screen {
 			if (this == parent.selectedEntry) {
 				color = 0xFFFF77;
 			}
-			parent.font.drawString(matrixStack, name, left + 43, top + 2, color);
+			parent.font.draw(matrixStack, name, left + 43, top + 2, color);
 		}
 
 		@Override

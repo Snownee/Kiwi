@@ -153,7 +153,7 @@ public class Kiwi {
 							type = ModConfig.Type.valueOf(typeHolder.getValue());
 						}
 						type = type == null ? ModConfig.Type.COMMON : type;
-						if (!(type == ModConfig.Type.CLIENT && FMLEnvironment.dist.isDedicatedServer())) {
+						if (((type != ModConfig.Type.CLIENT) || !FMLEnvironment.dist.isDedicatedServer())) {
 							try {
 								Class<?> clazz = Class.forName(annotationData.getClassType().getClassName());
 								KiwiConfig kiwiConfig = clazz.getAnnotation(KiwiConfig.class);
@@ -376,7 +376,7 @@ public class Kiwi {
 				subscriber.value().bus().get().register(info.module);
 			}
 
-			boolean useOwnGroup = info.group == null;
+			boolean useOwnGroup = info.category == null;
 			if (useOwnGroup) {
 				Group group = info.module.getClass().getAnnotation(Group.class);
 				if (group != null) {
@@ -385,7 +385,7 @@ public class Kiwi {
 						useOwnGroup = false;
 						ItemGroup itemGroup = getGroup(val);
 						if (itemGroup != null) {
-							info.group = itemGroup;
+							info.category = itemGroup;
 						}
 					}
 				}
@@ -436,8 +436,8 @@ public class Kiwi {
 				if (o == null) {
 					continue;
 				}
-				if (useOwnGroup && info.group == null && o instanceof ItemGroup) {
-					info.group = (ItemGroup) o;
+				if (useOwnGroup && info.category == null && o instanceof ItemGroup) {
+					info.category = (ItemGroup) o;
 				} else if (o instanceof IRecipeType) {
 					Registry.register(Registry.RECIPE_TYPE, regName, (IRecipeType<?>) o);
 					tmpBuilder = null;
@@ -501,7 +501,7 @@ public class Kiwi {
 
 	//    private static void processEvents(Object object) {
 	//        for (Method method : object.getClass().getMethods()) {
-	//            
+	//
 	//        }
 	//        //IModBusEvent
 	//    }
@@ -513,8 +513,8 @@ public class Kiwi {
 			return null;
 		}
 		return GROUP_CACHE.computeIfAbsent(path, $ -> {
-			for (ItemGroup group : ItemGroup.GROUPS) {
-				if (path.equals(group.getPath())) {
+			for (ItemGroup group : ItemGroup.TABS) {
+				if (path.equals(group.getRecipeFolderName())) {
 					return group;
 				}
 			}
@@ -524,7 +524,7 @@ public class Kiwi {
 
 	private static void checkNoGroup(ModuleInfo info, Field field, Object o) {
 		if (field.getAnnotation(NoGroup.class) != null) {
-			info.noGroups.add(o);
+			info.noCategories.add(o);
 		}
 	}
 
@@ -544,7 +544,7 @@ public class Kiwi {
 
 	private void serverInit(FMLServerStartingEvent event) {
 		KiwiManager.MODULES.values().forEach(m -> m.serverInit(event));
-		event.getServer().getWorld(World.OVERWORLD).getSavedData().getOrCreate(() -> Scheduler.INSTANCE, Scheduler.ID);
+		event.getServer().getLevel(World.OVERWORLD).getDataStorage().computeIfAbsent(() -> Scheduler.INSTANCE, Scheduler.ID);
 		ModLoadingContext.get().setActiveContainer(null, null);
 	}
 

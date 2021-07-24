@@ -36,7 +36,7 @@ public class KiwiObjectHolderRef implements Consumer<Predicate<ResourceLocation>
 		try {
 			ReflectionUtil.setFinalValue(field, null, thing);
 		} catch (Exception e) {
-			Kiwi.logger.warn("Unable to set {} with value {} ({})", this.field, thing, this.injectedObject, e);
+			Kiwi.logger.warn("Unable to set {} with value {} ({})", field, thing, injectedObject, e);
 		}
 	}
 
@@ -63,9 +63,9 @@ public class KiwiObjectHolderRef implements Consumer<Predicate<ResourceLocation>
 			return false;
 		KiwiObjectHolderRef o = (KiwiObjectHolderRef) other;
 		if (field == null) {
-			return this.registry.equals(o.registry) && this.injectedObject.equals(o.injectedObject);
+			return registry.equals(o.registry) && injectedObject.equals(o.injectedObject);
 		} else {
-			return this.field.equals(o.field);
+			return field.equals(o.field);
 		}
 	}
 }

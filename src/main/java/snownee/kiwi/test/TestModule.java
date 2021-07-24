@@ -44,10 +44,10 @@ public class TestModule extends AbstractModule {
 	// And its potion
 	public static final Potion FIRST_POTION = new Potion(new EffectInstance(FIRST_EFFECT, 1800));
 
-	public static final TileEntityType<?> FIRST_TILE = TileEntityType.Builder.create(TestTile::new, FIRST_BLOCK).build(null);
+	public static final TileEntityType<?> FIRST_TILE = TileEntityType.Builder.of(TestTile::new, FIRST_BLOCK).build(null);
 
 	public static final TexBlock TEX_BLOCK = new TexBlock(blockProp(Material.WOOD));
-	public static final TileEntityType<?> TEX_TILE = TileEntityType.Builder.create(TexTile::new, TEX_BLOCK).build(null);
+	public static final TileEntityType<?> TEX_TILE = TileEntityType.Builder.of(TexTile::new, TEX_BLOCK).build(null);
 
 	public static TestModule INSTANCE;
 

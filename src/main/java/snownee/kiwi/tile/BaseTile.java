@@ -22,30 +22,30 @@ public abstract class BaseTile extends TileEntity {
 
 	@Override
 	public final SUpdateTileEntityPacket getUpdatePacket() {
-		return new SUpdateTileEntityPacket(this.pos, -1, this.writePacketData(new CompoundNBT()));
+		return new SUpdateTileEntityPacket(worldPosition, -1, writePacketData(new CompoundNBT()));
 	}
 
 	@Override
 	public final void onDataPacket(NetworkManager manager, SUpdateTileEntityPacket packet) {
-		this.readPacketData(packet.getNbtCompound());
+		readPacketData(packet.getTag());
 	}
 
 	// Used for syncing data at the time when the chunk is loaded
 	@Nonnull
 	@Override
 	public CompoundNBT getUpdateTag() {
-		return this.write(new CompoundNBT());
+		return save(new CompoundNBT());
 	}
 
 	// Used for syncing data at the time when the chunk is loaded
 	@Override
 	public void handleUpdateTag(BlockState state, CompoundNBT tag) {
-		this.read(state, tag);
+		load(state, tag);
 	}
 
 	/**
 	 * Read data for server-client syncing.
-	 * 
+	 *
 	 * @param data
 	 *            the data source
 	 */
@@ -53,7 +53,7 @@ public abstract class BaseTile extends TileEntity {
 
 	/**
 	 * Write data for server-client syncing. ONLY write the necessary data!
-	 * 
+	 *
 	 * @param data
 	 *            the data sink
 	 * @return the parameter, or delegate to super method
@@ -62,9 +62,9 @@ public abstract class BaseTile extends TileEntity {
 	protected abstract CompoundNBT writePacketData(CompoundNBT data);
 
 	protected void refresh() {
-		if (hasWorld() && !world.isRemote) {
+		if (hasLevel() && !level.isClientSide) {
 			BlockState state = getBlockState();
-			world.markAndNotifyBlock(pos, world.getChunkAt(pos), state, state, 11, 512 /* TODO whats this? */);
+			level.markAndNotifyBlock(worldPosition, level.getChunkAt(worldPosition), state, state, 11, 512 /* TODO whats this? */);
 		}
 	}
 

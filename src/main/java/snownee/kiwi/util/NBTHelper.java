@@ -19,9 +19,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.util.Constants;
 
 /**
- * 
+ *
  * Simple NBT helper. Use 'a.b.c' to access to values
- * 
+ *
  * @author Snownee
  *
  */
@@ -297,7 +297,7 @@ public class NBTHelper {
 		if (subTag != null) {
 			return NBTUtil.readBlockState(subTag);
 		}
-		return Blocks.AIR.getDefaultState();
+		return Blocks.AIR.defaultBlockState();
 	}
 
 	public NBTHelper setGameProfile(String key, GameProfile value) {
@@ -368,7 +368,7 @@ public class NBTHelper {
 	}
 
 	public NBTHelper setUUID(String key, UUID value) {
-		getTagInternal(key).putUniqueId(getLastNode(key), value);
+		getTagInternal(key).putUUID(getLastNode(key), value);
 		return this;
 	}
 
@@ -378,7 +378,7 @@ public class NBTHelper {
 		if (subTag != null) {
 			String actualKey = getLastNode(key);
 			if (!subTag.contains(actualKey + "Most", NBT.LONG) || !subTag.contains(actualKey + "Least", NBT.LONG)) {
-				return subTag.getUniqueId(actualKey);
+				return subTag.getUUID(actualKey);
 			}
 		}
 		return null;
@@ -408,7 +408,7 @@ public class NBTHelper {
 	}
 
 	public Set<String> keySet(String key) {
-		return hasTag(key, NBT.COMPOUND) ? getTag(key).keySet() : Collections.EMPTY_SET;
+		return hasTag(key, NBT.COMPOUND) ? getTag(key).getAllKeys() : Collections.EMPTY_SET;
 	}
 
 	// TODO: remove parent if empty?

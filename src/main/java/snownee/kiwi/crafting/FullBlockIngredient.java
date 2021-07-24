@@ -32,12 +32,12 @@ public class FullBlockIngredient extends Ingredient {
 		if (!isTextureBlock(stack)) {
 			return false;
 		}
-		Block block = Block.getBlockFromItem(stack.getItem());
-		BlockState state = block.getDefaultState();
-		boolean flag = state.isSolid() && !state.isTransparent();
+		Block block = Block.byItem(stack.getItem());
+		BlockState state = block.defaultBlockState();
+		boolean flag = state.canOcclude() && !state.useShapeForLightOcclusion();
 		if (flag) {
 			try {
-				if (VoxelShapes.fullCube().equals(state.getCollisionShape(null, BlockPos.ZERO)))
+				if (VoxelShapes.block().equals(state.getCollisionShape(null, BlockPos.ZERO)))
 					return true;
 			} catch (Exception e) {
 			}
@@ -49,9 +49,9 @@ public class FullBlockIngredient extends Ingredient {
 		if (stack == null || stack.isEmpty()) {
 			return false;
 		}
-		Block block = Block.getBlockFromItem(stack.getItem());
-		BlockState state = block.getDefaultState();
-		return state.getMaterial().isSolid() && state.getRenderType() == BlockRenderType.MODEL;
+		Block block = Block.byItem(stack.getItem());
+		BlockState state = block.defaultBlockState();
+		return state.getMaterial().isSolid() && state.getRenderShape() == BlockRenderType.MODEL;
 	}
 
 	@Override
@@ -65,7 +65,7 @@ public class FullBlockIngredient extends Ingredient {
 	}
 
 	@Override
-	public boolean hasNoMatchingItems() {
+	public boolean isEmpty() {
 		return false;
 	}
 
@@ -78,8 +78,8 @@ public class FullBlockIngredient extends Ingredient {
 
 		@Override
 		public FullBlockIngredient parse(PacketBuffer buffer) {
-			Ingredient example = Ingredient.read(buffer);
-			StackList stackList = new StackList(ImmutableList.copyOf(example.getMatchingStacks()));
+			Ingredient example = Ingredient.fromNetwork(buffer);
+			StackList stackList = new StackList(ImmutableList.copyOf(example.getItems()));
 			return new FullBlockIngredient(Stream.of(stackList), example);
 		}
 
@@ -91,13 +91,13 @@ public class FullBlockIngredient extends Ingredient {
 			} catch (JsonSyntaxException e) {
 				example = Ingredient.EMPTY;
 			}
-			StackList stackList = new StackList(ImmutableList.copyOf(example.getMatchingStacks()));
+			StackList stackList = new StackList(ImmutableList.copyOf(example.getItems()));
 			return new FullBlockIngredient(Stream.of(stackList), example);
 		}
 
 		@Override
 		public void write(PacketBuffer buffer, FullBlockIngredient ingredient) {
-			ingredient.example.write(buffer);
+			ingredient.example.toNetwork(buffer);
 		}
 
 	}

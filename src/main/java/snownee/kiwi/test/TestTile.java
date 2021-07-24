@@ -1,7 +1,6 @@
 package snownee.kiwi.test;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.nbt.CompoundNBT;
 import snownee.kiwi.tile.TextureTile;
 
@@ -17,15 +16,15 @@ public class TestTile extends TextureTile {
 	}
 
 	@Override
-	public void read(BlockState state, CompoundNBT compound) {
+	public void load(BlockState state, CompoundNBT compound) {
 		readPacketData(compound);
-		super.read(state, compound);
+		super.load(state, compound);
 	}
 
 	@Override
-	public CompoundNBT write(CompoundNBT compound) {
+	public CompoundNBT save(CompoundNBT compound) {
 		writePacketData(compound);
-		return super.write(compound);
+		return super.save(compound);
 	}
 
 }

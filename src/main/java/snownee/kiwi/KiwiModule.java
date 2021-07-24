@@ -30,7 +30,7 @@ public @interface KiwiModule {
 	String dependencies() default "";
 
 	/**
-     * 
+     *
      * Optional module can be disabled in Kiwi's configuration
      * @author Snownee
      *
@@ -42,11 +42,11 @@ public @interface KiwiModule {
 	}
 
 	/**
-     * 
+     *
      * Item group this module belongs to.
      * You can input vanilla group id, such as 'buildingBlocks', 'misc'
      * If empty, Kiwi will catch the first ItemGroup in this module.
-     * 
+     *
      * @author Snownee
      *
      */
@@ -77,7 +77,7 @@ public @interface KiwiModule {
 		enum Bus {
 			/**
 			 * The main Forge Event Bus.
-			 * 
+			 *
 			 * @see MinecraftForge#EVENT_BUS
 			 */
 			FORGE(() -> MinecraftForge.EVENT_BUS),
@@ -90,7 +90,7 @@ public @interface KiwiModule {
 			private final Supplier<IEventBus> busSupplier;
 
 			Bus(Supplier<IEventBus> eventBusSupplier) {
-				this.busSupplier = eventBusSupplier;
+				busSupplier = eventBusSupplier;
 			}
 
 			public Supplier<IEventBus> bus() {

@@ -36,7 +36,7 @@ public interface ITierProvider {
 		return getPlayerTiers(playerName).contains(tier);
 	}
 
-	public static enum Empty implements ITierProvider {
+	public enum Empty implements ITierProvider {
 		INSTANCE;
 
 		@Override

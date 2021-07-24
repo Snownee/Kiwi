@@ -20,7 +20,7 @@ public class TestModule2 extends AbstractModule {
 	@Name("kiwi:test_item")
 	public static final TestItem FIRST_ITEM = new TestItem(itemProp().rarity(Rarity.EPIC)) {
 		@Override
-		public boolean hasEffect(ItemStack stack) {
+		public boolean isFoil(ItemStack stack) {
 			return true;
 		}
 	};

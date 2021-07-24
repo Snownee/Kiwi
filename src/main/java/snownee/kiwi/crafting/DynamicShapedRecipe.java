@@ -23,12 +23,12 @@ public abstract class DynamicShapedRecipe implements ICraftingRecipe, IShapedRec
 	private final String group;
 
 	public DynamicShapedRecipe(ResourceLocation idIn, String groupIn, int recipeWidthIn, int recipeHeightIn, NonNullList<Ingredient> ingredients, ItemStack recipeOutputIn) {
-		this.id = idIn;
-		this.group = groupIn;
-		this.recipeWidth = recipeWidthIn;
-		this.recipeHeight = recipeHeightIn;
-		this.recipeItems = ingredients;
-		this.recipeOutput = recipeOutputIn;
+		id = idIn;
+		group = groupIn;
+		recipeWidth = recipeWidthIn;
+		recipeHeight = recipeHeightIn;
+		recipeItems = ingredients;
+		recipeOutput = recipeOutputIn;
 	}
 
 	@Override
@@ -49,10 +49,10 @@ public abstract class DynamicShapedRecipe implements ICraftingRecipe, IShapedRec
 	}
 
 	@Override
-	public abstract ItemStack getCraftingResult(CraftingInventory inv);
+	public abstract ItemStack assemble(CraftingInventory inv);
 
 	@Override
-	public ItemStack getRecipeOutput() {
+	public ItemStack getResultItem() {
 		return recipeOutput;
 	}
 
@@ -72,7 +72,7 @@ public abstract class DynamicShapedRecipe implements ICraftingRecipe, IShapedRec
 	}
 
 	@Override
-	public boolean canFit(int width, int height) {
+	public boolean canCraftInDimensions(int width, int height) {
 		return width >= getRecipeWidth() && height >= getRecipeHeight();
 	}
 
@@ -82,7 +82,7 @@ public abstract class DynamicShapedRecipe implements ICraftingRecipe, IShapedRec
 	}
 
 	@Override
-	public boolean isDynamic() {
+	public boolean isSpecial() {
 		return true;
 	}
 
@@ -106,8 +106,8 @@ public abstract class DynamicShapedRecipe implements ICraftingRecipe, IShapedRec
 	}
 
 	public boolean matches(CraftingInventory inv, int x, int y, int ix, int iy) {
-		Ingredient ingredient = this.recipeItems.get(ix + iy * getRecipeWidth());
-		return ingredient.test(inv.getStackInSlot(x + y * inv.getWidth()));
+		Ingredient ingredient = recipeItems.get(ix + iy * getRecipeWidth());
+		return ingredient.test(inv.getItem(x + y * inv.getWidth()));
 	}
 
 	protected boolean checkEmpty(CraftingInventory inv, int startX, int startY) {
@@ -115,11 +115,11 @@ public abstract class DynamicShapedRecipe implements ICraftingRecipe, IShapedRec
 			int subY = y - startY;
 			for (int x = 0; x < inv.getWidth(); ++x) {
 				int subX = x - startX;
-				if (subX >= 0 && subY >= 0 && subX < this.getRecipeWidth() && subY < this.getRecipeHeight()) {
+				if (subX >= 0 && subY >= 0 && subX < getRecipeWidth() && subY < getRecipeHeight()) {
 					continue;
 				}
 
-				if (!getEmpty().test(inv.getStackInSlot(x + y * inv.getWidth()))) {
+				if (!getEmpty().test(inv.getItem(x + y * inv.getWidth()))) {
 					return false;
 				}
 			}

@@ -13,7 +13,7 @@ public class InventoryUtil {
 		}
 		stack = stack.copy();
 		for (int i = 0; i < itemHandler.getSlots(); ++i) {
-			if (stack.isItemEqual(itemHandler.getStackInSlot(i))) {
+			if (stack.sameItem(itemHandler.getStackInSlot(i))) {
 				ItemStack extracted = itemHandler.extractItem(i, stack.getCount(), true);
 				if (extracted.getCount() == stack.getCount()) {
 					if (!simulated) {

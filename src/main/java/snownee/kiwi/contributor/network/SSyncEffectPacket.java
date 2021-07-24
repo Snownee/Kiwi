@@ -34,7 +34,7 @@ public class SSyncEffectPacket extends Packet {
 		public void encode(SSyncEffectPacket msg, PacketBuffer buffer) {
 			buffer.writeVarInt(msg.map.size());
 			msg.map.forEach((k, v) -> {
-				buffer.writeString(k);
+				buffer.writeUtf(k);
 				buffer.writeResourceLocation(v);
 			});
 		}
@@ -44,8 +44,8 @@ public class SSyncEffectPacket extends Packet {
 			ImmutableMap.Builder<String, ResourceLocation> builder = ImmutableMap.builder();
 			int size = buffer.readVarInt();
 			for (int i = 0; i < size; i++) {
-				String k = buffer.readString();
-				String v = buffer.readString();
+				String k = buffer.readUtf();
+				String v = buffer.readUtf();
 				builder.put(k, Util.RL(v));
 			}
 			return new SSyncEffectPacket(builder.build());

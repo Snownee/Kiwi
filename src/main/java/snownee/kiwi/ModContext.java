@@ -30,8 +30,8 @@ public class ModContext {
 	private ModContext(String modid) {
 		Preconditions.checkNotNull(modid, "Cannot get name of kiwi module.");
 		try {
-			this.modContainer = ModList.get().getModContainerById(modid).get();
-			this.extension = (Supplier<?>) Kiwi.FIELD_EXTENSION.get(modContainer);
+			modContainer = ModList.get().getModContainerById(modid).get();
+			extension = (Supplier<?>) Kiwi.FIELD_EXTENSION.get(modContainer);
 		} catch (NoSuchElementException | IllegalArgumentException | IllegalAccessException e) {
 			Kiwi.logger.catching(e);
 		}

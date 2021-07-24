@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 
+ *
  * Only used by block. Kiwi will not automatically register its BlockItem
  * @author Snownee
  *

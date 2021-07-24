@@ -67,7 +67,7 @@ public final class Util {
 	@Nullable
 	public static ResourceLocation RL(@Nullable String string) {
 		try {
-			return ResourceLocation.tryCreate(string);
+			return ResourceLocation.tryParse(string);
 		} catch (Exception e) {
 			return null;
 		}
@@ -90,7 +90,7 @@ public final class Util {
 		if (rl != null) {
 			Item item = ForgeRegistries.ITEMS.getValue(rl);
 			if (item != null) {
-				return item.getTranslationKey();
+				return item.getDescriptionId();
 			}
 		}
 		return "";
