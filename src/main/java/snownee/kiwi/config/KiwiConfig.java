@@ -46,6 +46,6 @@ public @interface KiwiConfig {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.FIELD)
-	@interface WorldRestart {
+	@interface LevelRestart {
 	}
 }

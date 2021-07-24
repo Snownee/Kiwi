@@ -2,6 +2,8 @@ package snownee.kiwi.util;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -9,20 +11,22 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.mojang.datafixers.util.Pair;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.ComposterBlock;
-import net.minecraft.block.FireBlock;
-import net.minecraft.entity.ai.brain.task.FarmerWorkTask;
-import net.minecraft.entity.merchant.villager.VillagerEntity;
-import net.minecraft.item.AxeItem;
-import net.minecraft.item.HoeItem;
-import net.minecraft.item.ShovelItem;
-import net.minecraft.util.IItemProvider;
+import net.minecraft.world.entity.ai.behavior.WorkAtComposter;
+import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.item.AxeItem;
+import net.minecraft.world.item.HoeItem;
+import net.minecraft.world.item.ShovelItem;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ComposterBlock;
+import net.minecraft.world.level.block.FireBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.event.lifecycle.FMLModIdMappingEvent;
+import net.minecraftforge.fmllegacy.event.lifecycle.FMLModIdMappingEvent;
 import snownee.kiwi.Kiwi;
 
 /**
@@ -49,7 +53,7 @@ public final class DeferredActions { //TODO brewing
 		});
 	}
 
-	public static void registerHoeConversion(Block k, BlockState v) {
+	public static void registerHoeConversion(Block k, Pair<Predicate<UseOnContext>, Consumer<UseOnContext>> v) {
 		add(() -> {
 			HoeItem.TILLABLES.put(k, v);
 		});
@@ -57,10 +61,10 @@ public final class DeferredActions { //TODO brewing
 
 	public static void registerAxeConversion(Block k, Block v) {
 		add(() -> {
-			if (AxeItem.STRIPABLES instanceof ImmutableMap) {
-				AxeItem.STRIPABLES = Maps.newHashMap(AxeItem.STRIPABLES);
+			if (AxeItem.STRIPPABLES instanceof ImmutableMap) {
+				AxeItem.STRIPPABLES = Maps.newHashMap(AxeItem.STRIPPABLES);
 			}
-			AxeItem.STRIPABLES.put(k, v);
+			AxeItem.STRIPPABLES.put(k, v);
 		});
 	}
 
@@ -76,27 +80,27 @@ public final class DeferredActions { //TODO brewing
 		});
 	}
 
-	public static void registerCompostable(float chance, IItemProvider itemIn) {
+	public static void registerCompostable(float chance, ItemLike itemIn) {
 		add(() -> {
 			ComposterBlock.COMPOSTABLES.put(itemIn.asItem(), chance);
 		});
 	}
 
-	public static void registerVillagerPickupable(IItemProvider item) {
+	public static void registerVillagerPickupable(ItemLike item) {
 		add(() -> {
-			if (VillagerEntity.WANTED_ITEMS instanceof ImmutableSet) {
-				VillagerEntity.WANTED_ITEMS = Sets.newHashSet(VillagerEntity.WANTED_ITEMS);
+			if (Villager.WANTED_ITEMS instanceof ImmutableSet) {
+				Villager.WANTED_ITEMS = Sets.newHashSet(Villager.WANTED_ITEMS);
 			}
-			VillagerEntity.WANTED_ITEMS.add(item.asItem());
+			Villager.WANTED_ITEMS.add(item.asItem());
 		});
 	}
 
-	public static void registerVillagerCompostable(IItemProvider item) {
+	public static void registerVillagerCompostable(ItemLike item) {
 		add(() -> {
-			if (FarmerWorkTask.COMPOSTABLE_ITEMS instanceof ImmutableList) {
-				FarmerWorkTask.COMPOSTABLE_ITEMS = Lists.newArrayList(FarmerWorkTask.COMPOSTABLE_ITEMS);
+			if (WorkAtComposter.COMPOSTABLE_ITEMS instanceof ImmutableList) {
+				WorkAtComposter.COMPOSTABLE_ITEMS = Lists.newArrayList(WorkAtComposter.COMPOSTABLE_ITEMS);
 			}
-			FarmerWorkTask.COMPOSTABLE_ITEMS.add(item.asItem());
+			WorkAtComposter.COMPOSTABLE_ITEMS.add(item.asItem());
 		});
 	}
 

@@ -14,7 +14,7 @@ public enum YogaPrintOptions {
 
 	public final int bit;
 
-	private YogaPrintOptions(int bit) {
+	YogaPrintOptions(int bit) {
 		this.bit = bit;
 	}
 }

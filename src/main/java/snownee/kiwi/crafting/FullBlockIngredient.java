@@ -6,14 +6,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.IIngredientSerializer;
 import net.minecraftforge.common.crafting.StackList;
@@ -23,7 +23,7 @@ public class FullBlockIngredient extends Ingredient {
 
 	private final Ingredient example;
 
-	protected FullBlockIngredient(Stream<? extends IItemList> itemLists, Ingredient example) {
+	protected FullBlockIngredient(Stream<? extends Ingredient.Value> itemLists, Ingredient example) {
 		super(itemLists);
 		this.example = example;
 	}
@@ -37,7 +37,7 @@ public class FullBlockIngredient extends Ingredient {
 		boolean flag = state.canOcclude() && !state.useShapeForLightOcclusion();
 		if (flag) {
 			try {
-				if (VoxelShapes.block().equals(state.getCollisionShape(null, BlockPos.ZERO)))
+				if (Shapes.block().equals(state.getCollisionShape(null, BlockPos.ZERO)))
 					return true;
 			} catch (Exception e) {
 			}
@@ -51,7 +51,7 @@ public class FullBlockIngredient extends Ingredient {
 		}
 		Block block = Block.byItem(stack.getItem());
 		BlockState state = block.defaultBlockState();
-		return state.getMaterial().isSolid() && state.getRenderShape() == BlockRenderType.MODEL;
+		return state.getMaterial().isSolid() && state.getRenderShape() == RenderShape.MODEL;
 	}
 
 	@Override
@@ -77,7 +77,7 @@ public class FullBlockIngredient extends Ingredient {
 	public static class Serializer implements IIngredientSerializer<FullBlockIngredient> {
 
 		@Override
-		public FullBlockIngredient parse(PacketBuffer buffer) {
+		public FullBlockIngredient parse(FriendlyByteBuf buffer) {
 			Ingredient example = Ingredient.fromNetwork(buffer);
 			StackList stackList = new StackList(ImmutableList.copyOf(example.getItems()));
 			return new FullBlockIngredient(Stream.of(stackList), example);
@@ -96,7 +96,7 @@ public class FullBlockIngredient extends Ingredient {
 		}
 
 		@Override
-		public void write(PacketBuffer buffer, FullBlockIngredient ingredient) {
+		public void write(FriendlyByteBuf buffer, FullBlockIngredient ingredient) {
 			ingredient.example.toNetwork(buffer);
 		}
 

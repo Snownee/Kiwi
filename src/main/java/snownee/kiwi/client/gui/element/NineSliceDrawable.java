@@ -288,7 +288,7 @@
 //
 //    private static void draw(BufferBuilder bufferBuilder, float minU, double minV, float maxU, float maxV, int xOffset, int yOffset, int width, int height)
 //    {
-// SEE: IVertexBuilder
+// SEE: VertexConsumer
 //        bufferBuilder.pos(xOffset, yOffset + height, 0).tex(minU, maxV).endVertex();
 //        bufferBuilder.pos(xOffset + width, yOffset + height, 0).tex(maxU, maxV).endVertex();
 //        bufferBuilder.pos(xOffset + width, yOffset, 0).tex(maxU, minV).endVertex();

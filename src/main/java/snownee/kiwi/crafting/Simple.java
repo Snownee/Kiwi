@@ -1,15 +1,15 @@
 package snownee.kiwi.crafting;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
 
-public abstract class Recipe<C extends IInventory> implements IRecipe<C> {
+public abstract class Simple<C extends Container> implements Recipe<C> {
 
 	private final ResourceLocation id;
 
-	public Recipe(ResourceLocation id) {
+	public Simple(ResourceLocation id) {
 		this.id = id;
 	}
 

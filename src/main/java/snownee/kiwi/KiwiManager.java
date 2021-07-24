@@ -7,16 +7,16 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.collect.Maps;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.fml.CrashReportExtender;
+import net.minecraftforge.fml.CrashReportCallables;
 import net.minecraftforge.fml.ModLoadingContext;
 
 public final class KiwiManager {
 	public static final Map<ResourceLocation, ModuleInfo> MODULES = Maps.newLinkedHashMap();
 
 	static {
-		CrashReportExtender.registerCrashCallable("Kiwi Modules", () -> ("\n" + MODULES.keySet().stream().map(ResourceLocation::toString).sorted(StringUtils::compare).collect(Collectors.joining("\n\t\t", "\t\t", ""))));
+		CrashReportCallables.registerCrashCallable("Kiwi Modules", () -> ("\n" + MODULES.keySet().stream().map(ResourceLocation::toString).sorted(StringUtils::compare).collect(Collectors.joining("\n\t\t", "\t\t", ""))));
 	}
 
 	private KiwiManager() {

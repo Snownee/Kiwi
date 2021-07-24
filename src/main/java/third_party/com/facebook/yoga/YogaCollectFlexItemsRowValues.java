@@ -17,7 +17,7 @@ public class YogaCollectFlexItemsRowValues {
 	public float TotalFlexGrowFactors = 0;
 	public float TotalFlexShrinkScaledFactors = 0;
 	public int EndOfLineIndex;
-	public List<YogaNode> RelativeChildren = new ArrayList<YogaNode>();
+	public List<YogaNode> RelativeChildren = new ArrayList<>();
 	public float RemainingFreeSpace = 0;
 	// The size of the mainDim for the row after considering size, padding, margin
 	// and border of flex items. This is used to calculate maxLineDim after going

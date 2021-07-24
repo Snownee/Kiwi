@@ -4,17 +4,17 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.ICraftingRecipe;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
+import net.minecraft.core.NonNullList;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.crafting.IShapedRecipe;
 
-public abstract class DynamicShapedRecipe implements ICraftingRecipe, IShapedRecipe<CraftingInventory> {
+public abstract class DynamicShapedRecipe implements CraftingRecipe, IShapedRecipe<CraftingContainer> {
 	private final int recipeWidth;
 	private final int recipeHeight;
 	private final NonNullList<Ingredient> recipeItems;
@@ -32,12 +32,12 @@ public abstract class DynamicShapedRecipe implements ICraftingRecipe, IShapedRec
 	}
 
 	@Override
-	public boolean matches(CraftingInventory inv, World worldIn) {
+	public boolean matches(CraftingContainer inv, Level worldIn) {
 		return getMatchPos(inv) != null;
 	}
 
 	@Nullable
-	public int[] getMatchPos(CraftingInventory inv) {
+	public int[] getMatchPos(CraftingContainer inv) {
 		for (int x = 0; x <= inv.getWidth() - getRecipeWidth(); ++x) {
 			for (int y = 0; y <= inv.getHeight() - getRecipeHeight(); ++y) {
 				if (checkMatch(inv, x, y) && checkEmpty(inv, x, y)) {
@@ -49,7 +49,7 @@ public abstract class DynamicShapedRecipe implements ICraftingRecipe, IShapedRec
 	}
 
 	@Override
-	public abstract ItemStack assemble(CraftingInventory inv);
+	public abstract ItemStack assemble(CraftingContainer inv);
 
 	@Override
 	public ItemStack getResultItem() {
@@ -92,9 +92,9 @@ public abstract class DynamicShapedRecipe implements ICraftingRecipe, IShapedRec
 	}
 
 	@Override
-	public abstract IRecipeSerializer<?> getSerializer();
+	public abstract RecipeSerializer<?> getSerializer();
 
-	protected boolean checkMatch(CraftingInventory inv, int startX, int startY) {
+	protected boolean checkMatch(CraftingContainer inv, int startX, int startY) {
 		for (int y = startY; y < startY + getRecipeHeight(); ++y) {
 			for (int x = startX; x < startX + getRecipeWidth(); ++x) {
 				if (!matches(inv, x, y, x - startX, y - startY)) {
@@ -105,12 +105,12 @@ public abstract class DynamicShapedRecipe implements ICraftingRecipe, IShapedRec
 		return true;
 	}
 
-	public boolean matches(CraftingInventory inv, int x, int y, int ix, int iy) {
+	public boolean matches(CraftingContainer inv, int x, int y, int ix, int iy) {
 		Ingredient ingredient = recipeItems.get(ix + iy * getRecipeWidth());
 		return ingredient.test(inv.getItem(x + y * inv.getWidth()));
 	}
 
-	protected boolean checkEmpty(CraftingInventory inv, int startX, int startY) {
+	protected boolean checkEmpty(CraftingContainer inv, int startX, int startY) {
 		for (int y = 0; y < inv.getHeight(); ++y) {
 			int subY = y - startY;
 			for (int x = 0; x < inv.getWidth(); ++x) {

@@ -1,14 +1,14 @@
 package snownee.kiwi.inventory;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandlerModifiable;
 
 /**
  * @since 2.7.0
  */
-public class InvHandlerWrapper implements IInventory {
+public class InvHandlerWrapper implements Container {
 
 	protected final IItemHandlerModifiable handler;
 
@@ -73,7 +73,7 @@ public class InvHandlerWrapper implements IInventory {
 	}
 
 	@Override
-	public boolean stillValid(PlayerEntity player) {
+	public boolean stillValid(Player player) {
 		return true;
 	}
 

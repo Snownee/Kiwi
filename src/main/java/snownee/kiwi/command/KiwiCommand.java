@@ -9,20 +9,20 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.Commands.EnvironmentType;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.Commands.CommandSelection;
+import net.minecraft.network.chat.TranslatableComponent;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.util.LootDumper;
 
 public class KiwiCommand {
-	private static final SimpleCommandExceptionType WRONG_PATTERN_EXCEPTION = new SimpleCommandExceptionType(new TranslationTextComponent("commands.kiwi.dumpLoots.wrongPattern"));
+	private static final SimpleCommandExceptionType WRONG_PATTERN_EXCEPTION = new SimpleCommandExceptionType(new TranslatableComponent("commands.kiwi.dumpLoots.wrongPattern"));
 
-	public static void register(CommandDispatcher<CommandSource> dispatcher, EnvironmentType environmentType) {
-		LiteralArgumentBuilder<CommandSource> builder = Commands.literal(Kiwi.MODID);
+	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher, CommandSelection environmentType) {
+		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal(Kiwi.MODID);
 		/* off */
-        if (environmentType != EnvironmentType.DEDICATED) {
+        if (environmentType != CommandSelection.DEDICATED) {
             builder.then(Commands
                     .literal("dumpLoots")
                     .executes(ctx -> dumpLoots(ctx.getSource(), ".+"))
@@ -34,22 +34,22 @@ public class KiwiCommand {
         }
 
         builder.then(Commands
-                .literal("debugWorldRules")
+                .literal("debugLevelRules")
                 .requires(ctx -> ctx.hasPermission(2))
-                .executes(ctx -> cleanWorld(ctx.getSource()))
+                .executes(ctx -> cleanLevel(ctx.getSource()))
         );
         /* on */
-		dispatcher.register(builder);
+		commandDispatcher.register(builder);
 	}
 
-	public static int dumpLoots(CommandSource source, String pattern) throws CommandSyntaxException {
+	public static int dumpLoots(CommandSourceStack commandSourceStack, String pattern) throws CommandSyntaxException {
 		try {
 			Pattern p = Pattern.compile(pattern);
-			int r = LootDumper.dump(p, source.getServer().getServerDirectory());
+			int r = LootDumper.dump(p, commandSourceStack.getServer().getServerDirectory());
 			if (r == 0) {
-				source.sendFailure(new TranslationTextComponent("commands.kiwi.dumpLoots.noTargets"));
+				commandSourceStack.sendFailure(new TranslatableComponent("commands.kiwi.dumpLoots.noTargets"));
 			} else {
-				source.sendSuccess(new TranslationTextComponent("commands.kiwi.dumpLoots.success", r), true);
+				commandSourceStack.sendSuccess(new TranslatableComponent("commands.kiwi.dumpLoots.success", r), true);
 			}
 			return r;
 		} catch (PatternSyntaxException e) {
@@ -57,17 +57,17 @@ public class KiwiCommand {
 		}
 	}
 
-	private static int cleanWorld(CommandSource source) {
-		Commands commands = source.getServer().getCommands();
-		commands.performCommand(source, "gamerule doDaylightCycle false");
-		commands.performCommand(source, "gamerule doWeatherCycle false");
-		commands.performCommand(source, "gamerule doMobLoot false");
-		commands.performCommand(source, "gamerule doMobSpawning false");
-		commands.performCommand(source, "difficulty peaceful");
-		commands.performCommand(source, "kill @e[type=!minecraft:player]");
-		commands.performCommand(source, "time set day");
-		commands.performCommand(source, "weather clear");
-		commands.performCommand(source, "gamerule doMobLoot true");
+	private static int cleanLevel(CommandSourceStack commandSourceStack) {
+		Commands commands = commandSourceStack.getServer().getCommands();
+		commands.performCommand(commandSourceStack, "gamerule doDaylightCycle false");
+		commands.performCommand(commandSourceStack, "gamerule doWeatherCycle false");
+		commands.performCommand(commandSourceStack, "gamerule doMobLoot false");
+		commands.performCommand(commandSourceStack, "gamerule doMobSpawning false");
+		commands.performCommand(commandSourceStack, "difficulty peaceful");
+		commands.performCommand(commandSourceStack, "kill @e[type=!minecraft:player]");
+		commands.performCommand(commandSourceStack, "time set day");
+		commands.performCommand(commandSourceStack, "weather clear");
+		commands.performCommand(commandSourceStack, "gamerule doMobLoot true");
 		return 1;
 	}
 }

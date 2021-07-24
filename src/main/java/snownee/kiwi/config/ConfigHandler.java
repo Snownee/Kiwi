@@ -20,14 +20,15 @@ import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.javafmlmod.FMLModContainer;
 import net.minecraftforge.fml.loading.FMLPaths;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.config.KiwiConfig.Comment;
+import snownee.kiwi.config.KiwiConfig.LevelRestart;
 import snownee.kiwi.config.KiwiConfig.Path;
 import snownee.kiwi.config.KiwiConfig.Range;
 import snownee.kiwi.config.KiwiConfig.Translation;
-import snownee.kiwi.config.KiwiConfig.WorldRestart;
 
 public class ConfigHandler {
 
@@ -75,7 +76,7 @@ public class ConfigHandler {
 			if (type != int.class && type != long.class && type != double.class && type != float.class && type != boolean.class && type != String.class && !Enum.class.isAssignableFrom(type) && !List.class.isAssignableFrom(type)) {
 				continue;
 			}
-			if (field.getAnnotation(WorldRestart.class) != null) {
+			if (field.getAnnotation(LevelRestart.class) != null) {
 				builder.worldRestart();
 			}
 			Comment comment = field.getAnnotation(Comment.class);
@@ -155,11 +156,11 @@ public class ConfigHandler {
 		Field fCfg = ModConfig.class.getDeclaredField("configData");
 		fCfg.setAccessible(true);
 		fCfg.set(config, configData);
-		config.getSpec().setConfig(configData);
+		config.getSpec().acceptConfig(configData);
 		//config.save();
 	}
 
-	protected void onFileChange(ModConfig.Reloading event) {
+	protected void onFileChange(ModConfigEvent.Reloading event) {
 		((CommentedFileConfig) event.getConfig().getConfigData()).load();
 		refresh();
 	}

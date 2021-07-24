@@ -1,10 +1,10 @@
 package snownee.kiwi.crafting;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
-public class EmptyInventory implements IInventory {
+public class EmptyInventory implements Container {
 
 	@Override
 	public void clearContent() {
@@ -44,7 +44,7 @@ public class EmptyInventory implements IInventory {
 	}
 
 	@Override
-	public boolean stillValid(PlayerEntity player) {
+	public boolean stillValid(Player player) {
 		return false;
 	}
 

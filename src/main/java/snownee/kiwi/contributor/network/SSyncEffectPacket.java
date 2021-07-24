@@ -5,12 +5,12 @@ import java.util.function.Supplier;
 
 import com.google.common.collect.ImmutableMap;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.network.NetworkEvent.Context;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 import snownee.kiwi.contributor.Contributors;
 import snownee.kiwi.network.NetworkChannel;
 import snownee.kiwi.network.Packet;
@@ -24,14 +24,14 @@ public class SSyncEffectPacket extends Packet {
 		this.map = map;
 	}
 
-	public void sendExcept(ServerPlayerEntity player) {
+	public void sendExcept(ServerPlayer player) {
 		NetworkChannel.sendToAllExcept(player, this);
 	}
 
 	public static class Handler extends PacketHandler<SSyncEffectPacket> {
 
 		@Override
-		public void encode(SSyncEffectPacket msg, PacketBuffer buffer) {
+		public void encode(SSyncEffectPacket msg, FriendlyByteBuf buffer) {
 			buffer.writeVarInt(msg.map.size());
 			msg.map.forEach((k, v) -> {
 				buffer.writeUtf(k);
@@ -40,7 +40,7 @@ public class SSyncEffectPacket extends Packet {
 		}
 
 		@Override
-		public SSyncEffectPacket decode(PacketBuffer buffer) {
+		public SSyncEffectPacket decode(FriendlyByteBuf buffer) {
 			ImmutableMap.Builder<String, ResourceLocation> builder = ImmutableMap.builder();
 			int size = buffer.readVarInt();
 			for (int i = 0; i < size; i++) {
@@ -53,7 +53,7 @@ public class SSyncEffectPacket extends Packet {
 
 		@Override
 		@OnlyIn(Dist.CLIENT)
-		public void handle(SSyncEffectPacket msg, Supplier<Context> ctx) {
+		public void handle(SSyncEffectPacket msg, Supplier<NetworkEvent.Context> ctx) {
 			ctx.get().enqueueWork(() -> {
 				Contributors.changeEffect(msg.map);
 			});

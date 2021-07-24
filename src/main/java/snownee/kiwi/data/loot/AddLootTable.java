@@ -5,7 +5,7 @@
 //import com.google.gson.JsonObject;
 //
 //import net.minecraft.item.ItemStack;
-//import net.minecraft.util.JSONUtils;
+//import net.minecraft.util.GsonHelper;
 //import net.minecraft.util.ResourceLocation;
 //import net.minecraft.world.storage.loot.LootContext;
 //import net.minecraft.world.storage.loot.LootTable;
@@ -41,7 +41,7 @@
 //    public static class Serializer extends GlobalLootModifierSerializer<AddLootTable> {
 //        @Override
 //        public AddLootTable read(ResourceLocation location, JsonObject object, ILootCondition[] ailootcondition) {
-//            ResourceLocation lootTable = new ResourceLocation(JSONUtils.getString(object, "loot_table"));
+//            ResourceLocation lootTable = new ResourceLocation(GsonHelper.getString(object, "loot_table"));
 //            return new AddLootTable(ailootcondition, lootTable);
 //        }
 //    }

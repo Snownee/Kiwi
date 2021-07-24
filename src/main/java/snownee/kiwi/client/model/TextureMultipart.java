@@ -14,14 +14,14 @@ import org.apache.commons.lang3.tuple.Pair;
 import com.google.common.collect.Lists;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.model.ItemOverrideList;
+import net.minecraft.Util;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.ItemOverrides;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Util;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.data.IDynamicBakedModel;
@@ -36,11 +36,11 @@ import net.minecraftforge.client.model.data.IModelData;
 @SuppressWarnings("deprecation")
 @OnlyIn(Dist.CLIENT)
 public class TextureMultipart implements IDynamicBakedModel {
-	private final List<Pair<Predicate<BlockState>, IBakedModel>> selectors;
-	private final IBakedModel originalBaked;
+	private final List<Pair<Predicate<BlockState>, BakedModel>> selectors;
+	private final BakedModel originalBaked;
 	private final Map<BlockState, BitSet> field_210277_g = new Object2ObjectOpenCustomHashMap<>(Util.identityStrategy());
 
-	public TextureMultipart(List<Pair<Predicate<BlockState>, IBakedModel>> p_i48273_1_) {
+	public TextureMultipart(List<Pair<Predicate<BlockState>, BakedModel>> p_i48273_1_) {
 		selectors = p_i48273_1_;
 		originalBaked = p_i48273_1_.iterator().next().getRight();
 	}
@@ -55,7 +55,7 @@ public class TextureMultipart implements IDynamicBakedModel {
 				bitset = new BitSet();
 
 				for (int i = 0; i < selectors.size(); ++i) {
-					Pair<Predicate<BlockState>, IBakedModel> pair = selectors.get(i);
+					Pair<Predicate<BlockState>, BakedModel> pair = selectors.get(i);
 					if (pair.getLeft().test(state)) {
 						bitset.set(i);
 					}
@@ -98,29 +98,29 @@ public class TextureMultipart implements IDynamicBakedModel {
 	}
 
 	@Override
-	public TextureAtlasSprite getParticleTexture(IModelData data) {
-		return originalBaked.getParticleTexture(data);
+	public TextureAtlasSprite getParticleIcon(IModelData data) {
+		return originalBaked.getParticleIcon(data);
 	}
 
 	@Override
-	public ItemCameraTransforms getTransforms() {
+	public ItemTransforms getTransforms() {
 		return originalBaked.getTransforms();
 	}
 
 	@Override
-	public ItemOverrideList getOverrides() {
+	public ItemOverrides getOverrides() {
 		return originalBaked.getOverrides();
 	}
 
 	@OnlyIn(Dist.CLIENT)
 	public static class Builder {
-		private final List<Pair<Predicate<BlockState>, IBakedModel>> selectors = Lists.newArrayList();
+		private final List<Pair<Predicate<BlockState>, BakedModel>> selectors = Lists.newArrayList();
 
-		public void putModel(Predicate<BlockState> predicate, IBakedModel model) {
+		public void putModel(Predicate<BlockState> predicate, BakedModel model) {
 			selectors.add(Pair.of(predicate, model));
 		}
 
-		public IBakedModel build() {
+		public BakedModel build() {
 			return new TextureMultipart(selectors);
 		}
 	}

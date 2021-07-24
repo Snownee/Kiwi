@@ -4,7 +4,7 @@
 //import com.google.gson.JsonObject;
 //import com.google.gson.JsonSerializationContext;
 //
-//import net.minecraft.util.JSONUtils;
+//import net.minecraft.util.GsonHelper;
 //import net.minecraft.util.ResourceLocation;
 //import net.minecraft.world.storage.loot.LootContext;
 //import net.minecraft.world.storage.loot.LootTable;
@@ -42,7 +42,7 @@
 //
 //        @Override
 //        public HasLootTable deserialize(JsonObject json, JsonDeserializationContext context) {
-//            return new HasLootTable(new ResourceLocation(JSONUtils.getString(json, "loot_table")));
+//            return new HasLootTable(new ResourceLocation(GsonHelper.getString(json, "loot_table")));
 //        }
 //
 //    }

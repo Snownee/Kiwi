@@ -14,19 +14,19 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
-import net.minecraft.block.Block;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.RenderTypeLookup;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fmlserverevents.FMLServerStartingEvent;
 import net.minecraftforge.registries.IForgeRegistryEntry;
-import snownee.kiwi.KiwiModule.Group;
+import snownee.kiwi.KiwiModule.Category;
 import snownee.kiwi.item.ModBlockItem;
 
 public class ModuleInfo {
@@ -44,7 +44,7 @@ public class ModuleInfo {
 
 	public final AbstractModule module;
 	public final ModContext context;
-	public ItemGroup category;
+	public CreativeModeTab category;
 	final RegistryHolder registries = new RegistryHolder();
 	final Map<Block, Item.Properties> blockItemBuilders = Maps.newHashMap();
 	final Set<Object> noCategories = Sets.newHashSet();
@@ -80,9 +80,9 @@ public class ModuleInfo {
 				if (noCategories.contains(e.entry)) {
 					noCategories.add(item);
 				} else if (e.field != null) {
-					Group group = e.field.getAnnotation(Group.class);
+					Category group = e.field.getAnnotation(Category.class);
 					if (group != null && !group.value().isEmpty()) {
-						ItemGroup category = Kiwi.getGroup(group.value());
+						CreativeModeTab category = Kiwi.getGroup(group.value());
 						if (category != null) {
 							item.category = category;
 						} else {
@@ -107,7 +107,7 @@ public class ModuleInfo {
 					if (layer != null) {
 						RenderType type = layer.value().get();
 						if (type != solid && type != null) {
-							RenderTypeLookup.setRenderLayer(block, type);
+							ItemBlockRenderTypes.setRenderLayer(block, type);
 							return;
 						}
 					}
@@ -125,7 +125,7 @@ public class ModuleInfo {
 					return solid;
 				});
 				if (type != solid && type != null) {
-					RenderTypeLookup.setRenderLayer(block, type);
+					ItemBlockRenderTypes.setRenderLayer(block, type);
 				}
 			});
 		}

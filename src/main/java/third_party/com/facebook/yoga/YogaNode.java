@@ -1279,7 +1279,7 @@ public class YogaNode implements Iterable<YogaNode> {
 
 									float childHeight = !isMainAxisRow ? (child._layout.MeasuredDimensions[YogaDimension.Height.ordinal()] + child.GetMarginForAxis(crossAxis, availableInnerWidth)) : lineHeight;
 
-									if (!(YogaMath.FloatsEqual(childWidth, child._layout.MeasuredDimensions[YogaDimension.Width.ordinal()]) && YogaMath.FloatsEqual(childHeight, child._layout.MeasuredDimensions[YogaDimension.Height.ordinal()]))) {
+									if ((!YogaMath.FloatsEqual(childWidth, child._layout.MeasuredDimensions[YogaDimension.Width.ordinal()]) || !YogaMath.FloatsEqual(childHeight, child._layout.MeasuredDimensions[YogaDimension.Height.ordinal()]))) {
 										child.LayoutNode(childWidth, childHeight, direction, YogaMeasureMode.Exactly, YogaMeasureMode.Exactly, availableInnerWidth, availableInnerHeight, true, "multiline-stretch", config);
 									}
 								}
@@ -1924,7 +1924,7 @@ public class YogaNode implements Iterable<YogaNode> {
 
 				childCrossMeasureMode = YogaMeasureMode.Exactly;
 				childCrossSize += marginCross;
-			} else if (!Float.isNaN(availableInnerCrossDim) && !currentRelativeChild.IsStyleDimensionDefined(crossAxis, availableInnerCrossDim) && measureModeCrossDim == YogaMeasureMode.Exactly && !(isNodeFlexWrap && flexBasisOverflows) && GetAlign(currentRelativeChild) == YogaAlign.Stretch && currentRelativeChild.GetMarginLeadingValue(crossAxis).Unit != YogaUnit.Auto && currentRelativeChild.GetMarginTrailingValue(crossAxis).Unit != YogaUnit.Auto) {
+			} else if (!Float.isNaN(availableInnerCrossDim) && !currentRelativeChild.IsStyleDimensionDefined(crossAxis, availableInnerCrossDim) && measureModeCrossDim == YogaMeasureMode.Exactly && (!isNodeFlexWrap || !flexBasisOverflows) && GetAlign(currentRelativeChild) == YogaAlign.Stretch && currentRelativeChild.GetMarginLeadingValue(crossAxis).Unit != YogaUnit.Auto && currentRelativeChild.GetMarginTrailingValue(crossAxis).Unit != YogaUnit.Auto) {
 				childCrossSize = availableInnerCrossDim;
 				childCrossMeasureMode = YogaMeasureMode.Exactly;
 			} else if (!currentRelativeChild.IsStyleDimensionDefined(crossAxis, availableInnerCrossDim)) {
@@ -2254,7 +2254,7 @@ public class YogaNode implements Iterable<YogaNode> {
 
 	private boolean IsStyleDimensionDefined(YogaFlexDirection axis, float ownerSize) {
 		boolean isUndefined = Float.isNaN(GetResolvedDimension(Dimension[axis.ordinal()]).Value);
-		return !(GetResolvedDimension(Dimension[axis.ordinal()]).Unit == YogaUnit.Auto || GetResolvedDimension(Dimension[axis.ordinal()]).Unit == YogaUnit.Undefined || (GetResolvedDimension(Dimension[axis.ordinal()]).Unit == YogaUnit.Point && !isUndefined && GetResolvedDimension(Dimension[axis.ordinal()]).Value < 0.0f) || (GetResolvedDimension(Dimension[axis.ordinal()]).Unit == YogaUnit.Percent && !isUndefined && (GetResolvedDimension(Dimension[axis.ordinal()]).Value < 0.0f || Float.isNaN(ownerSize))));
+		return ((GetResolvedDimension(Dimension[axis.ordinal()]).Unit != YogaUnit.Auto) && (GetResolvedDimension(Dimension[axis.ordinal()]).Unit != YogaUnit.Undefined) && ((GetResolvedDimension(Dimension[axis.ordinal()]).Unit != YogaUnit.Point) || isUndefined || (GetResolvedDimension(Dimension[axis.ordinal()]).Value >= 0.0f)) && ((GetResolvedDimension(Dimension[axis.ordinal()]).Unit != YogaUnit.Percent) || isUndefined || ((GetResolvedDimension(Dimension[axis.ordinal()]).Value >= 0.0f) && !Float.isNaN(ownerSize))));
 	}
 
 	private boolean IsLayoutDimensionDefined(YogaFlexDirection axis) {
@@ -2699,7 +2699,7 @@ public class YogaNode implements Iterable<YogaNode> {
 		_layout = new YogaLayout();
 		_lineIndex = 0;
 		_owner = null;
-		_children = new ArrayList<YogaNode>();
+		_children = new ArrayList<>();
 		_nextChild = null;
 		_isDirty = false;
 		_resolvedDimensions = new YogaValue[] { YogaValue.UNDEFINED, YogaValue.UNDEFINED };

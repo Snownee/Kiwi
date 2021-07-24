@@ -1,7 +1,7 @@
 package snownee.kiwi.handler;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.Mth;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.energy.EnergyStorage;
 
@@ -23,7 +23,7 @@ public class Battery extends EnergyStorage {
 		super(capacity, maxReceive, maxExtract, energy);
 	}
 
-	public Battery readFromNBT(CompoundNBT nbt) {
+	public Battery readFromNBT(CompoundTag nbt) {
 		if (nbt.contains("Energy", Constants.NBT.TAG_INT)) {
 			energy = nbt.getInt("Energy");
 		} else {
@@ -32,7 +32,7 @@ public class Battery extends EnergyStorage {
 		return this;
 	}
 
-	public CompoundNBT writeToNBT(CompoundNBT nbt) {
+	public CompoundTag writeToNBT(CompoundTag nbt) {
 		if (energy > 0) {
 			nbt.putInt("Energy", energy);
 		}
@@ -41,7 +41,7 @@ public class Battery extends EnergyStorage {
 
 	public void setEnergy(int energy) {
 		int old = this.energy;
-		this.energy = MathHelper.clamp(energy, 0, getMaxEnergyStored());
+		this.energy = Mth.clamp(energy, 0, getMaxEnergyStored());
 		if (old != this.energy) {
 			onEnergyChanged();
 		}

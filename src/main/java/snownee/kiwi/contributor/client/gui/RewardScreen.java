@@ -4,16 +4,17 @@ import java.util.Objects;
 
 import javax.annotation.Nullable;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.list.ExtendedList;
-import net.minecraft.client.gui.widget.list.ExtendedList.AbstractListEntry;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Util;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
@@ -31,7 +32,7 @@ public class RewardScreen extends Screen {
 	private Entry selectedEntry;
 
 	public RewardScreen() {
-		super(new TranslationTextComponent("gui.kiwi.reward"));
+		super(new TranslatableComponent("gui.kiwi.reward"));
 	}
 
 	@Override
@@ -58,7 +59,7 @@ public class RewardScreen extends Screen {
 	}
 
 	@Override
-	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float pTicks) {
+	public void render(PoseStack matrixStack, int mouseX, int mouseY, float pTicks) {
 		renderBackground(matrixStack);
 		super.render(matrixStack, mouseX, mouseY, pTicks);
 		list.render(matrixStack, mouseX, mouseY, pTicks);
@@ -115,20 +116,20 @@ public class RewardScreen extends Screen {
 		return Minecraft.getInstance().getUser().getName();
 	}
 
-	private static class List extends ExtendedList<Entry> {
+	private static class List extends ObjectSelectionList<Entry> {
 
 		public List(Minecraft mcIn, int widthIn, int heightIn, int topIn, int bottomIn, int slotHeightIn) {
 			super(mcIn, widthIn, heightIn, topIn, bottomIn, slotHeightIn);
 		}
 
 		@Override
-		public int addEntry(Entry p_addEntry_1_) {
-			return super.addEntry(p_addEntry_1_);
+		public int addEntry(snownee.kiwi.contributor.client.gui.RewardScreen.Entry p_93487_) {
+			return super.addEntry(p_93487_);
 		}
 
 	}
 
-	private static class Entry extends AbstractListEntry<Entry> {
+	private static class Entry extends ObjectSelectionList.Entry<Entry> {
 
 		private final RewardScreen parent;
 		@Nullable
@@ -142,7 +143,7 @@ public class RewardScreen extends Screen {
 		}
 
 		@Override
-		public void render(MatrixStack matrixStack, int entryIdx, int top, int left, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hover, float partialTicks) {
+		public void render(PoseStack matrixStack, int entryIdx, int top, int left, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hover, float partialTicks) {
 			int color = hover ? 0xFFFFAA : 0xFFFFFF;
 			if (this == parent.selectedEntry) {
 				color = 0xFFFF77;
@@ -154,6 +155,11 @@ public class RewardScreen extends Screen {
 		public boolean mouseClicked(double p_mouseClicked_1_, double p_mouseClicked_3_, int p_mouseClicked_5_) {
 			parent.selectedEntry = this;
 			return false;
+		}
+
+		@Override
+		public Component getNarration() {
+			return new TextComponent(name);
 		}
 
 	}

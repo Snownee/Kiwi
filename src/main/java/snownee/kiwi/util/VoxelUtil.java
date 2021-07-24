@@ -2,19 +2,19 @@ package snownee.kiwi.util;
 
 import java.awt.geom.Point2D;
 
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.core.Direction;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 public final class VoxelUtil {
 	private VoxelUtil() {
 	}
 
-	public static AxisAlignedBB rotate(AxisAlignedBB aabb, Direction facing) {
+	public static AABB rotate(AABB aabb, Direction facing) {
 		Point2D.Double pointMin = rotate(new Point2D.Double(aabb.minX, aabb.minZ), facing);
 		Point2D.Double pointMax = rotate(new Point2D.Double(aabb.maxX, aabb.maxZ), facing);
-		return new AxisAlignedBB(pointMin.x, aabb.minY, pointMin.y, pointMax.x, aabb.maxY, pointMax.y);
+		return new AABB(pointMin.x, aabb.minY, pointMin.y, pointMax.x, aabb.maxY, pointMax.y);
 	}
 
 	public static VoxelShape rotate(VoxelShape shape, Direction facing) {
@@ -22,7 +22,7 @@ public final class VoxelUtil {
 		shape.forAllBoxes((x1, y1, z1, x2, y2, z2) -> {
 			Point2D.Double pointMin = rotate(new Point2D.Double(Math.min(x1, x2), Math.min(z1, z2)), facing);
 			Point2D.Double pointMax = rotate(new Point2D.Double(Math.max(x1, x2), Math.max(z1, z2)), facing);
-			builder.add(VoxelShapes.box(pointMin.x, Math.min(y1, y2), pointMin.y, pointMax.x, Math.max(y1, y2), pointMax.y));
+			builder.add(Shapes.box(pointMin.x, Math.min(y1, y2), pointMin.y, pointMax.x, Math.max(y1, y2), pointMax.y));
 		});
 		return builder.get();
 	}
@@ -54,7 +54,7 @@ public final class VoxelUtil {
 			if (shape == null) {
 				shape = newShape;
 			} else {
-				shape = VoxelShapes.or(shape, newShape);
+				shape = Shapes.or(shape, newShape);
 			}
 		}
 
@@ -63,12 +63,12 @@ public final class VoxelUtil {
 		}
 	}
 
-	//    public static int rayTraceByDistance(EntityPlayer player, List<AxisAlignedBB> aabbs)
+	//    public static int rayTraceByDistance(EntityPlayer player, List<AABB> aabbs)
 	//    {
 	//        Vec3d posPlayer = player.getPositionEyes(1);
-	//        List<AxisAlignedBB> sorted = Lists.newArrayList(aabbs);
+	//        List<AABB> sorted = Lists.newArrayList(aabbs);
 	//        sorted.sort(Comparator.comparingDouble(o -> getCenter(o).squareDistanceTo(posPlayer)));
-	//        for (AxisAlignedBB aabb : sorted)
+	//        for (AABB aabb : sorted)
 	//        {
 	//            if (rayTrace(player, aabb) != null)
 	//            {
@@ -78,7 +78,7 @@ public final class VoxelUtil {
 	//        return -1;
 	//    }
 	//
-	//    public static RayTraceResult rayTrace(EntityPlayer player, AxisAlignedBB aabb)
+	//    public static HitResult rayTrace(EntityPlayer player, AABB aabb)
 	//    {
 	//        Vec3d posPlayer = player.getPositionEyes(1);
 	//        double distance = player.getEntityAttribute(EntityPlayer.REACH_DISTANCE).getAttributeValue();
@@ -86,7 +86,7 @@ public final class VoxelUtil {
 	//        return aabb.calculateIntercept(posPlayer, posEnd);
 	//    }
 	//
-	//    public static Vec3d getCenter(AxisAlignedBB aabb)
+	//    public static Vec3d getCenter(AABB aabb)
 	//    {
 	//        return new Vec3d(aabb.minX + (aabb.maxX - aabb.minX) * 0.5D, aabb.minY + (aabb.maxY - aabb.minY) * 0.5D, aabb.minZ + (aabb.maxZ - aabb.minZ) * 0.5D);
 	//    }

@@ -45,14 +45,14 @@ public @interface KiwiModule {
      *
      * Item group this module belongs to.
      * You can input vanilla group id, such as 'buildingBlocks', 'misc'
-     * If empty, Kiwi will catch the first ItemGroup in this module.
+     * If empty, Kiwi will catch the first CreativeModeTab in this module.
      *
      * @author Snownee
      *
      */
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE, ElementType.FIELD })
-	@interface Group {
+	@interface Category {
 		String value() default "";
 	}
 

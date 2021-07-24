@@ -1,20 +1,20 @@
 package snownee.kiwi.test;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
-import net.minecraft.item.Item;
-import net.minecraft.item.Rarity;
-import net.minecraft.potion.Effect;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.EffectType;
-import net.minecraft.potion.HealthBoostEffect;
-import net.minecraft.potion.Potion;
-import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.world.effect.HealthBoostMobEffect;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.material.Material;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.fmlserverevents.FMLServerStartingEvent;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModule.Subscriber.Bus;
@@ -24,7 +24,7 @@ import snownee.kiwi.schedule.Scheduler;
 
 @KiwiModule("test")
 @KiwiModule.Optional(disabledByDefault = true)
-@KiwiModule.Group("building_blocks")
+@KiwiModule.Category("building_blocks")
 @KiwiModule.Subscriber(Bus.MOD)
 public class TestModule extends AbstractModule {
 	// Keep your fields `public static final`
@@ -39,15 +39,15 @@ public class TestModule extends AbstractModule {
 	public static final TestBlock FIRST_BLOCK = new TestBlock2(blockProp(Material.WOOD));
 
 	// Register a simple effect
-	public static final Effect FIRST_EFFECT = new HealthBoostEffect(EffectType.BENEFICIAL, 0xFF0000);
+	public static final MobEffect FIRST_EFFECT = new HealthBoostMobEffect(MobEffectCategory.BENEFICIAL, 0xFF0000);
 
 	// And its potion
-	public static final Potion FIRST_POTION = new Potion(new EffectInstance(FIRST_EFFECT, 1800));
+	public static final Potion FIRST_POTION = new Potion(new MobEffectInstance(FIRST_EFFECT, 1800));
 
-	public static final TileEntityType<?> FIRST_TILE = TileEntityType.Builder.of(TestTile::new, FIRST_BLOCK).build(null);
+	public static final BlockEntityType<?> FIRST_TILE = BlockEntityType.Builder.of(TestBlockEntity::new, FIRST_BLOCK).build(null);
 
 	public static final TexBlock TEX_BLOCK = new TexBlock(blockProp(Material.WOOD));
-	public static final TileEntityType<?> TEX_TILE = TileEntityType.Builder.of(TexTile::new, TEX_BLOCK).build(null);
+	public static final BlockEntityType<?> TEX_TILE = BlockEntityType.Builder.of(TexBlockEntity::new, TEX_BLOCK).build(null);
 
 	public static TestModule INSTANCE;
 

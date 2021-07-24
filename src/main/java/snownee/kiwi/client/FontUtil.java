@@ -4,19 +4,19 @@
 //import com.ibm.icu.text.ArabicShaping;
 //import com.ibm.icu.text.ArabicShapingException;
 //import com.ibm.icu.text.Bidi;
-//import net.minecraft.client.gui.FontRenderer;
+//import net.minecraft.client.gui.Font;
 //
 //import java.util.List;
 //
 //public class FontUtil
 //{
-//    public static List<String> drawSplitStringOverflow(FontRenderer fontRenderer, String str, int x, int y, int wrapWidth, int threshold, int textColor, boolean addShadow)
+//    public static List<String> drawSplitStringOverflow(Font fontRenderer, String str, int x, int y, int wrapWidth, int threshold, int textColor, boolean addShadow)
 //    {
 //        List<String> strs = fontRenderer.listFormattedStringToWidth(str, wrapWidth);
 //        return drawSplitStringOverflow(fontRenderer, strs, x, y, wrapWidth, threshold, textColor, addShadow);
 //    }
 //
-//    public static List<String> drawSplitStringOverflow(FontRenderer fontRenderer, List<String> strs, int x, int y, int wrapWidth, int threshold, int textColor, boolean addShadow)
+//    public static List<String> drawSplitStringOverflow(Font fontRenderer, List<String> strs, int x, int y, int wrapWidth, int threshold, int textColor, boolean addShadow)
 //    {
 //        threshold += y;
 //        for (int i = 0; i < strs.size(); i++)
@@ -41,7 +41,7 @@
 //        return text;
 //    }
 //
-//    private static int renderStringAligned(FontRenderer fontRenderer, String text, int x, int y, int width, int color, boolean dropShadow)
+//    private static int renderStringAligned(Font fontRenderer, String text, int x, int y, int width, int color, boolean dropShadow)
 //    {
 //        if (fontRenderer.getBidiFlag())
 //        {

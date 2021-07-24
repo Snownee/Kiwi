@@ -30,6 +30,6 @@ public enum YogaFlexDirection {
 	}
 
 	public YogaFlexDirection FlexDirectionCross(YogaDirection direction) {
-		return this.IsColumn() ? Row.ResolveFlexDirection(direction) : Column;
+		return IsColumn() ? Row.ResolveFlexDirection(direction) : Column;
 	}
 }

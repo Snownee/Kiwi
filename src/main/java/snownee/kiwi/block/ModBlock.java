@@ -1,22 +1,22 @@
 package snownee.kiwi.block;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.DoorBlock;
-import net.minecraft.block.PressurePlateBlock;
-import net.minecraft.block.SaplingBlock;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.TrapDoorBlock;
-import net.minecraft.block.WoodButtonBlock;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.world.IBlockReader;
-import snownee.kiwi.tile.BaseTile;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.PressurePlateBlock;
+import net.minecraft.world.level.block.SaplingBlock;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.TrapDoorBlock;
+import net.minecraft.world.level.block.WoodButtonBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.phys.HitResult;
+import snownee.kiwi.block.entity.BaseBlockEntity;
 import snownee.kiwi.util.DeferredActions;
 
 /**
@@ -102,16 +102,16 @@ public class ModBlock extends Block {
 	}
 
 	@Override
-	public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
+	public ItemStack getPickBlock(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
 		return pickBlock(state, target, world, pos, player);
 	}
 
 	@SuppressWarnings("deprecation")
-	public static ItemStack pickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
+	public static ItemStack pickBlock(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
 		ItemStack stack = state.getBlock().getCloneItemStack(world, pos, state);
-		TileEntity tile = world.getBlockEntity(pos);
-		if (tile instanceof BaseTile && !tile.onlyOpCanSetNbt() && ((BaseTile) tile).persistData) {
-			CompoundNBT data = tile.save(new CompoundNBT());
+		BlockEntity tile = world.getBlockEntity(pos);
+		if (tile instanceof BaseBlockEntity && !tile.onlyOpCanSetNbt() && ((BaseBlockEntity) tile).persistData) {
+			CompoundTag data = tile.save(new CompoundTag());
 			data.remove("x");
 			data.remove("y");
 			data.remove("z");

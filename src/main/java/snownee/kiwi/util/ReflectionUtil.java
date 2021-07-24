@@ -5,10 +5,10 @@ import java.lang.reflect.Modifier;
 import java.util.Map;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import snownee.kiwi.Kiwi;
 
@@ -25,7 +25,7 @@ public final class ReflectionUtil {
 		modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
 	}
 
-	public static <C extends IInventory, T extends IRecipe<C>> Map<ResourceLocation, IRecipe<C>> getRecipes(IRecipeType<T> recipeTypeIn) {
+	public static <C extends Container, T extends Recipe<C>> Map<ResourceLocation, Recipe<C>> getRecipes(RecipeType<T> recipeTypeIn) {
 		if (FMLEnvironment.dist.isClient()) {
 			return Minecraft.getInstance().level.getRecipeManager().byType(recipeTypeIn);
 		} else {

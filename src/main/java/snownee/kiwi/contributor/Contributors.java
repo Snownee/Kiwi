@@ -12,14 +12,17 @@ import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.platform.InputConstants.Key;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.util.InputMappings;
-import net.minecraft.client.util.InputMappings.Input;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
@@ -30,7 +33,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.network.PacketDistributor;
+import net.minecraftforge.fmllegacy.network.PacketDistributor;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiClientConfig;
@@ -73,11 +76,11 @@ public class Contributors extends AbstractModule {
 		return REWARD_PROVIDERS.getOrDefault(author.toLowerCase(Locale.ENGLISH), ITierProvider.Empty.INSTANCE).isContributor(playerName, tier);
 	}
 
-	public static boolean isContributor(String author, PlayerEntity player) {
+	public static boolean isContributor(String author, Player player) {
 		return isContributor(author, player.getGameProfile().getName());
 	}
 
-	public static boolean isContributor(String author, PlayerEntity player, String tier) {
+	public static boolean isContributor(String author, Player player, String tier) {
 		return isContributor(author, player.getGameProfile().getName(), tier);
 	}
 
@@ -109,12 +112,12 @@ public class Contributors extends AbstractModule {
 
 	@SubscribeEvent
 	public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-		if (!(event.getEntity().level instanceof ServerWorld)) {
+		if (!(event.getEntity().level instanceof ServerLevel)) {
 			return;
 		}
-		PlayerEntity player = event.getPlayer();
-		if (!((ServerWorld) event.getEntity().level).getServer().isSingleplayerOwner(player.getGameProfile())) {
-			new SSyncEffectPacket(PLAYER_EFFECTS).send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player));
+		Player player = event.getPlayer();
+		if (!((ServerLevel) event.getEntity().level).getServer().isSingleplayerOwner(player.getGameProfile())) {
+			new SSyncEffectPacket(PLAYER_EFFECTS).send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player));
 		}
 	}
 
@@ -141,9 +144,12 @@ public class Contributors extends AbstractModule {
 	@Override
 	protected void clientInit(FMLClientSetupEvent event) {
 		Minecraft.getInstance().getEntityRenderDispatcher().getSkinMap().values().forEach(renderer -> {
-			RewardLayer layer = new RewardLayer(renderer);
-			RewardLayer.ALL_LAYERS.add(layer);
-			renderer.addLayer(layer);
+			if (renderer instanceof LivingEntityRenderer) {
+				LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> o=(LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>>) renderer;
+				RewardLayer layer = new RewardLayer(o);
+				RewardLayer.ALL_LAYERS.add(layer);
+				o.addLayer(layer);
+			}
 		});
 	}
 
@@ -185,7 +191,7 @@ public class Contributors extends AbstractModule {
 		RewardLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidateAll(changes.keySet()));
 	}
 
-	public static void changeEffect(ServerPlayerEntity player, ResourceLocation effect) {
+	public static void changeEffect(ServerPlayer player, ResourceLocation effect) {
 		String playerName = player.getGameProfile().getName();
 		canPlayerUseEffect(playerName, effect).thenAccept(bl -> {
 			if (bl) {
@@ -258,7 +264,7 @@ public class Contributors extends AbstractModule {
 		if (event.getModifiers() != 0) {
 			return;
 		}
-		Input input = InputMappings.getKey(event.getKey(), event.getScanCode());
+		Key input = InputConstants.getKey(event.getKey(), event.getScanCode());
 		if (input.getValue() != 75) {
 			return;
 		}

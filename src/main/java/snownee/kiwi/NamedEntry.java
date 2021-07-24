@@ -4,7 +4,7 @@ import java.lang.reflect.Field;
 
 import javax.annotation.Nullable;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
 public class NamedEntry<T extends IForgeRegistryEntry<T>> {

@@ -8,14 +8,14 @@ import javax.annotation.Nullable;
 
 import com.mojang.authlib.GameProfile;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.NBTUtil;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.Tag;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.util.Constants;
 
 /**
@@ -46,26 +46,26 @@ public class NBTHelper {
 	@Nullable
 	private ItemStack stack;
 	@Nullable
-	private CompoundNBT tag;
+	private CompoundTag tag;
 
-	private NBTHelper(@Nullable CompoundNBT tag, @Nullable ItemStack stack) {
+	private NBTHelper(@Nullable CompoundTag tag, @Nullable ItemStack stack) {
 		this.stack = stack;
 		this.tag = tag;
 	}
 
 	@Nullable
-	public CompoundNBT getTag(String key) {
+	public CompoundTag getTag(String key) {
 		return getTag(key, false);
 	}
 
-	public CompoundNBT getTag(String key, boolean createIfNull) {
+	public CompoundTag getTag(String key, boolean createIfNull) {
 		return getTagInternal(key, createIfNull, false);
 	}
 
-	private CompoundNBT getTagInternal(String key, boolean createIfNull, boolean ignoreLastNode) {
+	private CompoundTag getTagInternal(String key, boolean createIfNull, boolean ignoreLastNode) {
 		if (tag == null) {
 			if (createIfNull) {
-				tag = new CompoundNBT();
+				tag = new CompoundTag();
 				if (stack != null) {
 					stack.setTag(tag);
 				}
@@ -76,7 +76,7 @@ public class NBTHelper {
 		if (key.isEmpty()) {
 			return tag;
 		}
-		CompoundNBT subTag = tag;
+		CompoundTag subTag = tag;
 		String[] parts = key.split("\\.");
 		int length = parts.length;
 		if (ignoreLastNode) {
@@ -86,17 +86,17 @@ public class NBTHelper {
 			// TODO: list support. e.g. a.b[2].c.d
 			if (!subTag.contains(parts[i], NBT.COMPOUND)) {
 				if (createIfNull) {
-					subTag.put(parts[i], new CompoundNBT());
+					subTag.put(parts[i], new CompoundTag());
 				} else {
 					return null;
 				}
 			}
-			subTag = (CompoundNBT) subTag.get(parts[i]);
+			subTag = (CompoundTag) subTag.get(parts[i]);
 		}
 		return subTag;
 	}
 
-	private CompoundNBT getTagInternal(String key) {
+	private CompoundTag getTagInternal(String key) {
 		return getTagInternal(key, true, true);
 	}
 
@@ -109,7 +109,7 @@ public class NBTHelper {
 		}
 	}
 
-	public NBTHelper setTag(String key, INBT value) {
+	public NBTHelper setTag(String key, Tag value) {
 		getTagInternal(key).put(getLastNode(key), value);
 		return this;
 	}
@@ -124,7 +124,7 @@ public class NBTHelper {
 	}
 
 	public int getInt(String key, int defaultValue) {
-		CompoundNBT subTag = getTagInternal(key, false, true);
+		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
 			String actualKey = getLastNode(key);
 			if (subTag.contains(actualKey, NBT.INT)) {
@@ -144,7 +144,7 @@ public class NBTHelper {
 	}
 
 	public long getLong(String key, long defaultValue) {
-		CompoundNBT subTag = getTagInternal(key, false, true);
+		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
 			String actualKey = getLastNode(key);
 			if (subTag.contains(actualKey, NBT.LONG)) {
@@ -164,7 +164,7 @@ public class NBTHelper {
 	}
 
 	public short getShort(String key, short defaultValue) {
-		CompoundNBT subTag = getTagInternal(key, false, true);
+		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
 			String actualKey = getLastNode(key);
 			if (subTag.contains(actualKey, NBT.SHORT)) {
@@ -184,7 +184,7 @@ public class NBTHelper {
 	}
 
 	public double getDouble(String key, double defaultValue) {
-		CompoundNBT subTag = getTagInternal(key, false, true);
+		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
 			String actualKey = getLastNode(key);
 			if (subTag.contains(actualKey, NBT.DOUBLE)) {
@@ -204,7 +204,7 @@ public class NBTHelper {
 	}
 
 	public float getFloat(String key, float defaultValue) {
-		CompoundNBT subTag = getTagInternal(key, false, true);
+		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
 			String actualKey = getLastNode(key);
 			if (subTag.contains(actualKey, NBT.FLOAT)) {
@@ -224,7 +224,7 @@ public class NBTHelper {
 	}
 
 	public byte getByte(String key, byte defaultValue) {
-		CompoundNBT subTag = getTagInternal(key, false, true);
+		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
 			String actualKey = getLastNode(key);
 			if (subTag.contains(actualKey, NBT.BYTE)) {
@@ -244,7 +244,7 @@ public class NBTHelper {
 	}
 
 	public boolean getBoolean(String key, boolean defaultValue) {
-		CompoundNBT subTag = getTagInternal(key, false, true);
+		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
 			String actualKey = getLastNode(key);
 			if (subTag.contains(actualKey, NBT.BYTE)) {
@@ -255,17 +255,17 @@ public class NBTHelper {
 	}
 
 	public NBTHelper setPos(String key, BlockPos value) {
-		getTagInternal(key).put(getLastNode(key), NBTUtil.writeBlockPos(value));
+		getTagInternal(key).put(getLastNode(key), NbtUtils.writeBlockPos(value));
 		return this;
 	}
 
 	@Nullable
 	public BlockPos getPos(String key) {
-		CompoundNBT subTag = getTagInternal(key, false, true);
+		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
 			String actualKey = getLastNode(key);
 			if (subTag.contains(actualKey, NBT.COMPOUND)) {
-				return NBTUtil.readBlockPos(getTag(actualKey));
+				return NbtUtils.readBlockPos(getTag(actualKey));
 			}
 		}
 		return null;
@@ -278,7 +278,7 @@ public class NBTHelper {
 	//
 	//    @Nullable
 	//    public GlobalPos getGlobalPos(String key) {
-	//        CompoundNBT subTag = getTagInternal(key, false, true);
+	//        CompoundTag subTag = getTagInternal(key, false, true);
 	//        if (subTag != null) {
 	//            String actualKey = getLastNode(key);
 	//            if (subTag.contains(actualKey, NBT.COMPOUND)) {
@@ -289,27 +289,27 @@ public class NBTHelper {
 	//    }
 
 	public NBTHelper setBlockState(String key, BlockState value) {
-		return setTag(key, NBTUtil.writeBlockState(value));
+		return setTag(key, NbtUtils.writeBlockState(value));
 	}
 
 	public BlockState getBlockState(String key) {
-		CompoundNBT subTag = getTagInternal(key, false, false);
+		CompoundTag subTag = getTagInternal(key, false, false);
 		if (subTag != null) {
-			return NBTUtil.readBlockState(subTag);
+			return NbtUtils.readBlockState(subTag);
 		}
 		return Blocks.AIR.defaultBlockState();
 	}
 
 	public NBTHelper setGameProfile(String key, GameProfile value) {
-		NBTUtil.writeGameProfile(getTag(key, true), value);
+		NbtUtils.writeGameProfile(getTag(key, true), value);
 		return this;
 	}
 
 	@Nullable
 	public GameProfile getGameProfile(String key) {
-		CompoundNBT subTag = getTagInternal(key, false, false);
+		CompoundTag subTag = getTagInternal(key, false, false);
 		if (subTag != null) {
-			return NBTUtil.readGameProfile(subTag);
+			return NbtUtils.readGameProfile(subTag);
 		}
 		return null;
 	}
@@ -325,7 +325,7 @@ public class NBTHelper {
 	}
 
 	public String getString(String key, String defaultValue) {
-		CompoundNBT subTag = getTagInternal(key, false, true);
+		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
 			String actualKey = getLastNode(key);
 			if (subTag.contains(actualKey, NBT.STRING)) {
@@ -341,7 +341,7 @@ public class NBTHelper {
 	}
 
 	public int[] getIntArray(String key) {
-		CompoundNBT subTag = getTagInternal(key, false, true);
+		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
 			String actualKey = getLastNode(key);
 			if (subTag.contains(actualKey, NBT.INT_ARRAY)) {
@@ -357,7 +357,7 @@ public class NBTHelper {
 	}
 
 	public byte[] getByteArray(String key) {
-		CompoundNBT subTag = getTagInternal(key, false, true);
+		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
 			String actualKey = getLastNode(key);
 			if (subTag.contains(actualKey, NBT.BYTE_ARRAY)) {
@@ -374,7 +374,7 @@ public class NBTHelper {
 
 	@Nullable
 	public UUID getUUID(String key) {
-		CompoundNBT subTag = getTagInternal(key, false, true);
+		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
 			String actualKey = getLastNode(key);
 			if (!subTag.contains(actualKey + "Most", NBT.LONG) || !subTag.contains(actualKey + "Least", NBT.LONG)) {
@@ -384,8 +384,8 @@ public class NBTHelper {
 		return null;
 	}
 
-	public ListNBT getTagList(String key, int type) {
-		CompoundNBT subTag = getTagInternal(key, false, true);
+	public ListTag getTagList(String key, int type) {
+		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
 			String actualKey = getLastNode(key);
 			if (subTag.contains(actualKey, NBT.LIST)) {
@@ -396,7 +396,7 @@ public class NBTHelper {
 	}
 
 	public boolean hasTag(String key, int type) {
-		CompoundNBT subTag = getTagInternal(key, false, true);
+		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
 			if (key.isEmpty()) {
 				return true;
@@ -413,7 +413,7 @@ public class NBTHelper {
 
 	// TODO: remove parent if empty?
 	public NBTHelper remove(String key) {
-		CompoundNBT subTag = getTagInternal(key, false, true);
+		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
 			String actualKey = getLastNode(key);
 			subTag.remove(actualKey);
@@ -422,7 +422,7 @@ public class NBTHelper {
 	}
 
 	@Nullable
-	public CompoundNBT get() {
+	public CompoundTag get() {
 		return tag;
 	}
 
@@ -434,7 +434,7 @@ public class NBTHelper {
 		return new NBTHelper(stack.getTag(), stack);
 	}
 
-	public static NBTHelper of(CompoundNBT tag) {
+	public static NBTHelper of(CompoundTag tag) {
 		return new NBTHelper(tag, null);
 	}
 

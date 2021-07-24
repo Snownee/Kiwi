@@ -5,9 +5,9 @@ import java.util.List;
 
 import net.minecraftforge.fml.config.ModConfig;
 import snownee.kiwi.config.KiwiConfig.Comment;
+import snownee.kiwi.config.KiwiConfig.LevelRestart;
 import snownee.kiwi.config.KiwiConfig.Path;
 import snownee.kiwi.config.KiwiConfig.Range;
-import snownee.kiwi.config.KiwiConfig.WorldRestart;
 
 //@KiwiConfig(type = ModConfig.Type.COMMON)
 public class TestConfig {
@@ -28,7 +28,7 @@ public class TestConfig {
 
 	public static List<String> listValue = Arrays.asList("test");
 
-	@WorldRestart
+	@LevelRestart
 	public static ModConfig.Type enumValue = ModConfig.Type.COMMON;
 
 }

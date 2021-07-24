@@ -39,14 +39,14 @@ import com.google.common.graph.MutableGraph;
 
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import net.minecraft.block.Block;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.crafting.IRecipeType;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.World;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -68,22 +68,21 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
-import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
-import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.moddiscovery.ModAnnotation;
-import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
-import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import net.minecraftforge.fml.loading.toposort.TopologicalSort;
+import net.minecraftforge.fmlserverevents.FMLServerAboutToStartEvent;
+import net.minecraftforge.fmlserverevents.FMLServerStartingEvent;
+import net.minecraftforge.fmlserverevents.FMLServerStoppedEvent;
+import net.minecraftforge.forgespi.language.IModFileInfo;
 import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.forgespi.language.ModFileScanData.AnnotationData;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.ObjectHolderRegistry;
 import net.minecraftforge.registries.RegistryManager;
-import snownee.kiwi.KiwiModule.Group;
+import snownee.kiwi.KiwiModule.Category;
 import snownee.kiwi.KiwiModule.Subscriber;
 import snownee.kiwi.command.KiwiCommand;
 import snownee.kiwi.config.ConfigHandler;
@@ -138,16 +137,16 @@ public class Kiwi {
 		final Type LOADING_CONDITION = Type.getType(KiwiModule.LoadingCondition.class);
 
 		Map<Type, AnnotationData> moduleToOptional = Maps.newHashMap();
-		List<ModInfo> mods = ImmutableList.copyOf(ModList.get().getMods());
-		for (ModInfo info : mods) {
-			ModFileInfo modFileInfo = info.getOwningFile();
+		List<IModInfo> mods = ImmutableList.copyOf(ModList.get().getMods());
+		for (IModInfo info : mods) {
+			IModFileInfo modFileInfo = info.getOwningFile();
 			if (modFileInfo != null) {
 				for (AnnotationData annotationData : modFileInfo.getFile().getScanResult().getAnnotations()) {
-					if (KIWI_MODULE.equals(annotationData.getAnnotationType())) {
-						String modid = (String) annotationData.getAnnotationData().get("modid");
+					if (KIWI_MODULE.equals(annotationData.annotationType())) {
+						String modid = (String) annotationData.annotationData().get("modid");
 						moduleData.put(Strings.isNullOrEmpty(modid) ? info.getModId() : modid, annotationData);
-					} else if (KIWI_CONFIG.equals(annotationData.getAnnotationType())) {
-						ModAnnotation.EnumHolder typeHolder = (ModAnnotation.EnumHolder) annotationData.getAnnotationData().get("type");
+					} else if (KIWI_CONFIG.equals(annotationData.annotationType())) {
+						ModAnnotation.EnumHolder typeHolder = (ModAnnotation.EnumHolder) annotationData.annotationData().get("type");
 						ModConfig.Type type = null;
 						if (typeHolder != null) {
 							type = ModConfig.Type.valueOf(typeHolder.getValue());
@@ -155,7 +154,7 @@ public class Kiwi {
 						type = type == null ? ModConfig.Type.COMMON : type;
 						if (((type != ModConfig.Type.CLIENT) || !FMLEnvironment.dist.isDedicatedServer())) {
 							try {
-								Class<?> clazz = Class.forName(annotationData.getClassType().getClassName());
+								Class<?> clazz = Class.forName(annotationData.clazz().getClassName());
 								KiwiConfig kiwiConfig = clazz.getAnnotation(KiwiConfig.class);
 								String fileName = kiwiConfig.value();
 								boolean master = type == ModConfig.Type.COMMON && Strings.isNullOrEmpty(fileName);
@@ -167,9 +166,9 @@ public class Kiwi {
 								logger.catching(e);
 							}
 						}
-					} else if (OPTIONAL_MODULE.equals(annotationData.getAnnotationType())) {
-						moduleToOptional.put(annotationData.getClassType(), annotationData);
-					} else if (LOADING_CONDITION.equals(annotationData.getAnnotationType())) {
+					} else if (OPTIONAL_MODULE.equals(annotationData.annotationType())) {
+						moduleToOptional.put(annotationData.clazz(), annotationData);
+					} else if (LOADING_CONDITION.equals(annotationData.annotationType())) {
 						conditions.put(annotationData, info.getModId());
 					}
 				}
@@ -179,19 +178,19 @@ public class Kiwi {
 		logger.info(MARKER, "Processing " + moduleData.size() + " KiwiModule annotations");
 
 		for (Entry<String, AnnotationData> entry : moduleData.entries()) {
-			AnnotationData optional = moduleToOptional.get(entry.getValue().getClassType());
+			AnnotationData optional = moduleToOptional.get(entry.getValue().clazz());
 			if (optional != null) {
 				String modid = entry.getKey();
 				if (!ModList.get().isLoaded(modid)) {
 					continue;
 				}
 
-				String name = (String) entry.getValue().getAnnotationData().get("value");
+				String name = (String) entry.getValue().annotationData().get("value");
 				if (Strings.isNullOrEmpty(name)) {
 					name = "core";
 				}
 
-				Boolean disabledByDefault = (Boolean) optional.getAnnotationData().get("disabledByDefault");
+				Boolean disabledByDefault = (Boolean) optional.annotationData().get("disabledByDefault");
 				if (disabledByDefault == null) {
 					disabledByDefault = Boolean.FALSE;
 				}
@@ -233,13 +232,13 @@ public class Kiwi {
 		Set<ResourceLocation> disabledModules = Sets.newHashSet();
 		conditions.forEach((k, v) -> {
 			try {
-				Class<?> clazz = Class.forName(k.getClassType().getClassName());
-				int p = k.getMemberName().indexOf('(');
+				Class<?> clazz = Class.forName(k.clazz().getClassName());
+				int p = k.memberName().indexOf('(');
 				if (p <= 0) {
 					throw new IllegalArgumentException();
 				}
-				String methodName = k.getMemberName().substring(0, p);
-				List<String> values = (List<String>) k.getAnnotationData().get("value");
+				String methodName = k.memberName().substring(0, p);
+				List<String> values = (List<String>) k.annotationData().get("value");
 				if (values == null) {
 					values = Arrays.asList(v);
 				}
@@ -273,7 +272,7 @@ public class Kiwi {
 				continue;
 			}
 
-			String name = (String) module.getAnnotationData().get("value");
+			String name = (String) module.annotationData().get("value");
 			if (Strings.isNullOrEmpty(name)) {
 				name = "core";
 			}
@@ -290,9 +289,9 @@ public class Kiwi {
 				continue;
 			}
 
-			Info info = new Info(rl, module.getClassType().getClassName());
+			Info info = new Info(rl, module.clazz().getClassName());
 
-			String dependencies = (String) module.getAnnotationData().get("dependencies");
+			String dependencies = (String) module.annotationData().get("dependencies");
 			/* off */
             List<String> rules = StringUtils.split(Strings.nullToEmpty(dependencies), ';').stream()
                     .filter(s -> !Strings.isNullOrEmpty(s))
@@ -378,12 +377,12 @@ public class Kiwi {
 
 			boolean useOwnGroup = info.category == null;
 			if (useOwnGroup) {
-				Group group = info.module.getClass().getAnnotation(Group.class);
+				Category group = info.module.getClass().getAnnotation(Category.class);
 				if (group != null) {
 					String val = group.value();
 					if (!val.isEmpty()) {
 						useOwnGroup = false;
-						ItemGroup itemGroup = getGroup(val);
+						CreativeModeTab itemGroup = getGroup(val);
 						if (itemGroup != null) {
 							info.category = itemGroup;
 						}
@@ -436,10 +435,10 @@ public class Kiwi {
 				if (o == null) {
 					continue;
 				}
-				if (useOwnGroup && info.category == null && o instanceof ItemGroup) {
-					info.category = (ItemGroup) o;
-				} else if (o instanceof IRecipeType) {
-					Registry.register(Registry.RECIPE_TYPE, regName, (IRecipeType<?>) o);
+				if (useOwnGroup && info.category == null && o instanceof CreativeModeTab) {
+					info.category = (CreativeModeTab) o;
+				} else if (o instanceof RecipeType) {
+					Registry.register(Registry.RECIPE_TYPE, regName, (RecipeType<?>) o);
 					tmpBuilder = null;
 					tmpBuilderField = null;
 					continue;
@@ -506,14 +505,14 @@ public class Kiwi {
 	//        //IModBusEvent
 	//    }
 
-	private static Map<String, ItemGroup> GROUP_CACHE = Maps.newHashMap();
+	private static Map<String, CreativeModeTab> GROUP_CACHE = Maps.newHashMap();
 
-	static ItemGroup getGroup(String path) {
+	static CreativeModeTab getGroup(String path) {
 		if (GROUP_CACHE == null) {
 			return null;
 		}
 		return GROUP_CACHE.computeIfAbsent(path, $ -> {
-			for (ItemGroup group : ItemGroup.TABS) {
+			for (CreativeModeTab group : CreativeModeTab.TABS) {
 				if (path.equals(group.getRecipeFolderName())) {
 					return group;
 				}
@@ -523,7 +522,7 @@ public class Kiwi {
 	}
 
 	private static void checkNoGroup(ModuleInfo info, Field field, Object o) {
-		if (field.getAnnotation(NoGroup.class) != null) {
+		if (field.getAnnotation(NoCategory.class) != null) {
 			info.noCategories.add(o);
 		}
 	}
@@ -544,7 +543,7 @@ public class Kiwi {
 
 	private void serverInit(FMLServerStartingEvent event) {
 		KiwiManager.MODULES.values().forEach(m -> m.serverInit(event));
-		event.getServer().getLevel(World.OVERWORLD).getDataStorage().computeIfAbsent(() -> Scheduler.INSTANCE, Scheduler.ID);
+		event.getServer().getLevel(Level.OVERWORLD).getDataStorage().computeIfAbsent(Scheduler::load, () -> Scheduler.INSTANCE, Scheduler.ID);
 		ModLoadingContext.get().setActiveContainer(null, null);
 	}
 

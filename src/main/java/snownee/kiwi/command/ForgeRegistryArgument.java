@@ -15,11 +15,11 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
-import net.minecraft.command.ISuggestionProvider;
-import net.minecraft.command.arguments.IArgumentSerializer;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.synchronization.ArgumentSerializer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryManager;
@@ -29,7 +29,7 @@ import net.minecraftforge.registries.RegistryManager;
  */
 public class ForgeRegistryArgument<T extends IForgeRegistryEntry<T>> implements ArgumentType<T> {
 
-	public static final DynamicCommandExceptionType BAD_ID = new DynamicCommandExceptionType(pair -> new TranslationTextComponent("argument.cuisine.registry.id.invalid", ((Pair) pair).getLeft(), ((Pair) pair).getRight()));
+	public static final DynamicCommandExceptionType BAD_ID = new DynamicCommandExceptionType(pair -> new TranslatableComponent("argument.cuisine.registry.id.invalid", ((Pair) pair).getLeft(), ((Pair) pair).getRight()));
 
 	private final IForgeRegistry<T> registry;
 	private Collection<String> examples;
@@ -51,7 +51,7 @@ public class ForgeRegistryArgument<T extends IForgeRegistryEntry<T>> implements 
 
 	@Override
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-		return ISuggestionProvider.suggestResource(registry.getKeys(), builder);
+		return SharedSuggestionProvider.suggestResource(registry.getKeys(), builder);
 	}
 
 	@Override
@@ -70,15 +70,15 @@ public class ForgeRegistryArgument<T extends IForgeRegistryEntry<T>> implements 
 		return examples;
 	}
 
-	public static class Serializer implements IArgumentSerializer<ForgeRegistryArgument<? extends IForgeRegistryEntry>> {
+	public static class Serializer implements ArgumentSerializer<ForgeRegistryArgument<? extends IForgeRegistryEntry>> {
 
 		@Override
-		public void serializeToNetwork(ForgeRegistryArgument<? extends IForgeRegistryEntry> argument, PacketBuffer buffer) {
+		public void serializeToNetwork(ForgeRegistryArgument<? extends IForgeRegistryEntry> argument, FriendlyByteBuf buffer) {
 			buffer.writeResourceLocation(argument.registry.getRegistryName());
 		}
 
 		@Override
-		public ForgeRegistryArgument<? extends IForgeRegistryEntry> deserializeFromNetwork(PacketBuffer buffer) {
+		public ForgeRegistryArgument<? extends IForgeRegistryEntry> deserializeFromNetwork(FriendlyByteBuf buffer) {
 			return new ForgeRegistryArgument(RegistryManager.ACTIVE.getRegistry(buffer.readResourceLocation()));
 		}
 

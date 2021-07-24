@@ -4,20 +4,21 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.google.common.base.Function;
+import com.mojang.blaze3d.platform.InputConstants;
 
+import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.util.InputMappings;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Util;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.util.text.event.ClickEvent;
-import net.minecraft.util.text.event.HoverEvent;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
@@ -35,9 +36,9 @@ public final class TooltipEvents {
 	}
 
 	private static ItemStack lastStack;
-	private static CompoundNBT lastNBT;
-	private static ITextComponent lastFormatted;
-	private static Function<CompoundNBT, ITextComponent> formatter;
+	private static CompoundTag lastNBT;
+	private static Component lastFormatted;
+	private static Function<CompoundTag, String> formatter;
 
 	@SubscribeEvent(priority = EventPriority.HIGH)
 	public static void globalTooltip(ItemTooltipEvent event) {
@@ -53,30 +54,30 @@ public final class TooltipEvents {
 
 		ItemStack stack = event.getItemStack();
 		Minecraft minecraft = Minecraft.getInstance();
-		if (stack != lastStack && minecraft.player != null && InputMappings.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 292/*F3*/)) {
+		if (stack != lastStack && minecraft.player != null && InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 292/*F3*/)) {
 			lastStack = stack;
-			CompoundNBT data = stack.getTag();
-			IFormattableTextComponent itextcomponent = new StringTextComponent(stack.getItem().getRegistryName().toString());
+			CompoundTag data = stack.getTag();
+			MutableComponent itextcomponent = new TextComponent(stack.getItem().getRegistryName().toString());
 			if (minecraft.keyboardHandler != null) {
 				minecraft.keyboardHandler.setClipboard(itextcomponent.getString());
 			}
 			if (data != null) {
-				itextcomponent.append(data.getPrettyDisplay());
+				itextcomponent.append(NbtUtils.prettyPrint(data));
 			}
-			itextcomponent.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, itextcomponent.getString())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslationTextComponent("chat.copy.click"))).withInsertion(itextcomponent.getString()));
+			itextcomponent.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, itextcomponent.getString())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslatableComponent("chat.copy.click"))).withInsertion(itextcomponent.getString()));
 			minecraft.player.sendMessage(itextcomponent, Util.NIL_UUID);
 			minecraft.options.renderDebug = !minecraft.options.renderDebug;
 		}
 
-		List<ITextComponent> tooltip = event.getToolTip();
+		List<Component> tooltip = event.getToolTip();
 
 		if (KiwiClientConfig.nbtTooltip && Screen.hasShiftDown() && stack.hasTag()) {
-			tooltip.removeIf(c -> c.getClass() == TranslationTextComponent.class && ((TranslationTextComponent) c).getKey().equals("item.nbt_tags"));
+			tooltip.removeIf(c -> c.getClass() == TranslatableComponent.class && ((TranslatableComponent) c).getKey().equals("item.nbt_tags"));
 			if (lastNBT != stack.getTag()) {
 				switch (KiwiClientConfig.debugTooltipNBTFormatter) {
 				case "kiwi":
 					formatter = tag -> {
-						TextFormatting[] colors = { TextFormatting.LIGHT_PURPLE, TextFormatting.RED, TextFormatting.GOLD, TextFormatting.YELLOW, TextFormatting.GREEN, TextFormatting.AQUA };
+						ChatFormatting[] colors = { ChatFormatting.LIGHT_PURPLE, ChatFormatting.RED, ChatFormatting.GOLD, ChatFormatting.YELLOW, ChatFormatting.GREEN, ChatFormatting.AQUA };
 						String s = tag.toString();
 						StringBuilder sb = new StringBuilder();
 						int i = 0;
@@ -87,18 +88,18 @@ public final class TooltipEvents {
 								if (ch == '"') {
 									quoted = false;
 									sb.appendCodePoint(ch);
-									sb.append(TextFormatting.WHITE);
+									sb.append(ChatFormatting.WHITE);
 									continue;
 								}
 							} else {
 								if (ch == ':' || ch == ',') {
-									sb.append(TextFormatting.GRAY);
+									sb.append(ChatFormatting.GRAY);
 									sb.appendCodePoint(ch);
-									sb.append(TextFormatting.WHITE);
+									sb.append(ChatFormatting.WHITE);
 									continue;
 								} else if (ch == '"') {
 									quoted = true;
-									sb.append(TextFormatting.GRAY);
+									sb.append(ChatFormatting.GRAY);
 								} else if (ch == '{' || ch == '[') {
 									++i;
 									special = true;
@@ -112,30 +113,30 @@ public final class TooltipEvents {
 							}
 							sb.appendCodePoint(ch);
 							if (special) {
-								sb.append(TextFormatting.WHITE);
+								sb.append(ChatFormatting.WHITE);
 								if (ch == '}' || ch == ']') {
 									--i;
 								}
 							}
 						}
-						return new StringTextComponent(sb.toString());
+						return sb.toString();
 					};
 					break;
 				case "vanilla":
-					formatter = tag -> stack.getTag().getPrettyDisplay();
+					formatter = tag -> NbtUtils.prettyPrint(stack.getTag());
 					break;
 				default:
-					formatter = tag -> new StringTextComponent(tag.toString());
+					formatter = tag -> tag.toString();
 					break;
 				}
 
 				lastNBT = stack.getTag();
-				lastFormatted = formatter.apply(lastNBT).copy().withStyle(TextFormatting.RESET);
+				lastFormatted = new TextComponent(formatter.apply(lastNBT)).copy().withStyle(ChatFormatting.RESET);
 			}
 			tooltip.add(lastFormatted);
 		} else if (KiwiClientConfig.tagsTooltip) {
 			stack.getItem().getTags().stream().map(Object::toString).sorted().forEach(id -> {
-				tooltip.add(new StringTextComponent("#" + id).withStyle(TextFormatting.DARK_GRAY));
+				tooltip.add(new TextComponent("#" + id).withStyle(ChatFormatting.DARK_GRAY));
 			});
 		}
 	}

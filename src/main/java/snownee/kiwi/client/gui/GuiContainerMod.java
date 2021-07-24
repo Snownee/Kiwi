@@ -7,7 +7,7 @@
 //
 //import org.lwjgl.input.Mouse;
 //
-//import net.minecraft.client.gui.FontRenderer;
+//import net.minecraft.client.gui.Font;
 //import net.minecraft.client.gui.inventory.GuiContainer;
 //import net.minecraft.inventory.Container;
 //import snownee.kiwi.client.gui.component.Component;
@@ -16,7 +16,7 @@
 //{
 //    public GuiControl control;
 //    protected List<String> tooltip;
-//    protected FontRenderer tooltipFont;
+//    protected Font tooltipFont;
 //
 //    public GuiContainerMod(Container container)
 //    {
@@ -66,7 +66,7 @@
 //    }
 //
 //    @Override
-//    public void setTooltip(GuiControl control, Component component, List<String> tooltip, FontRenderer fontRenderer)
+//    public void setTooltip(GuiControl control, Component component, List<String> tooltip, Font fontRenderer)
 //    {
 //        this.tooltip = tooltip;
 //        this.tooltipFont = fontRenderer;

@@ -1,4 +1,4 @@
-package snownee.kiwi.tile;
+package snownee.kiwi.block.entity;
 
 //package snownee.kiwi.tile;
 //

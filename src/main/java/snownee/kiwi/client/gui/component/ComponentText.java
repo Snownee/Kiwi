@@ -3,7 +3,7 @@
 //import java.util.Collections;
 //import java.util.List;
 //
-//import snownee.kiwi.client.AdvancedFontRenderer;
+//import snownee.kiwi.client.AdvancedFont;
 //import snownee.kiwi.client.gui.GuiControl;
 //import snownee.kiwi.client.gui.component.Component;
 //
@@ -22,15 +22,15 @@
 //
 //    public ComponentText(GuiControl parent, int width, int paddingX, int paddingY)
 //    {
-//        super(parent, width, AdvancedFontRenderer.INSTANCE.FONT_HEIGHT + 1);
+//        super(parent, width, AdvancedFont.INSTANCE.FONT_HEIGHT + 1);
 //        this.paddingX = paddingX;
 //        this.paddingY = paddingY;
 //    }
 //
 //    public void setText(String text)
 //    {
-//        lines = AdvancedFontRenderer.INSTANCE.listFormattedStringToWidth(text, width - paddingX * 2);
-//        height = paddingY * 2 + lines.size() * (AdvancedFontRenderer.INSTANCE.FONT_HEIGHT + 1);
+//        lines = AdvancedFont.INSTANCE.listFormattedStringToWidth(text, width - paddingX * 2);
+//        height = paddingY * 2 + lines.size() * (AdvancedFont.INSTANCE.FONT_HEIGHT + 1);
 //    }
 //
 //    public List<String> getLines()
@@ -45,8 +45,8 @@
 //        int y = offsetY + top + paddingY;
 //        for (String line : lines)
 //        {
-//            AdvancedFontRenderer.INSTANCE.drawString(line, x, y, baseColor, dropShadow);
-//            y += AdvancedFontRenderer.INSTANCE.FONT_HEIGHT + 1;
+//            AdvancedFont.INSTANCE.drawString(line, x, y, baseColor, dropShadow);
+//            y += AdvancedFont.INSTANCE.FONT_HEIGHT + 1;
 //        }
 //    }
 //

@@ -6,21 +6,21 @@ import java.util.function.BiConsumer;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.EntityType;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.item.Item;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.tags.ITag.INamedTag;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.tags.Tag.Named;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Material;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.fmlserverevents.FMLServerStartingEvent;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import snownee.kiwi.block.ModBlock;
 
@@ -74,8 +74,8 @@ public abstract class AbstractModule {
 		return new Item.Properties();
 	}
 
-	protected static AbstractBlock.Properties blockProp(Material material) {
-		AbstractBlock.Properties properties = AbstractBlock.Properties.of(material);
+	protected static BlockBehaviour.Properties blockProp(Material material) {
+		BlockBehaviour.Properties properties = BlockBehaviour.Properties.of(material);
 		properties.sound(ModBlock.deduceSoundType(material));
 		properties.strength(ModBlock.deduceHardness(material));
 		return properties;
@@ -84,23 +84,23 @@ public abstract class AbstractModule {
 	/**
 	 * @since 2.5.2
 	 */
-	protected static AbstractBlock.Properties blockProp(AbstractBlock block) {
-		return AbstractBlock.Properties.copy(block);
+	protected static BlockBehaviour.Properties blockProp(BlockBehaviour block) {
+		return BlockBehaviour.Properties.copy(block);
 	}
 
-	public static INamedTag<Item> itemTag(String namespace, String path) {
+	public static Named<Item> itemTag(String namespace, String path) {
 		return ItemTags.bind(namespace + ":" + path);
 	}
 
-	public static INamedTag<EntityType<?>> entityTag(String namespace, String path) {
+	public static Named<EntityType<?>> entityTag(String namespace, String path) {
 		return EntityTypeTags.bind(namespace + ":" + path);
 	}
 
-	public static INamedTag<Block> blockTag(String namespace, String path) {
+	public static Named<Block> blockTag(String namespace, String path) {
 		return BlockTags.bind(namespace + ":" + path);
 	}
 
-	public static INamedTag<Fluid> fluidTag(String namespace, String path) {
+	public static Named<Fluid> fluidTag(String namespace, String path) {
 		return FluidTags.bind(namespace + ":" + path);
 	}
 

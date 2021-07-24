@@ -4,16 +4,16 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUseContext;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -23,14 +23,14 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import snownee.kiwi.item.ModItem;
 import snownee.kiwi.schedule.Scheduler;
-import snownee.kiwi.schedule.impl.SimpleWorldTask;
+import snownee.kiwi.schedule.impl.SimpleLevelTask;
 import snownee.kiwi.util.MathUtil;
 
 // Your class don't have to extend ModItem or ModBlock to be registered
 public class TestItem extends ModItem {
 	public static List<BlockPos> posList;
-	public static Vector3d start;
-	public static Vector3d end;
+	public static Vec3 start;
+	public static Vec3 end;
 
 	public TestItem(Item.Properties builder) {
 		super(builder);
@@ -38,18 +38,18 @@ public class TestItem extends ModItem {
 	}
 
 	//    @Override
-	//    public FontRenderer getFontRenderer(ItemStack stack)
+	//    public Font getFont(ItemStack stack)
 	//    {
-	//        return AdvancedFontRenderer.INSTANCE;
+	//        return AdvancedFont.INSTANCE;
 	//    }
 
 	@Override
-	public ActionResultType useOn(ItemUseContext context) {
+	public InteractionResult useOn(UseOnContext context) {
 		if (!context.getLevel().isClientSide) {
 			Scheduler.add(new MyTask(context.getLevel(), Phase.END, "?"));
 		}
-		World world = context.getLevel();
-		Scheduler.add(new SimpleWorldTask(world, Phase.END, tick -> {
+		Level world = context.getLevel();
+		Scheduler.add(new SimpleLevelTask(world, Phase.END, tick -> {
 			if (tick >= 50) {
 				System.out.println("五十已到");
 				return true;
@@ -58,24 +58,24 @@ public class TestItem extends ModItem {
 			}
 		}));
 		System.out.println(TestModule.FIRST_ITEM == TestModule2.FIRST_ITEM);
-		return ActionResultType.SUCCESS;
-		//        World world = context.getWorld();
+		return InteractionResult.SUCCESS;
+		//        Level world = context.getLevel();
 		//        Hand hand = context.getHand();
-		//        PlayerEntity player = context.getPlayer();
+		//        Player player = context.getPlayer();
 		//        BlockPos pos = context.getPos();
 		//        Direction face = context.getFace();
 		//        BlockState state = Blocks.CARVED_PUMPKIN.getDefaultState().with(CarvedPumpkinBlock.FACING, player.getHorizontalFacing().getOpposite());
 		//        BlockPos result = PlayerUtil.tryPlace(world, pos, face, player, hand, state, null, true, true);
-		//        return result == null ? ActionResultType.PASS : ActionResultType.SUCCESS;
+		//        return result == null ? InteractionResult.PASS : InteractionResult.SUCCESS;
 	}
 
 	@Override
-	public ActionResult<ItemStack> use(World worldIn, PlayerEntity playerIn, Hand handIn) {
+	public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, InteractionHand handIn) {
 		//        if (worldIn.isRemote)
 		//        {
-		//            Vector3d start = playerIn.getEyePosition(1).add(playerIn.getLookVec().scale(3));
-		//            List<Vector3d> points = MathUtil.fibonacciSphere(start, 2, 100, true);
-		//            for (Vector3d point : points)
+		//            Vec3 start = playerIn.getEyePosition(1).add(playerIn.getLookVec().scale(3));
+		//            List<Vec3> points = MathUtil.fibonacciSphere(start, 2, 100, true);
+		//            for (Vec3 point : points)
 		//            {
 		//                worldIn.addParticle(ParticleTypes.FIREWORK, point.x, point.y, point.z, 0, 0, 0);
 		//            }
@@ -83,10 +83,10 @@ public class TestItem extends ModItem {
 
 		ItemStack stack = playerIn.getItemInHand(handIn);
 		//        NBTHelper data = NBTHelper.of(stack);
-		//        RayTraceResult result = rayTrace(worldIn, playerIn, FluidMode.ANY);
+		//        HitResult result = rayTrace(worldIn, playerIn, FluidMode.ANY);
 		//        if (result != null && result.getType() == Type.BLOCK)
 		//        {
-		//            BlockPos pos = ((BlockRayTraceResult) result).getPos();
+		//            BlockPos pos = ((BlockHitResult) result).getPos();
 		//            data.setPos("pos", pos);
 		//        }
 		//        else
@@ -99,7 +99,7 @@ public class TestItem extends ModItem {
 		MathUtil.posOnLine(start, end, list);
 		posList = list;
 
-		return new ActionResult<>(ActionResultType.SUCCESS, stack);
+		return new InteractionResultHolder<>(InteractionResult.SUCCESS, stack);
 	}
 
 	@SubscribeEvent
@@ -107,13 +107,13 @@ public class TestItem extends ModItem {
 	public void render(RenderWorldLastEvent event) {
 		//        Screen.fill(0, 0, 20, 20, 20);
 		//        Minecraft mc = Minecraft.getInstance();
-		//        PlayerEntity player = mc.player;
+		//        Player player = mc.player;
 		//        ItemStack stack = player.getHeldItemMainhand();
 		//        if (posList == null || stack.getItem() != TestModule.FIRST_ITEM) {
 		//            return;
 		//        }
 		//
-		//        RenderUtil.beginWorld();
+		//        RenderUtil.beginLevel();
 		//        GlStateManager.disableDepthTest();
 		//        GlStateManager.disableTexture();
 		//        GlStateManager.lineWidth(5);
@@ -128,11 +128,11 @@ public class TestItem extends ModItem {
 		//            buffer.pos(end.x, end.y, end.z).color(0.5f, 0, 0, 0.5f).endVertex();
 		//        }
 		//        for (BlockPos pos : posList) {
-		//            AxisAlignedBB box = new AxisAlignedBB(pos);
-		//            WorldRenderer.drawBoundingBox(buffer, box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, 0, 0, 0.5f, 0.5f);
+		//            AABB box = new AABB(pos);
+		//            LevelRenderer.drawBoundingBox(buffer, box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, 0, 0, 0.5f, 0.5f);
 		//        }
 		//        tessellator.draw();
-		//        RenderUtil.endWorld();
+		//        RenderUtil.endLevel();
 		//
 		//        GlStateManager.enableTexture();
 		//        GlStateManager.enableDepthTest();

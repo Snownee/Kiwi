@@ -29,25 +29,25 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.SpriteUploader;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.resources.TextureAtlasHolder;
+import net.minecraft.resources.ResourceLocation;
 import snownee.kiwi.Kiwi;
 
-public class KiwiSpriteUploader extends SpriteUploader {
+public class KiwiTextureManager extends TextureAtlasHolder {
 	public static final ResourceLocation LOCATION_GUI_TEXTURE = new ResourceLocation(Kiwi.MODID, "textures/atlas/gui.png");
-	public static final KiwiSpriteUploader GUI_ATLAS = new KiwiSpriteUploader(Minecraft.getInstance().textureManager, LOCATION_GUI_TEXTURE);
+	public static final KiwiTextureManager GUI_ATLAS = new KiwiTextureManager(Minecraft.getInstance().textureManager, LOCATION_GUI_TEXTURE);
 
 	private final Set<ResourceLocation> registeredSprites = new HashSet<>();
 	private final ResourceLocation atlasLocation;
 
-	public KiwiSpriteUploader(TextureManager textureManager, ResourceLocation atlasLocation, String prefixIn) {
+	public KiwiTextureManager(TextureManager textureManager, ResourceLocation atlasLocation, String prefixIn) {
 		super(textureManager, atlasLocation, prefixIn);
 		this.atlasLocation = atlasLocation;
 	}
 
-	public KiwiSpriteUploader(TextureManager textureManager, ResourceLocation atlasLocation) {
+	public KiwiTextureManager(TextureManager textureManager, ResourceLocation atlasLocation) {
 		this(textureManager, atlasLocation, "gui");
 	}
 

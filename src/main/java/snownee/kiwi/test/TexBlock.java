@@ -1,67 +1,62 @@
 package snownee.kiwi.test;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import snownee.kiwi.block.ModBlock;
+import snownee.kiwi.block.entity.TextureBlockEntity;
 import snownee.kiwi.crafting.FullBlockIngredient;
-import snownee.kiwi.tile.TextureTile;
 
-public class TexBlock extends Block {
+public class TexBlock extends BaseEntityBlock {
 
 	public TexBlock(Properties properties) {
 		super(properties);
 	}
 
 	@Override
-	public boolean hasTileEntity(BlockState state) {
-		return true;
-	}
-
-	@Override
-	public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-		return new TexTile();
-	}
-
-	@Override
-	public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
+	public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
 		if (worldIn.isClientSide) {
-			return ActionResultType.SUCCESS;
+			return InteractionResult.SUCCESS;
 		}
-		TileEntity tile = worldIn.getBlockEntity(pos);
+		BlockEntity tile = worldIn.getBlockEntity(pos);
 		ItemStack stack = player.getItemInHand(handIn);
-		if (tile instanceof TextureTile && !stack.isEmpty()) {
+		if (tile instanceof TextureBlockEntity && !stack.isEmpty()) {
 			if (FullBlockIngredient.isFullBlock(stack)) {
-				TextureTile textureTile = (TextureTile) tile;
+				TextureBlockEntity textureTile = (TextureBlockEntity) tile;
 				BlockState state2 = ((BlockItem) stack.getItem()).getBlock().defaultBlockState();
 				textureTile.setTexture("wool", state2);
 				textureTile.refresh();
 			}
 		}
-		return ActionResultType.SUCCESS;
+		return InteractionResult.SUCCESS;
 	}
 
 	@SuppressWarnings("deprecation")
 	@Override
-	public void onRemove(BlockState state, World worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
-		if (state.hasTileEntity() && state.getBlock() != newState.getBlock()) {
+	public void onRemove(BlockState state, Level worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
+		if (state.hasBlockEntity() && state.getBlock() != newState.getBlock()) {
 			worldIn.removeBlockEntity(pos);
 		}
 		super.onRemove(state, worldIn, pos, newState, isMoving);
 	}
 
 	@Override
-	public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
+	public ItemStack getPickBlock(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
 		return ModBlock.pickBlock(state, target, world, pos, player);
+	}
+
+	@Override
+	public BlockEntity newBlockEntity(BlockPos p_153215_, BlockState p_153216_) {
+		return new TexBlockEntity(p_153215_, p_153216_);
 	}
 }

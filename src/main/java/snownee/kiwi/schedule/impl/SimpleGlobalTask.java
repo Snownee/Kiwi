@@ -2,13 +2,13 @@ package snownee.kiwi.schedule.impl;
 
 import java.util.function.IntPredicate;
 
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.fml.LogicalSide;
 import snownee.kiwi.schedule.Task;
 
-public class SimpleGlobalTask extends Task<GlobalTicker> implements INBTSerializable<CompoundNBT> {
+public class SimpleGlobalTask extends Task<GlobalTicker> implements INBTSerializable<CompoundTag> {
 
 	protected int tick = 0;
 	protected LogicalSide side;
@@ -40,8 +40,8 @@ public class SimpleGlobalTask extends Task<GlobalTicker> implements INBTSerializ
 	}
 
 	@Override
-	public CompoundNBT serializeNBT() {
-		CompoundNBT data = new CompoundNBT();
+	public CompoundTag serializeNBT() {
+		CompoundTag data = new CompoundTag();
 		data.putInt("tick", tick);
 		data.putBoolean("client", side.isClient());
 		data.putBoolean("start", phase == Phase.START);
@@ -49,7 +49,7 @@ public class SimpleGlobalTask extends Task<GlobalTicker> implements INBTSerializ
 	}
 
 	@Override
-	public void deserializeNBT(CompoundNBT nbt) {
+	public void deserializeNBT(CompoundTag nbt) {
 		tick = nbt.getInt("tick");
 		side = nbt.getBoolean("client") ? LogicalSide.CLIENT : LogicalSide.SERVER;
 		phase = nbt.getBoolean("start") ? Phase.START : Phase.END;

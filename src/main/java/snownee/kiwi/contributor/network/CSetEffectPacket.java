@@ -4,9 +4,9 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.network.NetworkEvent.Context;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 import snownee.kiwi.contributor.Contributors;
 import snownee.kiwi.network.ClientPacket;
 import snownee.kiwi.util.Util;
@@ -23,7 +23,7 @@ public class CSetEffectPacket extends ClientPacket {
 	public static class Handler extends PacketHandler<CSetEffectPacket> {
 
 		@Override
-		public void encode(CSetEffectPacket msg, PacketBuffer buffer) {
+		public void encode(CSetEffectPacket msg, FriendlyByteBuf buffer) {
 			if (msg.id == null) {
 				buffer.writeUtf("");
 			} else {
@@ -32,13 +32,13 @@ public class CSetEffectPacket extends ClientPacket {
 		}
 
 		@Override
-		public CSetEffectPacket decode(PacketBuffer buffer) {
+		public CSetEffectPacket decode(FriendlyByteBuf buffer) {
 			ResourceLocation id = Util.RL(buffer.readUtf(32767));
 			return new CSetEffectPacket(id);
 		}
 
 		@Override
-		public void handle(CSetEffectPacket msg, Supplier<Context> ctx) {
+		public void handle(CSetEffectPacket msg, Supplier<NetworkEvent.Context> ctx) {
 			//            ctx.get().enqueueWork(() -> {
 			Contributors.changeEffect(ctx.get().getSender(), msg.id);
 			//            });

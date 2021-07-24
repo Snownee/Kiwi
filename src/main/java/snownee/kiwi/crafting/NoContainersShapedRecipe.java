@@ -2,13 +2,13 @@ package snownee.kiwi.crafting;
 
 import com.google.gson.JsonObject;
 
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.ShapedRecipe;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.core.NonNullList;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 import snownee.kiwi.data.DataModule;
 
@@ -18,29 +18,29 @@ public class NoContainersShapedRecipe extends ShapedRecipe {
 	}
 
 	@Override
-	public NonNullList<ItemStack> getRemainingItems(CraftingInventory inv) {
+	public NonNullList<ItemStack> getRemainingItems(CraftingContainer inv) {
 		return NonNullList.create();
 	}
 
 	@Override
-	public IRecipeSerializer<?> getSerializer() {
+	public RecipeSerializer<?> getSerializer() {
 		return DataModule.SHAPED_NO_CONTAINERS;
 	}
 
-	public static class Serializer extends ForgeRegistryEntry<IRecipeSerializer<?>> implements IRecipeSerializer<NoContainersShapedRecipe> {
+	public static class Serializer extends ForgeRegistryEntry<RecipeSerializer<?>> implements RecipeSerializer<NoContainersShapedRecipe> {
 		@Override
 		public NoContainersShapedRecipe fromJson(ResourceLocation recipeId, JsonObject json) {
-			return new NoContainersShapedRecipe(IRecipeSerializer.SHAPED_RECIPE.fromJson(recipeId, json));
+			return new NoContainersShapedRecipe(RecipeSerializer.SHAPED_RECIPE.fromJson(recipeId, json));
 		}
 
 		@Override
-		public NoContainersShapedRecipe fromNetwork(ResourceLocation recipeId, PacketBuffer buffer) {
-			return new NoContainersShapedRecipe(IRecipeSerializer.SHAPED_RECIPE.fromNetwork(recipeId, buffer));
+		public NoContainersShapedRecipe fromNetwork(ResourceLocation recipeId, FriendlyByteBuf buffer) {
+			return new NoContainersShapedRecipe(RecipeSerializer.SHAPED_RECIPE.fromNetwork(recipeId, buffer));
 		}
 
 		@Override
-		public void toNetwork(PacketBuffer buffer, NoContainersShapedRecipe recipe) {
-			IRecipeSerializer.SHAPED_RECIPE.toNetwork(buffer, recipe);
+		public void toNetwork(FriendlyByteBuf buffer, NoContainersShapedRecipe recipe) {
+			RecipeSerializer.SHAPED_RECIPE.toNetwork(buffer, recipe);
 		}
 	}
 }

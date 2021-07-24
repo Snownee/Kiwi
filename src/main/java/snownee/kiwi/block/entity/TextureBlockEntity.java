@@ -1,4 +1,4 @@
-package snownee.kiwi.tile;
+package snownee.kiwi.block.entity;
 
 import java.util.Map;
 
@@ -7,38 +7,39 @@ import javax.annotation.Nullable;
 import com.google.common.collect.Maps;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.nbt.NBTUtil;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.TagParser;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.data.ModelDataMap;
-import net.minecraftforge.fml.common.thread.EffectiveSide;
+import net.minecraftforge.fml.util.thread.EffectiveSide;
 import net.minecraftforge.registries.ForgeRegistries;
 import snownee.kiwi.client.model.TextureModel;
 import snownee.kiwi.util.NBTHelper;
 import snownee.kiwi.util.NBTHelper.NBT;
 import snownee.kiwi.util.Util;
 
-public class TextureTile extends BaseTile {
+public class TextureBlockEntity extends BaseBlockEntity {
 	@Nullable
 	protected Map<String, String> textures;
 	@Nullable
 	protected Map<String, Item> marks;
 	protected IModelData modelData;
 
-	public TextureTile(TileEntityType<?> tileEntityTypeIn, String... textureKeys) {
-		super(tileEntityTypeIn);
+	public TextureBlockEntity(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state, String... textureKeys) {
+		super(tileEntityTypeIn, pos, state);
 		persistData = true;
 		textures = textureKeys.length == 0 ? null : Maps.newHashMapWithExpectedSize(textureKeys.length);
 		for (String key : textureKeys) {
@@ -79,7 +80,7 @@ public class TextureTile extends BaseTile {
 			return;
 		}
 		if (EffectiveSide.get().isServer()) {
-			String value = NBTUtil.writeBlockState(state).toString();
+			String value = NbtUtils.writeBlockState(state).toString();
 			textures.put(key, value);
 		} else {
 			textures.put(key, getTextureFromState(state));
@@ -143,7 +144,7 @@ public class TextureTile extends BaseTile {
 	}
 
 	@Override
-	protected void readPacketData(CompoundNBT data) {
+	protected void readPacketData(CompoundTag data) {
 		if (!data.contains("Textures", NBT.COMPOUND)) {
 			return;
 		}
@@ -171,7 +172,7 @@ public class TextureTile extends BaseTile {
 		}
 	}
 
-	public static boolean readTextures(Map<String, String> textures, CompoundNBT data) {
+	public static boolean readTextures(Map<String, String> textures, CompoundTag data) {
 		if (textures == null) {
 			return false;
 		}
@@ -183,8 +184,8 @@ public class TextureTile extends BaseTile {
 				continue;
 			if (EffectiveSide.get().isClient() && v.startsWith("{")) {
 				try {
-					CompoundNBT stateNbt = JsonToNBT.parseTag(v);
-					BlockState state = NBTUtil.readBlockState(stateNbt);
+					CompoundTag stateNbt = TagParser.parseTag(v);
+					BlockState state = NbtUtils.readBlockState(stateNbt);
 					v = getTextureFromState(state);
 				} catch (CommandSyntaxException e) {
 					continue;
@@ -203,7 +204,7 @@ public class TextureTile extends BaseTile {
 	}
 
 	@Override
-	protected CompoundNBT writePacketData(CompoundNBT data) {
+	protected CompoundTag writePacketData(CompoundTag data) {
 		writeTextures(textures, data);
 		if (marks != null) {
 			NBTHelper helper = NBTHelper.of(data);
@@ -215,7 +216,7 @@ public class TextureTile extends BaseTile {
 		return data;
 	}
 
-	public static CompoundNBT writeTextures(Map<String, String> textures, CompoundNBT data) {
+	public static CompoundTag writeTextures(Map<String, String> textures, CompoundTag data) {
 		if (textures != null) {
 			NBTHelper tag = NBTHelper.of(data);
 			textures.forEach((k, v) -> tag.setString("Textures." + k, v));

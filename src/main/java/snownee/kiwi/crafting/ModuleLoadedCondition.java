@@ -2,8 +2,8 @@ package snownee.kiwi.crafting;
 
 import com.google.gson.JsonObject;
 
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.common.crafting.conditions.IConditionSerializer;
 import snownee.kiwi.Kiwi;
@@ -36,7 +36,7 @@ public class ModuleLoadedCondition implements ICondition {
 
 		@Override
 		public ModuleLoadedCondition read(JsonObject json) {
-			ResourceLocation module = new ResourceLocation(JSONUtils.getAsString(json, "module"));
+			ResourceLocation module = new ResourceLocation(GsonHelper.getAsString(json, "module"));
 			return new ModuleLoadedCondition(module);
 		}
 
