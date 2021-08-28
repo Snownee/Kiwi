@@ -10,7 +10,7 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import snownee.kiwi.contributor.client.RewardLayer;
+import snownee.kiwi.contributor.client.CosmeticLayer;
 
 public interface ITierProvider {
 	String getAuthor();
@@ -26,7 +26,7 @@ public interface ITierProvider {
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	RewardLayer createRenderer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer, String tier);
+	CosmeticLayer createRenderer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer, String tier);
 
 	default boolean isContributor(String playerName) {
 		return !getPlayerTiers(playerName).isEmpty();
@@ -61,7 +61,7 @@ public interface ITierProvider {
 
 		@OnlyIn(Dist.CLIENT)
 		@Override
-		public RewardLayer createRenderer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer, String tier) {
+		public CosmeticLayer createRenderer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer, String tier) {
 			return null;
 		}
 

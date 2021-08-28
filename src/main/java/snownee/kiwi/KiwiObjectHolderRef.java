@@ -8,7 +8,6 @@ import javax.annotation.Nullable;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.IForgeRegistry;
-import snownee.kiwi.util.ReflectionUtil;
 
 public class KiwiObjectHolderRef implements Consumer<Predicate<ResourceLocation>> {
 
@@ -33,10 +32,12 @@ public class KiwiObjectHolderRef implements Consumer<Predicate<ResourceLocation>
 		}
 
 		Object thing = registry.getValue(injectedObject);
-		try {
-			ReflectionUtil.setFinalValue(field, null, thing);
-		} catch (Exception e) {
-			Kiwi.logger.warn("Unable to set {} with value {} ({})", field, thing, injectedObject, e);
+		if (field.canAccess(null)) {
+			try {
+				field.set(null, thing);
+			} catch (Exception e) {
+				Kiwi.logger.warn("Unable to set {} with value {} ({})", field, thing, injectedObject, e);
+			}
 		}
 	}
 

@@ -20,14 +20,14 @@ import snownee.kiwi.contributor.Contributors;
 import snownee.kiwi.contributor.ITierProvider;
 
 @OnlyIn(Dist.CLIENT)
-public class RewardLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
+public class CosmeticLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
 
-	public static final Collection<RewardLayer> ALL_LAYERS = Lists.newLinkedList();
+	public static final Collection<CosmeticLayer> ALL_LAYERS = Lists.newLinkedList();
 	private final Cache<String, RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>>> player2renderer;
 
-	public RewardLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRendererIn) {
+	public CosmeticLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRendererIn) {
 		super(entityRendererIn);
-		if (getClass() == RewardLayer.class) {
+		if (getClass() == CosmeticLayer.class) {
 			player2renderer = CacheBuilder.newBuilder().build();
 		} else {
 			player2renderer = null;
@@ -42,11 +42,11 @@ public class RewardLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<A
 		RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> renderer = player2renderer.getIfPresent(entitylivingbaseIn.getGameProfile().getName());
 		if (renderer == null) {
 			String name = entitylivingbaseIn.getGameProfile().getName();
-			ResourceLocation id = Contributors.PLAYER_EFFECTS.get(name);
+			ResourceLocation id = Contributors.PLAYER_COSMETICS.get(name);
 			if (id != null) {
 				ITierProvider provider = Contributors.REWARD_PROVIDERS.get(id.getNamespace().toLowerCase(Locale.ENGLISH));
 				if (provider == null) {
-					Contributors.PLAYER_EFFECTS.remove(name);
+					Contributors.PLAYER_COSMETICS.remove(name);
 				} else {
 					renderer = provider.createRenderer(this.renderer, id.getPath());
 					if (renderer != null)

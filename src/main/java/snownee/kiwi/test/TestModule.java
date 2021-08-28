@@ -30,24 +30,24 @@ public class TestModule extends AbstractModule {
 	// Keep your fields `public static final`
 
 	// Register a simple item
-	public static final TestItem FIRST_ITEM = new TestItem(itemProp().rarity(Rarity.EPIC));
+	public static TestItem FIRST_ITEM = new TestItem(itemProp().rarity(Rarity.EPIC));
 
 	// The next block will use this builder to build its BlockItem. After that this field will be null
-	public static final Item.Properties FIRST_BLOCK_ITEM_BUILDER = itemProp().rarity(Rarity.RARE);
+	public static Item.Properties FIRST_BLOCK_ITEM_BUILDER = itemProp().rarity(Rarity.RARE);
 	// Register a simple block and its BlockItem
 	//@RenderLayer(Layer.CUTOUT)
-	public static final TestBlock FIRST_BLOCK = new TestBlock2(blockProp(Material.WOOD));
+	public static TestBlock FIRST_BLOCK = new TestBlock2(blockProp(Material.WOOD));
 
 	// Register a simple effect
-	public static final MobEffect FIRST_EFFECT = new HealthBoostMobEffect(MobEffectCategory.BENEFICIAL, 0xFF0000);
+	public static MobEffect FIRST_EFFECT = new HealthBoostMobEffect(MobEffectCategory.BENEFICIAL, 0xFF0000);
 
 	// And its potion
-	public static final Potion FIRST_POTION = new Potion(new MobEffectInstance(FIRST_EFFECT, 1800));
+	public static Potion FIRST_POTION = new Potion(new MobEffectInstance(FIRST_EFFECT, 1800));
 
-	public static final BlockEntityType<?> FIRST_TILE = BlockEntityType.Builder.of(TestBlockEntity::new, FIRST_BLOCK).build(null);
+	public static BlockEntityType<?> FIRST_TILE = BlockEntityType.Builder.of(TestBlockEntity::new, FIRST_BLOCK).build(null);
 
-	public static final TexBlock TEX_BLOCK = new TexBlock(blockProp(Material.WOOD));
-	public static final BlockEntityType<?> TEX_TILE = BlockEntityType.Builder.of(TexBlockEntity::new, TEX_BLOCK).build(null);
+	public static TexBlock TEX_BLOCK = new TexBlock(blockProp(Material.WOOD));
+	public static BlockEntityType<?> TEX_TILE = BlockEntityType.Builder.of(TexBlockEntity::new, TEX_BLOCK).build(null);
 
 	public static TestModule INSTANCE;
 

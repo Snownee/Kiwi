@@ -24,19 +24,16 @@ public class FoxTailModel<T extends LivingEntity> extends AgeableListModel<T> {
 	private ModelPart ear1;
 	private ModelPart ear2;
 
-	public FoxTailModel(PlayerModel<AbstractClientPlayer> playerModel) {
+	public FoxTailModel(PlayerModel<AbstractClientPlayer> playerModel, LayerDefinition definition) {
 		this.playerModel = playerModel;
 
-		//TODO cache it?
-		LayerDefinition definition = createBodyLayer();
 		ModelPart root = definition.bakeRoot();
-
 		this.ear1 = root.getChild("right_ear");
 		this.ear2 = root.getChild("left_ear");
 		this.tail = root.getChild("tail");
 	}
 
-	public static LayerDefinition createBodyLayer() {
+	public static LayerDefinition create() {
 		MeshDefinition meshdefinition = new MeshDefinition();
 		PartDefinition root = meshdefinition.getRoot();
 

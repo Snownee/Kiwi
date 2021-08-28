@@ -16,11 +16,11 @@ import snownee.kiwi.network.NetworkChannel;
 import snownee.kiwi.network.Packet;
 import snownee.kiwi.util.Util;
 
-public class SSyncEffectPacket extends Packet {
+public class SSyncCosmeticPacket extends Packet {
 
 	private final Map<String, ResourceLocation> map;
 
-	public SSyncEffectPacket(Map<String, ResourceLocation> map) {
+	public SSyncCosmeticPacket(Map<String, ResourceLocation> map) {
 		this.map = map;
 	}
 
@@ -28,10 +28,10 @@ public class SSyncEffectPacket extends Packet {
 		NetworkChannel.sendToAllExcept(player, this);
 	}
 
-	public static class Handler extends PacketHandler<SSyncEffectPacket> {
+	public static class Handler extends PacketHandler<SSyncCosmeticPacket> {
 
 		@Override
-		public void encode(SSyncEffectPacket msg, FriendlyByteBuf buffer) {
+		public void encode(SSyncCosmeticPacket msg, FriendlyByteBuf buffer) {
 			buffer.writeVarInt(msg.map.size());
 			msg.map.forEach((k, v) -> {
 				buffer.writeUtf(k);
@@ -40,7 +40,7 @@ public class SSyncEffectPacket extends Packet {
 		}
 
 		@Override
-		public SSyncEffectPacket decode(FriendlyByteBuf buffer) {
+		public SSyncCosmeticPacket decode(FriendlyByteBuf buffer) {
 			ImmutableMap.Builder<String, ResourceLocation> builder = ImmutableMap.builder();
 			int size = buffer.readVarInt();
 			for (int i = 0; i < size; i++) {
@@ -48,14 +48,14 @@ public class SSyncEffectPacket extends Packet {
 				String v = buffer.readUtf();
 				builder.put(k, Util.RL(v));
 			}
-			return new SSyncEffectPacket(builder.build());
+			return new SSyncCosmeticPacket(builder.build());
 		}
 
 		@Override
 		@OnlyIn(Dist.CLIENT)
-		public void handle(SSyncEffectPacket msg, Supplier<NetworkEvent.Context> ctx) {
+		public void handle(SSyncCosmeticPacket msg, Supplier<NetworkEvent.Context> ctx) {
 			ctx.get().enqueueWork(() -> {
-				Contributors.changeEffect(msg.map);
+				Contributors.changeCosmetic(msg.map);
 			});
 			ctx.get().setPacketHandled(true);
 		}

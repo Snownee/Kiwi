@@ -32,7 +32,7 @@ public final class KiwiManager {
 
 	static void handleRegister(RegistryEvent.Register<?> event) {
 		MODULES.values().forEach(info -> info.handleRegister(event));
-		ModLoadingContext.get().setActiveContainer(null, null);
+		ModLoadingContext.get().setActiveContainer(null);
 	}
 
 }

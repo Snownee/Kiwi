@@ -2,7 +2,6 @@ package snownee.kiwi;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.function.Supplier;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
@@ -15,7 +14,6 @@ public class ModContext {
 	public static final Map<String, ModContext> ALL_CONTEXTS = Maps.newHashMap();
 
 	public ModContainer modContainer;
-	public Supplier<?> extension;
 
 	public static ModContext get(String modid) {
 		if (ALL_CONTEXTS.containsKey(modid)) {
@@ -31,13 +29,12 @@ public class ModContext {
 		Preconditions.checkNotNull(modid, "Cannot get name of kiwi module.");
 		try {
 			modContainer = ModList.get().getModContainerById(modid).get();
-			extension = (Supplier<?>) Kiwi.FIELD_EXTENSION.get(modContainer);
-		} catch (NoSuchElementException | IllegalArgumentException | IllegalAccessException e) {
+		} catch (NoSuchElementException e) {
 			Kiwi.logger.catching(e);
 		}
 	}
 
 	public void setActiveContainer() {
-		ModLoadingContext.get().setActiveContainer(modContainer, extension.get());
+		ModLoadingContext.get().setActiveContainer(modContainer);
 	}
 }

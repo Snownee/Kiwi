@@ -15,10 +15,10 @@ import snownee.kiwi.Name;
 @KiwiModule(value = "test2", dependencies = "forge;@kiwi:test")
 @KiwiModule.Optional(disabledByDefault = true)
 public class TestModule2 extends AbstractModule {
-	public static final Named<EntityType<?>> BAT = entityTag(Kiwi.MODID, "bat");
+	public static Named<EntityType<?>> BAT = entityTag(Kiwi.MODID, "bat");
 
 	@Name("kiwi:test_item")
-	public static final TestItem FIRST_ITEM = new TestItem(itemProp().rarity(Rarity.EPIC)) {
+	public static TestItem FIRST_ITEM = new TestItem(itemProp().rarity(Rarity.EPIC)) {
 		@Override
 		public boolean isFoil(ItemStack stack) {
 			return true;

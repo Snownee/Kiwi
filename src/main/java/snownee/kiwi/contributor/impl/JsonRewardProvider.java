@@ -24,7 +24,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.contributor.ITierProvider;
-import snownee.kiwi.contributor.client.RewardLayer;
+import snownee.kiwi.contributor.client.CosmeticLayer;
 
 public class JsonRewardProvider implements ITierProvider {
 
@@ -105,7 +105,7 @@ public class JsonRewardProvider implements ITierProvider {
 
 	@OnlyIn(Dist.CLIENT)
 	@Override
-	public RewardLayer createRenderer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer, String tier) {
+	public CosmeticLayer createRenderer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer, String tier) {
 		return null;
 	}
 

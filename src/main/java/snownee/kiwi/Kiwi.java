@@ -55,7 +55,6 @@ import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoader;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -91,7 +90,6 @@ import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.crafting.FullBlockIngredient;
 import snownee.kiwi.crafting.ModuleLoadedCondition;
 import snownee.kiwi.schedule.Scheduler;
-import snownee.kiwi.util.ReflectionUtil;
 import snownee.kiwi.util.Util;
 
 @Mod(Kiwi.MODID)
@@ -102,7 +100,6 @@ public class Kiwi {
 
 	public static Logger logger = LogManager.getLogger(Kiwi.NAME);
 	static final Marker MARKER = MarkerManager.getMarker("Init");
-	static Field FIELD_EXTENSION;
 
 	private static final class Info {
 		final ResourceLocation id;
@@ -112,15 +109,6 @@ public class Kiwi {
 		public Info(ResourceLocation id, String className) {
 			this.id = id;
 			this.className = className;
-		}
-	}
-
-	static {
-		try {
-			FIELD_EXTENSION = ModContainer.class.getDeclaredField("contextExtension");
-			FIELD_EXTENSION.setAccessible(true);
-		} catch (NoSuchFieldException | SecurityException e) {
-			Kiwi.logger.catching(e);
 		}
 	}
 
@@ -346,15 +334,15 @@ public class Kiwi {
 			// Instantiate modules
 			try {
 				Class<?> clazz = Class.forName(info.className);
-				AbstractModule instance = (AbstractModule) clazz.newInstance();
+				AbstractModule instance = (AbstractModule) clazz.getDeclaredConstructor().newInstance();
 				KiwiManager.addInstance(id, instance, context);
-			} catch (InstantiationException | IllegalAccessException | ClassCastException | ClassNotFoundException e) {
+			} catch (Exception e) {
 				logger.error(MARKER, "Kiwi failed to initialize module class: {}", info.className);
 				logger.catching(e);
 				continue;
 			}
 
-			ModLoadingContext.get().setActiveContainer(null, null);
+			ModLoadingContext.get().setActiveContainer(null);
 		}
 
 		moduleData.clear();
@@ -413,14 +401,12 @@ public class Kiwi {
 					regName = checkPrefix(field.getName().toLowerCase(Locale.ENGLISH), modid);
 				}
 
-				if (!Modifier.isFinal(mods)) {
-					if (field.getType() == info.module.getClass() && regName.getPath().equals("instance") && regName.getNamespace().equals(modid)) {
-						try {
-							field.set(null, info.module);
-						} catch (IllegalArgumentException | IllegalAccessException e) {
-							logger.error(MARKER, "Kiwi failed to inject module instance to module class: {}", info.module.uid);
-							logger.catching(e);
-						}
+				if (field.getType() == info.module.getClass() && regName.getPath().equals("instance") && regName.getNamespace().equals(modid)) {
+					try {
+						field.set(null, info.module);
+					} catch (IllegalArgumentException | IllegalAccessException e) {
+						logger.error(MARKER, "Kiwi failed to inject module instance to module class: {}", info.module.uid);
+						logger.catching(e);
 					}
 					continue;
 				}
@@ -454,8 +440,8 @@ public class Kiwi {
 					if (tmpBuilder != null) {
 						info.blockItemBuilders.put((Block) o, tmpBuilder);
 						try {
-							ReflectionUtil.setFinalValue(tmpBuilderField, info.module, null);
-						} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
+							tmpBuilderField.set(info.module, null);
+						} catch (Exception e) {
 							logger.error(MARKER, "Kiwi failed to clean used item builder: {}", tmpBuilderField);
 							logger.catching(e);
 						}
@@ -493,7 +479,7 @@ public class Kiwi {
 		}
 
 		KiwiManager.MODULES.values().forEach(ModuleInfo::preInit);
-		ModLoadingContext.get().setActiveContainer(null, null);
+		ModLoadingContext.get().setActiveContainer(null);
 		holderRefs.clear();
 		holderRefs = null;
 	}
@@ -533,18 +519,18 @@ public class Kiwi {
 		CraftingHelper.register(new ResourceLocation(MODID, "full_block"), FullBlockIngredient.SERIALIZER);
 
 		KiwiManager.MODULES.values().forEach(m -> m.init(event));
-		ModLoadingContext.get().setActiveContainer(null, null);
+		ModLoadingContext.get().setActiveContainer(null);
 	}
 
 	private void clientInit(FMLClientSetupEvent event) {
 		KiwiManager.MODULES.values().forEach(m -> m.clientInit(event));
-		ModLoadingContext.get().setActiveContainer(null, null);
+		ModLoadingContext.get().setActiveContainer(null);
 	}
 
 	private void serverInit(FMLServerStartingEvent event) {
 		KiwiManager.MODULES.values().forEach(m -> m.serverInit(event));
 		event.getServer().getLevel(Level.OVERWORLD).getDataStorage().computeIfAbsent(Scheduler::load, () -> Scheduler.INSTANCE, Scheduler.ID);
-		ModLoadingContext.get().setActiveContainer(null, null);
+		ModLoadingContext.get().setActiveContainer(null);
 	}
 
 	@SubscribeEvent
@@ -568,7 +554,7 @@ public class Kiwi {
 
 	private void postInit(InterModProcessEvent event) {
 		KiwiManager.MODULES.values().forEach(ModuleInfo::postInit);
-		ModLoadingContext.get().setActiveContainer(null, null);
+		ModLoadingContext.get().setActiveContainer(null);
 	}
 
 	private void loadComplete(FMLLoadCompleteEvent event) {

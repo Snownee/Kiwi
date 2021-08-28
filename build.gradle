@@ -130,8 +130,8 @@ dependencies {
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    //compileOnly fg.deobf("mezz.jei:jei-1.16.4:7.6.1.68:api")
-    //runtimeOnly fg.deobf("mezz.jei:jei-1.16.4:7.6.1.68")
+    compileOnly fg.deobf("mezz.jei:jei-1.17.1:8.0.0.14:api")
+    runtimeOnly fg.deobf("mezz.jei:jei-1.17.1:8.0.0.14")
 }
 
 processResources {

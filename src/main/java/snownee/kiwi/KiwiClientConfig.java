@@ -10,7 +10,7 @@ import snownee.kiwi.config.KiwiConfig.Translation;
 @KiwiConfig(type = Type.CLIENT)
 public final class KiwiClientConfig {
 
-	public static String contributorEffect = "";
+	public static String contributorCosmetic = "";
 
 	@Comment("Show customized tooltips from any item. Mainly for pack devs")
 	@Translation("globalTooltip")

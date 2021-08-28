@@ -24,20 +24,20 @@ import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.contributor.Contributors;
 
 @OnlyIn(Dist.CLIENT)
-public class RewardScreen extends Screen {
+public class CosmeticScreen extends Screen {
 
 	private List list;
 	@Nullable
-	private ResourceLocation currentReward;
+	private ResourceLocation currentCosmetic;
 	private Entry selectedEntry;
 
-	public RewardScreen() {
-		super(new TranslatableComponent("gui.kiwi.reward"));
+	public CosmeticScreen() {
+		super(new TranslatableComponent("gui.kiwi.cosmetic"));
 	}
 
 	@Override
 	protected void init() {
-		currentReward = Contributors.PLAYER_EFFECTS.get(getPlayerName());
+		currentCosmetic = Contributors.PLAYER_COSMETICS.get(getPlayerName());
 		list = new List(minecraft, 150, height, 0, height, 20);
 		list.setLeftPos(20);
 		list.addEntry(selectedEntry = new Entry(this, null));
@@ -48,7 +48,7 @@ public class RewardScreen extends Screen {
 				Entry entry = new Entry(this, tier);
 				list.addEntry(entry);
 				added = true;
-				if (tier.equals(currentReward)) {
+				if (tier.equals(currentCosmetic)) {
 					selectedEntry = entry;
 				}
 			}
@@ -100,15 +100,15 @@ public class RewardScreen extends Screen {
 		super.onClose();
 		list = null;
 		ConfigHandler cfg = KiwiConfigManager.getHandler(KiwiClientConfig.class);
-		ConfigValue<String> val = (ConfigValue<String>) cfg.getValueByPath("contributorEffect");
-		if (currentReward != null && selectedEntry.id == null) {
+		ConfigValue<String> val = (ConfigValue<String>) cfg.getValueByPath("contributorCosmetic");
+		if (currentCosmetic != null && selectedEntry.id == null) {
 			val.set("");
 			cfg.refresh();
-			Contributors.changeEffect();
-		} else if (selectedEntry != null && !Objects.equals(selectedEntry.id, currentReward)) {
+			Contributors.changeCosmetic();
+		} else if (selectedEntry != null && !Objects.equals(selectedEntry.id, currentCosmetic)) {
 			val.set(selectedEntry.id.toString());
 			cfg.refresh();
-			Contributors.changeEffect();
+			Contributors.changeCosmetic();
 		}
 	}
 
@@ -123,7 +123,7 @@ public class RewardScreen extends Screen {
 		}
 
 		@Override
-		public int addEntry(snownee.kiwi.contributor.client.gui.RewardScreen.Entry p_93487_) {
+		public int addEntry(snownee.kiwi.contributor.client.gui.CosmeticScreen.Entry p_93487_) {
 			return super.addEntry(p_93487_);
 		}
 
@@ -131,15 +131,15 @@ public class RewardScreen extends Screen {
 
 	private static class Entry extends ObjectSelectionList.Entry<Entry> {
 
-		private final RewardScreen parent;
+		private final CosmeticScreen parent;
 		@Nullable
 		private final ResourceLocation id;
 		private final String name;
 
-		public Entry(RewardScreen parent, ResourceLocation id) {
+		public Entry(CosmeticScreen parent, ResourceLocation id) {
 			this.parent = parent;
 			this.id = id;
-			name = id == null ? "-" : I18n.get(Util.makeDescriptionId("reward", id));
+			name = id == null ? "-" : I18n.get(Util.makeDescriptionId("cosmetic", id));
 		}
 
 		@Override

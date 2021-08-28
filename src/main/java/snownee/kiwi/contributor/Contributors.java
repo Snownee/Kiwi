@@ -26,12 +26,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
+import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.InputEvent.KeyInputEvent;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fmllegacy.network.PacketDistributor;
 import snownee.kiwi.AbstractModule;
@@ -40,11 +41,11 @@ import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfigManager;
-import snownee.kiwi.contributor.client.RewardLayer;
-import snownee.kiwi.contributor.client.gui.RewardScreen;
+import snownee.kiwi.contributor.client.CosmeticLayer;
+import snownee.kiwi.contributor.client.gui.CosmeticScreen;
 import snownee.kiwi.contributor.impl.KiwiRewardProvider;
-import snownee.kiwi.contributor.network.CSetEffectPacket;
-import snownee.kiwi.contributor.network.SSyncEffectPacket;
+import snownee.kiwi.contributor.network.CSetCosmeticPacket;
+import snownee.kiwi.contributor.network.SSyncCosmeticPacket;
 import snownee.kiwi.network.NetworkChannel;
 import snownee.kiwi.util.Util;
 
@@ -53,14 +54,17 @@ import snownee.kiwi.util.Util;
 public class Contributors extends AbstractModule {
 
 	public static final Map<String, ITierProvider> REWARD_PROVIDERS = Maps.newConcurrentMap();
-	public static final Map<String, ResourceLocation> PLAYER_EFFECTS = Maps.newConcurrentMap();
+	public static final Map<String, ResourceLocation> PLAYER_COSMETICS = Maps.newConcurrentMap();
 	private static final Set<ResourceLocation> RENDERABLES = Sets.newLinkedHashSet();
 	private static int DAY = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
 
 	@Override
 	protected void preInit() {
-		NetworkChannel.register(CSetEffectPacket.class, new CSetEffectPacket.Handler());
-		NetworkChannel.register(SSyncEffectPacket.class, new SSyncEffectPacket.Handler());
+		NetworkChannel.register(CSetCosmeticPacket.class, new CSetCosmeticPacket.Handler());
+		NetworkChannel.register(SSyncCosmeticPacket.class, new SSyncCosmeticPacket.Handler());
+		if (FMLEnvironment.dist.isClient()) {
+			FMLJavaModLoadingContext.get().getModEventBus().addListener(this::addLayers);
+		}
 	}
 
 	@Override
@@ -117,50 +121,48 @@ public class Contributors extends AbstractModule {
 		}
 		Player player = event.getPlayer();
 		if (!((ServerLevel) event.getEntity().level).getServer().isSingleplayerOwner(player.getGameProfile())) {
-			new SSyncEffectPacket(PLAYER_EFFECTS).send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player));
+			new SSyncCosmeticPacket(PLAYER_COSMETICS).send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player));
 		}
 	}
 
 	@OnlyIn(Dist.CLIENT)
 	@SubscribeEvent
 	public void onClientPlayerLoggedIn(ClientPlayerNetworkEvent.LoggedInEvent event) {
-		changeEffect();
+		changeCosmetic();
 	}
 
 	@OnlyIn(Dist.DEDICATED_SERVER)
 	@SubscribeEvent
 	public void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
-		PLAYER_EFFECTS.remove(event.getPlayer().getGameProfile().getName());
+		PLAYER_COSMETICS.remove(event.getPlayer().getGameProfile().getName());
 	}
 
 	@OnlyIn(Dist.CLIENT)
 	@SubscribeEvent
 	public void onClientPlayerLoggedOut(ClientPlayerNetworkEvent.LoggedOutEvent event) {
-		PLAYER_EFFECTS.clear();
-		RewardLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidateAll());
+		PLAYER_COSMETICS.clear();
+		CosmeticLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidateAll());
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	@Override
-	protected void clientInit(FMLClientSetupEvent event) {
-		Minecraft.getInstance().getEntityRenderDispatcher().getSkinMap().values().forEach(renderer -> {
-			if (renderer instanceof LivingEntityRenderer) {
-				LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> o=(LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>>) renderer;
-				RewardLayer layer = new RewardLayer(o);
-				RewardLayer.ALL_LAYERS.add(layer);
-				o.addLayer(layer);
-			}
-		});
+	public void addLayers(EntityRenderersEvent.AddLayers event) {
+		for (String name : event.getSkins()) {
+			System.out.println(name);
+			LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> o = event.getSkin(name);
+			CosmeticLayer layer = new CosmeticLayer(o);
+			CosmeticLayer.ALL_LAYERS.add(layer);
+			o.addLayer(layer);
+		}
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	public static void changeEffect() {
-		ResourceLocation id = Util.RL(KiwiClientConfig.contributorEffect);
+	public static void changeCosmetic() {
+		ResourceLocation id = Util.RL(KiwiClientConfig.contributorCosmetic);
 		if (id != null && id.getPath().isEmpty()) {
 			id = null;
 		}
-		ResourceLocation effect = id;
-		canPlayerUseEffect(getPlayerName(), effect).thenAccept(bl -> {
+		ResourceLocation cosmetic = id;
+		canPlayerUseCosmetic(getPlayerName(), cosmetic).thenAccept(bl -> {
 			if (!bl) {
 				ConfigHandler cfg = KiwiConfigManager.getHandler(KiwiClientConfig.class);
 				ConfigValue<String> val = (ConfigValue<String>) cfg.getValueByPath("contributorEffect");
@@ -168,39 +170,39 @@ public class Contributors extends AbstractModule {
 				cfg.refresh();
 				return;
 			}
-			new CSetEffectPacket(effect).send();
-			if (effect == null) {
-				PLAYER_EFFECTS.remove(getPlayerName());
+			new CSetCosmeticPacket(cosmetic).send();
+			if (cosmetic == null) {
+				PLAYER_COSMETICS.remove(getPlayerName());
 			} else {
-				PLAYER_EFFECTS.put(getPlayerName(), effect);
-				Kiwi.logger.info("Enabled contributor effect: {}", effect);
+				PLAYER_COSMETICS.put(getPlayerName(), cosmetic);
+				Kiwi.logger.info("Enabled contributor effect: {}", cosmetic);
 			}
-			RewardLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidate(getPlayerName()));
+			CosmeticLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidate(getPlayerName()));
 		});
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	public static void changeEffect(Map<String, ResourceLocation> changes) {
+	public static void changeCosmetic(Map<String, ResourceLocation> changes) {
 		changes.forEach((k, v) -> {
 			if (v == null) {
-				PLAYER_EFFECTS.remove(k);
+				PLAYER_COSMETICS.remove(k);
 			} else {
-				PLAYER_EFFECTS.put(k, v);
+				PLAYER_COSMETICS.put(k, v);
 			}
 		});
-		RewardLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidateAll(changes.keySet()));
+		CosmeticLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidateAll(changes.keySet()));
 	}
 
-	public static void changeEffect(ServerPlayer player, ResourceLocation effect) {
+	public static void changeCosmetic(ServerPlayer player, ResourceLocation cosmetic) {
 		String playerName = player.getGameProfile().getName();
-		canPlayerUseEffect(playerName, effect).thenAccept(bl -> {
+		canPlayerUseCosmetic(playerName, cosmetic).thenAccept(bl -> {
 			if (bl) {
-				if (effect == null) {
-					PLAYER_EFFECTS.remove(playerName);
+				if (cosmetic == null) {
+					PLAYER_COSMETICS.remove(playerName);
 				} else {
-					PLAYER_EFFECTS.put(playerName, effect);
+					PLAYER_COSMETICS.put(playerName, cosmetic);
 				}
-				new SSyncEffectPacket(ImmutableMap.of(playerName, effect)).sendExcept(player);
+				new SSyncCosmeticPacket(ImmutableMap.of(playerName, cosmetic)).sendExcept(player);
 			}
 		});
 	}
@@ -229,17 +231,17 @@ public class Contributors extends AbstractModule {
 		}
 	}
 
-	public static CompletableFuture<Boolean> canPlayerUseEffect(String playerName, ResourceLocation effect) {
-		if (effect == null || effect.getPath().isEmpty()) { // Set to empty
+	public static CompletableFuture<Boolean> canPlayerUseCosmetic(String playerName, ResourceLocation cosmetic) {
+		if (cosmetic == null || cosmetic.getPath().isEmpty()) { // Set to empty
 			return CompletableFuture.completedFuture(Boolean.TRUE);
 		}
-		if (!isRenderable(effect)) {
+		if (!isRenderable(cosmetic)) {
 			return CompletableFuture.completedFuture(Boolean.FALSE);
 		}
-		ITierProvider provider = REWARD_PROVIDERS.getOrDefault(effect.getNamespace().toLowerCase(Locale.ENGLISH), ITierProvider.Empty.INSTANCE);
-		if (!provider.isContributor(playerName, effect.getPath())) {
+		ITierProvider provider = REWARD_PROVIDERS.getOrDefault(cosmetic.getNamespace().toLowerCase(Locale.ENGLISH), ITierProvider.Empty.INSTANCE);
+		if (!provider.isContributor(playerName, cosmetic.getPath())) {
 			if (FMLEnvironment.dist.isDedicatedServer()) {
-				return provider.refresh().thenApply($ -> provider.isContributor(playerName, effect.getPath()));
+				return provider.refresh().thenApply($ -> provider.isContributor(playerName, cosmetic.getPath()));
 			} else {
 				return CompletableFuture.completedFuture(Boolean.FALSE);
 			}
@@ -271,7 +273,7 @@ public class Contributors extends AbstractModule {
 		if (event.getAction() != 2) {
 			hold = 0;
 		} else if (++hold == 30) {
-			RewardScreen screen = new RewardScreen();
+			CosmeticScreen screen = new CosmeticScreen();
 			mc.setScreen(screen);
 		}
 	}

@@ -15,8 +15,11 @@ import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.kiwi.Kiwi;
-import snownee.kiwi.contributor.client.RewardLayer;
+import snownee.kiwi.contributor.client.CosmeticLayer;
 import snownee.kiwi.contributor.impl.client.layer.FoxTailLayer;
+import snownee.kiwi.contributor.impl.client.layer.PlanetLayer;
+import snownee.kiwi.contributor.impl.client.layer.SantaHatLayer;
+import snownee.kiwi.contributor.impl.client.layer.SunnyMilkLayer;
 
 public class KiwiRewardProvider extends JsonRewardProvider {
 	public KiwiRewardProvider() {
@@ -37,7 +40,7 @@ public class KiwiRewardProvider extends JsonRewardProvider {
 		}
 	}
 
-	private final List<String> renderableTiers = ImmutableList.of("2020q3", "2020q4"/*, "2021q1"*/, "sunny_milk");
+	private final List<String> renderableTiers = ImmutableList.of("2020q3", "2020q4"/*, "2021q1"*/, "sunny_milk", "xmas");
 
 	private static boolean isInXmas() {
 		Calendar calendar = Calendar.getInstance();
@@ -66,18 +69,18 @@ public class KiwiRewardProvider extends JsonRewardProvider {
 
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public RewardLayer createRenderer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer, String tier) {
+	public CosmeticLayer createRenderer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer, String tier) {
 		switch (tier) {
-		//		case "2020q3":
-		//			return new PlanetLayer(entityRenderer);
+		case "2020q3":
+			return new PlanetLayer(entityRenderer);
 		case "2020q4":
 			return new FoxTailLayer(entityRenderer);
 		//        case "2021q1":
 		//            return new ElectronicatLayer(entityRenderer);
-		//		case "xmas":
-		//			return new SantaHatLayer(entityRenderer);
-		//		case "sunny_milk":
-		//			return new SunnyMilkLayer(entityRenderer);
+		case "xmas":
+			return new SantaHatLayer(entityRenderer);
+		case "sunny_milk":
+			return new SunnyMilkLayer(entityRenderer);
 		default:
 			return null;
 		}

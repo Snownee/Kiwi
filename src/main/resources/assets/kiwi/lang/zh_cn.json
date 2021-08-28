@@ -6,7 +6,7 @@
   "tip.kiwi.press_ctrl": "§r§7<按住§f§oCtrl§r§7..>",
   "tip.kiwi.press_shift_or_ctrl": "§r§7<按住§f§oShift§r§7或§f§oCtrl§r§7..>",
   "msg.kiwi.no_dependencies": "{1}: 模块 §e{2}§r 需要启用以下依赖模块：§e{3}",
-  "reward.snownee.2020q3": "行星",
-  "reward.snownee.2020q4": "狐狸",
-  "reward.snownee.xmas": "圣诞帽"
+  "cosmetic.snownee.2020q3": "行星",
+  "cosmetic.snownee.2020q4": "狐狸",
+  "cosmetic.snownee.xmas": "圣诞帽"
 }

@@ -11,19 +11,19 @@ import snownee.kiwi.contributor.Contributors;
 import snownee.kiwi.network.ClientPacket;
 import snownee.kiwi.util.Util;
 
-public class CSetEffectPacket extends ClientPacket {
+public class CSetCosmeticPacket extends ClientPacket {
 
 	@Nullable
 	private final ResourceLocation id;
 
-	public CSetEffectPacket(@Nullable ResourceLocation id) {
+	public CSetCosmeticPacket(@Nullable ResourceLocation id) {
 		this.id = id;
 	}
 
-	public static class Handler extends PacketHandler<CSetEffectPacket> {
+	public static class Handler extends PacketHandler<CSetCosmeticPacket> {
 
 		@Override
-		public void encode(CSetEffectPacket msg, FriendlyByteBuf buffer) {
+		public void encode(CSetCosmeticPacket msg, FriendlyByteBuf buffer) {
 			if (msg.id == null) {
 				buffer.writeUtf("");
 			} else {
@@ -32,15 +32,15 @@ public class CSetEffectPacket extends ClientPacket {
 		}
 
 		@Override
-		public CSetEffectPacket decode(FriendlyByteBuf buffer) {
+		public CSetCosmeticPacket decode(FriendlyByteBuf buffer) {
 			ResourceLocation id = Util.RL(buffer.readUtf(32767));
-			return new CSetEffectPacket(id);
+			return new CSetCosmeticPacket(id);
 		}
 
 		@Override
-		public void handle(CSetEffectPacket msg, Supplier<NetworkEvent.Context> ctx) {
+		public void handle(CSetCosmeticPacket msg, Supplier<NetworkEvent.Context> ctx) {
 			//            ctx.get().enqueueWork(() -> {
-			Contributors.changeEffect(ctx.get().getSender(), msg.id);
+			Contributors.changeCosmetic(ctx.get().getSender(), msg.id);
 			//            });
 			ctx.get().setPacketHandled(true);
 		}

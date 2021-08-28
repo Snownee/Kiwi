@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -18,18 +19,20 @@ import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import snownee.kiwi.contributor.client.RewardLayer;
+import net.minecraftforge.common.util.LazyOptional;
+import snownee.kiwi.contributor.client.CosmeticLayer;
 import snownee.kiwi.contributor.impl.client.model.FoxTailModel;
 
 @OnlyIn(Dist.CLIENT)
-public class FoxTailLayer extends RewardLayer {
+public class FoxTailLayer extends CosmeticLayer {
 	private static final ResourceLocation FOX = new ResourceLocation("textures/entity/fox/fox.png");
 	private static final ResourceLocation SNOW_FOX = new ResourceLocation("textures/entity/fox/snow_fox.png");
+	private static final LazyOptional<LayerDefinition> definition = LazyOptional.of(FoxTailModel::create);
 	private final FoxTailModel<AbstractClientPlayer> modelFoxTail;
 
 	public FoxTailLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRendererIn) {
 		super(entityRendererIn);
-		modelFoxTail = new FoxTailModel<>(entityRendererIn.getModel());
+		modelFoxTail = new FoxTailModel<>(entityRendererIn.getModel(), definition.orElse(null));
 	}
 
 	@Override
