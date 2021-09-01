@@ -10,10 +10,8 @@ import snownee.kiwi.crafting.TextureBlockRecipe;
 @KiwiModule("data")
 public final class DataModule extends AbstractModule {
 
-	//public static final AddLootTable.Serializer ADD_LOOT = new AddLootTable.Serializer();
-
-	public static final RecipeSerializer<?> SHAPED_NO_CONTAINERS = new NoContainersShapedRecipe.Serializer();
-	public static final RecipeSerializer<?> SHAPELESS_NO_CONTAINERS = new NoContainersShapelessRecipe.Serializer();
-	public static final RecipeSerializer<?> TEXTURE_BLOCK = new TextureBlockRecipe.Serializer();
+	public static final RecipeSerializer<NoContainersShapedRecipe> SHAPED_NO_CONTAINERS = new NoContainersShapedRecipe.Serializer();
+	public static final RecipeSerializer<NoContainersShapelessRecipe> SHAPELESS_NO_CONTAINERS = new NoContainersShapelessRecipe.Serializer();
+	public static final RecipeSerializer<TextureBlockRecipe> TEXTURE_BLOCK = new TextureBlockRecipe.Serializer();
 
 }

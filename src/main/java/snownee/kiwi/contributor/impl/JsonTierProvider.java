@@ -26,7 +26,7 @@ import snownee.kiwi.Kiwi;
 import snownee.kiwi.contributor.ITierProvider;
 import snownee.kiwi.contributor.client.CosmeticLayer;
 
-public class JsonRewardProvider implements ITierProvider {
+public class JsonTierProvider implements ITierProvider {
 
 	private static final Gson GSON = new GsonBuilder().disableHtmlEscaping()/*.registerTypeAdapter(type, typeAdapter)*/.create();
 	private final String author;
@@ -34,7 +34,7 @@ public class JsonRewardProvider implements ITierProvider {
 	protected ImmutableSet<String> superusers = ImmutableSet.of();
 	private final Supplier<List<String>> urlProvider;
 
-	public JsonRewardProvider(String author, Supplier<List<String>> urlProvider) {
+	public JsonTierProvider(String author, Supplier<List<String>> urlProvider) {
 		this.author = author;
 		this.urlProvider = urlProvider;
 		refresh();

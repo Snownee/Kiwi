@@ -21,9 +21,9 @@ import snownee.kiwi.contributor.impl.client.layer.PlanetLayer;
 import snownee.kiwi.contributor.impl.client.layer.SantaHatLayer;
 import snownee.kiwi.contributor.impl.client.layer.SunnyMilkLayer;
 
-public class KiwiRewardProvider extends JsonRewardProvider {
-	public KiwiRewardProvider() {
-		super("Snownee", KiwiRewardProvider::getURLs);
+public class KiwiTierProvider extends JsonTierProvider {
+	public KiwiTierProvider() {
+		super("Snownee", KiwiTierProvider::getURLs);
 	}
 
 	private static List<String> getURLs() {

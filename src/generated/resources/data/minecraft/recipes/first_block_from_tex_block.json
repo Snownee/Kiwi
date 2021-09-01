@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "kiwi:tex_block"
+    }
+  ],
+  "result": {
+    "item": "kiwi:first_block"
+  }
+}

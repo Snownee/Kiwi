@@ -21,6 +21,7 @@ import net.minecraft.world.level.material.Material;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fmlserverevents.FMLServerStartingEvent;
+import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import snownee.kiwi.block.ModBlock;
 
@@ -32,7 +33,7 @@ import snownee.kiwi.block.ModBlock;
  *
  */
 public abstract class AbstractModule {
-	protected ResourceLocation uid;
+	public ResourceLocation uid;
 	private static final BiConsumer<ModuleInfo, Item> ITEM_DECORATOR = (module, item) -> {
 		if (module.category != null && item.category == null && !module.noCategories.contains(item))
 			item.category = module.category;
@@ -66,6 +67,13 @@ public abstract class AbstractModule {
 	}
 
 	protected void postInit() {
+		// NO-OP
+	}
+
+	/**
+	 * @since 4.1.0
+	 */
+	protected void gatherData(GatherDataEvent event) {
 		// NO-OP
 	}
 

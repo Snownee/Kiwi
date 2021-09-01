@@ -2,6 +2,7 @@ package snownee.kiwi;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -25,12 +26,13 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fmlserverevents.FMLServerStartingEvent;
+import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import snownee.kiwi.KiwiModule.Category;
 import snownee.kiwi.item.ModBlockItem;
 
 public class ModuleInfo {
-	static final class RegistryHolder {
+	public static final class RegistryHolder {
 		final Multimap<Class<?>, NamedEntry<?>> registries = LinkedListMultimap.create();
 
 		<T extends IForgeRegistryEntry<T>> void put(NamedEntry<T> entry) {
@@ -155,4 +157,14 @@ public class ModuleInfo {
 		context.setActiveContainer();
 		module.postInit();
 	}
+
+	public void gatherData(GatherDataEvent event) {
+		context.setActiveContainer();
+		module.gatherData(event);
+	}
+
+	public <T extends IForgeRegistryEntry<T>> List<T> getRegistries(Class<T> clazz) {
+		return registries.get(clazz).stream().map($ -> $.entry).collect(Collectors.toList());
+	}
+
 }

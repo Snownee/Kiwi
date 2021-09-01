@@ -43,7 +43,7 @@ import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.contributor.client.CosmeticLayer;
 import snownee.kiwi.contributor.client.gui.CosmeticScreen;
-import snownee.kiwi.contributor.impl.KiwiRewardProvider;
+import snownee.kiwi.contributor.impl.KiwiTierProvider;
 import snownee.kiwi.contributor.network.CSetCosmeticPacket;
 import snownee.kiwi.contributor.network.SSyncCosmeticPacket;
 import snownee.kiwi.network.NetworkChannel;
@@ -69,7 +69,7 @@ public class Contributors extends AbstractModule {
 
 	@Override
 	protected void init(FMLCommonSetupEvent event) {
-		registerTierProvider(new KiwiRewardProvider());
+		registerTierProvider(new KiwiTierProvider());
 	}
 
 	public static boolean isContributor(String author, String playerName) {
