@@ -18,6 +18,10 @@ public final class VoxelUtil {
 	}
 
 	public static VoxelShape rotate(VoxelShape shape, Direction facing) {
+		if (shape.isEmpty())
+			return shape;
+		if (shape == Shapes.block())
+			return shape;
 		VSBuilder builder = new VSBuilder();
 		shape.forAllBoxes((x1, y1, z1, x2, y2, z2) -> {
 			Point2D.Double pointMin = rotate(new Point2D.Double(Math.min(x1, x2), Math.min(z1, z2)), facing);
@@ -45,17 +49,13 @@ public final class VoxelUtil {
 	}
 
 	private static class VSBuilder {
-		VoxelShape shape;
+		VoxelShape shape = Shapes.empty();
 
 		public VSBuilder() {
 		}
 
 		public void add(VoxelShape newShape) {
-			if (shape == null) {
-				shape = newShape;
-			} else {
-				shape = Shapes.or(shape, newShape);
-			}
+			shape = Shapes.or(shape, newShape);
 		}
 
 		public VoxelShape get() {
