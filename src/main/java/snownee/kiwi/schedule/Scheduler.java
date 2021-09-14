@@ -1,10 +1,10 @@
 package snownee.kiwi.schedule;
 
 import java.util.Iterator;
-import java.util.Map;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
 import net.minecraft.nbt.CompoundTag;
@@ -29,8 +29,7 @@ public final class Scheduler extends SavedData {
 	public static final String ID = Kiwi.MODID + "-schedule";
 	public static final Scheduler INSTANCE = new Scheduler();
 
-	private static final Map<ResourceLocation, Class<Task>> idToTask = Maps.newHashMap();
-	private static final Map<Class<Task>, ResourceLocation> taskToId = Maps.newHashMap();
+	private static final BiMap<ResourceLocation, Class<Task>> idMap = HashBiMap.create();
 
 	protected static final Multimap<ITicker, Task> taskMap = LinkedListMultimap.create();
 
@@ -38,22 +37,21 @@ public final class Scheduler extends SavedData {
 	}
 
 	public static void register(ResourceLocation id, Class<? extends Task> clazz) {
-		if (idToTask.containsKey(id)) {
+		if (idMap.containsKey(id)) {
 			Kiwi.logger.error("Duplicate task id: " + id);
-		} else if (taskToId.containsKey(clazz)) {
+		} else if (idMap.containsValue(clazz)) {
 			Kiwi.logger.error("Duplicate task class: " + clazz);
 		} else if (!INBTSerializable.class.isAssignableFrom(clazz)) {
 			Kiwi.logger.error("task " + id + " should implement INBTSerializable");
 		} else {
-			idToTask.put(id, (Class<Task>) clazz);
-			taskToId.put((Class<Task>) clazz, id);
+			idMap.put(id, (Class<Task>) clazz);
 		}
 	}
 
 	public static Task deserialize(CompoundTag data) {
 		try {
 			ResourceLocation type = new ResourceLocation(data.getString("type"));
-			Class<Task> clazz = idToTask.get(type);
+			Class<Task> clazz = idMap.get(type);
 			if (clazz != null) {
 				Task task = clazz.getDeclaredConstructor().newInstance();
 				((INBTSerializable<CompoundTag>) task).deserializeNBT(data);
@@ -68,7 +66,7 @@ public final class Scheduler extends SavedData {
 	public CompoundTag serialize(Task task) {
 		if (task.shouldSave()) {
 			try {
-				ResourceLocation type = taskToId.get(task.getClass());
+				ResourceLocation type = idMap.inverse().get(task.getClass());
 				CompoundTag data = ((INBTSerializable<CompoundTag>) task).serializeNBT();
 				data.putString("type", type.toString());
 				return data;
