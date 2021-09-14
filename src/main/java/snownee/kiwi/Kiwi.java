@@ -206,8 +206,6 @@ public class Kiwi {
 			logger.fatal("Kiwi failed to start up. Please report this to developer!");
 			throw e;
 		}
-
-		//LootConditionManager.registerCondition(new HasLootTable.Serializer());
 	}
 
 	private void preInit(RegistryEvent.NewRegistry event) {
