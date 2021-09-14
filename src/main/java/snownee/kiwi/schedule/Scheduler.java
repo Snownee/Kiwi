@@ -25,6 +25,7 @@ import snownee.kiwi.Kiwi;
  * @since 2.4
  */
 @EventBusSubscriber
+@SuppressWarnings("rawtypes")
 public final class Scheduler extends SavedData {
 	public static final String ID = Kiwi.MODID + "-schedule";
 	public static final Scheduler INSTANCE = new Scheduler();

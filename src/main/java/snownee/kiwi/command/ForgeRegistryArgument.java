@@ -29,7 +29,8 @@ import net.minecraftforge.registries.RegistryManager;
  */
 public class ForgeRegistryArgument<T extends IForgeRegistryEntry<T>> implements ArgumentType<T> {
 
-	public static final DynamicCommandExceptionType BAD_ID = new DynamicCommandExceptionType(pair -> new TranslatableComponent("argument.cuisine.registry.id.invalid", ((Pair) pair).getLeft(), ((Pair) pair).getRight()));
+	@SuppressWarnings("rawtypes")
+	public static final DynamicCommandExceptionType BAD_ID = new DynamicCommandExceptionType(pair -> new TranslatableComponent("argument.kiwi.registry.id.invalid", ((Pair) pair).getLeft(), ((Pair) pair).getRight()));
 
 	private final IForgeRegistry<T> registry;
 	private Collection<String> examples;
@@ -70,6 +71,7 @@ public class ForgeRegistryArgument<T extends IForgeRegistryEntry<T>> implements 
 		return examples;
 	}
 
+	@SuppressWarnings("rawtypes")
 	public static class Serializer implements ArgumentSerializer<ForgeRegistryArgument<? extends IForgeRegistryEntry>> {
 
 		@Override

@@ -1,7 +1,4 @@
 {
-  "commands.kiwi.dumpLoots.wrongPattern": "Patrón incorrecto",
-  "commands.kiwi.dumpLoots.noTargets": "Incapaz de encontrar bloques coincidentes",
-  "commands.kiwi.dumpLoots.success": "Descargado con éxito %d tablas de botín",
   "tip.kiwi.press_shift": "§r§7<Presiona §f§oShift§r§7..>",
   "tip.kiwi.press_ctrl": "§r§7<Presiona §f§oCtrl§r§7..>",
   "tip.kiwi.press_shift_or_ctrl": "§r§7<Presiona §f§oShift§r§7 o §f§oCtrl§r§7..>",

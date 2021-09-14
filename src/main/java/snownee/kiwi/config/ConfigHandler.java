@@ -60,6 +60,7 @@ public class ConfigHandler {
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	private ConfigHandler build(ForgeConfigSpec.Builder builder) {
 		if (master) {
 			KiwiConfigManager.defineModules(modId, builder);

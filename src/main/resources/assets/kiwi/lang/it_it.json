@@ -1,7 +1,4 @@
 {
-  "commands.kiwi.dumpLoots.wrongPattern": "Modulo incorretto",
-  "commands.kiwi.dumpLoots.noTargets": "Incapace di trovare blocchi corrispondenti",
-  "commands.kiwi.dumpLoots.success": "%d loot table scaricati con successo",
   "tip.kiwi.press_shift": "§r§7<Premere §f§oShift§r§7..>",
   "tip.kiwi.press_ctrl": "§r§7<Premere §f§oCtrl§r§7..>",
   "tip.kiwi.press_shift_or_ctrl": "§r§7<Premere §f§oShift§r§7 o §f§oCtrl§r§7..>",

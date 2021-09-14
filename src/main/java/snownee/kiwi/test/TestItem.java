@@ -27,6 +27,7 @@ import snownee.kiwi.schedule.impl.SimpleLevelTask;
 import snownee.kiwi.util.MathUtil;
 
 // Your class don't have to extend ModItem or ModBlock to be registered
+@SuppressWarnings("deprecation")
 public class TestItem extends ModItem {
 	public static List<BlockPos> posList;
 	public static Vec3 start;

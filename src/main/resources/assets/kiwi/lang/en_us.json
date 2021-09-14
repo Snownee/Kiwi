@@ -1,7 +1,4 @@
 {
-  "commands.kiwi.dumpLoots.wrongPattern": "Pattern is illegal",
-  "commands.kiwi.dumpLoots.noTargets": "Unable to find matched blocks",
-  "commands.kiwi.dumpLoots.success": "Successfully dumped %d loot tables",
   "tip.kiwi.press_shift": "§r§7<Press §f§oShift§r§7..>",
   "tip.kiwi.press_ctrl": "§r§7<Press §f§oCtrl§r§7..>",
   "tip.kiwi.press_shift_or_ctrl": "§r§7<Press §f§oShift§r§7 or §f§oCtrl§r§7..>",
@@ -13,5 +10,6 @@
   "cosmetic.snownee.2020q4": "Fox",
   "cosmetic.snownee.2021q1": "Electronicat",
   "cosmetic.snownee.xmas": "Santa Hat",
-  "cosmetic.snownee.sunny_milk": "Sunny Milk"
+  "cosmetic.snownee.sunny_milk": "Sunny Milk",
+  "argument.kiwi.registry.id.invalid": "ID is invalid"
 }

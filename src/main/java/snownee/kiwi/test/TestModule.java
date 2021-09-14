@@ -1,7 +1,6 @@
 package snownee.kiwi.test;
 
 import net.minecraft.data.DataGenerator;
-import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.world.effect.HealthBoostMobEffect;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;

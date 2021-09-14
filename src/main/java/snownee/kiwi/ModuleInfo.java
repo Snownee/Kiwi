@@ -61,10 +61,12 @@ public class ModuleInfo {
 	/**
 	 * @since 2.5.2
 	 */
+	@SuppressWarnings("rawtypes")
 	public void register(IForgeRegistryEntry<?> entry, ResourceLocation name, @Nullable Field field) {
 		registries.put(new NamedEntry(name, entry, field));
 	}
 
+	@SuppressWarnings("rawtypes")
 	public <T extends IForgeRegistryEntry<T>> void handleRegister(RegistryEvent.Register<T> event) {
 		context.setActiveContainer();
 		Class<T> clazz = event.getRegistry().getRegistrySuperType();

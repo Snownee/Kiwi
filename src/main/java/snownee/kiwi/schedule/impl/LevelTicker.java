@@ -14,25 +14,20 @@ import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import snownee.kiwi.schedule.ITicker;
 import snownee.kiwi.schedule.Scheduler;
-import snownee.kiwi.util.MutablePair;
 
 public class LevelTicker implements ITicker {
-	private static final Map<ResourceKey<Level>, MutablePair<LevelTicker>> tickers = Maps.newHashMap();
+	private static final Map<ResourceKey<Level>, LevelTicker[]> tickers = Maps.newHashMap();
 
 	public static LevelTicker get(Level level, TickEvent.Phase phase) {
 		return get(level.dimension(), phase);
 	}
 
 	public static LevelTicker get(ResourceKey<Level> dimension, TickEvent.Phase phase) {
-		MutablePair<LevelTicker> pair = tickers.get(dimension);
-		if (pair == null) {
-			pair = new MutablePair<>();
-			tickers.put(dimension, pair);
-		}
-		LevelTicker ticker = pair.get(phase.ordinal());
+		LevelTicker[] pair = tickers.computeIfAbsent(dimension, $ -> new LevelTicker[2]);
+		LevelTicker ticker = pair[phase.ordinal()];
 		if (ticker == null) {
 			ticker = new LevelTicker(dimension);
-			pair.set(phase.ordinal(), ticker);
+			pair[phase.ordinal()] = ticker;
 		}
 		return ticker;
 	}
@@ -43,11 +38,11 @@ public class LevelTicker implements ITicker {
 
 	@SubscribeEvent
 	public static void onTick(TickEvent.WorldTickEvent event) {
-		MutablePair<LevelTicker> pair = tickers.get(event.world.dimension());
+		LevelTicker[] pair = tickers.get(event.world.dimension());
 		if (pair == null) {
 			return;
 		}
-		LevelTicker ticker = pair.get(event.phase.ordinal());
+		LevelTicker ticker = pair[event.phase.ordinal()];
 		if (ticker == null) {
 			return;
 		}
@@ -60,15 +55,15 @@ public class LevelTicker implements ITicker {
 		if (!(event.getWorld() instanceof Level)) {
 			return;
 		}
-		MutablePair<LevelTicker> pair = tickers.get(((Level) event.getWorld()).dimension());
+		LevelTicker[] pair = tickers.get(((Level) event.getWorld()).dimension());
 		if (pair == null) {
 			return;
 		}
-		if (pair.left != null) {
-			pair.left.level = null;
+		if (pair[0] != null) {
+			pair[0].level = null;
 		}
-		if (pair.right != null) {
-			pair.right.level = null;
+		if (pair[1] != null) {
+			pair[1].level = null;
 		}
 	}
 
@@ -87,13 +82,13 @@ public class LevelTicker implements ITicker {
 
 	@Override
 	public void destroy() {
-		MutablePair<LevelTicker> pair = tickers.get(dimension);
+		LevelTicker[] pair = tickers.get(dimension);
 		if (pair != null) {
-			if (pair.left == this) {
-				pair.left = null;
+			if (pair[0] == this) {
+				pair[0] = null;
 			}
-			if (pair.right == this) {
-				pair.left = null;
+			if (pair[1] == this) {
+				pair[1] = null;
 			}
 		}
 		level = null;

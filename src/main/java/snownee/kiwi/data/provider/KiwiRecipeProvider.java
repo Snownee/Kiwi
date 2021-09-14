@@ -299,6 +299,7 @@ public abstract class KiwiRecipeProvider implements DataProvider {
 		return "has_" + getItemName(p_176603_);
 	}
 
+	@SuppressWarnings("deprecation")
 	public static String getItemName(ItemLike p_176633_) {
 		return Registry.ITEM.getKey(p_176633_.asItem()).getPath();
 	}
