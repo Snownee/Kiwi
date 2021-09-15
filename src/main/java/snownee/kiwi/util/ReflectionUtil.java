@@ -8,7 +8,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import snownee.kiwi.Kiwi;
+import net.minecraftforge.fmllegacy.server.ServerLifecycleHooks;
 
 public final class ReflectionUtil {
 	private ReflectionUtil() {
@@ -18,7 +18,7 @@ public final class ReflectionUtil {
 		if (FMLEnvironment.dist.isClient()) {
 			return Minecraft.getInstance().level.getRecipeManager().byType(recipeTypeIn);
 		} else {
-			return Kiwi.getServer().getRecipeManager().byType(recipeTypeIn);
+			return ServerLifecycleHooks.getCurrentServer().getRecipeManager().byType(recipeTypeIn);
 		}
 	}
 }

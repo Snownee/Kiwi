@@ -7,8 +7,6 @@ import java.util.Objects;
 
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicates;
@@ -20,9 +18,11 @@ import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.config.ModConfig.Type;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.javafmlmod.FMLModContainer;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.fmllegacy.server.ServerLifecycleHooks;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.config.KiwiConfig.Comment;
 import snownee.kiwi.config.KiwiConfig.LevelRestart;
@@ -51,9 +51,10 @@ public class ConfigHandler {
 	}
 
 	public void init() {
-		Pair<ConfigHandler, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(this::build);
+		ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
+		build(builder);
 		ModContainer modContainer = ModList.get().getModContainerById(modId).orElseThrow(NullPointerException::new);
-		config = new ModConfig(type, specPair.getRight(), modContainer, fileName);
+		config = new ModConfig(type, builder.build(), modContainer, fileName);
 		modContainer.addConfig(config);
 		if (modContainer instanceof FMLModContainer) {
 			((FMLModContainer) modContainer).getEventBus().addListener(this::onFileChange);
@@ -61,12 +62,12 @@ public class ConfigHandler {
 	}
 
 	@SuppressWarnings("rawtypes")
-	private ConfigHandler build(ForgeConfigSpec.Builder builder) {
+	private void build(ForgeConfigSpec.Builder builder) {
 		if (master) {
 			KiwiConfigManager.defineModules(modId, builder);
 		}
 		if (clazz == null) {
-			return this;
+			return;
 		}
 		for (Field field : clazz.getFields()) {
 			int mods = field.getModifiers();
@@ -128,7 +129,6 @@ public class ConfigHandler {
 				Kiwi.logger.catching(e);
 			}
 		}
-		return this;
 	}
 
 	public void refresh() {
@@ -153,11 +153,18 @@ public class ConfigHandler {
 	}
 
 	public void forceLoad() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
-		CommentedFileConfig configData = config.getHandler().reader(FMLPaths.CONFIGDIR.get()).apply(config);
+		java.nio.file.Path path;
+		if (type == Type.SERVER) {
+			path = ServerLifecycleHooks.getCurrentServer().getFile("serverconfig").toPath();
+		} else {
+			path = FMLPaths.CONFIGDIR.get();
+		}
+		CommentedFileConfig configData = config.getHandler().reader(path).apply(config);
 		Field fCfg = ModConfig.class.getDeclaredField("configData");
 		fCfg.setAccessible(true);
 		fCfg.set(config, configData);
 		config.getSpec().acceptConfig(configData);
+		config.getHandler().unload(path, config);
 		//config.save();
 	}
 
