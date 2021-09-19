@@ -71,7 +71,6 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.moddiscovery.ModAnnotation;
 import net.minecraftforge.fml.loading.toposort.TopologicalSort;
 import net.minecraftforge.fmlserverevents.FMLServerStartingEvent;
-import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 import net.minecraftforge.forgespi.language.IModFileInfo;
 import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.forgespi.language.ModFileScanData.AnnotationData;
@@ -191,7 +190,6 @@ public class Kiwi {
 		modEventBus.addListener(this::clientInit);
 		MinecraftForge.EVENT_BUS.addListener(this::serverInit);
 		modEventBus.addListener(this::postInit);
-		modEventBus.addListener(this::gatherData);
 		modEventBus.addListener(this::loadComplete);
 		try {
 			Method method = modEventBus.getClass().getDeclaredMethod("addListener", EventPriority.class, Predicate.class, Consumer.class);
@@ -525,12 +523,6 @@ public class Kiwi {
 	private void serverInit(FMLServerStartingEvent event) {
 		KiwiManager.MODULES.values().forEach(m -> m.serverInit(event));
 		event.getServer().getLevel(Level.OVERWORLD).getDataStorage().computeIfAbsent(Scheduler::load, () -> Scheduler.INSTANCE, Scheduler.ID);
-		ModLoadingContext.get().setActiveContainer(null);
-	}
-
-	// DatagenModLoader.isRunningDatagen
-	private void gatherData(GatherDataEvent event) {
-		KiwiManager.MODULES.values().forEach(m -> m.gatherData(event));
 		ModLoadingContext.get().setActiveContainer(null);
 	}
 

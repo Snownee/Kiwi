@@ -24,9 +24,10 @@ import net.minecraft.world.level.block.Block;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLModContainer;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fmllegacy.DatagenModLoader;
 import net.minecraftforge.fmlserverevents.FMLServerStartingEvent;
-import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import snownee.kiwi.KiwiModule.Category;
 import snownee.kiwi.item.ModBlockItem;
@@ -56,6 +57,9 @@ public class ModuleInfo {
 		this.module = module;
 		this.context = context;
 		module.uid = rl;
+		if (DatagenModLoader.isRunningDataGen() && context.modContainer instanceof FMLModContainer) {
+			((FMLModContainer) context.modContainer).getEventBus().addListener(module::gatherData);
+		}
 	}
 
 	/**
@@ -158,11 +162,6 @@ public class ModuleInfo {
 	public void postInit() {
 		context.setActiveContainer();
 		module.postInit();
-	}
-
-	public void gatherData(GatherDataEvent event) {
-		context.setActiveContainer();
-		module.gatherData(event);
 	}
 
 	public <T extends IForgeRegistryEntry<T>> List<T> getRegistries(Class<T> clazz) {
