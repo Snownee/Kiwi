@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.fmllegacy.network.NetworkDirection;
 import net.minecraftforge.fmllegacy.network.NetworkEvent;
 import net.minecraftforge.fmllegacy.network.PacketDistributor;
 import net.minecraftforge.fmllegacy.network.PacketDistributor.PacketTarget;
@@ -32,5 +33,9 @@ public abstract class Packet {
 		public abstract T decode(FriendlyByteBuf buffer);
 
 		public abstract void handle(T msg, Supplier<NetworkEvent.Context> ctx);
+
+		public NetworkDirection direction() {
+			return null;
+		}
 	}
 }

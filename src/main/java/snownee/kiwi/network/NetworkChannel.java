@@ -1,6 +1,7 @@
 package snownee.kiwi.network;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -58,7 +59,7 @@ public enum NetworkChannel {
 			return Pair.of(channel, new AtomicInteger());
 		});
 		INSTANCE.packet2channel.put(klass, pair.getKey());
-		pair.getKey().registerMessage(pair.getValue().getAndIncrement(), klass, handler::encode, handler::decode, handler::handle);
+		pair.getKey().registerMessage(pair.getValue().getAndIncrement(), klass, handler::encode, handler::decode, handler::handle, Optional.ofNullable(handler.direction()));
 	}
 
 	public static SimpleChannel channel(Class<?> klass) {
