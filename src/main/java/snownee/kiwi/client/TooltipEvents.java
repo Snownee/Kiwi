@@ -38,7 +38,7 @@ public final class TooltipEvents {
 	private static ItemStack lastStack;
 	private static CompoundTag lastNBT;
 	private static Component lastFormatted;
-	private static Function<CompoundTag, String> formatter;
+	private static Function<CompoundTag, Component> formatter;
 
 	@SubscribeEvent(priority = EventPriority.HIGH)
 	public static void globalTooltip(ItemTooltipEvent event) {
@@ -119,19 +119,19 @@ public final class TooltipEvents {
 								}
 							}
 						}
-						return sb.toString();
+						return new TextComponent(sb.toString());
 					};
 					break;
 				case "vanilla":
-					formatter = tag -> NbtUtils.prettyPrint(stack.getTag());
+					formatter = tag -> NbtUtils.toPrettyComponent(stack.getTag());
 					break;
 				default:
-					formatter = tag -> tag.toString();
+					formatter = tag -> new TextComponent(tag.toString());
 					break;
 				}
 
 				lastNBT = stack.getTag();
-				lastFormatted = new TextComponent(formatter.apply(lastNBT)).copy().withStyle(ChatFormatting.RESET);
+				lastFormatted = formatter.apply(lastNBT);
 			}
 			tooltip.add(lastFormatted);
 		} else if (KiwiClientConfig.tagsTooltip) {

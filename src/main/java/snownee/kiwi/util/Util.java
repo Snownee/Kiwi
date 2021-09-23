@@ -2,12 +2,23 @@ package snownee.kiwi.util;
 
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
+import java.util.Collections;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fmllegacy.server.ServerLifecycleHooks;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public final class Util {
@@ -94,5 +105,28 @@ public final class Util {
 			}
 		}
 		return "";
+	}
+
+	@Nullable
+	public static RecipeManager getRecipeManager() {
+		MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+		if (server != null) {
+			return server.getRecipeManager();
+		} else if (FMLEnvironment.dist.isClient()) {
+			ClientPacketListener connection = Minecraft.getInstance().getConnection();
+			if (connection != null) {
+				return connection.getRecipeManager();
+			}
+		}
+		return null;
+	}
+
+	public static <C extends Container, T extends Recipe<C>> Map<ResourceLocation, Recipe<C>> getRecipes(RecipeType<T> recipeTypeIn) {
+		RecipeManager manager = getRecipeManager();
+		if (manager == null) {
+			return Collections.EMPTY_MAP;
+		} else {
+			return getRecipeManager().byType(recipeTypeIn);
+		}
 	}
 }
