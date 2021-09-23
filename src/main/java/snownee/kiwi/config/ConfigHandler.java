@@ -1,6 +1,7 @@
 package snownee.kiwi.config;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Objects;
@@ -40,6 +41,7 @@ public class ConfigHandler {
 	@Nullable
 	private final Class<?> clazz;
 	private final BiMap<Field, ConfigValue<?>> valueMap = HashBiMap.create();
+	private Method onChanged;
 
 	public ConfigHandler(String modId, String fileName, ModConfig.Type type, Class<?> clazz, boolean master) {
 		this.master = master;
@@ -48,6 +50,12 @@ public class ConfigHandler {
 		this.fileName = fileName;
 		this.type = type;
 		KiwiConfigManager.register(this);
+		if (clazz != null) {
+			try {
+				onChanged = clazz.getDeclaredMethod("onChanged", String.class);
+			} catch (Exception e) {
+			}
+		}
 	}
 
 	public void init() {
@@ -146,10 +154,13 @@ public class ConfigHandler {
 					field.set(null, value.get());
 				}
 				Kiwi.logger.debug("Set " + field.getName() + " to " + value.get());
-			} catch (IllegalArgumentException | IllegalAccessException e) {
+				if (onChanged != null)
+					onChanged.invoke(null, Joiner.on('.').join(value.getPath()));
+			} catch (Exception e) {
 				Kiwi.logger.catching(e);
 			}
 		});
+
 	}
 
 	public void forceLoad() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
