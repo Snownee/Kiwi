@@ -31,4 +31,8 @@ public class TestConfig {
 	@LevelRestart
 	public static ModConfig.Type enumValue = ModConfig.Type.COMMON;
 
+	public static void onChanged(String path) {
+		// do sth
+	}
+	
 }

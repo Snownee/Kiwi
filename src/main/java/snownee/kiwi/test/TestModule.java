@@ -31,7 +31,7 @@ import snownee.kiwi.schedule.Scheduler;
 @KiwiModule.Category("building_blocks")
 @KiwiModule.Subscriber(Bus.MOD)
 public class TestModule extends AbstractModule {
-	// Keep your fields `public static final`
+	// Keep your fields `public static`
 
 	// Register a simple item
 	public static TestItem FIRST_ITEM = new TestItem(itemProp().rarity(Rarity.EPIC));
@@ -54,6 +54,8 @@ public class TestModule extends AbstractModule {
 	public static BlockEntityType<?> TEX_TILE = BlockEntityType.Builder.of(TexBlockEntity::new, TEX_BLOCK).build(null);
 
 	public static TestModule INSTANCE;
+
+	//	public static RecipeType<CraftingRecipe> RECIPE_TYPE = new RecipeType<>() {};
 
 	@OnlyIn(Dist.CLIENT)
 	@SubscribeEvent

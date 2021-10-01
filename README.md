@@ -2,7 +2,7 @@
 
 Make modding no longer cumbersome.
 
-[中文指南](https://moddingwithkiwi.readthedocs.io/zh_CN/1.16/)
+[中文指南](https://moddingwithkiwi.readthedocs.io/zh_CN/1.17/)
 
 ## Registration
 
@@ -35,8 +35,3 @@ public class MyAddon extends AbstractModule
     }
 }
 ```
-
-## How to start
-
-1. Add Kiwi to your build path
-2. Follow the `Readme.txt` of MDK

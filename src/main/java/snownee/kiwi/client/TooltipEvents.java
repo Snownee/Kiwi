@@ -7,7 +7,6 @@ import com.google.common.base.Function;
 import com.mojang.blaze3d.platform.InputConstants;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
@@ -65,7 +64,7 @@ public final class TooltipEvents {
 				itextcomponent.append(NbtUtils.prettyPrint(data));
 			}
 			itextcomponent.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, itextcomponent.getString())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslatableComponent("chat.copy.click"))).withInsertion(itextcomponent.getString()));
-			minecraft.player.sendMessage(itextcomponent, Util.NIL_UUID);
+			minecraft.player.displayClientMessage(itextcomponent, false);
 			minecraft.options.renderDebug = !minecraft.options.renderDebug;
 		}
 

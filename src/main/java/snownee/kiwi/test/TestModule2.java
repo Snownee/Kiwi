@@ -3,7 +3,9 @@ package snownee.kiwi.test;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.Tag.Named;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -15,6 +17,13 @@ import snownee.kiwi.Name;
 @KiwiModule(value = "test2", dependencies = "forge;@kiwi:test")
 @KiwiModule.Optional(disabledByDefault = true)
 public class TestModule2 extends AbstractModule {
+	public static CreativeModeTab TAB = new CreativeModeTab("my_mod.items") {
+		@Override
+		public ItemStack makeIcon() {
+			return new ItemStack(Items.DANDELION);
+		}
+	};
+
 	public static Named<EntityType<?>> BAT = entityTag(Kiwi.MODID, "bat");
 
 	@Name("kiwi:test_item")

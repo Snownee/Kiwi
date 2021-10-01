@@ -135,7 +135,6 @@ public abstract class KiwiRecipeProvider implements DataProvider {
 		for (ItemLike itemlike : p_176536_) {
 			SimpleCookingRecipeBuilder.cooking(Ingredient.of(itemlike), p_176537_, p_176538_, p_176539_, p_176535_).group(p_176540_).unlockedBy(getHasName(itemlike), has(itemlike)).save(p_176534_, getItemName(p_176537_) + p_176541_ + "_" + getItemName(itemlike));
 		}
-
 	}
 
 	public static void netheriteSmithing(Consumer<FinishedRecipe> p_125995_, Item p_125996_, Item p_125997_) {
