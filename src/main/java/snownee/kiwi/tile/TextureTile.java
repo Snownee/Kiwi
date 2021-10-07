@@ -11,7 +11,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.model.IBakedModel;
@@ -153,7 +152,6 @@ public class TextureTile extends BaseTile {
 
 	@Override
 	public void onLoad() {
-		setTexture("top", Blocks.DIAMOND_BLOCK.getDefaultState());
 		super.requestModelDataUpdate();
 	}
 
