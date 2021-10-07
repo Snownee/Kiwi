@@ -1,6 +1,8 @@
 package snownee.kiwi.tile;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import javax.annotation.Nullable;
 
@@ -11,12 +13,15 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.model.BakedQuad;
+import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -61,10 +66,10 @@ public class TextureTile extends BaseTile {
 	}
 
 	public void setTexture(String key, BlockState state) {
-		setTexture(textures, key, state);
+		setTexture(textures, key, state, EmptyModelData.INSTANCE);
 		if (isMark(key)) {
 			Item item = state.getBlock().asItem();
-			if (item == null) {
+			if (item == Items.AIR) {
 				return;
 			}
 			if (marks == null) {
@@ -74,7 +79,7 @@ public class TextureTile extends BaseTile {
 		}
 	}
 
-	public static void setTexture(Map<String, String> textures, String key, BlockState state) {
+	public static void setTexture(Map<String, String> textures, String key, BlockState state, IModelData modelData) {
 		if (textures == null || !textures.containsKey(key)) {
 			return;
 		}
@@ -82,7 +87,7 @@ public class TextureTile extends BaseTile {
 			String value = NBTUtil.writeBlockState(state).toString();
 			textures.put(key, value);
 		} else {
-			textures.put(key, getTextureFromState(state));
+			textures.put(key, getTextureFromState(state, key, modelData));
 		}
 	}
 
@@ -99,7 +104,7 @@ public class TextureTile extends BaseTile {
 	public static void setTexture(Map<String, String> textures, String key, Item item) {
 		Block block = Block.getBlockFromItem(item);
 		if (block != null) {
-			setTexture(textures, key, block.getDefaultState());
+			setTexture(textures, key, block.getDefaultState(), EmptyModelData.INSTANCE);
 		}
 	}
 
@@ -110,10 +115,31 @@ public class TextureTile extends BaseTile {
 		return marks == null ? Items.AIR : marks.getOrDefault(key, Items.AIR);
 	}
 
-	@SuppressWarnings("deprecation")
+	public static String getTextureFromState(BlockState state, String key, IModelData modelData) {
+		if ("top".equals(key))
+			key = "up";
+		else if ("bottom".equals(key))
+			key = "down";
+		return getTextureFromState(state, Direction.byName(key), modelData);
+	}
+
 	@OnlyIn(Dist.CLIENT)
-	public static String getTextureFromState(BlockState state) {
-		return Util.trimRL(Minecraft.getInstance().getBlockRendererDispatcher().getBlockModelShapes().getTexture(state).getName());
+	public static String getTextureFromState(BlockState state, Direction direction, IModelData modelData) {
+		IBakedModel model = Minecraft.getInstance().getBlockRendererDispatcher().getBlockModelShapes().getModel(state);
+		Random random = new Random();
+		random.setSeed(42L);
+		ResourceLocation particleIcon = model.getParticleTexture(modelData).getName();
+		ResourceLocation sprite = particleIcon;
+		if (direction != null) {
+			List<BakedQuad> quads = model.getQuads(state, direction, random, modelData);
+			for (BakedQuad quad : quads) {
+				sprite = quad.getSprite().getName();
+				if (sprite.equals(particleIcon)) {
+					break;
+				}
+			}
+		}
+		return Util.trimRL(sprite);
 	}
 
 	@Override
@@ -147,7 +173,7 @@ public class TextureTile extends BaseTile {
 		if (!data.contains("Textures", NBT.COMPOUND)) {
 			return;
 		}
-		boolean shouldRefresh = readTextures(textures, data.getCompound("Textures"));
+		boolean shouldRefresh = readTextures(textures, data.getCompound("Textures"), EmptyModelData.INSTANCE);
 		if (data.contains("Items", NBT.COMPOUND)) {
 			NBTHelper helper = NBTHelper.of(data.getCompound("Items"));
 			for (String k : helper.keySet("")) {
@@ -171,7 +197,7 @@ public class TextureTile extends BaseTile {
 		}
 	}
 
-	public static boolean readTextures(Map<String, String> textures, CompoundNBT data) {
+	public static boolean readTextures(Map<String, String> textures, CompoundNBT data, IModelData modelData) {
 		if (textures == null) {
 			return false;
 		}
@@ -185,7 +211,7 @@ public class TextureTile extends BaseTile {
 				try {
 					CompoundNBT stateNbt = JsonToNBT.getTagFromJson(v);
 					BlockState state = NBTUtil.readBlockState(stateNbt);
-					v = getTextureFromState(state);
+					v = getTextureFromState(state, k, modelData);
 				} catch (CommandSyntaxException e) {
 					continue;
 				}
