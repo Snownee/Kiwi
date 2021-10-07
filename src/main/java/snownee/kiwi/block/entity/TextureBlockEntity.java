@@ -155,7 +155,6 @@ public class TextureBlockEntity extends BaseBlockEntity {
 
 	@Override
 	public void onLoad() {
-		setTexture("top", Blocks.DIAMOND_BLOCK.defaultBlockState());
 		super.requestModelDataUpdate();
 	}
 

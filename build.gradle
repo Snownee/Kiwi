@@ -106,6 +106,7 @@ def a = [
     "/assets/kiwi/models",
     "/snownee/kiwi/test",
     "/data",
+    "/.cache",
     "/third_party"
 ]
 def b = [
