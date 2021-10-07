@@ -1,6 +1,8 @@
 package snownee.kiwi.block.entity;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import javax.annotation.Nullable;
 
@@ -8,7 +10,10 @@ import com.google.common.collect.Maps;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.TagParser;
@@ -62,10 +67,10 @@ public class TextureBlockEntity extends BaseBlockEntity {
 	}
 
 	public void setTexture(String key, BlockState state) {
-		setTexture(textures, key, state);
+		setTexture(textures, key, state, EmptyModelData.INSTANCE);
 		if (isMark(key)) {
 			Item item = state.getBlock().asItem();
-			if (item == null) {
+			if (item == Items.AIR) {
 				return;
 			}
 			if (marks == null) {
@@ -75,7 +80,7 @@ public class TextureBlockEntity extends BaseBlockEntity {
 		}
 	}
 
-	public static void setTexture(Map<String, String> textures, String key, BlockState state) {
+	public static void setTexture(Map<String, String> textures, String key, BlockState state, IModelData modelData) {
 		if (textures == null || !textures.containsKey(key)) {
 			return;
 		}
@@ -83,7 +88,7 @@ public class TextureBlockEntity extends BaseBlockEntity {
 			String value = NbtUtils.writeBlockState(state).toString();
 			textures.put(key, value);
 		} else {
-			textures.put(key, getTextureFromState(state));
+			textures.put(key, getTextureFromState(state, key, modelData));
 		}
 	}
 
@@ -100,7 +105,7 @@ public class TextureBlockEntity extends BaseBlockEntity {
 	public static void setTexture(Map<String, String> textures, String key, Item item) {
 		Block block = Block.byItem(item);
 		if (block != null) {
-			setTexture(textures, key, block.defaultBlockState());
+			setTexture(textures, key, block.defaultBlockState(), EmptyModelData.INSTANCE);
 		}
 	}
 
@@ -111,10 +116,32 @@ public class TextureBlockEntity extends BaseBlockEntity {
 		return marks == null ? Items.AIR : marks.getOrDefault(key, Items.AIR);
 	}
 
-	@SuppressWarnings("deprecation")
 	@OnlyIn(Dist.CLIENT)
-	public static String getTextureFromState(BlockState state) {
-		return Util.trimRL(Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getParticleIcon(state).getName());
+	public static String getTextureFromState(BlockState state, String key, IModelData modelData) {
+		if ("top".equals(key))
+			key = "up";
+		else if ("bottom".equals(key))
+			key = "down";
+		return getTextureFromState(state, Direction.byName(key), modelData);
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	public static String getTextureFromState(BlockState state, Direction direction, IModelData modelData) {
+		BakedModel model = Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getBlockModel(state);
+		Random random = new Random();
+		random.setSeed(42L);
+		ResourceLocation particleIcon = model.getParticleIcon(modelData).getName();
+		ResourceLocation sprite = particleIcon;
+		if (direction != null) {
+			List<BakedQuad> quads = model.getQuads(state, direction, random, modelData);
+			for (BakedQuad quad : quads) {
+				sprite = quad.getSprite().getName();
+				if (sprite.equals(particleIcon)) {
+					break;
+				}
+			}
+		}
+		return Util.trimRL(sprite);
 	}
 
 	@Override
@@ -148,7 +175,7 @@ public class TextureBlockEntity extends BaseBlockEntity {
 		if (!data.contains("Textures", NBT.COMPOUND)) {
 			return;
 		}
-		boolean shouldRefresh = readTextures(textures, data.getCompound("Textures"));
+		boolean shouldRefresh = readTextures(textures, data.getCompound("Textures"), EmptyModelData.INSTANCE);
 		if (data.contains("Items", NBT.COMPOUND)) {
 			NBTHelper helper = NBTHelper.of(data.getCompound("Items"));
 			for (String k : helper.keySet("")) {
@@ -172,7 +199,7 @@ public class TextureBlockEntity extends BaseBlockEntity {
 		}
 	}
 
-	public static boolean readTextures(Map<String, String> textures, CompoundTag data) {
+	public static boolean readTextures(Map<String, String> textures, CompoundTag data, IModelData modelData) {
 		if (textures == null) {
 			return false;
 		}
@@ -186,7 +213,7 @@ public class TextureBlockEntity extends BaseBlockEntity {
 				try {
 					CompoundTag stateNbt = TagParser.parseTag(v);
 					BlockState state = NbtUtils.readBlockState(stateNbt);
-					v = getTextureFromState(state);
+					v = getTextureFromState(state, k, modelData);
 				} catch (CommandSyntaxException e) {
 					continue;
 				}
