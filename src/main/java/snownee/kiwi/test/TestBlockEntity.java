@@ -3,17 +3,12 @@ package snownee.kiwi.test;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.state.BlockState;
-import snownee.kiwi.block.entity.TextureBlockEntity;
+import snownee.kiwi.block.entity.RetextureBlockEntity;
 
-public class TestBlockEntity extends TextureBlockEntity {
+public class TestBlockEntity extends RetextureBlockEntity {
 
 	public TestBlockEntity(BlockPos pos, BlockState state) {
-		super(TestModule.FIRST_TILE, pos, state, "top", "side", "bottom");
-	}
-
-	@Override
-	public boolean isMark(String k) {
-		return k.equals("top");
+		super(TestModule.FIRST_TILE, pos, state, "0");
 	}
 
 	@Override

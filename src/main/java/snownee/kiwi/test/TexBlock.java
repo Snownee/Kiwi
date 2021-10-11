@@ -14,8 +14,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import snownee.kiwi.block.ModBlock;
-import snownee.kiwi.block.entity.TextureBlockEntity;
+import snownee.kiwi.block.entity.RetextureBlockEntity;
 import snownee.kiwi.crafting.FullBlockIngredient;
+import snownee.kiwi.util.BlockStateBlockDefinition;
 
 public class TexBlock extends BaseEntityBlock {
 
@@ -30,11 +31,11 @@ public class TexBlock extends BaseEntityBlock {
 		}
 		BlockEntity tile = worldIn.getBlockEntity(pos);
 		ItemStack stack = player.getItemInHand(handIn);
-		if (tile instanceof TextureBlockEntity && !stack.isEmpty()) {
+		if (tile instanceof RetextureBlockEntity && !stack.isEmpty()) {
 			if (FullBlockIngredient.isFullBlock(stack)) {
-				TextureBlockEntity textureTile = (TextureBlockEntity) tile;
+				RetextureBlockEntity textureTile = (RetextureBlockEntity) tile;
 				BlockState state2 = ((BlockItem) stack.getItem()).getBlock().defaultBlockState();
-				textureTile.setTexture("wool", state2);
+				textureTile.setTexture("0", BlockStateBlockDefinition.of(state2));
 				textureTile.refresh();
 			}
 		}

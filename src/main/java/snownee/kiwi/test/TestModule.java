@@ -8,7 +8,6 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
@@ -21,7 +20,6 @@ import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModule.Subscriber.Bus;
-import snownee.kiwi.client.model.TextureModel;
 import snownee.kiwi.data.provider.KiwiLootTableProvider;
 import snownee.kiwi.item.ModBlockItem;
 import snownee.kiwi.schedule.Scheduler;
@@ -60,13 +58,7 @@ public class TestModule extends AbstractModule {
 	@OnlyIn(Dist.CLIENT)
 	@SubscribeEvent
 	public void onModelBake(ModelBakeEvent event) {
-		Block block = TestModule.FIRST_BLOCK;
-		TextureModel.register(event, block, null, "top");
-		TextureModel.registerInventory(event, block, "top");
 		ModBlockItem.INSTANT_UPDATE_TILES.add(FIRST_TILE);
-		block = TestModule.TEX_BLOCK;
-		TextureModel.register(event, block, null, "wool");
-		TextureModel.registerInventory(event, block, "wool");
 		ModBlockItem.INSTANT_UPDATE_TILES.add(TEX_TILE);
 	}
 

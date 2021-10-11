@@ -51,7 +51,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -86,6 +89,7 @@ import net.minecraftforge.registries.ObjectHolderRegistry;
 import net.minecraftforge.registries.RegistryManager;
 import snownee.kiwi.KiwiModule.Category;
 import snownee.kiwi.KiwiModule.Subscriber;
+import snownee.kiwi.client.model.RetextureModel;
 import snownee.kiwi.command.KiwiCommand;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfig;
@@ -204,6 +208,9 @@ public class Kiwi {
 		MinecraftForge.EVENT_BUS.addListener(this::serverInit);
 		modEventBus.addListener(this::postInit);
 		modEventBus.addListener(this::loadComplete);
+		if (FMLEnvironment.dist.isClient()) {
+			modEventBus.addListener(this::registerModelLoader);
+		}
 		try {
 			Method method = modEventBus.getClass().getDeclaredMethod("addListener", EventPriority.class, Predicate.class, Consumer.class);
 			method.setAccessible(true);
@@ -611,6 +618,11 @@ public class Kiwi {
 	 */
 	public static boolean areTagsUpdated() {
 		return tagsUpdated;
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	private void registerModelLoader(ModelRegistryEvent event) {
+		ModelLoaderRegistry.registerLoader(Util.RL("kiwi:retexture"), RetextureModel.Loader.INSTANCE);
 	}
 
 }

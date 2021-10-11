@@ -18,8 +18,9 @@ import net.minecraft.world.phys.HitResult;
 import snownee.kiwi.RenderLayer;
 import snownee.kiwi.RenderLayer.Layer;
 import snownee.kiwi.block.ModBlock;
-import snownee.kiwi.block.entity.TextureBlockEntity;
+import snownee.kiwi.block.entity.RetextureBlockEntity;
 import snownee.kiwi.crafting.FullBlockIngredient;
+import snownee.kiwi.util.BlockStateBlockDefinition;
 
 // fill ~-40 ~ ~-40 ~40 ~ ~40 kiwi:tex_block
 @RenderLayer(Layer.CUTOUT)
@@ -37,13 +38,11 @@ public class TestBlock extends StairBlock implements EntityBlock {
 		}
 		BlockEntity tile = worldIn.getBlockEntity(pos);
 		ItemStack stack = player.getItemInHand(handIn);
-		if (tile instanceof TextureBlockEntity && !stack.isEmpty()) {
+		if (tile instanceof RetextureBlockEntity && !stack.isEmpty()) {
 			if (FullBlockIngredient.isFullBlock(stack)) {
-				TextureBlockEntity textureTile = (TextureBlockEntity) tile;
+				RetextureBlockEntity textureTile = (RetextureBlockEntity) tile;
 				BlockState state2 = ((BlockItem) stack.getItem()).getBlock().defaultBlockState();
-				textureTile.setTexture("top", state2);
-				textureTile.setTexture("side", state2);
-				textureTile.setTexture("bottom", state2);
+				textureTile.setTexture("0", BlockStateBlockDefinition.of(state2));
 				textureTile.refresh();
 			}
 		}
