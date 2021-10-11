@@ -10,7 +10,6 @@ import javax.annotation.Nullable;
 
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.google.common.base.Joiner;
-import com.google.common.base.Predicates;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
@@ -27,7 +26,6 @@ import net.minecraftforge.fmllegacy.server.ServerLifecycleHooks;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.config.KiwiConfig.Comment;
 import snownee.kiwi.config.KiwiConfig.LevelRestart;
-import snownee.kiwi.config.KiwiConfig.Path;
 import snownee.kiwi.config.KiwiConfig.Range;
 import snownee.kiwi.config.KiwiConfig.Translation;
 
@@ -97,13 +95,7 @@ public class ConfigHandler {
 			if (translation != null) {
 				builder.translation(modId + ".config." + translation.value());
 			}
-			String path;
-			Path pathAnnotation = field.getAnnotation(Path.class);
-			if (pathAnnotation == null) {
-				path = field.getName();
-			} else {
-				path = pathAnnotation.value();
-			}
+			List<String> path = NightConfigUtil.getPath(field);
 			ConfigValue<?> value = null;
 			try {
 				if (type == int.class || type == long.class || type == double.class || type == float.class) {
@@ -124,13 +116,13 @@ public class ConfigHandler {
 						value = builder.defineInRange(path, field.getFloat(null), Double.isNaN(min) ? Double.MIN_VALUE : min, Double.isNaN(max) ? Double.MAX_VALUE : max);
 					}
 				} else if (type == String.class) {
-					value = builder.define(path, field.get(null));
+					value = builder.define(path, field.get(null), NightConfigUtil.getValidator(field));
 				} else if (type == boolean.class) {
 					value = builder.define(path, field.getBoolean(null));
 				} else if (Enum.class.isAssignableFrom(type)) {
 					value = builder.defineEnum(path, (Enum) field.get(null));
 				} else if (List.class.isAssignableFrom(type)) {
-					value = builder.defineList(path, (List) field.get(null), Predicates.alwaysTrue());
+					value = builder.defineList(path, (List) field.get(null), NightConfigUtil.getValidator(field));
 				}
 				valueMap.put(field, value);
 			} catch (IllegalArgumentException | IllegalAccessException e) {

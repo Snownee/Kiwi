@@ -1,9 +1,10 @@
 package snownee.kiwi;
 
+import com.electronwill.nightconfig.core.conversion.Path;
+
 import net.minecraftforge.fml.config.ModConfig.Type;
 import snownee.kiwi.config.KiwiConfig;
 import snownee.kiwi.config.KiwiConfig.Comment;
-import snownee.kiwi.config.KiwiConfig.Path;
 import snownee.kiwi.config.KiwiConfig.Range;
 import snownee.kiwi.config.KiwiConfig.Translation;
 

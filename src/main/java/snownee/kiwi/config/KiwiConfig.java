@@ -20,12 +20,6 @@ public @interface KiwiConfig {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.FIELD)
-	@interface Path {
-		String value();
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.FIELD)
 	@interface Comment {
 		String[] value();
 	}
