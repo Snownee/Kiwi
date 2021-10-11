@@ -16,7 +16,7 @@ import net.minecraft.world.phys.HitResult;
 import snownee.kiwi.block.ModBlock;
 import snownee.kiwi.block.entity.RetextureBlockEntity;
 import snownee.kiwi.crafting.FullBlockIngredient;
-import snownee.kiwi.util.BlockStateBlockDefinition;
+import snownee.kiwi.util.SimpleBlockDefinition;
 
 public class TexBlock extends BaseEntityBlock {
 
@@ -35,7 +35,7 @@ public class TexBlock extends BaseEntityBlock {
 			if (FullBlockIngredient.isFullBlock(stack)) {
 				RetextureBlockEntity textureTile = (RetextureBlockEntity) tile;
 				BlockState state2 = ((BlockItem) stack.getItem()).getBlock().defaultBlockState();
-				textureTile.setTexture("0", BlockStateBlockDefinition.of(state2));
+				textureTile.setTexture("0", SimpleBlockDefinition.of(state2));
 				textureTile.refresh();
 			}
 		}

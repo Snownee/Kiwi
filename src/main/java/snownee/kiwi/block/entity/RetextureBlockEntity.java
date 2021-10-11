@@ -21,7 +21,7 @@ import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.fml.util.thread.EffectiveSide;
 import snownee.kiwi.client.model.RetextureModel;
-import snownee.kiwi.util.BlockStateBlockDefinition;
+import snownee.kiwi.util.SimpleBlockDefinition;
 import snownee.kiwi.util.BlockDefinition;
 import snownee.kiwi.util.NBTHelper;
 import snownee.kiwi.util.NBTHelper.NBT;
@@ -70,7 +70,7 @@ public abstract class RetextureBlockEntity extends BaseBlockEntity {
 	public static void setTexture(Map<String, BlockDefinition> textures, String key, Item item) {
 		Block block = Block.byItem(item);
 		if (block != null) {
-			setTexture(textures, key, BlockStateBlockDefinition.of(block.defaultBlockState()));
+			setTexture(textures, key, SimpleBlockDefinition.of(block.defaultBlockState()));
 		}
 	}
 

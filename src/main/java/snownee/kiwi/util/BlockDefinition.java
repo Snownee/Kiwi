@@ -32,7 +32,7 @@ public interface BlockDefinition {
 
 	static void registerFactory(Factory<?> factory) {
 		MAP.put(factory.getId(), factory);
-		if (factory.getId().equals(BlockStateBlockDefinition.TYPE)) {
+		if (factory.getId().equals(SimpleBlockDefinition.TYPE)) {
 			FACTORIES.add(factory);
 		} else {
 			FACTORIES.add(0, factory);

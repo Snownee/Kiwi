@@ -40,7 +40,7 @@ import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
-public class BlockStateBlockDefinition implements BlockDefinition {
+public class SimpleBlockDefinition implements BlockDefinition {
 
 	private static final MethodHandle GET_STATE_FOR_PLACEMENT;
 
@@ -63,11 +63,11 @@ public class BlockStateBlockDefinition implements BlockDefinition {
 		}
 	}
 
-	public enum Factory implements BlockDefinition.Factory<BlockStateBlockDefinition> {
+	public enum Factory implements BlockDefinition.Factory<SimpleBlockDefinition> {
 		INSTANCE;
 
 		@Override
-		public BlockStateBlockDefinition fromNBT(CompoundTag tag) {
+		public SimpleBlockDefinition fromNBT(CompoundTag tag) {
 			BlockState state = NbtUtils.readBlockState(tag.getCompound(TYPE));
 			if (state.isAir())
 				return null;
@@ -75,12 +75,12 @@ public class BlockStateBlockDefinition implements BlockDefinition {
 		}
 
 		@Override
-		public BlockStateBlockDefinition fromBlock(BlockState state, LevelReader level, BlockPos pos) {
+		public SimpleBlockDefinition fromBlock(BlockState state, LevelReader level, BlockPos pos) {
 			return of(state);
 		}
 
 		@Override
-		public BlockStateBlockDefinition fromItem(ItemStack stack, BlockPlaceContext context) {
+		public SimpleBlockDefinition fromItem(ItemStack stack, BlockPlaceContext context) {
 			if (!(stack.getItem() instanceof BlockItem)) {
 				return null;
 			}
@@ -104,20 +104,20 @@ public class BlockStateBlockDefinition implements BlockDefinition {
 	}
 
 	public static final String TYPE = "Block";
-	private static final Map<BlockState, BlockStateBlockDefinition> MAP = Maps.newIdentityHashMap();
+	private static final Map<BlockState, SimpleBlockDefinition> MAP = Maps.newIdentityHashMap();
 
-	public static BlockStateBlockDefinition of(BlockState state) {
+	public static SimpleBlockDefinition of(BlockState state) {
 		if (state.getBlock() == Blocks.GRASS_BLOCK) {
 			state = state.setValue(BlockStateProperties.SNOWY, false);
 		}
-		return MAP.computeIfAbsent(state, BlockStateBlockDefinition::new);
+		return MAP.computeIfAbsent(state, SimpleBlockDefinition::new);
 	}
 
 	public final BlockState state;
 	@OnlyIn(Dist.CLIENT)
 	private Material[] materials;
 
-	private BlockStateBlockDefinition(BlockState state) {
+	private SimpleBlockDefinition(BlockState state) {
 		this.state = state;
 		if (FMLEnvironment.dist.isClient()) {
 			materials = new Material[7];
@@ -215,7 +215,7 @@ public class BlockStateBlockDefinition implements BlockDefinition {
 	}
 
 	public static void reload() {
-		for (BlockStateBlockDefinition supplier : MAP.values()) {
+		for (SimpleBlockDefinition supplier : MAP.values()) {
 			Arrays.fill(supplier.materials, null);
 		}
 	}
