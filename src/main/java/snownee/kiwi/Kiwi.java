@@ -1,5 +1,6 @@
 package snownee.kiwi;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -21,7 +22,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.AnnotationNode;
+import org.objectweb.asm.tree.ClassNode;
 
 import com.electronwill.nightconfig.core.utils.StringUtils;
 import com.google.common.base.Predicates;
@@ -46,6 +51,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -123,39 +129,46 @@ public class Kiwi {
 
 		Map<Type, AnnotationData> moduleToOptional = Maps.newHashMap();
 		List<IModInfo> mods = ImmutableList.copyOf(ModList.get().getMods());
+		String dist = FMLEnvironment.dist.name();
 		for (IModInfo info : mods) {
 			IModFileInfo modFileInfo = info.getOwningFile();
-			if (modFileInfo != null) {
-				for (AnnotationData annotationData : modFileInfo.getFile().getScanResult().getAnnotations()) {
-					if (KIWI_MODULE.equals(annotationData.annotationType())) {
-						String modid = (String) annotationData.annotationData().get("modid");
-						moduleData.put(Strings.isNullOrEmpty(modid) ? info.getModId() : modid, annotationData);
-					} else if (KIWI_CONFIG.equals(annotationData.annotationType())) {
-						ModAnnotation.EnumHolder typeHolder = (ModAnnotation.EnumHolder) annotationData.annotationData().get("type");
-						ModConfig.Type type = null;
-						if (typeHolder != null) {
-							type = ModConfig.Type.valueOf(typeHolder.getValue());
-						}
-						type = type == null ? ModConfig.Type.COMMON : type;
-						if (((type != ModConfig.Type.CLIENT) || !FMLEnvironment.dist.isDedicatedServer())) {
-							try {
-								Class<?> clazz = Class.forName(annotationData.clazz().getClassName());
-								KiwiConfig kiwiConfig = clazz.getAnnotation(KiwiConfig.class);
-								String fileName = kiwiConfig.value();
-								boolean master = type == ModConfig.Type.COMMON && Strings.isNullOrEmpty(fileName);
-								if (Strings.isNullOrEmpty(fileName)) {
-									fileName = String.format("%s-%s", info.getModId(), type.extension());
-								}
-								new ConfigHandler(info.getModId(), fileName + ".toml", type, clazz, master);
-							} catch (ClassNotFoundException e) {
-								logger.catching(e);
-							}
-						}
-					} else if (OPTIONAL_MODULE.equals(annotationData.annotationType())) {
-						moduleToOptional.put(annotationData.clazz(), annotationData);
-					} else if (LOADING_CONDITION.equals(annotationData.annotationType())) {
-						conditions.put(annotationData, info.getModId());
+			if (modFileInfo == null)
+				continue;
+			for (AnnotationData annotationData : modFileInfo.getFile().getScanResult().getAnnotations()) {
+				if (KIWI_MODULE.equals(annotationData.annotationType())) {
+					if (!checkDist(annotationData, dist)) {
+						continue;
 					}
+					String modid = (String) annotationData.annotationData().get("modid");
+					moduleData.put(Strings.isNullOrEmpty(modid) ? info.getModId() : modid, annotationData);
+				} else if (KIWI_CONFIG.equals(annotationData.annotationType())) {
+					if (!checkDist(annotationData, dist)) {
+						continue;
+					}
+					ModAnnotation.EnumHolder typeHolder = (ModAnnotation.EnumHolder) annotationData.annotationData().get("type");
+					ModConfig.Type type = null;
+					if (typeHolder != null) {
+						type = ModConfig.Type.valueOf(typeHolder.getValue());
+					}
+					type = type == null ? ModConfig.Type.COMMON : type;
+					if (((type != ModConfig.Type.CLIENT) || !FMLEnvironment.dist.isDedicatedServer())) {
+						try {
+							Class<?> clazz = Class.forName(annotationData.clazz().getClassName());
+							KiwiConfig kiwiConfig = clazz.getAnnotation(KiwiConfig.class);
+							String fileName = kiwiConfig.value();
+							boolean master = type == ModConfig.Type.COMMON && Strings.isNullOrEmpty(fileName);
+							if (Strings.isNullOrEmpty(fileName)) {
+								fileName = String.format("%s-%s", info.getModId(), type.extension());
+							}
+							new ConfigHandler(info.getModId(), fileName + ".toml", type, clazz, master);
+						} catch (ClassNotFoundException e) {
+							logger.catching(e);
+						}
+					}
+				} else if (OPTIONAL_MODULE.equals(annotationData.annotationType())) {
+					moduleToOptional.put(annotationData.clazz(), annotationData);
+				} else if (LOADING_CONDITION.equals(annotationData.annotationType())) {
+					conditions.put(annotationData, info.getModId());
 				}
 			}
 		}
@@ -199,6 +212,24 @@ public class Kiwi {
 			logger.fatal("Kiwi failed to start up. Please report this to developer!");
 			throw e;
 		}
+	}
+
+	private static boolean checkDist(AnnotationData annotationData, String dist) throws IOException {
+		ClassNode clazz = new ClassNode(Opcodes.ASM7);
+		final ClassReader classReader = new ClassReader(annotationData.clazz().getClassName());
+		classReader.accept(clazz, 0);
+		if (clazz.visibleAnnotations != null) {
+			final String ONLYIN = Type.getDescriptor(OnlyIn.class);
+			for (AnnotationNode node : clazz.visibleAnnotations) {
+				if (node.values != null && ONLYIN.equals(node.desc)) {
+					int i = node.values.indexOf("value");
+					if (i != -1 && !node.values.get(i + 1).equals(dist)) {
+						return false;
+					}
+				}
+			}
+		}
+		return true;
 	}
 
 	private void preInit(RegistryEvent.NewRegistry event) {
