@@ -13,7 +13,6 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.IIngredientSerializer;
 import net.minecraftforge.common.crafting.StackList;
@@ -34,13 +33,10 @@ public class FullBlockIngredient extends Ingredient {
 		}
 		Block block = Block.byItem(stack.getItem());
 		BlockState state = block.defaultBlockState();
-		boolean flag = state.canOcclude() && !state.useShapeForLightOcclusion();
-		if (flag) {
-			try {
-				if (Shapes.block().equals(state.getCollisionShape(null, BlockPos.ZERO)))
-					return true;
-			} catch (Exception e) {
-			}
+		try {
+			if (Block.isShapeFullBlock(state.getOcclusionShape(null, BlockPos.ZERO)))
+				return true;
+		} catch (Throwable e) {
 		}
 		return false;
 	}

@@ -18,6 +18,7 @@ import com.google.common.collect.Sets;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -30,6 +31,7 @@ import net.minecraftforge.fmllegacy.DatagenModLoader;
 import net.minecraftforge.fmlserverevents.FMLServerStartingEvent;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import snownee.kiwi.KiwiModule.Category;
+import snownee.kiwi.block.IKiwiBlock;
 import snownee.kiwi.item.ModBlockItem;
 
 public class ModuleInfo {
@@ -84,7 +86,12 @@ public class ModuleInfo {
 				Item.Properties builder = blockItemBuilders.get(e.entry);
 				if (builder == null)
 					builder = new Item.Properties();
-				ModBlockItem item = new ModBlockItem(e.entry, builder);
+				BlockItem item;
+				if (e.entry instanceof IKiwiBlock) {
+					item = ((IKiwiBlock) e.entry).createItem(builder);
+				} else {
+					item = new ModBlockItem(e.entry, builder);
+				}
 				if (noCategories.contains(e.entry)) {
 					noCategories.add(item);
 				} else if (e.field != null) {

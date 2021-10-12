@@ -47,7 +47,7 @@ public class SimpleBlockDefinition implements BlockDefinition {
 	static {
 		MethodHandle m = null;
 		try {
-			m = MethodHandles.lookup().unreflect(ObfuscationReflectionHelper.findMethod(BlockItem.class, "func_195945_b", BlockPlaceContext.class));
+			m = MethodHandles.lookup().unreflect(ObfuscationReflectionHelper.findMethod(BlockItem.class, "m_5965_", BlockPlaceContext.class));
 		} catch (Exception e) {
 			throw new RuntimeException("Report this to author", e);
 		}

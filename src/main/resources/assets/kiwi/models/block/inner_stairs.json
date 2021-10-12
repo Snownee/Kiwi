@@ -1,0 +1,44 @@
+{
+"loader": "elements",
+    "textures": {
+        "0_down": "block/oak_planks",
+        "0_up": "block/oak_planks",
+        "0_north": "block/oak_planks",
+        "0_south": "block/oak_planks",
+        "0_west": "block/oak_planks",
+        "0_east": "block/oak_planks",
+        "particle": "block/oak_planks"
+    },
+    "elements": [
+        {   "from": [ 0, 0, 0 ],
+            "to": [ 16, 8, 16 ],
+            "faces": {
+                "down":  { "tintindex": 0, "uv": [ 0, 0, 16, 16 ], "texture": "#0_down", "cullface": "down" },
+                "up":    { "tintindex": 0, "uv": [ 0, 0, 16, 16 ], "texture": "#0_up" },
+                "north": { "tintindex": 0, "uv": [ 0, 8, 16, 16 ], "texture": "#0_north", "cullface": "north" },
+                "south": { "tintindex": 0, "uv": [ 0, 8, 16, 16 ], "texture": "#0_south", "cullface": "south" },
+                "west":  { "tintindex": 0, "uv": [ 0, 8, 16, 16 ], "texture": "#0_west", "cullface": "west" },
+                "east":  { "tintindex": 0, "uv": [ 0, 8, 16, 16 ], "texture": "#0_east", "cullface": "east" }
+            }
+        },
+        {   "from": [ 8, 8, 0 ],
+            "to": [ 16, 16, 16 ],
+            "faces": {
+                "up":    { "tintindex": 0, "uv": [ 8, 0, 16, 16 ], "texture": "#0_up", "cullface": "up" },
+                "north": { "tintindex": 0, "uv": [ 0, 0,  8,  8 ], "texture": "#0_north", "cullface": "north" },
+                "south": { "tintindex": 0, "uv": [ 8, 0, 16,  8 ], "texture": "#0_south", "cullface": "south" },
+                "west":  { "tintindex": 0, "uv": [ 0, 0, 16,  8 ], "texture": "#0_west" },
+                "east":  { "tintindex": 0, "uv": [ 0, 0, 16,  8 ], "texture": "#0_east", "cullface": "east" }
+            }
+        },
+        {   "from": [ 0, 8, 8 ],
+            "to": [ 8, 16, 16 ],
+            "faces": {
+                "up":    { "tintindex": 0, "uv": [ 0, 8,  8, 16 ], "texture": "#0_up", "cullface": "up" },
+                "north": { "tintindex": 0, "uv": [ 8, 0, 16,  8 ], "texture": "#0_north" },
+                "south": { "tintindex": 0, "uv": [ 0, 0,  8,  8 ], "texture": "#0_south", "cullface": "south" },
+                "west":  { "tintindex": 0, "uv": [ 8, 0, 16,  8 ], "texture": "#0_west", "cullface": "west" }
+            }
+        }
+    ]
+}

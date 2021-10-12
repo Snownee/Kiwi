@@ -62,10 +62,10 @@ public abstract class BaseBlockEntity extends BlockEntity {
 	@Nonnull
 	protected abstract CompoundTag writePacketData(CompoundTag data);
 
-	protected void refresh() {
+	public void refresh() {
 		if (hasLevel() && !level.isClientSide) {
 			BlockState state = getBlockState();
-			level.markAndNotifyBlock(worldPosition, level.getChunkAt(worldPosition), state, state, 11, 512 /* TODO whats this? */);
+			level.markAndNotifyBlock(worldPosition, level.getChunkAt(worldPosition), state, state, 11, 512);
 		}
 	}
 

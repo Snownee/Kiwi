@@ -57,10 +57,12 @@ public interface BlockDefinition {
 	}
 
 	static BlockDefinition fromItem(ItemStack stack, BlockPlaceContext context) {
-		for (Factory<?> factory : FACTORIES) {
-			BlockDefinition supplier = factory.fromItem(stack, context);
-			if (supplier != null) {
-				return supplier;
+		if (!stack.isEmpty()) {
+			for (Factory<?> factory : FACTORIES) {
+				BlockDefinition supplier = factory.fromItem(stack, context);
+				if (supplier != null) {
+					return supplier;
+				}
 			}
 		}
 		return null;

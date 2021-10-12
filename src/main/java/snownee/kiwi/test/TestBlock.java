@@ -15,15 +15,12 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import snownee.kiwi.RenderLayer;
-import snownee.kiwi.RenderLayer.Layer;
 import snownee.kiwi.block.ModBlock;
 import snownee.kiwi.block.entity.RetextureBlockEntity;
 import snownee.kiwi.crafting.FullBlockIngredient;
 import snownee.kiwi.util.SimpleBlockDefinition;
 
 // fill ~-40 ~ ~-40 ~40 ~ ~40 kiwi:tex_block
-@RenderLayer(Layer.CUTOUT)
 public class TestBlock extends StairBlock implements EntityBlock {
 
 	@SuppressWarnings("deprecation")

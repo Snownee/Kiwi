@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -30,7 +31,7 @@ import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.common.loot.CanToolPerformAction;
-import snownee.kiwi.KiwiManager;
+import snownee.kiwi.KiwiModules;
 import snownee.kiwi.ModuleInfo;
 
 public abstract class KiwiBlockLoot extends BlockLoot {
@@ -46,10 +47,9 @@ public abstract class KiwiBlockLoot extends BlockLoot {
 	private final Set<Block> added = Sets.newHashSet();
 
 	public KiwiBlockLoot(ResourceLocation moduleId) {
-		ModuleInfo info = KiwiManager.MODULES.get(moduleId);
-		if (info != null) {
-			knownBlocks = info.getRegistries(Block.class);
-		}
+		ModuleInfo info = KiwiModules.get(moduleId);
+		Preconditions.checkNotNull(info);
+		knownBlocks = info.getRegistries(Block.class);
 	}
 
 	protected void handle(Class<? extends Block> clazz, Function<Block, LootTable.Builder> handler) {

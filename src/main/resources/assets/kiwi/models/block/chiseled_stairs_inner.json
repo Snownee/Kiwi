@@ -1,0 +1,5 @@
+{
+"loader": "kiwi:retexture",
+"base": "kiwi:block/inner_stairs",
+"inventory": false
+}

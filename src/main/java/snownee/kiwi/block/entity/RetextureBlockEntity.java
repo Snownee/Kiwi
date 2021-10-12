@@ -11,6 +11,7 @@ import com.google.common.collect.Maps;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -21,10 +22,10 @@ import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.fml.util.thread.EffectiveSide;
 import snownee.kiwi.client.model.RetextureModel;
-import snownee.kiwi.util.SimpleBlockDefinition;
 import snownee.kiwi.util.BlockDefinition;
 import snownee.kiwi.util.NBTHelper;
 import snownee.kiwi.util.NBTHelper.NBT;
+import snownee.kiwi.util.SimpleBlockDefinition;
 
 public abstract class RetextureBlockEntity extends BaseBlockEntity {
 	@Nullable
@@ -51,7 +52,7 @@ public abstract class RetextureBlockEntity extends BaseBlockEntity {
 	}
 
 	public void setTexture(String key, BlockDefinition modelSupplier) {
-		if (modelSupplier != null && !isValidTexture(modelSupplier))
+		if (modelSupplier == null || !isValidTexture(modelSupplier))
 			return;
 		setTexture(textures, key, modelSupplier);
 	}
@@ -158,7 +159,7 @@ public abstract class RetextureBlockEntity extends BaseBlockEntity {
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	public int getColor(int index) {
+	public int getColor(BlockAndTintGetter level, int index) {
 		return RetextureModel.getColor(textures, getBlockState(), level, worldPosition, index);
 	}
 }

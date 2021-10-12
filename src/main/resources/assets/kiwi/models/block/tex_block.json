@@ -1,0 +1,4 @@
+{
+"loader": "kiwi:retexture",
+"base": "kiwi:block/blue_carpet"
+}

@@ -67,6 +67,8 @@ public class KiwiConfigManager {
 		for (Entry<ResourceLocation, Boolean> entry : Kiwi.defaultOptions.entrySet()) {
 			ResourceLocation rl = entry.getKey();
 			if (rl.getNamespace().equals(modId)) {
+				//				String translation = Util.makeDescriptionId("kiwi.config.module", rl);
+				//				builder.translation(translation);
 				modules.put(rl, builder.define(rl.getPath(), !entry.getValue().booleanValue()));
 			}
 		}
