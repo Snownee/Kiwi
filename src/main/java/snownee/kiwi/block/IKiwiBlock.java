@@ -1,6 +1,6 @@
 package snownee.kiwi.block;
 
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -10,7 +10,7 @@ import snownee.kiwi.item.ModBlockItem;
 
 public interface IKiwiBlock {
 
-	default Component getName(ItemStack stack) {
+	default MutableComponent getName(ItemStack stack) {
 		return new TranslatableComponent(stack.getDescriptionId());
 	}
 

@@ -23,16 +23,20 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
@@ -75,7 +79,7 @@ public class SimpleBlockDefinition implements BlockDefinition {
 		}
 
 		@Override
-		public SimpleBlockDefinition fromBlock(BlockState state, LevelReader level, BlockPos pos) {
+		public SimpleBlockDefinition fromBlock(BlockState state, BlockEntity blockEntity, LevelReader level, BlockPos pos) {
 			return of(state);
 		}
 
@@ -202,6 +206,11 @@ public class SimpleBlockDefinition implements BlockDefinition {
 		if (state.hasProperty(BlockStateProperties.LIT))
 			state = state.setValue(BlockStateProperties.LIT, false);
 		level.setBlockAndUpdate(pos, state);
+	}
+
+	@Override
+	public ItemStack createItem(HitResult target, BlockGetter world, BlockPos pos, Player player) {
+		return getBlockState().getPickBlock(target, world, pos, player);
 	}
 
 	@Override

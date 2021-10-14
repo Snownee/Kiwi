@@ -145,8 +145,8 @@ public abstract class RetextureBlockEntity extends BaseBlockEntity {
 				if (v == null)
 					return;
 				CompoundTag compound = new CompoundTag();
-				compound.putString("Type", v.getFactory().getId());
 				v.save(compound);
+				compound.putString("Type", v.getFactory().getId());
 				tag.setTag("Overrides." + k, compound);
 			});
 		}

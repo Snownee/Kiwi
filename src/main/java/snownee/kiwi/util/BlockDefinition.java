@@ -15,15 +15,21 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.model.data.EmptyModelData;
+import net.minecraftforge.client.model.data.IModelData;
 
 public interface BlockDefinition {
 
@@ -46,9 +52,9 @@ public interface BlockDefinition {
 		return factory.fromNBT(tag);
 	}
 
-	static BlockDefinition fromBlock(BlockState state, LevelReader level, BlockPos pos) {
+	static BlockDefinition fromBlock(BlockState state, BlockEntity blockEntity, LevelReader level, BlockPos pos) {
 		for (Factory<?> factory : FACTORIES) {
-			BlockDefinition supplier = factory.fromBlock(state, level, pos);
+			BlockDefinition supplier = factory.fromBlock(state, blockEntity, level, pos);
 			if (supplier != null) {
 				return supplier;
 			}
@@ -74,7 +80,12 @@ public interface BlockDefinition {
 	BakedModel model();
 
 	@OnlyIn(Dist.CLIENT)
-	Material renderMaterial(Direction direction);
+	default IModelData modelData() {
+		return EmptyModelData.INSTANCE;
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	Material renderMaterial(@Nullable Direction direction);
 
 	void save(CompoundTag tag);
 
@@ -90,6 +101,8 @@ public interface BlockDefinition {
 
 	void place(Level level, BlockPos pos);
 
+	ItemStack createItem(HitResult target, BlockGetter world, @Nullable BlockPos pos, @Nullable Player player);
+
 	BlockState getBlockState();
 
 	SoundType getSoundType();
@@ -100,7 +113,7 @@ public interface BlockDefinition {
 		String getId();
 
 		@Nullable
-		T fromBlock(BlockState state, LevelReader level, BlockPos pos);
+		T fromBlock(BlockState state, BlockEntity blockEntity, LevelReader level, BlockPos pos);
 
 		@Nullable
 		T fromItem(ItemStack stack, BlockPlaceContext context);

@@ -1,6 +1,7 @@
 package snownee.kiwi.test;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -15,13 +16,14 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import snownee.kiwi.block.IKiwiBlock;
 import snownee.kiwi.block.ModBlock;
 import snownee.kiwi.block.entity.RetextureBlockEntity;
 import snownee.kiwi.crafting.FullBlockIngredient;
 import snownee.kiwi.util.SimpleBlockDefinition;
 
 // fill ~-40 ~ ~-40 ~40 ~ ~40 kiwi:tex_block
-public class TestBlock extends StairBlock implements EntityBlock {
+public class TestBlock extends StairBlock implements EntityBlock, IKiwiBlock {
 
 	@SuppressWarnings("deprecation")
 	public TestBlock(Properties builder) {
@@ -47,11 +49,11 @@ public class TestBlock extends StairBlock implements EntityBlock {
 	}
 
 	@Override
-	public void onRemove(BlockState state, Level worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
-		if (state.hasBlockEntity() && state.getBlock() != newState.getBlock()) {
-			worldIn.removeBlockEntity(pos);
+	public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean isMoving) {
+		if (pState.hasBlockEntity() && (!pState.is(pNewState.getBlock()) || !pNewState.hasBlockEntity())) {
+			pLevel.removeBlockEntity(pPos);
 		}
-		super.onRemove(state, worldIn, pos, newState, isMoving);
+		super.onRemove(pState, pLevel, pPos, pNewState, isMoving);
 	}
 
 	@Override
@@ -62,5 +64,10 @@ public class TestBlock extends StairBlock implements EntityBlock {
 	@Override
 	public BlockEntity newBlockEntity(BlockPos p_153215_, BlockState p_153216_) {
 		return new TestBlockEntity(p_153215_, p_153216_);
+	}
+
+	@Override
+	public MutableComponent getName(ItemStack stack) {
+		return IKiwiBlock.super.getName(stack).append(" " + stack.getCount());
 	}
 }
