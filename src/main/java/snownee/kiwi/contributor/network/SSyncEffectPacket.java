@@ -10,6 +10,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkEvent.Context;
 import snownee.kiwi.contributor.Contributors;
 import snownee.kiwi.network.NetworkChannel;
@@ -58,6 +59,11 @@ public class SSyncEffectPacket extends Packet {
 				Contributors.changeEffect(msg.map);
 			});
 			ctx.get().setPacketHandled(true);
+		}
+
+		@Override
+		public NetworkDirection direction() {
+			return NetworkDirection.PLAY_TO_CLIENT;
 		}
 
 	}

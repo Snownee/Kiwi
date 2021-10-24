@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.fml.network.PacketDistributor.PacketTarget;
@@ -32,5 +33,9 @@ public abstract class Packet {
 		public abstract T decode(PacketBuffer buffer);
 
 		public abstract void handle(T msg, Supplier<NetworkEvent.Context> ctx);
+
+		public NetworkDirection direction() {
+			return null;
+		}
 	}
 }

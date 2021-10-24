@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkEvent.Context;
 import snownee.kiwi.contributor.Contributors;
 import snownee.kiwi.network.ClientPacket;
@@ -43,6 +44,11 @@ public class CSetEffectPacket extends ClientPacket {
 			Contributors.changeEffect(ctx.get().getSender(), msg.id);
 			//            });
 			ctx.get().setPacketHandled(true);
+		}
+
+		@Override
+		public NetworkDirection direction() {
+			return NetworkDirection.PLAY_TO_SERVER;
 		}
 	}
 
