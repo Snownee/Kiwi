@@ -1686,10 +1686,9 @@ public class YogaNode implements Iterable<YogaNode> {
 	}
 
 	private static float CalculateBaseline(YogaNode node) {
-		float baseline = Float.NaN;
+		float baseline;
 		if (node._baseline != null) {
-			baseline = node._baseline.apply(node, node._layout.MeasuredDimensions[YogaDimension.Width.ordinal()], node._layout.MeasuredDimensions[YogaDimension.Height.ordinal()]);
-			return baseline;
+			return node._baseline.apply(node, node._layout.MeasuredDimensions[YogaDimension.Width.ordinal()], node._layout.MeasuredDimensions[YogaDimension.Height.ordinal()]);
 		}
 
 		YogaNode baselineChild = null;

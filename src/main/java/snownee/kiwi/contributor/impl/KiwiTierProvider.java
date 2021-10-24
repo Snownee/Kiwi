@@ -31,7 +31,7 @@ public class KiwiTierProvider extends JsonTierProvider {
 		String github = "https://raw.githubusercontent.com/Snownee/Kiwi/master/contributors.json";
 		String coding = "https://snownee.coding.net/p/test/d/test/git/raw/master/contributors.json";
 		Locale locale = Locale.getDefault();
-		if (locale.getCountry().equals("CN") && Calendar.getInstance().get(Calendar.ZONE_OFFSET) == 28800000) {
+		if ("CN".equals(locale.getCountry()) && Calendar.getInstance().get(Calendar.ZONE_OFFSET) == 28800000) {
 			Kiwi.logger.debug("Use fetching strategy 1");
 			return ImmutableList.of(cdn, coding);
 		} else {

@@ -430,7 +430,7 @@ public class Kiwi {
 					regName = checkPrefix(field.getName().toLowerCase(Locale.ENGLISH), modid);
 				}
 
-				if (field.getType() == info.module.getClass() && regName.getPath().equals("instance") && regName.getNamespace().equals(modid)) {
+				if (field.getType() == info.module.getClass() && "instance".equals(regName.getPath()) && regName.getNamespace().equals(modid)) {
 					try {
 						field.set(null, info.module);
 					} catch (IllegalArgumentException | IllegalAccessException e) {

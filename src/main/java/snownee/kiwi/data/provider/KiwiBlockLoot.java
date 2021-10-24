@@ -76,6 +76,7 @@ public abstract class KiwiBlockLoot extends BlockLoot {
 		}
 	}
 
+	@Override
 	protected void add(Block block, LootTable.Builder builder) {
 		super.add(block, builder);
 		added.add(block);

@@ -14,7 +14,7 @@ public class MyPacket extends Packet {
 		this.number = number;
 	}
 
-	public static class Handler extends PacketHandler<MyPacket> {
+	public static class Handler implements PacketHandler<MyPacket> {
 
 		@Override
 		public void encode(MyPacket msg, FriendlyByteBuf buffer) {

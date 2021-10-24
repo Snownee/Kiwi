@@ -28,7 +28,7 @@ public class SSyncCosmeticPacket extends Packet {
 		NetworkChannel.sendToAllExcept(player, this);
 	}
 
-	public static class Handler extends PacketHandler<SSyncCosmeticPacket> {
+	public static class Handler implements PacketHandler<SSyncCosmeticPacket> {
 
 		@Override
 		public void encode(SSyncCosmeticPacket msg, FriendlyByteBuf buffer) {

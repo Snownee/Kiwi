@@ -27,14 +27,14 @@ public abstract class Packet {
 	public void send() {
 	}
 
-	public static abstract class PacketHandler<T extends Packet> {
-		public abstract void encode(T msg, FriendlyByteBuf buffer);
+	public interface PacketHandler<T extends Packet> {
+		void encode(T msg, FriendlyByteBuf buffer);
 
-		public abstract T decode(FriendlyByteBuf buffer);
+		T decode(FriendlyByteBuf buffer);
 
-		public abstract void handle(T msg, Supplier<NetworkEvent.Context> ctx);
+		void handle(T msg, Supplier<NetworkEvent.Context> ctx);
 
-		public NetworkDirection direction() {
+		default NetworkDirection direction() {
 			return null;
 		}
 	}

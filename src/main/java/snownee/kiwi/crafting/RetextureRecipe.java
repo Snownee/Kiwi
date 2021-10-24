@@ -191,8 +191,8 @@ public class RetextureRecipe extends DynamicShapedRecipe {
 			}
 			buffer.writeItem(recipe.getResultItem());
 
-			for (int i = 0; i < recipe.textureKeys.length; i++) {
-				buffer.writeUtf(recipe.textureKeys[i]);
+			for (String textureKey : recipe.textureKeys) {
+				buffer.writeUtf(textureKey);
 			}
 		}
 	}

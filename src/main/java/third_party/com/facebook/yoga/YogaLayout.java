@@ -70,9 +70,7 @@ public final class YogaLayout {
 
 		isEqual = isEqual && (self.ComputedFlexBasis == layout.ComputedFlexBasis);
 		isEqual = isEqual && (self.MeasuredDimensions[0] == layout.MeasuredDimensions[0]);
-		isEqual = isEqual && (self.MeasuredDimensions[1] == layout.MeasuredDimensions[1]);
-
-		return isEqual;
+		return isEqual && (self.MeasuredDimensions[1] == layout.MeasuredDimensions[1]);
 	}
 
 	public void CopyFrom(YogaLayout other) {

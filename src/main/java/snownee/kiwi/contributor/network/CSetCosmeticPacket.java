@@ -20,7 +20,7 @@ public class CSetCosmeticPacket extends ClientPacket {
 		this.id = id;
 	}
 
-	public static class Handler extends PacketHandler<CSetCosmeticPacket> {
+	public static class Handler implements PacketHandler<CSetCosmeticPacket> {
 
 		@Override
 		public void encode(CSetCosmeticPacket msg, FriendlyByteBuf buffer) {

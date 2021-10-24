@@ -41,8 +41,7 @@ public class JsonTierProvider implements ITierProvider {
 	}
 
 	public boolean load(String url) {
-		try {
-			InputStreamReader reader = new InputStreamReader(new URL(url).openStream());
+		try (InputStreamReader reader = new InputStreamReader(new URL(url).openStream())) {
 			Map<String, Collection<String>> map = GSON.fromJson(reader, Map.class);
 			if (map.containsKey("*")) {
 				superusers = ImmutableSet.copyOf(map.get("*"));
@@ -51,7 +50,7 @@ public class JsonTierProvider implements ITierProvider {
 			}
 			Builder<String, String> builder = ImmutableSetMultimap.builder();
 			map.forEach((reward, users) -> {
-				if (reward.equals("*")) {
+				if ("*".equals(reward)) {
 					return;
 				}
 				users.forEach(user -> builder.put(user, reward));

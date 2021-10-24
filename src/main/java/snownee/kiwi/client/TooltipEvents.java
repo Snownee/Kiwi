@@ -71,7 +71,7 @@ public final class TooltipEvents {
 		List<Component> tooltip = event.getToolTip();
 
 		if (KiwiClientConfig.nbtTooltip && Screen.hasShiftDown() && stack.hasTag()) {
-			tooltip.removeIf(c -> c.getClass() == TranslatableComponent.class && ((TranslatableComponent) c).getKey().equals("item.nbt_tags"));
+			tooltip.removeIf(c -> c.getClass() == TranslatableComponent.class && "item.nbt_tags".equals(((TranslatableComponent) c).getKey()));
 			if (lastNBT != stack.getTag()) {
 				switch (KiwiClientConfig.debugTooltipNBTFormatter) {
 				case "kiwi":

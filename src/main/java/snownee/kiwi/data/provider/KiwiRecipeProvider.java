@@ -17,7 +17,6 @@ import org.apache.logging.log4j.Logger;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import net.minecraft.advancements.critereon.EnterBlockTrigger;
@@ -61,7 +60,7 @@ public abstract class KiwiRecipeProvider implements DataProvider {
 
 	@Override
 	public void run(HashCache hashCache) throws IOException {
-		Path path = this.generator.getOutputFolder();
+		Path path = generator.getOutputFolder();
 		Set<ResourceLocation> set = Sets.newHashSet();
 		addRecipes(recipe -> {
 			if (!set.add(recipe.getId())) {
@@ -80,7 +79,7 @@ public abstract class KiwiRecipeProvider implements DataProvider {
 
 	protected void save(HashCache hashCache, JsonObject json, Path path) {
 		try {
-			String s = GSON.toJson((JsonElement) json);
+			String s = GSON.toJson(json);
 			String s1 = SHA1.hashUnencodedChars(s).toString();
 			if (!Objects.equals(hashCache.getHash(path), s1) || !Files.exists(path)) {
 				Files.createDirectories(path.getParent());

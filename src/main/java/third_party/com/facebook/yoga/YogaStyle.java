@@ -110,9 +110,7 @@ public final class YogaStyle {
 
 		areNonFloatValuesEqual = areNonFloatValuesEqual && self.FlexGrow == style.FlexGrow;
 		areNonFloatValuesEqual = areNonFloatValuesEqual && self.FlexShrink == style.FlexShrink;
-		areNonFloatValuesEqual = areNonFloatValuesEqual && self.AspectRatio == style.AspectRatio;
-
-		return areNonFloatValuesEqual;
+		return areNonFloatValuesEqual && self.AspectRatio == style.AspectRatio;
 	}
 
 	@Override

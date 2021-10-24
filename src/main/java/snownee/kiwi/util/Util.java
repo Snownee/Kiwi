@@ -36,7 +36,7 @@ public final class Util {
 	})).toArray($ -> {
 		return new Direction[$];
 	});
-	
+
 	private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("###,###");
 	public static final MessageFormat MESSAGE_FORMAT = new MessageFormat("{0,number,#.#}");
 
