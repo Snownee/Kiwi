@@ -58,7 +58,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
-import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IDynamicBakedModel;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.data.ModelProperty;
@@ -329,7 +328,7 @@ public class TextureModel implements IDynamicBakedModel {
 						Set<String> keySet = data.keySet();
 						Map<String, String> overrides = Maps.newHashMapWithExpectedSize(keySet.size());
 						keySet.forEach(k -> overrides.put(k, ""));
-						TextureTile.readTextures(overrides, data, EmptyModelData.INSTANCE);
+						TextureTile.readTextures(overrides, data);
 						return baked.getModel(overrides);
 					});
 				} catch (ExecutionException e) {
