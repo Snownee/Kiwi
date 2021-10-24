@@ -121,7 +121,10 @@ public class Contributors extends AbstractModule {
 	@OnlyIn(Dist.CLIENT)
 	@SubscribeEvent
 	public void onClientPlayerLoggedIn(ClientPlayerNetworkEvent.LoggedInEvent event) {
-		changeEffect();
+		ResourceLocation id = Util.RL(KiwiClientConfig.contributorEffect);
+		if (id != null) {
+			changeEffect();
+		}
 	}
 
 	@OnlyIn(Dist.DEDICATED_SERVER)
