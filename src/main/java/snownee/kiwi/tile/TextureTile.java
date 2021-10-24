@@ -63,7 +63,7 @@ public class TextureTile extends BaseTile {
 		setTexture(textures, key, state);
 		if (isMark(key)) {
 			Item item = state.getBlock().asItem();
-			if (item == null) {
+			if (item == Items.AIR) {
 				return;
 			}
 			if (marks == null) {

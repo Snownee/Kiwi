@@ -13,6 +13,10 @@ import snownee.kiwi.schedule.Scheduler;
 public enum GlobalTicker implements ITicker {
 	PRE_SERVER, POST_SERVER, PRE_CLIENT, POST_CLIENT;
 
+	static {
+		MinecraftForge.EVENT_BUS.register(GlobalTicker.class);
+	}
+
 	@SubscribeEvent
 	public static void onTickServer(TickEvent.ServerTickEvent event) {
 		Scheduler.tick(event.phase == Phase.START ? PRE_SERVER : POST_SERVER);
@@ -25,7 +29,6 @@ public enum GlobalTicker implements ITicker {
 	}
 
 	public static GlobalTicker get(LogicalSide side, Phase phase) {
-		MinecraftForge.EVENT_BUS.register(GlobalTicker.class);
 		return side == LogicalSide.SERVER ? (phase == Phase.START ? PRE_SERVER : POST_SERVER) : (phase == Phase.START ? PRE_CLIENT : POST_CLIENT);
 	}
 }

@@ -68,15 +68,14 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
-import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
-import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.moddiscovery.ModAnnotation;
 import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import net.minecraftforge.fml.loading.toposort.TopologicalSort;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.forgespi.language.ModFileScanData.AnnotationData;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -205,8 +204,6 @@ public class Kiwi {
 		modEventBus.addListener(this::init);
 		modEventBus.addListener(this::clientInit);
 		MinecraftForge.EVENT_BUS.addListener(this::serverInit);
-		MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGH, this::serverStarting);
-		MinecraftForge.EVENT_BUS.addListener(EventPriority.LOW, this::serverStopped);
 		modEventBus.addListener(this::postInit);
 		modEventBus.addListener(this::loadComplete);
 		try {
@@ -553,18 +550,8 @@ public class Kiwi {
 		KiwiCommand.register(event.getDispatcher(), event.getEnvironment());
 	}
 
-	private static MinecraftServer server;
-
 	public static MinecraftServer getServer() {
-		return server;
-	}
-
-	private void serverStarting(FMLServerAboutToStartEvent event) {
-		server = event.getServer();
-	}
-
-	private void serverStopped(FMLServerStoppedEvent event) {
-		server = null;
+		return ServerLifecycleHooks.getCurrentServer();
 	}
 
 	private void postInit(InterModProcessEvent event) {
