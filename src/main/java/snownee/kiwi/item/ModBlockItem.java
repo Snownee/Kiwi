@@ -24,6 +24,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import snownee.kiwi.KiwiClientConfig;
+import snownee.kiwi.block.IKiwiBlock;
 
 public class ModBlockItem extends BlockItem {
 	public static final Set<TileEntityType<?>> INSTANT_UPDATE_TILES = FMLEnvironment.dist == Dist.CLIENT ? Sets.newHashSet() : null;
@@ -55,4 +56,15 @@ public class ModBlockItem extends BlockItem {
 		if (!KiwiClientConfig.globalTooltip)
 			ModItem.addTip(stack, tooltip, flagIn);
 	}
+
+	@Override
+	public ITextComponent getDisplayName(ItemStack stack) {
+		Block block = getBlock();
+		if (block instanceof IKiwiBlock) {
+			return ((IKiwiBlock) block).getName(stack);
+		} else {
+			return super.getDisplayName(stack);
+		}
+	}
+
 }

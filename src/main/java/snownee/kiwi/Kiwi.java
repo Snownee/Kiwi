@@ -209,7 +209,7 @@ public class Kiwi {
 		try {
 			Method method = modEventBus.getClass().getDeclaredMethod("addListener", EventPriority.class, Predicate.class, Consumer.class);
 			method.setAccessible(true);
-			method.invoke(modEventBus, EventPriority.NORMAL, Predicates.alwaysTrue(), (Consumer<RegistryEvent.Register<?>>) KiwiManager::handleRegister);
+			method.invoke(modEventBus, EventPriority.NORMAL, Predicates.alwaysTrue(), (Consumer<RegistryEvent.Register<?>>) KiwiModules::handleRegister);
 		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			logger.fatal("Kiwi failed to start up. Please report this to developer!");
 			throw e;
@@ -345,7 +345,7 @@ public class Kiwi {
 			try {
 				Class<?> clazz = Class.forName(info.className);
 				AbstractModule instance = (AbstractModule) clazz.newInstance();
-				KiwiManager.addInstance(id, instance, context);
+				KiwiModules.addInstance(id, instance, context);
 			} catch (InstantiationException | IllegalAccessException | ClassCastException | ClassNotFoundException e) {
 				logger.error(MARKER, "Kiwi failed to initialize module class: {}", info.className);
 				logger.catching(e);
@@ -362,9 +362,8 @@ public class Kiwi {
 		conditions.clear();
 		conditions = null;
 
-		//Util.class.hashCode();
 		Object2IntMap<Class<?>> counter = new Object2IntArrayMap<>();
-		for (ModuleInfo info : KiwiManager.MODULES.values()) {
+		for (ModuleInfo info : KiwiModules.get()) {
 			counter.clear();
 			info.context.setActiveContainer();
 			Subscriber subscriber = info.module.getClass().getAnnotation(Subscriber.class);
@@ -490,7 +489,7 @@ public class Kiwi {
 			}
 		}
 
-		KiwiManager.MODULES.values().forEach(ModuleInfo::preInit);
+		KiwiModules.fire(ModuleInfo::preInit);
 		ModLoadingContext.get().setActiveContainer(null, null);
 		holderRefs.clear();
 		holderRefs = null;
@@ -530,17 +529,17 @@ public class Kiwi {
 		CraftingHelper.register(new ModuleLoadedCondition.Serializer());
 		CraftingHelper.register(new ResourceLocation(MODID, "full_block"), FullBlockIngredient.SERIALIZER);
 
-		KiwiManager.MODULES.values().forEach(m -> m.init(event));
+		KiwiModules.fire(m -> m.init(event));
 		ModLoadingContext.get().setActiveContainer(null, null);
 	}
 
 	private void clientInit(FMLClientSetupEvent event) {
-		KiwiManager.MODULES.values().forEach(m -> m.clientInit(event));
+		KiwiModules.fire(m -> m.clientInit(event));
 		ModLoadingContext.get().setActiveContainer(null, null);
 	}
 
 	private void serverInit(FMLServerStartingEvent event) {
-		KiwiManager.MODULES.values().forEach(m -> m.serverInit(event));
+		KiwiModules.fire(m -> m.serverInit(event));
 		event.getServer().getWorld(World.OVERWORLD).getSavedData().getOrCreate(() -> Scheduler.INSTANCE, Scheduler.ID);
 		ModLoadingContext.get().setActiveContainer(null, null);
 	}
@@ -555,8 +554,9 @@ public class Kiwi {
 	}
 
 	private void postInit(InterModProcessEvent event) {
-		KiwiManager.MODULES.values().forEach(ModuleInfo::postInit);
+		KiwiModules.fire(ModuleInfo::postInit);
 		ModLoadingContext.get().setActiveContainer(null, null);
+		KiwiModules.clear();
 	}
 
 	private void loadComplete(FMLLoadCompleteEvent event) {
@@ -565,11 +565,11 @@ public class Kiwi {
 	}
 
 	public static boolean isLoaded(ResourceLocation module) {
-		return KiwiManager.MODULES.containsKey(module);
+		return KiwiModules.isLoaded(module);
 	}
 
 	public static boolean isLoaded(AbstractModule module) {
-		return KiwiManager.MODULES.values().stream().map($ -> $.module).anyMatch(module::equals);
+		return KiwiModules.get().stream().map($ -> $.module).anyMatch(module::equals);
 	}
 
 	/**

@@ -13,7 +13,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.IIngredientSerializer;
 import net.minecraftforge.common.crafting.StackList;
@@ -37,9 +36,8 @@ public class FullBlockIngredient extends Ingredient {
 		boolean flag = state.isSolid() && !state.isTransparent();
 		if (flag) {
 			try {
-				if (VoxelShapes.fullCube().equals(state.getCollisionShape(null, BlockPos.ZERO)))
-					return true;
-			} catch (Exception e) {
+				return Block.isOpaque(state.getRenderShape(null, BlockPos.ZERO));
+			} catch (Throwable e) {
 			}
 		}
 		return false;

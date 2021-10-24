@@ -161,7 +161,7 @@ public class ConfigHandler {
 		fCfg.setAccessible(true);
 		fCfg.set(config, configData);
 		config.getSpec().setConfig(configData);
-		config.getHandler().unload(null, config);
+		config.getHandler().unload(path, config);
 		//config.save();
 	}
 
