@@ -18,12 +18,13 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Material;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fmlserverevents.FMLServerStartingEvent;
 import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import snownee.kiwi.block.ModBlock;
+import snownee.kiwi.loader.event.ClientInitEvent;
+import snownee.kiwi.loader.event.InitEvent;
+import snownee.kiwi.loader.event.PostInitEvent;
+import snownee.kiwi.loader.event.ServerInitEvent;
 
 /**
  *
@@ -50,19 +51,19 @@ public abstract class AbstractModule {
 		// NO-OP
 	}
 
-	protected void init(FMLCommonSetupEvent event) {
+	protected void init(InitEvent event) {
 		// NO-OP
 	}
 
-	protected void clientInit(FMLClientSetupEvent event) {
+	protected void clientInit(ClientInitEvent event) {
 		// NO-OP
 	}
 
-	protected void serverInit(FMLServerStartingEvent event) {
+	protected void serverInit(ServerInitEvent event) {
 		// NO-OP
 	}
 
-	protected void postInit() {
+	protected void postInit(PostInitEvent event) {
 		// NO-OP
 	}
 

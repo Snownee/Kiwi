@@ -7,12 +7,12 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModule.Name;
+import snownee.kiwi.loader.event.InitEvent;
 
 @KiwiModule(value = "test2", dependencies = "forge;@kiwi:test")
 @KiwiModule.Optional(disabledByDefault = true)
@@ -39,7 +39,7 @@ public class TestModule2 extends AbstractModule {
 	}
 
 	@Override
-	protected void init(FMLCommonSetupEvent event) {
+	protected void init(InitEvent event) {
 		System.out.println(1);
 	}
 }

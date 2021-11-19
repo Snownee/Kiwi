@@ -31,7 +31,6 @@ import net.minecraftforge.client.event.InputEvent.KeyInputEvent;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fmllegacy.network.PacketDistributor;
 import snownee.kiwi.AbstractModule;
@@ -46,6 +45,7 @@ import snownee.kiwi.contributor.impl.KiwiTierProvider;
 import snownee.kiwi.contributor.network.CSetCosmeticPacket;
 import snownee.kiwi.contributor.network.SSyncCosmeticPacket;
 import snownee.kiwi.loader.Platform;
+import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.network.NetworkChannel;
 import snownee.kiwi.util.Util;
 
@@ -68,7 +68,7 @@ public class Contributors extends AbstractModule {
 	}
 
 	@Override
-	protected void init(FMLCommonSetupEvent event) {
+	protected void init(InitEvent event) {
 		registerTierProvider(new KiwiTierProvider());
 	}
 

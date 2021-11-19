@@ -100,6 +100,10 @@ import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfig;
 import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.loader.Platform;
+import snownee.kiwi.loader.event.ClientInitEvent;
+import snownee.kiwi.loader.event.InitEvent;
+import snownee.kiwi.loader.event.PostInitEvent;
+import snownee.kiwi.loader.event.ServerInitEvent;
 import snownee.kiwi.schedule.Scheduler;
 import snownee.kiwi.util.Util;
 
@@ -549,19 +553,22 @@ public class Kiwi {
 
 	private void init(FMLCommonSetupEvent event) {
 		KiwiConfigManager.refresh();
-		KiwiModules.fire(m -> m.init(event));
+		InitEvent e = new InitEvent(event);
+		KiwiModules.fire(m -> m.init(e));
 		ModLoadingContext.get().setActiveContainer(null);
 
 		BlockDefinition.registerFactory(SimpleBlockDefinition.Factory.INSTANCE);
 	}
 
 	private void clientInit(FMLClientSetupEvent event) {
-		KiwiModules.fire(m -> m.clientInit(event));
+		ClientInitEvent e = new ClientInitEvent(event);
+		KiwiModules.fire(m -> m.clientInit(e));
 		ModLoadingContext.get().setActiveContainer(null);
 	}
 
 	private void serverInit(FMLServerStartingEvent event) {
-		KiwiModules.fire(m -> m.serverInit(event));
+		ServerInitEvent e = new ServerInitEvent();
+		KiwiModules.fire(m -> m.serverInit(e));
 		event.getServer().getLevel(Level.OVERWORLD).getDataStorage().computeIfAbsent(Scheduler::load, () -> Scheduler.INSTANCE, Scheduler.ID);
 		ModLoadingContext.get().setActiveContainer(null);
 	}
@@ -572,7 +579,8 @@ public class Kiwi {
 	}
 
 	private void postInit(InterModProcessEvent event) {
-		KiwiModules.fire(ModuleInfo::postInit);
+		PostInitEvent e = new PostInitEvent(event);
+		KiwiModules.fire(m -> m.postInit(e));
 		ModLoadingContext.get().setActiveContainer(null);
 		KiwiModules.clear();
 	}

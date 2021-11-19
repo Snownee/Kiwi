@@ -2,9 +2,9 @@ package snownee.kiwi.data;
 
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiModule;
+import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.recipe.FullBlockIngredient;
 import snownee.kiwi.recipe.ModuleLoadedCondition;
 import snownee.kiwi.recipe.crafting.NoContainersShapedRecipe;
@@ -19,7 +19,7 @@ public final class DataModule extends AbstractModule {
 	public static final RecipeSerializer<RetextureRecipe> RETEXTURE = new RetextureRecipe.Serializer();
 
 	@Override
-	protected void init(FMLCommonSetupEvent event) {
+	protected void init(InitEvent event) {
 		CraftingHelper.register(new ModuleLoadedCondition.Serializer());
 		CraftingHelper.register(RL("full_block"), FullBlockIngredient.SERIALIZER);
 	}

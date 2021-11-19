@@ -23,17 +23,18 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLModContainer;
 import net.minecraftforge.fmllegacy.DatagenModLoader;
-import net.minecraftforge.fmlserverevents.FMLServerStartingEvent;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import snownee.kiwi.KiwiModule.Category;
 import snownee.kiwi.KiwiModule.RenderLayer;
 import snownee.kiwi.block.IKiwiBlock;
 import snownee.kiwi.item.ModBlockItem;
 import snownee.kiwi.loader.Platform;
+import snownee.kiwi.loader.event.ClientInitEvent;
+import snownee.kiwi.loader.event.InitEvent;
+import snownee.kiwi.loader.event.PostInitEvent;
+import snownee.kiwi.loader.event.ServerInitEvent;
 
 public class ModuleInfo {
 	public static final class RegistryHolder {
@@ -152,24 +153,24 @@ public class ModuleInfo {
 		module.preInit();
 	}
 
-	public void init(FMLCommonSetupEvent event) {
+	public void init(InitEvent event) {
 		context.setActiveContainer();
 		module.init(event);
 	}
 
-	public void clientInit(FMLClientSetupEvent event) {
+	public void clientInit(ClientInitEvent event) {
 		context.setActiveContainer();
 		module.clientInit(event);
 	}
 
-	public void serverInit(FMLServerStartingEvent event) {
+	public void serverInit(ServerInitEvent event) {
 		context.setActiveContainer();
 		module.serverInit(event);
 	}
 
-	public void postInit() {
+	public void postInit(PostInitEvent event) {
 		context.setActiveContainer();
-		module.postInit();
+		module.postInit(event);
 	}
 
 	public <T extends IForgeRegistryEntry<T>> List<T> getRegistries(Class<T> clazz) {

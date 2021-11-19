@@ -18,8 +18,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fmlserverevents.FMLServerStartingEvent;
 import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiModule;
@@ -27,6 +25,8 @@ import snownee.kiwi.KiwiModule.Subscriber.Bus;
 import snownee.kiwi.block.entity.RetextureBlockEntity;
 import snownee.kiwi.data.provider.KiwiLootTableProvider;
 import snownee.kiwi.item.ModBlockItem;
+import snownee.kiwi.loader.event.ClientInitEvent;
+import snownee.kiwi.loader.event.ServerInitEvent;
 import snownee.kiwi.schedule.Scheduler;
 import snownee.kiwi.util.EnumUtil;
 
@@ -63,7 +63,7 @@ public class TestModule extends AbstractModule {
 
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	protected void clientInit(FMLClientSetupEvent event) {
+	protected void clientInit(ClientInitEvent event) {
 		ModBlockItem.INSTANT_UPDATE_TILES.add(FIRST_TILE);
 		ModBlockItem.INSTANT_UPDATE_TILES.add(TEX_TILE);
 		ItemBlockRenderTypes.setRenderLayer(TEX_BLOCK, EnumUtil.BLOCK_RENDER_TYPES::contains);
@@ -83,7 +83,7 @@ public class TestModule extends AbstractModule {
 	}
 
 	@Override
-	protected void serverInit(FMLServerStartingEvent event) {
+	protected void serverInit(ServerInitEvent event) {
 		Scheduler.register(MyTask.ID, MyTask.class);
 	}
 
