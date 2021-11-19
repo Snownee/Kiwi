@@ -33,7 +33,6 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fmllegacy.network.PacketDistributor;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.Kiwi;
@@ -46,6 +45,7 @@ import snownee.kiwi.contributor.client.gui.CosmeticScreen;
 import snownee.kiwi.contributor.impl.KiwiTierProvider;
 import snownee.kiwi.contributor.network.CSetCosmeticPacket;
 import snownee.kiwi.contributor.network.SSyncCosmeticPacket;
+import snownee.kiwi.loader.Platform;
 import snownee.kiwi.network.NetworkChannel;
 import snownee.kiwi.util.Util;
 
@@ -62,7 +62,7 @@ public class Contributors extends AbstractModule {
 	protected void preInit() {
 		NetworkChannel.register(CSetCosmeticPacket.class, new CSetCosmeticPacket.Handler());
 		NetworkChannel.register(SSyncCosmeticPacket.class, new SSyncCosmeticPacket.Handler());
-		if (FMLEnvironment.dist.isClient()) {
+		if (Platform.isPhysicalClient()) {
 			FMLJavaModLoadingContext.get().getModEventBus().addListener(this::addLayers);
 		}
 	}
@@ -240,7 +240,7 @@ public class Contributors extends AbstractModule {
 		}
 		ITierProvider provider = REWARD_PROVIDERS.getOrDefault(cosmetic.getNamespace().toLowerCase(Locale.ENGLISH), ITierProvider.Empty.INSTANCE);
 		if (!provider.isContributor(playerName, cosmetic.getPath())) {
-			if (FMLEnvironment.dist.isDedicatedServer()) {
+			if (!Platform.isPhysicalClient()) {
 				return provider.refresh().thenApply($ -> provider.isContributor(playerName, cosmetic.getPath()));
 			} else {
 				return CompletableFuture.completedFuture(Boolean.FALSE);

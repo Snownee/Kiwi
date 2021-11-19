@@ -66,7 +66,6 @@ import snownee.kiwi.util.NBTHelper;
 @OnlyIn(Dist.CLIENT)
 public class RetextureModel implements IDynamicBakedModel {
 	public static ModelProperty<Map<String, BlockDefinition>> TEXTURES = new ModelProperty<>();
-	public static Map<BakedModel, RetextureModel> CACHES = Maps.newHashMap();
 
 	public static class ModelConfiguration implements IModelConfiguration {
 

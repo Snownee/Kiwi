@@ -20,10 +20,10 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.data.ModelDataMap;
-import net.minecraftforge.fml.util.thread.EffectiveSide;
 import snownee.kiwi.block.def.BlockDefinition;
 import snownee.kiwi.block.def.SimpleBlockDefinition;
 import snownee.kiwi.client.model.RetextureModel;
+import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.NBTHelper;
 import snownee.kiwi.util.NBTHelper.NBT;
 
@@ -39,7 +39,7 @@ public abstract class RetextureBlockEntity extends BaseBlockEntity {
 		for (String key : textureKeys) {
 			textures.put(key, null);
 		}
-		if (textures != null && EffectiveSide.get().isClient()) {
+		if (textures != null && Platform.isLogicalClient()) {
 			modelData = new ModelDataMap.Builder().withInitial(RetextureModel.TEXTURES, textures).build();
 		}
 	}

@@ -10,7 +10,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Direction;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.loading.FMLEnvironment;
+import snownee.kiwi.loader.Platform;
 
 public class EnumUtil {
 	public static final Direction[] DIRECTIONS = Direction.values();
@@ -27,7 +27,7 @@ public class EnumUtil {
 	public static Set<RenderType> BLOCK_RENDER_TYPES;
 
 	static {
-		if (FMLEnvironment.dist.isClient()) {
+		if (Platform.isPhysicalClient()) {
 			BLOCK_RENDER_TYPES = ImmutableSet.of(RenderType.solid(), RenderType.cutout(), RenderType.cutoutMipped(), RenderType.translucent());
 		}
 	}

@@ -22,12 +22,12 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.block.IKiwiBlock;
+import snownee.kiwi.loader.Platform;
 
 public class ModBlockItem extends BlockItem {
-	public static final Set<BlockEntityType<?>> INSTANT_UPDATE_TILES = FMLEnvironment.dist == Dist.CLIENT ? Sets.newHashSet() : null;
+	public static final Set<BlockEntityType<?>> INSTANT_UPDATE_TILES = Platform.isPhysicalClient() ? Sets.newHashSet() : null;
 
 	public ModBlockItem(Block block, Item.Properties builder) {
 		super(block, builder);

@@ -26,13 +26,13 @@ import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLModContainer;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fmllegacy.DatagenModLoader;
 import net.minecraftforge.fmlserverevents.FMLServerStartingEvent;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import snownee.kiwi.KiwiModule.Category;
 import snownee.kiwi.block.IKiwiBlock;
 import snownee.kiwi.item.ModBlockItem;
+import snownee.kiwi.loader.Platform;
 
 public class ModuleInfo {
 	public static final class RegistryHolder {
@@ -112,7 +112,7 @@ public class ModuleInfo {
 			decorator.accept(this, e.entry.setRegistryName(e.name));
 			event.getRegistry().register(e.entry);
 		});
-		if (clazz == Block.class && FMLEnvironment.dist.isClient()) {
+		if (clazz == Block.class && Platform.isPhysicalClient()) {
 			final RenderType solid = RenderType.solid();
 			Map<Class<?>, RenderType> cache = Maps.newHashMap();
 			entries.stream().forEach(e -> {

@@ -20,9 +20,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fmllegacy.server.ServerLifecycleHooks;
 import net.minecraftforge.registries.ForgeRegistries;
+import snownee.kiwi.loader.Platform;
 
 public final class Util {
 	private Util() {
@@ -121,10 +120,10 @@ public final class Util {
 
 	@Nullable
 	public static RecipeManager getRecipeManager() {
-		MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+		MinecraftServer server = Platform.getServer();
 		if (server != null) {
 			return server.getRecipeManager();
-		} else if (FMLEnvironment.dist.isClient()) {
+		} else if (Platform.isPhysicalClient()) {
 			ClientPacketListener connection = Minecraft.getInstance().getConnection();
 			if (connection != null) {
 				return connection.getRecipeManager();

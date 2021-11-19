@@ -22,12 +22,12 @@ import net.minecraftforge.fml.config.ModConfig.Type;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.javafmlmod.FMLModContainer;
 import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.fmllegacy.server.ServerLifecycleHooks;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.config.KiwiConfig.Comment;
 import snownee.kiwi.config.KiwiConfig.LevelRestart;
 import snownee.kiwi.config.KiwiConfig.Range;
 import snownee.kiwi.config.KiwiConfig.Translation;
+import snownee.kiwi.loader.Platform;
 
 public class ConfigHandler {
 
@@ -158,7 +158,7 @@ public class ConfigHandler {
 	public void forceLoad() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
 		java.nio.file.Path path;
 		if (type == Type.SERVER) {
-			path = ServerLifecycleHooks.getCurrentServer().getFile("serverconfig").toPath();
+			path = Platform.getServer().getFile("serverconfig").toPath();
 		} else {
 			path = FMLPaths.CONFIGDIR.get();
 		}

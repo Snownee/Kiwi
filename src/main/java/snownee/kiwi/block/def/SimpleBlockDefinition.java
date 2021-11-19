@@ -41,8 +41,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.client.model.data.EmptyModelData;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import snownee.kiwi.loader.Platform;
 
 public class SimpleBlockDefinition implements BlockDefinition {
 
@@ -126,7 +126,7 @@ public class SimpleBlockDefinition implements BlockDefinition {
 
 	private SimpleBlockDefinition(BlockState state) {
 		this.state = state;
-		if (FMLEnvironment.dist.isClient()) {
+		if (Platform.isPhysicalClient()) {
 			materials = new Material[7];
 		}
 	}

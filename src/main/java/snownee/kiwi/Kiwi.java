@@ -95,6 +95,7 @@ import snownee.kiwi.command.KiwiCommand;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfig;
 import snownee.kiwi.config.KiwiConfigManager;
+import snownee.kiwi.loader.Platform;
 import snownee.kiwi.schedule.Scheduler;
 import snownee.kiwi.util.Util;
 
@@ -132,7 +133,7 @@ public class Kiwi {
 
 		Map<Type, AnnotationData> moduleToOptional = Maps.newHashMap();
 		List<IModInfo> mods = ImmutableList.copyOf(ModList.get().getMods());
-		String dist = FMLEnvironment.dist.name();
+		String dist = Platform.isPhysicalClient() ? "client" : "server";
 		for (IModInfo info : mods) {
 			IModFileInfo modFileInfo = info.getOwningFile();
 			if (modFileInfo == null)
@@ -154,7 +155,7 @@ public class Kiwi {
 						type = ModConfig.Type.valueOf(typeHolder.getValue());
 					}
 					type = type == null ? ModConfig.Type.COMMON : type;
-					if (((type != ModConfig.Type.CLIENT) || !FMLEnvironment.dist.isDedicatedServer())) {
+					if ((type != ModConfig.Type.CLIENT || Platform.isPhysicalClient())) {
 						try {
 							Class<?> clazz = Class.forName(annotationData.clazz().getClassName());
 							KiwiConfig kiwiConfig = clazz.getAnnotation(KiwiConfig.class);
@@ -182,7 +183,7 @@ public class Kiwi {
 			AnnotationData optional = moduleToOptional.get(entry.getValue().clazz());
 			if (optional != null) {
 				String modid = entry.getKey();
-				if (!ModList.get().isLoaded(modid)) {
+				if (!Platform.isModLoaded(modid)) {
 					continue;
 				}
 
@@ -207,7 +208,7 @@ public class Kiwi {
 		MinecraftForge.EVENT_BUS.addListener(this::serverInit);
 		modEventBus.addListener(this::postInit);
 		modEventBus.addListener(this::loadComplete);
-		if (FMLEnvironment.dist.isClient()) {
+		if (Platform.isPhysicalClient()) {
 			modEventBus.addListener(this::registerModelLoader);
 		}
 		try {
@@ -286,7 +287,7 @@ public class Kiwi {
 		for (Entry<String, AnnotationData> entry : moduleData.entries()) {
 			AnnotationData module = entry.getValue();
 			String modid = entry.getKey();
-			if (!ModList.get().isLoaded(modid)) {
+			if (!Platform.isModLoaded(modid)) {
 				continue;
 			}
 
@@ -320,7 +321,7 @@ public class Kiwi {
 				if (rule.startsWith("@")) {
 					info.moduleRules.add(Util.RL(rule.substring(1), modid));
 					checkDep = true;
-				} else if (!ModList.get().isLoaded(rule)) {
+				} else if (!Platform.isModLoaded(rule)) {
 					continue load;
 				}
 			}
