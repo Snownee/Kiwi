@@ -61,14 +61,12 @@ import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoader;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.ModLoadingStage;
 import net.minecraftforge.fml.ModLoadingWarning;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -108,7 +106,6 @@ import snownee.kiwi.schedule.Scheduler;
 import snownee.kiwi.util.Util;
 
 @Mod(Kiwi.MODID)
-@EventBusSubscriber
 public class Kiwi {
 	public static final String MODID = "kiwi";
 	public static final String NAME = "Kiwi";
@@ -219,6 +216,8 @@ public class Kiwi {
 		if (Platform.isPhysicalClient()) {
 			modEventBus.addListener(this::registerModelLoader);
 		}
+		MinecraftForge.EVENT_BUS.addListener(this::onCommandsRegister);
+		MinecraftForge.EVENT_BUS.addListener(this::onTagsUpdated);
 		try {
 			Method method = modEventBus.getClass().getDeclaredMethod("addListener", EventPriority.class, Predicate.class, Consumer.class);
 			method.setAccessible(true);
@@ -573,8 +572,7 @@ public class Kiwi {
 		ModLoadingContext.get().setActiveContainer(null);
 	}
 
-	@SubscribeEvent
-	protected static void onCommandsRegister(RegisterCommandsEvent event) {
+	private void onCommandsRegister(RegisterCommandsEvent event) {
 		KiwiCommand.register(event.getDispatcher(), event.getEnvironment());
 	}
 
@@ -615,8 +613,7 @@ public class Kiwi {
 
 	private static boolean tagsUpdated;
 
-	@SubscribeEvent
-	protected static void onTagsUpdated(TagsUpdatedEvent event) {
+	private void onTagsUpdated(TagsUpdatedEvent event) {
 		tagsUpdated = true;
 	}
 

@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.HitResult;
 import snownee.kiwi.block.entity.BaseBlockEntity;
-import snownee.kiwi.util.DeferredActions;
+import snownee.kiwi.util.VanillaActions;
 
 /**
  *
@@ -149,7 +149,7 @@ public class ModBlock extends Block {
 			flammability = 60;
 		}
 		if (fireSpreadSpeed != 0) {
-			DeferredActions.setFireInfo(block, fireSpreadSpeed, flammability);
+			VanillaActions.setFireInfo(block, fireSpreadSpeed, flammability);
 		}
 	}
 

@@ -19,7 +19,6 @@ import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.event.ForgeEventFactory;
 
@@ -87,8 +86,4 @@ public final class PlayerUtil {
 		return true;
 	}
 
-	public static boolean canTouch(Player player, BlockPos pos) {
-		double reach = player.getAttribute(ForgeMod.REACH_DISTANCE.get()).getValue();
-		return player.distanceToSqr(pos.getX() + 0.5d, pos.getY() + 0.5d, pos.getZ() + 0.5d) <= reach * reach;
-	}
 }

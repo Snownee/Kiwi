@@ -1,10 +1,12 @@
 package snownee.kiwi.recipe.crafting;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
+import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
 
 import it.unimi.dsi.fastutil.chars.Char2ObjectArrayMap;
@@ -60,6 +62,18 @@ public abstract class DynamicShapedRecipe extends CustomRecipe implements IShape
 			return inv.getItem(x + y * inv.getWidth());
 		}
 		return ItemStack.EMPTY;
+	}
+
+	public List<ItemStack> items(char key, CraftingContainer inv, int[] matchPos) {
+		List<ItemStack> items = Lists.newArrayList();
+		for (int i = 0; i < pattern.length(); i++) {
+			if (key == pattern.charAt(i)) {
+				int x = matchPos[0] + i % width;
+				int y = matchPos[1] + i / width;
+				items.add(inv.getItem(x + y * inv.getWidth()));
+			}
+		}
+		return items;
 	}
 
 	@Override
