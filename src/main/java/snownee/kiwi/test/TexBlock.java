@@ -14,9 +14,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import snownee.kiwi.block.ModBlock;
+import snownee.kiwi.block.def.SimpleBlockDefinition;
 import snownee.kiwi.block.entity.RetextureBlockEntity;
-import snownee.kiwi.crafting.FullBlockIngredient;
-import snownee.kiwi.util.SimpleBlockDefinition;
+import snownee.kiwi.recipe.FullBlockIngredient;
 
 public class TexBlock extends BaseEntityBlock {
 

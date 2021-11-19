@@ -58,8 +58,8 @@ import net.minecraftforge.client.model.geometry.IModelGeometry;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
+import snownee.kiwi.block.def.BlockDefinition;
 import snownee.kiwi.block.entity.RetextureBlockEntity;
-import snownee.kiwi.util.BlockDefinition;
 import snownee.kiwi.util.NBTHelper;
 
 @EventBusSubscriber(bus = Bus.MOD, value = Dist.CLIENT)

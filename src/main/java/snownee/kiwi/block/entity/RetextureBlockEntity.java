@@ -21,11 +21,11 @@ import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.fml.util.thread.EffectiveSide;
+import snownee.kiwi.block.def.BlockDefinition;
+import snownee.kiwi.block.def.SimpleBlockDefinition;
 import snownee.kiwi.client.model.RetextureModel;
-import snownee.kiwi.util.BlockDefinition;
 import snownee.kiwi.util.NBTHelper;
 import snownee.kiwi.util.NBTHelper.NBT;
-import snownee.kiwi.util.SimpleBlockDefinition;
 
 public abstract class RetextureBlockEntity extends BaseBlockEntity {
 	@Nullable

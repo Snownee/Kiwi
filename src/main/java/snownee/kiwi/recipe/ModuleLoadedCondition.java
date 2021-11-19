@@ -1,4 +1,4 @@
-package snownee.kiwi.crafting;
+package snownee.kiwi.recipe;
 
 import com.google.gson.JsonObject;
 

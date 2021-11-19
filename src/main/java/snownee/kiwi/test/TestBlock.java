@@ -18,9 +18,9 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import snownee.kiwi.block.IKiwiBlock;
 import snownee.kiwi.block.ModBlock;
+import snownee.kiwi.block.def.SimpleBlockDefinition;
 import snownee.kiwi.block.entity.RetextureBlockEntity;
-import snownee.kiwi.crafting.FullBlockIngredient;
-import snownee.kiwi.util.SimpleBlockDefinition;
+import snownee.kiwi.recipe.FullBlockIngredient;
 
 // fill ~-40 ~ ~-40 ~40 ~ ~40 kiwi:tex_block
 public class TestBlock extends StairBlock implements EntityBlock, IKiwiBlock {

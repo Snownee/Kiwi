@@ -1,5 +1,5 @@
 {
-  "type": "kiwi:texture_block",
+  "type": "kiwi:retexture",
   "conditions": [
     {
       "type": "kiwi:is_loaded",
@@ -17,11 +17,10 @@
     }
   },
   "texture": {
-    "#": [ "top", "bottom", "side" ]
+    "#": [ "0" ]
   },
-  "mark": [ "top" ],
   "result": {
-    "item": "kiwi:first_block",
+    "item": "kiwi:tex_block",
     "count": 4
   }
 }

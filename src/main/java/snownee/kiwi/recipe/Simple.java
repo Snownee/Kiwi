@@ -1,4 +1,4 @@
-package snownee.kiwi.crafting;
+package snownee.kiwi.recipe;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;

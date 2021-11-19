@@ -88,14 +88,14 @@ import net.minecraftforge.registries.ObjectHolderRegistry;
 import net.minecraftforge.registries.RegistryManager;
 import snownee.kiwi.KiwiModule.Category;
 import snownee.kiwi.KiwiModule.Subscriber;
+import snownee.kiwi.block.def.BlockDefinition;
+import snownee.kiwi.block.def.SimpleBlockDefinition;
 import snownee.kiwi.client.model.RetextureModel;
 import snownee.kiwi.command.KiwiCommand;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfig;
 import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.schedule.Scheduler;
-import snownee.kiwi.util.BlockDefinition;
-import snownee.kiwi.util.SimpleBlockDefinition;
 import snownee.kiwi.util.Util;
 
 @Mod(Kiwi.MODID)

@@ -5,11 +5,11 @@ import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiModule;
-import snownee.kiwi.crafting.FullBlockIngredient;
-import snownee.kiwi.crafting.ModuleLoadedCondition;
-import snownee.kiwi.crafting.NoContainersShapedRecipe;
-import snownee.kiwi.crafting.NoContainersShapelessRecipe;
-import snownee.kiwi.crafting.RetextureRecipe;
+import snownee.kiwi.recipe.FullBlockIngredient;
+import snownee.kiwi.recipe.ModuleLoadedCondition;
+import snownee.kiwi.recipe.crafting.NoContainersShapedRecipe;
+import snownee.kiwi.recipe.crafting.NoContainersShapelessRecipe;
+import snownee.kiwi.recipe.crafting.RetextureRecipe;
 
 @KiwiModule("data")
 public final class DataModule extends AbstractModule {

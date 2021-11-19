@@ -1,4 +1,4 @@
-package snownee.kiwi.util;
+package snownee.kiwi.block.def;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -89,6 +89,9 @@ public class SimpleBlockDefinition implements BlockDefinition {
 				return null;
 			}
 			BlockItem blockItem = (BlockItem) stack.getItem();
+			if (context == null) {
+				return of(blockItem.getBlock().defaultBlockState());
+			}
 			context = blockItem.updatePlacementContext(context);
 			if (context == null) {
 				return null;

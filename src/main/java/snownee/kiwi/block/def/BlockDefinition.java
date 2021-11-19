@@ -1,4 +1,4 @@
-package snownee.kiwi.util;
+package snownee.kiwi.block.def;
 
 import java.util.List;
 import java.util.Map;
@@ -62,7 +62,7 @@ public interface BlockDefinition {
 		return null;
 	}
 
-	static BlockDefinition fromItem(ItemStack stack, BlockPlaceContext context) {
+	static BlockDefinition fromItem(ItemStack stack, @Nullable BlockPlaceContext context) {
 		if (!stack.isEmpty()) {
 			for (Factory<?> factory : FACTORIES) {
 				BlockDefinition supplier = factory.fromItem(stack, context);
@@ -105,6 +105,23 @@ public interface BlockDefinition {
 
 	BlockState getBlockState();
 
+	default BlockDefinition getCamoDefinition() {
+		return null;
+	}
+
+	static BlockDefinition getCamo(BlockDefinition definition) {
+		BlockDefinition camo = definition.getCamoDefinition();
+		while (camo != null && camo != definition) {
+			definition = camo;
+			camo = definition.getCamoDefinition();
+		}
+		return definition;
+	}
+
+	default int getLightEmission(BlockGetter level, BlockPos pos) {
+		return getBlockState().getLightEmission(level, pos);
+	}
+
 	SoundType getSoundType();
 
 	interface Factory<T extends BlockDefinition> {
@@ -116,7 +133,7 @@ public interface BlockDefinition {
 		T fromBlock(BlockState state, BlockEntity blockEntity, LevelReader level, BlockPos pos);
 
 		@Nullable
-		T fromItem(ItemStack stack, BlockPlaceContext context);
+		T fromItem(ItemStack stack, @Nullable BlockPlaceContext context);
 	}
 
 }
