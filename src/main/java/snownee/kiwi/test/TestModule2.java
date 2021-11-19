@@ -12,7 +12,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiModule;
-import snownee.kiwi.Name;
+import snownee.kiwi.KiwiModule.Name;
 
 @KiwiModule(value = "test2", dependencies = "forge;@kiwi:test")
 @KiwiModule.Optional(disabledByDefault = true)

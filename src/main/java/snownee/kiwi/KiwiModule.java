@@ -6,7 +6,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.function.Supplier;
 
+import net.minecraft.client.renderer.RenderType;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -104,4 +106,77 @@ public @interface KiwiModule {
 	@interface LoadingCondition {
 		String[] value() default "";
 	}
+
+	/**
+	 *
+	 * Rename the entry's registry name. It will be useful if you want to custom
+	 * your own BlockItem
+	 *
+	 * @author Snownee
+	 *
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.FIELD)
+	public @interface Name {
+		String value();
+	}
+
+	/**
+	 *
+	 * Set group of this item/block to null
+	 *
+	 * @see KiwiModule.Category
+	 * @author Snownee
+	 *
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.FIELD)
+	public @interface NoCategory {
+	}
+
+	/**
+	 *
+	 * Only used by block. Kiwi will not automatically register its BlockItem
+	 * @author Snownee
+	 *
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.FIELD)
+	public @interface NoItem {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.TYPE, ElementType.FIELD })
+	public @interface RenderLayer {
+		Layer value();
+
+		enum Layer {
+			CUTOUT_MIPPED(() -> RenderType::cutoutMipped),
+			CUTOUT(() -> RenderType::cutout),
+			TRANSLUCENT(() -> RenderType::translucent);
+
+			private final Supplier<Supplier<RenderType>> supplier;
+
+			Layer(Supplier<Supplier<RenderType>> supplier) {
+				this.supplier = supplier;
+			}
+
+			@OnlyIn(Dist.CLIENT)
+			public RenderType get() {
+				return supplier.get().get();
+			}
+		}
+	}
+
+	/**
+	 *
+	 * Prevent this field being cached by Kiwi
+	 * @author Snownee
+	 *
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.FIELD)
+	public @interface Skip {
+	}
+
 }

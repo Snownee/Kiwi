@@ -30,6 +30,7 @@ import net.minecraftforge.fmllegacy.DatagenModLoader;
 import net.minecraftforge.fmlserverevents.FMLServerStartingEvent;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import snownee.kiwi.KiwiModule.Category;
+import snownee.kiwi.KiwiModule.RenderLayer;
 import snownee.kiwi.block.IKiwiBlock;
 import snownee.kiwi.item.ModBlockItem;
 import snownee.kiwi.loader.Platform;
