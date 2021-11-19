@@ -6,22 +6,37 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
+import com.google.gson.JsonElement;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.common.ForgeMod;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 import snownee.kiwi.loader.Platform;
+import snownee.kiwi.util.NBTHelper.NBT;
 
 public final class Util {
 	private Util() {
@@ -139,5 +154,131 @@ public final class Util {
 		} else {
 			return getRecipeManager().byType(recipeTypeIn);
 		}
+	}
+
+	public static int friendlyCompare(String a, String b) {
+		int aLength = a.length();
+		int bLength = b.length();
+		int minSize = Math.min(aLength, bLength);
+		char aChar, bChar;
+		boolean aNumber, bNumber;
+		boolean asNumeric = false;
+		int lastNumericCompare = 0;
+		for (int i = 0; i < minSize; i++) {
+			aChar = a.charAt(i);
+			bChar = b.charAt(i);
+			aNumber = aChar >= '0' && aChar <= '9';
+			bNumber = bChar >= '0' && bChar <= '9';
+			if (asNumeric)
+				if (aNumber && bNumber) {
+					if (lastNumericCompare == 0)
+						lastNumericCompare = aChar - bChar;
+				} else if (aNumber)
+					return 1;
+				else if (bNumber)
+					return -1;
+				else if (lastNumericCompare == 0) {
+					if (aChar != bChar)
+						return aChar - bChar;
+					asNumeric = false;
+				} else
+					return lastNumericCompare;
+			else if (aNumber && bNumber) {
+				asNumeric = true;
+				if (lastNumericCompare == 0)
+					lastNumericCompare = aChar - bChar;
+			} else if (aChar != bChar)
+				return aChar - bChar;
+		}
+		if (asNumeric)
+			if (aLength > bLength && a.charAt(bLength) >= '0' && a.charAt(bLength) <= '9') // as number
+				return 1; // a has bigger size, thus b is smaller
+			else if (bLength > aLength && b.charAt(aLength) >= '0' && b.charAt(aLength) <= '9') // as number
+				return -1; // b has bigger size, thus a is smaller
+			else if (lastNumericCompare == 0)
+				return aLength - bLength;
+			else
+				return lastNumericCompare;
+		else
+			return aLength - bLength;
+	}
+
+	public static boolean canPlayerBreak(Player player, BlockState state, BlockPos pos) {
+		if (!player.mayBuild() || !player.level.mayInteract(player, pos)) {
+			return false;
+		}
+		if (!player.isCreative() && state.getDestroyProgress(player, player.level, pos) <= 0) {
+			return false;
+		}
+		BreakEvent event = new BreakEvent(player.level, pos, state, player);
+		if (MinecraftForge.EVENT_BUS.post(event)) {
+			return false;
+		}
+		return true;
+	}
+
+	public static int applyAlpha(int color, float alpha) {
+		int prevAlphaChannel = (color >> 24) & 0xFF;
+		if (prevAlphaChannel > 0)
+			alpha *= prevAlphaChannel / 256f;
+		int alphaChannel = (int) (0xFF * Mth.clamp(alpha, 0, 1));
+		if (alphaChannel < 5) // fix font renderer bug
+			return 0;
+		return (color & 0xFFFFFF) | alphaChannel << 24;
+	}
+
+	public static float getPickRange(Player player) {
+		float attrib = (float) player.getAttribute(ForgeMod.REACH_DISTANCE.get()).getValue();
+		return player.isCreative() ? attrib : attrib - 0.5F;
+	}
+
+	public static void displayClientMessage(@Nullable Player player, boolean client, String key, Object... args) {
+		if (player == null) {
+			return;
+		}
+		if (client != player.level.isClientSide) {
+			return;
+		}
+		player.displayClientMessage(new TranslatableComponent(key, args), true);
+	}
+
+	public static void jsonList(JsonElement json, Consumer<JsonElement> collector) {
+		if (json.isJsonArray()) {
+			for (JsonElement e : json.getAsJsonArray()) {
+				collector.accept(e);
+			}
+		} else {
+			collector.accept(json);
+		}
+	}
+
+	@Nullable
+	public static String[] readNBTStrings(CompoundTag tag, String key, @Nullable String[] strings) {
+		if (!tag.contains(key, NBT.LIST)) {
+			return null;
+		}
+		ListTag list = tag.getList(key, NBT.STRING);
+		if (list.isEmpty()) {
+			return null;
+		}
+		if (strings == null || strings.length != list.size()) {
+			strings = new String[list.size()];
+		}
+		for (int i = 0; i < strings.length; i++) {
+			String s = list.getString(i);
+			strings[i] = s;
+		}
+		return strings;
+	}
+
+	public static void writeNBTStrings(CompoundTag tag, String key, @Nullable String[] strings) {
+		if (strings == null || strings.length == 0) {
+			return;
+		}
+		ListTag list = new ListTag();
+		for (String s : strings) {
+			list.add(StringTag.valueOf(s));
+		}
+		tag.put(key, list);
 	}
 }

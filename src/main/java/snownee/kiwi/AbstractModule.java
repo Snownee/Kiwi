@@ -50,10 +50,6 @@ public abstract class AbstractModule {
 		// NO-OP
 	}
 
-	/**
-     * @author Snownee
-     * @param event Note: this event's ModContainer is from Kiwi
-     */
 	protected void init(FMLCommonSetupEvent event) {
 		// NO-OP
 	}
