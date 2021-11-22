@@ -5,8 +5,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import javax.annotation.Nullable;
-
 import com.google.common.collect.ImmutableMap;
 
 import net.minecraft.network.FriendlyByteBuf;
@@ -24,7 +22,7 @@ public class SSyncCosmeticPacket extends PacketHandler.Impl {
 	public static SSyncCosmeticPacket I;
 
 	@Override
-	public CompletableFuture<@Nullable FriendlyByteBuf> receive(Function<Runnable, CompletableFuture<@Nullable FriendlyByteBuf>> executor, FriendlyByteBuf buf, ServerPlayer sender) {
+	public CompletableFuture<FriendlyByteBuf> receive(Function<Runnable, CompletableFuture<FriendlyByteBuf>> executor, FriendlyByteBuf buf, ServerPlayer sender) {
 		ImmutableMap.Builder<String, ResourceLocation> builder = ImmutableMap.builder();
 		int size = buf.readVarInt();
 		for (int i = 0; i < size; i++) {

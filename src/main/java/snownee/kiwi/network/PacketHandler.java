@@ -15,7 +15,7 @@ import net.minecraftforge.fmllegacy.network.PacketDistributor.PacketTarget;
 
 @FunctionalInterface
 public interface PacketHandler {
-	CompletableFuture<@Nullable FriendlyByteBuf> receive(Function<Runnable, CompletableFuture<@Nullable FriendlyByteBuf>> executor, FriendlyByteBuf buf, @Nullable ServerPlayer sender);
+	CompletableFuture<FriendlyByteBuf> receive(Function<Runnable, CompletableFuture<FriendlyByteBuf>> executor, FriendlyByteBuf buf, @Nullable ServerPlayer sender);
 
 	default Networking.Direction getDirection() {
 		return null;

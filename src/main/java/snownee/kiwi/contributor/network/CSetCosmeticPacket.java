@@ -3,8 +3,6 @@ package snownee.kiwi.contributor.network;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
-import javax.annotation.Nullable;
-
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -19,7 +17,7 @@ public class CSetCosmeticPacket extends PacketHandler.Impl {
 	public static CSetCosmeticPacket I;
 
 	@Override
-	public CompletableFuture<@Nullable FriendlyByteBuf> receive(Function<Runnable, CompletableFuture<@Nullable FriendlyByteBuf>> executor, FriendlyByteBuf buf, ServerPlayer sender) {
+	public CompletableFuture<FriendlyByteBuf> receive(Function<Runnable, CompletableFuture<FriendlyByteBuf>> executor, FriendlyByteBuf buf, ServerPlayer sender) {
 		ResourceLocation id = Util.RL(buf.readUtf(32767));
 		Contributors.changeCosmetic(sender, id);
 		return CompletableFuture.completedFuture(null);
