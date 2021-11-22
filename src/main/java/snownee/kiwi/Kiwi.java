@@ -102,6 +102,8 @@ import snownee.kiwi.loader.event.ClientInitEvent;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.loader.event.PostInitEvent;
 import snownee.kiwi.loader.event.ServerInitEvent;
+import snownee.kiwi.network.KiwiPacket;
+import snownee.kiwi.network.Networking;
 import snownee.kiwi.schedule.Scheduler;
 import snownee.kiwi.util.Util;
 
@@ -133,6 +135,7 @@ public class Kiwi {
 	public Kiwi() throws Exception {
 		final Type KIWI_MODULE = Type.getType(KiwiModule.class);
 		final Type KIWI_CONFIG = Type.getType(KiwiConfig.class);
+		final Type KIWI_PACKET = Type.getType(KiwiPacket.class);
 		final Type OPTIONAL_MODULE = Type.getType(KiwiModule.Optional.class);
 		final Type LOADING_CONDITION = Type.getType(KiwiModule.LoadingCondition.class);
 
@@ -144,7 +147,8 @@ public class Kiwi {
 			if (modFileInfo == null)
 				continue;
 			for (AnnotationData annotationData : modFileInfo.getFile().getScanResult().getAnnotations()) {
-				if (KIWI_MODULE.equals(annotationData.annotationType())) {
+				Type annotationType = annotationData.annotationType();
+				if (KIWI_MODULE.equals(annotationType)) {
 					if (!checkDist(annotationData, dist)) {
 						continue;
 					}
@@ -163,7 +167,7 @@ public class Kiwi {
 					if ((type != ModConfig.Type.CLIENT || Platform.isPhysicalClient())) {
 						try {
 							Class<?> clazz = Class.forName(annotationData.clazz().getClassName());
-							KiwiConfig kiwiConfig = clazz.getAnnotation(KiwiConfig.class);
+							KiwiConfig kiwiConfig = clazz.getDeclaredAnnotation(KiwiConfig.class);
 							String fileName = kiwiConfig.value();
 							boolean master = type == ModConfig.Type.COMMON && Strings.isNullOrEmpty(fileName);
 							if (Strings.isNullOrEmpty(fileName)) {
@@ -174,10 +178,12 @@ public class Kiwi {
 							logger.catching(e);
 						}
 					}
-				} else if (OPTIONAL_MODULE.equals(annotationData.annotationType())) {
+				} else if (OPTIONAL_MODULE.equals(annotationType)) {
 					moduleToOptional.put(annotationData.clazz(), annotationData);
-				} else if (LOADING_CONDITION.equals(annotationData.annotationType())) {
+				} else if (LOADING_CONDITION.equals(annotationType)) {
 					conditions.put(annotationData, info.getModId());
+				} else if (KIWI_PACKET.equals(annotationType)) {
+					Networking.processClass(annotationData.clazz().getClassName(), info.getModId());
 				}
 			}
 		}
@@ -394,7 +400,7 @@ public class Kiwi {
 		for (ModuleInfo info : KiwiModules.get()) {
 			counter.clear();
 			info.context.setActiveContainer();
-			Subscriber subscriber = info.module.getClass().getAnnotation(Subscriber.class);
+			Subscriber subscriber = info.module.getClass().getDeclaredAnnotation(Subscriber.class);
 			if (subscriber != null && ArrayUtils.contains(subscriber.side(), FMLEnvironment.dist)) {
 				// processEvents(info.module);
 				subscriber.value().bus().get().register(info.module);
@@ -402,7 +408,7 @@ public class Kiwi {
 
 			boolean useOwnGroup = info.category == null;
 			if (useOwnGroup) {
-				Category group = info.module.getClass().getAnnotation(Category.class);
+				Category group = info.module.getClass().getDeclaredAnnotation(Category.class);
 				if (group != null) {
 					String val = group.value();
 					if (!val.isEmpty()) {

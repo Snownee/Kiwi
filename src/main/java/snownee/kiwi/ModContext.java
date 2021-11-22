@@ -2,8 +2,8 @@ package snownee.kiwi;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 
 import net.minecraftforge.fml.ModContainer;
@@ -26,7 +26,7 @@ public class ModContext {
 	}
 
 	private ModContext(String modid) {
-		Preconditions.checkNotNull(modid, "Cannot get name of kiwi module.");
+		Objects.requireNonNull(modid, "Cannot get name of kiwi module.");
 		try {
 			modContainer = ModList.get().getModContainerById(modid).get();
 		} catch (NoSuchElementException e) {

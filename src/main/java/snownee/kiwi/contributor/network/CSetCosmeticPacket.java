@@ -1,49 +1,33 @@
 package snownee.kiwi.contributor.network;
 
-import java.util.function.Supplier;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.fmllegacy.network.NetworkEvent;
+import net.minecraft.server.level.ServerPlayer;
 import snownee.kiwi.contributor.Contributors;
-import snownee.kiwi.network.ClientPacket;
+import snownee.kiwi.network.KiwiPacket;
+import snownee.kiwi.network.PacketHandler;
 import snownee.kiwi.util.Util;
 
-public class CSetCosmeticPacket extends ClientPacket {
+@KiwiPacket("set_cosmetic")
+public class CSetCosmeticPacket extends PacketHandler.Impl {
 
-	@Nullable
-	private final ResourceLocation id;
+	public static CSetCosmeticPacket I;
 
-	public CSetCosmeticPacket(@Nullable ResourceLocation id) {
-		this.id = id;
+	@Override
+	public CompletableFuture<@Nullable FriendlyByteBuf> receive(Function<Runnable, CompletableFuture<@Nullable FriendlyByteBuf>> executor, FriendlyByteBuf buf, ServerPlayer sender) {
+		ResourceLocation id = Util.RL(buf.readUtf(32767));
+		Contributors.changeCosmetic(sender, id);
+		return CompletableFuture.completedFuture(null);
 	}
 
-	public static class Handler implements PacketHandler<CSetCosmeticPacket> {
-
-		@Override
-		public void encode(CSetCosmeticPacket msg, FriendlyByteBuf buffer) {
-			if (msg.id == null) {
-				buffer.writeUtf("");
-			} else {
-				buffer.writeUtf(msg.id.toString());
-			}
-		}
-
-		@Override
-		public CSetCosmeticPacket decode(FriendlyByteBuf buffer) {
-			ResourceLocation id = Util.RL(buffer.readUtf(32767));
-			return new CSetCosmeticPacket(id);
-		}
-
-		@Override
-		public void handle(CSetCosmeticPacket msg, Supplier<NetworkEvent.Context> ctx) {
-			//            ctx.get().enqueueWork(() -> {
-			Contributors.changeCosmetic(ctx.get().getSender(), msg.id);
-			//            });
-			ctx.get().setPacketHandled(true);
-		}
+	public static void send(ResourceLocation cosmetic) {
+		String id = cosmetic == null ? "" : cosmetic.toString();
+		I.sendToServer($ -> $.writeUtf(id));
 	}
 
 }

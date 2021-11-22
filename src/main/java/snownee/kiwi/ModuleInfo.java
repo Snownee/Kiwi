@@ -133,7 +133,7 @@ public class ModuleInfo {
 				RenderType type = cache.computeIfAbsent(klass, k -> {
 					RenderLayer layer = null;
 					while (k != Block.class) {
-						layer = k.getAnnotation(RenderLayer.class);
+						layer = k.getDeclaredAnnotation(RenderLayer.class);
 						if (layer != null) {
 							return layer.value().get();
 						}

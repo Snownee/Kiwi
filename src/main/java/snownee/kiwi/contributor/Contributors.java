@@ -32,7 +32,6 @@ import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fmllegacy.network.PacketDistributor;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiClientConfig;
@@ -46,7 +45,6 @@ import snownee.kiwi.contributor.network.CSetCosmeticPacket;
 import snownee.kiwi.contributor.network.SSyncCosmeticPacket;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.loader.event.InitEvent;
-import snownee.kiwi.network.NetworkChannel;
 import snownee.kiwi.util.Util;
 
 @KiwiModule("contributors")
@@ -60,8 +58,6 @@ public class Contributors extends AbstractModule {
 
 	@Override
 	protected void preInit() {
-		NetworkChannel.register(CSetCosmeticPacket.class, new CSetCosmeticPacket.Handler());
-		NetworkChannel.register(SSyncCosmeticPacket.class, new SSyncCosmeticPacket.Handler());
 		if (Platform.isPhysicalClient()) {
 			FMLJavaModLoadingContext.get().getModEventBus().addListener(this::addLayers);
 		}
@@ -121,7 +117,7 @@ public class Contributors extends AbstractModule {
 		}
 		Player player = event.getPlayer();
 		if (!((ServerLevel) event.getEntity().level).getServer().isSingleplayerOwner(player.getGameProfile())) {
-			new SSyncCosmeticPacket(PLAYER_COSMETICS).send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player));
+			SSyncCosmeticPacket.send(PLAYER_COSMETICS, (ServerPlayer) player, false);
 		}
 	}
 
@@ -170,7 +166,7 @@ public class Contributors extends AbstractModule {
 				cfg.refresh();
 				return;
 			}
-			new CSetCosmeticPacket(cosmetic).send();
+			CSetCosmeticPacket.send(cosmetic);
 			if (cosmetic == null) {
 				PLAYER_COSMETICS.remove(getPlayerName());
 			} else {
@@ -202,7 +198,7 @@ public class Contributors extends AbstractModule {
 				} else {
 					PLAYER_COSMETICS.put(playerName, cosmetic);
 				}
-				new SSyncCosmeticPacket(ImmutableMap.of(playerName, cosmetic)).sendExcept(player);
+				SSyncCosmeticPacket.send(ImmutableMap.of(playerName, cosmetic), player, true);
 			}
 		});
 	}

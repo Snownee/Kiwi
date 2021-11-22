@@ -2,10 +2,10 @@ package snownee.kiwi.data.provider;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -48,7 +48,7 @@ public abstract class KiwiBlockLoot extends BlockLoot {
 
 	public KiwiBlockLoot(ResourceLocation moduleId) {
 		ModuleInfo info = KiwiModules.get(moduleId);
-		Preconditions.checkNotNull(info);
+		Objects.requireNonNull(info);
 		knownBlocks = info.getRegistries(Block.class);
 	}
 

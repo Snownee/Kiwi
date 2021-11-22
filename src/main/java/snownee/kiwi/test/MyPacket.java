@@ -1,43 +1,27 @@
 package snownee.kiwi.test;
 
-import java.util.function.Supplier;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
+
+import javax.annotation.Nullable;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.fmllegacy.network.NetworkDirection;
-import net.minecraftforge.fmllegacy.network.NetworkEvent.Context;
-import snownee.kiwi.network.Packet;
+import net.minecraft.server.level.ServerPlayer;
+import snownee.kiwi.network.KiwiPacket;
+import snownee.kiwi.network.PacketHandler;
 
-public class MyPacket extends Packet {
-	private int number;
+@KiwiPacket("my")
+public class MyPacket extends PacketHandler.Impl {
+	public static MyPacket I;
 
-	public MyPacket(int number) {
-		this.number = number;
+	@Override
+	public CompletableFuture<@Nullable FriendlyByteBuf> receive(Function<Runnable, CompletableFuture<@Nullable FriendlyByteBuf>> executor, FriendlyByteBuf buf, ServerPlayer responseSender) {
+		int number = buf.readVarInt();
+		return executor.apply(() -> System.out.println(number));
 	}
 
-	public static class Handler implements PacketHandler<MyPacket> {
-
-		@Override
-		public void encode(MyPacket msg, FriendlyByteBuf buffer) {
-			buffer.writeVarInt(msg.number);
-		}
-
-		@Override
-		public MyPacket decode(FriendlyByteBuf buffer) {
-			return new MyPacket(buffer.readVarInt());
-		}
-
-		@Override
-		public void handle(MyPacket message, Supplier<Context> ctx) {
-			ctx.get().enqueueWork(() -> {
-				System.out.println(message.number);
-			});
-			ctx.get().setPacketHandled(true);
-		}
-
-		@Override
-		public NetworkDirection direction() {
-			return NetworkDirection.PLAY_TO_CLIENT;
-		}
-
+	public static void send(ServerPlayer player, int n) {
+		I.send(player, $ -> $.writeVarInt(n));
 	}
+
 }
