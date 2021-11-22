@@ -24,4 +24,8 @@ public class Platform {
 		return ServerLifecycleHooks.getCurrentServer();
 	}
 
+	public static boolean isProduction() {
+		return FMLEnvironment.production;
+	}
+
 }
