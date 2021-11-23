@@ -5,11 +5,11 @@ import java.util.function.Function;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import snownee.kiwi.network.KiwiPacket;
 import snownee.kiwi.network.PacketHandler;
+import snownee.kiwi.network.KiwiPacket;
 
 @KiwiPacket("my")
-public class MyPacket extends PacketHandler.Impl {
+public class MyPacket extends PacketHandler {
 	public static MyPacket I;
 
 	@Override

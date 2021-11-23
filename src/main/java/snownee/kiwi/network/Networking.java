@@ -20,12 +20,11 @@ import net.minecraftforge.fmllegacy.network.PacketDistributor.PacketTarget;
 import net.minecraftforge.fmllegacy.network.simple.SimpleChannel;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.loader.Platform;
-import snownee.kiwi.network.PacketHandler.Impl;
 
 public final class Networking {
 	private static final String protocol = Integer.toString(1);
 	private static final SimpleChannel channel;
-	private static final Map<ResourceLocation, PacketHandler> handlers = Maps.newHashMap();
+	private static final Map<ResourceLocation, IPacketHandler> handlers = Maps.newHashMap();
 
 	private Networking() {
 	}
@@ -52,7 +51,7 @@ public final class Networking {
 
 	private static void handle(FriendlyByteBuf msg, Supplier<NetworkEvent.Context> ctx) {
 		ResourceLocation id = msg.readResourceLocation();
-		PacketHandler handler = handlers.get(id);
+		IPacketHandler handler = handlers.get(id);
 		if (handler == null) {
 			ctx.get().getNetworkManager().disconnect(new TextComponent("Illegal packet received, terminating connection"));
 			throw new IllegalStateException("Invalid packet received, aborting connection");
@@ -65,7 +64,7 @@ public final class Networking {
 		ctx.get().setPacketHandled(true);
 	}
 
-	public static synchronized void registerHandler(ResourceLocation id, PacketHandler handler) {
+	public static synchronized void registerHandler(ResourceLocation id, IPacketHandler handler) {
 		handlers.put(id, handler);
 	}
 
@@ -101,8 +100,8 @@ public final class Networking {
 	}
 
 	public static void processClass(String className, String modId) throws Exception {
-		Class<? extends PacketHandler.Impl> clazz = (Class<? extends Impl>) Class.forName(className);
-		PacketHandler.Impl handler = clazz.getDeclaredConstructor().newInstance();
+		Class<? extends PacketHandler> clazz = (Class<? extends PacketHandler>) Class.forName(className);
+		PacketHandler handler = clazz.getDeclaredConstructor().newInstance();
 		handler.setModId(modId);
 		registerHandler(handler.id, handler);
 		try {
