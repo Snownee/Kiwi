@@ -20,7 +20,7 @@ public final class KiwiClientConfig {
 	@Comment("Max line width shown in description of tooltips")
 	@Translation("tooltipWrapWidth")
 	@Range(min = 50)
-	public static int tooltipWrapWidth1 = 200;
+	public static int tooltipWrapWidth = 200;
 
 	@Comment("Show item tags in advanced tooltips")
 	@Translation("tagsTooltip")

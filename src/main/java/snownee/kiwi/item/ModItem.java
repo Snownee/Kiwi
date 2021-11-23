@@ -61,7 +61,7 @@ public class ModItem extends Item {
 			List<String> lines = Lists.newArrayList(I18n.get(key).split("\n"));
 
 			Font fontRenderer = Minecraft.getInstance().font;
-			int width = Math.max(fontRenderer.width(tooltip.get(0).getString()), KiwiClientConfig.tooltipWrapWidth1);
+			int width = Math.max(fontRenderer.width(tooltip.get(0).getString()), KiwiClientConfig.tooltipWrapWidth);
 			/* off */
             tooltip.addAll(
                     lines.stream()
