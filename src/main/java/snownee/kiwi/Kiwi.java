@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -32,12 +31,10 @@ import com.electronwill.nightconfig.core.utils.StringUtils;
 import com.google.common.base.Predicates;
 import com.google.common.base.Strings;
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
 import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.MutableGraph;
@@ -81,7 +78,6 @@ import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.forgespi.language.ModFileScanData.AnnotationData;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
-import net.minecraftforge.registries.ObjectHolderRegistry;
 import net.minecraftforge.registries.RegistryManager;
 import snownee.kiwi.KiwiModule.Category;
 import snownee.kiwi.KiwiModule.Name;
@@ -128,10 +124,8 @@ public class Kiwi {
 
 	private static Multimap<String, AnnotationData> moduleData = ArrayListMultimap.create();
 	public static Map<ResourceLocation, Boolean> defaultOptions = Maps.newHashMap();
-	private static SetMultimap<ResourceLocation, KiwiObjectHolderRef> holderRefs = HashMultimap.create();
 	private static Map<AnnotationData, String> conditions = Maps.newHashMap();
 
-	@SuppressWarnings("unused")
 	public Kiwi() throws Exception {
 		final Type KIWI_MODULE = Type.getType(KiwiModule.class);
 		final Type KIWI_CONFIG = Type.getType(KiwiConfig.class);
@@ -498,10 +492,6 @@ public class Kiwi {
 					int i = counter.getOrDefault(superType, 0);
 					counter.put(superType, i + 1);
 					info.register(entry, regName, field);
-					Optional<KiwiObjectHolderRef> optional = holderRefs.get(regName).stream().filter(ref -> superType.equals(ref.getRegistryType())).findAny();
-					if (optional.isPresent()) {
-						ObjectHolderRegistry.addHandler(optional.get().withField(field));
-					}
 				}
 
 				tmpBuilder = null;
@@ -523,8 +513,6 @@ public class Kiwi {
 
 		KiwiModules.fire(ModuleInfo::preInit);
 		ModLoadingContext.get().setActiveContainer(null);
-		holderRefs.clear();
-		holderRefs = null;
 	}
 
 	//    private static void processEvents(Object object) {
@@ -596,17 +584,6 @@ public class Kiwi {
 
 	public static boolean isLoaded(ResourceLocation module) {
 		return KiwiModules.isLoaded(module);
-	}
-
-	/**
-	 * @since 2.6.0
-	 */
-	public static void applyObjectHolder(IForgeRegistry<?> registry, ResourceLocation registryName) {
-		if (holderRefs == null) {
-			logger.warn(MARKER, "Adding object holder too late. {}: {}", registry, registryName);
-			return;
-		}
-		holderRefs.put(registryName, new KiwiObjectHolderRef(null, registryName, registry));
 	}
 
 	private static ResourceLocation checkPrefix(String name, String defaultModid) {

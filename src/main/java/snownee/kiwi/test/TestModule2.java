@@ -1,13 +1,11 @@
 package snownee.kiwi.test;
 
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.Tag.Named;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
-import net.minecraftforge.registries.ForgeRegistries;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiModule;
@@ -33,10 +31,6 @@ public class TestModule2 extends AbstractModule {
 			return true;
 		}
 	};
-
-	static {
-		Kiwi.applyObjectHolder(ForgeRegistries.ITEMS, new ResourceLocation(Kiwi.MODID, "first_item"));
-	}
 
 	@Override
 	protected void init(InitEvent event) {
