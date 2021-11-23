@@ -7,8 +7,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import snownee.kiwi.contributor.Contributors;
-import snownee.kiwi.network.PacketHandler;
 import snownee.kiwi.network.KiwiPacket;
+import snownee.kiwi.network.PacketHandler;
 import snownee.kiwi.util.Util;
 
 @KiwiPacket("set_cosmetic")

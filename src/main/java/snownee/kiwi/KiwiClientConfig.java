@@ -1,10 +1,9 @@
 package snownee.kiwi;
 
-import com.electronwill.nightconfig.core.conversion.Path;
-
 import snownee.kiwi.config.ConfigType;
 import snownee.kiwi.config.KiwiConfig;
 import snownee.kiwi.config.KiwiConfig.Comment;
+import snownee.kiwi.config.KiwiConfig.Path;
 import snownee.kiwi.config.KiwiConfig.Range;
 import snownee.kiwi.config.KiwiConfig.Translation;
 

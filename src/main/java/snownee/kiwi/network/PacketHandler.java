@@ -25,6 +25,7 @@ public abstract class PacketHandler implements IPacketHandler {
 		direction = annotation.dir();
 	}
 
+	@Override
 	public Networking.Direction getDirection() {
 		return direction;
 	}

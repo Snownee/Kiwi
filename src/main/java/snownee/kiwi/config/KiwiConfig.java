@@ -40,4 +40,28 @@ public @interface KiwiConfig {
 	@Target(ElementType.FIELD)
 	@interface LevelRestart {
 	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.FIELD, ElementType.TYPE })
+	@interface Path {
+		/**
+		 * The path of the value in the configuration. Each key is separated by a dot.
+		 * <p>
+		 * Use {@link AdvancedPath} if you have a key that contains dots.
+		 *
+		 * @return the path in the config
+		 */
+		String value();
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.FIELD, ElementType.TYPE })
+	@interface AdvancedPath {
+		/**
+		 * The path of the value in the configuration. Each key is given by an element of the array.
+		 *
+		 * @return the path in the config
+		 */
+		String[] value();
+	}
 }

@@ -7,7 +7,7 @@ public enum ConfigType {
 
 	public final Type value;
 
-	private ConfigType(Type value) {
+	ConfigType(Type value) {
 		this.value = value;
 	}
 

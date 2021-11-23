@@ -8,12 +8,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 
-import com.electronwill.nightconfig.core.conversion.AdvancedPath;
-import com.electronwill.nightconfig.core.conversion.Path;
 import com.electronwill.nightconfig.core.conversion.ReflectionException;
 import com.electronwill.nightconfig.core.conversion.SpecValidator;
 import com.electronwill.nightconfig.core.utils.StringUtils;
 import com.google.common.base.Predicates;
+
+import snownee.kiwi.config.KiwiConfig.AdvancedPath;
+import snownee.kiwi.config.KiwiConfig.Path;
 
 public class NightConfigUtil {
 

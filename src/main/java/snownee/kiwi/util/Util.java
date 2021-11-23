@@ -19,13 +19,13 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -34,7 +34,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
-import net.minecraftforge.registries.ForgeRegistries;
+import snownee.kiwi.block.def.BlockDefinition;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.NBTHelper.NBT;
 
@@ -121,16 +121,17 @@ public final class Util {
 		return RL(string);
 	}
 
-	public static String getTextureItem(ItemStack stack, String mark) {
+	@Nullable
+	public static Component getBlockDefName(ItemStack stack, String key) {
 		NBTHelper data = NBTHelper.of(stack);
-		ResourceLocation rl = RL(data.getString("BlockEntityTag.Items." + mark));
-		if (rl != null) {
-			Item item = ForgeRegistries.ITEMS.getValue(rl);
-			if (item != null) {
-				return item.getDescriptionId();
+		CompoundTag tag = data.getTag("BlockEntityTag.Overrides." + key);
+		if (tag != null) {
+			BlockDefinition def = BlockDefinition.fromNBT(tag);
+			if (def != null) {
+				return def.getDescription();
 			}
 		}
-		return "";
+		return null;
 	}
 
 	@Nullable

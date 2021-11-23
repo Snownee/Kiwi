@@ -18,18 +18,14 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.event.entity.player.ItemTooltipEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.item.ModItem;
 
 @OnlyIn(Dist.CLIENT)
-@EventBusSubscriber(Dist.CLIENT)
 public final class TooltipEvents {
 	private TooltipEvents() {
 	}
@@ -39,19 +35,16 @@ public final class TooltipEvents {
 	private static Component lastFormatted;
 	private static Function<CompoundTag, Component> formatter;
 
-	@SubscribeEvent(priority = EventPriority.HIGH)
-	public static void globalTooltip(ItemTooltipEvent event) {
+	public static void globalTooltip(ItemStack stack, List<Component> tooltip, TooltipFlag flag) {
 		if (KiwiClientConfig.globalTooltip)
-			ModItem.addTip(event.getItemStack(), event.getToolTip(), event.getFlags());
+			ModItem.addTip(stack, tooltip, flag);
 	}
 
-	@SubscribeEvent(priority = EventPriority.LOWEST)
-	public static void debugTooltip(ItemTooltipEvent event) {
-		if (!Kiwi.areTagsUpdated() || !event.getFlags().isAdvanced()) {
+	public static void debugTooltip(ItemStack stack, List<Component> tooltip, TooltipFlag flag) {
+		if (!Kiwi.areTagsUpdated() || !flag.isAdvanced()) {
 			return;
 		}
 
-		ItemStack stack = event.getItemStack();
 		Minecraft minecraft = Minecraft.getInstance();
 		if (stack != lastStack && minecraft.player != null && InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 292/*F3*/)) {
 			lastStack = stack;
@@ -67,8 +60,6 @@ public final class TooltipEvents {
 			minecraft.player.displayClientMessage(itextcomponent, false);
 			minecraft.options.renderDebug = !minecraft.options.renderDebug;
 		}
-
-		List<Component> tooltip = event.getToolTip();
 
 		if (KiwiClientConfig.nbtTooltip && Screen.hasShiftDown() && stack.hasTag()) {
 			tooltip.removeIf(c -> c.getClass() == TranslatableComponent.class && "item.nbt_tags".equals(((TranslatableComponent) c).getKey()));

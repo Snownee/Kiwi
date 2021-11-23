@@ -23,13 +23,13 @@ import net.minecraftforge.client.model.data.ModelDataMap;
 import snownee.kiwi.block.def.BlockDefinition;
 import snownee.kiwi.block.def.SimpleBlockDefinition;
 import snownee.kiwi.client.model.RetextureModel;
-import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.NBTHelper;
 import snownee.kiwi.util.NBTHelper.NBT;
 
 public abstract class RetextureBlockEntity extends BaseBlockEntity {
 	@Nullable
 	protected Map<String, BlockDefinition> textures;
+	/** Do not get modelData directly, use getModelData() */
 	protected IModelData modelData = EmptyModelData.INSTANCE;
 
 	public RetextureBlockEntity(BlockEntityType<?> tileEntityTypeIn, BlockPos level, BlockState state, String... textureKeys) {
@@ -38,9 +38,6 @@ public abstract class RetextureBlockEntity extends BaseBlockEntity {
 		textures = textureKeys.length == 0 ? null : Maps.newHashMapWithExpectedSize(textureKeys.length);
 		for (String key : textureKeys) {
 			textures.put(key, null);
-		}
-		if (textures != null && Platform.isLogicalClient()) {
-			modelData = new ModelDataMap.Builder().withInitial(RetextureModel.TEXTURES, textures).build();
 		}
 	}
 
@@ -155,6 +152,9 @@ public abstract class RetextureBlockEntity extends BaseBlockEntity {
 
 	@Override
 	public IModelData getModelData() {
+		if (textures != null && modelData == EmptyModelData.INSTANCE) {
+			modelData = new ModelDataMap.Builder().withInitial(RetextureModel.TEXTURES, textures).build();
+		}
 		return modelData;
 	}
 
