@@ -67,7 +67,6 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.ModLoadingStage;
 import net.minecraftforge.fml.ModLoadingWarning;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
@@ -95,6 +94,7 @@ import snownee.kiwi.block.def.SimpleBlockDefinition;
 import snownee.kiwi.client.model.RetextureModel;
 import snownee.kiwi.command.KiwiCommand;
 import snownee.kiwi.config.ConfigHandler;
+import snownee.kiwi.config.ConfigType;
 import snownee.kiwi.config.KiwiConfig;
 import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.loader.Platform;
@@ -159,17 +159,17 @@ public class Kiwi {
 						continue;
 					}
 					ModAnnotation.EnumHolder typeHolder = (ModAnnotation.EnumHolder) annotationData.annotationData().get("type");
-					ModConfig.Type type = null;
+					ConfigType type = null;
 					if (typeHolder != null) {
-						type = ModConfig.Type.valueOf(typeHolder.getValue());
+						type = ConfigType.valueOf(typeHolder.getValue());
 					}
-					type = type == null ? ModConfig.Type.COMMON : type;
-					if ((type != ModConfig.Type.CLIENT || Platform.isPhysicalClient())) {
+					type = type == null ? ConfigType.COMMON : type;
+					if ((type != ConfigType.CLIENT || Platform.isPhysicalClient())) {
 						try {
 							Class<?> clazz = Class.forName(annotationData.clazz().getClassName());
 							KiwiConfig kiwiConfig = clazz.getDeclaredAnnotation(KiwiConfig.class);
 							String fileName = kiwiConfig.value();
-							boolean master = type == ModConfig.Type.COMMON && Strings.isNullOrEmpty(fileName);
+							boolean master = type == ConfigType.COMMON && Strings.isNullOrEmpty(fileName);
 							if (Strings.isNullOrEmpty(fileName)) {
 								fileName = String.format("%s-%s", info.getModId(), type.extension());
 							}

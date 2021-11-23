@@ -13,7 +13,6 @@ import com.google.common.collect.Sets;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
 import net.minecraftforge.common.ForgeConfigSpec.Builder;
-import net.minecraftforge.fml.config.ModConfig;
 import snownee.kiwi.Kiwi;
 
 public class KiwiConfigManager {
@@ -38,7 +37,7 @@ public class KiwiConfigManager {
 			}
 		}
 		for (ConfigHandler config : allConfigs) {
-			if (!config.isMaster() && config.getType() == ModConfig.Type.COMMON && !settledMods.contains(config.getModId())) {
+			if (!config.isMaster() && config.getType() == ConfigType.COMMON && !settledMods.contains(config.getModId())) {
 				settledMods.add(config.getModId());
 				config.setMaster(true);
 			}
@@ -49,7 +48,7 @@ public class KiwiConfigManager {
 				continue;
 			}
 			settledMods.add(rl.getNamespace());
-			ConfigHandler configHandler = new ConfigHandler(rl.getNamespace(), rl.getNamespace() + "-modules.toml", ModConfig.Type.COMMON, null, true);
+			ConfigHandler configHandler = new ConfigHandler(rl.getNamespace(), rl.getNamespace() + "-modules.toml", ConfigType.COMMON, null, true);
 			configHandler.init();
 		}
 	}

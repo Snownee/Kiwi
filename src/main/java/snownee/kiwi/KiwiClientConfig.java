@@ -2,13 +2,13 @@ package snownee.kiwi;
 
 import com.electronwill.nightconfig.core.conversion.Path;
 
-import net.minecraftforge.fml.config.ModConfig.Type;
+import snownee.kiwi.config.ConfigType;
 import snownee.kiwi.config.KiwiConfig;
 import snownee.kiwi.config.KiwiConfig.Comment;
 import snownee.kiwi.config.KiwiConfig.Range;
 import snownee.kiwi.config.KiwiConfig.Translation;
 
-@KiwiConfig(type = Type.CLIENT)
+@KiwiConfig(type = ConfigType.CLIENT)
 public final class KiwiClientConfig {
 
 	public static String contributorCosmetic = "";

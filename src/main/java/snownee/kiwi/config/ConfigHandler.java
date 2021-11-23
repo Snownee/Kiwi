@@ -18,7 +18,6 @@ import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.config.ModConfig.Type;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.javafmlmod.FMLModContainer;
 import net.minecraftforge.fml.loading.FMLPaths;
@@ -34,14 +33,14 @@ public class ConfigHandler {
 	private boolean master;
 	private final String modId;
 	private final String fileName;
-	private final ModConfig.Type type;
+	private final ConfigType type;
 	private ModConfig config;
 	@Nullable
 	private final Class<?> clazz;
 	private final BiMap<Field, ConfigValue<?>> valueMap = HashBiMap.create();
 	private Method onChanged;
 
-	public ConfigHandler(String modId, String fileName, ModConfig.Type type, Class<?> clazz, boolean master) {
+	public ConfigHandler(String modId, String fileName, ConfigType type, Class<?> clazz, boolean master) {
 		this.master = master;
 		this.modId = modId;
 		this.clazz = clazz;
@@ -60,7 +59,7 @@ public class ConfigHandler {
 		ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
 		build(builder);
 		ModContainer modContainer = ModList.get().getModContainerById(modId).orElseThrow(NullPointerException::new);
-		config = new ModConfig(type, builder.build(), modContainer, fileName);
+		config = new ModConfig(type.value, builder.build(), modContainer, fileName);
 		modContainer.addConfig(config);
 		if (modContainer instanceof FMLModContainer) {
 			((FMLModContainer) modContainer).getEventBus().addListener(this::onFileChange);
@@ -157,7 +156,7 @@ public class ConfigHandler {
 
 	public void forceLoad() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
 		java.nio.file.Path path;
-		if (type == Type.SERVER) {
+		if (type == ConfigType.SERVER) {
 			path = Platform.getServer().getFile("serverconfig").toPath();
 		} else {
 			path = FMLPaths.CONFIGDIR.get();
@@ -188,7 +187,7 @@ public class ConfigHandler {
 		return modId;
 	}
 
-	public ModConfig.Type getType() {
+	public ConfigType getType() {
 		return type;
 	}
 

@@ -5,8 +5,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import net.minecraftforge.fml.config.ModConfig;
-
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface KiwiConfig {
@@ -16,7 +14,7 @@ public @interface KiwiConfig {
      */
 	String value() default "";
 
-	ModConfig.Type type() default ModConfig.Type.COMMON;
+	ConfigType type() default ConfigType.COMMON;
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.FIELD)
