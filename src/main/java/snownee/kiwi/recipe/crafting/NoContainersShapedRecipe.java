@@ -19,7 +19,7 @@ public class NoContainersShapedRecipe extends ShapedRecipe {
 
 	@Override
 	public NonNullList<ItemStack> getRemainingItems(CraftingContainer inv) {
-		return NonNullList.create();
+		return NonNullList.withSize(inv.getContainerSize(), ItemStack.EMPTY);
 	}
 
 	@Override
