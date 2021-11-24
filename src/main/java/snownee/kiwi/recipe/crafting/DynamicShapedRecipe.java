@@ -39,11 +39,11 @@ public abstract class DynamicShapedRecipe extends CustomRecipe implements IShape
 
 	@Override
 	public boolean matches(CraftingContainer inv, Level worldIn) {
-		return getMatchPos(inv) != null;
+		return search(inv) != null;
 	}
 
 	@Nullable
-	public int[] getMatchPos(CraftingContainer inv) {
+	public int[] search(CraftingContainer inv) {
 		for (int x = 0; x <= inv.getWidth() - getRecipeWidth(); ++x) {
 			for (int y = 0; y <= inv.getHeight() - getRecipeHeight(); ++y) {
 				if (checkMatch(inv, x, y) && checkEmpty(inv, x, y)) {

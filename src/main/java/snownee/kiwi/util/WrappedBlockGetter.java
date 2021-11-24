@@ -11,7 +11,7 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-public abstract class WrappedBlockReader implements BlockAndTintGetter {
+public abstract class WrappedBlockGetter implements BlockAndTintGetter {
 
 	protected BlockAndTintGetter delegate;
 

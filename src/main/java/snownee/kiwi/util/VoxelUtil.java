@@ -233,7 +233,7 @@ public final class VoxelUtil {
 	}
 
 	public static void setShape(VoxelShape shape, VoxelShape[] dest, boolean verticalAxis, boolean invert) {
-		Direction[] dirs = verticalAxis ? Util.DIRECTIONS : Util.HORIZONTAL_DIRECTIONS;
+		Direction[] dirs = verticalAxis ? EnumUtil.DIRECTIONS : EnumUtil.HORIZONTAL_DIRECTIONS;
 		for (Direction side : dirs) {
 			dest[verticalAxis ? side.ordinal() : side.ordinal() - 2] = verticalAxis ? rotate(shape, invert ? side.getOpposite() : side) : rotateHorizontal(shape, side);
 		}

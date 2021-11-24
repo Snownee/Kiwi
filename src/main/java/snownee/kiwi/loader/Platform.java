@@ -7,6 +7,9 @@ import net.minecraftforge.fmllegacy.server.ServerLifecycleHooks;
 
 public class Platform {
 
+	private Platform() {
+	}
+
 	public static boolean isModLoaded(String id) {
 		return ModList.get().isLoaded(id);
 	}

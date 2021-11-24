@@ -2,9 +2,7 @@ package snownee.kiwi.util;
 
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -15,7 +13,6 @@ import com.google.gson.JsonElement;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -41,15 +38,6 @@ import snownee.kiwi.util.NBTHelper.NBT;
 public final class Util {
 	private Util() {
 	}
-
-	public static final Direction[] DIRECTIONS = Direction.values();
-	public static final Direction[] HORIZONTAL_DIRECTIONS = Arrays.stream(DIRECTIONS).filter($ -> {
-		return $.getAxis().isHorizontal();
-	}).sorted(Comparator.comparingInt($ -> {
-		return $.get2DDataValue();
-	})).toArray($ -> {
-		return new Direction[$];
-	});
 
 	private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("###,###");
 	public static final MessageFormat MESSAGE_FORMAT = new MessageFormat("{0,number,#.#}");
