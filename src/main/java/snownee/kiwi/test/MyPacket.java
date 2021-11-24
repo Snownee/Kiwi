@@ -5,12 +5,10 @@ import java.util.function.Function;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import snownee.kiwi.network.KiwiPacket;
-import snownee.kiwi.network.Networking.Direction;
 import snownee.kiwi.network.PacketHandler;
 
 // 设置包的类型名及发送方向。并自动注册
-@KiwiPacket(value = "my", dir = Direction.PLAY_TO_CLIENT)
+//@KiwiPacket(value = "my", dir = Direction.PLAY_TO_CLIENT)
 public class MyPacket extends PacketHandler {
 	// 将自动注册的实例注入到 I 中
 	public static MyPacket I;
