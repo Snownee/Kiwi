@@ -9,12 +9,12 @@ import com.google.common.collect.Multimap;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -105,7 +105,7 @@ public final class Scheduler extends SavedData {
 	}
 
 	public static Scheduler load(CompoundTag nbt) {
-		ListTag list = nbt.getList("tasks", Constants.NBT.TAG_COMPOUND);
+		ListTag list = nbt.getList("tasks", Tag.TAG_COMPOUND);
 		for (int i = 0; i < list.size(); i++) {
 			Task task = deserialize(list.getCompound(i));
 			if (task != null) {

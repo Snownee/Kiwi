@@ -13,7 +13,7 @@ import snownee.kiwi.KiwiModule.Name;
 import snownee.kiwi.loader.event.InitEvent;
 
 @KiwiModule(value = "test2", dependencies = "forge;@kiwi:test")
-@KiwiModule.Optional(disabledByDefault = true)
+@KiwiModule.Optional(defaultEnabled = false)
 public class TestModule2 extends AbstractModule {
 	public static CreativeModeTab TAB = new CreativeModeTab("my_mod.items") {
 		@Override
@@ -34,6 +34,6 @@ public class TestModule2 extends AbstractModule {
 
 	@Override
 	protected void init(InitEvent event) {
-		System.out.println(1);
+		System.out.println("init");
 	}
 }

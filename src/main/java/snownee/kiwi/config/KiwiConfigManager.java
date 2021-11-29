@@ -14,6 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
 import net.minecraftforge.common.ForgeConfigSpec.Builder;
 import snownee.kiwi.Kiwi;
+import snownee.kiwi.config.KiwiConfig.ConfigType;
 
 public class KiwiConfigManager {
 
@@ -68,7 +69,7 @@ public class KiwiConfigManager {
 			if (rl.getNamespace().equals(modId)) {
 				//				String translation = Util.makeDescriptionId("kiwi.config.module", rl);
 				//				builder.translation(translation);
-				modules.put(rl, builder.define(rl.getPath(), !entry.getValue().booleanValue()));
+				modules.put(rl, builder.define(rl.getPath(), entry.getValue().booleanValue()));
 			}
 		}
 		builder.pop();

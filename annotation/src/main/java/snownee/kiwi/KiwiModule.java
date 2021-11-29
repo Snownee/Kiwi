@@ -17,8 +17,6 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 @Target(ElementType.TYPE)
 public @interface KiwiModule {
 
-	String modid() default "";
-
 	/**
 	 * Unique id of module. "core" by default
 	 */
@@ -40,7 +38,7 @@ public @interface KiwiModule {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
 	@interface Optional {
-		boolean disabledByDefault() default false;
+		boolean defaultEnabled() default true;
 	}
 
 	/**

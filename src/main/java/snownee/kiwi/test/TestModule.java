@@ -31,7 +31,7 @@ import snownee.kiwi.schedule.Scheduler;
 import snownee.kiwi.util.EnumUtil;
 
 @KiwiModule("test")
-@KiwiModule.Optional(disabledByDefault = true)
+@KiwiModule.Optional(defaultEnabled = false)
 @KiwiModule.Category("building_blocks")
 @KiwiModule.Subscriber(Bus.MOD)
 public class TestModule extends AbstractModule {

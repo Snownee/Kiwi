@@ -16,6 +16,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -33,7 +34,6 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import snownee.kiwi.block.def.BlockDefinition;
 import snownee.kiwi.loader.Platform;
-import snownee.kiwi.util.NBTHelper.NBT;
 
 public final class Util {
 	private Util() {
@@ -243,10 +243,10 @@ public final class Util {
 
 	@Nullable
 	public static String[] readNBTStrings(CompoundTag tag, String key, @Nullable String[] strings) {
-		if (!tag.contains(key, NBT.LIST)) {
+		if (!tag.contains(key, Tag.TAG_LIST)) {
 			return null;
 		}
-		ListTag list = tag.getList(key, NBT.STRING);
+		ListTag list = tag.getList(key, Tag.TAG_STRING);
 		if (list.isEmpty()) {
 			return null;
 		}

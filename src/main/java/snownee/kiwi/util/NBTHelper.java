@@ -16,7 +16,6 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.util.Constants;
 
 /**
  *
@@ -26,22 +25,6 @@ import net.minecraftforge.common.util.Constants;
  *
  */
 public class NBTHelper {
-	public static class NBT {
-		public static final int END = Constants.NBT.TAG_END;
-		public static final int BYTE = Constants.NBT.TAG_BYTE;
-		public static final int SHORT = Constants.NBT.TAG_SHORT;
-		public static final int INT = Constants.NBT.TAG_INT;
-		public static final int LONG = Constants.NBT.TAG_LONG;
-		public static final int FLOAT = Constants.NBT.TAG_FLOAT;
-		public static final int DOUBLE = Constants.NBT.TAG_DOUBLE;
-		public static final int BYTE_ARRAY = Constants.NBT.TAG_BYTE_ARRAY;
-		public static final int STRING = Constants.NBT.TAG_STRING;
-		public static final int LIST = Constants.NBT.TAG_LIST;
-		public static final int COMPOUND = Constants.NBT.TAG_COMPOUND;
-		public static final int INT_ARRAY = Constants.NBT.TAG_INT_ARRAY;
-		public static final int LONG_ARRAY = Constants.NBT.TAG_LONG_ARRAY;
-		public static final int ANY_NUMERIC = Constants.NBT.TAG_ANY_NUMERIC;
-	}
 
 	@Nullable
 	private ItemStack stack;
@@ -84,7 +67,7 @@ public class NBTHelper {
 		}
 		for (int i = 0; i < length; ++i) {
 			// TODO: list support. e.g. a.b[2].c.d
-			if (!subTag.contains(parts[i], NBT.COMPOUND)) {
+			if (!subTag.contains(parts[i], Tag.TAG_COMPOUND)) {
 				if (createIfNull) {
 					subTag.put(parts[i], new CompoundTag());
 				} else {
@@ -127,7 +110,7 @@ public class NBTHelper {
 		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
 			String actualKey = getLastNode(key);
-			if (subTag.contains(actualKey, NBT.INT)) {
+			if (subTag.contains(actualKey, Tag.TAG_INT)) {
 				return subTag.getInt(actualKey);
 			}
 		}
@@ -147,7 +130,7 @@ public class NBTHelper {
 		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
 			String actualKey = getLastNode(key);
-			if (subTag.contains(actualKey, NBT.LONG)) {
+			if (subTag.contains(actualKey, Tag.TAG_LONG)) {
 				return subTag.getLong(actualKey);
 			}
 		}
@@ -167,7 +150,7 @@ public class NBTHelper {
 		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
 			String actualKey = getLastNode(key);
-			if (subTag.contains(actualKey, NBT.SHORT)) {
+			if (subTag.contains(actualKey, Tag.TAG_SHORT)) {
 				return subTag.getShort(actualKey);
 			}
 		}
@@ -187,7 +170,7 @@ public class NBTHelper {
 		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
 			String actualKey = getLastNode(key);
-			if (subTag.contains(actualKey, NBT.DOUBLE)) {
+			if (subTag.contains(actualKey, Tag.TAG_DOUBLE)) {
 				return subTag.getDouble(actualKey);
 			}
 		}
@@ -207,7 +190,7 @@ public class NBTHelper {
 		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
 			String actualKey = getLastNode(key);
-			if (subTag.contains(actualKey, NBT.FLOAT)) {
+			if (subTag.contains(actualKey, Tag.TAG_FLOAT)) {
 				return subTag.getFloat(actualKey);
 			}
 		}
@@ -227,7 +210,7 @@ public class NBTHelper {
 		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
 			String actualKey = getLastNode(key);
-			if (subTag.contains(actualKey, NBT.BYTE)) {
+			if (subTag.contains(actualKey, Tag.TAG_BYTE)) {
 				return subTag.getByte(actualKey);
 			}
 		}
@@ -247,7 +230,7 @@ public class NBTHelper {
 		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
 			String actualKey = getLastNode(key);
-			if (subTag.contains(actualKey, NBT.BYTE)) {
+			if (subTag.contains(actualKey, Tag.TAG_BYTE)) {
 				return subTag.getBoolean(actualKey);
 			}
 		}
@@ -264,7 +247,7 @@ public class NBTHelper {
 		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
 			String actualKey = getLastNode(key);
-			if (subTag.contains(actualKey, NBT.COMPOUND)) {
+			if (subTag.contains(actualKey, Tag.TAG_COMPOUND)) {
 				return NbtUtils.readBlockPos(getTag(actualKey));
 			}
 		}
@@ -328,7 +311,7 @@ public class NBTHelper {
 		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
 			String actualKey = getLastNode(key);
-			if (subTag.contains(actualKey, NBT.STRING)) {
+			if (subTag.contains(actualKey, Tag.TAG_STRING)) {
 				return subTag.getString(actualKey);
 			}
 		}
@@ -344,7 +327,7 @@ public class NBTHelper {
 		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
 			String actualKey = getLastNode(key);
-			if (subTag.contains(actualKey, NBT.INT_ARRAY)) {
+			if (subTag.contains(actualKey, Tag.TAG_INT_ARRAY)) {
 				return subTag.getIntArray(actualKey);
 			}
 		}
@@ -360,7 +343,7 @@ public class NBTHelper {
 		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
 			String actualKey = getLastNode(key);
-			if (subTag.contains(actualKey, NBT.BYTE_ARRAY)) {
+			if (subTag.contains(actualKey, Tag.TAG_BYTE_ARRAY)) {
 				return subTag.getByteArray(actualKey);
 			}
 		}
@@ -377,7 +360,7 @@ public class NBTHelper {
 		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
 			String actualKey = getLastNode(key);
-			if (!subTag.contains(actualKey + "Most", NBT.LONG) || !subTag.contains(actualKey + "Least", NBT.LONG)) {
+			if (!subTag.contains(actualKey + "Most", Tag.TAG_LONG) || !subTag.contains(actualKey + "Least", Tag.TAG_LONG)) {
 				return subTag.getUUID(actualKey);
 			}
 		}
@@ -388,7 +371,7 @@ public class NBTHelper {
 		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
 			String actualKey = getLastNode(key);
-			if (subTag.contains(actualKey, NBT.LIST)) {
+			if (subTag.contains(actualKey, Tag.TAG_LIST)) {
 				return subTag.getList(actualKey, type);
 			}
 		}
@@ -408,7 +391,7 @@ public class NBTHelper {
 	}
 
 	public Set<String> keySet(String key) {
-		return hasTag(key, NBT.COMPOUND) ? getTag(key).getAllKeys() : Collections.EMPTY_SET;
+		return hasTag(key, Tag.TAG_COMPOUND) ? getTag(key).getAllKeys() : Collections.EMPTY_SET;
 	}
 
 	// TODO: remove parent if empty?

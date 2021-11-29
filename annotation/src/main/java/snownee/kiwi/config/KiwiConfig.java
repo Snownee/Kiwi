@@ -4,6 +4,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Locale;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
@@ -15,6 +16,14 @@ public @interface KiwiConfig {
 	String value() default "";
 
 	ConfigType type() default ConfigType.COMMON;
+
+	public enum ConfigType {
+		COMMON, CLIENT, SERVER;
+
+		public String extension() {
+			return name().toLowerCase(Locale.ENGLISH);
+		}
+	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.FIELD)

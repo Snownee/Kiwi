@@ -1,8 +1,8 @@
 package snownee.kiwi.handler;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.util.Mth;
-import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.energy.EnergyStorage;
 
 public class Battery extends EnergyStorage {
@@ -24,7 +24,7 @@ public class Battery extends EnergyStorage {
 	}
 
 	public Battery readFromNBT(CompoundTag nbt) {
-		if (nbt.contains("Energy", Constants.NBT.TAG_INT)) {
+		if (nbt.contains("Energy", Tag.TAG_INT)) {
 			energy = nbt.getInt("Energy");
 		} else {
 			energy = 0;

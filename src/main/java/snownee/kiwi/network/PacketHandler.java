@@ -8,11 +8,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.fmllegacy.network.PacketDistributor;
 import net.minecraftforge.fmllegacy.network.PacketDistributor.PacketTarget;
+import snownee.kiwi.network.KiwiPacket.Direction;
 
 public abstract class PacketHandler implements IPacketHandler {
 
 	public ResourceLocation id;
-	private Networking.Direction direction;
+	private Direction direction;
 
 	void setModId(String modId) {
 		KiwiPacket annotation = getClass().getDeclaredAnnotation(KiwiPacket.class);
@@ -26,7 +27,7 @@ public abstract class PacketHandler implements IPacketHandler {
 	}
 
 	@Override
-	public Networking.Direction getDirection() {
+	public Direction getDirection() {
 		return direction;
 	}
 

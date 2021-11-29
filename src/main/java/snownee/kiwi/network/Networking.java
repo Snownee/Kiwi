@@ -20,6 +20,7 @@ import net.minecraftforge.fmllegacy.network.PacketDistributor.PacketTarget;
 import net.minecraftforge.fmllegacy.network.simple.SimpleChannel;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.loader.Platform;
+import snownee.kiwi.network.KiwiPacket.Direction;
 
 public final class Networking {
 	private static final String protocol = Integer.toString(1);
@@ -85,19 +86,6 @@ public final class Networking {
 			player2.connection.connection.send(p);
 		}
 	})), NetworkDirection.PLAY_TO_CLIENT);
-
-	public enum Direction {
-		PLAY_TO_SERVER(NetworkDirection.PLAY_TO_SERVER),
-		PLAY_TO_CLIENT(NetworkDirection.PLAY_TO_CLIENT),
-		LOGIN_TO_SERVER(NetworkDirection.LOGIN_TO_SERVER),
-		LOGIN_TO_CLIENT(NetworkDirection.LOGIN_TO_CLIENT);
-
-		private final NetworkDirection value;
-
-		Direction(NetworkDirection value) {
-			this.value = value;
-		}
-	}
 
 	public static void processClass(String className, String modId) throws Exception {
 		Class<? extends PacketHandler> clazz = (Class<? extends PacketHandler>) Class.forName(className);

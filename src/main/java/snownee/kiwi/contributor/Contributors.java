@@ -143,7 +143,6 @@ public class Contributors extends AbstractModule {
 	@OnlyIn(Dist.CLIENT)
 	public void addLayers(EntityRenderersEvent.AddLayers event) {
 		for (String name : event.getSkins()) {
-			System.out.println(name);
 			LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> o = event.getSkin(name);
 			CosmeticLayer layer = new CosmeticLayer(o);
 			CosmeticLayer.ALL_LAYERS.add(layer);

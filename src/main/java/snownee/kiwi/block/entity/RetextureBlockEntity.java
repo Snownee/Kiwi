@@ -10,6 +10,7 @@ import com.google.common.collect.Maps;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.Block;
@@ -24,7 +25,6 @@ import snownee.kiwi.block.def.BlockDefinition;
 import snownee.kiwi.block.def.SimpleBlockDefinition;
 import snownee.kiwi.client.model.RetextureModel;
 import snownee.kiwi.util.NBTHelper;
-import snownee.kiwi.util.NBTHelper.NBT;
 
 public abstract class RetextureBlockEntity extends BaseBlockEntity {
 	@Nullable
@@ -99,7 +99,7 @@ public abstract class RetextureBlockEntity extends BaseBlockEntity {
 
 	@Override
 	protected void readPacketData(CompoundTag data) {
-		if (!data.contains("Overrides", NBT.COMPOUND)) {
+		if (!data.contains("Overrides", Tag.TAG_COMPOUND)) {
 			return;
 		}
 		boolean shouldRefresh = readTextures(textures, data.getCompound("Overrides"), this::isValidTexture);

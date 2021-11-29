@@ -23,6 +23,7 @@ import net.minecraftforge.fml.javafmlmod.FMLModContainer;
 import net.minecraftforge.fml.loading.FMLPaths;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.config.KiwiConfig.Comment;
+import snownee.kiwi.config.KiwiConfig.ConfigType;
 import snownee.kiwi.config.KiwiConfig.LevelRestart;
 import snownee.kiwi.config.KiwiConfig.Range;
 import snownee.kiwi.config.KiwiConfig.Translation;
@@ -59,7 +60,7 @@ public class ConfigHandler {
 		ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
 		build(builder);
 		ModContainer modContainer = ModList.get().getModContainerById(modId).orElseThrow(NullPointerException::new);
-		config = new ModConfig(type.value, builder.build(), modContainer, fileName);
+		config = new ModConfig(ModConfig.Type.valueOf(type.name()), builder.build(), modContainer, fileName);
 		modContainer.addConfig(config);
 		if (modContainer instanceof FMLModContainer) {
 			((FMLModContainer) modContainer).getEventBus().addListener(this::onFileChange);
