@@ -6,11 +6,11 @@ buildscript {
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-        classpath 'org.parchmentmc:librarian:1.+'
+        //classpath 'org.parchmentmc:librarian:1.+'
     }
 }
 apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'org.parchmentmc.librarian.forgegradle'
+//apply plugin: 'org.parchmentmc.librarian.forgegradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
@@ -19,7 +19,7 @@ version = "${version_major}.${version_minor}.${version_patch}"
 group = "snownee.kiwi"
 archivesBaseName = "Kiwi-${minecraft_version}"
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(16)
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 
 if (System.getenv().BUILD_NUMBER != null) {
@@ -34,7 +34,8 @@ minecraft {
     // Use non-default mappings at your own risk. they may not always work.
     // Simply re-run your setup task after changing the mappings to update your workspace.
 
-    mappings channel: 'parchment', version: '2021.09.05-1.17.1'
+    mappings channel: 'official', version: '1.18'
+    //mappings channel: 'parchment', version: '2021.09.05-1.17.1'
 
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
@@ -193,8 +194,8 @@ dependencies {
 	implementation project(':annotation')
     annotationProcessor project(':annotation-processor')
 
-    compileOnly fg.deobf("curse.maven:jei-238222:3448057")
-    runtimeOnly fg.deobf("curse.maven:jei-238222:3448057")
+    //compileOnly fg.deobf("curse.maven:jei-238222:3448057")
+    //runtimeOnly fg.deobf("curse.maven:jei-238222:3448057")
 }
 
 processResources {

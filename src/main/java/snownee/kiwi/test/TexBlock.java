@@ -52,8 +52,8 @@ public class TexBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public ItemStack getPickBlock(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
-		return ModBlock.pickBlock(state, target, world, pos, player);
+	public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
+		return ModBlock.pick(state, target, world, pos, player);
 	}
 
 	@Override

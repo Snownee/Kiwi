@@ -213,7 +213,7 @@ public class SimpleBlockDefinition implements BlockDefinition {
 
 	@Override
 	public ItemStack createItem(HitResult target, BlockGetter world, BlockPos pos, Player player) {
-		return getBlockState().getPickBlock(target, world, pos, player);
+		return getBlockState().getCloneItemStack(target, world, pos, player);
 	}
 
 	@Override

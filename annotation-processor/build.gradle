@@ -1,26 +1,26 @@
 buildscript {
     repositories {
         maven { url = 'https://maven.minecraftforge.net' }
-        maven { url = 'https://maven.parchmentmc.org' }
+        //maven { url = 'https://maven.parchmentmc.org' }
         mavenCentral()
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-        classpath 'org.parchmentmc:librarian:1.+'
+        //classpath 'org.parchmentmc:librarian:1.+'
     }
 }
 
 apply plugin: 'net.minecraftforge.gradle'
-//apply plugin: 'org.parchmentmc.librarian.forgegradle'
+apply plugin: 'eclipse'
 
 group 'snownee.kiwi'
 version = rootProject.version
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(16)
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 minecraft {
     //mappings channel: 'parchment', version: '2021.09.05-1.17.1'
-    mappings channel: 'official', version: '1.17.1'
+    mappings channel: 'official', version: '1.18'
 }
 
 dependencies {

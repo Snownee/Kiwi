@@ -48,9 +48,9 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.model.BlockModelConfiguration;
+import net.minecraftforge.client.model.ForgeModelBakery;
 import net.minecraftforge.client.model.IModelConfiguration;
 import net.minecraftforge.client.model.IModelLoader;
-import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.data.IDynamicBakedModel;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.data.ModelProperty;
@@ -180,7 +180,7 @@ public class RetextureModel implements IDynamicBakedModel {
 		@Override
 		public Geometry read(JsonDeserializationContext deserializationContext, JsonObject modelContents) {
 			ResourceLocation loaderId = new ResourceLocation(GsonHelper.getAsString(modelContents, "base_loader", "elements"));
-			Lazy<BlockModel> blockModel = Lazy.of(() -> (BlockModel) ModelLoader.instance().getModel(new ResourceLocation(GsonHelper.getAsString(modelContents, "base"))));
+			Lazy<BlockModel> blockModel = Lazy.of(() -> (BlockModel) ForgeModelBakery.instance().getModel(new ResourceLocation(GsonHelper.getAsString(modelContents, "base"))));
 			return new Geometry(blockModel, loaderId, GsonHelper.getAsString(modelContents, "particle", "0"), GsonHelper.getAsBoolean(modelContents, "inventory", true));
 		}
 
@@ -224,7 +224,7 @@ public class RetextureModel implements IDynamicBakedModel {
 			BlockDefinition supplier = data.getData(TEXTURES).get(particleKey);
 			if (supplier != null) {
 				Material material = supplier.renderMaterial(null);
-				TextureAtlasSprite particle = ModelLoader.defaultTextureGetter().apply(material);
+				TextureAtlasSprite particle = ForgeModelBakery.defaultTextureGetter().apply(material);
 				if (particle.getClass() != MissingTextureAtlasSprite.class) {
 					return particle;
 				}
@@ -253,7 +253,7 @@ public class RetextureModel implements IDynamicBakedModel {
 		Map<String, BlockDefinition> overrides = extraData.getData(TEXTURES);
 		if (overrides == null)
 			overrides = Collections.EMPTY_MAP;
-		RenderType layer = MinecraftForgeClient.getRenderLayer();
+		RenderType layer = MinecraftForgeClient.getRenderType();
 		boolean noSupplier = true;
 		if (layer != null) {
 			for (BlockDefinition supplier : overrides.values()) {
@@ -278,7 +278,7 @@ public class RetextureModel implements IDynamicBakedModel {
 		try {
 			return baked.get(key, () -> {
 				ModelConfiguration configuration = new ModelConfiguration(baseConfiguration, overrides);
-				return baseConfiguration.getCustomGeometry().bake(configuration, modelLoader, ModelLoader.defaultTextureGetter(), variant, overrideList, loaderId);
+				return baseConfiguration.getCustomGeometry().bake(configuration, modelLoader, ForgeModelBakery.defaultTextureGetter(), variant, overrideList, loaderId);
 			});
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -6,7 +6,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import net.minecraftforge.fmllegacy.network.NetworkDirection;
+import net.minecraftforge.network.NetworkDirection;
 
 @Retention(RUNTIME)
 @Target(TYPE)

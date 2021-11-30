@@ -23,7 +23,7 @@ public abstract class BaseBlockEntity extends BlockEntity {
 
 	@Override
 	public final ClientboundBlockEntityDataPacket getUpdatePacket() {
-		return new ClientboundBlockEntityDataPacket(worldPosition, -1, writePacketData(new CompoundTag()));
+		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	@Override

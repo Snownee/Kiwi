@@ -16,7 +16,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.client.event.RenderLevelLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -105,7 +105,7 @@ public class TestItem extends ModItem {
 
 	@SubscribeEvent
 	@OnlyIn(Dist.CLIENT)
-	public void render(RenderWorldLastEvent event) {
+	public void render(RenderLevelLastEvent event) {
 		//        Screen.fill(0, 0, 20, 20, 20);
 		//        Minecraft mc = Minecraft.getInstance();
 		//        Player player = mc.player;

@@ -16,9 +16,9 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fmlserverevents.FMLServerStoppedEvent;
 import snownee.kiwi.Kiwi;
 
 /**
@@ -142,7 +142,7 @@ public final class Scheduler extends SavedData {
 	}
 
 	@SubscribeEvent
-	public static void serverStopped(FMLServerStoppedEvent event) {
+	public static void serverStopped(ServerStoppedEvent event) {
 		clear();
 	}
 }

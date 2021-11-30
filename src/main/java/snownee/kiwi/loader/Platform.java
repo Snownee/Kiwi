@@ -3,7 +3,7 @@ package snownee.kiwi.loader;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fmllegacy.server.ServerLifecycleHooks;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 public class Platform {
 

@@ -14,10 +14,10 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.data.loading.DatagenModLoader;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.CrashReportCallables;
 import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fmllegacy.DatagenModLoader;
 
 public final class KiwiModules {
 	private static Map<ResourceLocation, ModuleInfo> MODULES = Maps.newLinkedHashMap();

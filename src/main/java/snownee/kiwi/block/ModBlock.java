@@ -102,12 +102,12 @@ public class ModBlock extends Block {
 	}
 
 	@Override
-	public ItemStack getPickBlock(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
-		return pickBlock(state, target, world, pos, player);
+	public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
+		return pick(state, target, world, pos, player);
 	}
 
 	@SuppressWarnings("deprecation")
-	public static ItemStack pickBlock(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
+	public static ItemStack pick(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
 		ItemStack stack = state.getBlock().getCloneItemStack(world, pos, state);
 		BlockEntity tile = world.getBlockEntity(pos);
 		if (tile instanceof BaseBlockEntity && !tile.onlyOpCanSetNbt() && ((BaseBlockEntity) tile).persistData) {

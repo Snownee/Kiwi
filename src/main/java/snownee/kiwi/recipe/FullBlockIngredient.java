@@ -15,7 +15,7 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.IIngredientSerializer;
-import net.minecraftforge.common.crafting.StackList;
+import net.minecraftforge.common.crafting.MultiItemValue;
 
 public class FullBlockIngredient extends Ingredient {
 	public static final Serializer SERIALIZER = new Serializer();
@@ -75,7 +75,7 @@ public class FullBlockIngredient extends Ingredient {
 		@Override
 		public FullBlockIngredient parse(FriendlyByteBuf buffer) {
 			Ingredient example = Ingredient.fromNetwork(buffer);
-			StackList stackList = new StackList(ImmutableList.copyOf(example.getItems()));
+			MultiItemValue stackList = new MultiItemValue(ImmutableList.copyOf(example.getItems()));
 			return new FullBlockIngredient(Stream.of(stackList), example);
 		}
 
@@ -87,7 +87,7 @@ public class FullBlockIngredient extends Ingredient {
 			} catch (JsonSyntaxException e) {
 				example = Ingredient.EMPTY;
 			}
-			StackList stackList = new StackList(ImmutableList.copyOf(example.getItems()));
+			MultiItemValue stackList = new MultiItemValue(ImmutableList.copyOf(example.getItems()));
 			return new FullBlockIngredient(Stream.of(stackList), example);
 		}
 

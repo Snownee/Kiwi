@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[37,)"
+loaderVersion="[38,)"
 license="MIT"
 
 [[mods]]
@@ -8,7 +8,7 @@ version="${file.jarVersion}"
 displayName="Kiwi"
 authors="Snownee"
 displayURL="https://www.curseforge.com/minecraft/mc-mods/kiwi"
-description=""
+description="Minecraft modding library"
 
 [modproperties.kiwi]
     catalogueItemIcon="minecraft:bookshelf" #Support for Catalogue mod
