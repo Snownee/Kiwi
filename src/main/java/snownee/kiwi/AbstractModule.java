@@ -25,6 +25,7 @@ import snownee.kiwi.loader.event.ClientInitEvent;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.loader.event.PostInitEvent;
 import snownee.kiwi.loader.event.ServerInitEvent;
+import snownee.kiwi.mixin.ItemAccessor;
 
 /**
  *
@@ -36,8 +37,8 @@ import snownee.kiwi.loader.event.ServerInitEvent;
 public abstract class AbstractModule {
 	public ResourceLocation uid;
 	private static final BiConsumer<ModuleInfo, Item> ITEM_DECORATOR = (module, item) -> {
-		if (module.category != null && item.category == null && !module.noCategories.contains(item))
-			item.category = module.category;
+		if (module.category != null && ((ItemAccessor) item).getCategory() == null && !module.noCategories.contains(item))
+			((ItemAccessor) item).setCategory(module.category);
 	};
 	private static final BiConsumer<ModuleInfo, Block> BLOCK_DECORATOR = (module, block) -> {
 		ModBlock.setFireInfo(block);

@@ -1,6 +1,6 @@
 package snownee.kiwi.test;
 
-import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
@@ -19,7 +19,7 @@ public class MyModule extends AbstractModule {
 
 	@Override
 	protected void init(InitEvent event) {
-		event.enqueueWork(() -> VanillaActions.registerCompostable(0.5F, Items.DIAMOND));
+		event.enqueueWork(() -> VanillaActions.registerAxeConversion(Blocks.DIAMOND_BLOCK, Blocks.REDSTONE_BLOCK));
 	}
 
 	@Override

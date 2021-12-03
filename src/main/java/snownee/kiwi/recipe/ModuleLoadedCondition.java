@@ -27,7 +27,8 @@ public class ModuleLoadedCondition implements ICondition {
 		return Kiwi.isLoaded(module);
 	}
 
-	public static final class Serializer implements IConditionSerializer<ModuleLoadedCondition> {
+	public enum Serializer implements IConditionSerializer<ModuleLoadedCondition> {
+		INSTANCE;
 
 		@Override
 		public void write(JsonObject json, ModuleLoadedCondition condition) {

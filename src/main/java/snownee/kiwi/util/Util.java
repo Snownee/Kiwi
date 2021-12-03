@@ -3,7 +3,7 @@ package snownee.kiwi.util;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.util.Collections;
-import java.util.Map;
+import java.util.List;
 import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
@@ -136,12 +136,12 @@ public final class Util {
 		return null;
 	}
 
-	public static <C extends Container, T extends Recipe<C>> Map<ResourceLocation, Recipe<C>> getRecipes(RecipeType<T> recipeTypeIn) {
+	public static <C extends Container, T extends Recipe<C>> List<T> getRecipes(RecipeType<T> recipeTypeIn) {
 		RecipeManager manager = getRecipeManager();
 		if (manager == null) {
-			return Collections.EMPTY_MAP;
+			return Collections.EMPTY_LIST;
 		} else {
-			return getRecipeManager().byType(recipeTypeIn);
+			return getRecipeManager().getAllRecipesFor(recipeTypeIn);
 		}
 	}
 

@@ -35,6 +35,7 @@ import snownee.kiwi.loader.event.ClientInitEvent;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.loader.event.PostInitEvent;
 import snownee.kiwi.loader.event.ServerInitEvent;
+import snownee.kiwi.mixin.ItemAccessor;
 
 public class ModuleInfo {
 	public static final class RegistryHolder {
@@ -101,9 +102,9 @@ public class ModuleInfo {
 					if (group != null && !group.value().isEmpty()) {
 						CreativeModeTab category = Kiwi.getGroup(group.value());
 						if (category != null) {
-							item.category = category;
+							((ItemAccessor) item).setCategory(category);
 						} else {
-							item.category = this.category;
+							((ItemAccessor) item).setCategory(this.category);
 						}
 					}
 				}

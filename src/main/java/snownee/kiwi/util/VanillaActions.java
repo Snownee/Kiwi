@@ -11,18 +11,18 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
 
-import net.minecraft.world.entity.ai.behavior.WorkAtComposter;
-import net.minecraft.world.entity.npc.Villager;
-import net.minecraft.world.item.AxeItem;
-import net.minecraft.world.item.HoeItem;
-import net.minecraft.world.item.ShovelItem;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ComposterBlock;
-import net.minecraft.world.level.block.FireBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import snownee.kiwi.mixin.AxeItemAccessor;
+import snownee.kiwi.mixin.FireBlockAccessor;
+import snownee.kiwi.mixin.HoeItemAccessor;
+import snownee.kiwi.mixin.ShovelItemAccessor;
+import snownee.kiwi.mixin.VillagerAccessor;
+import snownee.kiwi.mixin.WorkAtComposterAccessor;
 
 /**
  * @since 5.0.0
@@ -32,25 +32,25 @@ public final class VanillaActions { //TODO brewing
 	}
 
 	public static void setFireInfo(Block blockIn, int encouragement, int flammability) {
-		((FireBlock) Blocks.FIRE).setFlammable(blockIn, encouragement, flammability);
+		((FireBlockAccessor) Blocks.FIRE).callSetFlammable(blockIn, encouragement, flammability);
 	}
 
 	public static void registerHoeConversion(Block k, Pair<Predicate<UseOnContext>, Consumer<UseOnContext>> v) {
-		HoeItem.TILLABLES.put(k, v);
+		HoeItemAccessor.getTILLABLES().put(k, v);
 	}
 
 	public static void registerAxeConversion(Block k, Block v) {
-		if (AxeItem.STRIPPABLES instanceof ImmutableMap) {
-			AxeItem.STRIPPABLES = Maps.newHashMap(AxeItem.STRIPPABLES);
+		if (AxeItemAccessor.getSTRIPPABLES() instanceof ImmutableMap) {
+			AxeItemAccessor.setSTRIPPABLES(Maps.newHashMap(AxeItemAccessor.getSTRIPPABLES()));
 		}
-		AxeItem.STRIPPABLES.put(k, v);
+		AxeItemAccessor.getSTRIPPABLES().put(k, v);
 	}
 
 	public static void registerShovelConversion(Block k, BlockState v) {
-		if (ShovelItem.FLATTENABLES instanceof ImmutableMap) {
-			ShovelItem.FLATTENABLES = Maps.newHashMap(ShovelItem.FLATTENABLES);
+		if (ShovelItemAccessor.getFLATTENABLES() instanceof ImmutableMap) {
+			ShovelItemAccessor.setFLATTENABLES( Maps.newHashMap(ShovelItemAccessor.getFLATTENABLES()));
 		}
-		ShovelItem.FLATTENABLES.put(k, v);
+		ShovelItemAccessor.getFLATTENABLES().put(k, v);
 	}
 
 	public static void registerCompostable(float chance, ItemLike itemIn) {
@@ -58,17 +58,17 @@ public final class VanillaActions { //TODO brewing
 	}
 
 	public static void registerVillagerPickupable(ItemLike item) {
-		if (Villager.WANTED_ITEMS instanceof ImmutableSet) {
-			Villager.WANTED_ITEMS = Sets.newHashSet(Villager.WANTED_ITEMS);
+		if (VillagerAccessor.getWANTED_ITEMS() instanceof ImmutableSet) {
+			VillagerAccessor.setWANTED_ITEMS( Sets.newHashSet(VillagerAccessor.getWANTED_ITEMS()));
 		}
-		Villager.WANTED_ITEMS.add(item.asItem());
+		VillagerAccessor.getWANTED_ITEMS().add(item.asItem());
 	}
 
 	public static void registerVillagerCompostable(ItemLike item) {
-		if (WorkAtComposter.COMPOSTABLE_ITEMS instanceof ImmutableList) {
-			WorkAtComposter.COMPOSTABLE_ITEMS = Lists.newArrayList(WorkAtComposter.COMPOSTABLE_ITEMS);
+		if (WorkAtComposterAccessor.getCOMPOSTABLE_ITEMS() instanceof ImmutableList) {
+			WorkAtComposterAccessor.setCOMPOSTABLE_ITEMS(Lists.newArrayList(WorkAtComposterAccessor.getCOMPOSTABLE_ITEMS()));
 		}
-		WorkAtComposter.COMPOSTABLE_ITEMS.add(item.asItem());
+		WorkAtComposterAccessor.getCOMPOSTABLE_ITEMS().add(item.asItem());
 	}
 
 }

@@ -6,11 +6,13 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.level.block.Blocks;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModule.Name;
 import snownee.kiwi.loader.event.InitEvent;
+import snownee.kiwi.util.VanillaActions;
 
 @KiwiModule(value = "test2", dependencies = "forge;@kiwi:test")
 @KiwiModule.Optional(defaultEnabled = false)
@@ -34,6 +36,6 @@ public class TestModule2 extends AbstractModule {
 
 	@Override
 	protected void init(InitEvent event) {
-		System.out.println("init");
+		event.enqueueWork(() -> VanillaActions.registerAxeConversion(Blocks.DIAMOND_BLOCK, Blocks.REDSTONE_BLOCK));
 	}
 }

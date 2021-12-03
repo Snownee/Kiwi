@@ -24,9 +24,11 @@ public class CosmeticLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
 
 	public static final Collection<CosmeticLayer> ALL_LAYERS = Lists.newLinkedList();
 	private final Cache<String, RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>>> player2renderer;
+	public final RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> renderer;
 
 	public CosmeticLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRendererIn) {
 		super(entityRendererIn);
+		this.renderer = entityRendererIn;
 		if (getClass() == CosmeticLayer.class) {
 			player2renderer = CacheBuilder.newBuilder().build();
 		} else {

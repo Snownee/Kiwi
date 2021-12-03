@@ -8,6 +8,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Material;
 import net.minecraftforge.common.data.ExistingFileHelper;
+import snownee.kiwi.mixin.BlockAccessor;
 
 public abstract class KiwiBlockTagsProvider extends BlockTagsProvider {
 
@@ -16,7 +17,7 @@ public abstract class KiwiBlockTagsProvider extends BlockTagsProvider {
 	}
 
 	public void processTools(Block block) {
-		Material material = block.material;
+		Material material = ((BlockAccessor) block).getMaterial();
 		if (material == Material.LEAVES) {
 			tag(BlockTags.MINEABLE_WITH_HOE).add(block);
 		} else if (material == Material.WOOD || material == Material.NETHER_WOOD || material == Material.PLANT || material == Material.REPLACEABLE_PLANT || material == Material.VEGETABLE) {
