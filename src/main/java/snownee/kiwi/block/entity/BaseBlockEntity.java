@@ -5,6 +5,8 @@ import javax.annotation.Nonnull;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -22,26 +24,22 @@ public abstract class BaseBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public final ClientboundBlockEntityDataPacket getUpdatePacket() {
+	public Packet<ClientGamePacketListener> getUpdatePacket() {
 		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	@Override
 	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
-		readPacketData(pkt.getTag());
+		CompoundTag compoundtag = pkt.getTag();
+		if (compoundtag != null)
+			readPacketData(compoundtag);
 	}
 
 	// Used for syncing data at the time when the chunk is loaded
 	@Nonnull
 	@Override
 	public CompoundTag getUpdateTag() {
-		return save(new CompoundTag());
-	}
-
-	// Used for syncing data at the time when the chunk is loaded
-	@Override
-	public void handleUpdateTag(CompoundTag tag) {
-		load(tag);
+		return writePacketData(new CompoundTag());
 	}
 
 	/**
@@ -65,7 +63,8 @@ public abstract class BaseBlockEntity extends BlockEntity {
 	public void refresh() {
 		if (hasLevel() && !level.isClientSide) {
 			BlockState state = getBlockState();
-			level.markAndNotifyBlock(worldPosition, level.getChunkAt(worldPosition), state, state, 11, 512);
+			level.sendBlockUpdated(worldPosition, state, state, 11);
+			setChanged();
 		}
 	}
 

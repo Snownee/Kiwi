@@ -102,7 +102,8 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 				} else {
 					target = ele.toString();
 				}
-				map.put(annotation.getSimpleName(), new KiwiAnnotationData(target, o.isEmpty() ? null : o));
+				if (!target.startsWith("snownee.kiwi.test."))
+					map.put(annotation.getSimpleName(), new KiwiAnnotationData(target, o.isEmpty() ? null : o));
 			}
 		}
 		String json = new GsonBuilder().setPrettyPrinting().create().toJson(map.asMap());
