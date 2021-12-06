@@ -116,13 +116,21 @@ public class ConfigHandler {
 						value = builder.defineInRange(path, field.getFloat(null), Double.isNaN(min) ? Double.MIN_VALUE : min, Double.isNaN(max) ? Double.MAX_VALUE : max);
 					}
 				} else if (type == String.class) {
-					value = builder.define(path, field.get(null), NightConfigUtil.getValidator(field));
+					String defaultVal = (String) field.get(null);
+					if (defaultVal == null) {
+						defaultVal = "";
+					}
+					value = builder.define(path, defaultVal, NightConfigUtil.getValidator(field));
 				} else if (type == boolean.class) {
 					value = builder.define(path, field.getBoolean(null));
 				} else if (Enum.class.isAssignableFrom(type)) {
 					value = builder.defineEnum(path, (Enum) field.get(null));
 				} else if (List.class.isAssignableFrom(type)) {
-					value = builder.defineList(path, (List) field.get(null), NightConfigUtil.getValidator(field));
+					List<?> defaultVal = (List<?>) field.get(null);
+					if (defaultVal == null) {
+						defaultVal = List.of();
+					}
+					value = builder.defineList(path, defaultVal, NightConfigUtil.getValidator(field));
 				}
 				valueMap.put(field, value);
 			} catch (IllegalArgumentException | IllegalAccessException e) {
