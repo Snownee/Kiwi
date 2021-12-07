@@ -6,11 +6,13 @@ import java.util.List;
 import com.electronwill.nightconfig.core.conversion.Path;
 
 import net.minecraftforge.fml.config.ModConfig;
+import snownee.kiwi.config.KiwiConfig;
 import snownee.kiwi.config.KiwiConfig.Comment;
+import snownee.kiwi.config.KiwiConfig.ConfigType;
 import snownee.kiwi.config.KiwiConfig.LevelRestart;
 import snownee.kiwi.config.KiwiConfig.Range;
 
-//@KiwiConfig(type = ModConfig.Type.COMMON)
+@KiwiConfig(value = "test", type = ConfigType.COMMON)
 public class TestConfig {
 
 	public static int intValue = 5;
@@ -29,11 +31,15 @@ public class TestConfig {
 
 	public static List<String> listValue = Arrays.asList("test");
 
+	public static String emptyStr;
+
 	@LevelRestart
 	public static ModConfig.Type enumValue = ModConfig.Type.COMMON;
 
 	public static void onChanged(String path) {
 		// do sth
+		System.out.println(path);
+		System.out.println(strValue);
 	}
 
 }

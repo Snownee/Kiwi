@@ -120,7 +120,9 @@ public class ConfigHandler {
 					if (defaultVal == null) {
 						defaultVal = "";
 					}
-					value = builder.define(path, defaultVal, NightConfigUtil.getValidator(field));
+					// dont know why but it is not working
+					//					value = builder.define(path, defaultVal, NightConfigUtil.getValidator(field));
+					value = builder.define(path, defaultVal);
 				} else if (type == boolean.class) {
 					value = builder.define(path, field.getBoolean(null));
 				} else if (Enum.class.isAssignableFrom(type)) {
@@ -148,7 +150,7 @@ public class ConfigHandler {
 					}
 					field.setFloat(null, ((Double) value.get()).floatValue());
 				} else {
-					if (Objects.equals(value.get(), field.get(null))) {
+					if (field.getType() != List.class && Objects.deepEquals(value.get(), field.get(null))) {
 						return;
 					}
 					field.set(null, value.get());
@@ -180,8 +182,10 @@ public class ConfigHandler {
 	}
 
 	protected void onFileChange(ModConfigEvent.Reloading event) {
-		((CommentedFileConfig) event.getConfig().getConfigData()).load();
-		refresh();
+		if (event.getConfig() == config) {
+			((CommentedFileConfig) event.getConfig().getConfigData()).load();
+			refresh();
+		}
 	}
 
 	public void setMaster(boolean master) {
