@@ -3,6 +3,7 @@ package snownee.kiwi.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
@@ -112,12 +113,11 @@ public class ModBlock extends Block {
 		ItemStack stack = state.getBlock().getCloneItemStack(world, pos, state);
 		BlockEntity tile = world.getBlockEntity(pos);
 		if (tile instanceof BaseBlockEntity && !tile.onlyOpCanSetNbt() && ((BaseBlockEntity) tile).persistData) {
-			CompoundTag data = tile.save(new CompoundTag());
+			CompoundTag data = tile.saveWithFullMetadata();
 			data.remove("x");
 			data.remove("y");
 			data.remove("z");
-			data.remove("id");
-			stack.addTagElement("BlockEntityTag", data);
+			BlockItem.setBlockEntityData(stack, tile.getType(), data);
 		}
 		return stack;
 	}

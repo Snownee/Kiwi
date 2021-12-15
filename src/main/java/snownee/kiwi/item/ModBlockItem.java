@@ -35,15 +35,15 @@ public class ModBlockItem extends BlockItem {
 
 	@Override
 	protected boolean updateCustomBlockEntityTag(BlockPos pos, Level worldIn, Player player, ItemStack stack, BlockState state) {
-		BlockEntity tile = worldIn.getBlockEntity(pos);
-		if (worldIn.isClientSide && tile != null && INSTANT_UPDATE_TILES.contains(tile.getType())) {
-			CompoundTag data = stack.getTagElement("BlockEntityTag");
-			if (data != null) {
-				data = data.copy();
-				data.putInt("x", pos.getX());
-				data.putInt("y", pos.getY());
-				data.putInt("z", pos.getZ());
-				tile.load(data);
+		if (worldIn.isClientSide) {
+			BlockEntity tile = worldIn.getBlockEntity(pos);
+			if (tile != null && INSTANT_UPDATE_TILES.contains(tile.getType())) {
+				CompoundTag data = getBlockEntityData(stack);
+				if (data != null) {
+					data = data.copy();
+					tile.load(data);
+					tile.setChanged();
+				}
 			}
 		}
 		return super.updateCustomBlockEntityTag(pos, worldIn, player, stack, state);
