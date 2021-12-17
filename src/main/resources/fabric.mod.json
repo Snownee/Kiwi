@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "kiwi",
+  "version": "${version}",
+
+  "name": "Kiwi",
+  "description": "Minecraft modding library",
+  "authors": ["Snownee"],
+  "contact": {
+    "homepage": "https://minecraft.curseforge.com/projects/kiwi-fabric",
+    "sources": "https://github.com/Snownee/Kiwi",
+    "issues": "https://github.com/Snownee/Kiwi/issues"
+  },
+
+  "license": "MIT",
+
+  "entrypoints": {
+    "main": [
+      "snownee.kiwi.Kiwi"
+    ],
+    "client": [
+      "snownee.kiwi.loader.Initializer"
+    ],
+    "modmenu": [
+      "snownee.kiwi.config.ModMenuIntegration"
+    ]
+  },
+  "mixins": ["kiwi.mixins.json"],
+
+  "depends": {
+    "fabricloader": ">=0.11.3",
+    "minecraft": ">=1.18",
+    "java": ">=17"
+  },
+
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.discord": "https://discord.gg/rRBvGkz"
+      },
+      "badges": [
+        "library"
+      ]
+    }
+  }
+}

@@ -1,3 +1,4 @@
+/*
 package snownee.kiwi.recipe;
 
 import com.google.gson.JsonObject;
@@ -48,3 +49,4 @@ public class ModuleLoadedCondition implements ICondition {
 	}
 
 }
+*/

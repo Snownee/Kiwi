@@ -1,26 +1,23 @@
 package snownee.kiwi.loader;
 
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.event.entity.player.ItemTooltipEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
+import net.fabricmc.fabric.api.event.Event;
+import net.minecraft.resources.ResourceLocation;
+import snownee.kiwi.Kiwi;
 import snownee.kiwi.client.TooltipEvents;
 
-@EventBusSubscriber
-public class Initializer {
+public class Initializer implements ClientModInitializer {
 
-	@OnlyIn(Dist.CLIENT)
-	@SubscribeEvent(priority = EventPriority.HIGH)
-	public static void globalTooltip(ItemTooltipEvent event) {
-		TooltipEvents.globalTooltip(event.getItemStack(), event.getToolTip(), event.getFlags());
-	}
+	public static final ResourceLocation HIGH = new ResourceLocation(Kiwi.MODID, "high");
+	public static final ResourceLocation LOW = new ResourceLocation(Kiwi.MODID, "low");
 
-	@OnlyIn(Dist.CLIENT)
-	@SubscribeEvent(priority = EventPriority.LOWEST)
-	public static void debugTooltip(ItemTooltipEvent event) {
-		TooltipEvents.debugTooltip(event.getItemStack(), event.getToolTip(), event.getFlags());
+	@Override
+	public void onInitializeClient() {
+		ItemTooltipCallback.EVENT.addPhaseOrdering(HIGH, Event.DEFAULT_PHASE);
+		ItemTooltipCallback.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, LOW);
+		ItemTooltipCallback.EVENT.register(HIGH, (stack, context, lines) -> TooltipEvents.globalTooltip(stack, lines, context));
+		ItemTooltipCallback.EVENT.register(LOW, (stack, context, lines) -> TooltipEvents.debugTooltip(stack, lines, context));
 	}
 
 }

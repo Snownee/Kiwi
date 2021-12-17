@@ -18,9 +18,9 @@ public class TexBlockEntity extends RetextureBlockEntity {
 	}
 
 	@Override
-	public CompoundTag save(CompoundTag compound) {
-		writePacketData(compound);
-		return super.save(compound);
+	protected void saveAdditional(CompoundTag compoundTag) {
+		writePacketData(compoundTag);
+		super.saveAdditional(compoundTag);
 	}
 
 }

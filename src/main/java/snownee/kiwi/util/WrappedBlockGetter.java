@@ -1,5 +1,7 @@
 package snownee.kiwi.util;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -8,8 +10,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 public abstract class WrappedBlockGetter implements BlockAndTintGetter {
 
@@ -35,7 +35,7 @@ public abstract class WrappedBlockGetter implements BlockAndTintGetter {
 	}
 
 	@Override
-	@OnlyIn(Dist.CLIENT)
+	@Environment(EnvType.CLIENT)
 	public float getShade(Direction p_230487_1_, boolean p_230487_2_) {
 		return delegate.getShade(p_230487_1_, p_230487_2_);
 	}
@@ -46,7 +46,7 @@ public abstract class WrappedBlockGetter implements BlockAndTintGetter {
 	}
 
 	@Override
-	@OnlyIn(Dist.CLIENT)
+	@Environment(EnvType.CLIENT)
 	public int getBlockTint(BlockPos pos, ColorResolver colorResolver) {
 		return delegate.getBlockTint(pos, colorResolver);
 	}

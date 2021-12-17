@@ -3,13 +3,11 @@ package snownee.kiwi.test;
 import java.util.Arrays;
 import java.util.List;
 
-import com.electronwill.nightconfig.core.conversion.Path;
-
-import net.minecraftforge.fml.config.ModConfig;
 import snownee.kiwi.config.KiwiConfig;
 import snownee.kiwi.config.KiwiConfig.Comment;
 import snownee.kiwi.config.KiwiConfig.ConfigType;
 import snownee.kiwi.config.KiwiConfig.LevelRestart;
+import snownee.kiwi.config.KiwiConfig.Path;
 import snownee.kiwi.config.KiwiConfig.Range;
 
 @KiwiConfig(value = "test", type = ConfigType.COMMON)
@@ -34,7 +32,7 @@ public class TestConfig {
 	public static String emptyStr;
 
 	@LevelRestart
-	public static ModConfig.Type enumValue = ModConfig.Type.COMMON;
+	public static ConfigType enumValue = ConfigType.COMMON;
 
 	public static void onChanged(String path) {
 		// do sth

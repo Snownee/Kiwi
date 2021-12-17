@@ -2,10 +2,12 @@ package snownee.kiwi.contributor.client.gui;
 
 import java.util.Objects;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.ObjectSelectionList;
@@ -15,15 +17,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.contributor.Contributors;
 
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public class CosmeticScreen extends Screen {
 
 	private List list;
@@ -100,14 +99,13 @@ public class CosmeticScreen extends Screen {
 		super.onClose();
 		list = null;
 		ConfigHandler cfg = KiwiConfigManager.getHandler(KiwiClientConfig.class);
-		ConfigValue<String> val = (ConfigValue<String>) cfg.getValueByPath("contributorCosmetic");
 		if (currentCosmetic != null && selectedEntry.id == null) {
-			val.set("");
-			cfg.refresh();
+			KiwiClientConfig.contributorCosmetic = "";
+			cfg.save();
 			Contributors.changeCosmetic();
 		} else if (selectedEntry != null && !Objects.equals(selectedEntry.id, currentCosmetic)) {
-			val.set(selectedEntry.id.toString());
-			cfg.refresh();
+			KiwiClientConfig.contributorCosmetic = selectedEntry.id.toString();
+			cfg.save();
 			Contributors.changeCosmetic();
 		}
 	}

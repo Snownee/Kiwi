@@ -1,6 +1,6 @@
 package snownee.kiwi.block.entity;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -28,7 +28,6 @@ public abstract class BaseBlockEntity extends BlockEntity {
 		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
-	@Override
 	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
 		CompoundTag compoundtag = pkt.getTag();
 		if (compoundtag != null)
@@ -36,7 +35,7 @@ public abstract class BaseBlockEntity extends BlockEntity {
 	}
 
 	// Used for syncing data at the time when the chunk is loaded
-	@Nonnull
+	@NotNull
 	@Override
 	public CompoundTag getUpdateTag() {
 		return writePacketData(new CompoundTag());
@@ -57,7 +56,7 @@ public abstract class BaseBlockEntity extends BlockEntity {
 	 *            the data sink
 	 * @return the parameter, or delegate to super method
 	 */
-	@Nonnull
+	@NotNull
 	protected abstract CompoundTag writePacketData(CompoundTag data);
 
 	public void refresh() {

@@ -1,9 +1,9 @@
 package snownee.kiwi.loader;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import snownee.kiwi.Kiwi;
 
 public class Platform {
 
@@ -11,19 +11,19 @@ public class Platform {
 	}
 
 	public static boolean isModLoaded(String id) {
-		return ModList.get().isLoaded(id);
+		return FabricLoader.getInstance().isModLoaded(id);
 	}
 
 	public static boolean isPhysicalClient() {
-		return FMLEnvironment.dist.isClient();
+		return FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT;
 	}
 
 	public static MinecraftServer getServer() {
-		return ServerLifecycleHooks.getCurrentServer();
+		return Kiwi.currentServer;
 	}
 
 	public static boolean isProduction() {
-		return FMLEnvironment.production;
+		return !FabricLoader.getInstance().isDevelopmentEnvironment();
 	}
 
 }

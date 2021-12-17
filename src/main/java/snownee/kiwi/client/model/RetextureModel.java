@@ -1,3 +1,4 @@
+/*
 package snownee.kiwi.client.model;
 
 import java.util.Collection;
@@ -20,6 +21,8 @@ import com.google.common.collect.Maps;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderType;
@@ -45,7 +48,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.model.BlockModelConfiguration;
 import net.minecraftforge.client.model.ForgeModelBakery;
@@ -57,13 +59,13 @@ import net.minecraftforge.client.model.data.ModelProperty;
 import net.minecraftforge.client.model.geometry.IModelGeometry;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
+import snownee.kiwi.KiwiModule.Subscriber.Bus;
 import snownee.kiwi.block.def.BlockDefinition;
 import snownee.kiwi.block.entity.RetextureBlockEntity;
 import snownee.kiwi.util.NBTHelper;
 
 @EventBusSubscriber(bus = Bus.MOD, value = Dist.CLIENT)
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public class RetextureModel implements IDynamicBakedModel {
 	public static ModelProperty<Map<String, BlockDefinition>> TEXTURES = new ModelProperty<>();
 
@@ -345,3 +347,4 @@ public class RetextureModel implements IDynamicBakedModel {
 		return -1;
 	}
 }
+*/

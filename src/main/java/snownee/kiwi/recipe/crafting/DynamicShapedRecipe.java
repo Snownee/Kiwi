@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
@@ -21,11 +21,9 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.crafting.IShapedRecipe;
-import net.minecraftforge.registries.ForgeRegistryEntry;
 import snownee.kiwi.mixin.ShapedRecipeAccessor;
 
-public abstract class DynamicShapedRecipe extends CustomRecipe implements IShapedRecipe<CraftingContainer> {
+public abstract class DynamicShapedRecipe extends CustomRecipe {
 	private int width;
 	private int height;
 	private NonNullList<Ingredient> recipeItems;
@@ -80,12 +78,12 @@ public abstract class DynamicShapedRecipe extends CustomRecipe implements IShape
 	@Override
 	public abstract ItemStack assemble(CraftingContainer inv);
 
-	@Override
+	//	@Override
 	public int getRecipeWidth() {
 		return width;
 	}
 
-	@Override
+	//	@Override
 	public int getRecipeHeight() {
 		return height;
 	}
@@ -164,7 +162,7 @@ public abstract class DynamicShapedRecipe extends CustomRecipe implements IShape
 		return Ingredient.EMPTY;
 	}
 
-	public static abstract class Serializer<T extends DynamicShapedRecipe> extends ForgeRegistryEntry<RecipeSerializer<?>> implements RecipeSerializer<T> {
+	public static abstract class Serializer<T extends DynamicShapedRecipe> implements RecipeSerializer<T> {
 		public static void fromJson(DynamicShapedRecipe recipe, JsonObject json) {
 			recipe.group = GsonHelper.getAsString(json, "group", "");
 			Map<String, Ingredient> ingredientMap = ShapedRecipeAccessor.callKeyFromJson(GsonHelper.getAsJsonObject(json, "key"));

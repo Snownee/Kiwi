@@ -1,3 +1,4 @@
+/*
 package snownee.kiwi.util;
 
 import net.minecraft.world.item.ItemStack;
@@ -28,3 +29,4 @@ public class InventoryUtil {
 	}
 
 }
+*/

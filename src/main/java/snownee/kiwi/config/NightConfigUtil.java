@@ -1,17 +1,10 @@
 package snownee.kiwi.config;
 
 import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Predicate;
-
-import com.electronwill.nightconfig.core.conversion.ReflectionException;
-import com.electronwill.nightconfig.core.conversion.SpecValidator;
-import com.electronwill.nightconfig.core.utils.StringUtils;
-import com.google.common.base.Predicates;
 
 import snownee.kiwi.config.KiwiConfig.AdvancedPath;
 import snownee.kiwi.config.KiwiConfig.Path;
@@ -37,7 +30,7 @@ public class NightConfigUtil {
 	static List<String> getPath(AnnotatedElement annotatedElement) {
 		Path path = annotatedElement.getDeclaredAnnotation(Path.class);
 		if (path != null) {
-			return StringUtils.split(path.value(), '.');
+			return List.of(path.value().split("\\."));
 		}
 		AdvancedPath advancedPath = annotatedElement.getDeclaredAnnotation(AdvancedPath.class);
 		if (advancedPath != null) {
@@ -46,19 +39,19 @@ public class NightConfigUtil {
 		return null;
 	}
 
-	static Predicate<Object> getValidator(Field field) {
-		final Predicate<Object> validatorInstance;
-		try {
-			SpecValidator spec = field.getAnnotation(SpecValidator.class);
-			if (spec == null) {
-				return Predicates.alwaysTrue();
-			}
-			Constructor<? extends Predicate<Object>> constructor = spec.value().getDeclaredConstructor();
-			constructor.setAccessible(true);
-			validatorInstance = constructor.newInstance();
-		} catch (ReflectiveOperationException ex) {
-			throw new ReflectionException("Cannot create a converter for field " + field, ex);
-		}
-		return validatorInstance;
-	}
+	//	static Predicate<Object> getValidator(Field field) {
+	//		final Predicate<Object> validatorInstance;
+	//		try {
+	//			SpecValidator spec = field.getAnnotation(SpecValidator.class);
+	//			if (spec == null) {
+	//				return Predicates.alwaysTrue();
+	//			}
+	//			Constructor<? extends Predicate<Object>> constructor = spec.value().getDeclaredConstructor();
+	//			constructor.setAccessible(true);
+	//			validatorInstance = constructor.newInstance();
+	//		} catch (ReflectiveOperationException ex) {
+	//			throw new ReflectionException("Cannot create a converter for field " + field, ex);
+	//		}
+	//		return validatorInstance;
+	//	}
 }

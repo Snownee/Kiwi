@@ -1,31 +1,22 @@
 package snownee.kiwi.recipe;
 
-import java.util.stream.Stream;
-
-import com.google.common.collect.ImmutableList;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
-
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.common.crafting.IIngredientSerializer;
-import net.minecraftforge.common.crafting.MultiItemValue;
 
-public class FullBlockIngredient extends Ingredient {
+public class FullBlockIngredient /*extends Ingredient*/ {
+	/*
 	public static final Serializer SERIALIZER = new Serializer();
-
+	
 	private final Ingredient example;
-
+	
 	protected FullBlockIngredient(Stream<? extends Ingredient.Value> itemLists, Ingredient example) {
 		super(itemLists);
 		this.example = example;
 	}
+	*/
 
 	public static boolean isFullBlock(ItemStack stack) {
 		if (!isTextureBlock(stack)) {
@@ -50,6 +41,7 @@ public class FullBlockIngredient extends Ingredient {
 		return state.getMaterial().isSolid() && state.getRenderShape() == RenderShape.MODEL;
 	}
 
+	/*
 	@Override
 	public boolean test(ItemStack stack) {
 		return isFullBlock(stack);
@@ -97,5 +89,5 @@ public class FullBlockIngredient extends Ingredient {
 		}
 
 	}
-
+	 */
 }

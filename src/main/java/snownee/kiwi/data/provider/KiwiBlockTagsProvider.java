@@ -1,3 +1,4 @@
+/*
 package snownee.kiwi.data.provider;
 
 import net.minecraft.data.DataGenerator;
@@ -113,3 +114,4 @@ public abstract class KiwiBlockTagsProvider extends BlockTagsProvider {
 		return tag(BlockTags.createOptional(new ResourceLocation(modId, name)));
 	}
 }
+*/

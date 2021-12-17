@@ -2,24 +2,22 @@ package snownee.kiwi;
 
 import java.lang.reflect.Field;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 
-public class NamedEntry<T extends IForgeRegistryEntry<T>> {
+public class NamedEntry<T> {
 	public final ResourceLocation name;
 	public final T entry;
+	public final Registry<T> registry;
 	@Nullable
 	public final Field field;
 
-	public NamedEntry(ResourceLocation name, T entry) {
-		this(name, entry, null);
-	}
-
-	public NamedEntry(ResourceLocation name, T entry, Field field) {
+	public NamedEntry(ResourceLocation name, T entry, Registry<T> registry, @Nullable Field field) {
 		this.name = name;
 		this.entry = entry;
 		this.field = field;
+		this.registry = registry;
 	}
 }

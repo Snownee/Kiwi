@@ -1,9 +1,8 @@
 package snownee.kiwi.test;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.loader.event.ClientInitEvent;
 import snownee.kiwi.loader.event.InitEvent;
@@ -23,7 +22,7 @@ public class MyModule extends AbstractModule {
 	}
 
 	@Override
-	@OnlyIn(Dist.CLIENT)
+	@Environment(EnvType.CLIENT)
 	protected void clientInit(ClientInitEvent event) {
 	}
 
@@ -35,8 +34,8 @@ public class MyModule extends AbstractModule {
 	protected void postInit(PostInitEvent event) {
 	}
 
-	@Override
-	protected void gatherData(GatherDataEvent event) {
-	}
+	//	@Override
+	//	protected void gatherData(GatherDataEvent event) {
+	//	}
 
 }

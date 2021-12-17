@@ -20,7 +20,7 @@
 //import snownee.kiwi.contributor.client.RewardLayer;
 //import snownee.kiwi.contributor.impl.client.model.ElectronicatModel;
 //
-//@OnlyIn(Dist.CLIENT)
+//@Environment(EnvType.CLIENT)
 //public class ElectronicatLayer extends CosmeticLayer {
 //	private static final ResourceLocation TEXTURE = new ResourceLocation(Kiwi.MODID, "textures/reward/electronicat.png");
 //	private final ElectronicatModel<AbstractClientPlayer> model;

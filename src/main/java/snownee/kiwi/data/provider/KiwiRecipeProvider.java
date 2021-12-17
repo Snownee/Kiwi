@@ -1,3 +1,4 @@
+/*
 package snownee.kiwi.data.provider;
 
 import java.io.BufferedWriter;
@@ -318,3 +319,4 @@ public abstract class KiwiRecipeProvider implements DataProvider {
 		return getItemName(p_176669_) + "_from_blasting";
 	}
 }
+*/

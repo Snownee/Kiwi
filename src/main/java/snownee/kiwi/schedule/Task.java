@@ -1,6 +1,6 @@
 package snownee.kiwi.schedule;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class Task<T extends ITicker> {
 	public Task() {

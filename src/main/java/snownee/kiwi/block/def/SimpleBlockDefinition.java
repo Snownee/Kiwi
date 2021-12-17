@@ -7,14 +7,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.Maps;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.block.BlockPickInteractionAware;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.BlockPos;
@@ -37,21 +42,18 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.HitResult;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.model.ModelLoaderRegistry;
-import net.minecraftforge.client.model.data.EmptyModelData;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import snownee.kiwi.loader.Platform;
 
 public class SimpleBlockDefinition implements BlockDefinition {
 
-	private static final MethodHandle GET_STATE_FOR_PLACEMENT;
+	public static final MethodHandle GET_STATE_FOR_PLACEMENT;
 
 	static {
 		MethodHandle m = null;
 		try {
-			m = MethodHandles.lookup().unreflect(ObfuscationReflectionHelper.findMethod(BlockItem.class, "m_5965_", BlockPlaceContext.class));
+			// getPlacementState
+			String methodName = FabricLoader.getInstance().getMappingResolver().mapMethodName("intermediary", "net.minecraft.class_1747", "method_7707", "(Lnet/minecraft/class_1750;)Lnet/minecraft/class_2680;");
+			m = MethodHandles.lookup().unreflect(BlockItem.class.getDeclaredMethod(methodName, BlockPlaceContext.class));
 		} catch (Exception e) {
 			throw new RuntimeException("Report this to author", e);
 		}
@@ -121,7 +123,7 @@ public class SimpleBlockDefinition implements BlockDefinition {
 	}
 
 	public final BlockState state;
-	@OnlyIn(Dist.CLIENT)
+	@Environment(EnvType.CLIENT)
 	private Material[] materials;
 
 	private SimpleBlockDefinition(BlockState state) {
@@ -137,28 +139,29 @@ public class SimpleBlockDefinition implements BlockDefinition {
 	}
 
 	@Override
-	@OnlyIn(Dist.CLIENT)
+	@Environment(EnvType.CLIENT)
 	public BakedModel model() {
 		return Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getBlockModel(state);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
-	@OnlyIn(Dist.CLIENT)
+	@Environment(EnvType.CLIENT)
 	public Material renderMaterial(Direction direction) {
 		int index = direction == null ? 0 : direction.ordinal() + 1;
 		if (materials[index] == null) {
 			BakedModel model = model();
 			Random random = new Random();
 			random.setSeed(42L);
-			ResourceLocation particleIcon = model.getParticleIcon(EmptyModelData.INSTANCE).getName();
+			ResourceLocation particleIcon = model.getParticleIcon().getName();
 			ResourceLocation sprite = particleIcon;
 			if (state.getBlock() == Blocks.GRASS_BLOCK) {
 				direction = Direction.UP;
 			}
 			if (direction != null) {
-				List<BakedQuad> quads = model.getQuads(state, direction, random, EmptyModelData.INSTANCE);
+				List<BakedQuad> quads = model.getQuads(state, direction, random);
 				if (quads.isEmpty())
-					quads = model.getQuads(state, null, random, EmptyModelData.INSTANCE);
+					quads = model.getQuads(state, null, random);
 				for (BakedQuad quad : quads) {
 					sprite = quad.getSprite().getName();
 					if (sprite.equals(particleIcon)) {
@@ -166,15 +169,15 @@ public class SimpleBlockDefinition implements BlockDefinition {
 					}
 				}
 			}
-			materials[index] = ModelLoaderRegistry.blockMaterial(sprite);
+			materials[index] = new Material(TextureAtlas.LOCATION_BLOCKS, sprite);
 		}
 		return materials[index];
 	}
 
 	@Override
-	@OnlyIn(Dist.CLIENT)
+	@Environment(EnvType.CLIENT)
 	public boolean canRenderInLayer(RenderType layer) {
-		return ItemBlockRenderTypes.canRenderInLayer(state, layer);
+		return ItemBlockRenderTypes.getRenderType(state, false) == layer;
 	}
 
 	@Override
@@ -193,7 +196,7 @@ public class SimpleBlockDefinition implements BlockDefinition {
 	}
 
 	@Override
-	@OnlyIn(Dist.CLIENT)
+	@Environment(EnvType.CLIENT)
 	public int getColor(BlockState blockState, BlockAndTintGetter level, BlockPos worldPosition, int index) {
 		return Minecraft.getInstance().getBlockColors().getColor(state, level, worldPosition, index);
 	}
@@ -213,7 +216,10 @@ public class SimpleBlockDefinition implements BlockDefinition {
 
 	@Override
 	public ItemStack createItem(HitResult target, BlockGetter world, BlockPos pos, Player player) {
-		return getBlockState().getCloneItemStack(target, world, pos, player);
+		if (state.getBlock() instanceof BlockPickInteractionAware) {
+			return (((BlockPickInteractionAware) state.getBlock()).getPickedStack(state, world, pos, player, target));
+		}
+		return state.getBlock().getCloneItemStack(world, pos, state);
 	}
 
 	@Override

@@ -37,7 +37,7 @@ import snownee.kiwi.Kiwi;
 
 public class KiwiTextureManager extends TextureAtlasHolder {
 	public static final ResourceLocation LOCATION_GUI_TEXTURE = new ResourceLocation(Kiwi.MODID, "textures/atlas/gui.png");
-	public static final KiwiTextureManager GUI_ATLAS = new KiwiTextureManager(Minecraft.getInstance().textureManager, LOCATION_GUI_TEXTURE);
+	public static final KiwiTextureManager GUI_ATLAS = new KiwiTextureManager(Minecraft.getInstance().getTextureManager(), LOCATION_GUI_TEXTURE);
 
 	private final Set<ResourceLocation> registeredSprites = new HashSet<>();
 	private final ResourceLocation atlasLocation;

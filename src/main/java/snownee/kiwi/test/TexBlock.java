@@ -6,19 +6,17 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
-import snownee.kiwi.block.ModBlock;
+import snownee.kiwi.block.IKiwiBlock;
 import snownee.kiwi.block.def.SimpleBlockDefinition;
 import snownee.kiwi.block.entity.RetextureBlockEntity;
 import snownee.kiwi.recipe.FullBlockIngredient;
 
-public class TexBlock extends BaseEntityBlock {
+public class TexBlock extends BaseEntityBlock implements IKiwiBlock {
 
 	public TexBlock(Properties properties) {
 		super(properties);
@@ -49,11 +47,6 @@ public class TexBlock extends BaseEntityBlock {
 			worldIn.removeBlockEntity(pos);
 		}
 		super.onRemove(state, worldIn, pos, newState, isMoving);
-	}
-
-	@Override
-	public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
-		return ModBlock.pick(state, target, world, pos, player);
 	}
 
 	@Override

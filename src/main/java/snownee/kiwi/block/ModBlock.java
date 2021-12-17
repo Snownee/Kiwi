@@ -1,5 +1,7 @@
 package snownee.kiwi.block;
 
+import org.jetbrains.annotations.Nullable;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
@@ -26,7 +28,7 @@ import snownee.kiwi.util.VanillaActions;
  * @author Snownee
  *
  */
-public class ModBlock extends Block {
+public class ModBlock extends Block implements IKiwiBlock {
 
 	public ModBlock(Block.Properties builder) {
 		super(builder);
@@ -103,13 +105,16 @@ public class ModBlock extends Block {
 		return 1;
 	}
 
-	@Override
 	public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
 		return pick(state, target, world, pos, player);
 	}
 
-	@SuppressWarnings("deprecation")
-	public static ItemStack pick(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
+	@Override
+	public ItemStack getPickedStack(BlockState state, BlockGetter view, BlockPos pos, @Nullable Player player, @Nullable HitResult result) {
+		return getCloneItemStack(state, result, view, pos, player);
+	}
+
+	public static ItemStack pick(BlockState state, @Nullable HitResult target, BlockGetter world, BlockPos pos, @Nullable Player player) {
 		ItemStack stack = state.getBlock().getCloneItemStack(world, pos, state);
 		BlockEntity tile = world.getBlockEntity(pos);
 		if (tile instanceof BaseBlockEntity && !tile.onlyOpCanSetNbt() && ((BaseBlockEntity) tile).persistData) {

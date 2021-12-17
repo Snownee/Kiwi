@@ -1,3 +1,4 @@
+/*
 package snownee.kiwi.recipe;
 
 import com.google.gson.JsonElement;
@@ -55,3 +56,4 @@ public class TryParseCondition implements ICondition {
 	}
 
 }
+*/

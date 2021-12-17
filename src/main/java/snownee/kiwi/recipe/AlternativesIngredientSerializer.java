@@ -1,3 +1,4 @@
+/*
 package snownee.kiwi.recipe;
 
 import java.lang.reflect.Constructor;
@@ -96,3 +97,4 @@ public enum AlternativesIngredientSerializer implements IIngredientSerializer<In
 	}
 
 }
+*/

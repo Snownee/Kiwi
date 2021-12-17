@@ -5,12 +5,11 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.Commands.CommandSelection;
 import snownee.kiwi.Kiwi;
 
 public class KiwiCommand {
 
-	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher, CommandSelection environmentType) {
+	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher, boolean dedicated) {
 		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal(Kiwi.MODID);
 		/* off */
         builder.then(Commands

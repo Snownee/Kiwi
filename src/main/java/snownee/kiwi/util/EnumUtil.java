@@ -6,10 +6,10 @@ import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Direction;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.kiwi.loader.Platform;
 
 public class EnumUtil {
@@ -23,7 +23,7 @@ public class EnumUtil {
 		return new Direction[$];
 	});
 
-	@OnlyIn(Dist.CLIENT)
+	@Environment(EnvType.CLIENT)
 	public static Set<RenderType> BLOCK_RENDER_TYPES;
 
 	static {

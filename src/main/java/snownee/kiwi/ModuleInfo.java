@@ -8,24 +8,21 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.data.loading.DatagenModLoader;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.fml.javafmlmod.FMLModContainer;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 import snownee.kiwi.KiwiModule.Category;
 import snownee.kiwi.KiwiModule.RenderLayer;
 import snownee.kiwi.block.IKiwiBlock;
@@ -39,14 +36,14 @@ import snownee.kiwi.mixin.ItemAccessor;
 
 public class ModuleInfo {
 	public static final class RegistryHolder {
-		final Multimap<Class<?>, NamedEntry<?>> registries = LinkedListMultimap.create();
+		final Multimap<Registry<?>, NamedEntry<?>> registries = LinkedListMultimap.create();
 
-		<T extends IForgeRegistryEntry<T>> void put(NamedEntry<T> entry) {
-			registries.put(entry.entry.getRegistryType(), entry);
+		<T> void put(NamedEntry<T> entry) {
+			registries.put(entry.registry, entry);
 		}
 
-		<T extends IForgeRegistryEntry<T>> Collection<NamedEntry<T>> get(Class<T> clazz) {
-			return registries.get(clazz).stream().map(e -> (NamedEntry<T>) e).collect(Collectors.toList());
+		<T> Collection<NamedEntry<T>> get(Registry<T> registry) {
+			return registries.get(registry).stream().map(e -> (NamedEntry<T>) e).collect(Collectors.toList());
 		}
 	}
 
@@ -62,28 +59,27 @@ public class ModuleInfo {
 		this.module = module;
 		this.context = context;
 		module.uid = rl;
-		if (DatagenModLoader.isRunningDataGen() && context.modContainer instanceof FMLModContainer) {
-			((FMLModContainer) context.modContainer).getEventBus().addListener(module::gatherData);
-		}
+		//		if (FabricDataGenHelper.ENABLED && context.modContainer instanceof FMLModContainer) {
+		//			((FMLModContainer) context.modContainer).getEventBus().addListener(module::gatherData);
+		//		}
 	}
 
 	/**
 	 * @since 2.5.2
 	 */
 	@SuppressWarnings("rawtypes")
-	public void register(IForgeRegistryEntry<?> entry, ResourceLocation name, @Nullable Field field) {
-		registries.put(new NamedEntry(name, entry, field));
+	public void register(Object entry, ResourceLocation name, Registry<?> registry, @Nullable Field field) {
+		registries.put(new NamedEntry(name, entry, registry, field));
 	}
 
 	@SuppressWarnings("rawtypes")
-	public <T extends IForgeRegistryEntry<T>> void handleRegister(RegistryEvent.Register<T> event) {
+	public <T> void handleRegister(Registry<T> registry) {
 		context.setActiveContainer();
-		Class<T> clazz = event.getRegistry().getRegistrySuperType();
-		Collection<NamedEntry<T>> entries = registries.get(clazz);
-		BiConsumer<ModuleInfo, T> decorator = (BiConsumer<ModuleInfo, T>) module.decorators.getOrDefault(clazz, (a, b) -> {
+		Collection<NamedEntry<T>> entries = registries.get(registry);
+		BiConsumer<ModuleInfo, T> decorator = (BiConsumer<ModuleInfo, T>) module.decorators.getOrDefault(registry, (a, b) -> {
 		});
-		if (clazz == Item.class) {
-			registries.get(Block.class).forEach(e -> {
+		if (registry == Registry.ITEM) {
+			registries.get(Registry.BLOCK).forEach(e -> {
 				if (noItems.contains(e.entry))
 					return;
 				Item.Properties builder = blockItemBuilders.get(e.entry);
@@ -108,14 +104,14 @@ public class ModuleInfo {
 						}
 					}
 				}
-				entries.add(new NamedEntry(e.name, item));
+				entries.add(new NamedEntry(e.name, item, registry, null));
 			});
 		}
 		entries.forEach(e -> {
-			decorator.accept(this, e.entry.setRegistryName(e.name));
-			event.getRegistry().register(e.entry);
+			decorator.accept(this, e.entry);
+			Registry.register(e.registry, e.name, e.entry);
 		});
-		if (clazz == Block.class && Platform.isPhysicalClient()) {
+		if (registry == Registry.BLOCK && Platform.isPhysicalClient()) {
 			final RenderType solid = RenderType.solid();
 			Map<Class<?>, RenderType> cache = Maps.newHashMap();
 			entries.stream().forEach(e -> {
@@ -125,7 +121,7 @@ public class ModuleInfo {
 					if (layer != null) {
 						RenderType type = layer.value().get();
 						if (type != solid && type != null) {
-							ItemBlockRenderTypes.setRenderLayer(block, type);
+							BlockRenderLayerMap.INSTANCE.putBlock(block, type);
 							return;
 						}
 					}
@@ -143,7 +139,7 @@ public class ModuleInfo {
 					return solid;
 				});
 				if (type != solid && type != null) {
-					ItemBlockRenderTypes.setRenderLayer(block, type);
+					BlockRenderLayerMap.INSTANCE.putBlock(block, type);
 				}
 			});
 		}
@@ -152,6 +148,7 @@ public class ModuleInfo {
 	public void preInit() {
 		context.setActiveContainer();
 		module.preInit();
+		registries.registries.keySet().forEach(this::handleRegister);
 	}
 
 	public void init(InitEvent event) {
@@ -174,8 +171,8 @@ public class ModuleInfo {
 		module.postInit(event);
 	}
 
-	public <T extends IForgeRegistryEntry<T>> List<T> getRegistries(Class<T> clazz) {
-		return registries.get(clazz).stream().map($ -> $.entry).collect(Collectors.toList());
+	public <T> List<T> getRegistries(Registry<T> registry) {
+		return registries.get(registry).stream().map($ -> $.entry).collect(Collectors.toList());
 	}
 
 }

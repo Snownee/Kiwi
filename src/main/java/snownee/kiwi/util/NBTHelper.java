@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import com.mojang.authlib.GameProfile;
 
@@ -422,7 +422,7 @@ public class NBTHelper {
 	}
 
 	public static NBTHelper create() {
-		return new NBTHelper(null, null);
+		return of(new CompoundTag());
 	}
 
 }

@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.JsonElement;
 
@@ -29,9 +29,6 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import snownee.kiwi.block.def.BlockDefinition;
 import snownee.kiwi.loader.Platform;
 
@@ -199,10 +196,10 @@ public final class Util {
 		if (!player.isCreative() && state.getDestroyProgress(player, player.level, pos) <= 0) {
 			return false;
 		}
-		BreakEvent event = new BreakEvent(player.level, pos, state, player);
-		if (MinecraftForge.EVENT_BUS.post(event)) {
-			return false;
-		}
+		//		BreakEvent event = new BreakEvent(player.level, pos, state, player);
+		//		if (MinecraftForge.EVENT_BUS.post(event)) {
+		//			return false;
+		//		}
 		return true;
 	}
 
@@ -216,8 +213,9 @@ public final class Util {
 		return (color & 0xFFFFFF) | alphaChannel << 24;
 	}
 
+	// GameRenderer.pick
 	public static float getPickRange(Player player) {
-		float attrib = (float) player.getAttribute(ForgeMod.REACH_DISTANCE.get()).getValue();
+		float attrib = 5;
 		return player.isCreative() ? attrib : attrib - 0.5F;
 	}
 

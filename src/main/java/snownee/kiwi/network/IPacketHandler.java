@@ -3,7 +3,7 @@ package snownee.kiwi.network;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;

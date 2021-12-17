@@ -1,19 +1,14 @@
 package snownee.kiwi;
 
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 
 import com.google.common.collect.Maps;
 
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.ModLoadingContext;
-
 public class ModContext {
 	public static final Map<String, ModContext> ALL_CONTEXTS = Maps.newHashMap();
 
-	public ModContainer modContainer;
+	//	public ModContainer modContainer;
 
 	public static ModContext get(String modid) {
 		if (ALL_CONTEXTS.containsKey(modid)) {
@@ -27,14 +22,14 @@ public class ModContext {
 
 	private ModContext(String modid) {
 		Objects.requireNonNull(modid, "Cannot get name of kiwi module.");
-		try {
-			modContainer = ModList.get().getModContainerById(modid).get();
-		} catch (NoSuchElementException e) {
-			Kiwi.logger.catching(e);
-		}
+		//		try {
+		//			modContainer = ModList.get().getModContainerById(modid).get();
+		//		} catch (NoSuchElementException e) {
+		//			Kiwi.logger.catching(e);
+		//		}
 	}
 
 	public void setActiveContainer() {
-		ModLoadingContext.get().setActiveContainer(modContainer);
+		//		ModLoadingContext.get().setActiveContainer(modContainer);
 	}
 }

@@ -3,11 +3,13 @@ package snownee.kiwi.block.def;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.Material;
@@ -26,10 +28,6 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.HitResult;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.model.data.EmptyModelData;
-import net.minecraftforge.client.model.data.IModelData;
 
 public interface BlockDefinition {
 
@@ -76,25 +74,25 @@ public interface BlockDefinition {
 
 	Factory<?> getFactory();
 
-	@OnlyIn(Dist.CLIENT)
+	@Environment(EnvType.CLIENT)
 	BakedModel model();
 
-	@OnlyIn(Dist.CLIENT)
-	default IModelData modelData() {
-		return EmptyModelData.INSTANCE;
-	}
+	//	@Environment(EnvType.CLIENT)
+	//	default IModelData modelData() {
+	//		return EmptyModelData.INSTANCE;
+	//	}
 
-	@OnlyIn(Dist.CLIENT)
+	@Environment(EnvType.CLIENT)
 	Material renderMaterial(@Nullable Direction direction);
 
 	void save(CompoundTag tag);
 
-	@OnlyIn(Dist.CLIENT)
+	@Environment(EnvType.CLIENT)
 	boolean canRenderInLayer(RenderType layer);
 
 	boolean canOcclude();
 
-	@OnlyIn(Dist.CLIENT)
+	@Environment(EnvType.CLIENT)
 	int getColor(BlockState blockState, BlockAndTintGetter level, BlockPos pos, int index);
 
 	Component getDescription();
@@ -119,7 +117,7 @@ public interface BlockDefinition {
 	}
 
 	default int getLightEmission(BlockGetter level, BlockPos pos) {
-		return getBlockState().getLightEmission(level, pos);
+		return getBlockState().getLightEmission();
 	}
 
 	SoundType getSoundType();

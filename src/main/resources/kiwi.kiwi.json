@@ -1,0 +1,47 @@
+{
+  "KiwiConfig": [
+    {
+      "target": "snownee.kiwi.KiwiClientConfig",
+      "data": {
+        "type": "CLIENT"
+      }
+    }
+  ],
+  "KiwiModule": [
+    {
+      "target": "snownee.kiwi.test.TestModule",
+      "data": {
+        "value": "test"
+      }
+    },
+    {
+      "target": "snownee.kiwi.data.DataModule",
+      "data": {
+        "value": "data"
+      }
+    }
+  ],
+  "Optional": [
+    {
+      "target": "snownee.kiwi.test.TestModule",
+      "data": {
+        "defaultEnabled": false
+      }
+    }
+  ],
+  "KiwiPacket": [
+    {
+      "target": "snownee.kiwi.contributor.network.CSetCosmeticPacket",
+      "data": {
+        "value": "set_cosmetic"
+      }
+    },
+    {
+      "target": "snownee.kiwi.contributor.network.SSyncCosmeticPacket",
+      "data": {
+        "dir": "PLAY_TO_CLIENT",
+        "value": "sync_cosmetic"
+      }
+    }
+  ]
+}

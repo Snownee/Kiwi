@@ -1,25 +1,33 @@
 package snownee.kiwi;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
+
+import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.mojang.datafixers.types.Type;
 
+import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
+import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
+import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder.Factory;
+import net.fabricmc.fabric.api.tag.TagFactory;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.EntityTypeTags;
-import net.minecraft.tags.FluidTags;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.Tag.Named;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Material;
-import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 import snownee.kiwi.block.ModBlock;
 import snownee.kiwi.loader.event.ClientInitEvent;
 import snownee.kiwi.loader.event.InitEvent;
@@ -44,9 +52,9 @@ public abstract class AbstractModule {
 		ModBlock.setFireInfo(block);
 	};
 
-	private static final Map<Class<?>, BiConsumer<ModuleInfo, ? extends IForgeRegistryEntry<?>>> DEFAULT_DECORATORS = ImmutableMap.of(Item.class, ITEM_DECORATOR, Block.class, BLOCK_DECORATOR);
+	private static final Map<Registry<?>, BiConsumer<ModuleInfo, ?>> DEFAULT_DECORATORS = ImmutableMap.of(Registry.ITEM, ITEM_DECORATOR, Registry.BLOCK, BLOCK_DECORATOR);
 
-	protected final Map<Class<?>, BiConsumer<ModuleInfo, ? extends IForgeRegistryEntry<?>>> decorators = Maps.newHashMap(DEFAULT_DECORATORS);
+	protected final Map<Registry<?>, BiConsumer<ModuleInfo, ?>> decorators = Maps.newHashMap(DEFAULT_DECORATORS);
 
 	protected void preInit() {
 		// NO-OP
@@ -68,12 +76,12 @@ public abstract class AbstractModule {
 		// NO-OP
 	}
 
-	/**
-	 * @since 4.1.0
-	 */
-	protected void gatherData(GatherDataEvent event) {
-		// NO-OP
-	}
+	//	/**
+	//	 * @since 4.1.0
+	//	 */
+	//	protected void gatherData(GatherDataEvent event) {
+	//		// NO-OP
+	//	}
 
 	/// helper methods:
 	protected static Item.Properties itemProp() {
@@ -94,20 +102,34 @@ public abstract class AbstractModule {
 		return BlockBehaviour.Properties.copy(block);
 	}
 
+	/**
+	 * @since 5.2.0
+	 */
+	public static <T extends BlockEntity> BlockEntityType<T> blockEntity(Factory<? extends T> factory, Type<?> datafixer, Block... blocks) {
+		return FabricBlockEntityTypeBuilder.<T>create(factory, blocks).build(datafixer);
+	}
+
+	/**
+	 * @since 5.2.0
+	 */
+	public static CreativeModeTab itemCategory(String namespace, String path, Supplier<ItemStack> icon, @Nullable BiConsumer<List<ItemStack>, CreativeModeTab> stacksForDisplay) {
+		return FabricItemGroupBuilder.create(new ResourceLocation(namespace, path)).icon(icon).appendItems(stacksForDisplay).build();
+	}
+
 	public static Named<Item> itemTag(String namespace, String path) {
-		return ItemTags.bind(namespace + ":" + path);
+		return TagFactory.ITEM.create(new ResourceLocation(namespace, path));
 	}
 
 	public static Named<EntityType<?>> entityTag(String namespace, String path) {
-		return EntityTypeTags.bind(namespace + ":" + path);
+		return TagFactory.ENTITY_TYPE.create(new ResourceLocation(namespace, path));
 	}
 
 	public static Named<Block> blockTag(String namespace, String path) {
-		return BlockTags.bind(namespace + ":" + path);
+		return TagFactory.BLOCK.create(new ResourceLocation(namespace, path));
 	}
 
 	public static Named<Fluid> fluidTag(String namespace, String path) {
-		return FluidTags.bind(namespace + ":" + path);
+		return TagFactory.FLUID.create(new ResourceLocation(namespace, path));
 	}
 
 	/**

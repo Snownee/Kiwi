@@ -7,13 +7,13 @@
   "mixins": [
     "ItemAccessor",
     "BlockAccessor",
-    "FireBlockAccessor",
     "ShapedRecipeAccessor",
-    "HoeItemAccessor",
-    "AxeItemAccessor",
-    "ShovelItemAccessor",
     "VillagerAccessor",
-    "WorkAtComposterAccessor"
+    "WorkAtComposterAccessor",
+    "TagContainerMixin"
+  ],
+  "client": [
+    "ClientPacketListenerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

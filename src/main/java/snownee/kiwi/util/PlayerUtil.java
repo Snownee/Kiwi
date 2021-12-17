@@ -1,6 +1,6 @@
 package snownee.kiwi.util;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -19,8 +19,6 @@ import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraftforge.common.util.BlockSnapshot;
-import net.minecraftforge.event.ForgeEventFactory;
 
 public final class PlayerUtil {
 	private PlayerUtil() {
@@ -50,14 +48,14 @@ public final class PlayerUtil {
 		if (player != null && !player.mayUseItemAt(pos, direction, stack)) {
 			return false;
 		}
-		BlockSnapshot blocksnapshot = BlockSnapshot.create(world.dimension(), world, pos);
-		if (!world.setBlockAndUpdate(pos, state)) {
-			return false;
-		}
-		if (ForgeEventFactory.onBlockPlace(player, blocksnapshot, direction)) {
-			blocksnapshot.restore(true, false);
-			return false;
-		}
+		//		BlockSnapshot blocksnapshot = BlockSnapshot.create(world.dimension(), world, pos);
+		//		if (!world.setBlockAndUpdate(pos, state)) {
+		//			return false;
+		//		}
+		//		if (ForgeEventFactory.onBlockPlace(player, blocksnapshot, direction)) {
+		//			blocksnapshot.restore(true, false);
+		//			return false;
+		//		}
 		world.setBlock(pos, state, 11);
 
 		BlockState actualState = world.getBlockState(pos);
@@ -79,7 +77,7 @@ public final class PlayerUtil {
 		}
 
 		if (playSound) {
-			SoundType soundtype = actualState.getBlock().getSoundType(actualState, world, pos, player);
+			SoundType soundtype = actualState.getBlock().getSoundType(actualState);
 			world.playSound(player, pos, soundtype.getPlaceSound(), SoundSource.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
 		}
 

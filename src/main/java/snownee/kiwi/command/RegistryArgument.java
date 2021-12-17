@@ -17,25 +17,23 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.synchronization.ArgumentSerializer;
+import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistryEntry;
-import net.minecraftforge.registries.RegistryManager;
 
 /**
- * @since 2.7.0
+ * @since 5.2.0
  */
-public class ForgeRegistryArgument<T extends IForgeRegistryEntry<T>> implements ArgumentType<T> {
+public class RegistryArgument<T> implements ArgumentType<T> {
 
 	@SuppressWarnings("rawtypes")
 	public static final DynamicCommandExceptionType BAD_ID = new DynamicCommandExceptionType(pair -> new TranslatableComponent("argument.kiwi.registry.id.invalid", ((Pair) pair).getLeft(), ((Pair) pair).getRight()));
 
-	private final IForgeRegistry<T> registry;
+	private final Registry<T> registry;
 	private Collection<String> examples;
 
-	public ForgeRegistryArgument(IForgeRegistry<T> registry) {
+	public RegistryArgument(Registry<T> registry) {
 		this.registry = registry;
 	}
 
@@ -44,15 +42,15 @@ public class ForgeRegistryArgument<T extends IForgeRegistryEntry<T>> implements 
 		int i = reader.getCursor();
 		ResourceLocation resourcelocation = ResourceLocation.read(reader);
 		if (registry.containsKey(resourcelocation)) {
-			return registry.getValue(resourcelocation);
+			return registry.get(resourcelocation);
 		}
 		reader.setCursor(i);
-		throw BAD_ID.createWithContext(reader, Pair.of(registry.getRegistryName().getPath(), resourcelocation));
+		throw BAD_ID.createWithContext(reader, Pair.of(registry.key().location().getPath(), resourcelocation));
 	}
 
 	@Override
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-		return SharedSuggestionProvider.suggestResource(registry.getKeys(), builder);
+		return SharedSuggestionProvider.suggestResource(registry.keySet(), builder);
 	}
 
 	@Override
@@ -60,8 +58,8 @@ public class ForgeRegistryArgument<T extends IForgeRegistryEntry<T>> implements 
 		if (examples == null) {
 			ImmutableList.Builder<String> builder = ImmutableList.builder();
 			int count = 0;
-			for (T value : registry.getValues()) {
-				builder.add(value.getRegistryName().toString());
+			for (ResourceLocation key : registry.keySet()) {
+				builder.add(key.toString());
 				if (++count == 3) {
 					break;
 				}
@@ -72,21 +70,22 @@ public class ForgeRegistryArgument<T extends IForgeRegistryEntry<T>> implements 
 	}
 
 	@SuppressWarnings("rawtypes")
-	public static class Serializer implements ArgumentSerializer<ForgeRegistryArgument<? extends IForgeRegistryEntry>> {
+	public static class Serializer implements ArgumentSerializer<RegistryArgument<?>> {
 
+		//FIXME
 		@Override
-		public void serializeToNetwork(ForgeRegistryArgument<? extends IForgeRegistryEntry> argument, FriendlyByteBuf buffer) {
-			buffer.writeResourceLocation(argument.registry.getRegistryName());
+		public void serializeToNetwork(RegistryArgument<?> argument, FriendlyByteBuf buffer) {
+			buffer.writeResourceLocation(argument.registry.key().location());
 		}
 
 		@Override
-		public ForgeRegistryArgument<? extends IForgeRegistryEntry> deserializeFromNetwork(FriendlyByteBuf buffer) {
-			return new ForgeRegistryArgument(RegistryManager.ACTIVE.getRegistry(buffer.readResourceLocation()));
+		public RegistryArgument<?> deserializeFromNetwork(FriendlyByteBuf buffer) {
+			return new RegistryArgument(Registry.REGISTRY.get(buffer.readResourceLocation()));
 		}
 
 		@Override
-		public void serializeToJson(ForgeRegistryArgument<? extends IForgeRegistryEntry> argument, JsonObject json) {
-			json.addProperty("registry", argument.registry.getRegistryName().toString());
+		public void serializeToJson(RegistryArgument<?> argument, JsonObject json) {
+			json.addProperty("registry", argument.registry.key().location().toString());
 		}
 
 	}

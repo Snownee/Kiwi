@@ -6,9 +6,12 @@ import java.util.stream.Collectors;
 import com.google.common.base.Function;
 import com.mojang.blaze3d.platform.InputConstants;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.ClickEvent;
@@ -17,15 +20,14 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.item.ModItem;
 
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public final class TooltipEvents {
 	private TooltipEvents() {
 	}
@@ -49,7 +51,7 @@ public final class TooltipEvents {
 		if (stack != lastStack && minecraft.player != null && InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 292/*F3*/)) {
 			lastStack = stack;
 			CompoundTag data = stack.getTag();
-			MutableComponent itextcomponent = new TextComponent(stack.getItem().getRegistryName().toString());
+			MutableComponent itextcomponent = new TextComponent(Registry.ITEM.getKey(stack.getItem()).toString());
 			if (minecraft.keyboardHandler != null) {
 				minecraft.keyboardHandler.setClipboard(itextcomponent.getString());
 			}
@@ -125,7 +127,7 @@ public final class TooltipEvents {
 			}
 			tooltip.add(lastFormatted);
 		} else if (KiwiClientConfig.tagsTooltip) {
-			stack.getItem().getTags().stream().map(Object::toString).sorted().forEach(id -> {
+			ItemTags.getAllTags().getMatchingTags(stack.getItem()).stream().map(Object::toString).sorted().forEach(id -> {
 				tooltip.add(new TextComponent("#" + id).withStyle(ChatFormatting.DARK_GRAY));
 			});
 		}

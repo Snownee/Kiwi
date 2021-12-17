@@ -6,7 +6,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import net.minecraftforge.network.NetworkDirection;
+import net.fabricmc.fabric.impl.networking.GlobalReceiverRegistry;
+import net.fabricmc.fabric.impl.networking.client.ClientNetworkingImpl;
+import net.fabricmc.fabric.impl.networking.server.ServerNetworkingImpl;
 
 @Retention(RUNTIME)
 @Target(TYPE)
@@ -17,14 +19,14 @@ public @interface KiwiPacket {
 	Direction dir() default Direction.PLAY_TO_SERVER;
 
 	public enum Direction {
-		PLAY_TO_SERVER(NetworkDirection.PLAY_TO_SERVER),
-		PLAY_TO_CLIENT(NetworkDirection.PLAY_TO_CLIENT),
-		LOGIN_TO_SERVER(NetworkDirection.LOGIN_TO_SERVER),
-		LOGIN_TO_CLIENT(NetworkDirection.LOGIN_TO_CLIENT);
+		PLAY_TO_SERVER(ClientNetworkingImpl.PLAY),
+		PLAY_TO_CLIENT(ServerNetworkingImpl.PLAY),
+		LOGIN_TO_SERVER(ClientNetworkingImpl.LOGIN),
+		LOGIN_TO_CLIENT(ServerNetworkingImpl.LOGIN);
 
-		final NetworkDirection value;
+		final GlobalReceiverRegistry<?> value;
 
-		Direction(NetworkDirection value) {
+		Direction(GlobalReceiverRegistry<?> value) {
 			this.value = value;
 		}
 	}

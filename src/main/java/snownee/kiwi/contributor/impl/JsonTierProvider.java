@@ -17,11 +17,11 @@ import com.google.common.collect.ImmutableSetMultimap.Builder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.contributor.ITierProvider;
 import snownee.kiwi.contributor.client.CosmeticLayer;
@@ -102,7 +102,7 @@ public class JsonTierProvider implements ITierProvider {
 		return Collections.EMPTY_LIST;
 	}
 
-	@OnlyIn(Dist.CLIENT)
+	@Environment(EnvType.CLIENT)
 	@Override
 	public CosmeticLayer createRenderer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer, String tier) {
 		return null;

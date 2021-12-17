@@ -1,3 +1,4 @@
+/*
 package snownee.kiwi.data.provider;
 
 import java.util.List;
@@ -49,3 +50,4 @@ public class KiwiLootTableProvider extends LootTableProvider {
 	}
 
 }
+*/

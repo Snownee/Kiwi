@@ -3,7 +3,7 @@ package snownee.kiwi.block.entity;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Maps;
@@ -12,25 +12,18 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.model.data.EmptyModelData;
-import net.minecraftforge.client.model.data.IModelData;
-import net.minecraftforge.client.model.data.ModelDataMap;
 import snownee.kiwi.block.def.BlockDefinition;
 import snownee.kiwi.block.def.SimpleBlockDefinition;
-import snownee.kiwi.client.model.RetextureModel;
 import snownee.kiwi.util.NBTHelper;
 
 public abstract class RetextureBlockEntity extends BaseBlockEntity {
 	@Nullable
 	protected Map<String, BlockDefinition> textures;
-	/** Do not get modelData directly, use getModelData() */
-	protected IModelData modelData = EmptyModelData.INSTANCE;
+	//	/** Do not get modelData directly, use getModelData() */
+	//	protected IModelData modelData = EmptyModelData.INSTANCE;
 
 	public RetextureBlockEntity(BlockEntityType<?> tileEntityTypeIn, BlockPos level, BlockState state, String... textureKeys) {
 		super(tileEntityTypeIn, level, state);
@@ -75,27 +68,27 @@ public abstract class RetextureBlockEntity extends BaseBlockEntity {
 	@Override
 	public void refresh() {
 		if (level != null && level.isClientSide) {
-			requestModelDataUpdate();
+			//			requestModelDataUpdate();
 		} else {
 			super.refresh();
 		}
 	}
 
-	@Override
-	public void onLoad() {
-		super.requestModelDataUpdate();
-	}
+	//	@Override
+	//	public void onLoad() {
+	//		super.requestModelDataUpdate();
+	//	}
 
-	@Override
-	public void requestModelDataUpdate() {
-		if (textures == null) {
-			return;
-		}
-		super.requestModelDataUpdate();
-		if (!remove && level != null && level.isClientSide) {
-			level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 8);
-		}
-	}
+	//	@Override
+	//	public void requestModelDataUpdate() {
+	//		if (textures == null) {
+	//			return;
+	//		}
+	//		super.requestModelDataUpdate();
+	//		if (!remove && level != null && level.isClientSide) {
+	//			level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 8);
+	//		}
+	//	}
 
 	@Override
 	protected void readPacketData(CompoundTag data) {
@@ -150,16 +143,16 @@ public abstract class RetextureBlockEntity extends BaseBlockEntity {
 		return data;
 	}
 
-	@Override
-	public IModelData getModelData() {
-		if (textures != null && modelData == EmptyModelData.INSTANCE) {
-			modelData = new ModelDataMap.Builder().withInitial(RetextureModel.TEXTURES, textures).build();
-		}
-		return modelData;
-	}
+	//	@Override
+	//	public IModelData getModelData() {
+	//		if (textures != null && modelData == EmptyModelData.INSTANCE) {
+	//			modelData = new ModelDataMap.Builder().withInitial(RetextureModel.TEXTURES, textures).build();
+	//		}
+	//		return modelData;
+	//	}
 
-	@OnlyIn(Dist.CLIENT)
-	public int getColor(BlockAndTintGetter level, int index) {
-		return RetextureModel.getColor(textures, getBlockState(), level, worldPosition, index);
-	}
+	//	@Environment(EnvType.CLIENT)
+	//	public int getColor(BlockAndTintGetter level, int index) {
+	//		return RetextureModel.getColor(textures, getBlockState(), level, worldPosition, index);
+	//	}
 }
