@@ -18,7 +18,7 @@ public class CSetCosmeticPacket extends PacketHandler {
 
 	@Override
 	public CompletableFuture<FriendlyByteBuf> receive(Function<Runnable, CompletableFuture<FriendlyByteBuf>> executor, FriendlyByteBuf buf, ServerPlayer sender) {
-		ResourceLocation id = Util.RL(buf.readUtf(32767));
+		ResourceLocation id = Util.RL(buf.readUtf(Short.MAX_VALUE));
 		Contributors.changeCosmetic(sender, id);
 		return CompletableFuture.completedFuture(null);
 	}

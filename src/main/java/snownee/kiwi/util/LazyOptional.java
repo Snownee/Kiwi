@@ -1,5 +1,6 @@
 package snownee.kiwi.util;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
 public class LazyOptional<T> implements Supplier<T> {
@@ -15,9 +16,8 @@ public class LazyOptional<T> implements Supplier<T> {
 	public T get() {
 		if (value == null) {
 			value = supplier.get();
-			if (value == null) {
-				throw new NullPointerException();
-			}
+			supplier = null;
+			Objects.requireNonNull(value);
 		}
 		return value;
 	}
@@ -27,6 +27,7 @@ public class LazyOptional<T> implements Supplier<T> {
 	}
 
 	public static <T> LazyOptional<T> of(Supplier<T> supplier) {
+		Objects.requireNonNull(supplier);
 		return new LazyOptional<>(supplier);
 	}
 
