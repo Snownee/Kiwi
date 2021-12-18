@@ -35,14 +35,14 @@ public abstract class PacketHandler implements IPacketHandler {
 	}
 
 	public void send(Collection<ServerPlayer> players, Consumer<FriendlyByteBuf> buf) {
-		FriendlyByteBuf buffer = PacketByteBufs.empty();
+		FriendlyByteBuf buffer = PacketByteBufs.create();
 		buf.accept(buffer);
 		Packet<?> packet = ServerPlayNetworking.createS2CPacket(id, buffer);
 		players.forEach($ -> $.connection.send(packet));
 	}
 
 	public void send(ServerPlayer player, Consumer<FriendlyByteBuf> buf) {
-		FriendlyByteBuf buffer = PacketByteBufs.empty();
+		FriendlyByteBuf buffer = PacketByteBufs.create();
 		buf.accept(buffer);
 		ServerPlayNetworking.send(player, id, buffer);
 	}
@@ -54,7 +54,7 @@ public abstract class PacketHandler implements IPacketHandler {
 	}
 
 	public void sendToServer(Consumer<FriendlyByteBuf> buf) {
-		FriendlyByteBuf buffer = PacketByteBufs.empty();
+		FriendlyByteBuf buffer = PacketByteBufs.create();
 		buf.accept(buffer);
 		ClientPlayNetworking.send(id, buffer);
 	}

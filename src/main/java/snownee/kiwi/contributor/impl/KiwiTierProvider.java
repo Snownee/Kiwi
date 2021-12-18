@@ -20,6 +20,7 @@ import snownee.kiwi.contributor.impl.client.layer.FoxTailLayer;
 import snownee.kiwi.contributor.impl.client.layer.PlanetLayer;
 import snownee.kiwi.contributor.impl.client.layer.SantaHatLayer;
 import snownee.kiwi.contributor.impl.client.layer.SunnyMilkLayer;
+import snownee.kiwi.loader.Platform;
 
 public class KiwiTierProvider extends JsonTierProvider {
 	public KiwiTierProvider() {
@@ -44,12 +45,12 @@ public class KiwiTierProvider extends JsonTierProvider {
 
 	private static boolean isInXmas() {
 		Calendar calendar = Calendar.getInstance();
-		return calendar.get(Calendar.MONTH) == Calendar.DECEMBER && calendar.get(Calendar.DAY_OF_MONTH) >= 20;
+		return calendar.get(Calendar.MONTH) == Calendar.DECEMBER && calendar.get(Calendar.DAY_OF_MONTH) >= 15;
 	}
 
 	@Override
 	public Set<String> getPlayerTiers(String playerName) {
-		Set<String> ret = super.getPlayerTiers(playerName);
+		Set<String> ret = super.getPlayerTiers(Platform.isProduction() ? playerName : "Dev");
 		if (isInXmas()) {
 			ret = Sets.newHashSet(ret);
 			ret.add("xmas");

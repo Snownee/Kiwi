@@ -15,6 +15,12 @@
       }
     },
     {
+      "target": "snownee.kiwi.contributor.Contributors",
+      "data": {
+        "value": "contributors"
+      }
+    },
+    {
       "target": "snownee.kiwi.data.DataModule",
       "data": {
         "value": "data"

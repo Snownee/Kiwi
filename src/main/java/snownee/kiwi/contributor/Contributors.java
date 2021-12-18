@@ -12,11 +12,19 @@ import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRendererRegistrationCallback;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import snownee.kiwi.AbstractModule;
@@ -26,10 +34,12 @@ import snownee.kiwi.KiwiModule;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.contributor.client.CosmeticLayer;
+import snownee.kiwi.contributor.client.gui.CosmeticScreen;
 import snownee.kiwi.contributor.impl.KiwiTierProvider;
 import snownee.kiwi.contributor.network.CSetCosmeticPacket;
 import snownee.kiwi.contributor.network.SSyncCosmeticPacket;
 import snownee.kiwi.loader.Platform;
+import snownee.kiwi.loader.event.ClientInitEvent;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.util.Util;
 
@@ -42,15 +52,41 @@ public class Contributors extends AbstractModule {
 	private static int DAY = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
 
 	@Override
-	protected void preInit() {
-		if (Platform.isPhysicalClient()) {
-			//			FMLJavaModLoadingContext.get().getModEventBus().addListener(this::addLayers);
+	protected void init(InitEvent event) {
+		registerTierProvider(new KiwiTierProvider());
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+			if (!(handler.player.level instanceof ServerLevel)) {
+				return;
+			}
+			if (!(server.isSingleplayerOwner(handler.player.getGameProfile()))) {
+				SSyncCosmeticPacket.send(PLAYER_COSMETICS, handler.player, false);
+			}
+		});
+		if (!Platform.isPhysicalClient()) {
+			ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+				PLAYER_COSMETICS.remove(handler.player.getGameProfile().getName());
+			});
 		}
 	}
 
 	@Override
-	protected void init(InitEvent event) {
-		registerTierProvider(new KiwiTierProvider());
+	@Environment(EnvType.CLIENT)
+	protected void clientInit(ClientInitEvent event) {
+		LivingEntityFeatureRendererRegistrationCallback.EVENT.register((entityType, entityRenderer, registrationHelper, context) -> {
+			if (entityRenderer instanceof PlayerRenderer) {
+				CosmeticLayer layer = new CosmeticLayer((PlayerRenderer) entityRenderer);
+				CosmeticLayer.ALL_LAYERS.add(layer);
+				registrationHelper.register(layer);
+			}
+		});
+		ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
+			changeCosmetic();
+		});
+		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+			PLAYER_COSMETICS.clear();
+			CosmeticLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidateAll());
+		});
+		ClientTickEvents.END_CLIENT_TICK.register(this::onKeyInput);
 	}
 
 	public static boolean isContributor(String author, String playerName) {
@@ -94,46 +130,6 @@ public class Contributors extends AbstractModule {
 			RENDERABLES.add(new ResourceLocation(namespace, tier));
 		}
 	}
-
-	//	@SubscribeEvent
-	//	public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-	//		if (!(event.getEntity().level instanceof ServerLevel)) {
-	//			return;
-	//		}
-	//		Player player = event.getPlayer();
-	//		if (!((ServerLevel) event.getEntity().level).getServer().isSingleplayerOwner(player.getGameProfile())) {
-	//			SSyncCosmeticPacket.send(PLAYER_COSMETICS, (ServerPlayer) player, false);
-	//		}
-	//	}
-	//
-	//	@Environment(EnvType.CLIENT)
-	//	@SubscribeEvent
-	//	public void onClientPlayerLoggedIn(ClientPlayerNetworkEvent.LoggedInEvent event) {
-	//		changeCosmetic();
-	//	}
-	//
-	//	@Environment(EnvType.SERVER)
-	//	@SubscribeEvent
-	//	public void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
-	//		PLAYER_COSMETICS.remove(event.getPlayer().getGameProfile().getName());
-	//	}
-	//
-	//	@Environment(EnvType.CLIENT)
-	//	@SubscribeEvent
-	//	public void onClientPlayerLoggedOut(ClientPlayerNetworkEvent.LoggedOutEvent event) {
-	//		PLAYER_COSMETICS.clear();
-	//		CosmeticLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidateAll());
-	//	}
-	//
-	//	@Environment(EnvType.CLIENT)
-	//	public void addLayers(EntityRenderersEvent.AddLayers event) {
-	//		for (String name : event.getSkins()) {
-	//			LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> o = event.getSkin(name);
-	//			CosmeticLayer layer = new CosmeticLayer(o);
-	//			CosmeticLayer.ALL_LAYERS.add(layer);
-	//			o.addLayer(layer);
-	//		}
-	//	}
 
 	@Environment(EnvType.CLIENT)
 	public static void changeCosmetic() {
@@ -235,26 +231,20 @@ public class Contributors extends AbstractModule {
 
 	private int hold;
 
-	//	@SubscribeEvent
-	//	@Environment(EnvType.CLIENT)
-	//	public void onKeyInput(KeyInputEvent event) {
-	//		Minecraft mc = Minecraft.getInstance();
-	//		if (mc.screen != null || mc.player == null || !mc.isWindowActive()) {
-	//			return;
-	//		}
-	//		if (event.getModifiers() != 0) {
-	//			return;
-	//		}
-	//		Key input = InputConstants.getKey(event.getKey(), event.getScanCode());
-	//		if (input.getValue() != 75) {
-	//			return;
-	//		}
-	//		if (event.getAction() != 2) {
-	//			hold = 0;
-	//		} else if (++hold == 30) {
-	//			CosmeticScreen screen = new CosmeticScreen();
-	//			mc.setScreen(screen);
-	//		}
-	//	}
+	@Environment(EnvType.CLIENT)
+	public void onKeyInput(Minecraft mc) {
+		if (mc.screen != null || mc.player == null || !mc.isWindowActive()) {
+			return;
+		}
+		boolean K = InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), InputConstants.KEY_K);
+		if (!K || Screen.hasAltDown() || Screen.hasControlDown() || Screen.hasShiftDown()) {
+			hold = 0;
+			return;
+		}
+		if (++hold == 30) {
+			CosmeticScreen screen = new CosmeticScreen();
+			mc.setScreen(screen);
+		}
+	}
 
 }
