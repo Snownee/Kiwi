@@ -5,7 +5,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.Connection;
@@ -21,8 +20,8 @@ public class ClientPacketListenerMixin {
 
 	@Inject(
 			at = @At(
-					value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BlockEntity;load(Lnet/minecraft/nbt/CompoundTag;)V"
-			), method = "lambda$handleBlockEntityData$4", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD
+					value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BlockEntity;load(Lnet/minecraft/nbt/CompoundTag;)V", remap = true
+			), method = { "method_38542", "lambda$handleBlockEntityData$4" }, cancellable = true, remap = false
 	)
 	private void kiwi_handleBlockEntityData(ClientboundBlockEntityDataPacket clientboundBlockEntityDataPacket, BlockEntity blockEntity, CallbackInfo ci) {
 		if (blockEntity instanceof BaseBlockEntity) {

@@ -1,5 +1,6 @@
 package snownee.kiwi;
 
+import snownee.kiwi.config.ConfigUI;
 import snownee.kiwi.config.KiwiConfig;
 import snownee.kiwi.config.KiwiConfig.Comment;
 import snownee.kiwi.config.KiwiConfig.ConfigType;
@@ -10,6 +11,7 @@ import snownee.kiwi.config.KiwiConfig.Translation;
 @KiwiConfig(type = ConfigType.CLIENT)
 public final class KiwiClientConfig {
 
+	@ConfigUI.Hide
 	public static String contributorCosmetic = "";
 
 	@Comment("Show customized tooltips from any item. Mainly for pack devs")

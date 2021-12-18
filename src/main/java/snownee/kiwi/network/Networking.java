@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import snownee.kiwi.loader.Platform;
 import snownee.kiwi.network.KiwiPacket.Direction;
 
 public final class Networking {
@@ -15,7 +16,7 @@ public final class Networking {
 
 	public static synchronized void registerHandler(ResourceLocation id, IPacketHandler handler) {
 		Direction direction = handler.getDirection();
-		if (direction == Direction.PLAY_TO_CLIENT) {
+		if (Platform.isPhysicalClient() && direction == Direction.PLAY_TO_CLIENT) {
 			ClientPlayNetworking.PlayChannelHandler h = (client, listener, buf, responseSender) -> {
 				handler.receive($ -> {
 					CompletableFuture<FriendlyByteBuf> future = new CompletableFuture<>();

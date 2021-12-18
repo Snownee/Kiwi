@@ -125,7 +125,7 @@ import snownee.kiwi.util.Util;
 public class Kiwi implements ModInitializer {
 	public static final String MODID = "kiwi";
 	public static final String NAME = "Kiwi";
-	public static boolean TOML4J;
+	public static boolean CLOTH_CONFIG;
 
 	public static Logger logger = LogManager.getLogger(Kiwi.NAME);
 	static final Marker MARKER = MarkerManager.getMarker("Init");
@@ -148,11 +148,7 @@ public class Kiwi implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		try {
-			Class<?> clazz = Class.forName("com.moandjiezana.toml.Toml");
-			TOML4J = clazz != null;
-		} catch (Exception e) {
-		}
+		CLOTH_CONFIG = Platform.isModLoaded("cloth-config");
 		try {
 			registerRegistries();
 		} catch (Exception e) {
@@ -187,7 +183,7 @@ public class Kiwi implements ModInitializer {
 					continue;
 				conditions.put(condition, mod);
 			}
-			if (TOML4J) {
+			if (CLOTH_CONFIG) {
 				for (KiwiAnnotationData config : configuration.configs) {
 					if (!checkDist(config, dist))
 						continue;

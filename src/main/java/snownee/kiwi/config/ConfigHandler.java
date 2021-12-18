@@ -1,6 +1,7 @@
 package snownee.kiwi.config;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -11,7 +12,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 
-import org.apache.commons.lang3.SerializationException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,9 +20,9 @@ import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-import com.moandjiezana.toml.Toml;
-import com.moandjiezana.toml.TomlWriter;
 
+import me.shedaniel.cloth.clothconfig.shadowed.com.moandjiezana.toml.Toml;
+import me.shedaniel.cloth.clothconfig.shadowed.com.moandjiezana.toml.TomlWriter;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
@@ -30,6 +30,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.config.KiwiConfig.Comment;
 import snownee.kiwi.config.KiwiConfig.ConfigType;
+import snownee.kiwi.config.KiwiConfig.GameRestart;
 import snownee.kiwi.config.KiwiConfig.LevelRestart;
 import snownee.kiwi.config.KiwiConfig.Translation;
 
@@ -68,10 +69,19 @@ public class ConfigHandler {
 			return value;
 		}
 
+		public Class<?> getType() {
+			return field != null ? field.getType() : toPrimitiveClass(value.getClass());
+		}
+
 		public void accept(Object $, Method onChanged) {
 			try {
+				Class<?> type = getType();
+				if (type == int.class) {
+					$ = Integer.valueOf(((Long) $).intValue());
+				} else if (type == float.class) {
+					$ = Float.valueOf(((Double) $).floatValue());
+				}
 				if (!requiresRestart && field != null) {
-					Class<?> type = field.getType();
 					if (type == boolean.class) {
 						field.setBoolean(null, (Boolean) $);
 					} else if (type == int.class) {
@@ -83,7 +93,7 @@ public class ConfigHandler {
 					} else if (type == long.class) {
 						field.setLong(null, (Long) $);
 					} else {
-						field.set(null, field.getType().cast($));
+						field.set(null, $);
 					}
 				}
 				boolean changed = !Objects.equals(value, $);
@@ -94,6 +104,10 @@ public class ConfigHandler {
 			} catch (Exception e1) {
 				Kiwi.logger.catching(e1);
 			}
+		}
+
+		public <A extends Annotation> A getAnnotation(Class<A> clazz) {
+			return field == null ? null : field.getAnnotation(clazz);
 		}
 
 	}
@@ -124,11 +138,12 @@ public class ConfigHandler {
 			refresh();
 		}
 		save();
-		try {
-			Toml toml = new Toml().read(configPath.toFile());
-		} catch (IllegalStateException e) {
-			throw new SerializationException(e);
-		}
+		//		try {
+		//			Toml toml = new Toml().read(configPath.toFile());
+		//		} catch (IllegalStateException e) {
+		//			throw new SerializationException(e);
+		//		}
+
 		//		ConfigEntryBuilder builder = ConfigEntryBuilder.create();
 		//		ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
 		//		build(builder);
@@ -213,7 +228,8 @@ public class ConfigHandler {
 				component = new TextComponent(path.get(path.size() - 1));
 			}
 			Value<?> value = define(joiner.join(path), convert(field), field, component);
-			if (field.getAnnotation(LevelRestart.class) != null) {
+			if (field.getAnnotation(LevelRestart.class) != null || field.getAnnotation(GameRestart.class) != null) {
+				// since there is no difference between these two options..
 				value.requiresRestart = true;
 			}
 			Comment comment = field.getAnnotation(Comment.class);
@@ -336,13 +352,22 @@ public class ConfigHandler {
 		return clazz;
 	}
 
-	//	public ConfigValue<?> getValueByPath(String path) {
-	//		Joiner joiner = Joiner.on(".");
-	//		for (ConfigValue<?> value : valueMap.values()) {
-	//			if (path.equals(joiner.join(value.getPath()))) {
-	//				return value;
-	//			}
-	//		}
-	//		return null;
-	//	}
+	private static Class<?> toPrimitiveClass(Class<?> clazz) {
+		if (clazz == Boolean.class) {
+			return boolean.class;
+		}
+		if (clazz == Integer.class) {
+			return int.class;
+		}
+		if (clazz == Long.class) {
+			return long.class;
+		}
+		if (clazz == Float.class) {
+			return float.class;
+		}
+		if (clazz == Double.class) {
+			return double.class;
+		}
+		return clazz;
+	}
 }

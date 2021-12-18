@@ -10,7 +10,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-import net.fabricmc.fabric.impl.datagen.FabricDataGenHelper;
 import net.minecraft.resources.ResourceLocation;
 
 public final class KiwiModules {
@@ -48,7 +47,8 @@ public final class KiwiModules {
 	}
 
 	public static void clear() {
-		if (!FabricDataGenHelper.ENABLED) {
+		// FabricDataGenHelper.ENABLED
+		if (System.getProperty("fabric-api.datagen") != null) {
 			MODULES.clear();
 			MODULES = Collections.EMPTY_MAP;
 		}
