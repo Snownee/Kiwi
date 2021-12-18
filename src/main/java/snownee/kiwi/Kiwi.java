@@ -125,7 +125,7 @@ import snownee.kiwi.util.Util;
 public class Kiwi implements ModInitializer {
 	public static final String MODID = "kiwi";
 	public static final String NAME = "Kiwi";
-	public static boolean CLOTH_CONFIG;
+	//	public static boolean CLOTH_CONFIG;
 
 	public static Logger logger = LogManager.getLogger(Kiwi.NAME);
 	static final Marker MARKER = MarkerManager.getMarker("Init");
@@ -148,7 +148,7 @@ public class Kiwi implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		CLOTH_CONFIG = Platform.isModLoaded("cloth-config");
+		//		CLOTH_CONFIG = Platform.isModLoaded("cloth-config");
 		try {
 			registerRegistries();
 		} catch (Exception e) {
@@ -183,31 +183,31 @@ public class Kiwi implements ModInitializer {
 					continue;
 				conditions.put(condition, mod);
 			}
-			if (CLOTH_CONFIG) {
-				for (KiwiAnnotationData config : configuration.configs) {
-					if (!checkDist(config, dist))
-						continue;
-					ConfigType type = null;
+			//			if (CLOTH_CONFIG) {
+			for (KiwiAnnotationData config : configuration.configs) {
+				if (!checkDist(config, dist))
+					continue;
+				ConfigType type = null;
+				try {
+					type = ConfigType.valueOf((String) config.data().get("type"));
+				} catch (Throwable e) {
+				}
+				type = type == null ? ConfigType.COMMON : type;
+				if ((type != ConfigType.CLIENT || Platform.isPhysicalClient())) {
 					try {
-						type = ConfigType.valueOf((String) config.data().get("type"));
-					} catch (Throwable e) {
-					}
-					type = type == null ? ConfigType.COMMON : type;
-					if ((type != ConfigType.CLIENT || Platform.isPhysicalClient())) {
-						try {
-							Class<?> clazz = Class.forName(config.target());
-							String fileName = (String) config.data().get("value");
-							boolean master = type == ConfigType.COMMON && Strings.isNullOrEmpty(fileName);
-							if (Strings.isNullOrEmpty(fileName)) {
-								fileName = String.format("%s-%s", mod, type.extension());
-							}
-							new ConfigHandler(mod, fileName, type, clazz, master);
-						} catch (ClassNotFoundException e) {
-							logger.catching(e);
+						Class<?> clazz = Class.forName(config.target());
+						String fileName = (String) config.data().get("value");
+						boolean master = type == ConfigType.COMMON && Strings.isNullOrEmpty(fileName);
+						if (Strings.isNullOrEmpty(fileName)) {
+							fileName = String.format("%s-%s", mod, type.extension());
 						}
+						new ConfigHandler(mod, fileName, type, clazz, master);
+					} catch (ClassNotFoundException e) {
+						logger.catching(e);
 					}
 				}
 			}
+			//			}
 			for (KiwiAnnotationData packet : configuration.packets) {
 				if (!checkDist(packet, dist))
 					continue;

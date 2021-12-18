@@ -1,4 +1,5 @@
 plugins {
+    id "com.github.johnrengelman.shadow" version "7.0.0"
     id 'fabric-loom' version '0.10-SNAPSHOT'
     id 'maven-publish'
 }
@@ -34,6 +35,10 @@ loom {
     }
 }
 
+configurations {
+    shadowCommon
+}
+
 dependencies {
     // To change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -51,6 +56,26 @@ dependencies {
         exclude(group: "net.fabricmc.fabric-api")
     }
     modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
+    
+    shadowCommon("com.moandjiezana.toml:toml4j:${project.toml4j_version}") {
+        exclude(module: "gson")
+    }
+}
+
+def a = [
+    "/assets/kiwi/blockstates",
+    "/assets/kiwi/models",
+    "/snownee/kiwi/test",
+    "/data",
+    "/.cache",
+    "/third_party"
+]
+
+shadowJar {
+    exclude(a)
+    relocate "com.moandjiezana.toml", "${project.maven_group}.shadowed.com.moandjiezana.toml"
+    configurations = [project.configurations.shadowCommon]
+    archiveClassifier.set('shadow')
 }
 
 processResources {
@@ -79,17 +104,19 @@ java {
     // withSourcesJar()
 }
 
-def a = [
-    "/assets/kiwi/blockstates",
-    "/assets/kiwi/models",
-    "/snownee/kiwi/test",
-    "/data",
-    "/.cache",
-    "/third_party"
-]
+//jar {
+//    dependsOn(shadowJar)
+//    exclude(a)
+//    from("LICENSE") {
+//        rename { "${it}_${project.archivesBaseName}"}
+//    }
+//}
 
-jar {
-    exclude(a)
+remapJar {
+    dependsOn(shadowJar)
+    input.set(shadowJar.archiveFile)
+    archiveClassifier = ""
+    
     from("LICENSE") {
         rename { "${it}_${project.archivesBaseName}"}
     }

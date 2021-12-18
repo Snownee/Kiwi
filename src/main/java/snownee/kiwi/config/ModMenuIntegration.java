@@ -10,6 +10,7 @@ import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
 
 import snownee.kiwi.Kiwi;
+import snownee.kiwi.loader.Platform;
 
 public class ModMenuIntegration implements ModMenuApi {
 
@@ -17,7 +18,7 @@ public class ModMenuIntegration implements ModMenuApi {
 
 	public Map<String, ConfigScreenFactory<?>> factories() {
 		if (cachedFactories == null) {
-			if (Kiwi.CLOTH_CONFIG) {
+			if (Platform.isModLoaded("cloth-config")) {
 				Set<String> mods = KiwiConfigManager.allConfigs.stream().map($ -> $.getModId()).collect(Collectors.toSet());
 				Map<String, ConfigScreenFactory<?>> factories = Maps.newHashMap();
 				for (String mod : mods) {
