@@ -25,8 +25,8 @@ repositories {
 sourceSets {
     main.resources.srcDirs += "$rootDir/src/generated/resources"
     main.java.srcDirs += "$rootDir/annotation/src/main/java"
-    //main.resources.srcDirs += "$rootDir/annotation-processor/src/main/resources"
-    //main.java.srcDirs += "$rootDir/annotation-processor/src/main/java"
+    main.resources.srcDirs += "$rootDir/annotation-processor/src/main/resources"
+    main.java.srcDirs += "$rootDir/annotation-processor/src/main/java"
 }
 
 loom {

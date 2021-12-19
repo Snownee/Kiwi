@@ -122,6 +122,7 @@ import snownee.kiwi.loader.event.ServerInitEvent;
 import snownee.kiwi.network.Networking;
 import snownee.kiwi.util.Util;
 
+@Mod(Kiwi.MODID)
 public class Kiwi implements ModInitializer {
 	public static final String MODID = "kiwi";
 	public static final String NAME = "Kiwi";

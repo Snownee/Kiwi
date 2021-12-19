@@ -41,7 +41,7 @@ import snownee.kiwi.KiwiAnnotationData;
 	"snownee.kiwi.KiwiModule.LoadingCondition",
 	"snownee.kiwi.config.KiwiConfig",
 	"snownee.kiwi.network.KiwiPacket",
-	"net.minecraftforge.fml.common.Mod",
+	"snownee.kiwi.Mod",
 })
 @SuppressWarnings(value = { "unchecked" })
 /* on */
@@ -87,7 +87,7 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 				for (Entry<? extends ExecutableElement, ? extends AnnotationValue> e : a.getElementValues().entrySet()) {
 					o.put(e.getKey().getSimpleName().toString(), mapValue(e.getValue()));
 				}
-				if ("net.minecraftforge.fml.common.Mod".equals(className)) {
+				if ("snownee.kiwi.Mod".equals(className)) {
 					if (modId == null) {
 						modId = (String) o.get("value");
 					} else {
