@@ -27,11 +27,13 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.Mth;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.config.KiwiConfig.Comment;
 import snownee.kiwi.config.KiwiConfig.ConfigType;
 import snownee.kiwi.config.KiwiConfig.GameRestart;
 import snownee.kiwi.config.KiwiConfig.LevelRestart;
+import snownee.kiwi.config.KiwiConfig.Range;
 import snownee.kiwi.config.KiwiConfig.Translation;
 
 public class ConfigHandler {
@@ -57,6 +59,8 @@ public class ConfigHandler {
 		@Nullable
 		public String[] comment;
 		public Component component;
+		public double min = Double.NaN;
+		public double max = Double.NaN;
 
 		public Value(String path, @Nullable Field field, T value, Component component) {
 			this.path = path;
@@ -77,9 +81,21 @@ public class ConfigHandler {
 			try {
 				Class<?> type = getType();
 				if (type == int.class) {
-					$ = Integer.valueOf(((Long) $).intValue());
+					int min = Double.isNaN(this.min) ? Integer.MIN_VALUE : (int) this.min;
+					int max = Double.isNaN(this.max) ? Integer.MAX_VALUE : (int) this.max;
+					$ = Integer.valueOf(Mth.clamp(((Long) $).intValue(), min, max));
 				} else if (type == float.class) {
-					$ = Float.valueOf(((Double) $).floatValue());
+					float min = Double.isNaN(this.min) ? Float.MIN_VALUE : (float) this.min;
+					float max = Double.isNaN(this.max) ? Float.MAX_VALUE : (float) this.max;
+					$ = Float.valueOf(Mth.clamp(((Double) $).floatValue(), min, max));
+				} else if (type == double.class) {
+					double min = Double.isNaN(this.min) ? Double.MIN_VALUE : this.min;
+					double max = Double.isNaN(this.max) ? Double.MAX_VALUE : this.max;
+					$ = Double.valueOf(Mth.clamp((Double) $, min, max));
+				} else if (type == long.class) {
+					long min = Double.isNaN(this.min) ? Long.MIN_VALUE : (long) this.min;
+					long max = Double.isNaN(this.max) ? Long.MAX_VALUE : (long) this.max;
+					$ = Long.valueOf(Mth.clamp((Long) $, min, max));
 				}
 				if (!requiresRestart && field != null) {
 					if (type == boolean.class) {
@@ -235,6 +251,11 @@ public class ConfigHandler {
 			Comment comment = field.getAnnotation(Comment.class);
 			if (comment != null) {
 				value.comment = comment.value();
+			}
+			Range range = field.getAnnotation(Range.class);
+			if (range != null) {
+				value.min = range.min();
+				value.max = range.max();
 			}
 		}
 	}

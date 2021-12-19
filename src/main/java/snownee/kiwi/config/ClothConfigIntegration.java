@@ -12,9 +12,13 @@ import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import me.shedaniel.clothconfig2.impl.builders.BooleanToggleBuilder;
+import me.shedaniel.clothconfig2.impl.builders.ColorFieldBuilder;
 import me.shedaniel.clothconfig2.impl.builders.DoubleFieldBuilder;
 import me.shedaniel.clothconfig2.impl.builders.FloatFieldBuilder;
 import me.shedaniel.clothconfig2.impl.builders.IntFieldBuilder;
+import me.shedaniel.clothconfig2.impl.builders.IntSliderBuilder;
+import me.shedaniel.clothconfig2.impl.builders.LongFieldBuilder;
+import me.shedaniel.clothconfig2.impl.builders.LongSliderBuilder;
 import me.shedaniel.clothconfig2.impl.builders.TextFieldBuilder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
@@ -22,7 +26,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import snownee.kiwi.config.ConfigHandler.Value;
+import snownee.kiwi.config.ConfigUI.Color;
 import snownee.kiwi.config.ConfigUI.Hide;
+import snownee.kiwi.config.ConfigUI.Slider;
 
 public class ClothConfigIntegration {
 
@@ -56,20 +62,70 @@ public class ClothConfigIntegration {
 					toggle.setSaveConsumer($ -> value.accept($, config.onChanged));
 					entry = toggle.build();
 				} else if (type == int.class) {
-					IntFieldBuilder field = entryBuilder.startIntField(value.component, (Integer) value.value);
-					field.setTooltip(createComment(value));
-					field.setSaveConsumer($ -> value.accept($, config.onChanged));
-					entry = field.build();
+					Color color = value.getAnnotation(Color.class);
+					if (color != null) {
+						ColorFieldBuilder field = entryBuilder.startAlphaColorField(value.component, (Integer) value.value);
+						field.setAlphaMode(color.alpha());
+						field.setTooltip(createComment(value));
+						field.setSaveConsumer($ -> value.accept($, config.onChanged));
+						entry = field.build();
+					} else if (value.getAnnotation(Slider.class) != null) {
+						IntSliderBuilder field = entryBuilder.startIntSlider(value.component, (Integer) value.value, (int) value.min, (int) value.max);
+						field.setTooltip(createComment(value));
+						field.setSaveConsumer($ -> value.accept($, config.onChanged));
+						entry = field.build();
+					} else {
+						IntFieldBuilder field = entryBuilder.startIntField(value.component, (Integer) value.value);
+						field.setTooltip(createComment(value));
+						if (!Double.isNaN(value.min)) {
+							field.setMin((int) value.min);
+						}
+						if (!Double.isNaN(value.max)) {
+							field.setMax((int) value.max);
+						}
+						field.setSaveConsumer($ -> value.accept($, config.onChanged));
+						entry = field.build();
+					}
 				} else if (type == double.class) {
 					DoubleFieldBuilder field = entryBuilder.startDoubleField(value.component, (Double) value.value);
 					field.setTooltip(createComment(value));
+					if (!Double.isNaN(value.min)) {
+						field.setMin(value.min);
+					}
+					if (!Double.isNaN(value.max)) {
+						field.setMax(value.max);
+					}
 					field.setSaveConsumer($ -> value.accept($, config.onChanged));
 					entry = field.build();
 				} else if (type == float.class) {
 					FloatFieldBuilder field = entryBuilder.startFloatField(value.component, (Float) value.value);
 					field.setTooltip(createComment(value));
+					if (!Double.isNaN(value.min)) {
+						field.setMin((float) value.min);
+					}
+					if (!Double.isNaN(value.max)) {
+						field.setMax((float) value.max);
+					}
 					field.setSaveConsumer($ -> value.accept($, config.onChanged));
 					entry = field.build();
+				} else if (type == long.class) {
+					if (value.getAnnotation(Slider.class) != null) {
+						LongSliderBuilder field = entryBuilder.startLongSlider(value.component, (Long) value.value, (long) value.min, (long) value.max);
+						field.setTooltip(createComment(value));
+						field.setSaveConsumer($ -> value.accept($, config.onChanged));
+						entry = field.build();
+					} else {
+						LongFieldBuilder field = entryBuilder.startLongField(value.component, (Long) value.value);
+						field.setTooltip(createComment(value));
+						if (!Double.isNaN(value.min)) {
+							field.setMin((long) value.min);
+						}
+						if (!Double.isNaN(value.max)) {
+							field.setMax((long) value.max);
+						}
+						field.setSaveConsumer($ -> value.accept($, config.onChanged));
+						entry = field.build();
+					}
 				} else if (type == String.class) {
 					//TODO: better Enum
 					TextFieldBuilder field = entryBuilder.startTextField(value.component, (String) value.value);
