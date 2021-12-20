@@ -44,7 +44,7 @@ public class KiwiTierProvider extends JsonTierProvider {
 
 	private static boolean isInXmas() {
 		Calendar calendar = Calendar.getInstance();
-		return calendar.get(Calendar.MONTH) == Calendar.DECEMBER && calendar.get(Calendar.DAY_OF_MONTH) >= 20;
+		return calendar.get(Calendar.MONTH) == Calendar.DECEMBER && calendar.get(Calendar.DAY_OF_MONTH) >= 15;
 	}
 
 	@Override

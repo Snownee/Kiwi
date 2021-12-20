@@ -422,7 +422,7 @@ public class NBTHelper {
 	}
 
 	public static NBTHelper create() {
-		return new NBTHelper(null, null);
+		return of(new CompoundTag());
 	}
 
 }

@@ -170,7 +170,7 @@ public class Kiwi {
 						if (Strings.isNullOrEmpty(fileName)) {
 							fileName = String.format("%s-%s", mod, type.extension());
 						}
-						new ConfigHandler(mod, fileName + ".toml", type, clazz, master);
+						new ConfigHandler(mod, fileName, type, clazz, master);
 					} catch (ClassNotFoundException e) {
 						logger.catching(e);
 					}

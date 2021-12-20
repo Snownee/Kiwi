@@ -49,7 +49,7 @@ public class KiwiConfigManager {
 				continue;
 			}
 			settledMods.add(rl.getNamespace());
-			ConfigHandler configHandler = new ConfigHandler(rl.getNamespace(), rl.getNamespace() + "-modules.toml", ConfigType.COMMON, null, true);
+			ConfigHandler configHandler = new ConfigHandler(rl.getNamespace(), rl.getNamespace() + "-modules", ConfigType.COMMON, null, true);
 			configHandler.init();
 		}
 	}
@@ -69,7 +69,7 @@ public class KiwiConfigManager {
 			if (rl.getNamespace().equals(modId)) {
 				//				String translation = Util.makeDescriptionId("kiwi.config.module", rl);
 				//				builder.translation(translation);
-				modules.put(rl, builder.define(rl.getPath(), entry.getValue().booleanValue()));
+				modules.put(rl, builder.worldRestart().define(rl.getPath(), entry.getValue().booleanValue()));
 			}
 		}
 		builder.pop();

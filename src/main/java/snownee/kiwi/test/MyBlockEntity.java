@@ -28,8 +28,8 @@ public class MyBlockEntity extends BaseBlockEntity {
 	}
 
 	@Override
-	public CompoundTag save(CompoundTag data) {
+	protected void saveAdditional(CompoundTag data) {
 		writePacketData(data);
-		return super.save(data);
+		super.saveAdditional(data);
 	}
 }

@@ -52,10 +52,10 @@ public class TestModule extends AbstractModule {
 	// And its potion
 	public static Potion FIRST_POTION = new Potion(new MobEffectInstance(FIRST_EFFECT, 1800));
 
-	public static BlockEntityType<?> FIRST_TILE = BlockEntityType.Builder.of(TestBlockEntity::new, FIRST_BLOCK).build(null);
+	public static BlockEntityType<TestBlockEntity> FIRST_TILE = blockEntity(TestBlockEntity::new, null, FIRST_BLOCK);
 
 	public static TestBlock TEX_BLOCK = new TestBlock(blockProp(Material.WOOD));
-	public static BlockEntityType<?> TEX_TILE = BlockEntityType.Builder.of(TexBlockEntity::new, TEX_BLOCK).build(null);
+	public static BlockEntityType<TexBlockEntity> TEX_TILE = blockEntity(TexBlockEntity::new, null, TEX_BLOCK);
 
 	public static TestModule INSTANCE;
 

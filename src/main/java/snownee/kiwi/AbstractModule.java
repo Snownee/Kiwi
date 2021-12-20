@@ -1,11 +1,17 @@
 package snownee.kiwi;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
+
+import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.mojang.datafixers.types.Type;
 
+import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.EntityTypeTags;
@@ -13,8 +19,13 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.Tag.Named;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.BlockEntityType.BlockEntitySupplier;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Material;
@@ -92,6 +103,34 @@ public abstract class AbstractModule {
 	 */
 	protected static BlockBehaviour.Properties blockProp(BlockBehaviour block) {
 		return BlockBehaviour.Properties.copy(block);
+	}
+
+	/**
+	* @since 5.2.0
+	*/
+	public static <T extends BlockEntity> BlockEntityType<T> blockEntity(BlockEntitySupplier<? extends T> factory, Type<?> datafixer, Block... blocks) {
+		return BlockEntityType.Builder.<T>of(factory, blocks).build(datafixer);
+	}
+
+	/**
+	 * @since 5.2.0
+	 */
+	public static CreativeModeTab itemCategory(String namespace, String path, Supplier<ItemStack> icon, @Nullable BiConsumer<List<ItemStack>, CreativeModeTab> stacksForDisplay) {
+		return new CreativeModeTab(namespace + "." + path) {
+			@Override
+			public ItemStack makeIcon() {
+				return icon.get();
+			}
+
+			@Override
+			public void fillItemList(NonNullList<ItemStack> stacks) {
+				if (stacksForDisplay != null) {
+					stacksForDisplay.accept(stacks, this);
+					return;
+				}
+				super.fillItemList(stacks);
+			}
+		};
 	}
 
 	public static Named<Item> itemTag(String namespace, String path) {

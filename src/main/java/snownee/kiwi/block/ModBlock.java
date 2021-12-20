@@ -26,7 +26,7 @@ import snownee.kiwi.util.VanillaActions;
  * @author Snownee
  *
  */
-public class ModBlock extends Block {
+public class ModBlock extends Block implements IKiwiBlock {
 
 	public ModBlock(Block.Properties builder) {
 		super(builder);
@@ -101,11 +101,6 @@ public class ModBlock extends Block {
 			return 100;
 		}
 		return 1;
-	}
-
-	@Override
-	public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
-		return pick(state, target, world, pos, player);
 	}
 
 	@SuppressWarnings("deprecation")

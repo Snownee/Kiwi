@@ -60,7 +60,7 @@ public class ConfigHandler {
 		ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
 		build(builder);
 		ModContainer modContainer = ModList.get().getModContainerById(modId).orElseThrow(NullPointerException::new);
-		config = new ModConfig(ModConfig.Type.valueOf(type.name()), builder.build(), modContainer, fileName);
+		config = new ModConfig(ModConfig.Type.valueOf(type.name()), builder.build(), modContainer, fileName + ".toml");
 		modContainer.addConfig(config);
 		if (modContainer instanceof FMLModContainer) {
 			((FMLModContainer) modContainer).getEventBus().addListener(this::onFileChange);
@@ -150,7 +150,7 @@ public class ConfigHandler {
 					}
 					field.setFloat(null, ((Double) value.get()).floatValue());
 				} else {
-					if (field.getType() != List.class && Objects.deepEquals(value.get(), field.get(null))) {
+					if (field.getType() != List.class && Objects.equals(value.get(), field.get(null))) {
 						return;
 					}
 					field.set(null, value.get());
