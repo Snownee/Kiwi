@@ -21,6 +21,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiModule;
+import snownee.kiwi.KiwiModule.Category;
 import snownee.kiwi.KiwiModule.Subscriber.Bus;
 import snownee.kiwi.block.entity.RetextureBlockEntity;
 import snownee.kiwi.data.provider.KiwiLootTableProvider;
@@ -38,6 +39,7 @@ public class TestModule extends AbstractModule {
 	// Keep your fields `public static`
 
 	// Register a simple item
+	@Category("food")
 	public static TestItem FIRST_ITEM = new TestItem(itemProp().rarity(Rarity.EPIC));
 
 	// The next block will use this builder to build its BlockItem. After that this field will be null
