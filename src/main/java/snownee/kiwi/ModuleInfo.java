@@ -106,6 +106,19 @@ public class ModuleInfo {
 				}
 				entries.add(new NamedEntry(e.name, item, registry, null));
 			});
+			entries.forEach(e -> {
+				if (e.field != null) {
+					Category group = e.field.getAnnotation(Category.class);
+					if (group != null && !group.value().isEmpty()) {
+						CreativeModeTab category = Kiwi.getGroup(group.value());
+						if (category != null) {
+							((ItemAccessor) e.entry).setCategory(category);
+						} else {
+							((ItemAccessor) e.entry).setCategory(this.category);
+						}
+					}
+				}
+			});
 		}
 		entries.forEach(e -> {
 			decorator.accept(this, e.entry);
