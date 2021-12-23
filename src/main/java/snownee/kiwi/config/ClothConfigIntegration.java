@@ -1,7 +1,9 @@
 package snownee.kiwi.config;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -21,10 +23,15 @@ import me.shedaniel.clothconfig2.impl.builders.LongFieldBuilder;
 import me.shedaniel.clothconfig2.impl.builders.LongSliderBuilder;
 import me.shedaniel.clothconfig2.impl.builders.TextFieldBuilder;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.config.ConfigHandler.Value;
 import snownee.kiwi.config.ConfigUI.Color;
 import snownee.kiwi.config.ConfigUI.Hide;
@@ -155,6 +162,17 @@ public class ClothConfigIntegration {
 		if (value.requiresRestart) {
 			tooltip.add(requiresRestart);
 		}
+
+		Font fontRenderer = Minecraft.getInstance().font;
+		int width = KiwiClientConfig.tooltipWrapWidth;
+		/* off */
+		tooltip = tooltip.stream()
+			.map(s -> fontRenderer.getSplitter().splitLines(s, width, Style.EMPTY))
+			.flatMap(Collection::stream)
+			.map(FormattedText::getString)
+			.map(TextComponent::new)
+			.collect(Collectors.toList());
+		/* on */
 		return tooltip.isEmpty() ? Optional.empty() : Optional.of(tooltip.toArray(new Component[0]));
 	}
 
