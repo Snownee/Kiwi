@@ -37,7 +37,7 @@ public enum AlternativesIngredientSerializer implements IIngredientSerializer<In
 
 	@Override
 	public Ingredient parse(JsonObject json) {
-		JsonArray list = GsonHelper.convertToJsonArray(json, "list");
+		JsonArray list = GsonHelper.getAsJsonObject(json, "list");
 		List<Ingredient> ingredients = Lists.newArrayList();
 		for (JsonElement e : list) {
 			if (e.isJsonArray()) {
