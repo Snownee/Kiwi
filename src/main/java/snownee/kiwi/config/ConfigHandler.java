@@ -83,11 +83,17 @@ public class ConfigHandler {
 				if (type == int.class) {
 					int min = Double.isNaN(this.min) ? Integer.MIN_VALUE : (int) this.min;
 					int max = Double.isNaN(this.max) ? Integer.MAX_VALUE : (int) this.max;
-					$ = Integer.valueOf(Mth.clamp(((Long) $).intValue(), min, max));
+					if ($.getClass() == Long.class) {
+						$ = ((Long) $).intValue();
+					}
+					$ = Integer.valueOf(Mth.clamp((Integer) $, min, max));
 				} else if (type == float.class) {
 					float min = Double.isNaN(this.min) ? Float.MIN_VALUE : (float) this.min;
 					float max = Double.isNaN(this.max) ? Float.MAX_VALUE : (float) this.max;
-					$ = Float.valueOf(Mth.clamp(((Double) $).floatValue(), min, max));
+					if ($.getClass() == Double.class) {
+						$ = ((Double) $).floatValue();
+					}
+					$ = Float.valueOf(Mth.clamp((Float) $, min, max));
 				} else if (type == double.class) {
 					double min = Double.isNaN(this.min) ? Double.MIN_VALUE : this.min;
 					double max = Double.isNaN(this.max) ? Double.MAX_VALUE : this.max;
