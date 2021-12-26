@@ -9,16 +9,7 @@
   
   "argument.kiwi.registry.id.invalid": "ID is invalid",
   
-  "kiwi.config.common": "Common",
-  "kiwi.config.client": "Client",
-  "kiwi.config.server": "Server",
-  "kiwi.config.modules": "Modules",
   "kiwi.config.requiresRestart": "Requires restart",
-  "kiwi.config.globalTooltip": "Global Tooltip",
-  "kiwi.config.tagsTooltip": "Tags Tooltip",
-  "kiwi.config.nbtTooltip": "NBT Tooltip",
-  "kiwi.config.tooltipNBTFormatter": "NBT Tooltip Formatter",
-  "kiwi.config.tooltipWrapWidth": "Tooltip Warp Width",
   
   "gui.kiwi.cosmetic": "Choose a cosmetic effect",
   

@@ -10,7 +10,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.config.ConfigHandler.Value;
@@ -58,7 +57,7 @@ public class KiwiConfigManager {
 		for (Entry<ResourceLocation, Boolean> entry : Kiwi.defaultOptions.entrySet()) {
 			ResourceLocation rl = entry.getKey();
 			if (rl.getNamespace().equals(modId)) {
-				Value<Boolean> value = builder.define("modules." + rl.getPath(), entry.getValue(), null, new TextComponent(rl.getPath()));
+				Value<Boolean> value = builder.define("modules." + rl.getPath(), entry.getValue(), null, rl.getPath());
 				value.requiresRestart = true;
 				modules.put(rl, value);
 			}

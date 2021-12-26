@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.JsonElement;
@@ -187,6 +188,25 @@ public final class Util {
 				return lastNumericCompare;
 		else
 			return aLength - bLength;
+	}
+
+	public static String friendlyText(String s) {
+		StringBuilder sb = new StringBuilder();
+		MutableBoolean lastIsUpper = new MutableBoolean(true);
+		s.codePoints().forEach(ch -> {
+			if (Character.isUpperCase(ch) && lastIsUpper.isFalse()) {
+				sb.append(' ');
+			} else if (Character.isLowerCase(ch)) {
+				if (sb.isEmpty()) {
+					ch = Character.toUpperCase(ch);
+				} else if (lastIsUpper.isTrue() && sb.length() > 1 && Character.isUpperCase(sb.codePointAt(sb.length() - 2))) {
+					sb.insert(sb.length() - 1, ' ');
+				}
+			}
+			lastIsUpper.setValue(Character.isUpperCase(ch));
+			sb.appendCodePoint(ch);
+		});
+		return sb.toString();
 	}
 
 	public static boolean canPlayerBreak(Player player, BlockState state, BlockPos pos) {

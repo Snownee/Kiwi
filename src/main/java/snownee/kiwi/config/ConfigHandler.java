@@ -24,9 +24,6 @@ import com.moandjiezana.toml.Toml;
 import com.moandjiezana.toml.TomlWriter;
 
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.config.KiwiConfig.Comment;
@@ -58,15 +55,15 @@ public class ConfigHandler {
 		public boolean requiresRestart;
 		@Nullable
 		public String[] comment;
-		public Component component;
+		public String translation;
 		public double min = Double.NaN;
 		public double max = Double.NaN;
 
-		public Value(String path, @Nullable Field field, T value, Component component) {
+		public Value(String path, @Nullable Field field, T value, String translation) {
 			this.path = path;
 			this.field = field;
 			this.value = value;
-			this.component = component;
+			this.translation = translation;
 		}
 
 		public T get() {
@@ -242,14 +239,15 @@ public class ConfigHandler {
 				continue;
 			}
 			List<String> path = NightConfigUtil.getPath(field);
+			String pathKey = joiner.join(path);
 			Translation translation = field.getAnnotation(Translation.class);
-			Component component;
+			String translationKey;
 			if (translation != null) {
-				component = new TranslatableComponent(modId + ".config." + translation.value());
+				translationKey = translation.value();
 			} else {
-				component = new TextComponent(path.get(path.size() - 1));
+				translationKey = pathKey;
 			}
-			Value<?> value = define(joiner.join(path), convert(field), field, component);
+			Value<?> value = define(pathKey, convert(field), field, translationKey);
 			if (field.getAnnotation(LevelRestart.class) != null || field.getAnnotation(GameRestart.class) != null) {
 				// since there is no difference between these two options..
 				value.requiresRestart = true;
@@ -266,8 +264,8 @@ public class ConfigHandler {
 		}
 	}
 
-	public <T> Value<T> define(String path, T value, @Nullable Field field, Component component) {
-		Value<T> v = new Value<>(path, field, value, component);
+	public <T> Value<T> define(String path, T value, @Nullable Field field, String translation) {
+		Value<T> v = new Value<>(path, field, value, translation);
 		valueMap.put(path, v);
 		return v;
 	}
