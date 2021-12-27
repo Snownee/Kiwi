@@ -12,17 +12,11 @@ import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.mojang.blaze3d.platform.InputConstants;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRendererRegistrationCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -34,7 +28,6 @@ import snownee.kiwi.KiwiModule;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.contributor.client.CosmeticLayer;
-import snownee.kiwi.contributor.client.gui.CosmeticScreen;
 import snownee.kiwi.contributor.impl.KiwiTierProvider;
 import snownee.kiwi.contributor.network.CSetCosmeticPacket;
 import snownee.kiwi.contributor.network.SSyncCosmeticPacket;
@@ -72,21 +65,7 @@ public class Contributors extends AbstractModule {
 	@Override
 	@Environment(EnvType.CLIENT)
 	protected void clientInit(ClientInitEvent event) {
-		LivingEntityFeatureRendererRegistrationCallback.EVENT.register((entityType, entityRenderer, registrationHelper, context) -> {
-			if (entityRenderer instanceof PlayerRenderer) {
-				CosmeticLayer layer = new CosmeticLayer((PlayerRenderer) entityRenderer);
-				CosmeticLayer.ALL_LAYERS.add(layer);
-				registrationHelper.register(layer);
-			}
-		});
-		ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
-			changeCosmetic();
-		});
-		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
-			PLAYER_COSMETICS.clear();
-			CosmeticLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidateAll());
-		});
-		ClientTickEvents.END_CLIENT_TICK.register(this::onKeyInput);
+		ContributorsClient.init();
 	}
 
 	public static boolean isContributor(String author, String playerName) {
@@ -227,24 +206,6 @@ public class Contributors extends AbstractModule {
 	@Environment(EnvType.CLIENT)
 	private static String getPlayerName() {
 		return Minecraft.getInstance().getUser().getName();
-	}
-
-	private int hold;
-
-	@Environment(EnvType.CLIENT)
-	public void onKeyInput(Minecraft mc) {
-		if (mc.screen != null || mc.player == null || !mc.isWindowActive()) {
-			return;
-		}
-		boolean K = InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), InputConstants.KEY_K);
-		if (!K || Screen.hasAltDown() || Screen.hasControlDown() || Screen.hasShiftDown()) {
-			hold = 0;
-			return;
-		}
-		if (++hold == 30) {
-			CosmeticScreen screen = new CosmeticScreen();
-			mc.setScreen(screen);
-		}
 	}
 
 }
