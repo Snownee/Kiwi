@@ -1,14 +1,14 @@
 # Kiwi
 
-Make modding no longer cumbersome.
+Kiwi is a Minecraft modding library designed to help developers focus on content creation instead of repetitive work.
 
-[中文指南](https://moddingwithkiwi.readthedocs.io/zh_CN/1.17/)
+[中文指南](https://moddingwithkiwi.readthedocs.io/zh_CN/1.18/)
 
 ## Registration
 
 ``` java
 @KiwiModule
-@KiwiModule.Group("building_blocks")
+@KiwiModule.Category("building_blocks")
 public class MyModule extends AbstractModule
 {
     // Register a simple item. Kiwi will automatically register it
@@ -29,7 +29,7 @@ public class MyAddon extends AbstractModule
 {
     // This method is called in FMLCommonSetupEvent
     @Override
-    public void init(FMLCommonSetupEvent event)
+    public void init(InitEvent event)
     {
         // Do something
     }
