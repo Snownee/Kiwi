@@ -646,6 +646,9 @@ public class Kiwi implements ModInitializer {
 
 	@Environment(EnvType.CLIENT)
 	private void clientInit(Minecraft mc) {
+		if (GROUP_CACHE == null) { // Not Enough Crashes mod can trigger init event
+			return;
+		}
 		init();
 		ClientInitEvent e = new ClientInitEvent();
 		KiwiModules.fire(m -> m.clientInit(e));
@@ -657,6 +660,9 @@ public class Kiwi implements ModInitializer {
 
 	private void serverInit(MinecraftServer server) {
 		currentServer = server;
+		if (GROUP_CACHE == null) { // Not Enough Crashes mod can trigger init event
+			return;
+		}
 		if (server.isDedicatedServer()) {
 			init();
 		}
