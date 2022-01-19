@@ -214,7 +214,9 @@ public class ConfigHandler {
 		Map<String, Object> map = Maps.newLinkedHashMap();
 		for (Value<?> value : valueMap.values()) {
 			List<String> path = List.of(value.path.split("\\."));
-			getEndMap(map, path).put(path.get(path.size() - 1), value.field == null ? value.value : convert(value.field));
+			Object v = value.field == null ? value.value : convert(value.field);
+			value.accept(v, onChanged);
+ 			getEndMap(map, path).put(path.get(path.size() - 1), v);
 		}
 		TomlWriter writer = new TomlWriter();
 		try {
