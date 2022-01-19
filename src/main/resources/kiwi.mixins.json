@@ -13,7 +13,8 @@
     "TagContainerMixin"
   ],
   "client": [
-    "ClientPacketListenerMixin"
+    "ClientPacketListenerMixin",
+    "ClientTelemetryManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

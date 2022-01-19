@@ -20,6 +20,8 @@ public final class KiwiClientConfig {
 	@Range(min = 50)
 	public static int tooltipWrapWidth = 200;
 
+	public static boolean noMicrosoftTelemetry = true;
+
 	@Comment("Show item tags in advanced tooltips")
 	@Path("debug.tagsTooltip")
 	public static boolean tagsTooltip = true;
