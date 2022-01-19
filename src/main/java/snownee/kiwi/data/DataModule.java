@@ -15,7 +15,7 @@ public final class DataModule extends AbstractModule {
 	public static final RecipeSerializer<RetextureRecipe> RETEXTURE = new RetextureRecipe.Serializer();
 
 	//	@Override
-	//	protected void init(InitEvent event) {
+	//	protected void preInit() {
 	//		CraftingHelper.register(ModuleLoadedCondition.Serializer.INSTANCE);
 	//		CraftingHelper.register(TryParseCondition.Serializer.INSTANCE);
 	//		CraftingHelper.register(RL("full_block"), FullBlockIngredient.SERIALIZER);
