@@ -2,7 +2,16 @@
   "tip.kiwi.press_shift": "§r§7<按住§f§oShift§r§7..>",
   "tip.kiwi.press_ctrl": "§r§7<按住§f§oCtrl§r§7..>",
   "tip.kiwi.press_shift_or_ctrl": "§r§7<按住§f§oShift§r§7或§f§oCtrl§r§7..>",
+  "tip.kiwi.debug_tooltip": "==========\n感谢你使用Kiwi和Snownee的其他模组！\n物品NBT和标签调试气泡提示生效中。%s来禁用。\n==========",
+  "tip.kiwi.click_here": "[点击这里]",
+  "tip.kiwi.debug_tooltip.success": "调试气泡提示已禁用。你可以在配置里打开它们。",
+  
   "msg.kiwi.no_dependencies": "{1}: 模块 §e{2}§r 需要启用以下依赖模块：§e{3}",
+  
+  "kiwi.config.requiresRestart": "需要重启生效",
+  
+  "gui.kiwi.cosmetic": "选择饰品",
+  
   "cosmetic.snownee.2020q3": "行星",
   "cosmetic.snownee.2020q4": "狐狸",
   "cosmetic.snownee.xmas": "圣诞帽"

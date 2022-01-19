@@ -9,6 +9,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.Registry;
@@ -25,6 +26,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiClientConfig;
+import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.item.ModItem;
 
 @Environment(EnvType.CLIENT)
@@ -36,6 +38,8 @@ public final class TooltipEvents {
 	private static CompoundTag lastNBT;
 	private static Component lastFormatted;
 	private static Function<CompoundTag, Component> formatter;
+	private static boolean firstSeenDebugTooltip = true;
+	public static final ClickEvent disableClickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "disableClickEvent");
 
 	public static void globalTooltip(ItemStack stack, List<Component> tooltip, TooltipFlag flag) {
 		if (KiwiClientConfig.globalTooltip)
@@ -64,6 +68,7 @@ public final class TooltipEvents {
 		}
 
 		if (KiwiClientConfig.nbtTooltip && Screen.hasShiftDown() && stack.hasTag()) {
+			trySendTipMsg(minecraft);
 			tooltip.removeIf(c -> c.getClass() == TranslatableComponent.class && "item.nbt_tags".equals(((TranslatableComponent) c).getKey()));
 			if (lastNBT != stack.getTag()) {
 				switch (KiwiClientConfig.debugTooltipNBTFormatter) {
@@ -127,9 +132,25 @@ public final class TooltipEvents {
 			}
 			tooltip.add(lastFormatted);
 		} else if (KiwiClientConfig.tagsTooltip) {
-			ItemTags.getAllTags().getMatchingTags(stack.getItem()).stream().map(Object::toString).sorted().forEach(id -> {
-				tooltip.add(new TextComponent("#" + id).withStyle(ChatFormatting.DARK_GRAY));
-			});
+			List<String> tags = ItemTags.getAllTags().getMatchingTags(stack.getItem()).stream().map(Object::toString).sorted().toList();
+			if (!tags.isEmpty()) {
+				trySendTipMsg(minecraft);
+				tags.forEach(id -> {
+					tooltip.add(new TextComponent("#" + id).withStyle(ChatFormatting.DARK_GRAY));
+				});
+			}
+		}
+	}
+
+	private static void trySendTipMsg(Minecraft mc) {
+		if (firstSeenDebugTooltip && mc.player != null) {
+			firstSeenDebugTooltip = false;
+			if (KiwiClientConfig.debugTooltipMsg) {
+				MutableComponent clickHere = new TranslatableComponent("tip.kiwi.click_here").withStyle($ -> $.withClickEvent(disableClickEvent));
+				mc.player.sendMessage(new TranslatableComponent("tip.kiwi.debug_tooltip", clickHere.withStyle(ChatFormatting.AQUA)), Util.NIL_UUID);
+				KiwiClientConfig.debugTooltipMsg = false;
+				KiwiConfigManager.getHandler(KiwiClientConfig.class).save();
+			}
 		}
 	}
 }

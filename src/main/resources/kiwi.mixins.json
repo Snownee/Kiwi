@@ -14,7 +14,8 @@
   ],
   "client": [
     "ClientPacketListenerMixin",
-    "ClientTelemetryManagerMixin"
+    "ClientTelemetryManagerMixin",
+    "ScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

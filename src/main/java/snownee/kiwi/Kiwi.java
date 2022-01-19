@@ -349,36 +349,37 @@ public class Kiwi implements ModInitializer {
 			infos.put(rl, info);
 		}
 
-		List<ResourceLocation> list = null;
-		//		if (checkDep) {
-		//			List<Info> errorList = Lists.newLinkedList();
-		//			for (Info i : infos.values()) {
-		//				for (ResourceLocation id : i.moduleRules) {
-		//					if (!infos.containsKey(id)) {
-		//						errorList.add(i);
-		//						break;
-		//					}
-		//				}
-		//			}
-		//			for (Info i : errorList) {
-		//				IModInfo modInfo = ModList.get().getModContainerById(i.id.getNamespace()).get().getModInfo();
-		//				String dependencies = org.apache.commons.lang3.StringUtils.join(i.moduleRules, ", ");
-		//				ModLoader.get().addWarning(new ModLoadingWarning(modInfo, ModLoadingStage.ERROR, "msg.kiwi.no_dependencies", i.id, dependencies));
-		//			}
-		//			if (!errorList.isEmpty()) {
-		//				return;
-		//			}
-		//			MutableGraph<ResourceLocation> graph = GraphBuilder.directed().allowsSelfLoops(false).expectedNodeCount(infos.size()).build();
-		//			infos.keySet().forEach(graph::addNode);
-		//			infos.values().forEach($ -> {
-		//				$.moduleRules.forEach(r -> graph.putEdge(r, $.id));
-		//			});
-		//			list = TopologicalSort.topologicalSort(graph, null);
-		//		} else {
-		list = ImmutableList.copyOf(infos.keySet());
-		//		}
+		List<ResourceLocation> moduleLoadingQueue = null;
+		if (checkDep) {
+			//			List<Info> errorList = Lists.newLinkedList();
+			//			for (Info i : infos.values()) {
+			//				for (ResourceLocation id : i.moduleRules) {
+			//					if (!infos.containsKey(id)) {
+			//						errorList.add(i);
+			//						break;
+			//					}
+			//				}
+			//			}
+			//			for (Info i : errorList) {
+			//				IModInfo modInfo = ModList.get().getModContainerById(i.id.getNamespace()).get().getModInfo();
+			//				String dependencies = org.apache.commons.lang3.StringUtils.join(i.moduleRules, ", ");
+			//				ModLoader.get().addWarning(new ModLoadingWarning(modInfo, ModLoadingStage.ERROR, "msg.kiwi.no_dependencies", i.id, dependencies));
+			//			}
+			//			if (!errorList.isEmpty()) {
+			//				return;
+			//			}
+			//			MutableGraph<ResourceLocation> graph = GraphBuilder.directed().allowsSelfLoops(false).expectedNodeCount(infos.size()).build();
+			//			infos.keySet().forEach(graph::addNode);
+			//			infos.values().forEach($ -> {
+			//				$.moduleRules.forEach(r -> graph.putEdge(r, $.id));
+			//			});
+			//			list = TopologicalSort.topologicalSort(graph, null);
+			moduleLoadingQueue = ImmutableList.copyOf(infos.keySet());
+		} else {
+			moduleLoadingQueue = ImmutableList.copyOf(infos.keySet());
+		}
 
-		for (ResourceLocation id : list) {
+		for (ResourceLocation id : moduleLoadingQueue) {
 			Info info = infos.get(id);
 			ModContext context = ModContext.get(id.getNamespace());
 			context.setActiveContainer();
