@@ -15,6 +15,9 @@
     "VillagerAccessor",
     "WorkAtComposterAccessor"
   ],
+  "client": [
+    "ClientTelemetryManagerMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   }
