@@ -9,7 +9,7 @@ import net.minecraft.client.ClientTelemetryManager;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiClientConfig;
 
-@Mixin(ClientTelemetryManager.class)
+@Mixin(value = ClientTelemetryManager.class, priority = -114514)
 public class ClientTelemetryManagerMixin {
 
 	@Redirect(
@@ -19,7 +19,7 @@ public class ClientTelemetryManagerMixin {
 	)
 	private boolean getIS_RUNNING_IN_IDE() {
 		if (KiwiClientConfig.noMicrosoftTelemetry) {
-			Kiwi.logger.info("Cancelling Microsoft telemetry");
+			Kiwi.logger.info("Canceling Microsoft telemetry");
 		}
 		return KiwiClientConfig.noMicrosoftTelemetry || SharedConstants.IS_RUNNING_IN_IDE;
 	}
