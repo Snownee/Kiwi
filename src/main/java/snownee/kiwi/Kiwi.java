@@ -556,12 +556,18 @@ public class Kiwi {
 	}
 
 	private void clientInit(FMLClientSetupEvent event) {
+		if (GROUP_CACHE == null) { // Not Enough Crashes mod can trigger init event
+			return;
+		}
 		ClientInitEvent e = new ClientInitEvent(event);
 		KiwiModules.fire(m -> m.clientInit(e));
 		ModLoadingContext.get().setActiveContainer(null);
 	}
 
 	private void serverInit(ServerStartingEvent event) {
+		if (GROUP_CACHE == null) { // Not Enough Crashes mod can trigger init event
+			return;
+		}
 		ServerInitEvent e = new ServerInitEvent();
 		KiwiModules.fire(m -> m.serverInit(e));
 		event.getServer().getLevel(Level.OVERWORLD).getDataStorage().computeIfAbsent(Scheduler::load, () -> Scheduler.INSTANCE, Scheduler.ID);
