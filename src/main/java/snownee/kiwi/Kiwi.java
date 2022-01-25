@@ -337,7 +337,7 @@ public class Kiwi {
 			infos.put(rl, info);
 		}
 
-		List<ResourceLocation> list = null;
+		List<ResourceLocation> moduleLoadingQueue = null;
 		if (checkDep) {
 			List<Info> errorList = Lists.newLinkedList();
 			for (Info i : infos.values()) {
@@ -361,12 +361,12 @@ public class Kiwi {
 			infos.values().forEach($ -> {
 				$.moduleRules.forEach(r -> graph.putEdge(r, $.id));
 			});
-			list = TopologicalSort.topologicalSort(graph, null);
+			moduleLoadingQueue = TopologicalSort.topologicalSort(graph, null);
 		} else {
-			list = ImmutableList.copyOf(infos.keySet());
+			moduleLoadingQueue = ImmutableList.copyOf(infos.keySet());
 		}
 
-		for (ResourceLocation id : list) {
+		for (ResourceLocation id : moduleLoadingQueue) {
 			Info info = infos.get(id);
 			ModContext context = ModContext.get(id.getNamespace());
 			context.setActiveContainer();

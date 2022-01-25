@@ -38,4 +38,8 @@ public final class KiwiClientConfig {
 	@Path("debug.tooltipNBTFormatter")
 	public static String debugTooltipNBTFormatter = "vanilla";
 
+	@Comment("Show tips about disabling debug tooltips")
+	@Path("debug.debugTooltipMsg")
+	public static boolean debugTooltipMsg = true;
+
 }

@@ -16,7 +16,8 @@
     "WorkAtComposterAccessor"
   ],
   "client": [
-    "ClientTelemetryManagerMixin"
+    "ClientTelemetryManagerMixin",
+    "ScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1
