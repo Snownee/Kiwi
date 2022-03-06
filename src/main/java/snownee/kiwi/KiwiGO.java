@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -33,17 +34,27 @@ public class KiwiGO<T> implements Supplier<T> {
 	}
 
 	public boolean is(ItemStack stack) {
-		if (value instanceof Item) {
-			return stack.is((Item) value);
-		}
-		return false;
+		return stack.is((Item) value);
 	}
 
 	public boolean is(BlockState state) {
-		if (value instanceof Block) {
-			return state.is((Block) value);
+		return state.is((Block) value);
+	}
+
+	public BlockState defaultBlockState() {
+		return ((Block) value).defaultBlockState();
+	}
+
+	public ItemStack itemStack() {
+		return itemStack(1);
+	}
+
+	public ItemStack itemStack(int amount) {
+		ItemStack stack = ((ItemLike) value).asItem().getDefaultInstance();
+		if (!stack.isEmpty()) {
+			stack.setCount(amount);
 		}
-		return false;
+		return stack;
 	}
 
 }

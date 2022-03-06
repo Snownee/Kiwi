@@ -1,4 +1,4 @@
-package snownee.kiwi.data.provider;
+package snownee.kiwi.datagen.provider;
 
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.tags.BlockTagsProvider;
@@ -22,7 +22,7 @@ import net.minecraft.world.level.block.WoodButtonBlock;
 import net.minecraft.world.level.material.Material;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import snownee.kiwi.Kiwi;
-import snownee.kiwi.mixin.BlockAccessor;
+import snownee.kiwi.mixin.BlockAccess;
 
 public abstract class KiwiBlockTagsProvider extends BlockTagsProvider {
 
@@ -39,7 +39,7 @@ public abstract class KiwiBlockTagsProvider extends BlockTagsProvider {
 			tag(BlockTags.BANNERS).add(block);
 			return;
 		}
-		Material material = ((BlockAccessor) block).getMaterial();
+		Material material = ((BlockAccess) block).getMaterial();
 		if (material == Material.LEAVES) {
 			tag(BlockTags.MINEABLE_WITH_HOE).add(block);
 		} else if (material == Material.WOOD || material == Material.NETHER_WOOD) {

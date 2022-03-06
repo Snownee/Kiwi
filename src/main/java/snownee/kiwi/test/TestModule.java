@@ -20,12 +20,12 @@ import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 import snownee.kiwi.AbstractModule;
+import snownee.kiwi.KiwiGO;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModule.Category;
 import snownee.kiwi.KiwiModule.Subscriber.Bus;
-import snownee.kiwi.KiwiGO;
 import snownee.kiwi.block.entity.RetextureBlockEntity;
-import snownee.kiwi.data.provider.KiwiLootTableProvider;
+import snownee.kiwi.datagen.provider.KiwiLootTableProvider;
 import snownee.kiwi.item.ModBlockItem;
 import snownee.kiwi.loader.event.ClientInitEvent;
 import snownee.kiwi.loader.event.ServerInitEvent;
@@ -67,22 +67,22 @@ public class TestModule extends AbstractModule {
 	@Override
 	@OnlyIn(Dist.CLIENT)
 	protected void clientInit(ClientInitEvent event) {
-//		ModBlockItem.INSTANT_UPDATE_TILES.add(FIRST_TILE.get());
-//		ModBlockItem.INSTANT_UPDATE_TILES.add(TEX_TILE.get());
-//		ItemBlockRenderTypes.setRenderLayer(TEX_BLOCK.get(), EnumUtil.BLOCK_RENDER_TYPES::contains);
+		ModBlockItem.INSTANT_UPDATE_TILES.add(FIRST_TILE.get());
+		ModBlockItem.INSTANT_UPDATE_TILES.add(TEX_TILE.get());
+		ItemBlockRenderTypes.setRenderLayer(TEX_BLOCK.get(), EnumUtil.BLOCK_RENDER_TYPES::contains);
 	}
 
 	@SubscribeEvent
 	@OnlyIn(Dist.CLIENT)
 	public void blockColors(ColorHandlerEvent.Block event) {
-//		BlockColors blockColors = event.getBlockColors();
-//		blockColors.register((state, level, pos, i) -> {
-//			BlockEntity blockEntity = level.getBlockEntity(pos);
-//			if (blockEntity instanceof RetextureBlockEntity) {
-//				return ((RetextureBlockEntity) blockEntity).getColor(level, i);
-//			}
-//			return -1;
-//		}, TEX_BLOCK.get());
+		BlockColors blockColors = event.getBlockColors();
+		blockColors.register((state, level, pos, i) -> {
+			BlockEntity blockEntity = level.getBlockEntity(pos);
+			if (blockEntity instanceof RetextureBlockEntity) {
+				return ((RetextureBlockEntity) blockEntity).getColor(level, i);
+			}
+			return -1;
+		}, TEX_BLOCK.get());
 	}
 
 	@Override

@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 @Mixin(ShovelItem.class)
-public interface ShovelItemAccessor {
+public interface ShovelItemAccess {
 
 	@Accessor
 	static Map<Block, BlockState> getFLATTENABLES() {

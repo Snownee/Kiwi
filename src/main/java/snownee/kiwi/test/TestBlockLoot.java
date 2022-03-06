@@ -1,6 +1,6 @@
 package snownee.kiwi.test;
 
-import snownee.kiwi.data.provider.KiwiBlockLoot;
+import snownee.kiwi.datagen.provider.KiwiBlockLoot;
 
 public class TestBlockLoot extends KiwiBlockLoot {
 

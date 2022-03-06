@@ -7,7 +7,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Material;
 
 @Mixin(BlockBehaviour.class)
-public interface BlockAccessor {
+public interface BlockAccess {
 
 	@Accessor
 	Material getMaterial();

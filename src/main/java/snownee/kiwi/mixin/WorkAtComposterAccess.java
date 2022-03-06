@@ -11,7 +11,7 @@ import net.minecraft.world.entity.ai.behavior.WorkAtComposter;
 import net.minecraft.world.item.Item;
 
 @Mixin(WorkAtComposter.class)
-public interface WorkAtComposterAccessor {
+public interface WorkAtComposterAccess {
 
 	@Accessor
 	static List<Item> getCOMPOSTABLE_ITEMS() {

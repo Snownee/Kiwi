@@ -9,7 +9,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 
 @Mixin(Item.class)
-public interface ItemAccessor {
+public interface ItemAccess {
 
 	@Accessor
 	CreativeModeTab getCategory();

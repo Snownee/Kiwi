@@ -1,27 +1,27 @@
 package snownee.kiwi.mixin;
 
-import java.util.Set;
+import java.util.Map;
 
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-import net.minecraft.world.entity.npc.Villager;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.item.AxeItem;
+import net.minecraft.world.level.block.Block;
 
-@Mixin(Villager.class)
-public interface VillagerAccessor {
+@Mixin(AxeItem.class)
+public interface AxeItemAccess {
 
 	@Accessor
-	static Set<Item> getWANTED_ITEMS() {
+	static Map<Block, Block> getSTRIPPABLES() {
 		throw new IllegalStateException();
 	}
 
 	@Accessor
 	@Final
 	@Mutable
-	static void setWANTED_ITEMS(Set<Item> set) {
+	static void setSTRIPPABLES(Map<Block, Block> map) {
 		throw new IllegalStateException();
 	}
 

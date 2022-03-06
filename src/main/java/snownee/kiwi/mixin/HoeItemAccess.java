@@ -14,7 +14,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.Block;
 
 @Mixin(HoeItem.class)
-public interface HoeItemAccessor {
+public interface HoeItemAccess {
 
 	@Accessor
 	static Map<Block, Pair<Predicate<UseOnContext>, Consumer<UseOnContext>>> getTILLABLES() {

@@ -1,4 +1,4 @@
-package snownee.kiwi.data.provider;
+package snownee.kiwi.datagen.provider;
 
 import java.util.List;
 import java.util.Map;

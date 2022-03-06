@@ -23,7 +23,7 @@ import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.crafting.IShapedRecipe;
 import net.minecraftforge.registries.ForgeRegistryEntry;
-import snownee.kiwi.mixin.ShapedRecipeAccessor;
+import snownee.kiwi.mixin.ShapedRecipeAccess;
 
 public abstract class DynamicShapedRecipe extends CustomRecipe implements IShapedRecipe<CraftingContainer> {
 	private int width;
@@ -167,12 +167,12 @@ public abstract class DynamicShapedRecipe extends CustomRecipe implements IShape
 	public static abstract class Serializer<T extends DynamicShapedRecipe> extends ForgeRegistryEntry<RecipeSerializer<?>> implements RecipeSerializer<T> {
 		public static void fromJson(DynamicShapedRecipe recipe, JsonObject json) {
 			recipe.group = GsonHelper.getAsString(json, "group", "");
-			Map<String, Ingredient> ingredientMap = ShapedRecipeAccessor.callKeyFromJson(GsonHelper.getAsJsonObject(json, "key"));
-			String[] pattern = ShapedRecipeAccessor.callShrink(ShapedRecipeAccessor.callPatternFromJson(GsonHelper.getAsJsonArray(json, "pattern")));
+			Map<String, Ingredient> ingredientMap = ShapedRecipeAccess.callKeyFromJson(GsonHelper.getAsJsonObject(json, "key"));
+			String[] pattern = ShapedRecipeAccess.callShrink(ShapedRecipeAccess.callPatternFromJson(GsonHelper.getAsJsonArray(json, "pattern")));
 			recipe.pattern = String.join("", pattern);
 			recipe.width = pattern[0].length();
 			recipe.height = pattern.length;
-			recipe.recipeItems = ShapedRecipeAccessor.callDissolvePattern(pattern, ingredientMap, recipe.width, recipe.height);
+			recipe.recipeItems = ShapedRecipeAccess.callDissolvePattern(pattern, ingredientMap, recipe.width, recipe.height);
 			recipe.recipeOutput = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(json, "result"));
 			recipe.differentInputs = GsonHelper.getAsBoolean(json, "differentInputs", false);
 		}

@@ -1,4 +1,4 @@
-package snownee.kiwi.data.provider;
+package snownee.kiwi.datagen.provider;
 
 import java.io.BufferedWriter;
 import java.io.IOException;

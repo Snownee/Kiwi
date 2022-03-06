@@ -4,7 +4,7 @@ import java.util.function.Consumer;
 
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.recipes.FinishedRecipe;
-import snownee.kiwi.data.provider.KiwiRecipeProvider;
+import snownee.kiwi.datagen.provider.KiwiRecipeProvider;
 
 public class TestRecipeProvider extends KiwiRecipeProvider {
 

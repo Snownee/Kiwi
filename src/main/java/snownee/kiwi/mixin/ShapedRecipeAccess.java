@@ -13,7 +13,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 
 @Mixin(ShapedRecipe.class)
-public interface ShapedRecipeAccessor {
+public interface ShapedRecipeAccess {
 
 	@Invoker
 	static Map<String, Ingredient> callKeyFromJson(JsonObject p_44211_) {
