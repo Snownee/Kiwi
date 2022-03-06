@@ -15,7 +15,7 @@ public interface TagsProviderAccess<T> {
 	@Accessor
 	Registry<T> getRegistry();
 
-	@Accessor
+	@Accessor(remap = false)
 	String getModId();
 
 	@Invoker
