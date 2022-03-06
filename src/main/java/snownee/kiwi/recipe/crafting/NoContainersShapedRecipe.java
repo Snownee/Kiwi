@@ -24,7 +24,7 @@ public class NoContainersShapedRecipe extends ShapedRecipe {
 
 	@Override
 	public RecipeSerializer<?> getSerializer() {
-		return DataModule.SHAPED_NO_CONTAINERS;
+		return DataModule.SHAPED_NO_CONTAINERS.get();
 	}
 
 	public static class Serializer extends ForgeRegistryEntry<RecipeSerializer<?>> implements RecipeSerializer<NoContainersShapedRecipe> {

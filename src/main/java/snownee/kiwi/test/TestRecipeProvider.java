@@ -14,7 +14,7 @@ public class TestRecipeProvider extends KiwiRecipeProvider {
 
 	@Override
 	protected void addRecipes(Consumer<FinishedRecipe> collector) {
-		oneToOneConversionRecipe(collector, TestModule.FIRST_BLOCK, TestModule.TEX_BLOCK, null);
+		oneToOneConversionRecipe(collector, TestModule.FIRST_BLOCK.get(), TestModule.TEX_BLOCK.get(), null);
 	}
 
 }

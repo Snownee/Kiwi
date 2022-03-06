@@ -54,7 +54,7 @@ public class RetextureRecipe extends DynamicShapedRecipe {
 
 	@Override
 	public RecipeSerializer<?> getSerializer() {
-		return DataModule.RETEXTURE;
+		return DataModule.RETEXTURE.get();
 	}
 
 	public static class Serializer extends DynamicShapedRecipe.Serializer<RetextureRecipe> {

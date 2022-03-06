@@ -13,7 +13,8 @@
     "AxeItemAccessor",
     "ShovelItemAccessor",
     "VillagerAccessor",
-    "WorkAtComposterAccessor"
+    "WorkAtComposterAccessor",
+    "GameDataMixin"
   ],
   "client": [
     "ClientTelemetryManagerMixin",

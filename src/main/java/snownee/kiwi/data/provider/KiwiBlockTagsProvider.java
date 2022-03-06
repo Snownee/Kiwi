@@ -110,6 +110,6 @@ public abstract class KiwiBlockTagsProvider extends BlockTagsProvider {
 	}
 
 	public TagsProvider.TagAppender<Block> tag(String name) {
-		return tag(BlockTags.createOptional(new ResourceLocation(modId, name)));
+		return tag(BlockTags.create(new ResourceLocation(modId, name)));
 	}
 }

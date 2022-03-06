@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -12,12 +13,10 @@ import com.google.common.collect.Maps;
 import com.mojang.datafixers.types.Type;
 
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.EntityTypeTags;
-import net.minecraft.tags.FluidTags;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.Tag.Named;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -86,6 +85,10 @@ public abstract class AbstractModule {
 		// NO-OP
 	}
 
+	protected static <T> KiwiGO<T> go(Supplier<? extends T> factory) {
+		return new KiwiGO<>((Supplier<T>) factory);
+	}
+
 	/// helper methods:
 	protected static Item.Properties itemProp() {
 		return new Item.Properties();
@@ -108,8 +111,8 @@ public abstract class AbstractModule {
 	/**
 	* @since 5.2.0
 	*/
-	public static <T extends BlockEntity> BlockEntityType<T> blockEntity(BlockEntitySupplier<? extends T> factory, Type<?> datafixer, Block... blocks) {
-		return BlockEntityType.Builder.<T>of(factory, blocks).build(datafixer);
+	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(BlockEntitySupplier<? extends T> factory, Type<?> datafixer, Supplier<? extends Block>... blocks) {
+		return go(() -> BlockEntityType.Builder.<T>of(factory, Stream.of(blocks).map(Supplier::get).toArray(Block[]::new)).build(datafixer));
 	}
 
 	/**
@@ -133,20 +136,24 @@ public abstract class AbstractModule {
 		};
 	}
 
-	public static Named<Item> itemTag(String namespace, String path) {
-		return ItemTags.bind(namespace + ":" + path);
+	public static TagKey<Item> itemTag(String namespace, String path) {
+		return tag(Registry.ITEM_REGISTRY, namespace, path);
 	}
 
-	public static Named<EntityType<?>> entityTag(String namespace, String path) {
-		return EntityTypeTags.bind(namespace + ":" + path);
+	public static TagKey<EntityType<?>> entityTag(String namespace, String path) {
+		return tag(Registry.ENTITY_TYPE_REGISTRY, namespace, path);
 	}
 
-	public static Named<Block> blockTag(String namespace, String path) {
-		return BlockTags.bind(namespace + ":" + path);
+	public static TagKey<Block> blockTag(String namespace, String path) {
+		return tag(Registry.BLOCK_REGISTRY, namespace, path);
 	}
 
-	public static Named<Fluid> fluidTag(String namespace, String path) {
-		return FluidTags.bind(namespace + ":" + path);
+	public static TagKey<Fluid> fluidTag(String namespace, String path) {
+		return tag(Registry.FLUID_REGISTRY, namespace, path);
+	}
+
+	public static <T> TagKey<T> tag(ResourceKey<? extends Registry<T>> registryKey, String namespace, String path) {
+		return TagKey.create(registryKey, new ResourceLocation(namespace, path));
 	}
 
 	/**

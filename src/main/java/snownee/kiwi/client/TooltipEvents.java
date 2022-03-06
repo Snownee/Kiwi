@@ -132,7 +132,7 @@ public final class TooltipEvents {
 			}
 			tooltip.add(lastFormatted);
 		} else if (KiwiClientConfig.tagsTooltip) {
-			List<String> tags = stack.getItem().getTags().stream().map(Object::toString).sorted().toList();
+			List<String> tags = stack.getTags().map(Object::toString).sorted().toList();
 			if (!tags.isEmpty()) {
 				trySendTipMsg(minecraft);
 				tags.forEach(id -> {

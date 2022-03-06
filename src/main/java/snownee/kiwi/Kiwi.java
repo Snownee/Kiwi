@@ -123,6 +123,7 @@ public class Kiwi {
 	private static Multimap<String, KiwiAnnotationData> moduleData = ArrayListMultimap.create();
 	public static Map<ResourceLocation, Boolean> defaultOptions = Maps.newHashMap();
 	private static Map<KiwiAnnotationData, String> conditions = Maps.newHashMap();
+	private static boolean inited;
 
 	public Kiwi() throws Exception {
 		Map<String, KiwiAnnotationData> classOptionalMap = Maps.newHashMap();
@@ -208,7 +209,6 @@ public class Kiwi {
 
 		KiwiConfigManager.init();
 		final IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-		modEventBus.addListener(EventPriority.LOWEST, this::preInit);
 		modEventBus.addListener(this::init);
 		modEventBus.addListener(this::clientInit);
 		MinecraftForge.EVENT_BUS.addListener(this::serverInit);
@@ -252,7 +252,11 @@ public class Kiwi {
 		return true;
 	}
 
-	private void preInit(RegistryEvent.NewRegistry event) {
+	public static void preInit() {
+		if (inited) {
+			return;
+		}
+		inited = true;
 		try {
 			KiwiConfigManager.preload();
 		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
@@ -462,33 +466,36 @@ public class Kiwi {
 				}
 				if (useOwnGroup && info.category == null && o instanceof CreativeModeTab) {
 					info.category = (CreativeModeTab) o;
-				} else if (o instanceof RecipeType) {
-					Registry.register(Registry.RECIPE_TYPE, regName, (RecipeType<?>) o);
-					tmpBuilder = null;
-					tmpBuilderField = null;
-					continue;
 				} else if (o instanceof Item.Properties) {
 					tmpBuilder = (Item.Properties) o;
 					tmpBuilderField = field;
 					continue;
-				} else if (o instanceof Block) {
-					if (field.getAnnotation(NoItem.class) != null) {
-						info.noItems.add((Block) o);
-					}
-					checkNoGroup(info, field, o);
-					if (tmpBuilder != null) {
-						info.blockItemBuilders.put((Block) o, tmpBuilder);
-						try {
-							tmpBuilderField.set(info.module, null);
-						} catch (Exception e) {
-							logger.error(MARKER, "Kiwi failed to clean used item builder: {}", tmpBuilderField);
-							logger.catching(e);
-						}
-					}
-				} else if (o instanceof Item) {
-					checkNoGroup(info, field, o);
 				}
-				if (o instanceof IForgeRegistryEntry) {
+
+				if (o instanceof KiwiGO) {
+					o = ((KiwiGO<?>) o).create();
+				}
+
+				if (o instanceof RecipeType) {
+					Registry.register(Registry.RECIPE_TYPE, regName, (RecipeType<?>) o);
+				} else if (o instanceof IForgeRegistryEntry) {
+					if (o instanceof Block) {
+						if (field.getAnnotation(NoItem.class) != null) {
+							info.noItems.add((Block) o);
+						}
+						checkNoGroup(info, field, o);
+						if (tmpBuilder != null) {
+							info.blockItemBuilders.put((Block) o, tmpBuilder);
+							try {
+								tmpBuilderField.set(info.module, null);
+							} catch (Exception e) {
+								logger.error(MARKER, "Kiwi failed to clean used item builder: {}", tmpBuilderField);
+								logger.catching(e);
+							}
+						}
+					} else if (o instanceof Item) {
+						checkNoGroup(info, field, o);
+					}
 					IForgeRegistryEntry<?> entry = (IForgeRegistryEntry<?>) o;
 					Class<?> superType = entry.getRegistryType();
 					int i = counter.getOrDefault(superType, 0);

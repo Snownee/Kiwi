@@ -37,7 +37,7 @@ import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
 import net.minecraft.data.recipes.SingleItemRecipeBuilder;
 import net.minecraft.data.recipes.UpgradeRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.HoneycombItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -140,11 +140,11 @@ public abstract class KiwiRecipeProvider implements DataProvider {
 		UpgradeRecipeBuilder.smithing(Ingredient.of(p_125996_), Ingredient.of(Items.NETHERITE_INGOT), p_125997_).unlocks("has_netherite_ingot", has(Items.NETHERITE_INGOT)).save(p_125995_, getItemName(p_125997_) + "_smithing");
 	}
 
-	public static void planksFromLog(Consumer<FinishedRecipe> p_125999_, ItemLike p_126000_, Tag<Item> p_126001_) {
+	public static void planksFromLog(Consumer<FinishedRecipe> p_125999_, ItemLike p_126000_, TagKey<Item> p_126001_) {
 		ShapelessRecipeBuilder.shapeless(p_126000_, 4).requires(p_126001_).group("planks").unlockedBy("has_log", has(p_126001_)).save(p_125999_);
 	}
 
-	public static void planksFromLogs(Consumer<FinishedRecipe> p_126018_, ItemLike p_126019_, Tag<Item> p_126020_) {
+	public static void planksFromLogs(Consumer<FinishedRecipe> p_126018_, ItemLike p_126019_, TagKey<Item> p_126020_) {
 		ShapelessRecipeBuilder.shapeless(p_126019_, 4).requires(p_126020_).group("planks").unlockedBy("has_logs", has(p_126020_)).save(p_126018_);
 	}
 
@@ -285,7 +285,7 @@ public abstract class KiwiRecipeProvider implements DataProvider {
 		return inventoryTrigger(ItemPredicate.Builder.item().of(p_125978_).build());
 	}
 
-	protected static InventoryChangeTrigger.TriggerInstance has(Tag<Item> p_125976_) {
+	protected static InventoryChangeTrigger.TriggerInstance has(TagKey<Item> p_125976_) {
 		return inventoryTrigger(ItemPredicate.Builder.item().of(p_125976_).build());
 	}
 

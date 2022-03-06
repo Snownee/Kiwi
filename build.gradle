@@ -11,6 +11,11 @@ buildscript {
         classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
+
+plugins {
+    id "com.github.johnrengelman.shadow" version "7.1.2"
+}
+
 apply plugin: 'net.minecraftforge.gradle'
 //apply plugin: 'org.parchmentmc.librarian.forgegradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
@@ -18,7 +23,12 @@ apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 apply plugin: 'org.spongepowered.mixin'
 
-version = "${version_major}.${version_minor}.${version_patch}"
+configurations {
+    shadowCommon
+    implementation.extendsFrom shadowCommon
+}
+
+version = project.mod_version
 group = "snownee.kiwi"
 archivesBaseName = "Kiwi-${minecraft_version}-forge"
 
@@ -46,7 +56,7 @@ minecraft {
     // Use non-default mappings at your own risk. they may not always work.
     // Simply re-run your setup task after changing the mappings to update your workspace.
 
-    mappings channel: 'official', version: '1.18'
+    mappings channel: 'official', version: project.minecraft_version
     //mappings channel: 'parchment', version: '2021.09.05-1.17.1'
 
     //accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
@@ -151,6 +161,16 @@ sourceSets {
     }
 }
 
+shadowJar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    exclude(a)
+    manifest { attributes(b) }
+    relocate "com.typesafe.config", "${project.group}.shadowed.com.typesafe.config"
+    configurations = [project.configurations.shadowCommon]
+    archiveClassifier.set('')
+    finalizedBy 'reobfShadowJar'
+}
+
 task APJar(type: Jar) {
     //include "/snownee/kiwi/build"
     //exclude(a)
@@ -179,9 +199,11 @@ jar {
 }
 
 artifacts {
-    archives sourcesJar
-    archives deobfJar
-    archives APJar
+    shadowJar
+}
+
+reobf {
+    shadowJar {}
 }
 
 repositories {
@@ -195,6 +217,9 @@ repositories {
             includeGroup "curse.maven"
         }
     }
+    maven {
+        url = "https://repo1.maven.org/maven2/"
+    }
 }
 
 dependencies {
@@ -207,8 +232,10 @@ dependencies {
 	implementation project(':annotation')
     annotationProcessor project(':annotation-processor')
 
-    //compileOnly fg.deobf("curse.maven:jei-238222:3448057")
-    //runtimeOnly fg.deobf("curse.maven:jei-238222:3448057")
+    //compileOnly fg.deobf("curse.maven:jei-238222:3670531")
+    runtimeOnly fg.deobf("curse.maven:jei-238222:3670531")
+    
+    shadowCommon("com.typesafe:config:${project.config_version}")
 }
 
 processResources {
@@ -217,16 +244,14 @@ processResources {
     }
 }
 
-// Example configuration to allow publishing using the maven-publish plugin
-// This is the preferred method to reobfuscate your jar file
-jar.finalizedBy('reobfJar')
-// However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
-// publish.dependsOn('reobfJar')
+jar {
+    finalizedBy('reobfJar')
+}
 
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact jar
+            artifact shadowJar
         }
     }
     repositories {

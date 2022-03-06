@@ -23,6 +23,7 @@ import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModule.Category;
 import snownee.kiwi.KiwiModule.Subscriber.Bus;
+import snownee.kiwi.KiwiGO;
 import snownee.kiwi.block.entity.RetextureBlockEntity;
 import snownee.kiwi.data.provider.KiwiLootTableProvider;
 import snownee.kiwi.item.ModBlockItem;
@@ -40,24 +41,24 @@ public class TestModule extends AbstractModule {
 
 	// Register a simple item
 	@Category("food")
-	public static TestItem FIRST_ITEM = new TestItem(itemProp().rarity(Rarity.EPIC));
+	public static final KiwiGO<TestItem> FIRST_ITEM = go(() -> new TestItem(itemProp().rarity(Rarity.EPIC)));
 
 	// The next block will use this builder to build its BlockItem. After that this field will be null
 	public static Item.Properties FIRST_BLOCK_ITEM_BUILDER = itemProp().rarity(Rarity.RARE);
 	// Register a simple block and its BlockItem
 	//@RenderLayer(Layer.CUTOUT)
-	public static TestBlock FIRST_BLOCK = new TestBlock2(blockProp(Material.WOOD));
+	public static final KiwiGO<TestBlock> FIRST_BLOCK = go(() -> new TestBlock2(blockProp(Material.WOOD)));
 
 	// Register a simple effect
-	public static MobEffect FIRST_EFFECT = new HealthBoostMobEffect(MobEffectCategory.BENEFICIAL, 0xFF0000);
+	public static final KiwiGO<MobEffect> FIRST_EFFECT = go(() -> new HealthBoostMobEffect(MobEffectCategory.BENEFICIAL, 0xFF0000));
 
 	// And its potion
-	public static Potion FIRST_POTION = new Potion(new MobEffectInstance(FIRST_EFFECT, 1800));
+	public static final KiwiGO<Potion> FIRST_POTION = go(() -> new Potion(new MobEffectInstance(FIRST_EFFECT.get(), 1800)));
 
-	public static BlockEntityType<TestBlockEntity> FIRST_TILE = blockEntity(TestBlockEntity::new, null, FIRST_BLOCK);
+	public static final KiwiGO<BlockEntityType<TestBlockEntity>> FIRST_TILE = blockEntity(TestBlockEntity::new, null, FIRST_BLOCK);
 
-	public static TestBlock TEX_BLOCK = new TestBlock(blockProp(Material.WOOD));
-	public static BlockEntityType<TexBlockEntity> TEX_TILE = blockEntity(TexBlockEntity::new, null, TEX_BLOCK);
+	public static final KiwiGO<TestBlock> TEX_BLOCK = go(() -> new TestBlock(blockProp(Material.WOOD)));
+	public static final KiwiGO<BlockEntityType<TexBlockEntity>> TEX_TILE = blockEntity(TexBlockEntity::new, null, TEX_BLOCK);
 
 	public static TestModule INSTANCE;
 
@@ -66,22 +67,22 @@ public class TestModule extends AbstractModule {
 	@Override
 	@OnlyIn(Dist.CLIENT)
 	protected void clientInit(ClientInitEvent event) {
-		ModBlockItem.INSTANT_UPDATE_TILES.add(FIRST_TILE);
-		ModBlockItem.INSTANT_UPDATE_TILES.add(TEX_TILE);
-		ItemBlockRenderTypes.setRenderLayer(TEX_BLOCK, EnumUtil.BLOCK_RENDER_TYPES::contains);
+//		ModBlockItem.INSTANT_UPDATE_TILES.add(FIRST_TILE.get());
+//		ModBlockItem.INSTANT_UPDATE_TILES.add(TEX_TILE.get());
+//		ItemBlockRenderTypes.setRenderLayer(TEX_BLOCK.get(), EnumUtil.BLOCK_RENDER_TYPES::contains);
 	}
 
 	@SubscribeEvent
 	@OnlyIn(Dist.CLIENT)
 	public void blockColors(ColorHandlerEvent.Block event) {
-		BlockColors blockColors = event.getBlockColors();
-		blockColors.register((state, level, pos, i) -> {
-			BlockEntity blockEntity = level.getBlockEntity(pos);
-			if (blockEntity instanceof RetextureBlockEntity) {
-				return ((RetextureBlockEntity) blockEntity).getColor(level, i);
-			}
-			return -1;
-		}, TEX_BLOCK);
+//		BlockColors blockColors = event.getBlockColors();
+//		blockColors.register((state, level, pos, i) -> {
+//			BlockEntity blockEntity = level.getBlockEntity(pos);
+//			if (blockEntity instanceof RetextureBlockEntity) {
+//				return ((RetextureBlockEntity) blockEntity).getColor(level, i);
+//			}
+//			return -1;
+//		}, TEX_BLOCK.get());
 	}
 
 	@Override
