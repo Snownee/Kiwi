@@ -31,6 +31,7 @@ import net.minecraft.world.level.material.Material;
 import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import snownee.kiwi.block.ModBlock;
+import snownee.kiwi.block.entity.TagBasedBlockEntityType;
 import snownee.kiwi.loader.event.ClientInitEvent;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.loader.event.PostInitEvent;
@@ -113,6 +114,10 @@ public abstract class AbstractModule {
 	*/
 	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(BlockEntitySupplier<? extends T> factory, Type<?> datafixer, Supplier<? extends Block>... blocks) {
 		return go(() -> BlockEntityType.Builder.<T>of(factory, Stream.of(blocks).map(Supplier::get).toArray(Block[]::new)).build(datafixer));
+	}
+
+	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(BlockEntitySupplier<? extends T> factory, Type<?> datafixer, TagKey<Block> blockTag) {
+		return go(() -> new TagBasedBlockEntityType<>(factory, blockTag, datafixer));
 	}
 
 	/**
