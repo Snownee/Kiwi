@@ -21,17 +21,17 @@ public final class TagsProviderHelper<T> {
 		registry = this.tagsProvider.getRegistry();
 	}
 
-	public void optional(TagKey<T> tag, Supplier<T>... blocks) {
+	public void optional(TagKey<T> tag, Supplier<? extends T>... blocks) {
 		Tag.Builder builder = tagsProvider.callGetOrCreateRawBuilder(tag);
-		for (Supplier<T> block : blocks) {
-			builder.addElement(registry.getKey(block.get()), modId);
+		for (Supplier<? extends T> block : blocks) {
+			builder.addOptionalElement(registry.getKey(block.get()), modId);
 		}
 	}
 
-	public void add(TagKey<T> tag, Supplier<T>... blocks) {
+	public void add(TagKey<T> tag, Supplier<? extends T>... blocks) {
 		Tag.Builder builder = tagsProvider.callGetOrCreateRawBuilder(tag);
-		for (Supplier<T> block : blocks) {
-			builder.addOptionalElement(registry.getKey(block.get()), modId);
+		for (Supplier<? extends T> block : blocks) {
+			builder.addElement(registry.getKey(block.get()), modId);
 		}
 	}
 

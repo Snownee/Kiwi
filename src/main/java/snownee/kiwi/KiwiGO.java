@@ -29,7 +29,7 @@ public class KiwiGO<T> implements Supplier<T> {
 		return get();
 	}
 
-	public boolean is(T value) {
+	public boolean is(Object value) {
 		return Objects.equals(this.value, value);
 	}
 
