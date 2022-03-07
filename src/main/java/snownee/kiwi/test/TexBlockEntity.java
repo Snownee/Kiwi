@@ -8,7 +8,7 @@ import snownee.kiwi.block.entity.RetextureBlockEntity;
 public class TexBlockEntity extends RetextureBlockEntity {
 
 	public TexBlockEntity(BlockPos pos, BlockState state) {
-		super(TestModule.TEX_TILE, pos, state, "0");
+		super(TestModule.TEX_TILE.get(), pos, state, "0");
 	}
 
 	@Override

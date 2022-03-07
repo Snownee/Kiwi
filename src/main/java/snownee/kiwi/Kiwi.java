@@ -82,15 +82,16 @@ import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicateType;
 import net.minecraft.world.level.levelgen.carver.WorldCarver;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
-import net.minecraft.world.level.levelgen.feature.StructurePieceType;
 import net.minecraft.world.level.levelgen.feature.featuresize.FeatureSizeType;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacerType;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProviderType;
-import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElementType;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecoratorType;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacerType;
 import net.minecraft.world.level.levelgen.heightproviders.HeightProviderType;
 import net.minecraft.world.level.levelgen.placement.PlacementModifierType;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
+import net.minecraft.world.level.levelgen.structure.placement.StructurePlacementType;
+import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElementType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.PosRuleTestType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTestType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
@@ -132,6 +133,7 @@ public class Kiwi implements ModInitializer {
 	static final Marker MARKER = MarkerManager.getMarker("Init");
 
 	private static final class Info {
+		@SuppressWarnings("unused")
 		final ResourceLocation id;
 		final String className;
 		final List<ResourceLocation> moduleRules = Lists.newLinkedList();
@@ -473,34 +475,35 @@ public class Kiwi implements ModInitializer {
 				}
 				if (useOwnGroup && info.category == null && o instanceof CreativeModeTab) {
 					info.category = (CreativeModeTab) o;
-				} else if (o instanceof RecipeType) {
-					Registry.register(Registry.RECIPE_TYPE, regName, (RecipeType<?>) o);
-					tmpBuilder = null;
-					tmpBuilderField = null;
-					continue;
 				} else if (o instanceof Item.Properties) {
 					tmpBuilder = (Item.Properties) o;
 					tmpBuilderField = field;
 					continue;
-				} else if (o instanceof Block) {
-					if (field.getAnnotation(NoItem.class) != null) {
-						info.noItems.add((Block) o);
-					}
-					checkNoGroup(info, field, o);
-					if (tmpBuilder != null) {
-						info.blockItemBuilders.put((Block) o, tmpBuilder);
-						try {
-							tmpBuilderField.set(info.module, null);
-						} catch (Exception e) {
-							logger.error(MARKER, "Kiwi failed to clean used item builder: {}", tmpBuilderField);
-							logger.catching(e);
-						}
-					}
-				} else if (o instanceof Item) {
-					checkNoGroup(info, field, o);
 				}
+
+				if (o instanceof KiwiGO) {
+					o = ((KiwiGO<?>) o).create();
+				}
+
 				Registry<?> registry = registryLookup.findRegistry(o);
 				if (registry != null) {
+					if (o instanceof Block) {
+						if (field.getAnnotation(NoItem.class) != null) {
+							info.noItems.add((Block) o);
+						}
+						checkNoGroup(info, field, o);
+						if (tmpBuilder != null) {
+							info.blockItemBuilders.put((Block) o, tmpBuilder);
+							try {
+								tmpBuilderField.set(info.module, null);
+							} catch (Exception e) {
+								logger.error(MARKER, "Kiwi failed to clean used item builder: {}", tmpBuilderField);
+								logger.catching(e);
+							}
+						}
+					} else if (o instanceof Item) {
+						checkNoGroup(info, field, o);
+					}
 					ResourceKey<?> superType = registry.key();
 					int i = counter.getOrDefault(superType, 0);
 					counter.put(superType, i + 1);
@@ -601,6 +604,7 @@ public class Kiwi implements ModInitializer {
 		registerRegistry(Registry.CARVER, WorldCarver.class);
 		registerRegistry(Registry.FEATURE, Feature.class);
 		registerRegistry(Registry.STRUCTURE_FEATURE, StructureFeature.class);
+		registerRegistry(Registry.STRUCTURE_PLACEMENT_TYPE, StructurePlacementType.class);
 		registerRegistry(Registry.STRUCTURE_PIECE, StructurePieceType.class);
 		registerRegistry(Registry.PLACEMENT_MODIFIERS, PlacementModifierType.class);
 		registerRegistry(Registry.BLOCKSTATE_PROVIDER_TYPES, BlockStateProviderType.class);
@@ -612,6 +616,7 @@ public class Kiwi implements ModInitializer {
 		registerRegistry(Registry.CHUNK_GENERATOR, Codec.class);
 		registerRegistry(Registry.CONDITION, Codec.class);
 		registerRegistry(Registry.RULE, Codec.class);
+		registerRegistry(Registry.DENSITY_FUNCTION_TYPES, Codec.class);
 		registerRegistry(Registry.STRUCTURE_PROCESSOR, StructureProcessorType.class);
 		registerRegistry(Registry.STRUCTURE_POOL_ELEMENT, StructurePoolElementType.class);
 	}

@@ -30,6 +30,7 @@ sourceSets {
 }
 
 loom {
+    accessWidenerPath = file("src/main/resources/kiwi.accesswidener")
     mixin {
         defaultRefmapName = "${project.mod_id}.refmap.json"
     }

@@ -18,8 +18,8 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import snownee.kiwi.mixin.VillagerAccessor;
-import snownee.kiwi.mixin.WorkAtComposterAccessor;
+import snownee.kiwi.mixin.VillagerAccess;
+import snownee.kiwi.mixin.WorkAtComposterAccess;
 
 /**
  * @since 5.0.0
@@ -49,17 +49,17 @@ public final class VanillaActions { //TODO brewing
 	}
 
 	public static void registerVillagerPickupable(ItemLike item) {
-		if (VillagerAccessor.getWANTED_ITEMS() instanceof ImmutableSet) {
-			VillagerAccessor.setWANTED_ITEMS(Sets.newHashSet(VillagerAccessor.getWANTED_ITEMS()));
+		if (VillagerAccess.getWANTED_ITEMS() instanceof ImmutableSet) {
+			VillagerAccess.setWANTED_ITEMS(Sets.newHashSet(VillagerAccess.getWANTED_ITEMS()));
 		}
-		VillagerAccessor.getWANTED_ITEMS().add(item.asItem());
+		VillagerAccess.getWANTED_ITEMS().add(item.asItem());
 	}
 
 	public static void registerVillagerCompostable(ItemLike item) {
-		if (WorkAtComposterAccessor.getCOMPOSTABLE_ITEMS() instanceof ImmutableList) {
-			WorkAtComposterAccessor.setCOMPOSTABLE_ITEMS(Lists.newArrayList(WorkAtComposterAccessor.getCOMPOSTABLE_ITEMS()));
+		if (WorkAtComposterAccess.getCOMPOSTABLE_ITEMS() instanceof ImmutableList) {
+			WorkAtComposterAccess.setCOMPOSTABLE_ITEMS(Lists.newArrayList(WorkAtComposterAccess.getCOMPOSTABLE_ITEMS()));
 		}
-		WorkAtComposterAccessor.getCOMPOSTABLE_ITEMS().add(item.asItem());
+		WorkAtComposterAccess.getCOMPOSTABLE_ITEMS().add(item.asItem());
 	}
 
 }

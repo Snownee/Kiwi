@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -14,10 +15,10 @@ import com.mojang.datafixers.types.Type;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder.Factory;
-import net.fabricmc.fabric.api.tag.TagFactory;
 import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.Tag.Named;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -29,11 +30,12 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Material;
 import snownee.kiwi.block.ModBlock;
+import snownee.kiwi.block.entity.TagBasedBlockEntityType;
 import snownee.kiwi.loader.event.ClientInitEvent;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.loader.event.PostInitEvent;
 import snownee.kiwi.loader.event.ServerInitEvent;
-import snownee.kiwi.mixin.ItemAccessor;
+import snownee.kiwi.mixin.ItemAccess;
 
 /**
  *
@@ -45,8 +47,8 @@ import snownee.kiwi.mixin.ItemAccessor;
 public abstract class AbstractModule {
 	public ResourceLocation uid;
 	private static final BiConsumer<ModuleInfo, Item> ITEM_DECORATOR = (module, item) -> {
-		if (module.category != null && ((ItemAccessor) item).getCategory() == null && !module.noCategories.contains(item))
-			((ItemAccessor) item).setCategory(module.category);
+		if (module.category != null && ((ItemAccess) item).getCategory() == null && !module.noCategories.contains(item))
+			((ItemAccess) item).setCategory(module.category);
 	};
 	private static final BiConsumer<ModuleInfo, Block> BLOCK_DECORATOR = (module, block) -> {
 		ModBlock.setFireInfo(block);
@@ -83,6 +85,10 @@ public abstract class AbstractModule {
 	//		// NO-OP
 	//	}
 
+	protected static <T> KiwiGO<T> go(Supplier<? extends T> factory) {
+		return new KiwiGO<>((Supplier<T>) factory);
+	}
+
 	/// helper methods:
 	protected static Item.Properties itemProp() {
 		return new Item.Properties();
@@ -103,10 +109,14 @@ public abstract class AbstractModule {
 	}
 
 	/**
-	 * @since 5.2.0
-	 */
-	public static <T extends BlockEntity> BlockEntityType<T> blockEntity(Factory<? extends T> factory, Type<?> datafixer, Block... blocks) {
-		return FabricBlockEntityTypeBuilder.<T>create(factory, blocks).build(datafixer);
+	* @since 5.2.0
+	*/
+	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(Factory<? extends T> factory, Type<?> datafixer, Supplier<? extends Block>... blocks) {
+		return go(() -> FabricBlockEntityTypeBuilder.<T>create(factory, Stream.of(blocks).map(Supplier::get).toArray(Block[]::new)).build(datafixer));
+	}
+
+	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(Factory<? extends T> factory, Type<?> datafixer, TagKey<Block> blockTag) {
+		return go(() -> new TagBasedBlockEntityType<>(factory, blockTag, datafixer));
 	}
 
 	/**
@@ -116,20 +126,24 @@ public abstract class AbstractModule {
 		return FabricItemGroupBuilder.create(new ResourceLocation(namespace, path)).icon(icon).appendItems(stacksForDisplay).build();
 	}
 
-	public static Named<Item> itemTag(String namespace, String path) {
-		return TagFactory.ITEM.create(new ResourceLocation(namespace, path));
+	public static TagKey<Item> itemTag(String namespace, String path) {
+		return tag(Registry.ITEM_REGISTRY, namespace, path);
 	}
 
-	public static Named<EntityType<?>> entityTag(String namespace, String path) {
-		return TagFactory.ENTITY_TYPE.create(new ResourceLocation(namespace, path));
+	public static TagKey<EntityType<?>> entityTag(String namespace, String path) {
+		return tag(Registry.ENTITY_TYPE_REGISTRY, namespace, path);
 	}
 
-	public static Named<Block> blockTag(String namespace, String path) {
-		return TagFactory.BLOCK.create(new ResourceLocation(namespace, path));
+	public static TagKey<Block> blockTag(String namespace, String path) {
+		return tag(Registry.BLOCK_REGISTRY, namespace, path);
 	}
 
-	public static Named<Fluid> fluidTag(String namespace, String path) {
-		return TagFactory.FLUID.create(new ResourceLocation(namespace, path));
+	public static TagKey<Fluid> fluidTag(String namespace, String path) {
+		return tag(Registry.FLUID_REGISTRY, namespace, path);
+	}
+
+	public static <T> TagKey<T> tag(ResourceKey<? extends Registry<T>> registryKey, String namespace, String path) {
+		return TagKey.create(registryKey, new ResourceLocation(namespace, path));
 	}
 
 	/**

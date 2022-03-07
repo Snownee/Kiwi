@@ -21,7 +21,7 @@ public class ClientPacketListenerMixin {
 	@Inject(
 			at = @At(
 					value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BlockEntity;load(Lnet/minecraft/nbt/CompoundTag;)V", remap = true
-			), method = { "method_38542", "lambda$handleBlockEntityData$4" }, cancellable = true, remap = false
+			), method = { "method_38542", "lambda$handleBlockEntityData$5" }, cancellable = true, remap = false
 	)
 	private void kiwi_handleBlockEntityData(ClientboundBlockEntityDataPacket clientboundBlockEntityDataPacket, BlockEntity blockEntity, CallbackInfo ci) {
 		if (blockEntity instanceof BaseBlockEntity) {

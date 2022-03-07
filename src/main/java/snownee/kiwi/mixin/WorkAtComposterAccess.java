@@ -1,27 +1,27 @@
 package snownee.kiwi.mixin;
 
-import java.util.Set;
+import java.util.List;
 
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.ai.behavior.WorkAtComposter;
 import net.minecraft.world.item.Item;
 
-@Mixin(Villager.class)
-public interface VillagerAccessor {
+@Mixin(WorkAtComposter.class)
+public interface WorkAtComposterAccess {
 
 	@Accessor
-	static Set<Item> getWANTED_ITEMS() {
+	static List<Item> getCOMPOSTABLE_ITEMS() {
 		throw new IllegalStateException();
 	}
 
 	@Accessor
 	@Final
 	@Mutable
-	static void setWANTED_ITEMS(Set<Item> set) {
+	static void setCOMPOSTABLE_ITEMS(List<Item> list) {
 		throw new IllegalStateException();
 	}
 

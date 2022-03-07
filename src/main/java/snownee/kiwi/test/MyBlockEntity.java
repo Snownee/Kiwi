@@ -8,7 +8,7 @@ import snownee.kiwi.block.entity.BaseBlockEntity;
 public class MyBlockEntity extends BaseBlockEntity {
 
 	public MyBlockEntity(BlockPos pos, BlockState state) {
-		super(TestModule.FIRST_TILE, pos, state);
+		super(TestModule.FIRST_TILE.get(), pos, state);
 		persistData = true;
 	}
 

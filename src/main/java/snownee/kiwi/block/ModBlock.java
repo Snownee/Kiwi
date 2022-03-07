@@ -20,7 +20,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.HitResult;
 import snownee.kiwi.block.entity.BaseBlockEntity;
-import snownee.kiwi.mixin.BlockAccessor;
+import snownee.kiwi.mixin.BlockAccess;
 import snownee.kiwi.util.VanillaActions;
 
 /**
@@ -131,7 +131,7 @@ public class ModBlock extends Block implements IKiwiBlock {
 	 * @since 3.5.0
 	 */
 	public static void setFireInfo(Block block) {
-		Material material = ((BlockAccessor) block).getMaterial();
+		Material material = ((BlockAccess) block).getMaterial();
 		int fireSpreadSpeed = 0;
 		int flammability = 0;
 		if (material == Material.WOOD) {

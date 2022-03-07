@@ -32,7 +32,7 @@ import snownee.kiwi.loader.event.ClientInitEvent;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.loader.event.PostInitEvent;
 import snownee.kiwi.loader.event.ServerInitEvent;
-import snownee.kiwi.mixin.ItemAccessor;
+import snownee.kiwi.mixin.ItemAccess;
 
 public class ModuleInfo {
 	public static final class RegistryHolder {
@@ -98,9 +98,9 @@ public class ModuleInfo {
 					if (group != null && !group.value().isEmpty()) {
 						CreativeModeTab category = Kiwi.getGroup(group.value());
 						if (category != null) {
-							((ItemAccessor) item).setCategory(category);
+							((ItemAccess) item).setCategory(category);
 						} else {
-							((ItemAccessor) item).setCategory(this.category);
+							((ItemAccess) item).setCategory(this.category);
 						}
 					}
 				}
@@ -112,9 +112,9 @@ public class ModuleInfo {
 					if (group != null && !group.value().isEmpty()) {
 						CreativeModeTab category = Kiwi.getGroup(group.value());
 						if (category != null) {
-							((ItemAccessor) e.entry).setCategory(category);
+							((ItemAccess) e.entry).setCategory(category);
 						} else {
-							((ItemAccessor) e.entry).setCategory(this.category);
+							((ItemAccess) e.entry).setCategory(this.category);
 						}
 					}
 				}

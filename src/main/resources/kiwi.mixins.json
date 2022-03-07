@@ -5,12 +5,12 @@
   "compatibilityLevel": "JAVA_16",
   "refmap": "kiwi.refmap.json",
   "mixins": [
-    "ItemAccessor",
-    "BlockAccessor",
-    "ShapedRecipeAccessor",
-    "VillagerAccessor",
-    "WorkAtComposterAccessor",
-    "TagContainerMixin"
+    "ItemAccess",
+    "BlockAccess",
+    "ShapedRecipeAccess",
+    "VillagerAccess",
+    "WorkAtComposterAccess",
+    "ReloadableServerResourcesMixin"
   ],
   "client": [
     "ClientPacketListenerMixin",

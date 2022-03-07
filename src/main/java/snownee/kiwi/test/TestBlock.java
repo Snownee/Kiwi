@@ -22,7 +22,6 @@ import snownee.kiwi.recipe.FullBlockIngredient;
 // fill ~-40 ~ ~-40 ~40 ~ ~40 kiwi:tex_block
 public class TestBlock extends StairBlock implements EntityBlock, IKiwiBlock {
 
-	@SuppressWarnings("deprecation")
 	public TestBlock(Properties builder) {
 		super(Blocks.STONE.defaultBlockState(), builder);
 	}
