@@ -2,7 +2,7 @@
 
 Kiwi is a Minecraft modding library designed to help developers focus on content creation instead of repetitive work.
 
-[中文指南](https://moddingwithkiwi.readthedocs.io/zh_CN/1.18/)
+[中文指南](https://moddingwithkiwi.readthedocs.io/zh_CN/1.18.2/)
 
 ## Registration
 
@@ -12,10 +12,10 @@ Kiwi is a Minecraft modding library designed to help developers focus on content
 public class MyModule extends AbstractModule
 {
     // Register a simple item. Kiwi will automatically register it
-    public static Item FIRST_ITEM = new Item(itemProp().rarity(Rarity.EPIC));
+    public static final KiwiGO<Item> FIRST_ITEM = go(() -> new Item(itemProp().rarity(Rarity.EPIC)));
 
     // Register a simple block and its BlockItem
-    public static Block FIRST_BLOCK = new Block(blockProp(Material.WOOD));
+    public static final KiwiGO<Block> FIRST_BLOCK = go(() -> new Block(blockProp(Material.WOOD)));
 }
 ```
 
