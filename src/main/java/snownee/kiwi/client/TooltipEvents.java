@@ -18,6 +18,7 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraftforge.api.distmarker.Dist;
@@ -132,7 +133,7 @@ public final class TooltipEvents {
 			}
 			tooltip.add(lastFormatted);
 		} else if (KiwiClientConfig.tagsTooltip) {
-			List<String> tags = stack.getTags().map(Object::toString).sorted().toList();
+			List<String> tags = stack.getTags().map(TagKey::location).map(Object::toString).sorted().toList();
 			if (!tags.isEmpty()) {
 				trySendTipMsg(minecraft);
 				tags.forEach(id -> {
