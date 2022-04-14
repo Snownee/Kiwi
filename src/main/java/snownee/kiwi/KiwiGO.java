@@ -3,7 +3,6 @@ package snownee.kiwi;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -34,7 +33,7 @@ public class KiwiGO<T> implements Supplier<T> {
 	}
 
 	public boolean is(ItemStack stack) {
-		return stack.is((Item) value);
+		return stack.is(((ItemLike) value).asItem());
 	}
 
 	public boolean is(BlockState state) {
