@@ -29,7 +29,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Material;
 import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
-import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.minecraftforge.registries.ForgeRegistries;
 import snownee.kiwi.block.ModBlock;
 import snownee.kiwi.block.entity.TagBasedBlockEntityType;
 import snownee.kiwi.loader.event.ClientInitEvent;
@@ -55,9 +55,9 @@ public abstract class AbstractModule {
 		ModBlock.setFireInfo(block);
 	};
 
-	private static final Map<Class<?>, BiConsumer<ModuleInfo, ? extends IForgeRegistryEntry<?>>> DEFAULT_DECORATORS = ImmutableMap.of(Item.class, ITEM_DECORATOR, Block.class, BLOCK_DECORATOR);
+	private static final Map<Object, BiConsumer<ModuleInfo, ?>> DEFAULT_DECORATORS = ImmutableMap.of(ForgeRegistries.ITEMS, ITEM_DECORATOR, ForgeRegistries.BLOCKS, BLOCK_DECORATOR);
 
-	protected final Map<Class<?>, BiConsumer<ModuleInfo, ? extends IForgeRegistryEntry<?>>> decorators = Maps.newHashMap(DEFAULT_DECORATORS);
+	protected final Map<Object, BiConsumer<ModuleInfo, ?>> decorators = Maps.newHashMap(DEFAULT_DECORATORS);
 
 	protected void preInit() {
 		// NO-OP

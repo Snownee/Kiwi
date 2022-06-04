@@ -77,9 +77,11 @@ public class TestModule extends AbstractModule {
 	public void blockColors(ColorHandlerEvent.Block event) {
 		BlockColors blockColors = event.getBlockColors();
 		blockColors.register((state, level, pos, i) -> {
-			BlockEntity blockEntity = level.getBlockEntity(pos);
-			if (blockEntity instanceof RetextureBlockEntity) {
-				return ((RetextureBlockEntity) blockEntity).getColor(level, i);
+			if (level != null && pos != null) {
+				BlockEntity blockEntity = level.getBlockEntity(pos);
+				if (blockEntity instanceof RetextureBlockEntity) {
+					return ((RetextureBlockEntity) blockEntity).getColor(level, i);
+				}
 			}
 			return -1;
 		}, TEX_BLOCK.get());

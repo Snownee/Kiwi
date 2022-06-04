@@ -1,6 +1,5 @@
 package snownee.kiwi.recipe;
 
-import java.lang.reflect.Constructor;
 import java.util.List;
 
 import com.google.common.collect.Lists;
@@ -9,33 +8,32 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 
+import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraftforge.common.ForgeConfig;
+import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraftforge.common.crafting.CompoundIngredient;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.IIngredientSerializer;
-import snownee.kiwi.Kiwi;
+import net.minecraftforge.common.crafting.conditions.ICondition.IContext;
+import snownee.kiwi.mixin.RecipeManagerAccess;
+import snownee.kiwi.util.Util;
 
 public enum AlternativesIngredientSerializer implements IIngredientSerializer<Ingredient> {
 	INSTANCE;
 
-	private static Constructor<CompoundIngredient> constructor;
-
-	static {
-		try {
-			constructor = CompoundIngredient.class.getDeclaredConstructor(List.class);
-			constructor.setAccessible(true);
-		} catch (Exception e) {
-			Kiwi.logger.catching(e);
-		}
-	}
-
 	@Override
 	public Ingredient parse(JsonObject json) {
+		RecipeManager recipeManager = Util.getRecipeManager();
+		if (recipeManager == null) {
+			throw new JsonSyntaxException("Unable to get recipe manager");
+		}
+		IContext ctx = ((RecipeManagerAccess) recipeManager).getContext();
+
 		JsonArray list = GsonHelper.getAsJsonArray(json, "list");
 		List<Ingredient> ingredients = Lists.newArrayList();
 		for (JsonElement e : list) {
@@ -46,13 +44,13 @@ public enum AlternativesIngredientSerializer implements IIngredientSerializer<In
 				}
 				for (JsonElement e2 : a) {
 					try {
-						ingredients.add(getIngredient(e2));
+						ingredients.add(getIngredient(e2, ctx));
 					} catch (Exception ignore) {
 					}
 				}
 			} else {
 				try {
-					ingredients.add(getIngredient(e));
+					ingredients.add(getIngredient(e, ctx));
 				} catch (Exception ignore) {
 				}
 			}
@@ -61,26 +59,30 @@ public enum AlternativesIngredientSerializer implements IIngredientSerializer<In
 					return ingredients.get(0);
 				} else {
 					try {
-						return constructor.newInstance(ingredients);
+						return CompoundIngredient.of(ingredients.toArray(Ingredient[]::new));
 					} catch (Exception e1) {
 						break;
 					}
 				}
 			}
 		}
-		throw new JsonSyntaxException("Mismatched");
+		throw new JsonSyntaxException("Mismatched: " + json);
 	}
 
-	public static Ingredient getIngredient(JsonElement e) {
+	public static Ingredient getIngredient(JsonElement e, IContext ctx) {
+		if (e.isJsonObject()) {
+			JsonObject o = e.getAsJsonObject();
+			if (o.size() == 1 && o.has("tag")) {
+				ResourceLocation resourcelocation = new ResourceLocation(GsonHelper.getAsString(o, "tag"));
+				TagKey<Item> tagkey = TagKey.create(Registry.ITEM_REGISTRY, resourcelocation);
+				if (ctx.getTag(tagkey).getValues().isEmpty()) {
+					throw new JsonSyntaxException("hasNoMatchingItems");
+				}
+			}
+		}
 		Ingredient ingredient = CraftingHelper.getIngredient(e);
 		if (ingredient.isEmpty()) {
 			throw new JsonSyntaxException("hasNoMatchingItems");
-		}
-		if (!ForgeConfig.SERVER.treatEmptyTagsAsAir.get()) {
-			ItemStack[] stacks = ingredient.getItems();
-			if (stacks.length == 1 && stacks[0].getItem() == Items.BARRIER) {
-				throw new JsonSyntaxException("hasNoMatchingItems");
-			}
 		}
 		return ingredient;
 	}

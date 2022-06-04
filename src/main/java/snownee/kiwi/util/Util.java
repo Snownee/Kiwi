@@ -20,7 +20,6 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
@@ -122,11 +121,12 @@ public final class Util {
 		return null;
 	}
 
+	public static RecipeManager recipeManager;
+
 	@Nullable
 	public static RecipeManager getRecipeManager() {
-		MinecraftServer server = Platform.getServer();
-		if (server != null) {
-			return server.getRecipeManager();
+		if (recipeManager != null) {
+			return recipeManager;
 		} else if (Platform.isPhysicalClient()) {
 			ClientPacketListener connection = Minecraft.getInstance().getConnection();
 			if (connection != null) {

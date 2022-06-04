@@ -14,8 +14,10 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.data.loading.DatagenModLoader;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.CrashReportCallables;
 import net.minecraftforge.fml.ModLoadingContext;
 
@@ -36,8 +38,9 @@ public final class KiwiModules {
 		MODULES.put(resourceLocation, new ModuleInfo(resourceLocation, module, context));
 	}
 
-	public static void handleRegister(RegistryEvent.Register<?> event) {
-		MODULES.values().forEach(info -> info.handleRegister(event));
+	@SubscribeEvent
+	public static void handleRegister(RegistryEvent.Register<Block> event) {
+		MODULES.values().forEach(info -> info.registries.registries.keySet().forEach(info::handleRegister));
 		ModLoadingContext.get().setActiveContainer(null);
 	}
 

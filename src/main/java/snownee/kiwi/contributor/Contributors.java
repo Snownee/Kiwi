@@ -12,23 +12,16 @@ import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.platform.InputConstants.Key;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.PlayerModel;
-import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.client.event.InputEvent.KeyInputEvent;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -39,7 +32,6 @@ import snownee.kiwi.KiwiModule;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.contributor.client.CosmeticLayer;
-import snownee.kiwi.contributor.client.gui.CosmeticScreen;
 import snownee.kiwi.contributor.impl.KiwiTierProvider;
 import snownee.kiwi.contributor.network.CSetCosmeticPacket;
 import snownee.kiwi.contributor.network.SSyncCosmeticPacket;
@@ -59,7 +51,8 @@ public class Contributors extends AbstractModule {
 	@Override
 	protected void preInit() {
 		if (Platform.isPhysicalClient()) {
-			FMLJavaModLoadingContext.get().getModEventBus().addListener(this::addLayers);
+			FMLJavaModLoadingContext.get().getModEventBus().addListener(ContributorsClient::addLayers);
+			MinecraftForge.EVENT_BUS.register(ContributorsClient.class);
 		}
 	}
 
@@ -121,33 +114,10 @@ public class Contributors extends AbstractModule {
 		}
 	}
 
-	@OnlyIn(Dist.CLIENT)
-	@SubscribeEvent
-	public void onClientPlayerLoggedIn(ClientPlayerNetworkEvent.LoggedInEvent event) {
-		changeCosmetic();
-	}
-
 	@OnlyIn(Dist.DEDICATED_SERVER)
 	@SubscribeEvent
 	public void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
 		PLAYER_COSMETICS.remove(event.getPlayer().getGameProfile().getName());
-	}
-
-	@OnlyIn(Dist.CLIENT)
-	@SubscribeEvent
-	public void onClientPlayerLoggedOut(ClientPlayerNetworkEvent.LoggedOutEvent event) {
-		PLAYER_COSMETICS.clear();
-		CosmeticLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidateAll());
-	}
-
-	@OnlyIn(Dist.CLIENT)
-	public void addLayers(EntityRenderersEvent.AddLayers event) {
-		for (String name : event.getSkins()) {
-			LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> o = event.getSkin(name);
-			CosmeticLayer layer = new CosmeticLayer(o);
-			CosmeticLayer.ALL_LAYERS.add(layer);
-			o.addLayer(layer);
-		}
 	}
 
 	@OnlyIn(Dist.CLIENT)
@@ -247,30 +217,6 @@ public class Contributors extends AbstractModule {
 	@OnlyIn(Dist.CLIENT)
 	private static String getPlayerName() {
 		return Minecraft.getInstance().getUser().getName();
-	}
-
-	private int hold;
-
-	@SubscribeEvent
-	@OnlyIn(Dist.CLIENT)
-	public void onKeyInput(KeyInputEvent event) {
-		Minecraft mc = Minecraft.getInstance();
-		if (mc.screen != null || mc.player == null || !mc.isWindowActive()) {
-			return;
-		}
-		if (event.getModifiers() != 0) {
-			return;
-		}
-		Key input = InputConstants.getKey(event.getKey(), event.getScanCode());
-		if (input.getValue() != 75) {
-			return;
-		}
-		if (event.getAction() != 2) {
-			hold = 0;
-		} else if (++hold == 30) {
-			CosmeticScreen screen = new CosmeticScreen();
-			mc.setScreen(screen);
-		}
 	}
 
 }

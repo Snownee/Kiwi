@@ -10,5 +10,12 @@ authors="Snownee"
 displayURL="https://www.curseforge.com/minecraft/mc-mods/kiwi"
 description="Minecraft modding library"
 
+[[dependencies.kiwi]]
+    modId="forge"
+    mandatory=true
+    versionRange="[40.0.47, )"
+    ordering="NONE"
+    side="BOTH"
+
 [modproperties.kiwi]
     catalogueItemIcon="minecraft:bookshelf" #Support for Catalogue mod

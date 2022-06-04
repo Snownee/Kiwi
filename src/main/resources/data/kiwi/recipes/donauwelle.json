@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "type": "kiwi:alternatives",
+      "list": [
+        {
+          "tag": "forge:eggs"
+        },
+        {
+          "item": "cocoa_beans"
+        }
+      ]
+    }
+  ],
+  "result": {
+    "item": "sugar"
+  }
+}

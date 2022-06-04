@@ -17,14 +17,17 @@ import com.google.common.collect.Sets;
 
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.data.loading.DatagenModLoader;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.javafmlmod.FMLModContainer;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.ForgeRegistryEntry;
+import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import snownee.kiwi.KiwiModule.Category;
 import snownee.kiwi.KiwiModule.RenderLayer;
@@ -39,14 +42,14 @@ import snownee.kiwi.mixin.ItemAccess;
 
 public class ModuleInfo {
 	public static final class RegistryHolder {
-		final Multimap<Class<?>, NamedEntry<?>> registries = LinkedListMultimap.create();
+		final Multimap<Object, NamedEntry<?>> registries = LinkedListMultimap.create();
 
-		<T extends IForgeRegistryEntry<T>> void put(NamedEntry<T> entry) {
-			registries.put(entry.entry.getRegistryType(), entry);
+		void put(NamedEntry<?> entry) {
+			registries.put(entry.registry, entry);
 		}
 
-		<T extends IForgeRegistryEntry<T>> Collection<NamedEntry<T>> get(Class<T> clazz) {
-			return registries.get(clazz).stream().map(e -> (NamedEntry<T>) e).collect(Collectors.toList());
+		Collection<NamedEntry<?>> get(Object registry) {
+			return registries.get(registry);
 		}
 	}
 
@@ -71,19 +74,18 @@ public class ModuleInfo {
 	 * @since 2.5.2
 	 */
 	@SuppressWarnings("rawtypes")
-	public void register(IForgeRegistryEntry<?> entry, ResourceLocation name, @Nullable Field field) {
-		registries.put(new NamedEntry(name, entry, field));
+	public void register(Object entry, ResourceLocation name, Object registry, @Nullable Field field) {
+		registries.put(new NamedEntry(name, entry, registry, field));
 	}
 
 	@SuppressWarnings("rawtypes")
-	public <T extends IForgeRegistryEntry<T>> void handleRegister(RegistryEvent.Register<T> event) {
+	public void handleRegister(Object registry) {
 		context.setActiveContainer();
-		Class<T> clazz = event.getRegistry().getRegistrySuperType();
-		Collection<NamedEntry<T>> entries = registries.get(clazz);
-		BiConsumer<ModuleInfo, T> decorator = (BiConsumer<ModuleInfo, T>) module.decorators.getOrDefault(clazz, (a, b) -> {
+		Collection<NamedEntry<?>> entries = registries.get(registry);
+		BiConsumer<ModuleInfo, Object> decorator = (BiConsumer<ModuleInfo, Object>) module.decorators.getOrDefault(registry, (a, b) -> {
 		});
-		if (clazz == Item.class) {
-			registries.get(Block.class).forEach(e -> {
+		if (registry == ForgeRegistries.ITEMS) {
+			registries.get(ForgeRegistries.BLOCKS).forEach(e -> {
 				if (noItems.contains(e.entry))
 					return;
 				Item.Properties builder = blockItemBuilders.get(e.entry);
@@ -93,7 +95,7 @@ public class ModuleInfo {
 				if (e.entry instanceof IKiwiBlock) {
 					item = ((IKiwiBlock) e.entry).createItem(builder);
 				} else {
-					item = new ModBlockItem(e.entry, builder);
+					item = new ModBlockItem((Block) e.entry, builder);
 				}
 				if (noCategories.contains(e.entry)) {
 					noCategories.add(item);
@@ -108,7 +110,7 @@ public class ModuleInfo {
 						}
 					}
 				}
-				entries.add(new NamedEntry(e.name, item));
+				entries.add(new NamedEntry(e.name, item, registry, null));
 			});
 			entries.forEach(e -> {
 				if (e.field != null) {
@@ -125,10 +127,14 @@ public class ModuleInfo {
 			});
 		}
 		entries.forEach(e -> {
-			decorator.accept(this, e.entry.setRegistryName(e.name));
-			event.getRegistry().register(e.entry);
+			decorator.accept(this, e.entry);
+			if (registry instanceof Registry) {
+				Registry.register((Registry) registry, e.name, e.entry);
+			} else {
+				((IForgeRegistry) registry).register(((ForgeRegistryEntry) e.entry).setRegistryName(e.name));
+			}
 		});
-		if (clazz == Block.class && Platform.isPhysicalClient()) {
+		if (registry == ForgeRegistries.BLOCKS && Platform.isPhysicalClient()) {
 			final RenderType solid = RenderType.solid();
 			Map<Class<?>, RenderType> cache = Maps.newHashMap();
 			entries.stream().forEach(e -> {
@@ -187,8 +193,8 @@ public class ModuleInfo {
 		module.postInit(event);
 	}
 
-	public <T extends IForgeRegistryEntry<T>> List<T> getRegistries(Class<T> clazz) {
-		return registries.get(clazz).stream().map($ -> $.entry).collect(Collectors.toList());
+	public <T extends IForgeRegistryEntry<T>> List<T> getRegistries(Object registry) {
+		return registries.get(registry).stream().map($ -> (T) $.entry).collect(Collectors.toList());
 	}
 
 }

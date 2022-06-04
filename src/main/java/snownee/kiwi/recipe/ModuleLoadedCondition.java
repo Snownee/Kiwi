@@ -27,6 +27,11 @@ public class ModuleLoadedCondition implements ICondition {
 		return Kiwi.isLoaded(module);
 	}
 
+	@Override
+	public boolean test(IContext ctx) {
+		return Kiwi.isLoaded(module);
+	}
+
 	public enum Serializer implements IConditionSerializer<ModuleLoadedCondition> {
 		INSTANCE;
 
