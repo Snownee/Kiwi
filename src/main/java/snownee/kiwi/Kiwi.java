@@ -162,13 +162,21 @@ public class Kiwi {
 		}
 	}
 
+	private static enum LoadingStage {
+		UNINITED, CONSTRUCTED, INITED;
+	}
+
 	private static Multimap<String, KiwiAnnotationData> moduleData = ArrayListMultimap.create();
 	public static Map<ResourceLocation, Boolean> defaultOptions = Maps.newHashMap();
 	private static Map<KiwiAnnotationData, String> conditions = Maps.newHashMap();
 	private static RegistryLookup registryLookup = new RegistryLookup();
-	private static boolean inited;
+	private static LoadingStage stage = LoadingStage.UNINITED;
 
 	public Kiwi() throws Exception {
+		if (stage != LoadingStage.UNINITED) {
+			return;
+		}
+		stage = LoadingStage.CONSTRUCTED;
 		try {
 			registerRegistries();
 		} catch (Exception e) {
@@ -295,10 +303,10 @@ public class Kiwi {
 	}
 
 	public static void preInit() {
-		if (inited) {
+		if (stage != LoadingStage.CONSTRUCTED) {
 			return;
 		}
-		inited = true;
+		stage = LoadingStage.INITED;
 		try {
 			KiwiConfigManager.preload();
 		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
