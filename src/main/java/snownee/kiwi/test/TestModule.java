@@ -23,6 +23,8 @@ import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiGO;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModule.Category;
+import snownee.kiwi.KiwiModule.RenderLayer;
+import snownee.kiwi.KiwiModule.RenderLayer.Layer;
 import snownee.kiwi.KiwiModule.Subscriber.Bus;
 import snownee.kiwi.block.entity.RetextureBlockEntity;
 import snownee.kiwi.datagen.provider.KiwiLootTableProvider;
@@ -46,7 +48,7 @@ public class TestModule extends AbstractModule {
 	// The next block will use this builder to build its BlockItem. After that this field will be null
 	public static Item.Properties FIRST_BLOCK_ITEM_BUILDER = itemProp().rarity(Rarity.RARE);
 	// Register a simple block and its BlockItem
-	//@RenderLayer(Layer.CUTOUT)
+	@RenderLayer(Layer.CUTOUT)
 	public static final KiwiGO<TestBlock> FIRST_BLOCK = go(() -> new TestBlock2(blockProp(Material.WOOD)));
 
 	// Register a simple effect

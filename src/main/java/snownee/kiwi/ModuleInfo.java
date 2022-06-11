@@ -134,7 +134,7 @@ public class ModuleInfo {
 				((IForgeRegistry) registry).register(((ForgeRegistryEntry) e.entry).setRegistryName(e.name));
 			}
 		});
-		if (registry == ForgeRegistries.BLOCKS && Platform.isPhysicalClient()) {
+		if (registry == ForgeRegistries.BLOCKS && Platform.isPhysicalClient() && !Platform.isDataGen()) {
 			final RenderType solid = RenderType.solid();
 			Map<Class<?>, RenderType> cache = Maps.newHashMap();
 			entries.stream().forEach(e -> {
