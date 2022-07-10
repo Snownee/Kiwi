@@ -23,12 +23,19 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.EntityHitResult;
 import snownee.kiwi.block.def.BlockDefinition;
 import snownee.kiwi.loader.Platform;
 
@@ -286,5 +293,16 @@ public final class Util {
 			list.add(StringTag.valueOf(s));
 		}
 		tag.put(key, list);
+	}
+
+	public static InteractionResult onAttackEntity(Player player, Level world, InteractionHand hand, Entity entity, @Nullable EntityHitResult hitResult) {
+		if (entity instanceof ItemFrame frame && !frame.getItem().isEmpty() && !frame.isNoGravity() && !frame.isInvulnerable()) {
+			ItemStack stack = player.getItemInHand(hand);
+			if (stack.is(Items.END_PORTAL_FRAME)) {
+				frame.setInvisible(!frame.isInvisible());
+				return InteractionResult.SUCCESS;
+			}
+		}
+		return InteractionResult.PASS;
 	}
 }

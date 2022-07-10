@@ -40,6 +40,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
@@ -250,6 +251,9 @@ public class Kiwi implements ModInitializer {
 		CommandRegistrationCallback.EVENT.register(KiwiCommand::register);
 		ServerLifecycleEvents.SERVER_STARTING.register(this::serverInit);
 		ServerLifecycleEvents.SERVER_STOPPED.register($ -> currentServer = null);
+		AttackEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
+			return Util.onAttackEntity(player, world, hand, entity, hitResult);
+		});
 		if (Platform.isPhysicalClient()) {
 			ClientLifecycleEvents.CLIENT_STARTED.register(this::clientInit);
 		}
