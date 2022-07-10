@@ -4,11 +4,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.function.Supplier;
-
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.client.renderer.RenderType;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
@@ -103,20 +98,9 @@ public @interface KiwiModule {
 		Layer value();
 
 		enum Layer {
-			CUTOUT_MIPPED(() -> RenderType::cutoutMipped),
-			CUTOUT(() -> RenderType::cutout),
-			TRANSLUCENT(() -> RenderType::translucent);
+			CUTOUT_MIPPED, CUTOUT, TRANSLUCENT;
 
-			private final Supplier<Supplier<RenderType>> supplier;
-
-			Layer(Supplier<Supplier<RenderType>> supplier) {
-				this.supplier = supplier;
-			}
-
-			@Environment(EnvType.CLIENT)
-			public RenderType get() {
-				return supplier.get().get();
-			}
+			public Object value;
 		}
 	}
 

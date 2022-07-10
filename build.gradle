@@ -105,13 +105,15 @@ java {
     // withSourcesJar()
 }
 
-//jar {
-//    dependsOn(shadowJar)
-//    exclude(a)
-//    from("LICENSE") {
-//        rename { "${it}_${project.archivesBaseName}"}
-//    }
-//}
+/*
+jar {
+    dependsOn(shadowJar)
+    exclude(a)
+    from("LICENSE") {
+        rename { "${it}_${project.archivesBaseName}"}
+    }
+}
+*/
 
 remapJar {
     dependsOn(shadowJar)
@@ -127,13 +129,7 @@ remapJar {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            // add all the jars that should be included when publishing to maven
-            artifact(remapJar) {
-                builtBy remapJar
-            }
-            //artifact(sourcesJar) {
-            //  builtBy remapSourcesJar
-            //}
+            from components.java
         }
     }
 

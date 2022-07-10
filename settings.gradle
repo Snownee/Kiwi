@@ -10,5 +10,4 @@ pluginManagement {
 }
 
 rootProject.name = 'Kiwi'
-include 'annotation'
-include 'annotation-processor'
+include 'annotation', 'annotation-processor'

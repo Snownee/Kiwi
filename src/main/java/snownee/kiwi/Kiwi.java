@@ -46,6 +46,7 @@ import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.fabricmc.loader.impl.metadata.AbstractModMetadata;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleType;
@@ -112,6 +113,7 @@ import snownee.kiwi.KiwiModule.Category;
 import snownee.kiwi.KiwiModule.Name;
 import snownee.kiwi.KiwiModule.NoCategory;
 import snownee.kiwi.KiwiModule.NoItem;
+import snownee.kiwi.KiwiModule.RenderLayer.Layer;
 import snownee.kiwi.KiwiModule.Skip;
 import snownee.kiwi.block.def.BlockDefinition;
 import snownee.kiwi.block.def.SimpleBlockDefinition;
@@ -670,6 +672,9 @@ public class Kiwi implements ModInitializer {
 		KiwiModules.fire(m -> m.clientInit(e));
 		postInit();
 		loadComplete();
+		Layer.CUTOUT.value = RenderType.cutout();
+		Layer.CUTOUT_MIPPED.value = RenderType.cutoutMipped();
+		Layer.TRANSLUCENT.value = RenderType.translucent();
 	}
 
 	public static MinecraftServer currentServer;

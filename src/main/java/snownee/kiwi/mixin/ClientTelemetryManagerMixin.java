@@ -19,7 +19,7 @@ public class ClientTelemetryManagerMixin {
 	)
 	private boolean getIS_RUNNING_IN_IDE() {
 		if (KiwiClientConfig.noMicrosoftTelemetry) {
-			Kiwi.logger.info("Canceling Microsoft telemetry");
+			Kiwi.logger.info("Kiwi: Canceling Microsoft telemetry");
 		}
 		return KiwiClientConfig.noMicrosoftTelemetry || SharedConstants.IS_RUNNING_IN_IDE;
 	}

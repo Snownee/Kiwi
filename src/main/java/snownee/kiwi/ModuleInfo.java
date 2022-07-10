@@ -132,7 +132,7 @@ public class ModuleInfo {
 				if (e.field != null) {
 					RenderLayer layer = e.field.getAnnotation(RenderLayer.class);
 					if (layer != null) {
-						RenderType type = layer.value().get();
+						RenderType type = (RenderType) layer.value().value;
 						if (type != solid && type != null) {
 							BlockRenderLayerMap.INSTANCE.putBlock(block, type);
 							return;
@@ -145,7 +145,7 @@ public class ModuleInfo {
 					while (k != Block.class) {
 						layer = k.getDeclaredAnnotation(RenderLayer.class);
 						if (layer != null) {
-							return layer.value().get();
+							return (RenderType) layer.value().value;
 						}
 						k = k.getSuperclass();
 					}
