@@ -5,12 +5,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TranslatableComponent;
 import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.client.TooltipEvents;
 import snownee.kiwi.config.KiwiConfigManager;
@@ -32,7 +31,7 @@ public class ScreenMixin {
 			}
 			LocalPlayer player = Minecraft.getInstance().player;
 			if (player != null) {
-				player.sendMessage(new TranslatableComponent("tip.kiwi.debug_tooltip.success"), Util.NIL_UUID);
+				player.sendSystemMessage(Component.translatable("tip.kiwi.debug_tooltip.success"));
 			}
 			ci.setReturnValue(true);
 		}

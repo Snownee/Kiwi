@@ -18,8 +18,6 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -68,7 +66,7 @@ public class ModItem extends Item {
                     .map(s -> fontRenderer.getSplitter().splitLines(s, width, Style.EMPTY))
                     .flatMap(Collection::stream)
                     .map(FormattedText::getString)
-                    .map(TextComponent::new)
+                    .map(Component::literal)
                     .peek(c -> c.withStyle(ChatFormatting.GRAY)) //FIXME: Style is empty after wrapping line
                     .collect(Collectors.toList())
             );
@@ -78,11 +76,11 @@ public class ModItem extends Item {
 			boolean hasShiftKey = I18n.exists(key + ".shift");
 			boolean hasCtrlKey = I18n.exists(key + ".ctrl");
 			if (hasShiftKey && hasCtrlKey) {
-				tooltip.add(new TranslatableComponent("tip.kiwi.press_shift_or_ctrl"));
+				tooltip.add(Component.translatable("tip.kiwi.press_shift_or_ctrl"));
 			} else if (hasShiftKey) {
-				tooltip.add(new TranslatableComponent("tip.kiwi.press_shift"));
+				tooltip.add(Component.translatable("tip.kiwi.press_shift"));
 			} else if (hasCtrlKey) {
-				tooltip.add(new TranslatableComponent("tip.kiwi.press_ctrl"));
+				tooltip.add(Component.translatable("tip.kiwi.press_ctrl"));
 			}
 		}
 	}

@@ -19,7 +19,6 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Mth;
@@ -246,7 +245,7 @@ public final class Util {
 		if (client != player.level.isClientSide) {
 			return;
 		}
-		player.displayClientMessage(new TranslatableComponent(key, args), true);
+		player.sendSystemMessage(Component.translatable(key, args));
 	}
 
 	public static void jsonList(JsonElement json, Consumer<JsonElement> collector) {

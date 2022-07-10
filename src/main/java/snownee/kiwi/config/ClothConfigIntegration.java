@@ -33,8 +33,6 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.config.ConfigHandler.Value;
 import snownee.kiwi.config.ConfigUI.Color;
@@ -44,7 +42,7 @@ import snownee.kiwi.util.Util;
 
 public class ClothConfigIntegration {
 
-	private static final Component requiresRestart = new TranslatableComponent("kiwi.config.requiresRestart").withStyle(ChatFormatting.RED);
+	private static final Component requiresRestart = Component.translatable("kiwi.config.requiresRestart").withStyle(ChatFormatting.RED);
 
 	public static Screen create(Screen parent, String namespace) {
 		ConfigBuilder builder = ConfigBuilder.create();
@@ -62,9 +60,9 @@ public class ClothConfigIntegration {
 			}
 			Component title;
 			if (I18n.exists("kiwi.config." + titleKey)) {
-				title = new TranslatableComponent("kiwi.config." + titleKey);
+				title = Component.translatable("kiwi.config." + titleKey);
 			} else {
-				title = new TextComponent(Util.friendlyText(titleKey));
+				title = Component.literal(Util.friendlyText(titleKey));
 			}
 			ConfigCategory category = builder.getOrCreateCategory(title);
 
@@ -81,9 +79,9 @@ public class ClothConfigIntegration {
 				List<String> path = Lists.newArrayList(value.path.split("\\."));
 				String key = config.getModId() + ".config." + value.translation;
 				if (I18n.exists(key)) {
-					title = new TranslatableComponent(key);
+					title = Component.translatable(key);
 				} else {
-					title = new TextComponent(Util.friendlyText(path.get(path.size() - 1)));
+					title = Component.literal(Util.friendlyText(path.get(path.size() - 1)));
 				}
 
 				ConfigEntryBuilder entryBuilder = builder.entryBuilder();
@@ -93,9 +91,9 @@ public class ClothConfigIntegration {
 					String key0 = config.getModId() + ".config." + $;
 					Component title0;
 					if (I18n.exists(key0)) {
-						title0 = new TranslatableComponent(key0);
+						title0 = Component.translatable(key0);
 					} else {
-						title0 = new TextComponent(Util.friendlyText(path.get(path.size() - 1)));
+						title0 = Component.literal(Util.friendlyText(path.get(path.size() - 1)));
 					}
 					SubCategoryBuilder builder0 = entryBuilder.startSubCategory(title0);
 					builder0.setExpanded(true);
@@ -199,7 +197,7 @@ public class ClothConfigIntegration {
 		List<Component> tooltip = Lists.newArrayList();
 		if (value.comment != null) {
 			for (String comment : value.comment) {
-				tooltip.add(new TextComponent(comment));
+				tooltip.add(Component.literal(comment));
 			}
 		}
 		if (value.requiresRestart) {
@@ -213,7 +211,7 @@ public class ClothConfigIntegration {
 			.map(s -> fontRenderer.getSplitter().splitLines(s, width, Style.EMPTY))
 			.flatMap(Collection::stream)
 			.map(FormattedText::getString)
-			.map(TextComponent::new)
+			.map(Component::literal)
 			.collect(Collectors.toList());
 		/* on */
 		return tooltip.isEmpty() ? Optional.empty() : Optional.of(tooltip.toArray(new Component[0]));

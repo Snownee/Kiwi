@@ -5,7 +5,6 @@ import java.lang.invoke.MethodHandles;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -28,6 +27,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
@@ -151,7 +151,7 @@ public class SimpleBlockDefinition implements BlockDefinition {
 		int index = direction == null ? 0 : direction.ordinal() + 1;
 		if (materials[index] == null) {
 			BakedModel model = model();
-			Random random = new Random();
+			RandomSource random = RandomSource.create();
 			random.setSeed(42L);
 			ResourceLocation particleIcon = model.getParticleIcon().getName();
 			ResourceLocation sprite = particleIcon;

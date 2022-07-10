@@ -9,7 +9,6 @@ import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.Registry;
@@ -19,8 +18,7 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -55,21 +53,21 @@ public final class TooltipEvents {
 		if (stack != lastStack && minecraft.player != null && InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 292/*F3*/)) {
 			lastStack = stack;
 			CompoundTag data = stack.getTag();
-			MutableComponent itextcomponent = new TextComponent(Registry.ITEM.getKey(stack.getItem()).toString());
+			MutableComponent itextcomponent = Component.literal(Registry.ITEM.getKey(stack.getItem()).toString());
 			if (minecraft.keyboardHandler != null) {
 				minecraft.keyboardHandler.setClipboard(itextcomponent.getString());
 			}
 			if (data != null) {
 				itextcomponent.append(NbtUtils.prettyPrint(data));
 			}
-			itextcomponent.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, itextcomponent.getString())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslatableComponent("chat.copy.click"))).withInsertion(itextcomponent.getString()));
+			itextcomponent.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, itextcomponent.getString())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click"))).withInsertion(itextcomponent.getString()));
 			minecraft.player.displayClientMessage(itextcomponent, false);
 			minecraft.options.renderDebug = !minecraft.options.renderDebug;
 		}
 
 		if (KiwiClientConfig.nbtTooltip && Screen.hasShiftDown() && stack.hasTag()) {
 			trySendTipMsg(minecraft);
-			tooltip.removeIf(c -> c.getClass() == TranslatableComponent.class && "item.nbt_tags".equals(((TranslatableComponent) c).getKey()));
+			tooltip.removeIf(c -> c.getContents() instanceof TranslatableContents && "item.nbt_tags".equals(((TranslatableContents) c.getContents()).getKey()));
 			if (lastNBT != stack.getTag()) {
 				switch (KiwiClientConfig.debugTooltipNBTFormatter) {
 				case "kiwi":
@@ -116,14 +114,14 @@ public final class TooltipEvents {
 								}
 							}
 						}
-						return new TextComponent(sb.toString());
+						return Component.literal(sb.toString());
 					};
 					break;
 				case "vanilla":
 					formatter = tag -> NbtUtils.toPrettyComponent(stack.getTag());
 					break;
 				default:
-					formatter = tag -> new TextComponent(tag.toString());
+					formatter = tag -> Component.literal(tag.toString());
 					break;
 				}
 
@@ -136,7 +134,7 @@ public final class TooltipEvents {
 			if (!tags.isEmpty()) {
 				trySendTipMsg(minecraft);
 				tags.forEach(id -> {
-					tooltip.add(new TextComponent("#" + id).withStyle(ChatFormatting.DARK_GRAY));
+					tooltip.add(Component.literal("#" + id).withStyle(ChatFormatting.DARK_GRAY));
 				});
 			}
 		}
@@ -146,8 +144,8 @@ public final class TooltipEvents {
 		if (firstSeenDebugTooltip && mc.player != null) {
 			firstSeenDebugTooltip = false;
 			if (KiwiClientConfig.debugTooltipMsg) {
-				MutableComponent clickHere = new TranslatableComponent("tip.kiwi.click_here").withStyle($ -> $.withClickEvent(disableClickEvent));
-				mc.player.sendMessage(new TranslatableComponent("tip.kiwi.debug_tooltip", clickHere.withStyle(ChatFormatting.AQUA)), Util.NIL_UUID);
+				MutableComponent clickHere = Component.translatable("tip.kiwi.click_here").withStyle($ -> $.withClickEvent(disableClickEvent));
+				mc.player.sendSystemMessage(Component.translatable("tip.kiwi.debug_tooltip", clickHere.withStyle(ChatFormatting.AQUA)));
 				KiwiClientConfig.debugTooltipMsg = false;
 				KiwiConfigManager.getHandler(KiwiClientConfig.class).save();
 			}

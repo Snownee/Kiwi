@@ -3,13 +3,14 @@ package snownee.kiwi.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import snownee.kiwi.Kiwi;
 
 public class KiwiCommand {
 
-	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher, boolean dedicated) {
+	public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
 		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal(Kiwi.MODID);
 		/* off */
         builder.then(Commands
@@ -18,7 +19,7 @@ public class KiwiCommand {
                 .executes(ctx -> cleanLevel(ctx.getSource()))
         );
         /* on */
-		commandDispatcher.register(builder);
+		dispatcher.register(builder);
 	}
 
 	private static int cleanLevel(CommandSourceStack commandSourceStack) {

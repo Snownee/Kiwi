@@ -14,8 +14,6 @@ import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.config.ConfigHandler;
@@ -31,7 +29,7 @@ public class CosmeticScreen extends Screen {
 	private Entry selectedEntry;
 
 	public CosmeticScreen() {
-		super(new TranslatableComponent("gui.kiwi.cosmetic"));
+		super(Component.translatable("gui.kiwi.cosmetic"));
 	}
 
 	@Override
@@ -157,7 +155,7 @@ public class CosmeticScreen extends Screen {
 
 		@Override
 		public Component getNarration() {
-			return new TextComponent(name);
+			return Component.translatable(name);
 		}
 
 	}
