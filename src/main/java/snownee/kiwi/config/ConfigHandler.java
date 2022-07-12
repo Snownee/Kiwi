@@ -52,6 +52,8 @@ public class ConfigHandler {
 		public Field field;
 		@NotNull
 		public T value;
+		@NotNull
+		public final T defValue;
 		public boolean requiresRestart;
 		@Nullable
 		public String[] comment;
@@ -62,7 +64,7 @@ public class ConfigHandler {
 		public Value(String path, @Nullable Field field, T value, String translation) {
 			this.path = path;
 			this.field = field;
-			this.value = value;
+			defValue = this.value = value;
 			this.translation = translation;
 		}
 
@@ -216,7 +218,7 @@ public class ConfigHandler {
 			List<String> path = List.of(value.path.split("\\."));
 			Object v = value.field == null ? value.value : convert(value.field);
 			value.accept(v, onChanged);
- 			getEndMap(map, path).put(path.get(path.size() - 1), v);
+			getEndMap(map, path).put(path.get(path.size() - 1), v);
 		}
 		TomlWriter writer = new TomlWriter();
 		try {

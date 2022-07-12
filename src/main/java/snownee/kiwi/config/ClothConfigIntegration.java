@@ -107,6 +107,7 @@ public class ClothConfigIntegration {
 					BooleanToggleBuilder toggle = entryBuilder.startBooleanToggle(title, (Boolean) value.value);
 					toggle.setTooltip(createComment(value));
 					toggle.setSaveConsumer($ -> value.accept($, config.onChanged));
+					toggle.setDefaultValue((Boolean) value.defValue);
 					entry = toggle.build();
 				} else if (type == int.class) {
 					Color color = value.getAnnotation(Color.class);
@@ -115,11 +116,13 @@ public class ClothConfigIntegration {
 						field.setAlphaMode(color.alpha());
 						field.setTooltip(createComment(value));
 						field.setSaveConsumer($ -> value.accept($, config.onChanged));
+						field.setDefaultValue((Integer) value.defValue);
 						entry = field.build();
 					} else if (value.getAnnotation(Slider.class) != null) {
 						IntSliderBuilder field = entryBuilder.startIntSlider(title, (Integer) value.value, (int) value.min, (int) value.max);
 						field.setTooltip(createComment(value));
 						field.setSaveConsumer($ -> value.accept($, config.onChanged));
+						field.setDefaultValue((Integer) value.defValue);
 						entry = field.build();
 					} else {
 						IntFieldBuilder field = entryBuilder.startIntField(title, (Integer) value.value);
@@ -131,6 +134,7 @@ public class ClothConfigIntegration {
 							field.setMax((int) value.max);
 						}
 						field.setSaveConsumer($ -> value.accept($, config.onChanged));
+						field.setDefaultValue((Integer) value.defValue);
 						entry = field.build();
 					}
 				} else if (type == double.class) {
@@ -143,6 +147,7 @@ public class ClothConfigIntegration {
 						field.setMax(value.max);
 					}
 					field.setSaveConsumer($ -> value.accept($, config.onChanged));
+					field.setDefaultValue((Double) value.defValue);
 					entry = field.build();
 				} else if (type == float.class) {
 					FloatFieldBuilder field = entryBuilder.startFloatField(title, (Float) value.value);
@@ -154,12 +159,14 @@ public class ClothConfigIntegration {
 						field.setMax((float) value.max);
 					}
 					field.setSaveConsumer($ -> value.accept($, config.onChanged));
+					field.setDefaultValue((Float) value.defValue);
 					entry = field.build();
 				} else if (type == long.class) {
 					if (value.getAnnotation(Slider.class) != null) {
 						LongSliderBuilder field = entryBuilder.startLongSlider(title, (Long) value.value, (long) value.min, (long) value.max);
 						field.setTooltip(createComment(value));
 						field.setSaveConsumer($ -> value.accept($, config.onChanged));
+						field.setDefaultValue((Long) value.defValue);
 						entry = field.build();
 					} else {
 						LongFieldBuilder field = entryBuilder.startLongField(title, (Long) value.value);
@@ -171,6 +178,7 @@ public class ClothConfigIntegration {
 							field.setMax((long) value.max);
 						}
 						field.setSaveConsumer($ -> value.accept($, config.onChanged));
+						field.setDefaultValue((Long) value.defValue);
 						entry = field.build();
 					}
 				} else if (type == String.class) {
@@ -178,6 +186,7 @@ public class ClothConfigIntegration {
 					TextFieldBuilder field = entryBuilder.startTextField(title, (String) value.value);
 					field.setTooltip(createComment(value));
 					field.setSaveConsumer($ -> value.accept($, config.onChanged));
+					field.setDefaultValue((String) value.defValue);
 					entry = field.build();
 				}
 				if (entry != null) {
