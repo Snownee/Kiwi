@@ -5,6 +5,12 @@
       "data": {
         "type": "CLIENT"
       }
+    },
+    {
+      "target": "snownee.kiwi.test.TestConfig",
+      "data": {
+        "value": "test"
+      }
     }
   ],
   "KiwiModule": [

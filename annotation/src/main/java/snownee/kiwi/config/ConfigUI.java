@@ -23,4 +23,18 @@ public @interface ConfigUI {
 		boolean alpha() default false;
 	}
 
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.FIELD)
+	@interface TextDescription {
+		String value();
+
+		boolean after() default false;
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.FIELD)
+	@interface ItemType {
+		Class<?> value();
+	}
+
 }

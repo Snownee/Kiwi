@@ -1,8 +1,6 @@
 package snownee.kiwi.item;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -11,13 +9,9 @@ import com.google.common.collect.Lists;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.Style;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -57,18 +51,12 @@ public class ModItem extends Item {
 		}
 		if (hasKey) {
 			List<String> lines = Lists.newArrayList(I18n.get(key).split("\n"));
-
-			Font fontRenderer = Minecraft.getInstance().font;
-			int width = Math.max(fontRenderer.width(tooltip.get(0).getString()), KiwiClientConfig.tooltipWrapWidth);
 			/* off */
             tooltip.addAll(
                     lines.stream()
-                    .map(s -> fontRenderer.getSplitter().splitLines(s, width, Style.EMPTY))
-                    .flatMap(Collection::stream)
-                    .map(FormattedText::getString)
                     .map(Component::literal)
-                    .peek(c -> c.withStyle(ChatFormatting.GRAY)) //FIXME: Style is empty after wrapping line
-                    .collect(Collectors.toList())
+                    .peek(c -> c.withStyle(ChatFormatting.GRAY))
+                    .toList()
             );
             /* on */
 		}

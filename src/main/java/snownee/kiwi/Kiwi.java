@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.apache.logging.log4j.LogManager;
@@ -208,11 +207,11 @@ public class Kiwi implements ModInitializer {
 					try {
 						Class<?> clazz = Class.forName(config.target());
 						String fileName = (String) config.data().get("value");
-						boolean master = type == ConfigType.COMMON && Strings.isNullOrEmpty(fileName);
+						boolean hasModules = type == ConfigType.COMMON && Strings.isNullOrEmpty(fileName);
 						if (Strings.isNullOrEmpty(fileName)) {
 							fileName = String.format("%s-%s", mod, type.extension());
 						}
-						new ConfigHandler(mod, fileName, type, clazz, master);
+						new ConfigHandler(mod, fileName, type, clazz, hasModules);
 					} catch (ClassNotFoundException e) {
 						logger.catching(e);
 					}
@@ -295,7 +294,7 @@ public class Kiwi implements ModInitializer {
 				if (values == null) {
 					values = Arrays.asList(v);
 				}
-				List<ResourceLocation> ids = values.stream().map(s -> checkPrefix(s, v)).collect(Collectors.toList());
+				List<ResourceLocation> ids = values.stream().map(s -> checkPrefix(s, v)).toList();
 				for (ResourceLocation id : ids) {
 					LoadingContext context = new LoadingContext(id);
 					try {
@@ -348,7 +347,7 @@ public class Kiwi implements ModInitializer {
 			/* off */
             List<String> rules = List.of(Strings.nullToEmpty(dependencies).split(";")).stream()
                     .filter(s -> !Strings.isNullOrEmpty(s))
-                    .collect(Collectors.toList());
+                    .toList();
             /* on */
 
 			for (String rule : rules) {

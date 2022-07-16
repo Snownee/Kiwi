@@ -1,9 +1,7 @@
 package snownee.kiwi.client;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-import com.google.common.base.Function;
 import com.mojang.blaze3d.platform.InputConstants;
 
 import net.fabricmc.api.EnvType;
@@ -35,7 +33,6 @@ public final class TooltipEvents {
 	private static ItemStack lastStack;
 	private static CompoundTag lastNBT;
 	private static Component lastFormatted;
-	private static Function<CompoundTag, Component> formatter;
 	private static boolean firstSeenDebugTooltip = true;
 	public static final ClickEvent disableClickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "disableClickEvent");
 
@@ -69,64 +66,8 @@ public final class TooltipEvents {
 			trySendTipMsg(minecraft);
 			tooltip.removeIf(c -> c.getContents() instanceof TranslatableContents && "item.nbt_tags".equals(((TranslatableContents) c.getContents()).getKey()));
 			if (lastNBT != stack.getTag()) {
-				switch (KiwiClientConfig.debugTooltipNBTFormatter) {
-				case "kiwi":
-					formatter = tag -> {
-						ChatFormatting[] colors = { ChatFormatting.LIGHT_PURPLE, ChatFormatting.RED, ChatFormatting.GOLD, ChatFormatting.YELLOW, ChatFormatting.GREEN, ChatFormatting.AQUA };
-						String s = tag.toString();
-						StringBuilder sb = new StringBuilder();
-						int i = 0;
-						boolean quoted = false;
-						for (int ch : s.chars().boxed().collect(Collectors.toList())) {
-							boolean special = false;
-							if (quoted) {
-								if (ch == '"') {
-									quoted = false;
-									sb.appendCodePoint(ch);
-									sb.append(ChatFormatting.WHITE);
-									continue;
-								}
-							} else {
-								if (ch == ':' || ch == ',') {
-									sb.append(ChatFormatting.GRAY);
-									sb.appendCodePoint(ch);
-									sb.append(ChatFormatting.WHITE);
-									continue;
-								} else if (ch == '"') {
-									quoted = true;
-									sb.append(ChatFormatting.GRAY);
-								} else if (ch == '{' || ch == '[') {
-									++i;
-									special = true;
-								} else if (ch == '}' || ch == ']') {
-									special = true;
-								}
-							}
-							if (special) {
-								int colotIndex = i % colors.length;
-								sb.append(colors[colotIndex]);
-							}
-							sb.appendCodePoint(ch);
-							if (special) {
-								sb.append(ChatFormatting.WHITE);
-								if (ch == '}' || ch == ']') {
-									--i;
-								}
-							}
-						}
-						return Component.literal(sb.toString());
-					};
-					break;
-				case "vanilla":
-					formatter = tag -> NbtUtils.toPrettyComponent(stack.getTag());
-					break;
-				default:
-					formatter = tag -> Component.literal(tag.toString());
-					break;
-				}
-
 				lastNBT = stack.getTag();
-				lastFormatted = formatter.apply(lastNBT);
+				lastFormatted = NbtUtils.toPrettyComponent(lastNBT);
 			}
 			tooltip.add(lastFormatted);
 		} else if (KiwiClientConfig.tagsTooltip) {

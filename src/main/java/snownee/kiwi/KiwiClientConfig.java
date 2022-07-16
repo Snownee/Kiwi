@@ -5,7 +5,6 @@ import snownee.kiwi.config.KiwiConfig;
 import snownee.kiwi.config.KiwiConfig.Comment;
 import snownee.kiwi.config.KiwiConfig.ConfigType;
 import snownee.kiwi.config.KiwiConfig.Path;
-import snownee.kiwi.config.KiwiConfig.Range;
 
 @KiwiConfig(type = ConfigType.CLIENT)
 public final class KiwiClientConfig {
@@ -13,12 +12,8 @@ public final class KiwiClientConfig {
 	@ConfigUI.Hide
 	public static String contributorCosmetic = "";
 
-	@Comment("Show customized tooltips from any item. Mainly for pack devs")
+	@Comment("Show customized tooltips from any item.\nMainly for pack devs")
 	public static boolean globalTooltip = false;
-
-	@Comment("Max line width shown in description of tooltips")
-	@Range(min = 50)
-	public static int tooltipWrapWidth = 200;
 
 	public static boolean noMicrosoftTelemetry = true;
 
@@ -29,10 +24,6 @@ public final class KiwiClientConfig {
 	@Comment("Show item nbt in advanced tooltips while holding shift")
 	@Path("debug.NBTTooltip")
 	public static boolean nbtTooltip = true;
-
-	@Comment("Allowed values: vanilla, kiwi")
-	@Path("debug.NBTTooltipFormatter")
-	public static String debugTooltipNBTFormatter = "vanilla";
 
 	@ConfigUI.Hide
 	@Comment("Show tips about disabling debug tooltips")

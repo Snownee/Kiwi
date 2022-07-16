@@ -2,16 +2,20 @@ package snownee.kiwi.config;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 
+import org.apache.commons.lang3.EnumUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,6 +30,7 @@ import com.moandjiezana.toml.TomlWriter;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Mth;
 import snownee.kiwi.Kiwi;
+import snownee.kiwi.config.KiwiConfig.AdvancedPath;
 import snownee.kiwi.config.KiwiConfig.Comment;
 import snownee.kiwi.config.KiwiConfig.ConfigType;
 import snownee.kiwi.config.KiwiConfig.GameRestart;
@@ -37,7 +42,7 @@ public class ConfigHandler {
 
 	public static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 
-	private boolean master;
+	private boolean hasModules;
 	private final String modId;
 	private final String fileName;
 	private final ConfigType type;
@@ -102,7 +107,7 @@ public class ConfigHandler {
 					long max = Double.isNaN(this.max) ? Long.MAX_VALUE : (long) this.max;
 					$ = Long.valueOf(Mth.clamp((Long) $, min, max));
 				}
-				if (!requiresRestart && field != null) {
+				if (field != null) {
 					if (type == boolean.class) {
 						field.setBoolean(null, (Boolean) $);
 					} else if (type == int.class) {
@@ -133,13 +138,12 @@ public class ConfigHandler {
 
 	}
 
-	public ConfigHandler(String modId, String fileName, ConfigType type, Class<?> clazz, boolean master) {
-		this.master = master;
+	public ConfigHandler(String modId, String fileName, ConfigType type, Class<?> clazz, boolean hasModules) {
+		this.hasModules = hasModules;
 		this.modId = modId;
 		this.clazz = clazz;
 		this.fileName = fileName;
 		this.type = type;
-		build();
 		KiwiConfigManager.register(this);
 		if (clazz != null) {
 			try {
@@ -154,6 +158,7 @@ public class ConfigHandler {
 	}
 
 	public void init() {
+		build();
 		Path configPath = getConfigPath();
 		if (Files.exists(configPath)) {
 			refresh();
@@ -196,7 +201,12 @@ public class ConfigHandler {
 		for (Entry<String, Object> e : flatMap.entrySet()) {
 			Value value = valueMap.get(e.getKey());
 			if (value != null) {
-				value.accept(e.getValue(), onChanged);
+				Object $ = e.getValue();
+				Class<?> type = value.getType();
+				if (Enum.class.isAssignableFrom(type)) {
+					$ = EnumUtils.getEnumIgnoreCase((Class<Enum>) type, (String) $, (Enum) type.getEnumConstants()[0]);
+				}
+				value.accept($, onChanged);
 			}
 		}
 	}
@@ -228,10 +238,9 @@ public class ConfigHandler {
 		}
 	}
 
-	//TODO refactor
 	private void build() {
-		if (master) {
-			KiwiConfigManager.defineModules(modId, this);
+		if (hasModules) {
+			KiwiConfigManager.defineModules(modId, this, !fileName.equals(modId + "-modules"));
 		}
 		if (clazz == null) {
 			return;
@@ -242,7 +251,7 @@ public class ConfigHandler {
 			if (!Modifier.isPublic(mods) || !Modifier.isStatic(mods) || Modifier.isFinal(mods)) {
 				continue;
 			}
-			List<String> path = NightConfigUtil.getPath(field);
+			List<String> path = getPath(field);
 			String pathKey = joiner.join(path);
 			Translation translation = field.getAnnotation(Translation.class);
 			String translationKey;
@@ -266,6 +275,34 @@ public class ConfigHandler {
 				value.max = range.max();
 			}
 		}
+	}
+
+	/**
+	 * Gets the path of a field: returns the annotated path, or the field's name if there is no
+	 * annotated path.
+	 *
+	 * @return the annotated path, if any, or the field name
+	 */
+	static List<String> getPath(Field field) {
+		List<String> annotatedPath = getPath((AnnotatedElement) field);
+		return (annotatedPath == null) ? Collections.singletonList(field.getName()) : annotatedPath;
+	}
+
+	/**
+	 * Gets the annotated path (specified with @Path or @AdvancedPath) of an annotated element.
+	 *
+	 * @return the annotated path, or {@code null} if there is none.
+	 */
+	static List<String> getPath(AnnotatedElement annotatedElement) {
+		var path = annotatedElement.getDeclaredAnnotation(snownee.kiwi.config.KiwiConfig.Path.class);
+		if (path != null) {
+			return List.of(path.value().split("\\."));
+		}
+		AdvancedPath advancedPath = annotatedElement.getDeclaredAnnotation(AdvancedPath.class);
+		if (advancedPath != null) {
+			return Arrays.asList(advancedPath.value());
+		}
+		return null;
 	}
 
 	public <T> Value<T> define(String path, T value, @Nullable Field field, String translation) {
@@ -295,9 +332,6 @@ public class ConfigHandler {
 				}
 				return defaultVal;
 			}
-			if (Enum.class.isAssignableFrom(type)) {
-				return Objects.toString(field.get(null));
-			}
 			if (List.class.isAssignableFrom(type)) {
 				List<?> defaultVal = (List<?>) field.get(null);
 				if (defaultVal == null) {
@@ -311,58 +345,12 @@ public class ConfigHandler {
 		return null;
 	}
 
-	//	public void refresh() {
-	//		valueMap.forEach((field, value) -> {
-	//			try {
-	//				if (field.getType() == float.class) {
-	//					if (Objects.equals(((Double) value.get()).floatValue(), field.get(null))) {
-	//						return;
-	//					}
-	//					field.setFloat(null, ((Double) value.get()).floatValue());
-	//				} else {
-	//					if (field.getType() != List.class && Objects.deepEquals(value.get(), field.get(null))) {
-	//						return;
-	//					}
-	//					field.set(null, value.get());
-	//				}
-	//				Kiwi.logger.debug("Set " + field.getName() + " to " + value.get());
-	//				if (onChanged != null)
-	//					onChanged.invoke(null, Joiner.on('.').join(value.getPath()));
-	//			} catch (Exception e) {
-	//				Kiwi.logger.catching(e);
-	//			}
-	//		});
-	//	}
-
-	//	public void forceLoad() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
-	//		java.nio.file.Path path;
-	//		if (type == ConfigType.SERVER) {
-	//			path = Platform.getServer().getFile("serverconfig").toPath();
-	//		} else {
-	//			path = FMLPaths.CONFIGDIR.get();
-	//		}
-	//		CommentedFileConfig configData = config.getHandler().reader(path).apply(config);
-	//		Field fCfg = ModConfig.class.getDeclaredField("configData");
-	//		fCfg.setAccessible(true);
-	//		fCfg.set(config, configData);
-	//		config.getSpec().acceptConfig(configData);
-	//		config.getHandler().unload(path, config);
-	//		//config.save();
-	//	}
-
-	//	protected void onFileChange(ModConfigEvent.Reloading event) {
-	//		if (event.getConfig() == config) {
-	//			((CommentedFileConfig) event.getConfig().getConfigData()).load();
-	//			refresh();
-	//		}
-	//	}
-
-	public void setMaster(boolean master) {
-		this.master = master;
+	public void setHasModules(boolean hasModules) {
+		this.hasModules = hasModules;
 	}
 
-	public boolean isMaster() {
-		return master;
+	public boolean hasModules() {
+		return hasModules;
 	}
 
 	public String getModId() {
@@ -399,4 +387,16 @@ public class ConfigHandler {
 		}
 		return clazz;
 	}
+
+	public <T> Value<T> get(String path) {
+		return (Value<T>) valueMap.get(path);
+	}
+
+	//	static List<ResourceLocation> StrToIdList(List<String> list) {
+	//		return list.stream().map(ResourceLocation::tryParse).filter(Objects::nonNull).toList();
+	//	}
+	//
+	//	static List<String> IdToStrList(List<ResourceLocation> list) {
+	//		return list.stream().map(Object::toString).toList();
+	//	}
 }

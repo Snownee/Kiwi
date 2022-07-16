@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -43,7 +42,7 @@ public class ModuleInfo {
 		}
 
 		<T> Collection<NamedEntry<T>> get(Registry<T> registry) {
-			return registries.get(registry).stream().map(e -> (NamedEntry<T>) e).collect(Collectors.toList());
+			return registries.get(registry).stream().map(e -> (NamedEntry<T>) e).toList();
 		}
 	}
 
@@ -185,7 +184,7 @@ public class ModuleInfo {
 	}
 
 	public <T> List<T> getRegistries(Registry<T> registry) {
-		return registries.get(registry).stream().map($ -> $.entry).collect(Collectors.toList());
+		return registries.get(registry).stream().map($ -> $.entry).toList();
 	}
 
 }

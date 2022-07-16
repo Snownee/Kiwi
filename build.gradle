@@ -61,22 +61,8 @@ dependencies {
     shadowCommon("com.moandjiezana.toml:toml4j:${project.toml4j_version}") {
         exclude(module: "gson")
     }
-}
-
-def a = [
-    "/assets/kiwi/blockstates",
-    "/assets/kiwi/models",
-    "/snownee/kiwi/test",
-    "/data",
-    "/.cache",
-    "/third_party"
-]
-
-shadowJar {
-    exclude(a)
-    relocate "com.moandjiezana.toml", "${project.maven_group}.shadowed.com.moandjiezana.toml"
-    configurations = [project.configurations.shadowCommon]
-    archiveClassifier.set('shadow')
+    
+    annotationProcessor project(':annotation-processor')
 }
 
 processResources {
@@ -105,17 +91,29 @@ java {
     // withSourcesJar()
 }
 
-/*
+def a = [
+    "/assets/kiwi/blockstates",
+    "/assets/kiwi/models",
+    "/snownee/kiwi/test",
+    "/data",
+    "/.cache",
+    "/third_party"
+]
+
 jar {
-    dependsOn(shadowJar)
-    exclude(a)
-    from("LICENSE") {
-        rename { "${it}_${project.archivesBaseName}"}
-    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
-*/
+
+shadowJar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    exclude(a)
+    relocate "com.moandjiezana.toml", "${project.maven_group}.shadowed.com.moandjiezana.toml"
+    configurations = [project.configurations.shadowCommon]
+    archiveClassifier.set('shadow')
+}
 
 remapJar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     dependsOn(shadowJar)
     input.set(shadowJar.archiveFile)
     archiveClassifier = ""

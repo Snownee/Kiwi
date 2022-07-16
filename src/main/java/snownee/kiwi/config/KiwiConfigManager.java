@@ -32,15 +32,15 @@ public class KiwiConfigManager {
 		Collections.sort(allConfigs, (a, b) -> a.getFileName().compareTo(b.getFileName()));
 		Set<String> settledMods = Sets.newHashSet();
 		for (ConfigHandler config : allConfigs) {
-			if (config.isMaster()) {
+			if (config.hasModules()) {
 				settledMods.add(config.getModId());
 			}
 		}
 		for (ConfigHandler config : allConfigs) {
-			if (!config.isMaster() && config.getType() == ConfigType.COMMON && !settledMods.contains(config.getModId())) {
-				settledMods.add(config.getModId());
-				config.setMaster(true);
-			}
+			//			if (!config.hasModules() && config.getType() == ConfigType.COMMON && !settledMods.contains(config.getModId())) {
+			//				settledMods.add(config.getModId());
+			//				config.setHasModules(true);
+			//			}
 			config.init();
 		}
 		for (ResourceLocation rl : Kiwi.defaultOptions.keySet()) {
@@ -48,16 +48,17 @@ public class KiwiConfigManager {
 				continue;
 			}
 			settledMods.add(rl.getNamespace());
-			ConfigHandler configHandler = new ConfigHandler(rl.getNamespace(), rl.getNamespace() + "-modules", ConfigType.COMMON, null, true);
-			configHandler.init();
+			ConfigHandler config = new ConfigHandler(rl.getNamespace(), rl.getNamespace() + "-modules", ConfigType.COMMON, null, true);
+			config.init();
 		}
 	}
 
-	public static void defineModules(String modId, ConfigHandler builder) {
+	public static void defineModules(String modId, ConfigHandler builder, boolean subcategory) {
+		String prefix = subcategory ? "modules." : "";
 		for (Entry<ResourceLocation, Boolean> entry : Kiwi.defaultOptions.entrySet()) {
 			ResourceLocation rl = entry.getKey();
 			if (rl.getNamespace().equals(modId)) {
-				Value<Boolean> value = builder.define("modules." + rl.getPath(), entry.getValue(), null, rl.getPath());
+				Value<Boolean> value = builder.define(prefix + rl.getPath(), entry.getValue(), null, rl.getPath());
 				value.requiresRestart = true;
 				modules.put(rl, value);
 			}

@@ -1,11 +1,10 @@
 package snownee.kiwi.config;
 
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
@@ -18,26 +17,27 @@ import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import me.shedaniel.clothconfig2.impl.builders.BooleanToggleBuilder;
 import me.shedaniel.clothconfig2.impl.builders.ColorFieldBuilder;
 import me.shedaniel.clothconfig2.impl.builders.DoubleFieldBuilder;
+import me.shedaniel.clothconfig2.impl.builders.EnumSelectorBuilder;
 import me.shedaniel.clothconfig2.impl.builders.FloatFieldBuilder;
 import me.shedaniel.clothconfig2.impl.builders.IntFieldBuilder;
 import me.shedaniel.clothconfig2.impl.builders.IntSliderBuilder;
 import me.shedaniel.clothconfig2.impl.builders.LongFieldBuilder;
 import me.shedaniel.clothconfig2.impl.builders.LongSliderBuilder;
+import me.shedaniel.clothconfig2.impl.builders.StringListBuilder;
 import me.shedaniel.clothconfig2.impl.builders.SubCategoryBuilder;
+import me.shedaniel.clothconfig2.impl.builders.TextDescriptionBuilder;
 import me.shedaniel.clothconfig2.impl.builders.TextFieldBuilder;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.Style;
-import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.config.ConfigHandler.Value;
 import snownee.kiwi.config.ConfigUI.Color;
 import snownee.kiwi.config.ConfigUI.Hide;
+import snownee.kiwi.config.ConfigUI.ItemType;
 import snownee.kiwi.config.ConfigUI.Slider;
+import snownee.kiwi.config.ConfigUI.TextDescription;
+import snownee.kiwi.util.LocalizableItem;
 import snownee.kiwi.util.Util;
 
 public class ClothConfigIntegration {
@@ -100,6 +100,9 @@ public class ClothConfigIntegration {
 					subCats.add(builder0);
 					return builder0::add;
 				});
+
+				TextDescription description = value.field == null ? null : value.field.getAnnotation(TextDescription.class);
+				putDescription(subCat, entryBuilder, description, false);
 
 				AbstractConfigListEntry<?> entry = null;
 				Class<?> type = value.getType();
@@ -182,17 +185,47 @@ public class ClothConfigIntegration {
 						entry = field.build();
 					}
 				} else if (type == String.class) {
-					//TODO: better Enum
 					TextFieldBuilder field = entryBuilder.startTextField(title, (String) value.value);
 					field.setTooltip(createComment(value));
 					field.setSaveConsumer($ -> value.accept($, config.onChanged));
 					field.setDefaultValue((String) value.defValue);
 					entry = field.build();
+				} else if (Enum.class.isAssignableFrom(type)) {
+					EnumSelectorBuilder<Enum<?>> field = entryBuilder.startEnumSelector(title, (Class<Enum<?>>) type, (Enum<?>) value.value);
+					field.setSaveConsumer($ -> value.accept($, config.onChanged));
+					field.setDefaultValue((Enum<?>) value.defValue);
+					field.setEnumNameProvider($ -> {
+						if ($ instanceof LocalizableItem item) {
+							return item.getDisplayName().copy();
+						} else {
+							return Component.literal($.name());
+						}
+					});
+					field.setTooltipSupplier($ -> {
+						List<Component> tooltip = Lists.newArrayList();
+						if ($ instanceof LocalizableItem item) {
+							tooltip.add(item.getDisplayName().copy().append(" - ").append(item.getDescription()));
+						}
+						createComment(value).map(Arrays::asList).ifPresent(tooltip::addAll);
+						return tooltip.isEmpty() ? Optional.empty() : Optional.of(tooltip.toArray(Component[]::new));
+					});
+					entry = field.build();
+				} else if (List.class.isAssignableFrom(type)) {
+					ItemType itemType = value.field.getAnnotation(ItemType.class);
+					if (itemType.value() == String.class) {
+						StringListBuilder field = entryBuilder.startStrList(title, (List<String>) value.value);
+						field.setTooltip(createComment(value));
+						field.setSaveConsumer($ -> value.accept($, config.onChanged));
+						field.setDefaultValue((List<String>) value.defValue);
+						entry = field.build();
+					}
 				}
 				if (entry != null) {
 					entry.setRequiresRestart(value.requiresRestart);
 					subCat.accept(entry);
 				}
+
+				putDescription(subCat, entryBuilder, description, true);
 			}
 			subCats.forEach($ -> category.addEntry($.build()));
 		}
@@ -200,6 +233,20 @@ public class ClothConfigIntegration {
 			configs.forEach(ConfigHandler::save);
 		});
 		return builder.build();
+	}
+
+	private static void putDescription(Consumer<AbstractConfigListEntry<?>> subCat, ConfigEntryBuilder entryBuilder, TextDescription description, boolean after) {
+		if (description == null || description.after() != after) {
+			return;
+		}
+		Component component;
+		if (I18n.exists(description.value())) {
+			component = Component.translatable(description.value());
+		} else {
+			component = Component.literal(description.value());
+		}
+		TextDescriptionBuilder builder = entryBuilder.startTextDescription(component);
+		subCat.accept(builder.build());
 	}
 
 	private static Optional<Component[]> createComment(Value<?> value) {
@@ -212,18 +259,7 @@ public class ClothConfigIntegration {
 		if (value.requiresRestart) {
 			tooltip.add(requiresRestart);
 		}
-
-		Font fontRenderer = Minecraft.getInstance().font;
-		int width = KiwiClientConfig.tooltipWrapWidth;
-		/* off */
-		tooltip = tooltip.stream()
-			.map(s -> fontRenderer.getSplitter().splitLines(s, width, Style.EMPTY))
-			.flatMap(Collection::stream)
-			.map(FormattedText::getString)
-			.map(Component::literal)
-			.collect(Collectors.toList());
-		/* on */
-		return tooltip.isEmpty() ? Optional.empty() : Optional.of(tooltip.toArray(new Component[0]));
+		return tooltip.isEmpty() ? Optional.empty() : Optional.of(tooltip.toArray(Component[]::new));
 	}
 
 }
