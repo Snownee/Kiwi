@@ -123,7 +123,7 @@ public class ModuleInfo {
 			decorator.accept(this, e.entry);
 			Registry.register(e.registry, e.name, e.entry);
 		});
-		if (registry == Registry.BLOCK && Platform.isPhysicalClient()) {
+		if (registry == Registry.BLOCK && Platform.isPhysicalClient() && !Platform.isDataGen()) {
 			final RenderType solid = RenderType.solid();
 			Map<Class<?>, RenderType> cache = Maps.newHashMap();
 			entries.stream().forEach(e -> {
