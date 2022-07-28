@@ -24,15 +24,15 @@ public class KiwiCommand {
 
 	private static int cleanLevel(CommandSourceStack commandSourceStack) {
 		Commands commands = commandSourceStack.getServer().getCommands();
-		commands.performCommand(commandSourceStack, "gamerule doDaylightCycle false");
-		commands.performCommand(commandSourceStack, "gamerule doWeatherCycle false");
-		commands.performCommand(commandSourceStack, "gamerule doMobLoot false");
-		commands.performCommand(commandSourceStack, "gamerule doMobSpawning false");
-		commands.performCommand(commandSourceStack, "difficulty peaceful");
-		commands.performCommand(commandSourceStack, "kill @e[type=!minecraft:player]");
-		commands.performCommand(commandSourceStack, "time set day");
-		commands.performCommand(commandSourceStack, "weather clear");
-		commands.performCommand(commandSourceStack, "gamerule doMobLoot true");
+		commands.performPrefixedCommand(commandSourceStack, "gamerule doDaylightCycle false");
+		commands.performPrefixedCommand(commandSourceStack, "gamerule doWeatherCycle false");
+		commands.performPrefixedCommand(commandSourceStack, "gamerule doMobLoot false");
+		commands.performPrefixedCommand(commandSourceStack, "gamerule doMobSpawning false");
+		commands.performPrefixedCommand(commandSourceStack, "difficulty peaceful");
+		commands.performPrefixedCommand(commandSourceStack, "kill @e[type=!minecraft:player]");
+		commands.performPrefixedCommand(commandSourceStack, "time set day");
+		commands.performPrefixedCommand(commandSourceStack, "weather clear");
+		commands.performPrefixedCommand(commandSourceStack, "gamerule doMobLoot true");
 		return 1;
 	}
 }
