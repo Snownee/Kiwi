@@ -12,12 +12,9 @@ import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfigManager;
@@ -32,7 +29,7 @@ public class CosmeticScreen extends Screen {
 	private Entry selectedEntry;
 
 	public CosmeticScreen() {
-		super(new TranslatableComponent("gui.kiwi.cosmetic"));
+		super(Component.translatable("gui.kiwi.cosmetic"));
 	}
 
 	@Override
@@ -100,14 +97,13 @@ public class CosmeticScreen extends Screen {
 		super.onClose();
 		list = null;
 		ConfigHandler cfg = KiwiConfigManager.getHandler(KiwiClientConfig.class);
-		ConfigValue<String> val = (ConfigValue<String>) cfg.getValueByPath("contributorCosmetic");
 		if (currentCosmetic != null && selectedEntry.id == null) {
-			val.set("");
-			cfg.refresh();
+			KiwiClientConfig.contributorCosmetic = "";
+			cfg.save();
 			Contributors.changeCosmetic();
 		} else if (selectedEntry != null && !Objects.equals(selectedEntry.id, currentCosmetic)) {
-			val.set(selectedEntry.id.toString());
-			cfg.refresh();
+			KiwiClientConfig.contributorCosmetic = selectedEntry.id.toString();
+			cfg.save();
 			Contributors.changeCosmetic();
 		}
 	}
@@ -159,7 +155,7 @@ public class CosmeticScreen extends Screen {
 
 		@Override
 		public Component getNarration() {
-			return new TextComponent(name);
+			return Component.literal(name);
 		}
 
 	}

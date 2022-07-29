@@ -5,15 +5,12 @@ import java.lang.invoke.MethodHandles;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import javax.annotation.Nullable;
 
 import com.google.common.collect.Maps;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.Material;
@@ -23,7 +20,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -39,8 +38,8 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.model.ModelLoaderRegistry;
-import net.minecraftforge.client.model.data.EmptyModelData;
+import net.minecraftforge.client.ChunkRenderTypeSet;
+import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import snownee.kiwi.loader.Platform;
 
@@ -148,17 +147,17 @@ public class SimpleBlockDefinition implements BlockDefinition {
 		int index = direction == null ? 0 : direction.ordinal() + 1;
 		if (materials[index] == null) {
 			BakedModel model = model();
-			Random random = new Random();
+			RandomSource random = RandomSource.create();
 			random.setSeed(42L);
-			ResourceLocation particleIcon = model.getParticleIcon(EmptyModelData.INSTANCE).getName();
+			ResourceLocation particleIcon = model.getParticleIcon(ModelData.EMPTY).getName();
 			ResourceLocation sprite = particleIcon;
 			if (state.getBlock() == Blocks.GRASS_BLOCK) {
 				direction = Direction.UP;
 			}
 			if (direction != null) {
-				List<BakedQuad> quads = model.getQuads(state, direction, random, EmptyModelData.INSTANCE);
+				List<BakedQuad> quads = model.getQuads(state, direction, random, ModelData.EMPTY, null);
 				if (quads.isEmpty())
-					quads = model.getQuads(state, null, random, EmptyModelData.INSTANCE);
+					quads = model.getQuads(state, null, random, ModelData.EMPTY, null);
 				for (BakedQuad quad : quads) {
 					sprite = quad.getSprite().getName();
 					if (sprite.equals(particleIcon)) {
@@ -166,15 +165,14 @@ public class SimpleBlockDefinition implements BlockDefinition {
 					}
 				}
 			}
-			materials[index] = ModelLoaderRegistry.blockMaterial(sprite);
+			materials[index] = new Material(InventoryMenu.BLOCK_ATLAS, sprite);
 		}
 		return materials[index];
 	}
 
-	@Override
 	@OnlyIn(Dist.CLIENT)
-	public boolean canRenderInLayer(RenderType layer) {
-		return ItemBlockRenderTypes.canRenderInLayer(state, layer);
+	public ChunkRenderTypeSet getRenderTypes() {
+		return model().getRenderTypes(state, RandomSource.create(42), modelData());
 	}
 
 	@Override

@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 import net.minecraft.core.Registry;
 import net.minecraft.data.tags.TagsProvider;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagBuilder;
 import net.minecraft.tags.TagKey;
 
 @Mixin(TagsProvider.class)
@@ -19,6 +19,6 @@ public interface TagsProviderAccess<T> {
 	String getModId();
 
 	@Invoker
-	Tag.Builder callGetOrCreateRawBuilder(TagKey<T> tag);
+	TagBuilder callGetOrCreateRawBuilder(TagKey<T> tag);
 
 }

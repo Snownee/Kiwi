@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[40,)"
+loaderVersion="[42,)"
 license="MIT"
 
 [[mods]]
@@ -13,7 +13,7 @@ description="Minecraft modding library"
 [[dependencies.kiwi]]
     modId="forge"
     mandatory=true
-    versionRange="[40.0.47, )"
+    versionRange="[42, )"
     ordering="NONE"
     side="BOTH"
 

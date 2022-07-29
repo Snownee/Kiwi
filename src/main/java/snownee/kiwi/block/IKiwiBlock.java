@@ -1,8 +1,8 @@
 package snownee.kiwi.block;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -17,7 +17,7 @@ import snownee.kiwi.item.ModBlockItem;
 public interface IKiwiBlock extends IForgeBlock {
 
 	default MutableComponent getName(ItemStack stack) {
-		return new TranslatableComponent(stack.getDescriptionId());
+		return Component.translatable(stack.getDescriptionId());
 	}
 
 	default BlockItem createItem(Item.Properties builder) {

@@ -20,7 +20,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -108,7 +107,7 @@ public class Contributors extends AbstractModule {
 		if (!(event.getEntity().level instanceof ServerLevel)) {
 			return;
 		}
-		Player player = event.getPlayer();
+		Player player = event.getEntity();
 		if (!((ServerLevel) event.getEntity().level).getServer().isSingleplayerOwner(player.getGameProfile())) {
 			SSyncCosmeticPacket.send(PLAYER_COSMETICS, (ServerPlayer) player, false);
 		}
@@ -117,7 +116,7 @@ public class Contributors extends AbstractModule {
 	@OnlyIn(Dist.DEDICATED_SERVER)
 	@SubscribeEvent
 	public void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
-		PLAYER_COSMETICS.remove(event.getPlayer().getGameProfile().getName());
+		PLAYER_COSMETICS.remove(event.getEntity().getGameProfile().getName());
 	}
 
 	@OnlyIn(Dist.CLIENT)
@@ -130,9 +129,8 @@ public class Contributors extends AbstractModule {
 		canPlayerUseCosmetic(getPlayerName(), cosmetic).thenAccept(bl -> {
 			if (!bl) {
 				ConfigHandler cfg = KiwiConfigManager.getHandler(KiwiClientConfig.class);
-				ConfigValue<String> val = (ConfigValue<String>) cfg.getValueByPath("contributorEffect");
-				val.set("");
-				cfg.refresh();
+				KiwiClientConfig.contributorCosmetic = "";
+				cfg.save();
 				return;
 			}
 			CSetCosmeticPacket.send(cosmetic);

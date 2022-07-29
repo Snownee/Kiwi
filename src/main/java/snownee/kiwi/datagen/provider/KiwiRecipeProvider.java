@@ -1,11 +1,8 @@
 package snownee.kiwi.datagen.provider;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -15,8 +12,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.google.common.collect.Sets;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
 import net.minecraft.advancements.critereon.EnterBlockTrigger;
@@ -26,9 +21,9 @@ import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.core.Registry;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.HashCache;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeBuilder;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
@@ -51,7 +46,6 @@ import net.minecraft.world.level.block.Blocks;
 public abstract class KiwiRecipeProvider implements DataProvider {
 
 	protected static final Logger LOGGER = LogManager.getLogger();
-	private static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().create();
 	protected final DataGenerator generator;
 
 	public KiwiRecipeProvider(DataGenerator generator) {
@@ -59,7 +53,7 @@ public abstract class KiwiRecipeProvider implements DataProvider {
 	}
 
 	@Override
-	public void run(HashCache hashCache) throws IOException {
+	public void run(CachedOutput hashCache) {
 		Path path = generator.getOutputFolder();
 		Set<ResourceLocation> set = Sets.newHashSet();
 		addRecipes(recipe -> {
@@ -77,35 +71,11 @@ public abstract class KiwiRecipeProvider implements DataProvider {
 
 	protected abstract void addRecipes(Consumer<FinishedRecipe> collector);
 
-	protected void save(HashCache hashCache, JsonObject json, Path path) {
+	protected static void save(CachedOutput p_236360_, JsonObject p_236361_, Path p_236362_) {
 		try {
-			String s = GSON.toJson(json);
-			String s1 = SHA1.hashUnencodedChars(s).toString();
-			if (!Objects.equals(hashCache.getHash(path), s1) || !Files.exists(path)) {
-				Files.createDirectories(path.getParent());
-				BufferedWriter bufferedwriter = Files.newBufferedWriter(path);
-
-				try {
-					bufferedwriter.write(s);
-				} catch (Throwable throwable1) {
-					if (bufferedwriter != null) {
-						try {
-							bufferedwriter.close();
-						} catch (Throwable throwable) {
-							throwable1.addSuppressed(throwable);
-						}
-					}
-					throw throwable1;
-				}
-
-				if (bufferedwriter != null) {
-					bufferedwriter.close();
-				}
-			}
-
-			hashCache.putNew(path, s1);
+			DataProvider.saveStable(p_236360_, p_236361_, p_236362_);
 		} catch (IOException ioexception) {
-			LOGGER.error("Couldn't save recipe {}", path, ioexception);
+			LOGGER.error("Couldn't save recipe {}", p_236362_, ioexception);
 		}
 	}
 

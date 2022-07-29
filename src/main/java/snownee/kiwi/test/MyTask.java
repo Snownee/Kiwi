@@ -1,9 +1,7 @@
 package snownee.kiwi.test;
 
-import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.ChatType;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
@@ -28,8 +26,8 @@ public class MyTask extends SimpleLevelTask {
 		if (++tick >= 50) {
 			MinecraftServer server = ticker.getLevel().getServer();
 			if (server != null) {
-				TextComponent text = new TextComponent(words);
-				server.getPlayerList().broadcastMessage(text, ChatType.SYSTEM, Util.NIL_UUID);
+				Component text = Component.literal(words);
+				server.getPlayerList().broadcastSystemMessage(text, false);
 			}
 			return true;
 		} else {

@@ -1,8 +1,6 @@
 buildscript {
     repositories {
         maven { url = 'https://maven.minecraftforge.net' }
-        //maven { url = 'https://maven.parchmentmc.org' }
-        mavenCentral()
         maven { url='https://repo.spongepowered.org/repository/maven-public/' }
     }
     dependencies {
@@ -165,7 +163,7 @@ shadowJar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     exclude(a)
     manifest { attributes(b) }
-    relocate "com.typesafe.config", "${project.group}.shadowed.com.typesafe.config"
+    relocate "com.moandjiezana.toml", "${project.group}.shadowed.com.moandjiezana.toml"
     configurations = [project.configurations.shadowCommon]
     archiveClassifier.set('')
     finalizedBy 'reobfShadowJar'
@@ -217,9 +215,19 @@ repositories {
             includeGroup "curse.maven"
         }
     }
-    maven {
-        url = "https://repo1.maven.org/maven2/"
-    }
+    maven { url "https://maven.shedaniel.me/" }
+}
+
+configurations {
+    library // Create a new special configuration for your Java libraries
+    implementation.extendsFrom library
+}
+
+minecraft.runs.all {
+  // Tell forge to include your libraries in the classpath
+  lazyToken('minecraft_classpath') {
+    configurations.library.copyRecursive().resolve().collect { it.absolutePath }.join(File.pathSeparator)
+  }
 }
 
 dependencies {
@@ -232,10 +240,10 @@ dependencies {
 	implementation project(':annotation')
     annotationProcessor project(':annotation-processor')
 
-    //compileOnly fg.deobf("curse.maven:jei-238222:3670531")
-    runtimeOnly fg.deobf("curse.maven:jei-238222:3670531")
-    
-    shadowCommon("com.typesafe:config:${project.config_version}")
+    implementation fg.deobf("me.shedaniel.cloth:cloth-config-forge:${project.cloth_config_version}")
+    library shadowCommon("com.moandjiezana.toml:toml4j:${project.toml4j_version}") {
+        exclude(module: "gson")
+    }
 }
 
 processResources {

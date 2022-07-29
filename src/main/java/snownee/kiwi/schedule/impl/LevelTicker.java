@@ -10,7 +10,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import snownee.kiwi.schedule.ITicker;
 import snownee.kiwi.schedule.Scheduler;
@@ -37,8 +37,8 @@ public class LevelTicker implements ITicker {
 	}
 
 	@SubscribeEvent
-	public static void onTick(TickEvent.WorldTickEvent event) {
-		LevelTicker[] pair = tickers.get(event.world.dimension());
+	public static void onTick(TickEvent.LevelTickEvent event) {
+		LevelTicker[] pair = tickers.get(event.level.dimension());
 		if (pair == null) {
 			return;
 		}
@@ -46,16 +46,16 @@ public class LevelTicker implements ITicker {
 		if (ticker == null) {
 			return;
 		}
-		ticker.level = event.world;
+		ticker.level = event.level;
 		Scheduler.tick(ticker);
 	}
 
 	@SubscribeEvent
-	public static void unloadLevel(WorldEvent.Unload event) {
-		if (!(event.getWorld() instanceof Level)) {
+	public static void unloadLevel(LevelEvent.Unload event) {
+		if (!(event.getLevel() instanceof Level)) {
 			return;
 		}
-		LevelTicker[] pair = tickers.get(((Level) event.getWorld()).dimension());
+		LevelTicker[] pair = tickers.get(((Level) event.getLevel()).dimension());
 		if (pair == null) {
 			return;
 		}

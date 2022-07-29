@@ -6,7 +6,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
-import javax.annotation.Nullable;
+import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.JsonElement;
 
@@ -18,23 +19,29 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.world.BlockEvent.BreakEvent;
+import net.minecraft.world.phys.EntityHitResult;
 import snownee.kiwi.block.def.BlockDefinition;
 import snownee.kiwi.loader.Platform;
 
 public final class Util {
+	public static RecipeManager recipeManager;
+
 	private Util() {
 	}
 
@@ -121,12 +128,13 @@ public final class Util {
 		return null;
 	}
 
-	public static RecipeManager recipeManager;
-
 	@Nullable
 	public static RecipeManager getRecipeManager() {
-		if (recipeManager != null) {
+		if (recipeManager != null)
 			return recipeManager;
+		MinecraftServer server = Platform.getServer();
+		if (server != null) {
+			return server.getRecipeManager();
 		} else if (Platform.isPhysicalClient()) {
 			ClientPacketListener connection = Minecraft.getInstance().getConnection();
 			if (connection != null) {
@@ -192,6 +200,25 @@ public final class Util {
 			return aLength - bLength;
 	}
 
+	public static String friendlyText(String s) {
+		StringBuilder sb = new StringBuilder();
+		MutableBoolean lastIsUpper = new MutableBoolean(true);
+		s.codePoints().forEach(ch -> {
+			if (Character.isUpperCase(ch) && lastIsUpper.isFalse()) {
+				sb.append(' ');
+			} else if (Character.isLowerCase(ch)) {
+				if (sb.isEmpty()) {
+					ch = Character.toUpperCase(ch);
+				} else if (lastIsUpper.isTrue() && sb.length() > 1 && Character.isUpperCase(sb.codePointAt(sb.length() - 2))) {
+					sb.insert(sb.length() - 1, ' ');
+				}
+			}
+			lastIsUpper.setValue(Character.isUpperCase(ch));
+			sb.appendCodePoint(ch);
+		});
+		return sb.toString();
+	}
+
 	public static boolean canPlayerBreak(Player player, BlockState state, BlockPos pos) {
 		if (!player.mayBuild() || !player.level.mayInteract(player, pos)) {
 			return false;
@@ -199,10 +226,10 @@ public final class Util {
 		if (!player.isCreative() && state.getDestroyProgress(player, player.level, pos) <= 0) {
 			return false;
 		}
-		BreakEvent event = new BreakEvent(player.level, pos, state, player);
-		if (MinecraftForge.EVENT_BUS.post(event)) {
-			return false;
-		}
+		//		BreakEvent event = new BreakEvent(player.level, pos, state, player);
+		//		if (MinecraftForge.EVENT_BUS.post(event)) {
+		//			return false;
+		//		}
 		return true;
 	}
 
@@ -216,8 +243,9 @@ public final class Util {
 		return (color & 0xFFFFFF) | alphaChannel << 24;
 	}
 
+	// GameRenderer.pick
 	public static float getPickRange(Player player) {
-		float attrib = (float) player.getAttribute(ForgeMod.REACH_DISTANCE.get()).getValue();
+		float attrib = 5;
 		return player.isCreative() ? attrib : attrib - 0.5F;
 	}
 
@@ -228,7 +256,7 @@ public final class Util {
 		if (client != player.level.isClientSide) {
 			return;
 		}
-		player.displayClientMessage(new TranslatableComponent(key, args), true);
+		player.sendSystemMessage(Component.translatable(key, args));
 	}
 
 	public static void jsonList(JsonElement json, Consumer<JsonElement> collector) {
@@ -269,5 +297,16 @@ public final class Util {
 			list.add(StringTag.valueOf(s));
 		}
 		tag.put(key, list);
+	}
+
+	public static InteractionResult onAttackEntity(Player player, Level world, InteractionHand hand, Entity entity, @Nullable EntityHitResult hitResult) {
+		if (entity instanceof ItemFrame frame && !frame.getItem().isEmpty() && !frame.isNoGravity() && !frame.isInvulnerable()) {
+			ItemStack stack = player.getItemInHand(hand);
+			if (stack.is(Items.END_PORTAL_FRAME)) {
+				frame.setInvisible(!frame.isInvisible());
+				return InteractionResult.SUCCESS;
+			}
+		}
+		return InteractionResult.PASS;
 	}
 }

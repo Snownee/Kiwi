@@ -22,7 +22,6 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.crafting.IShapedRecipe;
-import net.minecraftforge.registries.ForgeRegistryEntry;
 import snownee.kiwi.mixin.ShapedRecipeAccess;
 
 public abstract class DynamicShapedRecipe extends CustomRecipe implements IShapedRecipe<CraftingContainer> {
@@ -164,7 +163,7 @@ public abstract class DynamicShapedRecipe extends CustomRecipe implements IShape
 		return Ingredient.EMPTY;
 	}
 
-	public static abstract class Serializer<T extends DynamicShapedRecipe> extends ForgeRegistryEntry<RecipeSerializer<?>> implements RecipeSerializer<T> {
+	public static abstract class Serializer<T extends DynamicShapedRecipe> implements RecipeSerializer<T> {
 		public static void fromJson(DynamicShapedRecipe recipe, JsonObject json) {
 			recipe.group = GsonHelper.getAsString(json, "group", "");
 			Map<String, Ingredient> ingredientMap = ShapedRecipeAccess.callKeyFromJson(GsonHelper.getAsJsonObject(json, "key"));

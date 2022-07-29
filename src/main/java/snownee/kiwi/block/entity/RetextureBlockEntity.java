@@ -18,9 +18,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.model.data.EmptyModelData;
-import net.minecraftforge.client.model.data.IModelData;
-import net.minecraftforge.client.model.data.ModelDataMap;
+import net.minecraftforge.client.model.data.ModelData;
 import snownee.kiwi.block.def.BlockDefinition;
 import snownee.kiwi.block.def.SimpleBlockDefinition;
 import snownee.kiwi.client.model.RetextureModel;
@@ -30,7 +28,7 @@ public abstract class RetextureBlockEntity extends BaseBlockEntity {
 	@Nullable
 	protected Map<String, BlockDefinition> textures;
 	/** Do not get modelData directly, use getModelData() */
-	protected IModelData modelData = EmptyModelData.INSTANCE;
+	protected ModelData modelData = ModelData.EMPTY;
 
 	public RetextureBlockEntity(BlockEntityType<?> tileEntityTypeIn, BlockPos level, BlockState state, String... textureKeys) {
 		super(tileEntityTypeIn, level, state);
@@ -151,9 +149,9 @@ public abstract class RetextureBlockEntity extends BaseBlockEntity {
 	}
 
 	@Override
-	public IModelData getModelData() {
-		if (textures != null && modelData == EmptyModelData.INSTANCE) {
-			modelData = new ModelDataMap.Builder().withInitial(RetextureModel.TEXTURES, textures).build();
+	public ModelData getModelData() {
+		if (textures != null && modelData == ModelData.EMPTY) {
+			modelData = ModelData.builder().with(RetextureModel.TEXTURES, textures).build();
 		}
 		return modelData;
 	}

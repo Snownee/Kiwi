@@ -75,7 +75,7 @@ public enum AlternativesIngredientSerializer implements IIngredientSerializer<In
 			if (o.size() == 1 && o.has("tag")) {
 				ResourceLocation resourcelocation = new ResourceLocation(GsonHelper.getAsString(o, "tag"));
 				TagKey<Item> tagkey = TagKey.create(Registry.ITEM_REGISTRY, resourcelocation);
-				if (ctx.getTag(tagkey).getValues().isEmpty()) {
+				if (ctx.getTag(tagkey).isEmpty()) {
 					throw new JsonSyntaxException("hasNoMatchingItems");
 				}
 			}

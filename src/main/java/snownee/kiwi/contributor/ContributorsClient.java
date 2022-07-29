@@ -11,7 +11,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.client.event.InputEvent.KeyInputEvent;
+import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import snownee.kiwi.contributor.client.CosmeticLayer;
 import snownee.kiwi.contributor.client.gui.CosmeticScreen;
@@ -20,12 +20,12 @@ import snownee.kiwi.contributor.client.gui.CosmeticScreen;
 public class ContributorsClient {
 
 	@SubscribeEvent
-	public static void onClientPlayerLoggedIn(ClientPlayerNetworkEvent.LoggedInEvent event) {
+	public static void onClientPlayerLoggedIn(ClientPlayerNetworkEvent.LoggingIn event) {
 		Contributors.changeCosmetic();
 	}
 
 	@SubscribeEvent
-	public static void onClientPlayerLoggedOut(ClientPlayerNetworkEvent.LoggedOutEvent event) {
+	public static void onClientPlayerLoggedOut(ClientPlayerNetworkEvent.LoggingOut event) {
 		Contributors.PLAYER_COSMETICS.clear();
 		CosmeticLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidateAll());
 	}
@@ -42,7 +42,7 @@ public class ContributorsClient {
 	private static int hold;
 
 	@SubscribeEvent
-	public static void onKeyInput(KeyInputEvent event) {
+	public static void onKeyInput(InputEvent.Key event) {
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.screen != null || mc.player == null || !mc.isWindowActive()) {
 			return;

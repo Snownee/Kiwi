@@ -23,11 +23,6 @@ public class ModuleLoadedCondition implements ICondition {
 	}
 
 	@Override
-	public boolean test() {
-		return Kiwi.isLoaded(module);
-	}
-
-	@Override
 	public boolean test(IContext ctx) {
 		return Kiwi.isLoaded(module);
 	}

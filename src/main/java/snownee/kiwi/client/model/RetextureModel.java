@@ -4,13 +4,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 
 import com.google.common.base.Predicates;
 import com.google.common.cache.Cache;
@@ -19,6 +19,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
+import com.mojang.math.Transformation;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -38,24 +39,21 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.MinecraftForgeClient;
-import net.minecraftforge.client.model.BlockModelConfiguration;
-import net.minecraftforge.client.model.ForgeModelBakery;
-import net.minecraftforge.client.model.IModelConfiguration;
-import net.minecraftforge.client.model.IModelLoader;
-import net.minecraftforge.client.model.data.IDynamicBakedModel;
-import net.minecraftforge.client.model.data.IModelData;
+import net.minecraftforge.client.model.IDynamicBakedModel;
+import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.model.data.ModelProperty;
-import net.minecraftforge.client.model.geometry.IModelGeometry;
-import net.minecraftforge.common.util.Lazy;
+import net.minecraftforge.client.model.geometry.BlockGeometryBakingContext;
+import net.minecraftforge.client.model.geometry.IGeometryBakingContext;
+import net.minecraftforge.client.model.geometry.IGeometryLoader;
+import net.minecraftforge.client.model.geometry.IUnbakedGeometry;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import snownee.kiwi.block.def.BlockDefinition;
@@ -67,19 +65,14 @@ import snownee.kiwi.util.NBTHelper;
 public class RetextureModel implements IDynamicBakedModel {
 	public static ModelProperty<Map<String, BlockDefinition>> TEXTURES = new ModelProperty<>();
 
-	public static class ModelConfiguration implements IModelConfiguration {
+	public static class ModelConfiguration implements IGeometryBakingContext {
 
-		private final IModelConfiguration baseConfiguration;
+		private final IGeometryBakingContext baseConfiguration;
 		private final Map<String, BlockDefinition> overrides;
 
-		public ModelConfiguration(IModelConfiguration baseConfiguration, Map<String, BlockDefinition> overrides) {
+		public ModelConfiguration(IGeometryBakingContext baseConfiguration, Map<String, BlockDefinition> overrides) {
 			this.baseConfiguration = baseConfiguration;
 			this.overrides = overrides;
-		}
-
-		@Override
-		public UnbakedModel getOwnerModel() {
-			return baseConfiguration.getOwnerModel();
 		}
 
 		@Override
@@ -88,12 +81,12 @@ public class RetextureModel implements IDynamicBakedModel {
 		}
 
 		@Override
-		public boolean isTexturePresent(String name) {
-			return baseConfiguration.isTexturePresent(name);
+		public boolean hasMaterial(String name) {
+			return baseConfiguration.hasMaterial(name);
 		}
 
 		@Override
-		public Material resolveTexture(String name) {
+		public Material getMaterial(String name) {
 			if (name.charAt(0) == '#') {
 				String ref = name.substring(1);
 				int i = ref.lastIndexOf('_');
@@ -110,44 +103,55 @@ public class RetextureModel implements IDynamicBakedModel {
 					return supplier.renderMaterial(null);
 				}
 			}
-			return baseConfiguration.resolveTexture(name);
+			return baseConfiguration.getMaterial(name);
 		}
 
 		@Override
-		public boolean isShadedInGui() {
-			return baseConfiguration.isShadedInGui();
+		public boolean isGui3d() {
+			return baseConfiguration.isGui3d();
 		}
 
 		@Override
-		public boolean isSideLit() {
-			return baseConfiguration.isSideLit();
+		public boolean useBlockLight() {
+			return baseConfiguration.useBlockLight();
 		}
 
 		@Override
-		public boolean useSmoothLighting() {
-			return baseConfiguration.useSmoothLighting();
+		public boolean useAmbientOcclusion() {
+			return baseConfiguration.useAmbientOcclusion();
 		}
 
 		@Override
-		public ItemTransforms getCameraTransforms() {
-			return baseConfiguration.getCameraTransforms();
+		public ItemTransforms getTransforms() {
+			return baseConfiguration.getTransforms();
 		}
 
 		@Override
-		public ModelState getCombinedTransform() {
-			return baseConfiguration.getCombinedTransform();
+		public Transformation getRootTransform() {
+			return baseConfiguration.getRootTransform();
+		}
+
+		@Override
+		public @Nullable ResourceLocation getRenderTypeHint() {
+			//ChunkRenderTypeSet.union(overrides.values().stream().map(BlockDefinition::getRenderTypes).toList());
+			return null;
+		}
+
+		@Override
+		public boolean isComponentVisible(String component, boolean fallback) {
+			return baseConfiguration.isComponentVisible(component, fallback);
 		}
 
 	}
 
-	public static class Geometry implements IModelGeometry<Geometry> {
+	public static class Geometry implements IUnbakedGeometry<Geometry> {
 
 		private final ResourceLocation loaderId;
-		private final Lazy<BlockModel> blockModel;
+		private final Function<ModelBakery, BlockModel> blockModel;
 		private final String particle;
 		private final boolean inventory;
 
-		public Geometry(Lazy<BlockModel> blockModel, ResourceLocation loaderId, String particle, boolean inventory) {
+		public Geometry(Function<ModelBakery, BlockModel> blockModel, ResourceLocation loaderId, String particle, boolean inventory) {
 			this.blockModel = blockModel;
 			this.loaderId = loaderId;
 			this.particle = particle;
@@ -155,18 +159,18 @@ public class RetextureModel implements IDynamicBakedModel {
 		}
 
 		@Override
-		public BakedModel bake(IModelConfiguration owner, ModelBakery bakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides, ResourceLocation modelLocation) {
-			return new RetextureModel(bakery, modelTransform, loaderId, blockModel.get().customData, particle, inventory);
+		public BakedModel bake(IGeometryBakingContext owner, ModelBakery bakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides, ResourceLocation modelLocation) {
+			return new RetextureModel(bakery, modelTransform, loaderId, blockModel.apply(bakery).customData, particle, inventory);
 		}
 
 		@Override
-		public Collection<Material> getTextures(IModelConfiguration owner, Function<ResourceLocation, UnbakedModel> modelGetter, Set<com.mojang.datafixers.util.Pair<String, String>> missingTextureErrors) {
-			return blockModel.get().getMaterials(modelGetter, missingTextureErrors);
+		public Collection<Material> getMaterials(IGeometryBakingContext owner, Function<ResourceLocation, UnbakedModel> modelGetter, Set<com.mojang.datafixers.util.Pair<String, String>> missingTextureErrors) {
+			return Collections.EMPTY_LIST;
 		}
 
 	}
 
-	public static class Loader implements IModelLoader<Geometry> {
+	public static class Loader implements IGeometryLoader<Geometry> {
 
 		public static final Loader INSTANCE = new Loader();
 
@@ -174,14 +178,10 @@ public class RetextureModel implements IDynamicBakedModel {
 		}
 
 		@Override
-		public void onResourceManagerReload(ResourceManager resourceManager) {
-		}
-
-		@Override
-		public Geometry read(JsonDeserializationContext deserializationContext, JsonObject modelContents) {
-			ResourceLocation loaderId = new ResourceLocation(GsonHelper.getAsString(modelContents, "base_loader", "elements"));
-			Lazy<BlockModel> blockModel = Lazy.of(() -> (BlockModel) ForgeModelBakery.instance().getModel(new ResourceLocation(GsonHelper.getAsString(modelContents, "base"))));
-			return new Geometry(blockModel, loaderId, GsonHelper.getAsString(modelContents, "particle", "0"), GsonHelper.getAsBoolean(modelContents, "inventory", true));
+		public Geometry read(JsonObject jsonObject, JsonDeserializationContext deserializationContext) {
+			ResourceLocation loaderId = new ResourceLocation(GsonHelper.getAsString(jsonObject, "base_loader", "elements"));
+			Function<ModelBakery, BlockModel> blockModel = bakery -> (BlockModel) bakery.getModel(new ResourceLocation(GsonHelper.getAsString(jsonObject, "base")));
+			return new Geometry(blockModel, loaderId, GsonHelper.getAsString(jsonObject, "particle", "0"), GsonHelper.getAsBoolean(jsonObject, "inventory", true));
 		}
 
 	}
@@ -191,10 +191,10 @@ public class RetextureModel implements IDynamicBakedModel {
 	private final ResourceLocation loaderId;
 	private ItemOverrides overrideList;
 	private final Cache<String, BakedModel> baked = CacheBuilder.newBuilder().expireAfterAccess(500L, TimeUnit.SECONDS).build();
-	private final BlockModelConfiguration baseConfiguration;
+	private final BlockGeometryBakingContext baseConfiguration;
 	private final String particleKey;
 
-	public RetextureModel(ModelBakery modelLoader, ModelState variant, ResourceLocation loaderId, BlockModelConfiguration baseConfiguration, String particleKey, boolean inventory) {
+	public RetextureModel(ModelBakery modelLoader, ModelState variant, ResourceLocation loaderId, BlockGeometryBakingContext baseConfiguration, String particleKey, boolean inventory) {
 		this.modelLoader = modelLoader;
 		this.variant = variant;
 		this.loaderId = loaderId;
@@ -205,12 +205,12 @@ public class RetextureModel implements IDynamicBakedModel {
 
 	@Override
 	public boolean useAmbientOcclusion() {
-		return baseConfiguration.useSmoothLighting();
+		return baseConfiguration.useAmbientOcclusion();
 	}
 
 	@Override
 	public boolean isGui3d() {
-		return baseConfiguration.isShadedInGui();
+		return baseConfiguration.isGui3d();
 	}
 
 	@Override
@@ -219,12 +219,12 @@ public class RetextureModel implements IDynamicBakedModel {
 	}
 
 	@Override
-	public TextureAtlasSprite getParticleIcon(IModelData data) {
-		if (data.getData(TEXTURES) != null) {
-			BlockDefinition supplier = data.getData(TEXTURES).get(particleKey);
+	public TextureAtlasSprite getParticleIcon(ModelData data) {
+		if (data.get(TEXTURES) != null) {
+			BlockDefinition supplier = data.get(TEXTURES).get(particleKey);
 			if (supplier != null) {
 				Material material = supplier.renderMaterial(null);
-				TextureAtlasSprite particle = ForgeModelBakery.defaultTextureGetter().apply(material);
+				TextureAtlasSprite particle = modelLoader.getAtlasSet().getSprite(material);
 				if (particle.getClass() != MissingTextureAtlasSprite.class) {
 					return particle;
 				}
@@ -235,7 +235,7 @@ public class RetextureModel implements IDynamicBakedModel {
 
 	@Override
 	public TextureAtlasSprite getParticleIcon() {
-		return modelLoader.getSpriteMap().getSprite(baseConfiguration.resolveTexture("particle"));
+		return modelLoader.getAtlasSet().getSprite(baseConfiguration.getMaterial("particle"));
 	}
 
 	@Override
@@ -245,30 +245,29 @@ public class RetextureModel implements IDynamicBakedModel {
 
 	@Override
 	public ItemTransforms getTransforms() {
-		return baseConfiguration.getCameraTransforms();
+		return baseConfiguration.getTransforms();
 	}
 
 	@Override
-	public List<BakedQuad> getQuads(BlockState state, Direction side, Random rand, IModelData extraData) {
-		Map<String, BlockDefinition> overrides = extraData.getData(TEXTURES);
+	public List<BakedQuad> getQuads(BlockState state, Direction side, RandomSource rand, ModelData extraData, @Nullable RenderType renderType) {
+		Map<String, BlockDefinition> overrides = extraData.get(TEXTURES);
 		if (overrides == null)
 			overrides = Collections.EMPTY_MAP;
-		RenderType layer = MinecraftForgeClient.getRenderType();
 		boolean noSupplier = true;
-		if (layer != null) {
+		if (renderType != null) {
 			for (BlockDefinition supplier : overrides.values()) {
 				if (supplier != null) {
 					noSupplier = false;
-					if (supplier.canRenderInLayer(layer)) {
+					if (supplier.canRenderInLayer(renderType)) {
 						BakedModel model = getModel(overrides);
-						return model.getQuads(state, side, rand, extraData);
+						return model.getQuads(state, side, rand, extraData, renderType);
 					}
 				}
 			}
 		}
-		if (layer == null || (noSupplier && layer == RenderType.solid())) {
+		if (renderType == null || (noSupplier && renderType == RenderType.solid())) {
 			BakedModel model = getModel(overrides);
-			return model.getQuads(state, side, rand, extraData);
+			return model.getQuads(state, side, rand, extraData, renderType);
 		}
 		return Collections.EMPTY_LIST;
 	}
@@ -278,7 +277,7 @@ public class RetextureModel implements IDynamicBakedModel {
 		try {
 			return baked.get(key, () -> {
 				ModelConfiguration configuration = new ModelConfiguration(baseConfiguration, overrides);
-				return baseConfiguration.getCustomGeometry().bake(configuration, modelLoader, ForgeModelBakery.defaultTextureGetter(), variant, overrideList, loaderId);
+				return baseConfiguration.getCustomGeometry().bake(configuration, modelLoader, modelLoader.getAtlasSet()::getSprite, variant, overrideList, loaderId);
 			});
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -335,7 +334,7 @@ public class RetextureModel implements IDynamicBakedModel {
 
 	@Override
 	public boolean usesBlockLight() {
-		return baseConfiguration.isSideLit();
+		return baseConfiguration.useBlockLight();
 	}
 
 	public static int getColor(Map<String, BlockDefinition> textures, BlockState state, BlockAndTintGetter level, BlockPos pos, int index) {

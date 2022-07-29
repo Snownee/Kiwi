@@ -1,6 +1,5 @@
 package snownee.kiwi.test;
 
-import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.world.effect.HealthBoostMobEffect;
@@ -16,16 +15,15 @@ import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.ColorHandlerEvent;
+import net.minecraftforge.client.event.RegisterColorHandlersEvent;
+import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiGO;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModule.Category;
 import snownee.kiwi.KiwiModule.RenderLayer;
 import snownee.kiwi.KiwiModule.RenderLayer.Layer;
-import snownee.kiwi.KiwiModule.Subscriber.Bus;
 import snownee.kiwi.block.entity.RetextureBlockEntity;
 import snownee.kiwi.datagen.provider.KiwiLootTableProvider;
 import snownee.kiwi.item.ModBlockItem;
@@ -37,7 +35,7 @@ import snownee.kiwi.util.EnumUtil;
 @KiwiModule("test")
 @KiwiModule.Optional(defaultEnabled = false)
 @KiwiModule.Category("building_blocks")
-@KiwiModule.Subscriber(Bus.MOD)
+@KiwiModule.Subscriber(modBus = true)
 public class TestModule extends AbstractModule {
 	// Keep your fields `public static`
 
@@ -76,9 +74,8 @@ public class TestModule extends AbstractModule {
 
 	@SubscribeEvent
 	@OnlyIn(Dist.CLIENT)
-	public void blockColors(ColorHandlerEvent.Block event) {
-		BlockColors blockColors = event.getBlockColors();
-		blockColors.register((state, level, pos, i) -> {
+	public void blockColors(RegisterColorHandlersEvent.Block event) {
+		event.register((state, level, pos, i) -> {
 			if (level != null && pos != null) {
 				BlockEntity blockEntity = level.getBlockEntity(pos);
 				if (blockEntity instanceof RetextureBlockEntity) {
@@ -98,8 +95,8 @@ public class TestModule extends AbstractModule {
 	protected void gatherData(GatherDataEvent event) {
 		DataGenerator gen = event.getGenerator();
 		if (event.includeServer()) {
-			gen.addProvider(new KiwiLootTableProvider(gen).add(TestBlockLoot::new, LootContextParamSets.BLOCK));
-			gen.addProvider(new TestRecipeProvider(gen));
+			gen.addProvider(event.includeServer(), new KiwiLootTableProvider(gen).add(TestBlockLoot::new, LootContextParamSets.BLOCK));
+			gen.addProvider(event.includeServer(), new TestRecipeProvider(gen));
 		}
 	}
 }

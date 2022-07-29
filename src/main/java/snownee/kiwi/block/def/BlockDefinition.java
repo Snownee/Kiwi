@@ -28,8 +28,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.model.data.EmptyModelData;
-import net.minecraftforge.client.model.data.IModelData;
+import net.minecraftforge.client.ChunkRenderTypeSet;
+import net.minecraftforge.client.model.data.ModelData;
 
 public interface BlockDefinition {
 
@@ -80,8 +80,8 @@ public interface BlockDefinition {
 	BakedModel model();
 
 	@OnlyIn(Dist.CLIENT)
-	default IModelData modelData() {
-		return EmptyModelData.INSTANCE;
+	default ModelData modelData() {
+		return ModelData.EMPTY;
 	}
 
 	@OnlyIn(Dist.CLIENT)
@@ -90,7 +90,12 @@ public interface BlockDefinition {
 	void save(CompoundTag tag);
 
 	@OnlyIn(Dist.CLIENT)
-	boolean canRenderInLayer(RenderType layer);
+	default boolean canRenderInLayer(RenderType layer) {
+		return getRenderTypes().contains(layer);
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	ChunkRenderTypeSet getRenderTypes();
 
 	boolean canOcclude();
 

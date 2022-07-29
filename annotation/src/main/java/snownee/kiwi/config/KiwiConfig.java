@@ -51,6 +51,11 @@ public @interface KiwiConfig {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.FIELD)
+	@interface GameRestart {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.FIELD, ElementType.TYPE })
 	@interface Path {
 		/**

@@ -9,7 +9,6 @@ import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
-import net.minecraftforge.registries.ForgeRegistryEntry;
 import snownee.kiwi.data.DataModule;
 
 public class NoContainersShapedRecipe extends ShapedRecipe {
@@ -27,7 +26,7 @@ public class NoContainersShapedRecipe extends ShapedRecipe {
 		return DataModule.SHAPED_NO_CONTAINERS.get();
 	}
 
-	public static class Serializer extends ForgeRegistryEntry<RecipeSerializer<?>> implements RecipeSerializer<NoContainersShapedRecipe> {
+	public static class Serializer implements RecipeSerializer<NoContainersShapedRecipe> {
 		@Override
 		public NoContainersShapedRecipe fromJson(ResourceLocation recipeId, JsonObject json) {
 			return new NoContainersShapedRecipe(RecipeSerializer.SHAPED_RECIPE.fromJson(recipeId, json));

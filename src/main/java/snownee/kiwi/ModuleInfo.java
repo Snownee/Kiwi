@@ -26,9 +26,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraftforge.data.loading.DatagenModLoader;
 import net.minecraftforge.fml.javafmlmod.FMLModContainer;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.ForgeRegistryEntry;
 import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 import snownee.kiwi.KiwiModule.Category;
 import snownee.kiwi.KiwiModule.RenderLayer;
 import snownee.kiwi.block.IKiwiBlock;
@@ -131,7 +129,7 @@ public class ModuleInfo {
 			if (registry instanceof Registry) {
 				Registry.register((Registry) registry, e.name, e.entry);
 			} else {
-				((IForgeRegistry) registry).register(((ForgeRegistryEntry) e.entry).setRegistryName(e.name));
+				((IForgeRegistry) registry).register(e.name, e.entry);
 			}
 		});
 		if (registry == ForgeRegistries.BLOCKS && Platform.isPhysicalClient() && !Platform.isDataGen()) {
@@ -142,7 +140,7 @@ public class ModuleInfo {
 				if (e.field != null) {
 					RenderLayer layer = e.field.getAnnotation(RenderLayer.class);
 					if (layer != null) {
-						RenderType type = layer.value().get();
+						RenderType type = (RenderType) layer.value().value;
 						if (type != solid && type != null) {
 							ItemBlockRenderTypes.setRenderLayer(block, type);
 							return;
@@ -155,7 +153,7 @@ public class ModuleInfo {
 					while (k != Block.class) {
 						layer = k.getDeclaredAnnotation(RenderLayer.class);
 						if (layer != null) {
-							return layer.value().get();
+							return (RenderType) layer.value().value;
 						}
 						k = k.getSuperclass();
 					}
@@ -193,7 +191,7 @@ public class ModuleInfo {
 		module.postInit(event);
 	}
 
-	public <T extends IForgeRegistryEntry<T>> List<T> getRegistries(Object registry) {
+	public <T> List<T> getRegistries(Object registry) {
 		return registries.get(registry).stream().map($ -> (T) $.entry).collect(Collectors.toList());
 	}
 

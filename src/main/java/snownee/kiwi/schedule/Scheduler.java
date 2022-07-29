@@ -137,7 +137,7 @@ public final class Scheduler extends SavedData {
 
 	@OnlyIn(Dist.CLIENT)
 	@SubscribeEvent
-	public static void clientLoggedOut(ClientPlayerNetworkEvent.LoggedOutEvent event) {
+	public static void clientLoggedOut(ClientPlayerNetworkEvent.LoggingOut event) {
 		clear();
 	}
 

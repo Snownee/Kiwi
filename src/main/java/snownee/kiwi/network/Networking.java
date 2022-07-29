@@ -8,7 +8,7 @@ import java.util.function.Supplier;
 import com.google.common.collect.Maps;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkDirection;
@@ -54,12 +54,12 @@ public final class Networking {
 		ResourceLocation id = msg.readResourceLocation();
 		IPacketHandler handler = handlers.get(id);
 		if (handler == null) {
-			ctx.get().getNetworkManager().disconnect(new TextComponent("Illegal packet received, terminating connection"));
+			ctx.get().getNetworkManager().disconnect(Component.literal("Illegal packet received, terminating connection"));
 			throw new IllegalStateException("Invalid packet received, aborting connection");
 		}
 		Direction direction = handler.getDirection();
 		if (direction != null) {
-			NetworkHooks.validatePacketDirection(ctx.get().getDirection(), Optional.of(direction.value), ctx.get().getNetworkManager());
+			NetworkHooks.validatePacketDirection(ctx.get().getDirection(), Optional.of(NetworkDirection.valueOf(direction.name())), ctx.get().getNetworkManager());
 		}
 		handler.receive($ -> ctx.get().enqueueWork($).thenApply($$ -> null), msg, ctx.get().getSender());
 		ctx.get().setPacketHandled(true);

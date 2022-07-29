@@ -14,7 +14,6 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
-import net.minecraftforge.registries.ForgeRegistryEntry;
 import snownee.kiwi.data.DataModule;
 
 public class KiwiShapelessRecipe extends ShapelessRecipe {
@@ -40,7 +39,7 @@ public class KiwiShapelessRecipe extends ShapelessRecipe {
 		return DataModule.SHAPELESS.get();
 	}
 
-	public static class Serializer extends ForgeRegistryEntry<RecipeSerializer<?>> implements RecipeSerializer<KiwiShapelessRecipe> {
+	public static class Serializer implements RecipeSerializer<KiwiShapelessRecipe> {
 
 		@Override
 		public KiwiShapelessRecipe fromJson(ResourceLocation id, JsonObject o) {

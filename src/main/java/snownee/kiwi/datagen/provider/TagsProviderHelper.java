@@ -5,7 +5,7 @@ import java.util.stream.Stream;
 
 import net.minecraft.core.Registry;
 import net.minecraft.data.tags.TagsProvider;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagBuilder;
 import net.minecraft.tags.TagKey;
 import snownee.kiwi.mixin.TagsProviderAccess;
 
@@ -22,16 +22,16 @@ public final class TagsProviderHelper<T> {
 	}
 
 	public void optional(TagKey<T> tag, Supplier<? extends T>... blocks) {
-		Tag.Builder builder = tagsProvider.callGetOrCreateRawBuilder(tag);
+		TagBuilder builder = tagsProvider.callGetOrCreateRawBuilder(tag);
 		for (Supplier<? extends T> block : blocks) {
-			builder.addOptionalElement(registry.getKey(block.get()), modId);
+			builder.addOptionalElement(registry.getKey(block.get()));
 		}
 	}
 
 	public void add(TagKey<T> tag, Supplier<? extends T>... blocks) {
-		Tag.Builder builder = tagsProvider.callGetOrCreateRawBuilder(tag);
+		TagBuilder builder = tagsProvider.callGetOrCreateRawBuilder(tag);
 		for (Supplier<? extends T> block : blocks) {
-			builder.addElement(registry.getKey(block.get()), modId);
+			builder.addElement(registry.getKey(block.get()));
 		}
 	}
 

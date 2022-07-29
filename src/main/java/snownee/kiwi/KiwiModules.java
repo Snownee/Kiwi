@@ -2,6 +2,7 @@ package snownee.kiwi;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -10,16 +11,18 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.Block;
 import net.minecraftforge.data.loading.DatagenModLoader;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.CrashReportCallables;
 import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegisterEvent;
 
 public final class KiwiModules {
 	private static Map<ResourceLocation, ModuleInfo> MODULES = Maps.newLinkedHashMap();
@@ -38,10 +41,18 @@ public final class KiwiModules {
 		MODULES.put(resourceLocation, new ModuleInfo(resourceLocation, module, context));
 	}
 
+	@SuppressWarnings("deprecation")
 	@SubscribeEvent
-	public static void handleRegister(RegistryEvent.Register<Block> event) {
-		MODULES.values().forEach(info -> info.registries.registries.keySet().forEach(info::handleRegister));
-		ModLoadingContext.get().setActiveContainer(null);
+	public static void handleRegister(RegisterEvent event) {
+		if (Registry.BLOCK.equals(event.getVanillaRegistry())) {
+			for (ModuleInfo info : MODULES.values()) {
+				LinkedList<Object> registries = Lists.newLinkedList(info.registries.registries.keySet());
+				if (registries.remove(ForgeRegistries.BLOCKS))
+					registries.addFirst(ForgeRegistries.BLOCKS);
+				registries.forEach(info::handleRegister);
+			}
+			ModLoadingContext.get().setActiveContainer(null);
+		}
 	}
 
 	public static boolean isLoaded(ResourceLocation module) {
