@@ -1,5 +1,8 @@
 name: publish
 
+on:
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -12,4 +15,5 @@ jobs:
       - run: ./gradlew publishCurseforge
         env:
           CURSEFORGEKEY: ${{ secrets.CURSEFORGEKEY }}
+          TEST: ${{ secrets.TEST }}
       - run: ./gradlew --stop
