@@ -1,14 +1,31 @@
-plugins {
-    id 'java'
+buildscript {
+    repositories {
+        maven { url = 'https://maven.minecraftforge.net' }
+        //maven { url = 'https://maven.parchmentmc.org' }
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+        //classpath 'org.parchmentmc:librarian:1.+'
+    }
 }
 
-repositories {
-    mavenCentral()
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'eclipse'
+
+group 'snownee.kiwi'
+version = rootProject.version
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+minecraft {
+    //mappings channel: 'parchment', version: '2021.09.05-1.17.1'
+    mappings channel: 'official', version: '1.18'
 }
 
 dependencies {
-    implementation 'com.google.code.gson:gson:2.8.9'
-    implementation "com.google.guava:guava:31.0.1-jre"
-    
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     implementation project(':annotation')
 }
+
+jar.finalizedBy('reobfJar')
