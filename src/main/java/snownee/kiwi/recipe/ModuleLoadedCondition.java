@@ -1,52 +1,45 @@
-/*
 package snownee.kiwi.recipe;
+
+import java.util.function.Predicate;
 
 import com.google.gson.JsonObject;
 
+import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
-import net.minecraftforge.common.crafting.conditions.ICondition;
-import net.minecraftforge.common.crafting.conditions.IConditionSerializer;
 import snownee.kiwi.Kiwi;
+import snownee.kiwi.util.Util;
 
-public class ModuleLoadedCondition implements ICondition {
+public enum ModuleLoadedCondition implements Predicate<JsonObject> {
+	INSTANCE;
+
 	public static final ResourceLocation ID = new ResourceLocation(Kiwi.MODID, "is_loaded");
 
-	final ResourceLocation module;
-
-	public ModuleLoadedCondition(ResourceLocation module) {
-		this.module = module;
-	}
-
 	@Override
-	public ResourceLocation getID() {
-		return ID;
+	public boolean test(JsonObject jsonObject) {
+		return Kiwi.isLoaded(Util.RL(GsonHelper.getAsString(jsonObject, "module")));
 	}
 
-	@Override
-	public boolean test() {
-		return Kiwi.isLoaded(module);
+	public static Provider provider(ResourceLocation module) {
+		return new Provider(module);
 	}
 
-	public enum Serializer implements IConditionSerializer<ModuleLoadedCondition> {
-		INSTANCE;
+	public static class Provider implements ConditionJsonProvider {
+		private final ResourceLocation module;
 
-		@Override
-		public void write(JsonObject json, ModuleLoadedCondition condition) {
-			json.addProperty("module", condition.module.toString());
+		protected Provider(ResourceLocation module) {
+			this.module = module;
 		}
 
 		@Override
-		public ModuleLoadedCondition read(JsonObject json) {
-			ResourceLocation module = new ResourceLocation(GsonHelper.getAsString(json, "module"));
-			return new ModuleLoadedCondition(module);
+		public void writeParameters(JsonObject json) {
+			json.addProperty("module", module.toString());
 		}
 
 		@Override
-		public ResourceLocation getID() {
+		public ResourceLocation getConditionId() {
 			return ModuleLoadedCondition.ID;
 		}
 	}
 
 }
-*/

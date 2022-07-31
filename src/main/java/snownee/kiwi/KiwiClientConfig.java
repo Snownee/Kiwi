@@ -26,7 +26,6 @@ public final class KiwiClientConfig {
 	public static boolean nbtTooltip = true;
 
 	@ConfigUI.Hide
-	@Comment("Show tips about disabling debug tooltips")
 	@Path("debug.debugTooltipMsg")
 	public static boolean debugTooltipMsg = true;
 
