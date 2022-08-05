@@ -53,7 +53,7 @@ public class KiwiConfigManager {
 			config.init();
 		}
 
-		if (Platform.isModLoaded("cloth_config")) {
+		if (Platform.isPhysicalClient() && Platform.isModLoaded("cloth_config")) {
 			ClothConfigIntegration.init();
 		}
 	}
