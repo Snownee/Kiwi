@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import net.minecraftforge.registries.IForgeRegistry;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Preconditions;
@@ -28,6 +30,8 @@ public final class KiwiModules {
 	private static Map<ResourceLocation, ModuleInfo> MODULES = Maps.newLinkedHashMap();
 	private static final Set<ResourceLocation> LOADED_MODULES = Sets.newHashSet();
 
+	static final Set<Object> ALL_USED_REGISTRIES = Sets.newHashSet();
+
 	static {
 		CrashReportCallables.registerCrashCallable("Kiwi Modules", () -> ("\n" + LOADED_MODULES.stream().map(ResourceLocation::toString).sorted(StringUtils::compare).collect(Collectors.joining("\n\t\t", "\t\t", ""))));
 	}
@@ -44,15 +48,15 @@ public final class KiwiModules {
 	@SuppressWarnings("deprecation")
 	@SubscribeEvent
 	public static void handleRegister(RegisterEvent event) {
-		if (Registry.BLOCK.equals(event.getVanillaRegistry())) {
-			for (ModuleInfo info : MODULES.values()) {
-				LinkedList<Object> registries = Lists.newLinkedList(info.registries.registries.keySet());
-				if (registries.remove(ForgeRegistries.BLOCKS))
-					registries.addFirst(ForgeRegistries.BLOCKS);
-				registries.forEach(info::handleRegister);
-			}
-			ModLoadingContext.get().setActiveContainer(null);
+		Object registry = event.getForgeRegistry();
+		if (registry == null)
+			registry = event.getVanillaRegistry();
+		if (!ALL_USED_REGISTRIES.contains(registry))
+			return;
+		for (ModuleInfo info : MODULES.values()) {
+			info.handleRegister(registry);
 		}
+		ModLoadingContext.get().setActiveContainer(null);
 	}
 
 	public static boolean isLoaded(ResourceLocation module) {

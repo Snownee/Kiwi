@@ -269,19 +269,3 @@ publishing {
         }
     }
 }
-
-// CurseForgeGradle
-task publishCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
-
-    println('222')
-    println(System.getenv('TEST') + '222')
-    println(System.getenv('TEST'))
-    println(System.getenv('UNKNOWN'))
-    apiToken = System.getenv('CURSEFORGEKEY')
-
-    // The main file to upload
-    def mainFile = upload(303657, shadowJar)
-    mainFile.releaseType = 'release'
-    mainFile.changelog = file('CHANGELOG.md')
-    mainFile.changelogType = 'markdown'
-}

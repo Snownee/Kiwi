@@ -282,6 +282,10 @@ public class Kiwi {
 		modEventBus.register(KiwiModules.class);
 		if (Platform.isPhysicalClient()) {
 			modEventBus.addListener(this::registerModelLoader);
+
+			Layer.CUTOUT.value = RenderType.cutout();
+			Layer.CUTOUT_MIPPED.value = RenderType.cutoutMipped();
+			Layer.TRANSLUCENT.value = RenderType.translucent();
 		}
 		MinecraftForge.EVENT_BUS.addListener(this::onCommandsRegister);
 		MinecraftForge.EVENT_BUS.addListener(this::onTagsUpdated);
@@ -561,6 +565,7 @@ public class Kiwi {
 			}
 		}
 
+		KiwiModules.ALL_USED_REGISTRIES.add(ForgeRegistries.ITEMS);
 		KiwiModules.fire(ModuleInfo::preInit);
 		ModLoadingContext.get().setActiveContainer(null);
 	}
@@ -709,9 +714,6 @@ public class Kiwi {
 		ClientInitEvent e = new ClientInitEvent(event);
 		KiwiModules.fire(m -> m.clientInit(e));
 		ModLoadingContext.get().setActiveContainer(null);
-		Layer.CUTOUT.value = RenderType.cutout();
-		Layer.CUTOUT_MIPPED.value = RenderType.cutoutMipped();
-		Layer.TRANSLUCENT.value = RenderType.translucent();
 	}
 
 	private void serverInit(ServerStartingEvent event) {
