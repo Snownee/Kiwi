@@ -31,6 +31,7 @@ import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.common.loot.CanToolPerformAction;
+import net.minecraftforge.registries.ForgeRegistries;
 import snownee.kiwi.KiwiModules;
 import snownee.kiwi.ModuleInfo;
 
@@ -49,7 +50,7 @@ public abstract class KiwiBlockLoot extends BlockLoot {
 	public KiwiBlockLoot(ResourceLocation moduleId) {
 		ModuleInfo info = KiwiModules.get(moduleId);
 		Objects.requireNonNull(info);
-		knownBlocks = info.getRegistries(Block.class);
+		knownBlocks = info.getRegistries(ForgeRegistries.BLOCKS);
 	}
 
 	protected void handle(Class<? extends Block> clazz, Function<Block, LootTable.Builder> handler) {
