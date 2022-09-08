@@ -10,9 +10,9 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder.ListMultimapBuilder;
 import com.google.common.collect.Sets;
 
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -40,7 +40,7 @@ import snownee.kiwi.mixin.ItemAccess;
 
 public class ModuleInfo {
 	public static final class RegistryHolder {
-		final Multimap<Object, NamedEntry<?>> registries = LinkedListMultimap.create();
+		final Multimap<Object, NamedEntry<?>> registries = ListMultimapBuilder.linkedHashKeys().linkedListValues().build();
 
 		void put(NamedEntry<?> entry) {
 			registries.put(entry.registry, entry);
@@ -128,8 +128,10 @@ public class ModuleInfo {
 			decorator.accept(this, e.entry);
 			if (registry instanceof Registry) {
 				Registry.register((Registry) registry, e.name, e.entry);
-			} else {
+			} else if (registry instanceof IForgeRegistry) {
 				((IForgeRegistry) registry).register(e.name, e.entry);
+			} else {
+				throw new RuntimeException("registry is invalid");
 			}
 		});
 		if (registry == ForgeRegistries.BLOCKS && Platform.isPhysicalClient() && !Platform.isDataGen()) {

@@ -177,7 +177,7 @@ public class Kiwi {
 	private static Multimap<String, KiwiAnnotationData> moduleData = ArrayListMultimap.create();
 	public static Map<ResourceLocation, Boolean> defaultOptions = Maps.newHashMap();
 	private static Map<KiwiAnnotationData, String> conditions = Maps.newHashMap();
-	private static RegistryLookup registryLookup = new RegistryLookup();
+	public static final RegistryLookup registryLookup = new RegistryLookup();
 	private static LoadingStage stage = LoadingStage.UNINITED;
 
 	public Kiwi() throws Exception {
@@ -534,11 +534,14 @@ public class Kiwi {
 					continue;
 				}
 
-				if (o instanceof KiwiGO) {
-					o = ((KiwiGO<?>) o).create();
+				Object registry;
+				if (o instanceof KiwiGO<?> kiwiGO) {
+					o = kiwiGO.create(regName);
+					registry = kiwiGO.registry();
+				} else {
+					registry = registryLookup.findRegistry(o);
 				}
 
-				Object registry = registryLookup.findRegistry(o);
 				if (registry != null) {
 					if (o instanceof Block) {
 						if (field.getAnnotation(NoItem.class) != null) {
