@@ -163,7 +163,7 @@ public class Kiwi {
 	}
 
 	private static enum LoadingStage {
-		UNINITED, CONSTRUCTED, INITED;
+		UNINITED, CONSTRUCTING, CONSTRUCTED, INITED;
 	}
 
 	private static Multimap<String, KiwiAnnotationData> moduleData = ArrayListMultimap.create();
@@ -176,7 +176,7 @@ public class Kiwi {
 		if (stage != LoadingStage.UNINITED) {
 			return;
 		}
-		stage = LoadingStage.CONSTRUCTED;
+		stage = LoadingStage.CONSTRUCTING;
 		try {
 			registerRegistries();
 		} catch (Exception e) {
@@ -277,6 +277,7 @@ public class Kiwi {
 		}
 		MinecraftForge.EVENT_BUS.addListener(this::onCommandsRegister);
 		MinecraftForge.EVENT_BUS.addListener(this::onTagsUpdated);
+		stage = LoadingStage.CONSTRUCTED;
 	}
 
 	private static boolean checkDist(KiwiAnnotationData annotationData, String dist) throws IOException {
@@ -306,7 +307,6 @@ public class Kiwi {
 		if (stage != LoadingStage.CONSTRUCTED) {
 			return;
 		}
-		stage = LoadingStage.INITED;
 		try {
 			KiwiConfigManager.preload();
 		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
@@ -555,6 +555,7 @@ public class Kiwi {
 
 		KiwiModules.fire(ModuleInfo::preInit);
 		ModLoadingContext.get().setActiveContainer(null);
+		stage = LoadingStage.INITED;
 	}
 
 	public static void registerRegistry(Registry<?> registry, Class<?> baseClass) {
