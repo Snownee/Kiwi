@@ -158,6 +158,7 @@ public class ModuleInfo {
 	}
 
 	public void preInit() {
+		KiwiModules.ALL_USED_REGISTRIES.addAll(registries.registries.keySet());
 		context.setActiveContainer();
 		module.preInit();
 		registries.registries.keySet().forEach(this::handleRegister);

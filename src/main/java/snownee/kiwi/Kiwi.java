@@ -256,6 +256,10 @@ public class Kiwi implements ModInitializer {
 			return Util.onAttackEntity(player, world, hand, entity, hitResult);
 		});
 		if (Platform.isPhysicalClient()) {
+			Layer.CUTOUT.value = RenderType.cutout();
+			Layer.CUTOUT_MIPPED.value = RenderType.cutoutMipped();
+			Layer.TRANSLUCENT.value = RenderType.translucent();
+
 			ClientLifecycleEvents.CLIENT_STARTED.register(this::clientInit);
 		}
 		preInit();
@@ -531,6 +535,7 @@ public class Kiwi implements ModInitializer {
 			}
 		}
 
+		KiwiModules.ALL_USED_REGISTRIES.add(Registry.ITEM);
 		KiwiModules.fire(ModuleInfo::preInit);
 	}
 
@@ -671,9 +676,6 @@ public class Kiwi implements ModInitializer {
 		KiwiModules.fire(m -> m.clientInit(e));
 		postInit();
 		loadComplete();
-		Layer.CUTOUT.value = RenderType.cutout();
-		Layer.CUTOUT_MIPPED.value = RenderType.cutoutMipped();
-		Layer.TRANSLUCENT.value = RenderType.translucent();
 	}
 
 	public static MinecraftServer currentServer;

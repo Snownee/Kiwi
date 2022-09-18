@@ -16,9 +16,7 @@ public final class KiwiModules {
 	private static Map<ResourceLocation, ModuleInfo> MODULES = Maps.newLinkedHashMap();
 	private static final Set<ResourceLocation> LOADED_MODULES = Sets.newHashSet();
 
-	//	static {
-	//		CrashReportCallables.registerCrashCallable("Kiwi Modules", () -> ("\n" + LOADED_MODULES.stream().map(ResourceLocation::toString).sorted(StringUtils::compare).collect(Collectors.joining("\n\t\t", "\t\t", ""))));
-	//	}
+	static final Set<Object> ALL_USED_REGISTRIES = Sets.newHashSet();
 
 	private KiwiModules() {
 	}
