@@ -89,6 +89,10 @@ public abstract class AbstractModule {
 		return new KiwiGO<>((Supplier<T>) factory);
 	}
 
+	protected static <T> KiwiGO<T> go(Supplier<? extends T> factory, Supplier<Object> registry) {
+		return new KiwiGO.RegistrySpecified<>((Supplier<T>) factory, registry);
+	}
+
 	/// helper methods:
 	protected static Item.Properties itemProp() {
 		return new Item.Properties();

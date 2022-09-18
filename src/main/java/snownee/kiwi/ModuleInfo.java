@@ -9,9 +9,9 @@ import java.util.function.BiConsumer;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder.ListMultimapBuilder;
 import com.google.common.collect.Sets;
 
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
@@ -35,14 +35,14 @@ import snownee.kiwi.mixin.ItemAccess;
 
 public class ModuleInfo {
 	public static final class RegistryHolder {
-		final Multimap<Registry<?>, NamedEntry<?>> registries = LinkedListMultimap.create();
+		final Multimap<Registry<?>, NamedEntry<?>> registries = ListMultimapBuilder.linkedHashKeys().linkedListValues().build();
 
 		<T> void put(NamedEntry<T> entry) {
 			registries.put(entry.registry, entry);
 		}
 
 		<T> Collection<NamedEntry<T>> get(Registry<T> registry) {
-			return registries.get(registry).stream().map(e -> (NamedEntry<T>) e).toList();
+			return (Collection<NamedEntry<T>>) (Object) registries.get(registry);
 		}
 	}
 

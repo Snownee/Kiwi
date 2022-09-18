@@ -50,7 +50,7 @@ public abstract class KiwiBlockLoot extends BlockLoot {
 	public KiwiBlockLoot(ResourceLocation moduleId) {
 		ModuleInfo info = KiwiModules.get(moduleId);
 		Objects.requireNonNull(info);
-		knownBlocks = info.getRegistries(Block.class);
+		knownBlocks = info.getRegistries(block registry);
 	}
 
 	protected void handle(Class<? extends Block> clazz, Function<Block, LootTable.Builder> handler) {

@@ -15,7 +15,7 @@ import net.minecraft.core.Registry;
 public class RegistryLookup {
 
 	public final Map<Class<?>, Registry<?>> registries = Maps.newConcurrentMap();
-	private final Cache<Class<?>, Optional<Registry<?>>> cache = CacheBuilder.newBuilder().build();
+	public final Cache<Class<?>, Optional<Registry<?>>> cache = CacheBuilder.newBuilder().build();
 
 	public Registry<?> findRegistry(Object o) {
 		try {

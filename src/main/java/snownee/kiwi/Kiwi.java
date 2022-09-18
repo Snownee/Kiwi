@@ -154,7 +154,7 @@ public class Kiwi implements ModInitializer {
 	private static Multimap<String, KiwiAnnotationData> moduleData = ArrayListMultimap.create();
 	public static Map<ResourceLocation, Boolean> defaultOptions = Maps.newHashMap();
 	private static Map<KiwiAnnotationData, String> conditions = Maps.newHashMap();
-	private static RegistryLookup registryLookup = new RegistryLookup();
+	public static final RegistryLookup registryLookup = new RegistryLookup();
 
 	@Override
 	public void onInitialize() {
@@ -495,11 +495,14 @@ public class Kiwi implements ModInitializer {
 					continue;
 				}
 
-				if (o instanceof KiwiGO) {
-					o = ((KiwiGO<?>) o).create();
+				Registry<?> registry;
+				if (o instanceof KiwiGO<?> kiwiGO) {
+					o = kiwiGO.create(regName);
+					registry = (Registry<?>) kiwiGO.registry();
+				} else {
+					registry = registryLookup.findRegistry(o);
 				}
 
-				Registry<?> registry = registryLookup.findRegistry(o);
 				if (registry != null) {
 					if (o instanceof Block) {
 						if (field.getAnnotation(NoItem.class) != null) {
@@ -706,7 +709,7 @@ public class Kiwi implements ModInitializer {
 	private void loadComplete() {
 		GROUP_CACHE.clear();
 		GROUP_CACHE = null;
-		registryLookup = null;
+		registryLookup.cache.invalidateAll();
 	}
 
 	public static boolean isLoaded(ResourceLocation module) {
