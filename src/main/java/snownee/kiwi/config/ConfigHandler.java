@@ -30,6 +30,7 @@ import com.moandjiezana.toml.TomlWriter;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Mth;
 import snownee.kiwi.Kiwi;
+import snownee.kiwi.KiwiModule.Skip;
 import snownee.kiwi.config.KiwiConfig.AdvancedPath;
 import snownee.kiwi.config.KiwiConfig.Comment;
 import snownee.kiwi.config.KiwiConfig.ConfigType;
@@ -251,6 +252,9 @@ public class ConfigHandler {
 			if (!Modifier.isPublic(mods) || !Modifier.isStatic(mods) || Modifier.isFinal(mods)) {
 				continue;
 			}
+			if (field.getAnnotation(Skip.class) != null) {
+				continue;
+			}
 			List<String> path = getPath(field);
 			String pathKey = joiner.join(path);
 			Translation translation = field.getAnnotation(Translation.class);
@@ -260,7 +264,11 @@ public class ConfigHandler {
 			} else {
 				translationKey = pathKey;
 			}
-			Value<?> value = define(pathKey, convert(field), field, translationKey);
+			Object converted = convert(field);
+			if (converted == null) {
+				continue;
+			}
+			Value<?> value = define(pathKey, converted, field, translationKey);
 			if (field.getAnnotation(LevelRestart.class) != null || field.getAnnotation(GameRestart.class) != null) {
 				// since there is no difference between these two options..
 				value.requiresRestart = true;
