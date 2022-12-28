@@ -17,7 +17,7 @@ import snownee.kiwi.KiwiModule.Category;
 
 @KiwiModule("test")
 @KiwiModule.Optional(defaultEnabled = false)
-@KiwiModule.Category("building_blocks")
+@KiwiModule.Category(value = "building", after = "redstone_block")
 //@KiwiModule.Subscriber(Bus.MOD)
 public class TestModule extends AbstractModule {
 	// Keep your fields `public static`

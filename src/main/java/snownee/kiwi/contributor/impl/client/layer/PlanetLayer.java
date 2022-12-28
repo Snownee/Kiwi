@@ -2,7 +2,7 @@ package snownee.kiwi.contributor.impl.client.layer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -38,7 +38,7 @@ public class PlanetLayer extends CosmeticLayer {
 		}
 		matrixStackIn.pushPose();
 		matrixStackIn.translate(0, -0.6, 0);
-		matrixStackIn.mulPose(Vector3f.YP.rotationDegrees(-ageInTicks));
+		matrixStackIn.mulPose(Axis.YP.rotationDegrees(-ageInTicks));
 		matrixStackIn.scale(1.2f, 1.2f, 1.2f);
 		modelPlanet.setupAnim(entitylivingbaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
 		VertexConsumer ivertexbuilder = ItemRenderer.getFoilBuffer(bufferIn, RenderType.entityTranslucent(TEXTURE), false, false);

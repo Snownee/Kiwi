@@ -16,6 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -32,8 +33,8 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 	public ItemStack recipeOutput;
 	private String group;
 
-	public DynamicShapedRecipe(ResourceLocation idIn) {
-		super(idIn);
+	public DynamicShapedRecipe(ResourceLocation idIn, CraftingBookCategory category) {
+		super(idIn, category);
 	}
 
 	@Override
@@ -126,7 +127,7 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 						ItemStack stack1 = ingredientsArrayMap.get(key);
 						if (stack1 == null) {
 							ingredientsArrayMap.put(key, stack0);
-						} else if (!stack1.sameItemStackIgnoreDurability(stack0)) {
+						} else if (!ItemStack.isSameItemSameTags(stack1, stack0)) {
 							return false;
 						}
 					}

@@ -1,21 +1,20 @@
 package snownee.kiwi;
 
-import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import org.jetbrains.annotations.Nullable;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.types.Type;
 
-import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder.Factory;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -35,7 +34,6 @@ import snownee.kiwi.loader.event.ClientInitEvent;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.loader.event.PostInitEvent;
 import snownee.kiwi.loader.event.ServerInitEvent;
-import snownee.kiwi.mixin.ItemAccess;
 
 /**
  *
@@ -46,15 +44,12 @@ import snownee.kiwi.mixin.ItemAccess;
  */
 public abstract class AbstractModule {
 	public ResourceLocation uid;
-	private static final BiConsumer<ModuleInfo, Item> ITEM_DECORATOR = (module, item) -> {
-		if (module.category != null && ((ItemAccess) item).getCategory() == null && !module.noCategories.contains(item))
-			((ItemAccess) item).setCategory(module.category);
-	};
+
 	private static final BiConsumer<ModuleInfo, Block> BLOCK_DECORATOR = (module, block) -> {
 		ModBlock.setFireInfo(block);
 	};
 
-	private static final Map<Registry<?>, BiConsumer<ModuleInfo, ?>> DEFAULT_DECORATORS = ImmutableMap.of(Registry.ITEM, ITEM_DECORATOR, Registry.BLOCK, BLOCK_DECORATOR);
+	private static final Map<Registry<?>, BiConsumer<ModuleInfo, ?>> DEFAULT_DECORATORS = ImmutableMap.of(BuiltInRegistries.BLOCK, BLOCK_DECORATOR);
 
 	protected final Map<Registry<?>, BiConsumer<ModuleInfo, ?>> decorators = Maps.newHashMap(DEFAULT_DECORATORS);
 
@@ -123,27 +118,24 @@ public abstract class AbstractModule {
 		return go(() -> new TagBasedBlockEntityType<>(factory, blockTag, datafixer));
 	}
 
-	/**
-	 * @since 5.2.0
-	 */
-	public static CreativeModeTab itemCategory(String namespace, String path, Supplier<ItemStack> icon, @Nullable BiConsumer<List<ItemStack>, CreativeModeTab> stacksForDisplay) {
-		return FabricItemGroupBuilder.create(new ResourceLocation(namespace, path)).icon(icon).appendItems(stacksForDisplay).build();
+	public static CreativeModeTab.Builder itemCategory(String namespace, String path, Supplier<ItemStack> icon) {
+		return FabricItemGroup.builder(new ResourceLocation(namespace, path)).icon(icon);
 	}
 
 	public static TagKey<Item> itemTag(String namespace, String path) {
-		return tag(Registry.ITEM_REGISTRY, namespace, path);
+		return tag(Registries.ITEM, namespace, path);
 	}
 
 	public static TagKey<EntityType<?>> entityTag(String namespace, String path) {
-		return tag(Registry.ENTITY_TYPE_REGISTRY, namespace, path);
+		return tag(Registries.ENTITY_TYPE, namespace, path);
 	}
 
 	public static TagKey<Block> blockTag(String namespace, String path) {
-		return tag(Registry.BLOCK_REGISTRY, namespace, path);
+		return tag(Registries.BLOCK, namespace, path);
 	}
 
 	public static TagKey<Fluid> fluidTag(String namespace, String path) {
-		return tag(Registry.FLUID_REGISTRY, namespace, path);
+		return tag(Registries.FLUID, namespace, path);
 	}
 
 	public static <T> TagKey<T> tag(ResourceKey<? extends Registry<T>> registryKey, String namespace, String path) {

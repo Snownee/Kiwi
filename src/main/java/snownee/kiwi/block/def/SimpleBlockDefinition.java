@@ -23,6 +23,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
@@ -74,7 +75,7 @@ public class SimpleBlockDefinition implements BlockDefinition {
 
 		@Override
 		public SimpleBlockDefinition fromNBT(CompoundTag tag) {
-			BlockState state = NbtUtils.readBlockState(tag.getCompound(TYPE));
+			BlockState state = NbtUtils.readBlockState(BuiltInRegistries.BLOCK.asLookup(), tag.getCompound(TYPE));
 			if (state.isAir())
 				return null;
 			return of(state);
@@ -153,7 +154,7 @@ public class SimpleBlockDefinition implements BlockDefinition {
 			BakedModel model = model();
 			RandomSource random = RandomSource.create();
 			random.setSeed(42L);
-			ResourceLocation particleIcon = model.getParticleIcon().getName();
+			ResourceLocation particleIcon = model.getParticleIcon().contents().name();
 			ResourceLocation sprite = particleIcon;
 			if (state.getBlock() == Blocks.GRASS_BLOCK) {
 				direction = Direction.UP;
@@ -163,7 +164,7 @@ public class SimpleBlockDefinition implements BlockDefinition {
 				if (quads.isEmpty())
 					quads = model.getQuads(state, null, random);
 				for (BakedQuad quad : quads) {
-					sprite = quad.getSprite().getName();
+					sprite = quad.getSprite().contents().name();
 					if (sprite.equals(particleIcon)) {
 						break;
 					}

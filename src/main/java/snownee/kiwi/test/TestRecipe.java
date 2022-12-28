@@ -6,6 +6,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 import snownee.kiwi.recipe.crafting.DynamicShapedRecipe;
@@ -13,7 +14,7 @@ import snownee.kiwi.recipe.crafting.DynamicShapedRecipe;
 public class TestRecipe extends DynamicShapedRecipe {
 
 	public TestRecipe(ResourceLocation idIn) {
-		super(idIn);
+		super(idIn, CraftingBookCategory.MISC);
 	}
 
 	// optional

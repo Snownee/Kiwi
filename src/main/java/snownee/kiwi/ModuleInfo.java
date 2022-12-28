@@ -17,10 +17,11 @@ import com.google.common.collect.Sets;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import snownee.kiwi.KiwiModule.Category;
 import snownee.kiwi.KiwiModule.RenderLayer;
@@ -31,7 +32,6 @@ import snownee.kiwi.loader.event.ClientInitEvent;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.loader.event.PostInitEvent;
 import snownee.kiwi.loader.event.ServerInitEvent;
-import snownee.kiwi.mixin.ItemAccess;
 
 public class ModuleInfo {
 	public static final class RegistryHolder {
@@ -48,7 +48,7 @@ public class ModuleInfo {
 
 	public final AbstractModule module;
 	public final ModContext context;
-	public CreativeModeTab category;
+	public GroupSetting groupSetting;
 	final RegistryHolder registries = new RegistryHolder();
 	final Map<Block, Item.Properties> blockItemBuilders = Maps.newHashMap();
 	final Set<Object> noCategories = Sets.newHashSet();
@@ -67,8 +67,15 @@ public class ModuleInfo {
 	 * @since 2.5.2
 	 */
 	@SuppressWarnings("rawtypes")
-	public void register(Object entry, ResourceLocation name, Registry<?> registry, @Nullable Field field) {
-		registries.put(new NamedEntry(name, entry, registry, field));
+	public void register(Object object, ResourceLocation name, Registry<?> registry, @Nullable Field field) {
+		NamedEntry entry = new NamedEntry(name, object, registry, field);
+		registries.put(entry);
+		if (field != null) {
+			Category group = field.getAnnotation(Category.class);
+			if (group != null) {
+				entry.groupSetting = GroupSetting.of(group);
+			}
+		}
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -77,8 +84,8 @@ public class ModuleInfo {
 		Collection<NamedEntry<T>> entries = registries.get(registry);
 		BiConsumer<ModuleInfo, T> decorator = (BiConsumer<ModuleInfo, T>) module.decorators.getOrDefault(registry, (a, b) -> {
 		});
-		if (registry == Registry.ITEM) {
-			registries.get(Registry.BLOCK).forEach(e -> {
+		if (registry == BuiltInRegistries.ITEM) {
+			registries.get(BuiltInRegistries.BLOCK).forEach(e -> {
 				if (noItems.contains(e.entry))
 					return;
 				Item.Properties builder = blockItemBuilders.get(e.entry);
@@ -92,29 +99,18 @@ public class ModuleInfo {
 				}
 				if (noCategories.contains(e.entry)) {
 					noCategories.add(item);
-				} else if (e.field != null) {
-					Category group = e.field.getAnnotation(Category.class);
-					if (group != null && !group.value().isEmpty()) {
-						CreativeModeTab category = Kiwi.getGroup(group.value());
-						if (category != null) {
-							((ItemAccess) item).setCategory(category);
-						} else {
-							((ItemAccess) item).setCategory(this.category);
-						}
-					}
 				}
-				entries.add(new NamedEntry(e.name, item, registry, null));
+				NamedEntry itemEntry = new NamedEntry(e.name, item, registry, null);
+				itemEntry.groupSetting = e.groupSetting;
+				entries.add(itemEntry);
 			});
 			entries.forEach(e -> {
-				if (e.field != null) {
-					Category group = e.field.getAnnotation(Category.class);
-					if (group != null && !group.value().isEmpty()) {
-						CreativeModeTab category = Kiwi.getGroup(group.value());
-						if (category != null) {
-							((ItemAccess) e.entry).setCategory(category);
-						} else {
-							((ItemAccess) e.entry).setCategory(this.category);
-						}
+				if (!noCategories.contains(e.entry)) {
+					List<ItemStack> stacks = List.of(new ItemStack((Item) e.entry));
+					if (e.groupSetting != null) {
+						e.groupSetting.apply(stacks);
+					} else if (groupSetting != null) {
+						groupSetting.apply(stacks);
 					}
 				}
 			});
@@ -123,7 +119,7 @@ public class ModuleInfo {
 			decorator.accept(this, e.entry);
 			Registry.register(e.registry, e.name, e.entry);
 		});
-		if (registry == Registry.BLOCK && Platform.isPhysicalClient() && !Platform.isDataGen()) {
+		if (registry == BuiltInRegistries.BLOCK && Platform.isPhysicalClient() && !Platform.isDataGen()) {
 			final RenderType solid = RenderType.solid();
 			Map<Class<?>, RenderType> cache = Maps.newHashMap();
 			entries.stream().forEach(e -> {

@@ -45,7 +45,9 @@ public @interface KiwiModule {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE, ElementType.FIELD })
 	@interface Category {
-		String value() default "";
+		String[] value() default {};
+
+		String[] after() default {};
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)

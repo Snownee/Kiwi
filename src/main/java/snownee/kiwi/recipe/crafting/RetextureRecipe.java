@@ -12,8 +12,10 @@ import it.unimi.dsi.fastutil.chars.Char2ObjectArrayMap;
 import it.unimi.dsi.fastutil.chars.Char2ObjectMap;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import snownee.kiwi.block.def.BlockDefinition;
 import snownee.kiwi.block.entity.RetextureBlockEntity;
@@ -23,8 +25,8 @@ import snownee.kiwi.recipe.FullBlockIngredient;
 public class RetextureRecipe extends DynamicShapedRecipe {
 	private Char2ObjectMap<String[]> textureKeys;
 
-	public RetextureRecipe(ResourceLocation idIn) {
-		super(idIn);
+	public RetextureRecipe(ResourceLocation idIn, CraftingBookCategory category) {
+		super(idIn, category);
 	}
 
 	@Override //FIXME
@@ -59,9 +61,11 @@ public class RetextureRecipe extends DynamicShapedRecipe {
 
 	public static class Serializer extends DynamicShapedRecipe.Serializer<RetextureRecipe> {
 
+		@SuppressWarnings("deprecation")
 		@Override
 		public RetextureRecipe fromJson(ResourceLocation pRecipeId, JsonObject pSerializedRecipe) {
-			RetextureRecipe recipe = new RetextureRecipe(pRecipeId);
+			CraftingBookCategory category = CraftingBookCategory.CODEC.byName(GsonHelper.getAsString(pSerializedRecipe, "category", null), CraftingBookCategory.MISC);
+			RetextureRecipe recipe = new RetextureRecipe(pRecipeId, category);
 			fromJson(recipe, pSerializedRecipe);
 			JsonObject o = pSerializedRecipe.getAsJsonObject("texture");
 			recipe.textureKeys = new Char2ObjectArrayMap<>(o.size());
@@ -78,7 +82,7 @@ public class RetextureRecipe extends DynamicShapedRecipe {
 
 		@Override
 		public RetextureRecipe fromNetwork(ResourceLocation pRecipeId, FriendlyByteBuf pBuffer) {
-			RetextureRecipe recipe = new RetextureRecipe(pRecipeId);
+			RetextureRecipe recipe = new RetextureRecipe(pRecipeId, pBuffer.readEnum(CraftingBookCategory.class));
 			fromNetwork(recipe, pBuffer);
 			int size = pBuffer.readVarInt();
 			recipe.textureKeys = new Char2ObjectArrayMap<>(size);
@@ -96,6 +100,7 @@ public class RetextureRecipe extends DynamicShapedRecipe {
 
 		@Override
 		public void toNetwork(FriendlyByteBuf buffer, RetextureRecipe recipe) {
+			buffer.writeEnum(recipe.category());
 			super.toNetwork(buffer, recipe);
 			buffer.writeVarInt(recipe.textureKeys.size());
 			for (Char2ObjectMap.Entry<String[]> e : recipe.textureKeys.char2ObjectEntrySet()) {

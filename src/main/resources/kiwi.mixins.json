@@ -5,7 +5,6 @@
   "compatibilityLevel": "JAVA_16",
   "refmap": "kiwi.refmap.json",
   "mixins": [
-    "ItemAccess",
     "BlockAccess",
     "ShapedRecipeAccess",
     "VillagerAccess",

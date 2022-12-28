@@ -9,12 +9,12 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.ButtonBlock;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.PressurePlateBlock;
 import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.TrapDoorBlock;
-import net.minecraft.world.level.block.WoodButtonBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
@@ -135,7 +135,7 @@ public class ModBlock extends Block implements IKiwiBlock {
 		int fireSpreadSpeed = 0;
 		int flammability = 0;
 		if (material == Material.WOOD) {
-			if ((!(block instanceof DoorBlock) && !(block instanceof TrapDoorBlock) && !(block instanceof WoodButtonBlock) && !(block instanceof PressurePlateBlock))) {
+			if ((!(block instanceof DoorBlock) && !(block instanceof TrapDoorBlock) && !(block instanceof ButtonBlock) && !(block instanceof PressurePlateBlock))) {
 				fireSpreadSpeed = 5;
 				flammability = 20;
 			}

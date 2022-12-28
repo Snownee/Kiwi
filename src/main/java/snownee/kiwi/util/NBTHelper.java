@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import com.mojang.authlib.GameProfile;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
@@ -278,7 +279,7 @@ public class NBTHelper {
 	public BlockState getBlockState(String key) {
 		CompoundTag subTag = getTagInternal(key, false, false);
 		if (subTag != null) {
-			return NbtUtils.readBlockState(subTag);
+			return NbtUtils.readBlockState(BuiltInRegistries.BLOCK.asLookup(), subTag);
 		}
 		return Blocks.AIR.defaultBlockState();
 	}

@@ -13,6 +13,8 @@ public class NamedEntry<T> {
 	public final Registry<T> registry;
 	@Nullable
 	public final Field field;
+	@Nullable
+	public GroupSetting groupSetting;
 
 	public NamedEntry(ResourceLocation name, T entry, Registry<T> registry, @Nullable Field field) {
 		this.name = name;
