@@ -20,8 +20,8 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.data.loading.DatagenModLoader;
 import net.minecraftforge.fml.javafmlmod.FMLModContainer;
@@ -30,13 +30,13 @@ import net.minecraftforge.registries.IForgeRegistry;
 import snownee.kiwi.KiwiModule.Category;
 import snownee.kiwi.KiwiModule.RenderLayer;
 import snownee.kiwi.block.IKiwiBlock;
+import snownee.kiwi.item.ItemCategoryFiller;
 import snownee.kiwi.item.ModBlockItem;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.loader.event.ClientInitEvent;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.loader.event.PostInitEvent;
 import snownee.kiwi.loader.event.ServerInitEvent;
-import snownee.kiwi.mixin.ItemAccess;
 
 public class ModuleInfo {
 	public static final class RegistryHolder {
@@ -53,7 +53,7 @@ public class ModuleInfo {
 
 	public final AbstractModule module;
 	public final ModContext context;
-	public CreativeModeTab category;
+	public GroupSetting groupSetting;
 	final RegistryHolder registries = new RegistryHolder();
 	final Map<Block, Item.Properties> blockItemBuilders = Maps.newHashMap();
 	final Set<Object> noCategories = Sets.newHashSet();
@@ -72,8 +72,15 @@ public class ModuleInfo {
 	 * @since 2.5.2
 	 */
 	@SuppressWarnings("rawtypes")
-	public void register(Object entry, ResourceLocation name, Object registry, @Nullable Field field) {
-		registries.put(new NamedEntry(name, entry, registry, field));
+	public void register(Object object, ResourceLocation name, Object registry, @Nullable Field field) {
+		NamedEntry entry = new NamedEntry(name, object, registry, field);
+		registries.put(entry);
+		if (field != null) {
+			Category group = field.getAnnotation(Category.class);
+			if (group != null) {
+				entry.groupSetting = GroupSetting.of(group);
+			}
+		}
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -97,29 +104,23 @@ public class ModuleInfo {
 				}
 				if (noCategories.contains(e.entry)) {
 					noCategories.add(item);
-				} else if (e.field != null) {
-					Category group = e.field.getAnnotation(Category.class);
-					if (group != null && !group.value().isEmpty()) {
-						CreativeModeTab category = Kiwi.getGroup(group.value());
-						if (category != null) {
-							((ItemAccess) item).setCategory(category);
-						} else {
-							((ItemAccess) item).setCategory(this.category);
-						}
-					}
 				}
-				entries.add(new NamedEntry(e.name, item, registry, null));
+				NamedEntry itemEntry = new NamedEntry(e.name, item, registry, null);
+				itemEntry.groupSetting = e.groupSetting;
+				entries.add(itemEntry);
 			});
 			entries.forEach(e -> {
-				if (e.field != null) {
-					Category group = e.field.getAnnotation(Category.class);
-					if (group != null && !group.value().isEmpty()) {
-						CreativeModeTab category = Kiwi.getGroup(group.value());
-						if (category != null) {
-							((ItemAccess) e.entry).setCategory(category);
-						} else {
-							((ItemAccess) e.entry).setCategory(this.category);
-						}
+				if (!noCategories.contains(e.entry)) {
+					ItemCategoryFiller filler;
+					if (e.entry instanceof ItemCategoryFiller) {
+						filler = (ItemCategoryFiller) e.entry;
+					} else {
+						filler = (tab, flags, hasPermissions, items) -> items.add(new ItemStack((Item) e.entry));
+					}
+					if (e.groupSetting != null) {
+						e.groupSetting.apply(filler);
+					} else if (groupSetting != null) {
+						groupSetting.apply(filler);
 					}
 				}
 			});

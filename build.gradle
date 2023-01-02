@@ -59,7 +59,7 @@ minecraft {
     mappings channel: 'official', version: project.minecraft_version
     //mappings channel: 'parchment', version: '2021.09.05-1.17.1'
 
-    //accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
     // Default run configurations.
     // These can be tweaked, removed, or duplicated as needed.
@@ -207,6 +207,7 @@ reobf {
 }
 
 repositories {
+    maven { url "https://maven.shedaniel.me/" }
     maven {
         name = "jei"
         url = "https://dvs1.progwml6.com/files/maven"
@@ -217,7 +218,6 @@ repositories {
             includeGroup "curse.maven"
         }
     }
-    maven { url "https://maven.shedaniel.me/" }
 }
 
 configurations {
@@ -277,7 +277,7 @@ modrinth {
     versionNumber = project.mod_version // You don't need to set this manually. Will fail if Modrinth has this version already
     versionType = "release" // This is the default -- can also be `beta` or `alpha`
     uploadFile = jar // With Loom, this MUST be set to `remapJar` instead of `jar`!
-    gameVersions = ["1.19.1", "1.19.2"] // Must be an array, even with only one version
+    gameVersions = ["1.19.3"] // Must be an array, even with only one version
     loaders = ["forge"] // Must also be an array - no need to specify this if you're using Loom or ForgeGradle
     dependencies { // A special DSL for creating dependencies
         // scope.type

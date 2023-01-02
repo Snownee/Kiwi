@@ -1,9 +1,10 @@
 package snownee.kiwi.datagen.provider;
 
-import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
@@ -20,63 +21,88 @@ import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.data.BlockFamily;
 import net.minecraft.data.CachedOutput;
-import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
+import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeBuilder;
+import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
 import net.minecraft.data.recipes.SingleItemRecipeBuilder;
 import net.minecraft.data.recipes.UpgradeRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.HoneycombItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.SimpleCookingSerializer;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
 public abstract class KiwiRecipeProvider implements DataProvider {
 
-	protected static final Logger LOGGER = LogManager.getLogger();
-	protected final DataGenerator generator;
+	public static final Logger LOGGER = LogManager.getLogger();
+	protected final PackOutput.PathProvider recipePathProvider;
+	protected final PackOutput.PathProvider advancementPathProvider;
 
-	public KiwiRecipeProvider(DataGenerator generator) {
-		this.generator = generator;
+	public static class ModIdOverriden extends PackOutput.PathProvider {
+
+		private final String modId;
+
+		public ModIdOverriden(String modId, PackOutput packOutput, PackOutput.Target target, String kind) {
+			super(packOutput, target, kind);
+			this.modId = modId;
+		}
+
+		public Path file(ResourceLocation p_250940_, String p_251208_) {
+			return root.resolve(modId).resolve(kind).resolve(p_250940_.getPath() + "." + p_251208_);
+		}
+
+		public Path json(ResourceLocation p_251634_) {
+			return root.resolve(modId).resolve(kind).resolve(p_251634_.getPath() + ".json");
+		}
+
 	}
 
-	@Override
-	public void run(CachedOutput hashCache) {
-		Path path = generator.getOutputFolder();
+	public KiwiRecipeProvider(String modId, PackOutput packOutput) {
+		this.recipePathProvider = new ModIdOverriden(modId, packOutput, PackOutput.Target.DATA_PACK, "recipes");
+		this.advancementPathProvider = new ModIdOverriden(modId, packOutput, PackOutput.Target.DATA_PACK, "advancements");
+	}
+
+	public CompletableFuture<?> run(CachedOutput p_254020_) {
 		Set<ResourceLocation> set = Sets.newHashSet();
-		addRecipes(recipe -> {
-			if (!set.add(recipe.getId())) {
-				throw new IllegalStateException("Duplicate recipe " + recipe.getId());
+		List<CompletableFuture<?>> list = new ArrayList<>();
+		this.buildRecipes((p_253413_) -> {
+			if (!set.add(p_253413_.getId())) {
+				throw new IllegalStateException("Duplicate recipe " + p_253413_.getId());
 			} else {
-				save(hashCache, recipe.serializeRecipe(), path.resolve("data/" + recipe.getId().getNamespace() + "/recipes/" + recipe.getId().getPath() + ".json"));
-				JsonObject jsonobject = recipe.serializeAdvancement();
+				list.add(DataProvider.saveStable(p_254020_, p_253413_.serializeRecipe(), this.recipePathProvider.json(p_253413_.getId())));
+				JsonObject jsonobject = p_253413_.serializeAdvancement();
 				if (jsonobject != null) {
-					save(hashCache, jsonobject, path.resolve("data/" + recipe.getId().getNamespace() + "/advancements/" + recipe.getAdvancementId().getPath() + ".json"));
+					var saveAdvancementFuture = saveAdvancement(p_254020_, p_253413_, jsonobject);
+					if (saveAdvancementFuture != null)
+						list.add(saveAdvancementFuture);
 				}
 			}
 		});
+		return CompletableFuture.allOf(list.toArray((p_253414_) -> {
+			return new CompletableFuture[p_253414_];
+		}));
 	}
 
-	protected abstract void addRecipes(Consumer<FinishedRecipe> collector);
+	public abstract void buildRecipes(Consumer<FinishedRecipe> collector);
 
-	protected static void save(CachedOutput p_236360_, JsonObject p_236361_, Path p_236362_) {
-		try {
-			DataProvider.saveStable(p_236360_, p_236361_, p_236362_);
-		} catch (IOException ioexception) {
-			LOGGER.error("Couldn't save recipe {}", p_236362_, ioexception);
-		}
+	@Nullable
+	public CompletableFuture<?> saveAdvancement(CachedOutput output, FinishedRecipe finishedRecipe, JsonObject advancementJson) {
+		return DataProvider.saveStable(output, advancementJson, this.advancementPathProvider.json(finishedRecipe.getAdvancementId()));
 	}
 
 	@Override
@@ -84,166 +110,250 @@ public abstract class KiwiRecipeProvider implements DataProvider {
 		return getClass().getSimpleName();
 	}
 
-	public static void oneToOneConversionRecipe(Consumer<FinishedRecipe> collector, ItemLike to, ItemLike from, @Nullable String group) {
-		oneToOneConversionRecipe(collector, to, from, group, 1);
+	public static void oneToOneConversionRecipe(Consumer<FinishedRecipe> p_176552_, ItemLike p_176553_, ItemLike p_176554_, @Nullable String p_176555_) {
+		oneToOneConversionRecipe(p_176552_, p_176553_, p_176554_, p_176555_, 1);
 	}
 
-	public static void oneToOneConversionRecipe(Consumer<FinishedRecipe> collector, ItemLike to, ItemLike from, @Nullable String group, int count) {
-		ShapelessRecipeBuilder.shapeless(to, count).requires(from).group(group).unlockedBy(getHasName(from), has(from)).save(collector, getConversionRecipeName(to, from));
+	public static void oneToOneConversionRecipe(Consumer<FinishedRecipe> p_176557_, ItemLike p_176558_, ItemLike p_176559_, @Nullable String p_176560_, int p_176561_) {
+		ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, p_176558_, p_176561_).requires(p_176559_).group(p_176560_).unlockedBy(getHasName(p_176559_), has(p_176559_)).save(p_176557_, getConversionRecipeName(p_176558_, p_176559_));
 	}
 
-	public static void oreSmelting(Consumer<FinishedRecipe> p_176592_, List<ItemLike> p_176593_, ItemLike p_176594_, float p_176595_, int p_176596_, String p_176597_) {
-		oreCooking(p_176592_, RecipeSerializer.SMELTING_RECIPE, p_176593_, p_176594_, p_176595_, p_176596_, p_176597_, "_from_smelting");
+	public static void oreSmelting(Consumer<FinishedRecipe> p_250654_, List<ItemLike> p_250172_, RecipeCategory p_250588_, ItemLike p_251868_, float p_250789_, int p_252144_, String p_251687_) {
+		oreCooking(p_250654_, RecipeSerializer.SMELTING_RECIPE, p_250172_, p_250588_, p_251868_, p_250789_, p_252144_, p_251687_, "_from_smelting");
 	}
 
-	public static void oreBlasting(Consumer<FinishedRecipe> p_176626_, List<ItemLike> p_176627_, ItemLike p_176628_, float p_176629_, int p_176630_, String p_176631_) {
-		oreCooking(p_176626_, RecipeSerializer.BLASTING_RECIPE, p_176627_, p_176628_, p_176629_, p_176630_, p_176631_, "_from_blasting");
+	public static void oreBlasting(Consumer<FinishedRecipe> p_248775_, List<ItemLike> p_251504_, RecipeCategory p_248846_, ItemLike p_249735_, float p_248783_, int p_250303_, String p_251984_) {
+		oreCooking(p_248775_, RecipeSerializer.BLASTING_RECIPE, p_251504_, p_248846_, p_249735_, p_248783_, p_250303_, p_251984_, "_from_blasting");
 	}
 
-	public static void oreCooking(Consumer<FinishedRecipe> p_176534_, SimpleCookingSerializer<?> p_176535_, List<ItemLike> p_176536_, ItemLike p_176537_, float p_176538_, int p_176539_, String p_176540_, String p_176541_) {
-		for (ItemLike itemlike : p_176536_) {
-			SimpleCookingRecipeBuilder.cooking(Ingredient.of(itemlike), p_176537_, p_176538_, p_176539_, p_176535_).group(p_176540_).unlockedBy(getHasName(itemlike), has(itemlike)).save(p_176534_, getItemName(p_176537_) + p_176541_ + "_" + getItemName(itemlike));
+	public static void oreCooking(Consumer<FinishedRecipe> p_250791_, RecipeSerializer<? extends AbstractCookingRecipe> p_251817_, List<ItemLike> p_249619_, RecipeCategory p_251154_, ItemLike p_250066_, float p_251871_, int p_251316_, String p_251450_, String p_249236_) {
+		for (ItemLike itemlike : p_249619_) {
+			SimpleCookingRecipeBuilder.generic(Ingredient.of(itemlike), p_251154_, p_250066_, p_251871_, p_251316_, p_251817_).group(p_251450_).unlockedBy(getHasName(itemlike), has(itemlike)).save(p_250791_, getItemName(p_250066_) + p_249236_ + "_" + getItemName(itemlike));
 		}
 	}
 
-	public static void netheriteSmithing(Consumer<FinishedRecipe> p_125995_, Item p_125996_, Item p_125997_) {
-		UpgradeRecipeBuilder.smithing(Ingredient.of(p_125996_), Ingredient.of(Items.NETHERITE_INGOT), p_125997_).unlocks("has_netherite_ingot", has(Items.NETHERITE_INGOT)).save(p_125995_, getItemName(p_125997_) + "_smithing");
+	public static void netheriteSmithing(Consumer<FinishedRecipe> p_251614_, Item p_250046_, RecipeCategory p_248986_, Item p_250389_) {
+		UpgradeRecipeBuilder.smithing(Ingredient.of(p_250046_), Ingredient.of(Items.NETHERITE_INGOT), p_248986_, p_250389_).unlocks("has_netherite_ingot", has(Items.NETHERITE_INGOT)).save(p_251614_, getItemName(p_250389_) + "_smithing");
 	}
 
-	public static void planksFromLog(Consumer<FinishedRecipe> p_125999_, ItemLike p_126000_, TagKey<Item> p_126001_) {
-		ShapelessRecipeBuilder.shapeless(p_126000_, 4).requires(p_126001_).group("planks").unlockedBy("has_log", has(p_126001_)).save(p_125999_);
+	public static void twoByTwoPacker(Consumer<FinishedRecipe> p_248860_, RecipeCategory p_250881_, ItemLike p_252184_, ItemLike p_249710_) {
+		ShapedRecipeBuilder.shaped(p_250881_, p_252184_, 1).define('#', p_249710_).pattern("##").pattern("##").unlockedBy(getHasName(p_249710_), has(p_249710_)).save(p_248860_);
 	}
 
-	public static void planksFromLogs(Consumer<FinishedRecipe> p_126018_, ItemLike p_126019_, TagKey<Item> p_126020_) {
-		ShapelessRecipeBuilder.shapeless(p_126019_, 4).requires(p_126020_).group("planks").unlockedBy("has_logs", has(p_126020_)).save(p_126018_);
+	public static void threeByThreePacker(Consumer<FinishedRecipe> p_259036_, RecipeCategory p_259247_, ItemLike p_259376_, ItemLike p_259717_, String p_260308_) {
+		ShapelessRecipeBuilder.shapeless(p_259247_, p_259376_).requires(p_259717_, 9).unlockedBy(p_260308_, has(p_259717_)).save(p_259036_);
+	}
+
+	public static void threeByThreePacker(Consumer<FinishedRecipe> p_260012_, RecipeCategory p_259186_, ItemLike p_259360_, ItemLike p_259263_) {
+		threeByThreePacker(p_260012_, p_259186_, p_259360_, p_259263_, getHasName(p_259263_));
+	}
+
+	public static void planksFromLog(Consumer<FinishedRecipe> p_259712_, ItemLike p_259052_, TagKey<Item> p_259045_, int p_259471_) {
+		ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, p_259052_, p_259471_).requires(p_259045_).group("planks").unlockedBy("has_log", has(p_259045_)).save(p_259712_);
+	}
+
+	public static void planksFromLogs(Consumer<FinishedRecipe> p_259910_, ItemLike p_259193_, TagKey<Item> p_259818_, int p_259807_) {
+		ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, p_259193_, p_259807_).requires(p_259818_).group("planks").unlockedBy("has_logs", has(p_259818_)).save(p_259910_);
 	}
 
 	public static void woodFromLogs(Consumer<FinishedRecipe> p_126003_, ItemLike p_126004_, ItemLike p_126005_) {
-		ShapedRecipeBuilder.shaped(p_126004_, 3).define('#', p_126005_).pattern("##").pattern("##").group("bark").unlockedBy("has_log", has(p_126005_)).save(p_126003_);
+		ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, p_126004_, 3).define('#', p_126005_).pattern("##").pattern("##").group("bark").unlockedBy("has_log", has(p_126005_)).save(p_126003_);
 	}
 
 	public static void woodenBoat(Consumer<FinishedRecipe> p_126022_, ItemLike p_126023_, ItemLike p_126024_) {
-		ShapedRecipeBuilder.shaped(p_126023_).define('#', p_126024_).pattern("# #").pattern("###").group("boat").unlockedBy("in_water", insideOf(Blocks.WATER)).save(p_126022_);
+		ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, p_126023_).define('#', p_126024_).pattern("# #").pattern("###").group("boat").unlockedBy("in_water", insideOf(Blocks.WATER)).save(p_126022_);
+	}
+
+	public static void chestBoat(Consumer<FinishedRecipe> p_236372_, ItemLike p_236373_, ItemLike p_236374_) {
+		ShapelessRecipeBuilder.shapeless(RecipeCategory.TRANSPORTATION, p_236373_).requires(Blocks.CHEST).requires(p_236374_).group("chest_boat").unlockedBy("has_boat", has(ItemTags.BOATS)).save(p_236372_);
 	}
 
 	public static RecipeBuilder buttonBuilder(ItemLike p_176659_, Ingredient p_176660_) {
-		return ShapelessRecipeBuilder.shapeless(p_176659_).requires(p_176660_);
+		return ShapelessRecipeBuilder.shapeless(RecipeCategory.REDSTONE, p_176659_).requires(p_176660_);
 	}
 
 	public static RecipeBuilder doorBuilder(ItemLike p_176671_, Ingredient p_176672_) {
-		return ShapedRecipeBuilder.shaped(p_176671_, 3).define('#', p_176672_).pattern("##").pattern("##").pattern("##");
+		return ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, p_176671_, 3).define('#', p_176672_).pattern("##").pattern("##").pattern("##");
 	}
 
 	public static RecipeBuilder fenceBuilder(ItemLike p_176679_, Ingredient p_176680_) {
 		int i = p_176679_ == Blocks.NETHER_BRICK_FENCE ? 6 : 3;
 		Item item = p_176679_ == Blocks.NETHER_BRICK_FENCE ? Items.NETHER_BRICK : Items.STICK;
-		return ShapedRecipeBuilder.shaped(p_176679_, i).define('W', p_176680_).define('#', item).pattern("W#W").pattern("W#W");
+		return ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, p_176679_, i).define('W', p_176680_).define('#', item).pattern("W#W").pattern("W#W");
 	}
 
 	public static RecipeBuilder fenceGateBuilder(ItemLike p_176685_, Ingredient p_176686_) {
-		return ShapedRecipeBuilder.shaped(p_176685_).define('#', Items.STICK).define('W', p_176686_).pattern("#W#").pattern("#W#");
+		return ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, p_176685_).define('#', Items.STICK).define('W', p_176686_).pattern("#W#").pattern("#W#");
 	}
 
 	public static void pressurePlate(Consumer<FinishedRecipe> p_176691_, ItemLike p_176692_, ItemLike p_176693_) {
-		pressurePlateBuilder(p_176692_, Ingredient.of(p_176693_)).unlockedBy(getHasName(p_176693_), has(p_176693_)).save(p_176691_);
+		pressurePlateBuilder(RecipeCategory.REDSTONE, p_176692_, Ingredient.of(p_176693_)).unlockedBy(getHasName(p_176693_), has(p_176693_)).save(p_176691_);
 	}
 
-	public static RecipeBuilder pressurePlateBuilder(ItemLike p_176695_, Ingredient p_176696_) {
-		return ShapedRecipeBuilder.shaped(p_176695_).define('#', p_176696_).pattern("##");
+	public static RecipeBuilder pressurePlateBuilder(RecipeCategory p_251447_, ItemLike p_251989_, Ingredient p_249211_) {
+		return ShapedRecipeBuilder.shaped(p_251447_, p_251989_).define('#', p_249211_).pattern("##");
 	}
 
-	public static void slab(Consumer<FinishedRecipe> p_176701_, ItemLike p_176702_, ItemLike p_176703_) {
-		slabBuilder(p_176702_, Ingredient.of(p_176703_)).unlockedBy(getHasName(p_176703_), has(p_176703_)).save(p_176701_);
+	public static void slab(Consumer<FinishedRecipe> p_248880_, RecipeCategory p_251848_, ItemLike p_249368_, ItemLike p_252133_) {
+		slabBuilder(p_251848_, p_249368_, Ingredient.of(p_252133_)).unlockedBy(getHasName(p_252133_), has(p_252133_)).save(p_248880_);
 	}
 
-	public static RecipeBuilder slabBuilder(ItemLike p_176705_, Ingredient p_176706_) {
-		return ShapedRecipeBuilder.shaped(p_176705_, 6).define('#', p_176706_).pattern("###");
+	public static RecipeBuilder slabBuilder(RecipeCategory p_251707_, ItemLike p_251284_, Ingredient p_248824_) {
+		return ShapedRecipeBuilder.shaped(p_251707_, p_251284_, 6).define('#', p_248824_).pattern("###");
 	}
 
 	public static RecipeBuilder stairBuilder(ItemLike p_176711_, Ingredient p_176712_) {
-		return ShapedRecipeBuilder.shaped(p_176711_, 4).define('#', p_176712_).pattern("#  ").pattern("## ").pattern("###");
+		return ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, p_176711_, 4).define('#', p_176712_).pattern("#  ").pattern("## ").pattern("###");
 	}
 
 	public static RecipeBuilder trapdoorBuilder(ItemLike p_176721_, Ingredient p_176722_) {
-		return ShapedRecipeBuilder.shaped(p_176721_, 2).define('#', p_176722_).pattern("###").pattern("###");
+		return ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, p_176721_, 2).define('#', p_176722_).pattern("###").pattern("###");
 	}
 
 	public static RecipeBuilder signBuilder(ItemLike p_176727_, Ingredient p_176728_) {
-		return ShapedRecipeBuilder.shaped(p_176727_, 3).group("sign").define('#', p_176728_).define('X', Items.STICK).pattern("###").pattern("###").pattern(" X ");
+		return ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, p_176727_, 3).group("sign").define('#', p_176728_).define('X', Items.STICK).pattern("###").pattern("###").pattern(" X ");
 	}
 
-	public static void wall(Consumer<FinishedRecipe> p_176613_, ItemLike p_176614_, ItemLike p_176615_) {
-		wallBuilder(p_176614_, Ingredient.of(p_176615_)).unlockedBy(getHasName(p_176615_), has(p_176615_)).save(p_176613_);
+	public static void hangingSign(Consumer<FinishedRecipe> p_250663_, ItemLike p_252355_, ItemLike p_250437_) {
+		ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, p_252355_, 6).group("hanging_sign").define('#', p_250437_).define('X', Items.CHAIN).pattern("X X").pattern("###").pattern("###").unlockedBy("has_stripped_logs", has(p_250437_)).save(p_250663_);
 	}
 
-	public static RecipeBuilder wallBuilder(ItemLike p_176515_, Ingredient p_176516_) {
-		return ShapedRecipeBuilder.shaped(p_176515_, 6).define('#', p_176516_).pattern("###").pattern("###");
+	public static void coloredWoolFromWhiteWoolAndDye(Consumer<FinishedRecipe> p_126062_, ItemLike p_126063_, ItemLike p_126064_) {
+		ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, p_126063_).requires(p_126064_).requires(Blocks.WHITE_WOOL).group("wool").unlockedBy("has_white_wool", has(Blocks.WHITE_WOOL)).save(p_126062_);
 	}
 
-	public static void polished(Consumer<FinishedRecipe> p_176641_, ItemLike p_176642_, ItemLike p_176643_) {
-		polishedBuilder(p_176642_, Ingredient.of(p_176643_)).unlockedBy(getHasName(p_176643_), has(p_176643_)).save(p_176641_);
+	public static void carpet(Consumer<FinishedRecipe> p_176717_, ItemLike p_176718_, ItemLike p_176719_) {
+		ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, p_176718_, 3).define('#', p_176719_).pattern("##").group("carpet").unlockedBy(getHasName(p_176719_), has(p_176719_)).save(p_176717_);
 	}
 
-	public static RecipeBuilder polishedBuilder(ItemLike p_176605_, Ingredient p_176606_) {
-		return ShapedRecipeBuilder.shaped(p_176605_, 4).define('S', p_176606_).pattern("SS").pattern("SS");
+	public static void coloredCarpetFromWhiteCarpetAndDye(Consumer<FinishedRecipe> p_126070_, ItemLike p_126071_, ItemLike p_126072_) {
+		ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, p_126071_, 8).define('#', Blocks.WHITE_CARPET).define('$', p_126072_).pattern("###").pattern("#$#").pattern("###").group("carpet").unlockedBy("has_white_carpet", has(Blocks.WHITE_CARPET)).unlockedBy(getHasName(p_126072_), has(p_126072_)).save(p_126070_, getConversionRecipeName(p_126071_, Blocks.WHITE_CARPET));
 	}
 
-	public static void cut(Consumer<FinishedRecipe> p_176653_, ItemLike p_176654_, ItemLike p_176655_) {
-		cutBuilder(p_176654_, Ingredient.of(p_176655_)).unlockedBy(getHasName(p_176655_), has(p_176655_)).save(p_176653_);
+	public static void bedFromPlanksAndWool(Consumer<FinishedRecipe> p_126074_, ItemLike p_126075_, ItemLike p_126076_) {
+		ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, p_126075_).define('#', p_126076_).define('X', ItemTags.PLANKS).pattern("###").pattern("XXX").group("bed").unlockedBy(getHasName(p_126076_), has(p_126076_)).save(p_126074_);
 	}
 
-	public static ShapedRecipeBuilder cutBuilder(ItemLike p_176635_, Ingredient p_176636_) {
-		return ShapedRecipeBuilder.shaped(p_176635_, 4).define('#', p_176636_).pattern("##").pattern("##");
+	public static void bedFromWhiteBedAndDye(Consumer<FinishedRecipe> p_126078_, ItemLike p_126079_, ItemLike p_126080_) {
+		ShapelessRecipeBuilder.shapeless(RecipeCategory.DECORATIONS, p_126079_).requires(Items.WHITE_BED).requires(p_126080_).group("dyed_bed").unlockedBy("has_bed", has(Items.WHITE_BED)).save(p_126078_, getConversionRecipeName(p_126079_, Items.WHITE_BED));
 	}
 
-	public static void chiseled(Consumer<FinishedRecipe> p_176665_, ItemLike p_176666_, ItemLike p_176667_) {
-		chiseledBuilder(p_176666_, Ingredient.of(p_176667_)).unlockedBy(getHasName(p_176667_), has(p_176667_)).save(p_176665_);
+	public static void banner(Consumer<FinishedRecipe> p_126082_, ItemLike p_126083_, ItemLike p_126084_) {
+		ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, p_126083_).define('#', p_126084_).define('|', Items.STICK).pattern("###").pattern("###").pattern(" | ").group("banner").unlockedBy(getHasName(p_126084_), has(p_126084_)).save(p_126082_);
 	}
 
-	public static ShapedRecipeBuilder chiseledBuilder(ItemLike p_176647_, Ingredient p_176648_) {
-		return ShapedRecipeBuilder.shaped(p_176647_).define('#', p_176648_).pattern("#").pattern("#");
+	public static void stainedGlassFromGlassAndDye(Consumer<FinishedRecipe> p_126086_, ItemLike p_126087_, ItemLike p_126088_) {
+		ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, p_126087_, 8).define('#', Blocks.GLASS).define('X', p_126088_).pattern("###").pattern("#X#").pattern("###").group("stained_glass").unlockedBy("has_glass", has(Blocks.GLASS)).save(p_126086_);
 	}
 
-	public static void stonecutterResultFromBase(Consumer<FinishedRecipe> p_176736_, ItemLike p_176737_, ItemLike p_176738_) {
-		stonecutterResultFromBase(p_176736_, p_176737_, p_176738_, 1);
+	public static void stainedGlassPaneFromStainedGlass(Consumer<FinishedRecipe> p_126090_, ItemLike p_126091_, ItemLike p_126092_) {
+		ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, p_126091_, 16).define('#', p_126092_).pattern("###").pattern("###").group("stained_glass_pane").unlockedBy("has_glass", has(p_126092_)).save(p_126090_);
 	}
 
-	public static void stonecutterResultFromBase(Consumer<FinishedRecipe> p_176547_, ItemLike p_176548_, ItemLike p_176549_, int p_176550_) {
-		SingleItemRecipeBuilder.stonecutting(Ingredient.of(p_176549_), p_176548_, p_176550_).unlockedBy(getHasName(p_176549_), has(p_176549_)).save(p_176547_, getConversionRecipeName(p_176548_, p_176549_) + "_stonecutting");
+	public static void stainedGlassPaneFromGlassPaneAndDye(Consumer<FinishedRecipe> p_126094_, ItemLike p_126095_, ItemLike p_126096_) {
+		ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, p_126095_, 8).define('#', Blocks.GLASS_PANE).define('$', p_126096_).pattern("###").pattern("#$#").pattern("###").group("stained_glass_pane").unlockedBy("has_glass_pane", has(Blocks.GLASS_PANE)).unlockedBy(getHasName(p_126096_), has(p_126096_)).save(p_126094_, getConversionRecipeName(p_126095_, Blocks.GLASS_PANE));
+	}
+
+	public static void coloredTerracottaFromTerracottaAndDye(Consumer<FinishedRecipe> p_126098_, ItemLike p_126099_, ItemLike p_126100_) {
+		ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, p_126099_, 8).define('#', Blocks.TERRACOTTA).define('X', p_126100_).pattern("###").pattern("#X#").pattern("###").group("stained_terracotta").unlockedBy("has_terracotta", has(Blocks.TERRACOTTA)).save(p_126098_);
+	}
+
+	public static void concretePowder(Consumer<FinishedRecipe> p_126102_, ItemLike p_126103_, ItemLike p_126104_) {
+		ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, p_126103_, 8).requires(p_126104_).requires(Blocks.SAND, 4).requires(Blocks.GRAVEL, 4).group("concrete_powder").unlockedBy("has_sand", has(Blocks.SAND)).unlockedBy("has_gravel", has(Blocks.GRAVEL)).save(p_126102_);
+	}
+
+	public static void candle(Consumer<FinishedRecipe> p_176543_, ItemLike p_176544_, ItemLike p_176545_) {
+		ShapelessRecipeBuilder.shapeless(RecipeCategory.DECORATIONS, p_176544_).requires(Blocks.CANDLE).requires(p_176545_).group("dyed_candle").unlockedBy(getHasName(p_176545_), has(p_176545_)).save(p_176543_);
+	}
+
+	public static void wall(Consumer<FinishedRecipe> p_251034_, RecipeCategory p_251148_, ItemLike p_250499_, ItemLike p_249970_) {
+		wallBuilder(p_251148_, p_250499_, Ingredient.of(p_249970_)).unlockedBy(getHasName(p_249970_), has(p_249970_)).save(p_251034_);
+	}
+
+	public static RecipeBuilder wallBuilder(RecipeCategory p_249083_, ItemLike p_250754_, Ingredient p_250311_) {
+		return ShapedRecipeBuilder.shaped(p_249083_, p_250754_, 6).define('#', p_250311_).pattern("###").pattern("###");
+	}
+
+	public static void polished(Consumer<FinishedRecipe> p_251348_, RecipeCategory p_248719_, ItemLike p_250032_, ItemLike p_250021_) {
+		polishedBuilder(p_248719_, p_250032_, Ingredient.of(p_250021_)).unlockedBy(getHasName(p_250021_), has(p_250021_)).save(p_251348_);
+	}
+
+	public static RecipeBuilder polishedBuilder(RecipeCategory p_249131_, ItemLike p_251242_, Ingredient p_251412_) {
+		return ShapedRecipeBuilder.shaped(p_249131_, p_251242_, 4).define('S', p_251412_).pattern("SS").pattern("SS");
+	}
+
+	public static void cut(Consumer<FinishedRecipe> p_248712_, RecipeCategory p_252306_, ItemLike p_249686_, ItemLike p_251100_) {
+		cutBuilder(p_252306_, p_249686_, Ingredient.of(p_251100_)).unlockedBy(getHasName(p_251100_), has(p_251100_)).save(p_248712_);
+	}
+
+	public static ShapedRecipeBuilder cutBuilder(RecipeCategory p_250895_, ItemLike p_251147_, Ingredient p_251563_) {
+		return ShapedRecipeBuilder.shaped(p_250895_, p_251147_, 4).define('#', p_251563_).pattern("##").pattern("##");
+	}
+
+	public static void chiseled(Consumer<FinishedRecipe> p_250120_, RecipeCategory p_251604_, ItemLike p_251049_, ItemLike p_252267_) {
+		chiseledBuilder(p_251604_, p_251049_, Ingredient.of(p_252267_)).unlockedBy(getHasName(p_252267_), has(p_252267_)).save(p_250120_);
+	}
+
+	public static void mosaicBuilder(Consumer<FinishedRecipe> p_249200_, RecipeCategory p_248788_, ItemLike p_251925_, ItemLike p_252242_) {
+		ShapedRecipeBuilder.shaped(p_248788_, p_251925_).define('#', p_252242_).pattern("#").pattern("#").unlockedBy(getHasName(p_252242_), has(p_252242_)).save(p_249200_);
+	}
+
+	public static ShapedRecipeBuilder chiseledBuilder(RecipeCategory p_251755_, ItemLike p_249782_, Ingredient p_250087_) {
+		return ShapedRecipeBuilder.shaped(p_251755_, p_249782_).define('#', p_250087_).pattern("#").pattern("#");
+	}
+
+	public static void stonecutterResultFromBase(Consumer<FinishedRecipe> p_251589_, RecipeCategory p_248911_, ItemLike p_251265_, ItemLike p_250033_) {
+		stonecutterResultFromBase(p_251589_, p_248911_, p_251265_, p_250033_, 1);
+	}
+
+	public static void stonecutterResultFromBase(Consumer<FinishedRecipe> p_249145_, RecipeCategory p_250609_, ItemLike p_251254_, ItemLike p_249666_, int p_251462_) {
+		SingleItemRecipeBuilder.stonecutting(Ingredient.of(p_249666_), p_250609_, p_251254_, p_251462_).unlockedBy(getHasName(p_249666_), has(p_249666_)).save(p_249145_, getConversionRecipeName(p_251254_, p_249666_) + "_stonecutting");
 	}
 
 	public static void smeltingResultFromBase(Consumer<FinishedRecipe> p_176740_, ItemLike p_176741_, ItemLike p_176742_) {
-		SimpleCookingRecipeBuilder.smelting(Ingredient.of(p_176742_), p_176741_, 0.1F, 200).unlockedBy(getHasName(p_176742_), has(p_176742_)).save(p_176740_);
+		SimpleCookingRecipeBuilder.smelting(Ingredient.of(p_176742_), RecipeCategory.BUILDING_BLOCKS, p_176741_, 0.1F, 200).unlockedBy(getHasName(p_176742_), has(p_176742_)).save(p_176740_);
 	}
 
-	public static void nineBlockStorageRecipes(Consumer<FinishedRecipe> p_176744_, ItemLike p_176745_, ItemLike p_176746_) {
-		nineBlockStorageRecipes(p_176744_, p_176745_, p_176746_, getSimpleRecipeName(p_176746_), (String) null, getSimpleRecipeName(p_176745_), (String) null);
+	public static void nineBlockStorageRecipes(Consumer<FinishedRecipe> p_249580_, RecipeCategory p_251203_, ItemLike p_251689_, RecipeCategory p_251376_, ItemLike p_248771_) {
+		nineBlockStorageRecipes(p_249580_, p_251203_, p_251689_, p_251376_, p_248771_, getSimpleRecipeName(p_248771_), (String) null, getSimpleRecipeName(p_251689_), (String) null);
 	}
 
-	public static void nineBlockStorageRecipesWithCustomPacking(Consumer<FinishedRecipe> p_176563_, ItemLike p_176564_, ItemLike p_176565_, String p_176566_, String p_176567_) {
-		nineBlockStorageRecipes(p_176563_, p_176564_, p_176565_, p_176566_, p_176567_, getSimpleRecipeName(p_176564_), (String) null);
+	public static void nineBlockStorageRecipesWithCustomPacking(Consumer<FinishedRecipe> p_250488_, RecipeCategory p_250885_, ItemLike p_251651_, RecipeCategory p_250874_, ItemLike p_248576_, String p_250171_, String p_249386_) {
+		nineBlockStorageRecipes(p_250488_, p_250885_, p_251651_, p_250874_, p_248576_, p_250171_, p_249386_, getSimpleRecipeName(p_251651_), (String) null);
 	}
 
-	public static void nineBlockStorageRecipesRecipesWithCustomUnpacking(Consumer<FinishedRecipe> p_176617_, ItemLike p_176618_, ItemLike p_176619_, String p_176620_, String p_176621_) {
-		nineBlockStorageRecipes(p_176617_, p_176618_, p_176619_, getSimpleRecipeName(p_176619_), (String) null, p_176620_, p_176621_);
+	public static void nineBlockStorageRecipesRecipesWithCustomUnpacking(Consumer<FinishedRecipe> p_250320_, RecipeCategory p_248979_, ItemLike p_249101_, RecipeCategory p_252036_, ItemLike p_250886_, String p_248768_, String p_250847_) {
+		nineBlockStorageRecipes(p_250320_, p_248979_, p_249101_, p_252036_, p_250886_, getSimpleRecipeName(p_250886_), (String) null, p_248768_, p_250847_);
 	}
 
-	public static void nineBlockStorageRecipes(Consumer<FinishedRecipe> p_176569_, ItemLike p_176570_, ItemLike p_176571_, String p_176572_, @Nullable String p_176573_, String p_176574_, @Nullable String p_176575_) {
-		ShapelessRecipeBuilder.shapeless(p_176570_, 9).requires(p_176571_).group(p_176575_).unlockedBy(getHasName(p_176571_), has(p_176571_)).save(p_176569_, new ResourceLocation(p_176574_));
-		ShapedRecipeBuilder.shaped(p_176571_).define('#', p_176570_).pattern("###").pattern("###").pattern("###").group(p_176573_).unlockedBy(getHasName(p_176570_), has(p_176570_)).save(p_176569_, new ResourceLocation(p_176572_));
+	public static void nineBlockStorageRecipes(Consumer<FinishedRecipe> p_250423_, RecipeCategory p_250083_, ItemLike p_250042_, RecipeCategory p_248977_, ItemLike p_251911_, String p_250475_, @Nullable String p_248641_, String p_252237_, @Nullable String p_250414_) {
+		ShapelessRecipeBuilder.shapeless(p_250083_, p_250042_, 9).requires(p_251911_).group(p_250414_).unlockedBy(getHasName(p_251911_), has(p_251911_)).save(p_250423_, new ResourceLocation(p_252237_));
+		ShapedRecipeBuilder.shaped(p_248977_, p_251911_).define('#', p_250042_).pattern("###").pattern("###").pattern("###").group(p_248641_).unlockedBy(getHasName(p_250042_), has(p_250042_)).save(p_250423_, new ResourceLocation(p_250475_));
 	}
 
-	public static void simpleCookingRecipe(Consumer<FinishedRecipe> p_176584_, String p_176585_, SimpleCookingSerializer<?> p_176586_, int p_176587_, ItemLike p_176588_, ItemLike p_176589_, float p_176590_) {
-		SimpleCookingRecipeBuilder.cooking(Ingredient.of(p_176588_), p_176589_, p_176590_, p_176587_, p_176586_).unlockedBy(getHasName(p_176588_), has(p_176588_)).save(p_176584_, getItemName(p_176589_) + "_from_" + p_176585_);
+	public static void simpleCookingRecipe(Consumer<FinishedRecipe> p_249398_, String p_249709_, RecipeSerializer<? extends AbstractCookingRecipe> p_251876_, int p_249258_, ItemLike p_250669_, ItemLike p_250224_, float p_252138_) {
+		SimpleCookingRecipeBuilder.generic(Ingredient.of(p_250669_), RecipeCategory.FOOD, p_250224_, p_252138_, p_249258_, p_251876_).unlockedBy(getHasName(p_250669_), has(p_250669_)).save(p_249398_, getItemName(p_250224_) + "_from_" + p_249709_);
 	}
 
 	public static void waxRecipes(Consumer<FinishedRecipe> p_176611_) {
-		HoneycombItem.WAXABLES.get().forEach((p_176578_, p_176579_) -> {
-			ShapelessRecipeBuilder.shapeless(p_176579_).requires(p_176578_).requires(Items.HONEYCOMB).group(getItemName(p_176579_)).unlockedBy(getHasName(p_176578_), has(p_176578_)).save(p_176611_, getConversionRecipeName(p_176579_, Items.HONEYCOMB));
+		HoneycombItem.WAXABLES.get().forEach((p_248022_, p_248023_) -> {
+			ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, p_248023_).requires(p_248022_).requires(Items.HONEYCOMB).group(getItemName(p_248023_)).unlockedBy(getHasName(p_248022_), has(p_248022_)).save(p_176611_, getConversionRecipeName(p_248023_, Items.HONEYCOMB));
 		});
 	}
 
-	protected static EnterBlockTrigger.TriggerInstance insideOf(Block p_125980_) {
+	public static Block getBaseBlock(BlockFamily p_176524_, BlockFamily.Variant p_176525_) {
+		if (p_176525_ == BlockFamily.Variant.CHISELED) {
+			if (!p_176524_.getVariants().containsKey(BlockFamily.Variant.SLAB)) {
+				throw new IllegalStateException("Slab is not defined for the family.");
+			} else {
+				return p_176524_.get(BlockFamily.Variant.SLAB);
+			}
+		} else {
+			return p_176524_.getBaseBlock();
+		}
+	}
+
+	public static EnterBlockTrigger.TriggerInstance insideOf(Block p_125980_) {
 		return new EnterBlockTrigger.TriggerInstance(EntityPredicate.Composite.ANY, p_125980_, StatePropertiesPredicate.ANY);
 	}
 
@@ -251,15 +361,15 @@ public abstract class KiwiRecipeProvider implements DataProvider {
 		return inventoryTrigger(ItemPredicate.Builder.item().of(p_176522_).withCount(p_176521_).build());
 	}
 
-	protected static InventoryChangeTrigger.TriggerInstance has(ItemLike p_125978_) {
+	public static InventoryChangeTrigger.TriggerInstance has(ItemLike p_125978_) {
 		return inventoryTrigger(ItemPredicate.Builder.item().of(p_125978_).build());
 	}
 
-	protected static InventoryChangeTrigger.TriggerInstance has(TagKey<Item> p_125976_) {
-		return inventoryTrigger(ItemPredicate.Builder.item().of(p_125976_).build());
+	public static InventoryChangeTrigger.TriggerInstance has(TagKey<Item> p_206407_) {
+		return inventoryTrigger(ItemPredicate.Builder.item().of(p_206407_).build());
 	}
 
-	protected static InventoryChangeTrigger.TriggerInstance inventoryTrigger(ItemPredicate... p_126012_) {
+	public static InventoryChangeTrigger.TriggerInstance inventoryTrigger(ItemPredicate... p_126012_) {
 		return new InventoryChangeTrigger.TriggerInstance(EntityPredicate.Composite.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, p_126012_);
 	}
 
@@ -269,7 +379,7 @@ public abstract class KiwiRecipeProvider implements DataProvider {
 
 	@SuppressWarnings("deprecation")
 	public static String getItemName(ItemLike p_176633_) {
-		return Registry.ITEM.getKey(p_176633_.asItem()).getPath();
+		return BuiltInRegistries.ITEM.getKey(p_176633_.asItem()).getPath();
 	}
 
 	public static String getSimpleRecipeName(ItemLike p_176645_) {

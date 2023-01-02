@@ -12,6 +12,8 @@ public class NamedEntry<T> {
 	public final Object registry;
 	@Nullable
 	public final Field field;
+	@Nullable
+	public GroupSetting groupSetting;
 
 	public NamedEntry(ResourceLocation name, T entry, Object registry, @Nullable Field field) {
 		this.name = name;

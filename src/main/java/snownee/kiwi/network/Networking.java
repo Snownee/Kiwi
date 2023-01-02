@@ -33,7 +33,7 @@ public final class Networking {
 	static {
 		/* off */
 		channel = NetworkRegistry.ChannelBuilder
-				.named(new ResourceLocation(Kiwi.MODID, "main"))
+				.named(new ResourceLocation(Kiwi.ID, "main"))
 				.clientAcceptedVersions(protocol::equals)
 				.serverAcceptedVersions(protocol::equals)
 				.networkProtocolVersion(() -> protocol)

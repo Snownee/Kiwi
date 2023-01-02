@@ -23,7 +23,7 @@ import snownee.kiwi.contributor.impl.client.model.SantaHatModel;
 
 @OnlyIn(Dist.CLIENT)
 public class SantaHatLayer extends CosmeticLayer {
-	private static final ResourceLocation TEXTURE = new ResourceLocation(Kiwi.MODID, "textures/reward/santa.png");
+	private static final ResourceLocation TEXTURE = new ResourceLocation(Kiwi.ID, "textures/reward/santa.png");
 	private static final LazyOptional<LayerDefinition> definition = LazyOptional.of(SantaHatModel::create);
 	private final SantaHatModel<AbstractClientPlayer> modelSantaHat;
 

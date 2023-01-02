@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
-import com.mojang.math.Vector3d;
+import org.joml.Vector3d;
 
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Rotation;

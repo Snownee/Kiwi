@@ -2,26 +2,23 @@ package snownee.kiwi.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import net.minecraft.SharedConstants;
-import net.minecraft.client.ClientTelemetryManager;
+import net.minecraft.client.telemetry.ClientTelemetryManager;
+import net.minecraft.client.telemetry.TelemetryEventSender;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiClientConfig;
 
 @Mixin(value = ClientTelemetryManager.class, priority = -114514)
 public class ClientTelemetryManagerMixin {
 
-	@Redirect(
-			method = "<init>", at = @At(
-					value = "FIELD", target = "Lnet/minecraft/SharedConstants;IS_RUNNING_IN_IDE:Z"
-			), require = 0
-	)
-	private boolean getIS_RUNNING_IN_IDE() {
+	@Inject(method = "createWorldSessionEventSender", at = @At("HEAD"), cancellable = true)
+	private void kiwi_createWorldSessionEventSender(CallbackInfoReturnable<TelemetryEventSender> ci) {
 		if (KiwiClientConfig.noMicrosoftTelemetry) {
 			Kiwi.logger.info("Kiwi: Canceling Microsoft telemetry");
+			ci.setReturnValue(TelemetryEventSender.DISABLED);
 		}
-		return KiwiClientConfig.noMicrosoftTelemetry || SharedConstants.IS_RUNNING_IN_IDE;
 	}
 
 }

@@ -3,8 +3,9 @@ package snownee.kiwi.util;
 import java.util.Collection;
 import java.util.List;
 
+import org.joml.Vector3f;
+
 import com.google.common.collect.Lists;
-import com.mojang.math.Vector3f;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;

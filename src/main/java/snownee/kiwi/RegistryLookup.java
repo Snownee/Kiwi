@@ -13,7 +13,7 @@ import com.google.common.collect.Maps;
 public class RegistryLookup {
 
 	public final Map<Class<?>, Object> registries = Maps.newConcurrentMap();
-	private final Cache<Class<?>, Optional<Object>> cache = CacheBuilder.newBuilder().build();
+	public final Cache<Class<?>, Optional<Object>> cache = CacheBuilder.newBuilder().build();
 
 	public Object findRegistry(Object o) {
 		try {

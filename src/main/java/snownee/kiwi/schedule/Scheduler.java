@@ -27,7 +27,7 @@ import snownee.kiwi.Kiwi;
 @EventBusSubscriber
 @SuppressWarnings("rawtypes")
 public final class Scheduler extends SavedData {
-	public static final String ID = Kiwi.MODID + "-schedule";
+	public static final String ID = Kiwi.ID + "-schedule";
 	public static final Scheduler INSTANCE = new Scheduler();
 
 	private static final BiMap<ResourceLocation, Class<Task>> idMap = HashBiMap.create();

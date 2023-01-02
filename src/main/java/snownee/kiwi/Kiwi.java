@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,6 +43,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.StatType;
@@ -63,6 +65,7 @@ import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.entity.schedule.Schedule;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Instrument;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.alchemy.Potion;
@@ -151,9 +154,9 @@ import snownee.kiwi.network.Networking;
 import snownee.kiwi.schedule.Scheduler;
 import snownee.kiwi.util.Util;
 
-@Mod(Kiwi.MODID)
+@Mod(Kiwi.ID)
 public class Kiwi {
-	public static final String MODID = "kiwi";
+	public static final String ID = "kiwi";
 	public static final String NAME = "Kiwi";
 
 	public static Logger logger = LogManager.getLogger(Kiwi.NAME);
@@ -187,6 +190,7 @@ public class Kiwi {
 		stage = LoadingStage.CONSTRUCTING;
 		try {
 			registerRegistries();
+			registerTabs();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -468,23 +472,19 @@ public class Kiwi {
 				eventBus.register(info.module);
 			}
 
-			boolean useOwnGroup = info.category == null;
+			boolean useOwnGroup = info.groupSetting == null;
 			if (useOwnGroup) {
 				Category group = info.module.getClass().getDeclaredAnnotation(Category.class);
 				if (group != null) {
-					String val = group.value();
-					if (!val.isEmpty()) {
+					if (group.value().length > 0) {
 						useOwnGroup = false;
-						CreativeModeTab itemGroup = getGroup(val);
-						if (itemGroup != null) {
-							info.category = itemGroup;
-						}
+						info.groupSetting = GroupSetting.of(group);
 					}
 				}
 			}
 
 			String modid = info.module.uid.getNamespace();
-			//			String name = info.module.uid.getPath();
+			String name = info.module.uid.getPath();
 
 			Item.Properties tmpBuilder = null;
 			Field tmpBuilderField = null;
@@ -526,8 +526,10 @@ public class Kiwi {
 				if (o == null) {
 					continue;
 				}
-				if (useOwnGroup && info.category == null && o instanceof CreativeModeTab) {
-					info.category = (CreativeModeTab) o;
+				if (useOwnGroup && info.groupSetting == null && o instanceof CreativeModeTab tab) {
+					String id = modid + "." + name;
+					registerTab(id, tab);
+					info.groupSetting = new GroupSetting(new String[] { id }, new String[0]);
 				} else if (o instanceof Item.Properties) {
 					tmpBuilder = (Item.Properties) o;
 					tmpBuilderField = field;
@@ -585,7 +587,7 @@ public class Kiwi {
 	//	@SuppressWarnings("rawtypes")
 	private static <T> void registerRegistries() throws Exception {
 		//		Map<String, Field> allFields = Maps.newHashMap();
-		//		for (Field field : Registry.class.getFields()) {
+		//		for (Field field : BuiltInRegistries.class.getFields()) {
 		//			if (!Modifier.isStatic(field.getModifiers()) || !Modifier.isPublic(field.getModifiers())) {
 		//				continue;
 		//			}
@@ -609,13 +611,13 @@ public class Kiwi {
 		//				}
 		//				String className = matcher.group(1).replace('/', '.');
 		//				Class<?> baseClass = Class.forName(className);
-		//				sb.append("registerRegistry(Registry.%s, %s.class);\n".formatted(field.name, baseClass.getSimpleName()));
+		//				sb.append("registerRegistry(BuiltInRegistries.%s, %s.class);\n".formatted(field.name, baseClass.getSimpleName()));
 		//				registerRegistry((Registry) allFields.get(field.name).get(null), baseClass);
 		//			}
 		//		}
 		//		System.out.println(sb);
 
-		registerRegistry(Registry.GAME_EVENT, GameEvent.class);
+		registerRegistry(BuiltInRegistries.GAME_EVENT, GameEvent.class);
 		registerRegistry(ForgeRegistries.SOUND_EVENTS, SoundEvent.class);
 		registerRegistry(ForgeRegistries.FLUIDS, Fluid.class);
 		registerRegistry(ForgeRegistries.MOB_EFFECTS, MobEffect.class);
@@ -627,73 +629,82 @@ public class Kiwi {
 		registerRegistry(ForgeRegistries.PARTICLE_TYPES, ParticleType.class);
 		registerRegistry(ForgeRegistries.BLOCK_ENTITY_TYPES, BlockEntityType.class);
 		registerRegistry(ForgeRegistries.PAINTING_VARIANTS, PaintingVariant.class);
-		registerRegistry(Registry.CUSTOM_STAT, ResourceLocation.class);
+		registerRegistry(BuiltInRegistries.CUSTOM_STAT, ResourceLocation.class);
 		registerRegistry(ForgeRegistries.CHUNK_STATUS, ChunkStatus.class);
-		registerRegistry(Registry.RULE_TEST, RuleTestType.class);
-		registerRegistry(Registry.POS_RULE_TEST, PosRuleTestType.class);
+		registerRegistry(BuiltInRegistries.RULE_TEST, RuleTestType.class);
+		registerRegistry(BuiltInRegistries.POS_RULE_TEST, PosRuleTestType.class);
 		registerRegistry(ForgeRegistries.MENU_TYPES, MenuType.class);
 		registerRegistry(ForgeRegistries.RECIPE_TYPES, RecipeType.class);
 		registerRegistry(ForgeRegistries.RECIPE_SERIALIZERS, RecipeSerializer.class);
 		registerRegistry(ForgeRegistries.ATTRIBUTES, Attribute.class);
-		registerRegistry(Registry.POSITION_SOURCE_TYPE, PositionSourceType.class);
+		registerRegistry(BuiltInRegistries.POSITION_SOURCE_TYPE, PositionSourceType.class);
 		registerRegistry(ForgeRegistries.COMMAND_ARGUMENT_TYPES, ArgumentTypeInfo.class);
 		registerRegistry(ForgeRegistries.STAT_TYPES, StatType.class);
-		registerRegistry(Registry.VILLAGER_TYPE, VillagerType.class);
+		registerRegistry(BuiltInRegistries.VILLAGER_TYPE, VillagerType.class);
 		registerRegistry(ForgeRegistries.VILLAGER_PROFESSIONS, VillagerProfession.class);
 		registerRegistry(ForgeRegistries.POI_TYPES, PoiType.class);
 		registerRegistry(ForgeRegistries.MEMORY_MODULE_TYPES, MemoryModuleType.class);
 		registerRegistry(ForgeRegistries.SENSOR_TYPES, SensorType.class);
 		registerRegistry(ForgeRegistries.SCHEDULES, Schedule.class);
 		registerRegistry(ForgeRegistries.ACTIVITIES, Activity.class);
-		registerRegistry(Registry.LOOT_POOL_ENTRY_TYPE, LootPoolEntryType.class);
-		registerRegistry(Registry.LOOT_FUNCTION_TYPE, LootItemFunctionType.class);
-		registerRegistry(Registry.LOOT_CONDITION_TYPE, LootItemConditionType.class);
-		registerRegistry(Registry.LOOT_NUMBER_PROVIDER_TYPE, LootNumberProviderType.class);
-		registerRegistry(Registry.LOOT_NBT_PROVIDER_TYPE, LootNbtProviderType.class);
-		registerRegistry(Registry.LOOT_SCORE_PROVIDER_TYPE, LootScoreProviderType.class);
-		registerRegistry(Registry.FLOAT_PROVIDER_TYPES, FloatProviderType.class);
-		registerRegistry(Registry.INT_PROVIDER_TYPES, IntProviderType.class);
-		registerRegistry(Registry.HEIGHT_PROVIDER_TYPES, HeightProviderType.class);
-		registerRegistry(Registry.BLOCK_PREDICATE_TYPES, BlockPredicateType.class);
+		registerRegistry(BuiltInRegistries.LOOT_POOL_ENTRY_TYPE, LootPoolEntryType.class);
+		registerRegistry(BuiltInRegistries.LOOT_FUNCTION_TYPE, LootItemFunctionType.class);
+		registerRegistry(BuiltInRegistries.LOOT_CONDITION_TYPE, LootItemConditionType.class);
+		registerRegistry(BuiltInRegistries.LOOT_NUMBER_PROVIDER_TYPE, LootNumberProviderType.class);
+		registerRegistry(BuiltInRegistries.LOOT_NBT_PROVIDER_TYPE, LootNbtProviderType.class);
+		registerRegistry(BuiltInRegistries.LOOT_SCORE_PROVIDER_TYPE, LootScoreProviderType.class);
+		registerRegistry(BuiltInRegistries.FLOAT_PROVIDER_TYPE, FloatProviderType.class);
+		registerRegistry(BuiltInRegistries.INT_PROVIDER_TYPE, IntProviderType.class);
+		registerRegistry(BuiltInRegistries.HEIGHT_PROVIDER_TYPE, HeightProviderType.class);
+		registerRegistry(BuiltInRegistries.BLOCK_PREDICATE_TYPE, BlockPredicateType.class);
 		registerRegistry(ForgeRegistries.WORLD_CARVERS, WorldCarver.class);
 		registerRegistry(ForgeRegistries.FEATURES, Feature.class);
-		registerRegistry(Registry.STRUCTURE_PLACEMENT_TYPE, StructurePlacementType.class);
-		registerRegistry(Registry.STRUCTURE_PIECE, StructurePieceType.class);
-		registerRegistry(Registry.STRUCTURE_TYPES, StructureType.class);
-		registerRegistry(Registry.PLACEMENT_MODIFIERS, PlacementModifierType.class);
+		registerRegistry(BuiltInRegistries.STRUCTURE_PLACEMENT, StructurePlacementType.class);
+		registerRegistry(BuiltInRegistries.STRUCTURE_PIECE, StructurePieceType.class);
+		registerRegistry(BuiltInRegistries.STRUCTURE_TYPE, StructureType.class);
+		registerRegistry(BuiltInRegistries.PLACEMENT_MODIFIER_TYPE, PlacementModifierType.class);
 		registerRegistry(ForgeRegistries.BLOCK_STATE_PROVIDER_TYPES, BlockStateProviderType.class);
 		registerRegistry(ForgeRegistries.FOLIAGE_PLACER_TYPES, FoliagePlacerType.class);
-		registerRegistry(Registry.TRUNK_PLACER_TYPES, TrunkPlacerType.class);
-		registerRegistry(Registry.ROOT_PLACER_TYPES, RootPlacerType.class);
+		registerRegistry(BuiltInRegistries.TRUNK_PLACER_TYPE, TrunkPlacerType.class);
+		registerRegistry(BuiltInRegistries.ROOT_PLACER_TYPE, RootPlacerType.class);
 		registerRegistry(ForgeRegistries.TREE_DECORATOR_TYPES, TreeDecoratorType.class);
-		registerRegistry(Registry.FEATURE_SIZE_TYPES, FeatureSizeType.class);
-		registerRegistry(Registry.BIOME_SOURCE, Codec.class);
-		registerRegistry(Registry.CHUNK_GENERATOR, Codec.class);
-		registerRegistry(Registry.CONDITION, Codec.class);
-		registerRegistry(Registry.RULE, Codec.class);
-		registerRegistry(Registry.DENSITY_FUNCTION_TYPES, Codec.class);
-		registerRegistry(Registry.STRUCTURE_PROCESSOR, StructureProcessorType.class);
-		registerRegistry(Registry.STRUCTURE_POOL_ELEMENT, StructurePoolElementType.class);
-		registerRegistry(Registry.CAT_VARIANT, CatVariant.class);
-		registerRegistry(Registry.FROG_VARIANT, FrogVariant.class);
-		registerRegistry(Registry.BANNER_PATTERN, BannerPattern.class);
-		registerRegistry(Registry.INSTRUMENT, Instrument.class);
+		registerRegistry(BuiltInRegistries.FEATURE_SIZE_TYPE, FeatureSizeType.class);
+		registerRegistry(BuiltInRegistries.BIOME_SOURCE, Codec.class);
+		registerRegistry(BuiltInRegistries.CHUNK_GENERATOR, Codec.class);
+		registerRegistry(BuiltInRegistries.MATERIAL_CONDITION, Codec.class);
+		registerRegistry(BuiltInRegistries.MATERIAL_RULE, Codec.class);
+		registerRegistry(BuiltInRegistries.DENSITY_FUNCTION_TYPE, Codec.class);
+		registerRegistry(BuiltInRegistries.STRUCTURE_PROCESSOR, StructureProcessorType.class);
+		registerRegistry(BuiltInRegistries.STRUCTURE_POOL_ELEMENT, StructurePoolElementType.class);
+		registerRegistry(BuiltInRegistries.CAT_VARIANT, CatVariant.class);
+		registerRegistry(BuiltInRegistries.FROG_VARIANT, FrogVariant.class);
+		registerRegistry(BuiltInRegistries.BANNER_PATTERN, BannerPattern.class);
+		registerRegistry(BuiltInRegistries.INSTRUMENT, Instrument.class);
 	}
 
-	private static Map<String, CreativeModeTab> GROUP_CACHE = Maps.newHashMap();
+	public static void registerTab(String id, CreativeModeTab tab) {
+		Validate.isTrue(!GROUPS.containsKey(id), "Already exists: %s", id);
+		GROUPS.put(id, tab);
+	}
+
+	private static void registerTabs() {
+		registerTab(Categories.BUILDING_BLOCKS, CreativeModeTabs.BUILDING_BLOCKS);
+		registerTab(Categories.COLORED_BLOCKS, CreativeModeTabs.COLORED_BLOCKS);
+		registerTab(Categories.COMBAT, CreativeModeTabs.COMBAT);
+		registerTab(Categories.FOOD_AND_DRINKS, CreativeModeTabs.FOOD_AND_DRINKS);
+		registerTab(Categories.FUNCTIONAL_BLOCKS, CreativeModeTabs.FUNCTIONAL_BLOCKS);
+		registerTab(Categories.INGREDIENTS, CreativeModeTabs.INGREDIENTS);
+		registerTab(Categories.NATURAL_BLOCKS, CreativeModeTabs.NATURAL_BLOCKS);
+		registerTab(Categories.OP_BLOCKS, CreativeModeTabs.OP_BLOCKS);
+		registerTab(Categories.REDSTONE_BLOCKS, CreativeModeTabs.REDSTONE_BLOCKS);
+		registerTab(Categories.SPAWN_EGGS, CreativeModeTabs.SPAWN_EGGS);
+		registerTab(Categories.TOOLS_AND_UTILITIES, CreativeModeTabs.TOOLS_AND_UTILITIES);
+	}
+
+	private static Map<String, CreativeModeTab> GROUPS = Maps.newHashMap();
 
 	static CreativeModeTab getGroup(String path) {
-		if (GROUP_CACHE == null) {
-			return null;
-		}
-		return GROUP_CACHE.computeIfAbsent(path, $ -> {
-			for (CreativeModeTab group : CreativeModeTab.TABS) {
-				if (path.equals(group.getRecipeFolderName())) {
-					return group;
-				}
-			}
-			return null;
-		});
+		return GROUPS.get(path);
 	}
 
 	private static void checkNoGroup(ModuleInfo info, Field field, Object o) {
@@ -712,18 +723,12 @@ public class Kiwi {
 	}
 
 	private void clientInit(FMLClientSetupEvent event) {
-		if (GROUP_CACHE == null) { // Not Enough Crashes mod can trigger init event
-			return;
-		}
 		ClientInitEvent e = new ClientInitEvent(event);
 		KiwiModules.fire(m -> m.clientInit(e));
 		ModLoadingContext.get().setActiveContainer(null);
 	}
 
 	private void serverInit(ServerStartingEvent event) {
-		if (GROUP_CACHE == null) { // Not Enough Crashes mod can trigger init event
-			return;
-		}
 		ServerInitEvent e = new ServerInitEvent();
 		KiwiModules.fire(m -> m.serverInit(e));
 		event.getServer().getLevel(Level.OVERWORLD).getDataStorage().computeIfAbsent(Scheduler::load, () -> Scheduler.INSTANCE, Scheduler.ID);
@@ -742,8 +747,7 @@ public class Kiwi {
 	}
 
 	private void loadComplete(FMLLoadCompleteEvent event) {
-		GROUP_CACHE.clear();
-		GROUP_CACHE = null;
+		registryLookup.cache.invalidateAll();
 	}
 
 	public static boolean isLoaded(ResourceLocation module) {

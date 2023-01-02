@@ -11,7 +11,7 @@ import snownee.kiwi.Kiwi;
 
 public class TryParseCondition implements ICondition {
 
-	private static final ResourceLocation NAME = new ResourceLocation(Kiwi.MODID, "try_parse");
+	private static final ResourceLocation NAME = new ResourceLocation(Kiwi.ID, "try_parse");
 
 	private final JsonElement e;
 

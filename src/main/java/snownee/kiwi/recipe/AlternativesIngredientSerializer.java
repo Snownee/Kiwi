@@ -8,7 +8,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -74,7 +74,7 @@ public enum AlternativesIngredientSerializer implements IIngredientSerializer<In
 			JsonObject o = e.getAsJsonObject();
 			if (o.size() == 1 && o.has("tag")) {
 				ResourceLocation resourcelocation = new ResourceLocation(GsonHelper.getAsString(o, "tag"));
-				TagKey<Item> tagkey = TagKey.create(Registry.ITEM_REGISTRY, resourcelocation);
+				TagKey<Item> tagkey = TagKey.create(Registries.ITEM, resourcelocation);
 				if (ctx.getTag(tagkey).isEmpty()) {
 					throw new JsonSyntaxException("hasNoMatchingItems");
 				}

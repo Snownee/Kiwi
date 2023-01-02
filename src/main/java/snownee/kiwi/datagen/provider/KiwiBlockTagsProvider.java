@@ -1,13 +1,16 @@
 package snownee.kiwi.datagen.provider;
 
-import net.minecraft.data.DataGenerator;
-import net.minecraft.data.tags.BlockTagsProvider;
+import java.util.concurrent.CompletableFuture;
+
+import net.minecraft.core.HolderLookup.Provider;
+import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.BannerBlock;
 import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.ButtonBlock;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.PressurePlateBlock;
@@ -18,16 +21,16 @@ import net.minecraft.world.level.block.StandingSignBlock;
 import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.WallSignBlock;
-import net.minecraft.world.level.block.WoodButtonBlock;
 import net.minecraft.world.level.material.Material;
+import net.minecraftforge.common.data.BlockTagsProvider;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.mixin.BlockAccess;
 
 public abstract class KiwiBlockTagsProvider extends BlockTagsProvider {
 
-	public KiwiBlockTagsProvider(DataGenerator pGenerator, String modId, ExistingFileHelper existingFileHelper) {
-		super(pGenerator, modId, existingFileHelper);
+	public KiwiBlockTagsProvider(PackOutput packOutput, CompletableFuture<Provider> lookupProvider, String modId, ExistingFileHelper existingFileHelper) {
+		super(packOutput, lookupProvider, modId, existingFileHelper);
 	}
 
 	public void processTools(Block block) {
@@ -52,7 +55,7 @@ public abstract class KiwiBlockTagsProvider extends BlockTagsProvider {
 					tag(BlockTags.STANDING_SIGNS).add(block);
 					return;
 				}
-				if (block instanceof WoodButtonBlock) {
+				if (block instanceof ButtonBlock) {
 					tag(BlockTags.WOODEN_BUTTONS).add(block);
 					return;
 				}

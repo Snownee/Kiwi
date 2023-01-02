@@ -7,7 +7,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.ClickEvent;
@@ -51,7 +51,7 @@ public final class TooltipEvents {
 		if (stack != lastStack && minecraft.player != null && InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 292/*F3*/)) {
 			lastStack = stack;
 			CompoundTag data = stack.getTag();
-			MutableComponent itextcomponent = Component.literal(Registry.ITEM.getKey(stack.getItem()).toString());
+			MutableComponent itextcomponent = Component.literal(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString());
 			if (minecraft.keyboardHandler != null) {
 				minecraft.keyboardHandler.setClipboard(itextcomponent.getString());
 			}

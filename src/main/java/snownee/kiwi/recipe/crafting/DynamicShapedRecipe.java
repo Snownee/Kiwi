@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
@@ -16,15 +16,15 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.crafting.IShapedRecipe;
 import snownee.kiwi.mixin.ShapedRecipeAccess;
 
-public abstract class DynamicShapedRecipe extends CustomRecipe implements IShapedRecipe<CraftingContainer> {
+public abstract class DynamicShapedRecipe extends CustomRecipe {
 	private int width;
 	private int height;
 	private NonNullList<Ingredient> recipeItems;
@@ -33,8 +33,8 @@ public abstract class DynamicShapedRecipe extends CustomRecipe implements IShape
 	public ItemStack recipeOutput;
 	private String group;
 
-	public DynamicShapedRecipe(ResourceLocation idIn) {
-		super(idIn);
+	public DynamicShapedRecipe(ResourceLocation idIn, CraftingBookCategory category) {
+		super(idIn, category);
 	}
 
 	@Override
@@ -79,12 +79,12 @@ public abstract class DynamicShapedRecipe extends CustomRecipe implements IShape
 	@Override
 	public abstract ItemStack assemble(CraftingContainer inv);
 
-	@Override
+	//	@Override
 	public int getRecipeWidth() {
 		return width;
 	}
 
-	@Override
+	//	@Override
 	public int getRecipeHeight() {
 		return height;
 	}
@@ -127,7 +127,7 @@ public abstract class DynamicShapedRecipe extends CustomRecipe implements IShape
 						ItemStack stack1 = ingredientsArrayMap.get(key);
 						if (stack1 == null) {
 							ingredientsArrayMap.put(key, stack0);
-						} else if (!stack1.sameItemStackIgnoreDurability(stack0)) {
+						} else if (!ItemStack.isSameItemSameTags(stack1, stack0)) {
 							return false;
 						}
 					}

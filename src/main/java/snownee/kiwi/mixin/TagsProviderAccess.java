@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 import net.minecraft.core.Registry;
 import net.minecraft.data.tags.TagsProvider;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagBuilder;
 import net.minecraft.tags.TagKey;
 
@@ -13,7 +14,7 @@ import net.minecraft.tags.TagKey;
 public interface TagsProviderAccess<T> {
 
 	@Accessor
-	Registry<T> getRegistry();
+	ResourceKey<? extends Registry<T>> getRegistryKey();
 
 	@Accessor(remap = false)
 	String getModId();

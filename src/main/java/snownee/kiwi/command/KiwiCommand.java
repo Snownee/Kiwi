@@ -11,7 +11,7 @@ import snownee.kiwi.Kiwi;
 public class KiwiCommand {
 
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandSelection environmentType) {
-		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal(Kiwi.MODID);
+		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal(Kiwi.ID);
 		/* off */
         builder.then(Commands
                 .literal("debugLevelRules")

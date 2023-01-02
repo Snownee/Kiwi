@@ -24,7 +24,7 @@ import snownee.kiwi.contributor.impl.client.model.SunnyMilkModel;
 
 @OnlyIn(Dist.CLIENT)
 public class SunnyMilkLayer extends CosmeticLayer {
-	private static final ResourceLocation TEXTURE = new ResourceLocation(Kiwi.MODID, "textures/reward/sunny_milk.png");
+	private static final ResourceLocation TEXTURE = new ResourceLocation(Kiwi.ID, "textures/reward/sunny_milk.png");
 	private static final LazyOptional<LayerDefinition> definition = LazyOptional.of(SunnyMilkModel::create);
 	private final SunnyMilkModel<AbstractClientPlayer> model;
 

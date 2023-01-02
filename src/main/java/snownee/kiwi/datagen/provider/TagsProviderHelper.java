@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.tags.TagBuilder;
 import net.minecraft.tags.TagKey;
@@ -18,7 +19,7 @@ public final class TagsProviderHelper<T> {
 	public TagsProviderHelper(TagsProvider<T> tagsProvider) {
 		this.tagsProvider = (TagsProviderAccess<T>) tagsProvider;
 		modId = this.tagsProvider.getModId();
-		registry = this.tagsProvider.getRegistry();
+		registry = (Registry<T>) BuiltInRegistries.REGISTRY.get(this.tagsProvider.getRegistryKey().location());
 	}
 
 	public void optional(TagKey<T> tag, Supplier<? extends T>... blocks) {

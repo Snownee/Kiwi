@@ -1,7 +1,12 @@
 package snownee.kiwi.test;
 
+import java.util.List;
+import java.util.Set;
+
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.data.DataGenerator;
+import net.minecraft.data.loot.LootTableProvider;
+import net.minecraft.data.loot.LootTableProvider.SubProviderEntry;
 import net.minecraft.world.effect.HealthBoostMobEffect;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
@@ -19,13 +24,13 @@ import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import snownee.kiwi.AbstractModule;
+import snownee.kiwi.Categories;
 import snownee.kiwi.KiwiGO;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModule.Category;
 import snownee.kiwi.KiwiModule.RenderLayer;
 import snownee.kiwi.KiwiModule.RenderLayer.Layer;
 import snownee.kiwi.block.entity.RetextureBlockEntity;
-import snownee.kiwi.datagen.provider.KiwiLootTableProvider;
 import snownee.kiwi.item.ModBlockItem;
 import snownee.kiwi.loader.event.ClientInitEvent;
 import snownee.kiwi.loader.event.ServerInitEvent;
@@ -34,13 +39,13 @@ import snownee.kiwi.util.EnumUtil;
 
 @KiwiModule("test")
 @KiwiModule.Optional(defaultEnabled = false)
-@KiwiModule.Category("building_blocks")
+@KiwiModule.Category(value = Categories.BUILDING_BLOCKS, after = "redstone_block")
 @KiwiModule.Subscriber(modBus = true)
 public class TestModule extends AbstractModule {
 	// Keep your fields `public static`
 
 	// Register a simple item
-	@Category("food")
+	@Category(Categories.FOOD_AND_DRINKS)
 	public static final KiwiGO<TestItem> FIRST_ITEM = go(() -> new TestItem(itemProp().rarity(Rarity.EPIC)));
 
 	// The next block will use this builder to build its BlockItem. After that this field will be null
@@ -95,8 +100,8 @@ public class TestModule extends AbstractModule {
 	protected void gatherData(GatherDataEvent event) {
 		DataGenerator gen = event.getGenerator();
 		if (event.includeServer()) {
-			gen.addProvider(event.includeServer(), new KiwiLootTableProvider(gen).add(TestBlockLoot::new, LootContextParamSets.BLOCK));
-			gen.addProvider(event.includeServer(), new TestRecipeProvider(gen));
+			gen.addProvider(true, new LootTableProvider(event.getGenerator().getPackOutput(), Set.of(), List.of(new SubProviderEntry(TestBlockLoot::new, LootContextParamSets.BLOCK))));
+			gen.addProvider(true, new TestRecipeProvider(event.getGenerator().getPackOutput()));
 		}
 	}
 }

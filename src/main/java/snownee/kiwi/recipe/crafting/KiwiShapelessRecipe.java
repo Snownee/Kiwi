@@ -10,6 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
@@ -21,7 +22,7 @@ public class KiwiShapelessRecipe extends ShapelessRecipe {
 	private boolean noContainers;
 
 	public KiwiShapelessRecipe(ShapelessRecipe rawRecipe, boolean noContainers) {
-		super(rawRecipe.getId(), rawRecipe.getGroup(), rawRecipe.getResultItem(), rawRecipe.getIngredients());
+		super(rawRecipe.getId(), rawRecipe.getGroup(), rawRecipe.category(), rawRecipe.getResultItem(), rawRecipe.getIngredients());
 		this.noContainers = noContainers;
 	}
 
@@ -50,8 +51,10 @@ public class KiwiShapelessRecipe extends ShapelessRecipe {
 				//		} else if (nonnulllist.size() > ShapedRecipe.MAX_WIDTH * ShapedRecipe.MAX_HEIGHT) {
 				//			throw new JsonParseException("Too many ingredients for shapeless recipe. The maximum is " + (ShapedRecipe.MAX_WIDTH * ShapedRecipe.MAX_HEIGHT));
 			} else {
+				@SuppressWarnings("deprecation")
+				CraftingBookCategory category = CraftingBookCategory.CODEC.byName(GsonHelper.getAsString(o, "category", null), CraftingBookCategory.MISC);
 				ItemStack itemstack = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(o, "result"));
-				return new KiwiShapelessRecipe(new ShapelessRecipe(id, s, itemstack, nonnulllist), GsonHelper.getAsBoolean(o, "no_containers", false));
+				return new KiwiShapelessRecipe(new ShapelessRecipe(id, s, category, itemstack, nonnulllist), GsonHelper.getAsBoolean(o, "no_containers", false));
 			}
 		}
 
