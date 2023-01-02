@@ -26,6 +26,7 @@ import net.minecraft.world.level.block.Block;
 import snownee.kiwi.KiwiModule.Category;
 import snownee.kiwi.KiwiModule.RenderLayer;
 import snownee.kiwi.block.IKiwiBlock;
+import snownee.kiwi.item.ItemCategoryFiller;
 import snownee.kiwi.item.ModBlockItem;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.loader.event.ClientInitEvent;
@@ -106,11 +107,16 @@ public class ModuleInfo {
 			});
 			entries.forEach(e -> {
 				if (!noCategories.contains(e.entry)) {
-					List<ItemStack> stacks = List.of(new ItemStack((Item) e.entry));
+					ItemCategoryFiller filler;
+					if (e.entry instanceof ItemCategoryFiller) {
+						filler = (ItemCategoryFiller) e.entry;
+					} else {
+						filler = (tab, flags, hasPermissions, items) -> items.add(new ItemStack((Item) e.entry));
+					}
 					if (e.groupSetting != null) {
-						e.groupSetting.apply(stacks);
+						e.groupSetting.apply(filler);
 					} else if (groupSetting != null) {
-						groupSetting.apply(stacks);
+						groupSetting.apply(filler);
 					}
 				}
 			});

@@ -7,13 +7,13 @@ import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.Sets;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -26,7 +26,7 @@ import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.block.IKiwiBlock;
 import snownee.kiwi.loader.Platform;
 
-public class ModBlockItem extends BlockItem {
+public class ModBlockItem extends BlockItem implements ItemCategoryFiller {
 	public static final Set<BlockEntityType<?>> INSTANT_UPDATE_TILES = Platform.isPhysicalClient() ? Sets.newHashSet() : null;
 
 	public ModBlockItem(Block block, Item.Properties builder) {
@@ -50,10 +50,9 @@ public class ModBlockItem extends BlockItem {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
 		super.appendHoverText(stack, worldIn, tooltip, flagIn);
-		if (!KiwiClientConfig.globalTooltip)
+		if (Platform.isPhysicalClient() && !KiwiClientConfig.globalTooltip)
 			ModItem.addTip(stack, tooltip, flagIn);
 	}
 
@@ -64,6 +63,15 @@ public class ModBlockItem extends BlockItem {
 			return ((IKiwiBlock) block).getName(pStack);
 		} else {
 			return super.getName(pStack);
+		}
+	}
+
+	@Override
+	public void fillItemCategory(CreativeModeTab tab, FeatureFlagSet flags, boolean hasPermissions, List<ItemStack> items) {
+		if (getBlock() instanceof ItemCategoryFiller filler) {
+			filler.fillItemCategory(tab, flags, hasPermissions, items);
+		} else {
+			items.add(new ItemStack(this));
 		}
 	}
 }

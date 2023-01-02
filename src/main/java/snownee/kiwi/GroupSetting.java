@@ -7,6 +7,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.google.common.collect.Lists;
+
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -16,6 +18,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import snownee.kiwi.KiwiModule.Category;
+import snownee.kiwi.item.ItemCategoryFiller;
 
 public class GroupSetting {
 
@@ -31,7 +34,7 @@ public class GroupSetting {
 		this.after = after;
 	}
 
-	public void apply(List<ItemStack> toAdd) {
+	public void apply(ItemCategoryFiller filler) {
 		/* off */
 		List<CreativeModeTab> tabs = Stream.of(groups)
 				.map(Kiwi::getGroup)
@@ -46,14 +49,16 @@ public class GroupSetting {
 		/* on */
 		for (CreativeModeTab tab : tabs) {
 			ItemGroupEvents.modifyEntriesEvent(tab).register(entries -> {
-				List<ItemStack> stacks = getEnabledStacks(toAdd, entries.getEnabledFeatures());
-				addAfter(stacks, entries.getDisplayStacks(), afterItems);
-				addAfter(stacks, entries.getSearchTabStacks(), afterItems);
+				List<ItemStack> items = Lists.newArrayList();
+				filler.fillItemCategory(tab, entries.getEnabledFeatures(), entries.shouldShowOpRestrictedItems(), items);
+				items = getEnabledStacks(items, entries.getEnabledFeatures());
+				addAfter(items, entries.getDisplayStacks(), afterItems);
+				addAfter(items, entries.getSearchTabStacks(), afterItems);
 			});
 		}
 	}
 
-	private void addAfter(List<ItemStack> toAdd, List<ItemStack> destination, Set<Item> afterItems) {
+	private static void addAfter(List<ItemStack> toAdd, List<ItemStack> destination, Set<Item> afterItems) {
 		int lastFound = -1;
 		if (!afterItems.isEmpty()) {
 			for (int i = 0; i < destination.size(); i++) {
@@ -70,7 +75,7 @@ public class GroupSetting {
 		}
 	}
 
-	private List<ItemStack> getEnabledStacks(List<ItemStack> newStacks, FeatureFlagSet enabledFeatures) {
+	private static List<ItemStack> getEnabledStacks(List<ItemStack> newStacks, FeatureFlagSet enabledFeatures) {
 		// If not all stacks are enabled, filter the list, otherwise use it as-is
 		if (newStacks.stream().allMatch($ -> isEnabled($, enabledFeatures))) {
 			return newStacks;
@@ -79,7 +84,7 @@ public class GroupSetting {
 		return newStacks.stream().filter($ -> isEnabled($, enabledFeatures)).toList();
 	}
 
-	private boolean isEnabled(ItemStack stack, FeatureFlagSet enabledFeatures) {
+	private static boolean isEnabled(ItemStack stack, FeatureFlagSet enabledFeatures) {
 		return stack.getItem().isEnabled(enabledFeatures);
 	}
 }

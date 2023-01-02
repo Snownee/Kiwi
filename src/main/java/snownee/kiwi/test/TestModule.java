@@ -11,19 +11,20 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.material.Material;
 import snownee.kiwi.AbstractModule;
+import snownee.kiwi.Categories;
 import snownee.kiwi.KiwiGO;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModule.Category;
 
 @KiwiModule("test")
 @KiwiModule.Optional(defaultEnabled = false)
-@KiwiModule.Category(value = "building", after = "redstone_block")
+@KiwiModule.Category(value = Categories.BUILDING_BLOCKS, after = "redstone_block")
 //@KiwiModule.Subscriber(Bus.MOD)
 public class TestModule extends AbstractModule {
 	// Keep your fields `public static`
 
 	// Register a simple item
-	@Category("food")
+	@Category(Categories.FOOD_AND_DRINKS)
 	public static final KiwiGO<TestItem> FIRST_ITEM = go(() -> new TestItem(itemProp().rarity(Rarity.EPIC)));
 
 	// The next block will use this builder to build its BlockItem. After that this field will be null

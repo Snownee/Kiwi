@@ -15,7 +15,7 @@ import snownee.kiwi.KiwiModule.Name;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.util.VanillaActions;
 
-@KiwiModule(value = "test2", dependencies = "forge;@kiwi:test")
+@KiwiModule(value = "test2")
 @KiwiModule.Optional(defaultEnabled = false)
 public class TestModule2 extends AbstractModule {
 	public static final CreativeModeTab TAB = itemCategory(Kiwi.MODID, "test", () -> new ItemStack(Items.DANDELION)).build();
@@ -32,6 +32,6 @@ public class TestModule2 extends AbstractModule {
 
 	@Override
 	protected void init(InitEvent event) {
-		event.enqueueWork(() -> VanillaActions.registerAxeConversion(Blocks.DIAMOND_BLOCK, Blocks.REDSTONE_BLOCK));
+		event.enqueueWork(() -> VanillaActions.registerShovelConversion(Blocks.DIAMOND_BLOCK, Blocks.REDSTONE_BLOCK.defaultBlockState()));
 	}
 }

@@ -21,6 +21,12 @@
       }
     },
     {
+      "target": "snownee.kiwi.test.TestModule2",
+      "data": {
+        "value": "test2"
+      }
+    },
+    {
       "target": "snownee.kiwi.contributor.Contributors",
       "data": {
         "value": "contributors"
@@ -36,6 +42,12 @@
   "Optional": [
     {
       "target": "snownee.kiwi.test.TestModule",
+      "data": {
+        "defaultEnabled": false
+      }
+    },
+    {
+      "target": "snownee.kiwi.test.TestModule2",
       "data": {
         "defaultEnabled": false
       }
