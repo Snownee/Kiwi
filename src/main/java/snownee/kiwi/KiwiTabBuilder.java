@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 
@@ -17,6 +18,7 @@ public class KiwiTabBuilder extends CreativeModeTab.Builder {
 	public KiwiTabBuilder(ResourceLocation id) {
 		super(CreativeModeTab.Row.TOP, 0);
 		this.id = id;
+		title(Component.translatable("itemGroup.%s.%s", id.getNamespace(), id.getPath()));
 		BUILDERS.add(this);
 	}
 
