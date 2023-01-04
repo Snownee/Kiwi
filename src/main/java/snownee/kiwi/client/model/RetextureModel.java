@@ -143,21 +143,19 @@ public class RetextureModel implements IDynamicBakedModel {
 
 	public static class Geometry implements IUnbakedGeometry<Geometry> {
 
-		private final ResourceLocation loaderId;
 		private final Function<ModelBaker, BlockModel> blockModel;
 		private final String particle;
 		private final boolean inventory;
 
-		public Geometry(Function<ModelBaker, BlockModel> blockModel, ResourceLocation loaderId, String particle, boolean inventory) {
+		public Geometry(Function<ModelBaker, BlockModel> blockModel, String particle, boolean inventory) {
 			this.blockModel = blockModel;
-			this.loaderId = loaderId;
 			this.particle = particle;
 			this.inventory = inventory;
 		}
 
 		@Override
 		public BakedModel bake(IGeometryBakingContext owner, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides, ResourceLocation modelLocation) {
-			return new RetextureModel(baker, modelTransform, loaderId, blockModel.apply(baker).customData, particle, inventory);
+			return new RetextureModel(baker, modelTransform, modelLocation, blockModel.apply(baker).customData, particle, inventory);
 		}
 
 	}
@@ -171,25 +169,24 @@ public class RetextureModel implements IDynamicBakedModel {
 
 		@Override
 		public Geometry read(JsonObject jsonObject, JsonDeserializationContext deserializationContext) {
-			ResourceLocation loaderId = new ResourceLocation(GsonHelper.getAsString(jsonObject, "base_loader", "elements"));
 			Function<ModelBaker, BlockModel> blockModel = baker -> (BlockModel) baker.getModel(new ResourceLocation(GsonHelper.getAsString(jsonObject, "base")));
-			return new Geometry(blockModel, loaderId, GsonHelper.getAsString(jsonObject, "particle", "0"), GsonHelper.getAsBoolean(jsonObject, "inventory", true));
+			return new Geometry(blockModel, GsonHelper.getAsString(jsonObject, "particle", "0"), GsonHelper.getAsBoolean(jsonObject, "inventory", true));
 		}
 
 	}
 
 	private final ModelBaker baker;
 	private final ModelState variant;
-	private final ResourceLocation loaderId;
+	private final ResourceLocation modelLocation;
 	private ItemOverrides overrideList;
 	private final Cache<String, BakedModel> baked = CacheBuilder.newBuilder().expireAfterAccess(500L, TimeUnit.SECONDS).build();
 	private final BlockGeometryBakingContext baseConfiguration;
 	private final String particleKey;
 
-	public RetextureModel(ModelBaker baker, ModelState variant, ResourceLocation loaderId, BlockGeometryBakingContext baseConfiguration, String particleKey, boolean inventory) {
+	public RetextureModel(ModelBaker baker, ModelState variant, ResourceLocation modelLocation, BlockGeometryBakingContext baseConfiguration, String particleKey, boolean inventory) {
 		this.baker = baker;
 		this.variant = variant;
-		this.loaderId = loaderId;
+		this.modelLocation = modelLocation;
 		this.baseConfiguration = baseConfiguration;
 		overrideList = inventory ? new Overrides(this) : ItemOverrides.EMPTY;
 		this.particleKey = particleKey;
@@ -266,7 +263,7 @@ public class RetextureModel implements IDynamicBakedModel {
 		try {
 			return baked.get(key, () -> {
 				ModelConfiguration configuration = new ModelConfiguration(baseConfiguration, overrides);
-				return baseConfiguration.getCustomGeometry().bake(configuration, baker, baker.getModelTextureGetter()::apply, variant, overrideList, loaderId);
+				return baseConfiguration.getCustomGeometry().bake(configuration, baker, baker.getModelTextureGetter()::apply, variant, overrideList, modelLocation);
 			});
 		} catch (Exception e) {
 			e.printStackTrace();
