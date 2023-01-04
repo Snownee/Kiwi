@@ -26,7 +26,10 @@ import snownee.kiwi.item.ItemCategoryFiller;
 
 public class GroupSetting {
 
-	public static GroupSetting of(Category category) {
+	public static GroupSetting of(Category category, GroupSetting preset) {
+		if (preset != null && category.value().length == 0) {
+			return new GroupSetting(preset.groups, category.after());
+		}
 		return new GroupSetting(category.value(), category.after());
 	}
 
