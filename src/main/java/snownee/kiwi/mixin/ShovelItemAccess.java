@@ -2,7 +2,6 @@ package snownee.kiwi.mixin;
 
 import java.util.Map;
 
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -20,7 +19,6 @@ public interface ShovelItemAccess {
 	}
 
 	@Accessor
-	@Final
 	@Mutable
 	static void setFLATTENABLES(Map<Block, BlockState> map) {
 		throw new IllegalStateException();
