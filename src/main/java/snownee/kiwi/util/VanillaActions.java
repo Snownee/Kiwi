@@ -48,7 +48,7 @@ public final class VanillaActions { //TODO brewing
 
 	public static void registerShovelConversion(Block k, BlockState v) {
 		if (ShovelItemAccess.getFLATTENABLES() instanceof ImmutableMap) {
-			ShovelItemAccess.setFLATTENABLES( Maps.newHashMap(ShovelItemAccess.getFLATTENABLES()));
+			ShovelItemAccess.setFLATTENABLES(Maps.newHashMap(ShovelItemAccess.getFLATTENABLES()));
 		}
 		ShovelItemAccess.getFLATTENABLES().put(k, v);
 	}
@@ -59,7 +59,7 @@ public final class VanillaActions { //TODO brewing
 
 	public static void registerVillagerPickupable(ItemLike item) {
 		if (VillagerAccess.getWANTED_ITEMS() instanceof ImmutableSet) {
-			VillagerAccess.setWANTED_ITEMS( Sets.newHashSet(VillagerAccess.getWANTED_ITEMS()));
+			VillagerAccess.setWANTED_ITEMS(Sets.newHashSet(VillagerAccess.getWANTED_ITEMS()));
 		}
 		VillagerAccess.getWANTED_ITEMS().add(item.asItem());
 	}
@@ -69,6 +69,13 @@ public final class VanillaActions { //TODO brewing
 			WorkAtComposterAccess.setCOMPOSTABLE_ITEMS(Lists.newArrayList(WorkAtComposterAccess.getCOMPOSTABLE_ITEMS()));
 		}
 		WorkAtComposterAccess.getCOMPOSTABLE_ITEMS().add(item.asItem());
+	}
+
+	public static void registerVillagerFood(ItemLike item, int value) {
+		if (VillagerAccess.getFOOD_POINTS() instanceof ImmutableMap) {
+			VillagerAccess.setFOOD_POINTS(Maps.newHashMap(VillagerAccess.getFOOD_POINTS()));
+		}
+		VillagerAccess.getFOOD_POINTS().put(item.asItem(), value);
 	}
 
 }
