@@ -1,12 +1,17 @@
 package snownee.kiwi.datagen.provider;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import net.minecraft.core.Registry;
 import net.minecraft.data.tags.TagsProvider;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagBuilder;
 import net.minecraft.tags.TagKey;
+import net.minecraftforge.registries.RegistryManager;
+import snownee.kiwi.KiwiModule;
+import snownee.kiwi.KiwiModules;
 import snownee.kiwi.mixin.TagsProviderAccess;
 
 public final class TagsProviderHelper<T> {
@@ -35,8 +40,36 @@ public final class TagsProviderHelper<T> {
 		}
 	}
 
-	public Stream<T> getModEntries() {
+	public void add(TagKey<T> tag, OptionalEntry<T> entry) {
+		TagBuilder builder = tagsProvider.callGetOrCreateRawBuilder(tag);
+		if (entry.optional) {
+			builder.addOptionalElement(registry.getKey(entry.object));
+		} else {
+			builder.addElement(registry.getKey(entry.object));
+		}
+	}
+
+	public Stream<T> getAllEntries() {
 		return registry.stream().filter($ -> registry.getKey($).getNamespace().equals(modId));
+	}
+
+	public Stream<OptionalEntry<T>> getEntriesByModule(String... ids) {
+		Object key = Optional.<Object>ofNullable(RegistryManager.ACTIVE.getRegistry(registry.key())).orElse(registry);
+		/* off */
+		return Stream.of(ids)
+				.map("%s:".formatted(modId)::concat)
+				.map(ResourceLocation::new)
+				.map(KiwiModules::get)
+				.mapMulti(($, consumer) -> {
+					boolean optional = $.module.getClass().getDeclaredAnnotation(KiwiModule.Optional.class) != null;
+					$.getRegistries(key).stream()
+							.map($$ -> (T) $$)
+							.map($$ -> new OptionalEntry<>($$, optional))
+							.forEach(consumer);
+				});
+	}
+
+	public record OptionalEntry<T> (T object, boolean optional) {
 	}
 
 }
