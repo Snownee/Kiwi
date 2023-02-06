@@ -21,14 +21,16 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
 public class KiwiLootTableProvider extends LootTableProvider {
 
 	private final List<Pair<Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>, LootContextParamSet>> subProviders = Lists.newArrayList();
+	private final ResourceLocation id;
 
-	public KiwiLootTableProvider(DataGenerator pGenerator) {
+	public KiwiLootTableProvider(ResourceLocation id, DataGenerator pGenerator) {
 		super(pGenerator);
+		this.id = id;
 	}
 
 	@Override
 	public String getName() {
-		return super.getName() + " - " + getClass().getSimpleName();
+		return super.getName() + " - " + id;
 	}
 
 	@Override

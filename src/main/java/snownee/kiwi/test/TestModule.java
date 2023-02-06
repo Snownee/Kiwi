@@ -95,7 +95,7 @@ public class TestModule extends AbstractModule {
 	protected void gatherData(GatherDataEvent event) {
 		DataGenerator gen = event.getGenerator();
 		if (event.includeServer()) {
-			gen.addProvider(event.includeServer(), new KiwiLootTableProvider(gen).add(TestBlockLoot::new, LootContextParamSets.BLOCK));
+			gen.addProvider(event.includeServer(), new KiwiLootTableProvider(uid, gen).add(TestBlockLoot::new, LootContextParamSets.BLOCK));
 			gen.addProvider(event.includeServer(), new TestRecipeProvider(gen));
 		}
 	}
