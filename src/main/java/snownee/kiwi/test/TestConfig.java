@@ -2,6 +2,7 @@ package snownee.kiwi.test;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import snownee.kiwi.config.ConfigUI.ItemType;
 import snownee.kiwi.config.ConfigUI.TextDescription;
@@ -35,6 +36,8 @@ public class TestConfig {
 
 	@TextDescription("Test2")
 	public static String emptyStr;
+
+	public static Map<String, Object> testMap = Map.of("datapack:custom", Map.of("1", "2"));
 
 	@LevelRestart
 	public static ConfigType enumValue = ConfigType.COMMON;
