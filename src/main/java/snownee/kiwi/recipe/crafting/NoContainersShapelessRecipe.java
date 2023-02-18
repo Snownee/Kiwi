@@ -23,7 +23,7 @@ public class NoContainersShapelessRecipe extends ShapelessRecipe {
 
 	@Override
 	public RecipeSerializer<?> getSerializer() {
-		return DataModule.SHAPELESS_NO_CONTAINERS;
+		return DataModule.SHAPELESS_NO_CONTAINERS.get();
 	}
 
 	public static class Serializer implements RecipeSerializer<NoContainersShapelessRecipe> {

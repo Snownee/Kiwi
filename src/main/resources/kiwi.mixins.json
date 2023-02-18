@@ -8,8 +8,6 @@
     "ItemAccess",
     "BlockAccess",
     "ShapedRecipeAccess",
-    "VillagerAccess",
-    "WorkAtComposterAccess",
     "ReloadableServerResourcesMixin"
   ],
   "client": [
