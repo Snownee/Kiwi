@@ -72,9 +72,9 @@ public class ModuleInfo {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public <T> void handleRegister(Registry<T> registry) {
+	public <T> void handleRegister(Object registry) {
 		context.setActiveContainer();
-		Collection<NamedEntry<T>> entries = registries.get(registry);
+		Collection<NamedEntry<T>> entries = registries.get((Registry<T>) registry);
 		BiConsumer<ModuleInfo, T> decorator = (BiConsumer<ModuleInfo, T>) module.decorators.getOrDefault(registry, (a, b) -> {
 		});
 		if (registry == Registry.ITEM) {
@@ -103,7 +103,7 @@ public class ModuleInfo {
 						}
 					}
 				}
-				entries.add(new NamedEntry(e.name, item, registry, null));
+				entries.add(new NamedEntry(e.name, item, (Registry) registry, null));
 			});
 			entries.forEach(e -> {
 				if (e.field != null) {
@@ -161,7 +161,7 @@ public class ModuleInfo {
 		KiwiModules.ALL_USED_REGISTRIES.addAll(registries.registries.keySet());
 		context.setActiveContainer();
 		module.preInit();
-		registries.registries.keySet().forEach(this::handleRegister);
+		KiwiModules.ALL_USED_REGISTRIES.forEach(this::handleRegister);
 	}
 
 	public void init(InitEvent event) {
