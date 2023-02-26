@@ -55,7 +55,7 @@ public final class TooltipEvents {
 				minecraft.keyboardHandler.setClipboard(itextcomponent.getString());
 			}
 			if (data != null) {
-				itextcomponent.append(NbtUtils.prettyPrint(data));
+				itextcomponent.append(NbtUtils.toPrettyComponent(data));
 			}
 			itextcomponent.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, itextcomponent.getString())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click"))).withInsertion(itextcomponent.getString()));
 			minecraft.player.displayClientMessage(itextcomponent, false);
