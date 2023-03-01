@@ -5,15 +5,16 @@
   "compatibilityLevel": "JAVA_16",
   "refmap": "kiwi.refmap.json",
   "mixins": [
-    "ItemAccess",
     "BlockAccess",
-    "ShapedRecipeAccess",
-    "ReloadableServerResourcesMixin"
+    "ItemAccess",
+    "ReloadableServerResourcesMixin",
+    "ShapedRecipeAccess"
   ],
   "client": [
-    "ClientPacketListenerMixin",
-    "ClientTelemetryManagerMixin",
-    "ScreenMixin"
+    "client.ClientPacketListenerMixin",
+    "client.ClientTelemetryManagerMixin",
+    "client.ScreenMixin",
+    "client.WorldOpenFlowsMixin"
   ],
   "injectors": {
     "defaultRequire": 1

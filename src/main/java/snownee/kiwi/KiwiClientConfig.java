@@ -13,7 +13,7 @@ public final class KiwiClientConfig {
 	public static String contributorCosmetic = "";
 
 	@Comment("Show customized tooltips from any item.\nMainly for pack devs")
-	public static boolean globalTooltip = false;
+	public static boolean globalTooltip;
 
 	public static boolean noMicrosoftTelemetry = true;
 
@@ -28,5 +28,8 @@ public final class KiwiClientConfig {
 	@ConfigUI.Hide
 	@Path("debug.debugTooltipMsg")
 	public static boolean debugTooltipMsg = true;
+
+	@Path("suppressExperimentalSettingsWarning")
+	public static boolean suppressExperimentalWarning;
 
 }

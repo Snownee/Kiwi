@@ -13,6 +13,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.ClickEvent.Action;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
@@ -34,7 +35,7 @@ public final class TooltipEvents {
 	private static CompoundTag lastNBT;
 	private static Component lastFormatted;
 	private static boolean firstSeenDebugTooltip = true;
-	public static final ClickEvent disableClickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "disableClickEvent");
+	public static final String disableDebugTooltipCommand = "@kiwi disable debugTooltip";
 
 	public static void globalTooltip(ItemStack stack, List<Component> tooltip, TooltipFlag flag) {
 		if (KiwiClientConfig.globalTooltip)
@@ -85,7 +86,7 @@ public final class TooltipEvents {
 		if (firstSeenDebugTooltip && mc.player != null) {
 			firstSeenDebugTooltip = false;
 			if (KiwiClientConfig.debugTooltipMsg) {
-				MutableComponent clickHere = Component.translatable("tip.kiwi.click_here").withStyle($ -> $.withClickEvent(disableClickEvent));
+				MutableComponent clickHere = Component.translatable("tip.kiwi.click_here").withStyle($ -> $.withClickEvent(new ClickEvent(Action.COPY_TO_CLIPBOARD, disableDebugTooltipCommand)));
 				mc.player.sendSystemMessage(Component.translatable("tip.kiwi.debug_tooltip", clickHere.withStyle(ChatFormatting.AQUA)));
 				KiwiClientConfig.debugTooltipMsg = false;
 				KiwiConfigManager.getHandler(KiwiClientConfig.class).save();

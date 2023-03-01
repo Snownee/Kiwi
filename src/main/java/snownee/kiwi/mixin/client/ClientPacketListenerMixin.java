@@ -1,4 +1,4 @@
-package snownee.kiwi.mixin;
+package snownee.kiwi.mixin.client;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -23,7 +23,7 @@ public class ClientPacketListenerMixin {
 					value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BlockEntity;load(Lnet/minecraft/nbt/CompoundTag;)V", remap = true
 			), method = { "method_38542", "lambda$handleBlockEntityData$5" }, cancellable = true, remap = false
 	)
-	private void kiwi_handleBlockEntityData(ClientboundBlockEntityDataPacket clientboundBlockEntityDataPacket, BlockEntity blockEntity, CallbackInfo ci) {
+	private void kiwi$handleBlockEntityData(ClientboundBlockEntityDataPacket clientboundBlockEntityDataPacket, BlockEntity blockEntity, CallbackInfo ci) {
 		if (blockEntity instanceof BaseBlockEntity) {
 			((BaseBlockEntity) blockEntity).onDataPacket(connection, clientboundBlockEntityDataPacket);
 			ci.cancel();
