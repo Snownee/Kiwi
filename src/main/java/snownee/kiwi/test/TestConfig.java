@@ -2,6 +2,7 @@ package snownee.kiwi.test;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import com.electronwill.nightconfig.core.conversion.Path;
 
@@ -32,6 +33,8 @@ public class TestConfig {
 	public static List<String> listValue = Arrays.asList("test");
 
 	public static String emptyStr;
+
+	public static Map<String, Object> testMap = Map.of("datapack:custom", Map.of("1", "2"));
 
 	@LevelRestart
 	public static ModConfig.Type enumValue = ModConfig.Type.COMMON;
