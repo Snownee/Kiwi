@@ -9,6 +9,7 @@ displayName="Kiwi"
 authors="Snownee"
 displayURL="https://www.curseforge.com/minecraft/mc-mods/kiwi"
 description="Minecraft modding library"
+logoFile = "icon.png"
 
 [[dependencies.kiwi]]
     modId="forge"

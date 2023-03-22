@@ -40,8 +40,6 @@ import snownee.kiwi.block.def.BlockDefinition;
 import snownee.kiwi.loader.Platform;
 
 public final class Util {
-	public static RecipeManager recipeManager;
-
 	private Util() {
 	}
 
@@ -130,8 +128,6 @@ public final class Util {
 
 	@Nullable
 	public static RecipeManager getRecipeManager() {
-		if (recipeManager != null)
-			return recipeManager;
 		MinecraftServer server = Platform.getServer();
 		if (server != null) {
 			return server.getRecipeManager();

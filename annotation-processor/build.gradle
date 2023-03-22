@@ -20,7 +20,7 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 minecraft {
     //mappings channel: 'parchment', version: '2021.09.05-1.17.1'
-    mappings channel: 'official', version: '1.18'
+    mappings channel: 'official', version: project.minecraft_version
 }
 
 dependencies {

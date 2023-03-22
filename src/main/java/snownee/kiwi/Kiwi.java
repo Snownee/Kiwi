@@ -106,7 +106,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -288,7 +287,6 @@ public class Kiwi {
 			Layer.TRANSLUCENT.value = RenderType.translucent();
 		}
 		MinecraftForge.EVENT_BUS.addListener(this::onCommandsRegister);
-		MinecraftForge.EVENT_BUS.addListener(this::onTagsUpdated);
 		MinecraftForge.EVENT_BUS.addListener(this::onAttachEntity);
 		stage = LoadingStage.CONSTRUCTED;
 	}
@@ -760,7 +758,7 @@ public class Kiwi {
 
 	private static boolean tagsUpdated;
 
-	private void onTagsUpdated(TagsUpdatedEvent event) {
+	public static void onTagsUpdated() {
 		tagsUpdated = true;
 	}
 
