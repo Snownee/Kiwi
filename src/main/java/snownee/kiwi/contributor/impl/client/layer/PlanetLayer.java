@@ -1,5 +1,7 @@
 package snownee.kiwi.contributor.impl.client.layer;
 
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -18,17 +20,16 @@ import net.minecraft.resources.ResourceLocation;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.contributor.client.CosmeticLayer;
 import snownee.kiwi.contributor.impl.client.model.PlanetModel;
-import snownee.kiwi.util.LazyOptional;
 
 @Environment(EnvType.CLIENT)
 public class PlanetLayer extends CosmeticLayer {
 	private static final ResourceLocation TEXTURE = new ResourceLocation(Kiwi.MODID, "textures/reward/planet.png");
-	private static final LazyOptional<LayerDefinition> definition = LazyOptional.of(PlanetModel::create);
+	private static final Supplier<LayerDefinition> definition = Suppliers.memoize(PlanetModel::create);
 	private final PlanetModel<AbstractClientPlayer> modelPlanet;
 
 	public PlanetLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRendererIn) {
 		super(entityRendererIn);
-		modelPlanet = new PlanetModel<>(definition.orElse(null));
+		modelPlanet = new PlanetModel<>(definition.get());
 	}
 
 	@Override
