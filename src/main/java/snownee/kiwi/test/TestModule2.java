@@ -18,7 +18,7 @@ import snownee.kiwi.util.VanillaActions;
 @KiwiModule(value = "test2")
 @KiwiModule.Optional(defaultEnabled = false)
 public class TestModule2 extends AbstractModule {
-	public static final CreativeModeTab TAB = itemCategory(Kiwi.MODID, "test", () -> new ItemStack(Items.DANDELION)).build();
+	public static final CreativeModeTab TAB = itemCategory("my_mod", "items", () -> new ItemStack(Items.DANDELION)).build();
 
 	public static final TagKey<EntityType<?>> BAT = entityTag(Kiwi.MODID, "bat");
 
