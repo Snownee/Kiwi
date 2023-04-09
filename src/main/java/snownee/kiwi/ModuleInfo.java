@@ -74,7 +74,7 @@ public class ModuleInfo {
 		if (field != null) {
 			Category group = field.getAnnotation(Category.class);
 			if (group != null) {
-				entry.groupSetting = GroupSetting.of(group);
+				entry.groupSetting = GroupSetting.of(group, groupSetting);
 			}
 		}
 	}

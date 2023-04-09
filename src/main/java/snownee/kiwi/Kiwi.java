@@ -437,7 +437,7 @@ public class Kiwi implements ModInitializer {
 				if (group != null) {
 					if (group.value().length > 0) {
 						useOwnGroup = false;
-						info.groupSetting = GroupSetting.of(group);
+						info.groupSetting = GroupSetting.of(group, null);
 					}
 				}
 			}
