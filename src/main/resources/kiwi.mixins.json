@@ -10,9 +10,10 @@
     "ReloadableServerResourcesMixin"
   ],
   "client": [
-    "ClientPacketListenerMixin",
-    "ClientTelemetryManagerMixin",
-    "ScreenMixin"
+    "client.ClientPacketListenerMixin",
+    "client.ClientTelemetryManagerMixin",
+    "client.ScreenMixin",
+    "client.WorldOpenFlowsMixin"
   ],
   "injectors": {
     "defaultRequire": 1

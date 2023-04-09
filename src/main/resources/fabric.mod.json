@@ -13,6 +13,7 @@
   },
 
   "license": "MIT",
+  "icon": "assets/kiwi/logo.png",
 
   "entrypoints": {
     "main": [

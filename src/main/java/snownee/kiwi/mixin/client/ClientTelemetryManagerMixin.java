@@ -1,4 +1,4 @@
-package snownee.kiwi.mixin;
+package snownee.kiwi.mixin.client;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -14,9 +14,9 @@ import snownee.kiwi.KiwiClientConfig;
 public class ClientTelemetryManagerMixin {
 
 	@Inject(method = "createWorldSessionEventSender", at = @At("HEAD"), cancellable = true)
-	private void kiwi_createWorldSessionEventSender(CallbackInfoReturnable<TelemetryEventSender> ci) {
+	private void kiwi$createWorldSessionEventSender(CallbackInfoReturnable<TelemetryEventSender> ci) {
 		if (KiwiClientConfig.noMicrosoftTelemetry) {
-			Kiwi.logger.info("Kiwi: Canceling Microsoft telemetry");
+			Kiwi.logger.info("Canceling Microsoft telemetry");
 			ci.setReturnValue(TelemetryEventSender.DISABLED);
 		}
 	}
