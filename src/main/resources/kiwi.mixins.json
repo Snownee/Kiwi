@@ -7,8 +7,6 @@
   "mixins": [
     "BlockAccess",
     "ShapedRecipeAccess",
-    "VillagerAccess",
-    "WorkAtComposterAccess",
     "ReloadableServerResourcesMixin"
   ],
   "client": [
