@@ -37,7 +37,7 @@ public final class MathUtil {
 	}
 
 	public static int posOnLine(Vec3 start, Vec3 end, Collection<BlockPos> list) {
-		list.add(new BlockPos(start));
+		list.add(BlockPos.containing(start));
 		if (start.equals(end)) {
 			return 1;
 		} else {

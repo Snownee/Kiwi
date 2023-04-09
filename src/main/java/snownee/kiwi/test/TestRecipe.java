@@ -2,6 +2,7 @@ package snownee.kiwi.test;
 
 import com.google.gson.JsonObject;
 
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
@@ -28,7 +29,7 @@ public class TestRecipe extends DynamicShapedRecipe {
 	}
 
 	@Override
-	public ItemStack assemble(CraftingContainer inv) {
+	public ItemStack assemble(CraftingContainer inv, RegistryAccess registryAccess) {
 		ItemStack res = recipeOutput.copy();
 		int[] pos = search(inv);
 		ItemStack stack = item('#', inv, pos);

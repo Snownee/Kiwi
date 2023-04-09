@@ -19,7 +19,7 @@ import snownee.kiwi.KiwiClientConfig;
 public abstract class WorldOpenFlowsMixin {
 
 	@Inject(method = "confirmWorldCreation", at = @At("HEAD"), cancellable = true)
-	private static void kiwi$confirmWorldCreation(Minecraft minecraft, CreateWorldScreen createWorldScreen, Lifecycle lifecycle, Runnable runnable, CallbackInfo ci) {
+	private static void kiwi$confirmWorldCreation(Minecraft minecraft, CreateWorldScreen createWorldScreen, Lifecycle lifecycle, Runnable runnable, boolean bl, CallbackInfo ci) {
 		if (KiwiClientConfig.suppressExperimentalWarning && lifecycle == Lifecycle.experimental()) {
 			runnable.run();
 			ci.cancel();

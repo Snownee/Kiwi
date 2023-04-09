@@ -108,7 +108,8 @@ public class ConfigHandler {
 				} else if (type == long.class) {
 					long min = Double.isNaN(this.min) ? Long.MIN_VALUE : (long) this.min;
 					long max = Double.isNaN(this.max) ? Long.MAX_VALUE : (long) this.max;
-					$ = Long.valueOf(Mth.clamp((Long) $, min, max));
+					long value = (Long) $;
+					$ = Long.valueOf(Math.min(Math.max(value, min), max));
 				}
 				if (field != null) {
 					if (type == boolean.class) {

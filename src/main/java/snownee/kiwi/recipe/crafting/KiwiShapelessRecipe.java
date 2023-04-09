@@ -22,7 +22,7 @@ public class KiwiShapelessRecipe extends ShapelessRecipe {
 	private boolean noContainers;
 
 	public KiwiShapelessRecipe(ShapelessRecipe rawRecipe, boolean noContainers) {
-		super(rawRecipe.getId(), rawRecipe.getGroup(), rawRecipe.category(), rawRecipe.getResultItem(), rawRecipe.getIngredients());
+		super(rawRecipe.getId(), rawRecipe.getGroup(), rawRecipe.category(), rawRecipe.getResultItem(null), rawRecipe.getIngredients());
 		this.noContainers = noContainers;
 	}
 

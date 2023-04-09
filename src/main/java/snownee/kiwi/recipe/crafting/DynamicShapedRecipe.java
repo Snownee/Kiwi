@@ -11,6 +11,7 @@ import com.google.gson.JsonObject;
 
 import it.unimi.dsi.fastutil.chars.Char2ObjectArrayMap;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -77,7 +78,7 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 	}
 
 	@Override
-	public abstract ItemStack assemble(CraftingContainer inv);
+	public abstract ItemStack assemble(CraftingContainer inv, RegistryAccess registryAccess);
 
 	//	@Override
 	public int getRecipeWidth() {
