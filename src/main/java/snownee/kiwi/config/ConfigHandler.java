@@ -232,8 +232,8 @@ public class ConfigHandler {
 		try (FileWriter writer = new FileWriter(configPath.toFile(), StandardCharsets.UTF_8)) {
 			DumperOptions dumperOptions = new DumperOptions();
 			dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-//			Representer representer = new Representer();
-//			representer.addTypeDescription(new TypeDescription(Map.class, Tag.OMAP));
+			//			Representer representer = new Representer();
+			//			representer.addTypeDescription(new TypeDescription(Map.class, Tag.OMAP));
 			Yaml yaml = new Yaml(dumperOptions);
 			yaml.dump(map, writer);
 		} catch (JsonSyntaxException | IOException e) {
@@ -290,14 +290,14 @@ public class ConfigHandler {
 			if (!Modifier.isPublic(mods) || !Modifier.isStatic(mods)) {
 				continue;
 			}
-			KiwiConfig.Listens listens = method.getAnnotation(KiwiConfig.Listens.class);
-			if (listens == null) {
+			KiwiConfig.Listen[] listens = method.getAnnotationsByType(KiwiConfig.Listen.class);
+			if (listens.length == 0) {
 				continue;
 			}
 			if (method.getParameterCount() != 1 || method.getParameterTypes()[0] != String.class) {
 				throw new IllegalArgumentException("Invalid listener method " + method);
 			}
-			for (KiwiConfig.Listen listen : listens.value()) {
+			for (KiwiConfig.Listen listen : listens) {
 				String path = listen.value();
 				Value<?> value = valueMap.get(path);
 				if (value == null) {
