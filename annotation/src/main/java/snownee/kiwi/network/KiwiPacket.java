@@ -13,7 +13,7 @@ public @interface KiwiPacket {
 
 	Direction dir() default Direction.PLAY_TO_SERVER;
 
-	public enum Direction {
+	enum Direction {
 		PLAY_TO_SERVER, PLAY_TO_CLIENT, LOGIN_TO_SERVER, LOGIN_TO_CLIENT;
 	}
 }

@@ -37,11 +37,12 @@ public class TestConfig {
 	@TextDescription("Test2")
 	public static String emptyStr;
 
-	public static Map<String, Object> testMap = Map.of("datapack:custom", Map.of("1", "2"));
+	public static Map<String, Object> testMap = Map.of("datapack:custom", Map.of("1.2", "2"));
 
 	@LevelRestart
 	public static ConfigType enumValue = ConfigType.COMMON;
 
+	@KiwiConfig.Listen("Malay.P")
 	public static void onChanged(String path) {
 		// do sth
 		System.out.println(path);

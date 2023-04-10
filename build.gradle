@@ -44,7 +44,7 @@ configurations {
 dependencies {
     // To change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    
+
     mappings loom.officialMojangMappings()
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
@@ -53,17 +53,14 @@ dependencies {
 
     // PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
     // You may need to force-disable transitiveness on them.
-    
+
     modApi("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}") {
         exclude(group: "net.fabricmc.fabric-api")
     }
     modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
-    
-    shadowCommon("com.moandjiezana.toml:toml4j:${project.toml4j_version}") {
-        exclude(module: "gson")
-    }
+
     shadowCommon("org.yaml:snakeyaml:${project.snakeyaml_version}")
-    
+
     annotationProcessor project(':annotation-processor')
 }
 
@@ -119,7 +116,7 @@ remapJar {
     dependsOn(shadowJar)
     input.set(shadowJar.archiveFile)
     archiveClassifier = ""
-    
+
     from("LICENSE") {
         rename { "${it}_${project.archivesBaseName}"}
     }

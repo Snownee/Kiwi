@@ -66,7 +66,7 @@ public @interface KiwiModule {
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.FIELD)
-	public @interface Name {
+	@interface Name {
 		String value();
 	}
 
@@ -80,7 +80,7 @@ public @interface KiwiModule {
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.FIELD)
-	public @interface NoCategory {
+	@interface NoCategory {
 	}
 
 	/**
@@ -91,12 +91,12 @@ public @interface KiwiModule {
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.FIELD)
-	public @interface NoItem {
+	@interface NoItem {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE, ElementType.FIELD })
-	public @interface RenderLayer {
+	@interface RenderLayer {
 		Layer value();
 
 		enum Layer {
@@ -114,7 +114,7 @@ public @interface KiwiModule {
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.FIELD)
-	public @interface Skip {
+	@interface Skip {
 	}
 
 }

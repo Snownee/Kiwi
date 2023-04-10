@@ -1,6 +1,7 @@
 package snownee.kiwi.config;
 
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -11,13 +12,13 @@ import java.util.Locale;
 public @interface KiwiConfig {
 
 	/**
-     * File name of this config. modid-type.toml by default
-     */
+	 * File name of this config. modid-type.toml by default
+	 */
 	String value() default "";
 
 	ConfigType type() default ConfigType.COMMON;
 
-	public enum ConfigType {
+	enum ConfigType {
 		COMMON, CLIENT, SERVER;
 
 		public String extension() {
@@ -56,7 +57,7 @@ public @interface KiwiConfig {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.FIELD, ElementType.TYPE })
+	@Target({ElementType.FIELD, ElementType.TYPE})
 	@interface Path {
 		/**
 		 * The path of the value in the configuration. Each key is separated by a dot.
@@ -69,7 +70,7 @@ public @interface KiwiConfig {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.FIELD, ElementType.TYPE })
+	@Target({ElementType.FIELD, ElementType.TYPE})
 	@interface AdvancedPath {
 		/**
 		 * The path of the value in the configuration. Each key is given by an element of the array.
@@ -77,5 +78,18 @@ public @interface KiwiConfig {
 		 * @return the path in the config
 		 */
 		String[] value();
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.METHOD)
+	@Repeatable(Listens.class)
+	@interface Listen {
+		String value();
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.METHOD)
+	@interface Listens {
+		Listen[] value();
 	}
 }
