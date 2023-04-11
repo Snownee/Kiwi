@@ -46,14 +46,15 @@ public class ClothConfigIntegration {
 
 	public static Screen create(Screen parent, String namespace) {
 		ConfigBuilder builder = ConfigBuilder.create();
+		ConfigEntryBuilder entryBuilder = builder.entryBuilder();
 		builder.setParentScreen(parent);
 		List<ConfigHandler> configs = KiwiConfigManager.allConfigs.stream().filter($ -> $.getModId().equals(namespace)).toList();
 		Joiner joiner = Joiner.on('.');
 		for (ConfigHandler config : configs) {
 			String titleKey;
-			if (config.getFileName().equals(config.getModId() + "-" + config.getType().extension())) {
+			if (config.getFileName().equals(namespace + "-" + config.getType().extension())) {
 				titleKey = config.getType().extension();
-			} else if (config.getFileName().equals(config.getModId() + "-modules")) {
+			} else if (config.getFileName().equals(namespace + "-modules")) {
 				titleKey = "modules";
 			} else {
 				titleKey = config.getFileName();
@@ -77,18 +78,16 @@ public class ClothConfigIntegration {
 				}
 
 				List<String> path = Lists.newArrayList(value.path.split("\\."));
-				String key = config.getModId() + ".config." + value.translation;
-				if (I18n.exists(key)) {
-					title = Component.translatable(key);
+				if (I18n.exists(value.translation)) {
+					title = Component.translatable(value.translation);
 				} else {
 					title = Component.literal(Util.friendlyText(path.get(path.size() - 1)));
 				}
 
-				ConfigEntryBuilder entryBuilder = builder.entryBuilder();
 				path.remove(path.size() - 1);
 				String subCatKey = joiner.join(path);
 				Consumer<AbstractConfigListEntry<?>> subCat = subCatsMap.computeIfAbsent(subCatKey, $ -> {
-					String key0 = config.getModId() + ".config." + $;
+					String key0 = namespace + ".config." + $;
 					Component title0;
 					if (I18n.exists(key0)) {
 						title0 = Component.translatable(key0);
@@ -101,7 +100,7 @@ public class ClothConfigIntegration {
 					return builder0::add;
 				});
 
-				TextDescription description = value.field == null ? null : value.field.getAnnotation(TextDescription.class);
+				TextDescription description = value.getAnnotation(TextDescription.class);
 				putDescription(subCat, entryBuilder, description, false);
 
 				AbstractConfigListEntry<?> entry = null;
@@ -219,15 +218,6 @@ public class ClothConfigIntegration {
 						field.setDefaultValue((List<String>) value.defValue);
 						entry = field.build();
 					}
-				} else if (List.class.isAssignableFrom(type)) {
-					ItemType itemType = value.field.getAnnotation(ItemType.class);
-					if (itemType.value() == String.class) {
-						StringListBuilder field = entryBuilder.startStrList(title, (List<String>) value.value);
-						field.setTooltip(createComment(value));
-						field.setSaveConsumer(value::accept);
-						field.setDefaultValue((List<String>) value.defValue);
-						entry = field.build();
-					}
 				}
 				if (entry != null) {
 					entry.setRequiresRestart(value.requiresRestart);
@@ -260,10 +250,9 @@ public class ClothConfigIntegration {
 
 	private static Optional<Component[]> createComment(Value<?> value) {
 		List<Component> tooltip = Lists.newArrayList();
-		if (value.comment != null) {
-			for (String comment : value.comment) {
-				tooltip.add(Component.literal(comment));
-			}
+		String key = value.translation + ".desc";
+		if (I18n.exists(key)) {
+			tooltip.add(Component.translatable(key));
 		}
 		if (value.requiresRestart) {
 			tooltip.add(requiresRestart);

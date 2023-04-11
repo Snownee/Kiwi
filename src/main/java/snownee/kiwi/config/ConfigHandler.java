@@ -34,7 +34,6 @@ import net.minecraft.util.Mth;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiModule.Skip;
 import snownee.kiwi.config.KiwiConfig.AdvancedPath;
-import snownee.kiwi.config.KiwiConfig.Comment;
 import snownee.kiwi.config.KiwiConfig.ConfigType;
 import snownee.kiwi.config.KiwiConfig.GameRestart;
 import snownee.kiwi.config.KiwiConfig.LevelRestart;
@@ -235,6 +234,10 @@ public class ConfigHandler {
 			//			Representer representer = new Representer();
 			//			representer.addTypeDescription(new TypeDescription(Map.class, Tag.OMAP));
 			Yaml yaml = new Yaml(dumperOptions);
+			writer.append("# Use Cloth Config mod for the descriptions.");
+			writer.append(dumperOptions.getLineBreak().getString());
+			writer.append("---");
+			writer.append(dumperOptions.getLineBreak().getString());
 			yaml.dump(map, writer);
 		} catch (JsonSyntaxException | IOException e) {
 			Kiwi.logger.catching(e);
@@ -264,7 +267,7 @@ public class ConfigHandler {
 			if (translation != null) {
 				translationKey = translation.value();
 			} else {
-				translationKey = pathKey;
+				translationKey = "%s.config.%s".formatted(modId, pathKey);
 			}
 			Object converted = convert(field);
 			if (converted == null) {
@@ -274,10 +277,6 @@ public class ConfigHandler {
 			if (field.getAnnotation(LevelRestart.class) != null || field.getAnnotation(GameRestart.class) != null) {
 				// since there is no difference between these two options..
 				value.requiresRestart = true;
-			}
-			Comment comment = field.getAnnotation(Comment.class);
-			if (comment != null) {
-				value.comment = comment.value();
 			}
 			Range range = field.getAnnotation(Range.class);
 			if (range != null) {
@@ -354,9 +353,6 @@ public class ConfigHandler {
 		@NotNull
 		public T value;
 		public boolean requiresRestart;
-		@Nullable
-		public String[] comment;
-		@Nullable
 		public String translation;
 		public double min = Double.NaN;
 		public double max = Double.NaN;
@@ -432,12 +428,4 @@ public class ConfigHandler {
 			return field == null ? null : field.getAnnotation(clazz);
 		}
 	}
-
-	//	static List<ResourceLocation> StrToIdList(List<String> list) {
-	//		return list.stream().map(ResourceLocation::tryParse).filter(Objects::nonNull).toList();
-	//	}
-	//
-	//	static List<String> IdToStrList(List<ResourceLocation> list) {
-	//		return list.stream().map(Object::toString).toList();
-	//	}
 }

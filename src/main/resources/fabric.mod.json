@@ -3,7 +3,7 @@
   "id": "kiwi",
   "version": "${version}",
 
-  "name": "Kiwi Lib",
+  "name": "Kiwi Library",
   "description": "Minecraft modding library",
   "authors": ["Snownee"],
   "contact": {
