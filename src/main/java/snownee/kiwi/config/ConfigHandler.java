@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
 
 import org.apache.commons.lang3.EnumUtils;
 import org.jetbrains.annotations.NotNull;
@@ -49,7 +50,7 @@ public class ConfigHandler {
 	private final ConfigType type;
 	@Nullable
 	private final Class<?> clazz;
-	final Map<String, Value<?>> valueMap = Maps.newLinkedHashMap();
+	private final Map<String, Value<?>> valueMap = Maps.newLinkedHashMap();
 	Method onChanged;
 
 	public static class Value<T> {
@@ -63,6 +64,7 @@ public class ConfigHandler {
 		public boolean requiresRestart;
 		@Nullable
 		public String[] comment;
+		@Nullable
 		public String translation;
 		public double min = Double.NaN;
 		public double max = Double.NaN;
@@ -198,7 +200,7 @@ public class ConfigHandler {
 			return;
 		}
 		Map<String, Object> flatMap = Maps.newHashMap();
-		flat(map, flatMap, "");
+		flatten(removeQuotes(map), flatMap, "", valueMap.keySet());
 		for (Entry<String, Object> e : flatMap.entrySet()) {
 			Value value = valueMap.get(e.getKey());
 			if (value != null) {
@@ -212,12 +214,31 @@ public class ConfigHandler {
 		}
 	}
 
-	private static void flat(Map<String, Object> src, Map<String, Object> dst, String path) {
+	// crude way to fix a bug in toml4j
+	private static Map<String, Object> removeQuotes(Map<String, Object> map) {
+		Map<String, Object> newMap = Maps.newHashMap();
+		for (Entry<String, Object> e : map.entrySet()) {
+			String key = e.getKey();
+			if (key.startsWith("\"") && key.endsWith("\"")) {
+				key = key.substring(1, key.length() - 1);
+			}
+			Object value = e.getValue();
+			if (value instanceof Map) {
+				value = removeQuotes((Map<String, Object>) value);
+			}
+			newMap.put(key, value);
+		}
+		return newMap;
+	}
+
+	private static void flatten(Map<String, Object> src, Map<String, Object> dst, String path, Set<String> keys) {
 		for (Entry<String, Object> e : src.entrySet()) {
-			if (e.getValue() instanceof Map) {
-				flat((Map<String, Object>) e.getValue(), dst, path + e.getKey() + ".");
+			String key = e.getKey();
+			String newPath = path + key;
+			if (e.getValue() instanceof Map && !keys.contains(newPath)) {
+				flatten((Map<String, Object>) e.getValue(), dst, newPath + ".", keys);
 			} else {
-				dst.put(path + e.getKey(), e.getValue());
+				dst.put(newPath, e.getValue());
 			}
 		}
 	}
@@ -330,7 +351,7 @@ public class ConfigHandler {
 	private static Object convert(Field field) {
 		try {
 			Class<?> type = field.getType();
-			if (type != int.class && type != long.class && type != double.class && type != float.class && type != boolean.class && type != String.class && !Enum.class.isAssignableFrom(type) && !List.class.isAssignableFrom(type)) {
+			if (type != int.class && type != long.class && type != double.class && type != float.class && type != boolean.class && type != String.class && !Enum.class.isAssignableFrom(type) && !List.class.isAssignableFrom(type) && !Map.class.isAssignableFrom(type)) {
 				return null;
 			}
 			if (type == String.class) {
@@ -344,6 +365,13 @@ public class ConfigHandler {
 				List<?> defaultVal = (List<?>) field.get(null);
 				if (defaultVal == null) {
 					defaultVal = List.of();
+				}
+				return defaultVal;
+			}
+			if (Map.class.isAssignableFrom(type)) {
+				Map<?, ?> defaultVal = (Map<?, ?>) field.get(null);
+				if (defaultVal == null) {
+					defaultVal = Map.of();
 				}
 				return defaultVal;
 			}
@@ -398,6 +426,10 @@ public class ConfigHandler {
 
 	public <T> Value<T> get(String path) {
 		return (Value<T>) valueMap.get(path);
+	}
+
+	public Map<String, Value<?>> getValueMap() {
+		return valueMap;
 	}
 
 	//	static List<ResourceLocation> StrToIdList(List<String> list) {

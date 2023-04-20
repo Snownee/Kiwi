@@ -72,7 +72,7 @@ public class ClothConfigIntegration {
 			List<SubCategoryBuilder> subCats = Lists.newArrayList();
 			subCatsMap.put("", category::addEntry);
 
-			for (Value<?> value : config.valueMap.values()) {
+			for (Value<?> value : config.getValueMap().values()) {
 				Hide hide = value.getAnnotation(Hide.class);
 				if (hide != null) {
 					continue;
@@ -212,6 +212,15 @@ public class ClothConfigIntegration {
 						return tooltip.isEmpty() ? Optional.empty() : Optional.of(tooltip.toArray(Component[]::new));
 					});
 					entry = field.build();
+				} else if (List.class.isAssignableFrom(type)) {
+					ItemType itemType = value.field.getAnnotation(ItemType.class);
+					if (itemType.value() == String.class) {
+						StringListBuilder field = entryBuilder.startStrList(title, (List<String>) value.value);
+						field.setTooltip(createComment(value));
+						field.setSaveConsumer($ -> value.accept($, config.onChanged));
+						field.setDefaultValue((List<String>) value.defValue);
+						entry = field.build();
+					}
 				} else if (List.class.isAssignableFrom(type)) {
 					ItemType itemType = value.field.getAnnotation(ItemType.class);
 					if (itemType.value() == String.class) {
