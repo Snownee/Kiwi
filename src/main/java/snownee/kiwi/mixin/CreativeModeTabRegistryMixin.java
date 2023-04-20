@@ -23,7 +23,7 @@ public class CreativeModeTabRegistryMixin {
 	private static Multimap<ResourceLocation, ResourceLocation> edges;
 
 	@Inject(at = @At(value = "INVOKE", target = "recalculateItemCreativeModeTabs()V"), method = "fireCollectionEvent")
-	private static void kiwi_fireCollectionEvent(CallbackInfo ci) {
+	private static void kiwi$fireCollectionEvent(CallbackInfo ci) {
 		for (KiwiTabBuilder builder : KiwiTabBuilder.BUILDERS) {
 			creativeModeTabs.put(builder.id, builder.build());
 			edges.put(new ResourceLocation("spawn_eggs"), builder.id);

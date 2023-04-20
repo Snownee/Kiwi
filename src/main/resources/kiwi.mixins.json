@@ -5,23 +5,24 @@
   "compatibilityLevel": "JAVA_16",
   "refmap": "kiwi.refmap.json",
   "mixins": [
+    "AxeItemAccess",
     "BlockAccess",
     "FireBlockAccess",
-    "ShapedRecipeAccess",
+    "GameDataMixin",
     "HoeItemAccess",
-    "AxeItemAccess",
-    "ShovelItemAccess",
-    "VillagerAccess",
-    "WorkAtComposterAccess",
-    "TagsProviderAccess",
     "RecipeManagerAccess",
     "CreativeModeTabRegistryMixin",
     "ReloadableServerResourcesMixin",
-    "GameDataMixin"
+    "ShapedRecipeAccess",
+    "ShovelItemAccess",
+    "TagsProviderAccess",
+    "VillagerAccess",
+    "WorkAtComposterAccess"
   ],
   "client": [
-    "ClientTelemetryManagerMixin",
-    "ScreenMixin"
+    "client.ClientTelemetryManagerMixin",
+    "client.ScreenMixin",
+    "client.WorldOpenFlowsMixin"
   ],
   "injectors": {
     "defaultRequire": 1

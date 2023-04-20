@@ -7,6 +7,7 @@ import java.util.Map;
 import com.electronwill.nightconfig.core.conversion.Path;
 
 import net.minecraftforge.fml.config.ModConfig;
+import snownee.kiwi.config.ConfigUI;
 import snownee.kiwi.config.KiwiConfig;
 import snownee.kiwi.config.KiwiConfig.Comment;
 import snownee.kiwi.config.KiwiConfig.ConfigType;
@@ -30,6 +31,7 @@ public class TestConfig {
 
 	public static boolean booleanValue = true;
 
+	@ConfigUI.ItemType(String.class)
 	public static List<String> listValue = Arrays.asList("test");
 
 	public static String emptyStr;

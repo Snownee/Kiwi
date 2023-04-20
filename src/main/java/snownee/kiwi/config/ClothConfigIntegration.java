@@ -214,15 +214,8 @@ public class ClothConfigIntegration {
 					entry = field.build();
 				} else if (List.class.isAssignableFrom(type)) {
 					ItemType itemType = value.field.getAnnotation(ItemType.class);
-					if (itemType.value() == String.class) {
-						StringListBuilder field = entryBuilder.startStrList(title, (List<String>) value.value);
-						field.setTooltip(createComment(value));
-						field.setSaveConsumer($ -> value.accept($, config.onChanged));
-						field.setDefaultValue((List<String>) value.defValue);
-						entry = field.build();
-					}
-				} else if (List.class.isAssignableFrom(type)) {
-					ItemType itemType = value.field.getAnnotation(ItemType.class);
+					if (itemType == null)
+						continue;
 					if (itemType.value() == String.class) {
 						StringListBuilder field = entryBuilder.startStrList(title, (List<String>) value.value);
 						field.setTooltip(createComment(value));

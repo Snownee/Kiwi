@@ -12,7 +12,7 @@ import snownee.kiwi.Kiwi;
 public class GameDataMixin {
 
 	@Inject(at = @At("TAIL"), method = "unfreezeData")
-	private static void kiwi_unfreezeData(CallbackInfo ci) {
+	private static void kiwi$unfreezeData(CallbackInfo ci) {
 		Kiwi.preInit();
 	}
 
