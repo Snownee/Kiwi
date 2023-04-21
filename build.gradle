@@ -243,9 +243,7 @@ dependencies {
     annotationProcessor project(':annotation-processor')
 
     implementation fg.deobf("me.shedaniel.cloth:cloth-config-forge:${project.cloth_config_version}")
-    library shadowCommon("com.moandjiezana.toml:toml4j:${project.toml4j_version}") {
-        exclude(module: "gson")
-    }
+    library shadowCommon("org.yaml:snakeyaml:${project.snakeyaml_version}")
 }
 
 processResources {
