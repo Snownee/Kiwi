@@ -1,5 +1,8 @@
 package snownee.kiwi.contributor.impl.client.layer;
 
+import java.util.function.Supplier;
+
+import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
@@ -16,7 +19,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.util.LazyOptional;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.contributor.client.CosmeticLayer;
 import snownee.kiwi.contributor.impl.client.model.SantaHatModel;
@@ -24,12 +26,12 @@ import snownee.kiwi.contributor.impl.client.model.SantaHatModel;
 @OnlyIn(Dist.CLIENT)
 public class SantaHatLayer extends CosmeticLayer {
 	private static final ResourceLocation TEXTURE = new ResourceLocation(Kiwi.ID, "textures/reward/santa.png");
-	private static final LazyOptional<LayerDefinition> definition = LazyOptional.of(SantaHatModel::create);
+	private static final Supplier<LayerDefinition> definition = Suppliers.memoize(SantaHatModel::create);
 	private final SantaHatModel<AbstractClientPlayer> modelSantaHat;
 
 	public SantaHatLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRendererIn) {
 		super(entityRendererIn);
-		modelSantaHat = new SantaHatModel<>(entityRendererIn.getModel(), definition.orElse(null));
+		modelSantaHat = new SantaHatModel<>(entityRendererIn.getModel(), definition.get());
 	}
 
 	@Override

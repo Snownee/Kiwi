@@ -1,5 +1,8 @@
 package snownee.kiwi.contributor.impl.client.layer;
 
+import java.util.function.Supplier;
+
+import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
@@ -17,7 +20,6 @@ import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.util.LazyOptional;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.contributor.client.CosmeticLayer;
 import snownee.kiwi.contributor.impl.client.model.SunnyMilkModel;
@@ -25,12 +27,12 @@ import snownee.kiwi.contributor.impl.client.model.SunnyMilkModel;
 @OnlyIn(Dist.CLIENT)
 public class SunnyMilkLayer extends CosmeticLayer {
 	private static final ResourceLocation TEXTURE = new ResourceLocation(Kiwi.ID, "textures/reward/sunny_milk.png");
-	private static final LazyOptional<LayerDefinition> definition = LazyOptional.of(SunnyMilkModel::create);
+	private static final Supplier<LayerDefinition> definition = Suppliers.memoize(SunnyMilkModel::create);
 	private final SunnyMilkModel<AbstractClientPlayer> model;
 
 	public SunnyMilkLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRendererIn) {
 		super(entityRendererIn);
-		model = new SunnyMilkModel<>(definition.orElse(null));
+		model = new SunnyMilkModel<>(definition.get());
 	}
 
 	@Override
