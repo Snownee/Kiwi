@@ -4,14 +4,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import com.electronwill.nightconfig.core.conversion.Path;
-
-import net.minecraftforge.fml.config.ModConfig;
-import snownee.kiwi.config.ConfigUI;
+import snownee.kiwi.config.ConfigUI.ItemType;
+import snownee.kiwi.config.ConfigUI.TextDescription;
 import snownee.kiwi.config.KiwiConfig;
 import snownee.kiwi.config.KiwiConfig.Comment;
 import snownee.kiwi.config.KiwiConfig.ConfigType;
 import snownee.kiwi.config.KiwiConfig.LevelRestart;
+import snownee.kiwi.config.KiwiConfig.Path;
 import snownee.kiwi.config.KiwiConfig.Range;
 
 @KiwiConfig(value = "test", type = ConfigType.COMMON)
@@ -31,16 +30,19 @@ public class TestConfig {
 
 	public static boolean booleanValue = true;
 
-	@ConfigUI.ItemType(String.class)
+	@ItemType(String.class)
+	@TextDescription(value = "1\n2\n3", after = true)
 	public static List<String> listValue = Arrays.asList("test");
 
+	@TextDescription("Test2")
 	public static String emptyStr;
 
-	public static Map<String, Object> testMap = Map.of("datapack:custom", Map.of("1", "2"));
+	public static Map<String, Object> testMap = Map.of("datapack:custom", Map.of("1.2", "2"));
 
 	@LevelRestart
-	public static ModConfig.Type enumValue = ModConfig.Type.COMMON;
+	public static ConfigType enumValue = ConfigType.COMMON;
 
+	@KiwiConfig.Listen("Malay.P")
 	public static void onChanged(String path) {
 		// do sth
 		System.out.println(path);

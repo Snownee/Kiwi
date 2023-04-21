@@ -111,7 +111,7 @@ public class ClothConfigIntegration {
 				if (type == boolean.class) {
 					BooleanToggleBuilder toggle = entryBuilder.startBooleanToggle(title, (Boolean) value.value);
 					toggle.setTooltip(createComment(value));
-					toggle.setSaveConsumer($ -> value.accept($, config.onChanged));
+					toggle.setSaveConsumer(value::accept);
 					toggle.setDefaultValue((Boolean) value.defValue);
 					entry = toggle.build();
 				} else if (type == int.class) {
@@ -120,13 +120,13 @@ public class ClothConfigIntegration {
 						ColorFieldBuilder field = entryBuilder.startAlphaColorField(title, (Integer) value.value);
 						field.setAlphaMode(color.alpha());
 						field.setTooltip(createComment(value));
-						field.setSaveConsumer($ -> value.accept($, config.onChanged));
+						field.setSaveConsumer(value::accept);
 						field.setDefaultValue((Integer) value.defValue);
 						entry = field.build();
 					} else if (value.getAnnotation(Slider.class) != null) {
 						IntSliderBuilder field = entryBuilder.startIntSlider(title, (Integer) value.value, (int) value.min, (int) value.max);
 						field.setTooltip(createComment(value));
-						field.setSaveConsumer($ -> value.accept($, config.onChanged));
+						field.setSaveConsumer(value::accept);
 						field.setDefaultValue((Integer) value.defValue);
 						entry = field.build();
 					} else {
@@ -138,7 +138,7 @@ public class ClothConfigIntegration {
 						if (!Double.isNaN(value.max)) {
 							field.setMax((int) value.max);
 						}
-						field.setSaveConsumer($ -> value.accept($, config.onChanged));
+						field.setSaveConsumer(value::accept);
 						field.setDefaultValue((Integer) value.defValue);
 						entry = field.build();
 					}
@@ -151,7 +151,7 @@ public class ClothConfigIntegration {
 					if (!Double.isNaN(value.max)) {
 						field.setMax(value.max);
 					}
-					field.setSaveConsumer($ -> value.accept($, config.onChanged));
+					field.setSaveConsumer(value::accept);
 					field.setDefaultValue((Double) value.defValue);
 					entry = field.build();
 				} else if (type == float.class) {
@@ -163,14 +163,14 @@ public class ClothConfigIntegration {
 					if (!Double.isNaN(value.max)) {
 						field.setMax((float) value.max);
 					}
-					field.setSaveConsumer($ -> value.accept($, config.onChanged));
+					field.setSaveConsumer(value::accept);
 					field.setDefaultValue((Float) value.defValue);
 					entry = field.build();
 				} else if (type == long.class) {
 					if (value.getAnnotation(Slider.class) != null) {
 						LongSliderBuilder field = entryBuilder.startLongSlider(title, (Long) value.value, (long) value.min, (long) value.max);
 						field.setTooltip(createComment(value));
-						field.setSaveConsumer($ -> value.accept($, config.onChanged));
+						field.setSaveConsumer(value::accept);
 						field.setDefaultValue((Long) value.defValue);
 						entry = field.build();
 					} else {
@@ -182,19 +182,19 @@ public class ClothConfigIntegration {
 						if (!Double.isNaN(value.max)) {
 							field.setMax((long) value.max);
 						}
-						field.setSaveConsumer($ -> value.accept($, config.onChanged));
+						field.setSaveConsumer(value::accept);
 						field.setDefaultValue((Long) value.defValue);
 						entry = field.build();
 					}
 				} else if (type == String.class) {
 					TextFieldBuilder field = entryBuilder.startTextField(title, (String) value.value);
 					field.setTooltip(createComment(value));
-					field.setSaveConsumer($ -> value.accept($, config.onChanged));
+					field.setSaveConsumer(value::accept);
 					field.setDefaultValue((String) value.defValue);
 					entry = field.build();
 				} else if (Enum.class.isAssignableFrom(type)) {
 					EnumSelectorBuilder<Enum<?>> field = entryBuilder.startEnumSelector(title, (Class<Enum<?>>) type, (Enum<?>) value.value);
-					field.setSaveConsumer($ -> value.accept($, config.onChanged));
+					field.setSaveConsumer(value::accept);
 					field.setDefaultValue((Enum<?>) value.defValue);
 					field.setEnumNameProvider($ -> {
 						if ($ instanceof LocalizableItem item) {
@@ -214,12 +214,19 @@ public class ClothConfigIntegration {
 					entry = field.build();
 				} else if (List.class.isAssignableFrom(type)) {
 					ItemType itemType = value.field.getAnnotation(ItemType.class);
-					if (itemType == null)
-						continue;
 					if (itemType.value() == String.class) {
 						StringListBuilder field = entryBuilder.startStrList(title, (List<String>) value.value);
 						field.setTooltip(createComment(value));
-						field.setSaveConsumer($ -> value.accept($, config.onChanged));
+						field.setSaveConsumer(value::accept);
+						field.setDefaultValue((List<String>) value.defValue);
+						entry = field.build();
+					}
+				} else if (List.class.isAssignableFrom(type)) {
+					ItemType itemType = value.field.getAnnotation(ItemType.class);
+					if (itemType.value() == String.class) {
+						StringListBuilder field = entryBuilder.startStrList(title, (List<String>) value.value);
+						field.setTooltip(createComment(value));
+						field.setSaveConsumer(value::accept);
 						field.setDefaultValue((List<String>) value.defValue);
 						entry = field.build();
 					}
