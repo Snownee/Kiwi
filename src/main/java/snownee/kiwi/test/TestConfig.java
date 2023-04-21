@@ -7,7 +7,6 @@ import java.util.Map;
 import snownee.kiwi.config.ConfigUI.ItemType;
 import snownee.kiwi.config.ConfigUI.TextDescription;
 import snownee.kiwi.config.KiwiConfig;
-import snownee.kiwi.config.KiwiConfig.Comment;
 import snownee.kiwi.config.KiwiConfig.ConfigType;
 import snownee.kiwi.config.KiwiConfig.LevelRestart;
 import snownee.kiwi.config.KiwiConfig.Path;
@@ -25,7 +24,6 @@ public class TestConfig {
 	public static float floatValue = 7.5f;
 
 	@Path("Malay.P")
-	@Comment("\\ MalayP /")
 	public static String strValue = "MalayP";
 
 	public static boolean booleanValue = true;

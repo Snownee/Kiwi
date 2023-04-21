@@ -28,12 +28,6 @@ public @interface KiwiConfig {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.FIELD)
-	@interface Comment {
-		String[] value();
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.FIELD)
 	@interface Translation {
 		String value();
 	}

@@ -5,7 +5,7 @@ license="MIT"
 [[mods]]
 modId="kiwi"
 version="${file.jarVersion}"
-displayName="Kiwi"
+displayName="Kiwi Library"
 authors="Snownee"
 displayURL="https://www.curseforge.com/minecraft/mc-mods/kiwi"
 description="Minecraft modding library"
