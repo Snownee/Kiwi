@@ -106,7 +106,7 @@ jar {
 shadowJar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     exclude(a)
-    relocate "com.moandjiezana.toml", "${project.maven_group}.shadowed.com.moandjiezana.toml"
+    relocate "org.yaml.snakeyaml", "${project.group}.shadowed.org.yaml.snakeyaml"
     configurations = [project.configurations.shadowCommon]
     archiveClassifier.set('shadow')
 }
