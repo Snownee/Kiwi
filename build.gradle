@@ -165,7 +165,7 @@ shadowJar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     exclude(a)
     manifest { attributes(b) }
-    relocate "com.moandjiezana.toml", "${project.group}.shadowed.com.moandjiezana.toml"
+    relocate "org.yaml.snakeyaml", "${project.group}.shadowed.org.yaml.snakeyaml"
     configurations = [project.configurations.shadowCommon]
     archiveClassifier.set('')
     finalizedBy 'reobfShadowJar'
