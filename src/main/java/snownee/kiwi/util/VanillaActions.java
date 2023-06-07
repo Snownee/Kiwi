@@ -11,7 +11,6 @@ import net.fabricmc.fabric.api.registry.FlattenableBlockRegistry;
 import net.fabricmc.fabric.api.registry.StrippableBlockRegistry;
 import net.fabricmc.fabric.api.registry.TillableBlockRegistry;
 import net.fabricmc.fabric.api.registry.VillagerInteractionRegistries;
-import net.fabricmc.fabric.api.registry.VillagerPlantableRegistry;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -54,10 +53,6 @@ public final class VanillaActions { //TODO brewing
 
 	public static void registerVillagerFood(ItemLike item, int value) {
 		VillagerInteractionRegistries.registerFood(item, value);
-	}
-
-	public static void registerVillagerPlantable(ItemLike item, BlockState plantState) {
-		VillagerPlantableRegistry.register(item, plantState);
 	}
 
 }

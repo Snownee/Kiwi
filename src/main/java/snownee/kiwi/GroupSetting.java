@@ -51,7 +51,7 @@ public class GroupSetting {
 				.collect(Collectors.toSet());
 		/* on */
 		for (CreativeModeTab tab : tabs) {
-			ItemGroupEvents.modifyEntriesEvent(tab).register(entries -> {
+			ItemGroupEvents.modifyEntriesEvent(BuiltInRegistries.CREATIVE_MODE_TAB.getResourceKey(tab).orElseThrow()).register(entries -> {
 				List<ItemStack> items = Lists.newArrayList();
 				filler.fillItemCategory(tab, entries.getEnabledFeatures(), entries.shouldShowOpRestrictedItems(), items);
 				items = getEnabledStacks(items, entries.getEnabledFeatures());

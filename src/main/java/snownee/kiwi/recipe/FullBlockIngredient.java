@@ -38,7 +38,7 @@ public class FullBlockIngredient /*extends Ingredient*/ {
 		}
 		Block block = Block.byItem(stack.getItem());
 		BlockState state = block.defaultBlockState();
-		return state.getMaterial().isSolid() && state.getRenderShape() == RenderShape.MODEL;
+		return state.isSolid() && state.getRenderShape() == RenderShape.MODEL;
 	}
 
 	/*

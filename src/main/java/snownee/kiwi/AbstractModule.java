@@ -5,7 +5,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.types.Type;
 
@@ -13,8 +12,8 @@ import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder.Factory;
 import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -27,8 +26,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.Material;
-import snownee.kiwi.block.ModBlock;
 import snownee.kiwi.block.entity.TagBasedBlockEntityType;
 import snownee.kiwi.loader.event.ClientInitEvent;
 import snownee.kiwi.loader.event.InitEvent;
@@ -45,13 +42,7 @@ import snownee.kiwi.loader.event.ServerInitEvent;
 public abstract class AbstractModule {
 	public ResourceLocation uid;
 
-	private static final BiConsumer<ModuleInfo, Block> BLOCK_DECORATOR = (module, block) -> {
-		ModBlock.setFireInfo(block);
-	};
-
-	private static final Map<Registry<?>, BiConsumer<ModuleInfo, ?>> DEFAULT_DECORATORS = ImmutableMap.of(BuiltInRegistries.BLOCK, BLOCK_DECORATOR);
-
-	protected final Map<Registry<?>, BiConsumer<ModuleInfo, ?>> decorators = Maps.newHashMap(DEFAULT_DECORATORS);
+	protected final Map<Registry<?>, BiConsumer<ModuleInfo, ?>> decorators = Maps.newHashMap();
 
 	protected void preInit() {
 		// NO-OP
@@ -93,11 +84,8 @@ public abstract class AbstractModule {
 		return new Item.Properties();
 	}
 
-	protected static BlockBehaviour.Properties blockProp(Material material) {
-		BlockBehaviour.Properties properties = BlockBehaviour.Properties.of(material);
-		properties.sound(ModBlock.deduceSoundType(material));
-		properties.strength(ModBlock.deduceHardness(material));
-		return properties;
+	protected static BlockBehaviour.Properties blockProp() {
+		return BlockBehaviour.Properties.of();
 	}
 
 	/**
@@ -119,7 +107,7 @@ public abstract class AbstractModule {
 	}
 
 	public static CreativeModeTab.Builder itemCategory(String namespace, String path, Supplier<ItemStack> icon) {
-		return FabricItemGroup.builder(new ResourceLocation(namespace, path)).icon(icon);
+		return FabricItemGroup.builder().title(Component.translatable("itemGroup.%s.%s", namespace, path)).icon(icon);
 	}
 
 	public static TagKey<Item> itemTag(String namespace, String path) {

@@ -16,7 +16,7 @@ public final class KiwiModules {
 	private static Map<ResourceLocation, ModuleInfo> MODULES = Maps.newLinkedHashMap();
 	private static final Set<ResourceLocation> LOADED_MODULES = Sets.newHashSet();
 
-	static final Set<Object> ALL_USED_REGISTRIES = Sets.newHashSet();
+	static final Set<Object> ALL_USED_REGISTRIES = Sets.newLinkedHashSet();
 
 	private KiwiModules() {
 	}

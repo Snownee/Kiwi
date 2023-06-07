@@ -18,7 +18,6 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import snownee.kiwi.AbstractModule;
@@ -48,9 +47,6 @@ public class Contributors extends AbstractModule {
 	protected void init(InitEvent event) {
 		registerTierProvider(new KiwiTierProvider());
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-			if (!(handler.player.level instanceof ServerLevel)) {
-				return;
-			}
 			if (!(server.isSingleplayerOwner(handler.player.getGameProfile()))) {
 				SSyncCosmeticPacket.send(PLAYER_COSMETICS, handler.player, false);
 			}

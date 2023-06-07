@@ -4,12 +4,11 @@ import java.util.Objects;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
@@ -56,10 +55,10 @@ public class CosmeticScreen extends Screen {
 	}
 
 	@Override
-	public void render(PoseStack matrixStack, int mouseX, int mouseY, float pTicks) {
-		renderBackground(matrixStack);
-		super.render(matrixStack, mouseX, mouseY, pTicks);
-		list.render(matrixStack, mouseX, mouseY, pTicks);
+	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float pTicks) {
+		renderBackground(guiGraphics);
+		super.render(guiGraphics, mouseX, mouseY, pTicks);
+		list.render(guiGraphics, mouseX, mouseY, pTicks);
 	}
 
 	@Override
@@ -139,12 +138,12 @@ public class CosmeticScreen extends Screen {
 		}
 
 		@Override
-		public void render(PoseStack matrixStack, int entryIdx, int top, int left, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hover, float partialTicks) {
+		public void render(GuiGraphics guiGraphics, int entryIdx, int top, int left, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hover, float partialTicks) {
 			int color = hover ? 0xFFFFAA : 0xFFFFFF;
 			if (this == parent.selectedEntry) {
 				color = 0xFFFF77;
 			}
-			parent.font.draw(matrixStack, name, left + 43, top + 2, color);
+			guiGraphics.drawString(parent.font, name, left + 43, top + 2, color);
 		}
 
 		@Override

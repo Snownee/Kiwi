@@ -485,11 +485,7 @@ public class Kiwi implements ModInitializer {
 				if (o == null) {
 					continue;
 				}
-				if (useOwnGroup && info.groupSetting == null && o instanceof CreativeModeTab tab) {
-					String id = modid + "." + name;
-					registerTab(id, tab);
-					info.groupSetting = new GroupSetting(new String[] { id }, new String[0]);
-				} else if (o instanceof Item.Properties) {
+				if (o instanceof Item.Properties) {
 					tmpBuilder = (Item.Properties) o;
 					tmpBuilderField = field;
 					continue;
@@ -520,6 +516,9 @@ public class Kiwi implements ModInitializer {
 						}
 					} else if (o instanceof Item) {
 						checkNoGroup(info, field, o);
+					} else if (useOwnGroup && info.groupSetting == null && o instanceof CreativeModeTab tab) {
+						//registerTab(id, tab);
+						info.groupSetting = new GroupSetting(new String[] { regName.toString() }, new String[0]);
 					}
 					ResourceKey<?> superType = registry.key();
 					int i = counter.getOrDefault(superType, 0);
@@ -538,6 +537,7 @@ public class Kiwi implements ModInitializer {
 			}
 		}
 
+		KiwiModules.ALL_USED_REGISTRIES.add(BuiltInRegistries.CREATIVE_MODE_TAB);
 		KiwiModules.ALL_USED_REGISTRIES.add(BuiltInRegistries.ITEM);
 		KiwiModules.fire(ModuleInfo::preInit);
 	}
@@ -638,11 +638,12 @@ public class Kiwi implements ModInitializer {
 		registerRegistry(BuiltInRegistries.FROG_VARIANT, FrogVariant.class);
 		registerRegistry(BuiltInRegistries.BANNER_PATTERN, BannerPattern.class);
 		registerRegistry(BuiltInRegistries.INSTRUMENT, Instrument.class);
+		registerRegistry(BuiltInRegistries.CREATIVE_MODE_TAB, CreativeModeTab.class);
 	}
 
-	public static void registerTab(String id, CreativeModeTab tab) {
+	public static void registerTab(String id, ResourceKey<CreativeModeTab> tab) {
 		Validate.isTrue(!GROUPS.containsKey(id), "Already exists: %s", id);
-		GROUPS.put(id, tab);
+		GROUPS.put(id, BuiltInRegistries.CREATIVE_MODE_TAB.getOrThrow(tab));
 	}
 
 	private static void registerTabs() {
@@ -662,7 +663,7 @@ public class Kiwi implements ModInitializer {
 	private static final Map<String, CreativeModeTab> GROUPS = Maps.newHashMap();
 
 	static CreativeModeTab getGroup(String path) {
-		return GROUPS.get(path);
+		return GROUPS.computeIfAbsent(path, $ -> BuiltInRegistries.CREATIVE_MODE_TAB.get(ResourceLocation.tryParse(path)));
 	}
 
 	private static void checkNoGroup(ModuleInfo info, Field field, Object o) {
