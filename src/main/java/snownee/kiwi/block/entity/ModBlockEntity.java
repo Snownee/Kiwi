@@ -16,10 +16,10 @@ import net.minecraft.world.level.block.state.BlockState;
  * Base BlockEntity skeleton used by all BlockEntity. It contains several standardized
  * implementations regarding networking.
  */
-public abstract class BaseBlockEntity extends BlockEntity {
+public abstract class ModBlockEntity extends BlockEntity {
 	public boolean persistData = false;
 
-	public BaseBlockEntity(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state) {
+	public ModBlockEntity(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state) {
 		super(tileEntityTypeIn, pos, state);
 	}
 

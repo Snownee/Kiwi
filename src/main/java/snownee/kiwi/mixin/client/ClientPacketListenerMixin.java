@@ -10,7 +10,7 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import snownee.kiwi.block.entity.BaseBlockEntity;
+import snownee.kiwi.block.entity.ModBlockEntity;
 
 @Mixin(ClientPacketListener.class)
 public class ClientPacketListenerMixin {
@@ -24,8 +24,8 @@ public class ClientPacketListenerMixin {
 			), method = { "method_38542", "lambda$handleBlockEntityData$5" }, cancellable = true, remap = false
 	)
 	private void kiwi$handleBlockEntityData(ClientboundBlockEntityDataPacket clientboundBlockEntityDataPacket, BlockEntity blockEntity, CallbackInfo ci) {
-		if (blockEntity instanceof BaseBlockEntity) {
-			((BaseBlockEntity) blockEntity).onDataPacket(connection, clientboundBlockEntityDataPacket);
+		if (blockEntity instanceof ModBlockEntity) {
+			((ModBlockEntity) blockEntity).onDataPacket(connection, clientboundBlockEntityDataPacket);
 			ci.cancel();
 		}
 	}

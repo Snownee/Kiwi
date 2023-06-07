@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.HitResult;
-import snownee.kiwi.block.entity.BaseBlockEntity;
+import snownee.kiwi.block.entity.ModBlockEntity;
 
 /**
  *
@@ -37,7 +37,7 @@ public class ModBlock extends Block implements IKiwiBlock {
 	public static ItemStack pick(BlockState state, @Nullable HitResult target, BlockGetter world, BlockPos pos, @Nullable Player player) {
 		ItemStack stack = state.getBlock().getCloneItemStack(world, pos, state);
 		BlockEntity tile = world.getBlockEntity(pos);
-		if (tile instanceof BaseBlockEntity && !tile.onlyOpCanSetNbt() && ((BaseBlockEntity) tile).persistData) {
+		if (tile instanceof ModBlockEntity && !tile.onlyOpCanSetNbt() && ((ModBlockEntity) tile).persistData) {
 			CompoundTag data = tile.saveWithFullMetadata();
 			data.remove("x");
 			data.remove("y");
