@@ -18,6 +18,7 @@ import com.google.common.collect.Sets;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -90,6 +91,7 @@ public class ModuleInfo {
 		BiConsumer<ModuleInfo, Object> decorator = (BiConsumer<ModuleInfo, Object>) module.decorators.getOrDefault(registry, (a, b) -> {
 		});
 		if (registry == ForgeRegistries.ITEMS) {
+			handleRegister(BuiltInRegistries.CREATIVE_MODE_TAB);
 			registries.get(ForgeRegistries.BLOCKS).forEach(e -> {
 				if (noItems.contains(e.entry))
 					return;

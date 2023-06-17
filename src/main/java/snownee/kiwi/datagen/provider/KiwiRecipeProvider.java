@@ -15,8 +15,8 @@ import org.apache.logging.log4j.Logger;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonObject;
 
+import net.minecraft.advancements.critereon.ContextAwarePredicate;
 import net.minecraft.advancements.critereon.EnterBlockTrigger;
-import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
@@ -354,7 +354,7 @@ public abstract class KiwiRecipeProvider implements DataProvider {
 	}
 
 	public static EnterBlockTrigger.TriggerInstance insideOf(Block p_125980_) {
-		return new EnterBlockTrigger.TriggerInstance(EntityPredicate.Composite.ANY, p_125980_, StatePropertiesPredicate.ANY);
+		return new EnterBlockTrigger.TriggerInstance(ContextAwarePredicate.ANY, p_125980_, StatePropertiesPredicate.ANY);
 	}
 
 	public static InventoryChangeTrigger.TriggerInstance has(MinMaxBounds.Ints p_176521_, ItemLike p_176522_) {
@@ -370,7 +370,7 @@ public abstract class KiwiRecipeProvider implements DataProvider {
 	}
 
 	public static InventoryChangeTrigger.TriggerInstance inventoryTrigger(ItemPredicate... p_126012_) {
-		return new InventoryChangeTrigger.TriggerInstance(EntityPredicate.Composite.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, p_126012_);
+		return new InventoryChangeTrigger.TriggerInstance(ContextAwarePredicate.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, p_126012_);
 	}
 
 	public static String getHasName(ItemLike p_176603_) {

@@ -6,12 +6,10 @@
   "refmap": "kiwi.refmap.json",
   "mixins": [
     "AxeItemAccess",
-    "BlockAccess",
     "FireBlockAccess",
     "GameDataMixin",
     "HoeItemAccess",
     "RecipeManagerAccess",
-    "CreativeModeTabRegistryMixin",
     "ReloadableServerResourcesMixin",
     "ShapedRecipeAccess",
     "ShovelItemAccess",

@@ -7,24 +7,9 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.ButtonBlock;
-import net.minecraft.world.level.block.DoorBlock;
-import net.minecraft.world.level.block.FenceBlock;
-import net.minecraft.world.level.block.PressurePlateBlock;
-import net.minecraft.world.level.block.SaplingBlock;
-import net.minecraft.world.level.block.SlabBlock;
-import net.minecraft.world.level.block.StairBlock;
-import net.minecraft.world.level.block.StandingSignBlock;
-import net.minecraft.world.level.block.TrapDoorBlock;
-import net.minecraft.world.level.block.WallBlock;
-import net.minecraft.world.level.block.WallSignBlock;
-import net.minecraft.world.level.material.Material;
 import net.minecraftforge.common.data.BlockTagsProvider;
 import net.minecraftforge.common.data.ExistingFileHelper;
-import snownee.kiwi.datagen.provider.TagsProviderHelper.OptionalEntry;
-import snownee.kiwi.mixin.BlockAccess;
 
 public abstract class KiwiBlockTagsProvider extends BlockTagsProvider {
 
@@ -35,7 +20,7 @@ public abstract class KiwiBlockTagsProvider extends BlockTagsProvider {
 		helper = new TagsProviderHelper<>(this);
 	}
 
-	public void processTools(OptionalEntry<Block> entry) {
+	/*	public void processTools(OptionalEntry<Block> entry) {
 		processTools(entry, true);
 	}
 
@@ -112,7 +97,7 @@ public abstract class KiwiBlockTagsProvider extends BlockTagsProvider {
 			return true;
 		}
 		return false;
-	}
+	}*/
 
 	public TagsProvider.TagAppender<Block> tag(String name) {
 		return tag(BlockTags.create(new ResourceLocation(modId, name)));

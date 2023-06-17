@@ -80,11 +80,7 @@ public enum AlternativesIngredientSerializer implements IIngredientSerializer<In
 				}
 			}
 		}
-		Ingredient ingredient = CraftingHelper.getIngredient(e);
-		if (ingredient.isEmpty()) {
-			throw new JsonSyntaxException("hasNoMatchingItems");
-		}
-		return ingredient;
+		return CraftingHelper.getIngredient(e, false);
 	}
 
 	@Override

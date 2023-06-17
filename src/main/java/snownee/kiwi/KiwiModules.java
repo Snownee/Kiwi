@@ -13,6 +13,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.data.loading.DatagenModLoader;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -24,7 +25,7 @@ public final class KiwiModules {
 	private static Map<ResourceLocation, ModuleInfo> MODULES = Maps.newLinkedHashMap();
 	private static final Set<ResourceLocation> LOADED_MODULES = Sets.newHashSet();
 
-	static final Set<Object> ALL_USED_REGISTRIES = Sets.newHashSet();
+	static final Set<Object> ALL_USED_REGISTRIES = Sets.newLinkedHashSet();
 
 	static {
 		CrashReportCallables.registerCrashCallable("Kiwi Modules", () -> ("\n" + LOADED_MODULES.stream().map(ResourceLocation::toString).sorted(StringUtils::compare).collect(Collectors.joining("\n\t\t", "\t\t", ""))));
@@ -44,7 +45,7 @@ public final class KiwiModules {
 		Object registry = event.getForgeRegistry();
 		if (registry == null)
 			registry = event.getVanillaRegistry();
-		if (!ALL_USED_REGISTRIES.contains(registry))
+		if (registry == BuiltInRegistries.CREATIVE_MODE_TAB || !ALL_USED_REGISTRIES.contains(registry))
 			return;
 		for (ModuleInfo info : MODULES.values()) {
 			info.handleRegister(registry);

@@ -104,11 +104,11 @@ public class Contributors extends AbstractModule {
 
 	@SubscribeEvent
 	public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-		if (!(event.getEntity().level instanceof ServerLevel)) {
+		if (!(event.getEntity().level() instanceof ServerLevel)) {
 			return;
 		}
 		Player player = event.getEntity();
-		if (!((ServerLevel) event.getEntity().level).getServer().isSingleplayerOwner(player.getGameProfile())) {
+		if (!((ServerLevel) event.getEntity().level()).getServer().isSingleplayerOwner(player.getGameProfile())) {
 			SSyncCosmeticPacket.send(PLAYER_COSMETICS, (ServerPlayer) player, false);
 		}
 	}

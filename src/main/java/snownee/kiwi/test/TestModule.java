@@ -16,7 +16,6 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -52,7 +51,7 @@ public class TestModule extends AbstractModule {
 	public static Item.Properties FIRST_BLOCK_ITEM_BUILDER = itemProp().rarity(Rarity.RARE);
 	// Register a simple block and its BlockItem
 	@RenderLayer(Layer.CUTOUT)
-	public static final KiwiGO<TestBlock> FIRST_BLOCK = go(() -> new TestBlock2(blockProp(Material.WOOD)));
+	public static final KiwiGO<TestBlock> FIRST_BLOCK = go(() -> new TestBlock2(blockProp()));
 
 	// Register a simple effect
 	public static final KiwiGO<MobEffect> FIRST_EFFECT = go(() -> new HealthBoostMobEffect(MobEffectCategory.BENEFICIAL, 0xFF0000));
@@ -62,7 +61,7 @@ public class TestModule extends AbstractModule {
 
 	public static final KiwiGO<BlockEntityType<TestBlockEntity>> FIRST_TILE = blockEntity(TestBlockEntity::new, null, FIRST_BLOCK);
 
-	public static final KiwiGO<TestBlock> TEX_BLOCK = go(() -> new TestBlock(blockProp(Material.WOOD)));
+	public static final KiwiGO<TestBlock> TEX_BLOCK = go(() -> new TestBlock(blockProp()));
 	public static final KiwiGO<BlockEntityType<TexBlockEntity>> TEX_TILE = blockEntity(TexBlockEntity::new, null, TEX_BLOCK);
 
 	public static TestModule INSTANCE;

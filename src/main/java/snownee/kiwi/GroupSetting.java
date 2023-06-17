@@ -19,7 +19,7 @@ import net.minecraft.world.item.CreativeModeTab.TabVisibility;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.common.util.MutableHashedLinkedMap;
-import net.minecraftforge.event.CreativeModeTabEvent;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import snownee.kiwi.KiwiModule.Category;
 import snownee.kiwi.item.ItemCategoryFiller;
@@ -100,7 +100,7 @@ public class GroupSetting {
 		return stack.getItem().isEnabled(enabledFeatures);
 	}
 
-	private static void buildContents(CreativeModeTabEvent.BuildContents event) {
+	private static void buildContents(BuildCreativeModeTabContentsEvent event) {
 		for (var pair : toAdd.get(event.getTab())) {
 			List<ItemStack> items = Lists.newArrayList();
 			pair.getRight().fillItemCategory(event.getTab(), event.getFlags(), event.hasPermissions(), items);

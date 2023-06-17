@@ -216,10 +216,10 @@ public final class Util {
 	}
 
 	public static boolean canPlayerBreak(Player player, BlockState state, BlockPos pos) {
-		if (!player.mayBuild() || !player.level.mayInteract(player, pos)) {
+		if (!player.mayBuild() || !player.level().mayInteract(player, pos)) {
 			return false;
 		}
-		if (!player.isCreative() && state.getDestroyProgress(player, player.level, pos) <= 0) {
+		if (!player.isCreative() && state.getDestroyProgress(player, player.level(), pos) <= 0) {
 			return false;
 		}
 		//		BreakEvent event = new BreakEvent(player.level, pos, state, player);
@@ -249,7 +249,7 @@ public final class Util {
 		if (player == null) {
 			return;
 		}
-		if (client != player.level.isClientSide) {
+		if (client != player.level().isClientSide) {
 			return;
 		}
 		player.sendSystemMessage(Component.translatable(key, args));

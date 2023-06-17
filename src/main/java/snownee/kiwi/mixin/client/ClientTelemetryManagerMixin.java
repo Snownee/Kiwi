@@ -13,8 +13,8 @@ import snownee.kiwi.KiwiClientConfig;
 @Mixin(value = ClientTelemetryManager.class, priority = -114514)
 public class ClientTelemetryManagerMixin {
 
-	@Inject(method = "createWorldSessionEventSender", at = @At("HEAD"), cancellable = true)
-	private void kiwi$createWorldSessionEventSender(CallbackInfoReturnable<TelemetryEventSender> ci) {
+	@Inject(method = "createEventSender", at = @At("HEAD"), cancellable = true)
+	private void kiwi$createEventSender(CallbackInfoReturnable<TelemetryEventSender> ci) {
 		if (KiwiClientConfig.noMicrosoftTelemetry) {
 			Kiwi.logger.info("Canceling Microsoft telemetry");
 			ci.setReturnValue(TelemetryEventSender.DISABLED);

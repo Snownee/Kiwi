@@ -47,7 +47,7 @@ public class FullBlockIngredient extends Ingredient {
 		}
 		Block block = Block.byItem(stack.getItem());
 		BlockState state = block.defaultBlockState();
-		return state.getMaterial().isSolid() && state.getRenderShape() == RenderShape.MODEL;
+		return state.isSolid() && state.getRenderShape() == RenderShape.MODEL;
 	}
 
 	@Override
@@ -83,7 +83,7 @@ public class FullBlockIngredient extends Ingredient {
 		public FullBlockIngredient parse(JsonObject json) {
 			Ingredient example;
 			try {
-				example = CraftingHelper.getIngredient(json.get("example"));
+				example = CraftingHelper.getIngredient(json.get("example"), true);
 			} catch (JsonSyntaxException e) {
 				example = Ingredient.EMPTY;
 			}

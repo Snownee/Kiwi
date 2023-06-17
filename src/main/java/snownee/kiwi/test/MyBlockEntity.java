@@ -3,9 +3,9 @@ package snownee.kiwi.test;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.state.BlockState;
-import snownee.kiwi.block.entity.BaseBlockEntity;
+import snownee.kiwi.block.entity.ModBlockEntity;
 
-public class MyBlockEntity extends BaseBlockEntity {
+public class MyBlockEntity extends ModBlockEntity {
 
 	public MyBlockEntity(BlockPos pos, BlockState state) {
 		super(TestModule.FIRST_TILE.get(), pos, state);

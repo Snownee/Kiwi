@@ -24,7 +24,7 @@ import snownee.kiwi.block.def.SimpleBlockDefinition;
 import snownee.kiwi.client.model.RetextureModel;
 import snownee.kiwi.util.NBTHelper;
 
-public abstract class RetextureBlockEntity extends BaseBlockEntity {
+public abstract class RetextureBlockEntity extends ModBlockEntity {
 	@Nullable
 	protected Map<String, BlockDefinition> textures;
 	/** Do not get modelData directly, use getModelData() */

@@ -5,7 +5,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.types.Type;
 
@@ -24,10 +23,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.BlockEntityType.BlockEntitySupplier;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.Material;
 import net.minecraftforge.data.event.GatherDataEvent;
-import net.minecraftforge.registries.ForgeRegistries;
-import snownee.kiwi.block.ModBlock;
 import snownee.kiwi.block.entity.TagBasedBlockEntityType;
 import snownee.kiwi.loader.event.ClientInitEvent;
 import snownee.kiwi.loader.event.InitEvent;
@@ -44,13 +40,7 @@ import snownee.kiwi.loader.event.ServerInitEvent;
 public abstract class AbstractModule {
 	public ResourceLocation uid;
 
-	private static final BiConsumer<ModuleInfo, Block> BLOCK_DECORATOR = (module, block) -> {
-		ModBlock.setFireInfo(block);
-	};
-
-	private static final Map<Object, BiConsumer<ModuleInfo, ?>> DEFAULT_DECORATORS = ImmutableMap.of(ForgeRegistries.BLOCKS, BLOCK_DECORATOR);
-
-	protected final Map<Object, BiConsumer<ModuleInfo, ?>> decorators = Maps.newHashMap(DEFAULT_DECORATORS);
+	protected final Map<Object, BiConsumer<ModuleInfo, ?>> decorators = Maps.newHashMap();
 
 	protected void preInit() {
 		// NO-OP
@@ -92,11 +82,8 @@ public abstract class AbstractModule {
 		return new Item.Properties();
 	}
 
-	protected static BlockBehaviour.Properties blockProp(Material material) {
-		BlockBehaviour.Properties properties = BlockBehaviour.Properties.of(material);
-		properties.sound(ModBlock.deduceSoundType(material));
-		properties.strength(ModBlock.deduceHardness(material));
-		return properties;
+	protected static BlockBehaviour.Properties blockProp() {
+		return BlockBehaviour.Properties.of();
 	}
 
 	/**
