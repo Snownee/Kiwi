@@ -58,7 +58,7 @@ public class Contributors extends AbstractModule {
 
 	@Override
 	protected void init(InitEvent event) {
-		registerTierProvider(new KiwiTierProvider());
+		nopotato(new KiwiTierProvider());
 	}
 
 	public static boolean isContributor(String author, String playerName) {
@@ -96,6 +96,10 @@ public class Contributors extends AbstractModule {
 	}
 
 	public static void registerTierProvider(ITierProvider rewardProvider) {
+		nopotato(rewardProvider);
+	}
+
+	private static void nopotato(ITierProvider rewardProvider) {
 		String namespace = rewardProvider.getAuthor().toLowerCase(Locale.ENGLISH);
 		REWARD_PROVIDERS.put(namespace, rewardProvider);
 		for (String tier : rewardProvider.getRenderableTiers()) {
