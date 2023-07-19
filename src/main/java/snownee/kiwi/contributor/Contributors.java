@@ -31,7 +31,6 @@ import snownee.kiwi.contributor.impl.KiwiTierProvider;
 import snownee.kiwi.contributor.network.CSetCosmeticPacket;
 import snownee.kiwi.contributor.network.SSyncCosmeticPacket;
 import snownee.kiwi.loader.Platform;
-import snownee.kiwi.loader.event.ClientInitEvent;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.util.Util;
 
@@ -42,27 +41,6 @@ public class Contributors extends AbstractModule {
 	public static final Map<String, ResourceLocation> PLAYER_COSMETICS = Maps.newConcurrentMap();
 	private static final Set<ResourceLocation> RENDERABLES = Sets.newLinkedHashSet();
 	private static int DAY = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
-
-	@Override
-	protected void init(InitEvent event) {
-		registerTierProvider(new KiwiTierProvider());
-		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-			if (!(server.isSingleplayerOwner(handler.player.getGameProfile()))) {
-				SSyncCosmeticPacket.send(PLAYER_COSMETICS, handler.player, false);
-			}
-		});
-		if (!Platform.isPhysicalClient()) {
-			ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
-				PLAYER_COSMETICS.remove(handler.player.getGameProfile().getName());
-			});
-		}
-	}
-
-	@Override
-	@Environment(EnvType.CLIENT)
-	protected void clientInit(ClientInitEvent event) {
-		ContributorsClient.init();
-	}
 
 	public static boolean isContributor(String author, String playerName) {
 		return REWARD_PROVIDERS.getOrDefault(author.toLowerCase(Locale.ENGLISH), ITierProvider.Empty.INSTANCE).isContributor(playerName);
@@ -82,20 +60,20 @@ public class Contributors extends AbstractModule {
 
 	public static Set<ResourceLocation> getPlayerTiers(String playerName) {
 		/* off */
-        return REWARD_PROVIDERS.values().stream()
-                .flatMap(tp -> tp.getPlayerTiers(playerName).stream()
-                        .map(s -> new ResourceLocation(tp.getAuthor().toLowerCase(Locale.ENGLISH), s)))
-                .collect(Collectors.toSet());
-        /* on */
+		return REWARD_PROVIDERS.values().stream()
+				.flatMap(tp -> tp.getPlayerTiers(playerName).stream()
+						.map(s -> new ResourceLocation(tp.getAuthor().toLowerCase(Locale.ENGLISH), s)))
+				.collect(Collectors.toSet());
+		/* on */
 	}
 
 	public static Set<ResourceLocation> getTiers() {
 		/* off */
-        return REWARD_PROVIDERS.values().stream()
-                .flatMap(tp -> tp.getTiers().stream()
-                        .map(s -> new ResourceLocation(tp.getAuthor().toLowerCase(Locale.ENGLISH), s)))
-                .collect(Collectors.toSet());
-        /* on */
+		return REWARD_PROVIDERS.values().stream()
+				.flatMap(tp -> tp.getTiers().stream()
+						.map(s -> new ResourceLocation(tp.getAuthor().toLowerCase(Locale.ENGLISH), s)))
+				.collect(Collectors.toSet());
+		/* on */
 	}
 
 	public static void registerTierProvider(ITierProvider rewardProvider) {
@@ -202,6 +180,23 @@ public class Contributors extends AbstractModule {
 	@Environment(EnvType.CLIENT)
 	private static String getPlayerName() {
 		return Minecraft.getInstance().getUser().getName();
+	}
+
+	@Override
+	protected void init(InitEvent event) {
+		registerTierProvider(new KiwiTierProvider());
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+			if (!(server.isSingleplayerOwner(handler.player.getGameProfile()))) {
+				SSyncCosmeticPacket.send(PLAYER_COSMETICS, handler.player, false);
+			}
+		});
+		if (Platform.isPhysicalClient()) {
+			ContributorsClient.init();
+		} else {
+			ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+				PLAYER_COSMETICS.remove(handler.player.getGameProfile().getName());
+			});
+		}
 	}
 
 }

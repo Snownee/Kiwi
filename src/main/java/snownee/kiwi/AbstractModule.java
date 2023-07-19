@@ -33,43 +33,13 @@ import snownee.kiwi.loader.event.PostInitEvent;
 import snownee.kiwi.loader.event.ServerInitEvent;
 
 /**
- *
  * All your modules should extend {@code AbstractModule}
  *
  * @author Snownee
- *
  */
 public abstract class AbstractModule {
-	public ResourceLocation uid;
-
 	protected final Map<Registry<?>, BiConsumer<ModuleInfo, ?>> decorators = Maps.newHashMap();
-
-	protected void preInit() {
-		// NO-OP
-	}
-
-	protected void init(InitEvent event) {
-		// NO-OP
-	}
-
-	protected void clientInit(ClientInitEvent event) {
-		// NO-OP
-	}
-
-	protected void serverInit(ServerInitEvent event) {
-		// NO-OP
-	}
-
-	protected void postInit(PostInitEvent event) {
-		// NO-OP
-	}
-
-	//	/**
-	//	 * @since 4.1.0
-	//	 */
-	//	protected void gatherData(GatherDataEvent event) {
-	//		// NO-OP
-	//	}
+	public ResourceLocation uid;
 
 	protected static <T> KiwiGO<T> go(Supplier<? extends T> factory) {
 		return new KiwiGO<>((Supplier<T>) factory);
@@ -96,8 +66,8 @@ public abstract class AbstractModule {
 	}
 
 	/**
-	* @since 5.2.0
-	*/
+	 * @since 5.2.0
+	 */
 	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(Factory<? extends T> factory, Type<?> datafixer, Supplier<? extends Block>... blocks) {
 		return go(() -> FabricBlockEntityTypeBuilder.<T>create(factory, Stream.of(blocks).map(Supplier::get).toArray(Block[]::new)).build(datafixer));
 	}
@@ -107,7 +77,7 @@ public abstract class AbstractModule {
 	}
 
 	public static CreativeModeTab.Builder itemCategory(String namespace, String path, Supplier<ItemStack> icon) {
-		return FabricItemGroup.builder().title(Component.translatable("itemGroup.%s.%s", namespace, path)).icon(icon);
+		return FabricItemGroup.builder().title(Component.translatable("itemGroup.%s.%s".formatted(namespace, path))).icon(icon);
 	}
 
 	public static TagKey<Item> itemTag(String namespace, String path) {
@@ -128,6 +98,28 @@ public abstract class AbstractModule {
 
 	public static <T> TagKey<T> tag(ResourceKey<? extends Registry<T>> registryKey, String namespace, String path) {
 		return TagKey.create(registryKey, new ResourceLocation(namespace, path));
+	}
+
+	protected void preInit() {
+		// NO-OP
+	}
+
+	protected void init(InitEvent event) {
+		// NO-OP
+	}
+
+	@Deprecated
+	protected void clientInit(ClientInitEvent event) {
+		// NO-OP
+	}
+
+	@Deprecated
+	protected void serverInit(ServerInitEvent event) {
+		// NO-OP
+	}
+
+	protected void postInit(PostInitEvent event) {
+		// NO-OP
 	}
 
 	/**

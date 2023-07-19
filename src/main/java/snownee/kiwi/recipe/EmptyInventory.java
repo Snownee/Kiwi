@@ -4,6 +4,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
+// TODO 1.21: Rename to EmptyContainer
 public class EmptyInventory implements Container {
 
 	@Override

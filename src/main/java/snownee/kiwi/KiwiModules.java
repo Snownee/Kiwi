@@ -48,7 +48,7 @@ public final class KiwiModules {
 		// FabricDataGenHelper.ENABLED
 		if (System.getProperty("fabric-api.datagen") != null) {
 			MODULES.clear();
-			MODULES = Collections.EMPTY_MAP;
+			MODULES = Map.of();
 		}
 	}
 

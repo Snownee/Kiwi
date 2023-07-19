@@ -2,10 +2,10 @@ package snownee.kiwi.network;
 
 import java.util.Collection;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -34,7 +34,8 @@ public abstract class PacketHandler implements IPacketHandler {
 		return direction;
 	}
 
-	public void send(Collection<ServerPlayer> players, Consumer<FriendlyByteBuf> buf) {
+
+	public void send(Stream<ServerPlayer> players, Consumer<FriendlyByteBuf> buf) {
 		FriendlyByteBuf buffer = PacketByteBufs.create();
 		buf.accept(buffer);
 		Packet<?> packet = ServerPlayNetworking.createS2CPacket(id, buffer);
@@ -42,21 +43,27 @@ public abstract class PacketHandler implements IPacketHandler {
 	}
 
 	public void send(ServerPlayer player, Consumer<FriendlyByteBuf> buf) {
-		FriendlyByteBuf buffer = PacketByteBufs.create();
-		buf.accept(buffer);
-		ServerPlayNetworking.send(player, id, buffer);
-	}
-
-	public void sendAllExcept(ServerPlayer player, Consumer<FriendlyByteBuf> buf) {
-		Collection<ServerPlayer> players = PlayerLookup.all(player.server);
-		players.remove(player);
-		send(players, buf);
+		send(Stream.of(player), buf);
 	}
 
 	public void sendToServer(Consumer<FriendlyByteBuf> buf) {
 		FriendlyByteBuf buffer = PacketByteBufs.create();
 		buf.accept(buffer);
 		ClientPlayNetworking.send(id, buffer);
+	}
+
+	public void send(KPacketTarget target, Consumer<FriendlyByteBuf> buf) {
+		target.send(this, buf);
+	}
+
+	@Deprecated
+	public void send(Collection<ServerPlayer> players, Consumer<FriendlyByteBuf> buf) {
+		send(players.stream(), buf);
+	}
+
+	@Deprecated
+	public void sendAllExcept(ServerPlayer player, Consumer<FriendlyByteBuf> buf) {
+		send(KPacketTarget.allExcept(player), buf);
 	}
 
 }
