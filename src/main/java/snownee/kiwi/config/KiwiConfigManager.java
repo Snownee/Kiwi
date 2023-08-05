@@ -17,7 +17,7 @@ import snownee.kiwi.config.KiwiConfig.ConfigType;
 
 public class KiwiConfigManager {
 
-	static final List<ConfigHandler> allConfigs = Lists.newLinkedList();
+	public static final List<ConfigHandler> allConfigs = Lists.newLinkedList();
 	private static final Map<Class<?>, ConfigHandler> clazz2Configs = Maps.newHashMap();
 	public static final Map<ResourceLocation, Value<Boolean>> modules = Maps.newHashMap();
 
@@ -58,7 +58,7 @@ public class KiwiConfigManager {
 		for (Entry<ResourceLocation, Boolean> entry : Kiwi.defaultOptions.entrySet()) {
 			ResourceLocation rl = entry.getKey();
 			if (rl.getNamespace().equals(modId)) {
-				Value<Boolean> value = builder.define(prefix + rl.getPath(), entry.getValue(), null, rl.getPath());
+				Value<Boolean> value = builder.define(prefix + rl.getPath(), entry.getValue(), null, "%s.config.modules.%s".formatted(modId, rl.getPath()));
 				value.requiresRestart = true;
 				modules.put(rl, value);
 			}

@@ -24,6 +24,9 @@
     ],
     "modmenu": [
       "snownee.kiwi.config.ModMenuIntegration"
+    ],
+    "fabric-datagen": [
+      "snownee.kiwi.datagen.KiwiDataGen"
     ]
   },
   "mixins": ["kiwi.mixins.json"],

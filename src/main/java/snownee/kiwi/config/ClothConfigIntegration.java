@@ -38,7 +38,6 @@ import snownee.kiwi.config.ConfigUI.ItemType;
 import snownee.kiwi.config.ConfigUI.Slider;
 import snownee.kiwi.config.ConfigUI.TextDescription;
 import snownee.kiwi.util.LocalizableItem;
-import snownee.kiwi.util.Util;
 
 public class ClothConfigIntegration {
 
@@ -51,20 +50,8 @@ public class ClothConfigIntegration {
 		List<ConfigHandler> configs = KiwiConfigManager.allConfigs.stream().filter($ -> $.getModId().equals(namespace)).toList();
 		Joiner joiner = Joiner.on('.');
 		for (ConfigHandler config : configs) {
-			String titleKey;
-			if (config.getFileName().equals(namespace + "-" + config.getType().extension())) {
-				titleKey = config.getType().extension();
-			} else if (config.getFileName().equals(namespace + "-modules")) {
-				titleKey = "modules";
-			} else {
-				titleKey = config.getFileName();
-			}
-			Component title;
-			if (I18n.exists("kiwi.config." + titleKey)) {
-				title = Component.translatable("kiwi.config." + titleKey);
-			} else {
-				title = Component.literal(Util.friendlyText(titleKey));
-			}
+			String titleKey = "kiwi.config." + config.getTranslationKey();
+			Component title = Component.translatable(titleKey);
 			ConfigCategory category = builder.getOrCreateCategory(title);
 
 			Map<String, Consumer<AbstractConfigListEntry<?>>> subCatsMap = Maps.newHashMap();
@@ -78,22 +65,11 @@ public class ClothConfigIntegration {
 				}
 
 				List<String> path = Lists.newArrayList(value.path.split("\\."));
-				if (I18n.exists(value.translation)) {
-					title = Component.translatable(value.translation);
-				} else {
-					title = Component.literal(Util.friendlyText(path.get(path.size() - 1)));
-				}
-
 				path.remove(path.size() - 1);
 				String subCatKey = joiner.join(path);
 				Consumer<AbstractConfigListEntry<?>> subCat = subCatsMap.computeIfAbsent(subCatKey, $ -> {
 					String key0 = namespace + ".config." + $;
-					Component title0;
-					if (I18n.exists(key0)) {
-						title0 = Component.translatable(key0);
-					} else {
-						title0 = Component.literal(Util.friendlyText(path.get(path.size() - 1)));
-					}
+					Component title0 = Component.translatable(key0);
 					SubCategoryBuilder builder0 = entryBuilder.startSubCategory(title0);
 					builder0.setExpanded(true);
 					subCats.add(builder0);
@@ -103,6 +79,7 @@ public class ClothConfigIntegration {
 				TextDescription description = value.getAnnotation(TextDescription.class);
 				putDescription(subCat, entryBuilder, description, false);
 
+				title = Component.translatable(value.translation);
 				AbstractConfigListEntry<?> entry = null;
 				Class<?> type = value.getType();
 				if (type == boolean.class) {
@@ -238,12 +215,7 @@ public class ClothConfigIntegration {
 		if (description == null || description.after() != after) {
 			return;
 		}
-		Component component;
-		if (I18n.exists(description.value())) {
-			component = Component.translatable(description.value());
-		} else {
-			component = Component.literal(description.value());
-		}
+		Component component = Component.translatable(description.value());
 		TextDescriptionBuilder builder = entryBuilder.startTextDescription(component);
 		subCat.accept(builder.build());
 	}
@@ -251,7 +223,7 @@ public class ClothConfigIntegration {
 	private static Optional<Component[]> createComment(Value<?> value) {
 		List<Component> tooltip = Lists.newArrayList();
 		String key = value.translation + ".desc";
-		if (I18n.exists(key)) {
+		if (!I18n.get(key).isEmpty()) {
 			tooltip.add(Component.translatable(key));
 		}
 		if (value.requiresRestart) {

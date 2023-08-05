@@ -35,6 +35,20 @@ loom {
     mixin {
         defaultRefmapName = "${project.mod_id}.refmap.json"
     }
+    runs {
+        //
+        // This adds a new gradle task that runs the datagen API: "gradlew runDatagenClient"
+        //
+        datagenClient {
+            inherit client
+            name "Data Generation"
+            vmArg "-Dfabric-api.datagen"
+            vmArg "-Dfabric-api.datagen.output-dir=${file("src/generated/resources")}"
+            vmArg "-Dfabric-api.datagen.modid=${mod_id}"
+
+            runDir "build/datagen"
+        }
+    }
 }
 
 configurations {
@@ -92,12 +106,13 @@ java {
 }
 
 def a = [
-    "/assets/kiwi/blockstates",
-    "/assets/kiwi/models",
-    "/snownee/kiwi/test",
-    "/data",
-    "/.cache",
-    "/third_party"
+        "/assets/kiwi/blockstates",
+        "/assets/kiwi/models",
+        "/assets/kiwi/lang/en_us.existing.json",
+        "/snownee/kiwi/test",
+        "/data",
+        "/.cache",
+        "/third_party"
 ]
 
 jar {
@@ -119,7 +134,7 @@ remapJar {
     archiveClassifier = ""
 
     from("LICENSE") {
-        rename { "${it}_${project.archivesBaseName}"}
+        rename { "${it}_${project.archivesBaseName}" }
     }
 }
 
@@ -141,9 +156,11 @@ publishing {
 }
 
 modrinth {
-    token = System.getenv("MODRINTH_TOKEN") // This is the default. Remember to have the MODRINTH_TOKEN environment variable set or else this will fail, or set it to whatever you want - just make sure it stays private!
+    token = System.getenv("MODRINTH_TOKEN")
+    // This is the default. Remember to have the MODRINTH_TOKEN environment variable set or else this will fail, or set it to whatever you want - just make sure it stays private!
     projectId = "ufdDoWPd" // This can be the project ID or the slug. Either will work!
-    versionNumber = project.mod_version // You don't need to set this manually. Will fail if Modrinth has this version already
+    versionNumber = project.mod_version
+    // You don't need to set this manually. Will fail if Modrinth has this version already
     versionType = "release" // This is the default -- can also be `beta` or `alpha`
     uploadFile = remapJar // With Loom, this MUST be set to `remapJar` instead of `jar`!
     gameVersions = ["1.20"] // Must be an array, even with only one version
