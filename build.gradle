@@ -95,7 +95,7 @@ minecraft {
                 }
             }
         }
-        
+
         data {
             workingDirectory project.file('run')
 
@@ -208,10 +208,7 @@ reobf {
 
 repositories {
     maven { url "https://maven.shedaniel.me/" }
-    maven {
-        name = "jei"
-        url = "https://dvs1.progwml6.com/files/maven"
-    }
+    maven { url "https://api.modrinth.com/maven" }
     maven {
         url = "https://cursemaven.com"
         content {
@@ -238,12 +235,15 @@ dependencies {
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
-    
+
 	implementation project(':annotation')
     annotationProcessor project(':annotation-processor')
 
     implementation fg.deobf("me.shedaniel.cloth:cloth-config-forge:${project.cloth_config_version}")
     library shadowCommon("org.yaml:snakeyaml:${project.snakeyaml_version}")
+
+    //implementation fg.deobf("curse.maven:jade-324717:4681833")
+    implementation fg.deobf("maven.modrinth:forgified-fabric-api:6SG9khep")
 }
 
 processResources {

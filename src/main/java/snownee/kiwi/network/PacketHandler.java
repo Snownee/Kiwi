@@ -31,6 +31,7 @@ public abstract class PacketHandler implements IPacketHandler {
 		return direction;
 	}
 
+	@Deprecated
 	public void send(PacketTarget target, Consumer<FriendlyByteBuf> buf) {
 		FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer()).writeResourceLocation(id);
 		buf.accept(buffer);
@@ -38,11 +39,12 @@ public abstract class PacketHandler implements IPacketHandler {
 	}
 
 	public void send(ServerPlayer player, Consumer<FriendlyByteBuf> buf) {
-		send(PacketDistributor.PLAYER.with(() -> player), buf);
+		send(() -> PacketDistributor.PLAYER.with(() -> player), buf);
 	}
 
+	@Deprecated
 	public void sendAllExcept(ServerPlayer player, Consumer<FriendlyByteBuf> buf) {
-		send(Networking.ALL_EXCEPT.with(() -> player), buf);
+		send(KPacketTarget.allExcept(player), buf);
 	}
 
 	public void sendToServer(Consumer<FriendlyByteBuf> buf) {
@@ -51,4 +53,7 @@ public abstract class PacketHandler implements IPacketHandler {
 		Networking.sendToServer(buffer);
 	}
 
+	public void send(KPacketTarget target, Consumer<FriendlyByteBuf> buf) {
+		target.send(this, buf);
+	}
 }

@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
 import net.minecraft.client.model.PlayerModel;
@@ -21,6 +19,8 @@ import snownee.kiwi.contributor.impl.client.layer.SantaHatLayer;
 import snownee.kiwi.contributor.impl.client.layer.SunnyMilkLayer;
 
 public class KiwiTierProvider extends JsonTierProvider {
+	private final List<String> renderableTiers = List.of("2020q3", "2020q4"/*, "2021q1"*/, "sunny_milk", "xmas");
+
 	public KiwiTierProvider() {
 		super("Snownee", KiwiTierProvider::getURLs);
 	}
@@ -30,13 +30,11 @@ public class KiwiTierProvider extends JsonTierProvider {
 		String github = "https://raw.githubusercontent.com/Snownee/Kiwi/master/contributors.json";
 		Locale locale = Locale.getDefault();
 		if ("CN".equals(locale.getCountry()) && Calendar.getInstance().get(Calendar.ZONE_OFFSET) == 28800000) {
-			return ImmutableList.of(cdn, github);
+			return List.of(cdn, github);
 		} else {
-			return ImmutableList.of(cdn, github);
+			return List.of(cdn, github);
 		}
 	}
-
-	private final List<String> renderableTiers = ImmutableList.of("2020q3", "2020q4"/*, "2021q1"*/, "sunny_milk", "xmas");
 
 	private static boolean isInXmas() {
 		Calendar calendar = Calendar.getInstance();
@@ -55,7 +53,7 @@ public class KiwiTierProvider extends JsonTierProvider {
 
 	@Override
 	public Set<String> getTiers() {
-		return ImmutableSet.copyOf(getRenderableTiers());
+		return Set.copyOf(getRenderableTiers());
 	}
 
 	@Override
@@ -66,20 +64,14 @@ public class KiwiTierProvider extends JsonTierProvider {
 	@Override
 	@OnlyIn(Dist.CLIENT)
 	public CosmeticLayer createRenderer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer, String tier) {
-		switch (tier) {
-		case "2020q3":
-			return new PlanetLayer(entityRenderer);
-		case "2020q4":
-			return new FoxTailLayer(entityRenderer);
-		//        case "2021q1":
-		//            return new ElectronicatLayer(entityRenderer);
-		case "xmas":
-			return new SantaHatLayer(entityRenderer);
-		case "sunny_milk":
-			return new SunnyMilkLayer(entityRenderer);
-		default:
-			return null;
-		}
+		return switch (tier) {
+			case "2020q3" -> new PlanetLayer(entityRenderer);
+			case "2020q4" -> new FoxTailLayer(entityRenderer);
+			// case "2021q2" -> new ElectronicatLayer(entityRenderer);
+			case "xmas" -> new SantaHatLayer(entityRenderer);
+			case "sunny_milk" -> new SunnyMilkLayer(entityRenderer);
+			default -> null;
+		};
 	}
 
 }

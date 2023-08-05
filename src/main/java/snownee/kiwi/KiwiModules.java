@@ -68,7 +68,7 @@ public final class KiwiModules {
 	public static void clear() {
 		if (!DatagenModLoader.isRunningDataGen()) {
 			MODULES.clear();
-			MODULES = Collections.EMPTY_MAP;
+			MODULES = Map.of();
 		}
 	}
 

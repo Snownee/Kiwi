@@ -22,7 +22,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.Kiwi;
@@ -47,19 +47,6 @@ public class Contributors extends AbstractModule {
 	private static final Set<ResourceLocation> RENDERABLES = Sets.newLinkedHashSet();
 	private static int DAY = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
 
-	@Override
-	protected void preInit() {
-		if (Platform.isPhysicalClient()) {
-			FMLJavaModLoadingContext.get().getModEventBus().addListener(ContributorsClient::addLayers);
-			MinecraftForge.EVENT_BUS.register(ContributorsClient.class);
-		}
-	}
-
-	@Override
-	protected void init(InitEvent event) {
-		registerTierProvider(new KiwiTierProvider());
-	}
-
 	public static boolean isContributor(String author, String playerName) {
 		return REWARD_PROVIDERS.getOrDefault(author.toLowerCase(Locale.ENGLISH), ITierProvider.Empty.INSTANCE).isContributor(playerName);
 	}
@@ -78,20 +65,20 @@ public class Contributors extends AbstractModule {
 
 	public static Set<ResourceLocation> getPlayerTiers(String playerName) {
 		/* off */
-        return REWARD_PROVIDERS.values().stream()
-                .flatMap(tp -> tp.getPlayerTiers(playerName).stream()
-                        .map(s -> new ResourceLocation(tp.getAuthor().toLowerCase(Locale.ENGLISH), s)))
-                .collect(Collectors.toSet());
-        /* on */
+		return REWARD_PROVIDERS.values().stream()
+				.flatMap(tp -> tp.getPlayerTiers(playerName).stream()
+						.map(s -> new ResourceLocation(tp.getAuthor().toLowerCase(Locale.ENGLISH), s)))
+				.collect(Collectors.toSet());
+		/* on */
 	}
 
 	public static Set<ResourceLocation> getTiers() {
 		/* off */
-        return REWARD_PROVIDERS.values().stream()
-                .flatMap(tp -> tp.getTiers().stream()
-                        .map(s -> new ResourceLocation(tp.getAuthor().toLowerCase(Locale.ENGLISH), s)))
-                .collect(Collectors.toSet());
-        /* on */
+		return REWARD_PROVIDERS.values().stream()
+				.flatMap(tp -> tp.getTiers().stream()
+						.map(s -> new ResourceLocation(tp.getAuthor().toLowerCase(Locale.ENGLISH), s)))
+				.collect(Collectors.toSet());
+		/* on */
 	}
 
 	public static void registerTierProvider(ITierProvider rewardProvider) {
@@ -100,23 +87,6 @@ public class Contributors extends AbstractModule {
 		for (String tier : rewardProvider.getRenderableTiers()) {
 			RENDERABLES.add(new ResourceLocation(namespace, tier));
 		}
-	}
-
-	@SubscribeEvent
-	public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-		if (!(event.getEntity().level() instanceof ServerLevel)) {
-			return;
-		}
-		Player player = event.getEntity();
-		if (!((ServerLevel) event.getEntity().level()).getServer().isSingleplayerOwner(player.getGameProfile())) {
-			SSyncCosmeticPacket.send(PLAYER_COSMETICS, (ServerPlayer) player, false);
-		}
-	}
-
-	@OnlyIn(Dist.DEDICATED_SERVER)
-	@SubscribeEvent
-	public void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
-		PLAYER_COSMETICS.remove(event.getEntity().getGameProfile().getName());
 	}
 
 	@OnlyIn(Dist.CLIENT)
@@ -215,6 +185,28 @@ public class Contributors extends AbstractModule {
 	@OnlyIn(Dist.CLIENT)
 	private static String getPlayerName() {
 		return Minecraft.getInstance().getUser().getName();
+	}
+
+	@Override
+	protected void preInit() {
+		if (Platform.isPhysicalClient()) {
+			FMLJavaModLoadingContext.get().getModEventBus().addListener(ContributorsClient::addLayers);
+			MinecraftForge.EVENT_BUS.register(ContributorsClient.class);
+		} else {
+			MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, false, PlayerEvent.PlayerLoggedOutEvent.class, event -> {
+				PLAYER_COSMETICS.remove(event.getEntity().getGameProfile().getName());
+			});
+		}
+		MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, false, PlayerEvent.PlayerLoggedInEvent.class, event -> {
+			if (event.getEntity().level() instanceof ServerLevel level && !level.getServer().isSingleplayerOwner(event.getEntity().getGameProfile())) {
+				SSyncCosmeticPacket.send(PLAYER_COSMETICS, (ServerPlayer) event.getEntity(), false);
+			}
+		});
+	}
+
+	@Override
+	protected void init(InitEvent event) {
+		registerTierProvider(new KiwiTierProvider());
 	}
 
 }

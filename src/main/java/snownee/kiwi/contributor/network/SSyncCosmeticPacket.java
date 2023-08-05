@@ -11,6 +11,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import snownee.kiwi.contributor.Contributors;
+import snownee.kiwi.network.KPacketTarget;
 import snownee.kiwi.network.KiwiPacket;
 import snownee.kiwi.network.KiwiPacket.Direction;
 import snownee.kiwi.network.PacketHandler;
@@ -42,7 +43,7 @@ public class SSyncCosmeticPacket extends PacketHandler {
 			});
 		};
 		if (except) {
-			I.sendAllExcept(player, consumer);
+			I.send(KPacketTarget.allExcept(player), consumer);
 		} else {
 			I.send(player, consumer);
 		}
