@@ -16,7 +16,7 @@ public class ClientTelemetryManagerMixin {
 	@Inject(method = "createEventSender", at = @At("HEAD"), cancellable = true)
 	private void kiwi$createEventSender(CallbackInfoReturnable<TelemetryEventSender> ci) {
 		if (KiwiClientConfig.noMicrosoftTelemetry) {
-			Kiwi.logger.info("Canceling Microsoft telemetry");
+			Kiwi.LOGGER.info("Canceling Microsoft telemetry");
 			ci.setReturnValue(TelemetryEventSender.DISABLED);
 		}
 	}

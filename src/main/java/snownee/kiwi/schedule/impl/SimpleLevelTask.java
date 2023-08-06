@@ -51,7 +51,7 @@ public class SimpleLevelTask extends Task<LevelTicker> implements INBTSerializab
 	public CompoundTag serializeNBT() {
 		CompoundTag data = new CompoundTag();
 		data.putInt("tick", tick);
-		Level.RESOURCE_KEY_CODEC.encodeStart(NbtOps.INSTANCE, dimension).resultOrPartial(Kiwi.logger::error).ifPresent(nbt -> {
+		Level.RESOURCE_KEY_CODEC.encodeStart(NbtOps.INSTANCE, dimension).resultOrPartial(Kiwi.LOGGER::error).ifPresent(nbt -> {
 			data.put("world", nbt);
 		});
 		data.putBoolean("start", phase == Phase.START);
@@ -60,7 +60,7 @@ public class SimpleLevelTask extends Task<LevelTicker> implements INBTSerializab
 
 	@Override
 	public void deserializeNBT(CompoundTag nbt) {
-		dimension = Level.RESOURCE_KEY_CODEC.parse(NbtOps.INSTANCE, nbt.get("world")).resultOrPartial(Kiwi.logger::error).orElse(Level.OVERWORLD);
+		dimension = Level.RESOURCE_KEY_CODEC.parse(NbtOps.INSTANCE, nbt.get("world")).resultOrPartial(Kiwi.LOGGER::error).orElse(Level.OVERWORLD);
 		tick = nbt.getInt("tick");
 		phase = nbt.getBoolean("start") ? Phase.START : Phase.END;
 	}

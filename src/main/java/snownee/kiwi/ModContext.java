@@ -30,7 +30,7 @@ public class ModContext {
 		try {
 			modContainer = ModList.get().getModContainerById(modid).get();
 		} catch (NoSuchElementException e) {
-			Kiwi.logger.catching(e);
+			Kiwi.LOGGER.error("Cannot find mod container for modid {}", modid);
 		}
 	}
 

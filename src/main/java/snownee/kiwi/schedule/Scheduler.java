@@ -39,11 +39,11 @@ public final class Scheduler extends SavedData {
 
 	public static void register(ResourceLocation id, Class<? extends Task> clazz) {
 		if (idMap.containsKey(id)) {
-			Kiwi.logger.error("Duplicate task id: " + id);
+			Kiwi.LOGGER.error("Duplicate task id: " + id);
 		} else if (idMap.containsValue(clazz)) {
-			Kiwi.logger.error("Duplicate task class: " + clazz);
+			Kiwi.LOGGER.error("Duplicate task class: " + clazz);
 		} else if (!INBTSerializable.class.isAssignableFrom(clazz)) {
-			Kiwi.logger.error("task " + id + " should implement INBTSerializable");
+			Kiwi.LOGGER.error("task " + id + " should implement INBTSerializable");
 		} else {
 			idMap.put(id, (Class<Task>) clazz);
 		}
@@ -59,7 +59,7 @@ public final class Scheduler extends SavedData {
 				return task;
 			}
 		} catch (Exception e) {
-			Kiwi.logger.catching(e);
+			Kiwi.LOGGER.error("Failed to deserialize task %s".formatted(data), e);
 		}
 		return null;
 	}
@@ -72,7 +72,7 @@ public final class Scheduler extends SavedData {
 				data.putString("type", type.toString());
 				return data;
 			} catch (Exception e) {
-				Kiwi.logger.catching(e);
+				Kiwi.LOGGER.error("Failed to serialize task %s".formatted(task), e);
 			}
 		}
 		return null;

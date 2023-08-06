@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -15,15 +14,14 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.MethodUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.Marker;
-import org.apache.logging.log4j.MarkerManager;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.ClassNode;
+import org.slf4j.Logger;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 import com.electronwill.nightconfig.core.utils.StringUtils;
 import com.google.common.base.Strings;
@@ -35,6 +33,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.MutableGraph;
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
@@ -160,10 +159,9 @@ import snownee.kiwi.util.Util;
 @Mod(Kiwi.ID)
 public class Kiwi {
 	public static final String ID = "kiwi";
-	public static final String NAME = "Kiwi";
 	public static final RegistryLookup registryLookup = new RegistryLookup();
-	static final Marker MARKER = MarkerManager.getMarker("Init");
-	public static Logger logger = LogManager.getLogger(Kiwi.NAME);
+	static final Marker MARKER = MarkerFactory.getMarker("INIT");
+	public static final Logger LOGGER = LogUtils.getLogger();
 	public static Map<ResourceLocation, Boolean> defaultOptions = Maps.newHashMap();
 	private static Multimap<String, KiwiAnnotationData> moduleData = ArrayListMultimap.create();
 	private static Map<KiwiAnnotationData, String> conditions = Maps.newHashMap();
@@ -230,7 +228,7 @@ public class Kiwi {
 						}
 						new ConfigHandler(mod, fileName, type, clazz, master);
 					} catch (ClassNotFoundException e) {
-						logger.catching(e);
+						LOGGER.error(MARKER, "Failed to load config class {}", config.target());
 					}
 				}
 			}
@@ -241,7 +239,7 @@ public class Kiwi {
 			}
 		}
 
-		logger.info(MARKER, "Processing " + moduleData.size() + " KiwiModule annotations");
+		LOGGER.info(MARKER, "Processing " + moduleData.size() + " KiwiModule annotations");
 
 		for (Entry<String, KiwiAnnotationData> entry : moduleData.entries()) {
 			KiwiAnnotationData optional = classOptionalMap.get(entry.getValue().target());
@@ -322,7 +320,7 @@ public class Kiwi {
 				String methodName = (String) k.data().get("method");
 				List<String> values = (List<String>) k.data().get("value");
 				if (values == null) {
-					values = Arrays.asList(v);
+					values = List.of(v);
 				}
 				List<ResourceLocation> ids = values.stream().map(s -> checkPrefix(s, v)).collect(Collectors.toList());
 				for (ResourceLocation id : ids) {
@@ -339,8 +337,7 @@ public class Kiwi {
 				}
 			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException |
 					 ClassNotFoundException e) {
-				logger.error(MARKER, "Failed to access to LoadingCondition: {}", k);
-				logger.catching(e);
+				LOGGER.error(MARKER, "Failed to access to LoadingCondition: %s".formatted(k), e);
 			}
 		});
 
@@ -432,8 +429,7 @@ public class Kiwi {
 				AbstractModule instance = (AbstractModule) clazz.getDeclaredConstructor().newInstance();
 				KiwiModules.add(id, instance, context);
 			} catch (Exception e) {
-				logger.error(MARKER, "Kiwi failed to initialize module class: {}", info.className);
-				logger.catching(e);
+				LOGGER.error(MARKER, "Kiwi failed to initialize module class: %s".formatted(info.className), e);
 				continue;
 			}
 
@@ -501,8 +497,7 @@ public class Kiwi {
 					try {
 						field.set(null, info.module);
 					} catch (IllegalArgumentException | IllegalAccessException e) {
-						logger.error(MARKER, "Kiwi failed to inject module instance to module class: {}", info.module.uid);
-						logger.catching(e);
+						LOGGER.error(MARKER, "Kiwi failed to inject module instance to module class: %s".formatted(info.module.uid), e);
 					}
 					continue;
 				}
@@ -511,8 +506,7 @@ public class Kiwi {
 				try {
 					o = field.get(null);
 				} catch (IllegalArgumentException | IllegalAccessException e) {
-					logger.error(MARKER, "Kiwi failed to catch game object: {}", field);
-					logger.catching(e);
+					LOGGER.error(MARKER, "Kiwi failed to catch game object: %s".formatted(field), e);
 				}
 				if (o == null) {
 					continue;
@@ -542,8 +536,7 @@ public class Kiwi {
 							try {
 								tmpBuilderField.set(info.module, null);
 							} catch (Exception e) {
-								logger.error(MARKER, "Kiwi failed to clean used item builder: {}", tmpBuilderField);
-								logger.catching(e);
+								LOGGER.error(MARKER, "Kiwi failed to clean used item builder: %s".formatted(tmpBuilderField), e);
 							}
 						}
 					} else if (o instanceof Item) {
@@ -569,10 +562,10 @@ public class Kiwi {
 				tmpBuilderField = null;
 			}
 
-			logger.info(MARKER, "Module [{}:{}] initialized", modid, name);
+			LOGGER.info(MARKER, "Module [{}:{}] initialized", modid, name);
 			for (ResourceKey<?> key : counter.keySet()) {
 				String keyName = Util.trimRL(key.location());
-				logger.info(MARKER, "    {}: {}", keyName, counter.getInt(key));
+				LOGGER.info(MARKER, "    {}: {}", keyName, counter.getInt(key));
 			}
 		}
 
