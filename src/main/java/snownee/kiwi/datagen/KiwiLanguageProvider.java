@@ -110,8 +110,7 @@ public class KiwiLanguageProvider implements DataProvider {
 					continue;
 				}
 				List<String> path = Lists.newArrayList(value.path.split("\\."));
-				String title = Util.friendlyText(path.get(path.size() - 1));
-				path.remove(path.size() - 1);
+				String title = Util.friendlyText(path.remove(path.size() - 1));
 				String subCatKey = joiner.join(path);
 				if (!path.isEmpty() && !subCats.contains(subCatKey)) {
 					subCats.add(subCatKey);
