@@ -47,6 +47,7 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
+@Deprecated
 public abstract class KiwiRecipeProvider implements DataProvider {
 
 	public static final Logger LOGGER = LogManager.getLogger();

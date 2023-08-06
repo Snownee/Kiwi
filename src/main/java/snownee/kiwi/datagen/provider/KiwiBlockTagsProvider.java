@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.data.BlockTagsProvider;
 import net.minecraftforge.common.data.ExistingFileHelper;
 
+@Deprecated
 public abstract class KiwiBlockTagsProvider extends BlockTagsProvider {
 
 	protected final TagsProviderHelper<Block> helper;

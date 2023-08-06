@@ -1,12 +1,6 @@
 package snownee.kiwi.test;
 
-import java.util.List;
-import java.util.Set;
-
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.data.DataGenerator;
-import net.minecraft.data.loot.LootTableProvider;
-import net.minecraft.data.loot.LootTableProvider.SubProviderEntry;
 import net.minecraft.world.effect.HealthBoostMobEffect;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
@@ -16,12 +10,10 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
-import net.minecraftforge.data.event.GatherDataEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.Categories;
 import snownee.kiwi.KiwiGO;
@@ -39,7 +31,6 @@ import snownee.kiwi.util.EnumUtil;
 @KiwiModule("test")
 @KiwiModule.Optional(defaultEnabled = false)
 @KiwiModule.Category(value = Categories.BUILDING_BLOCKS, after = "redstone_block")
-@KiwiModule.Subscriber(modBus = true)
 public class TestModule extends AbstractModule {
 	// Keep your fields `public static`
 
@@ -74,9 +65,9 @@ public class TestModule extends AbstractModule {
 		ModBlockItem.INSTANT_UPDATE_TILES.add(FIRST_TILE.get());
 		ModBlockItem.INSTANT_UPDATE_TILES.add(TEX_TILE.get());
 		ItemBlockRenderTypes.setRenderLayer(TEX_BLOCK.get(), EnumUtil.BLOCK_RENDER_TYPES::contains);
+		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::blockColors);
 	}
 
-	@SubscribeEvent
 	@OnlyIn(Dist.CLIENT)
 	public void blockColors(RegisterColorHandlersEvent.Block event) {
 		event.register((state, level, pos, i) -> {
@@ -93,14 +84,5 @@ public class TestModule extends AbstractModule {
 	@Override
 	protected void serverInit(ServerInitEvent event) {
 		Scheduler.register(MyTask.ID, MyTask.class);
-	}
-
-	@Override
-	protected void gatherData(GatherDataEvent event) {
-		DataGenerator gen = event.getGenerator();
-		if (event.includeServer()) {
-			gen.addProvider(true, new LootTableProvider(event.getGenerator().getPackOutput(), Set.of(), List.of(new SubProviderEntry(TestBlockLoot::new, LootContextParamSets.BLOCK))));
-			gen.addProvider(true, new TestRecipeProvider(event.getGenerator().getPackOutput()));
-		}
 	}
 }

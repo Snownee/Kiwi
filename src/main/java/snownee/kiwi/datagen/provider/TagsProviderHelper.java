@@ -15,6 +15,7 @@ import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModules;
 import snownee.kiwi.mixin.TagsProviderAccess;
 
+@Deprecated
 public final class TagsProviderHelper<T> {
 
 	private final TagsProviderAccess<T> tagsProvider;

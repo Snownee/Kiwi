@@ -54,6 +54,7 @@ public @interface KiwiModule {
 		String[] after() default {};
 	}
 
+	@Deprecated
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
 	@interface Subscriber {

@@ -3,7 +3,6 @@ package snownee.kiwi.test;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.data.event.GatherDataEvent;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.loader.event.ClientInitEvent;
 import snownee.kiwi.loader.event.InitEvent;
@@ -33,10 +32,6 @@ public class MyModule extends AbstractModule {
 
 	@Override
 	protected void postInit(PostInitEvent event) {
-	}
-
-	@Override
-	protected void gatherData(GatherDataEvent event) {
 	}
 
 }

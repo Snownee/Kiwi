@@ -33,6 +33,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import snownee.kiwi.KiwiModules;
 import snownee.kiwi.ModuleInfo;
 
+@Deprecated
 public abstract class KiwiBlockLoot extends BlockLootSubProvider {
 	public static final LootItemCondition.Builder HAS_SILK_TOUCH = MatchTool.toolMatches(ItemPredicate.Builder.item().hasEnchantment(new EnchantmentPredicate(Enchantments.SILK_TOUCH, MinMaxBounds.Ints.atLeast(1))));
 	public static final LootItemCondition.Builder HAS_NO_SILK_TOUCH = HAS_SILK_TOUCH.invert();

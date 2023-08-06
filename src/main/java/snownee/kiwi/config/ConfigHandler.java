@@ -333,6 +333,16 @@ public class ConfigHandler {
 		return fileName;
 	}
 
+	public String getTranslationKey() {
+		if (fileName.equals(modId + "-" + getType().extension())) {
+			return getType().extension();
+		} else if (fileName.equals(modId + "-modules")) {
+			return "modules";
+		} else {
+			return fileName;
+		}
+	}
+
 	public Class<?> getClazz() {
 		return clazz;
 	}
@@ -356,7 +366,7 @@ public class ConfigHandler {
 		public String translation;
 		public double min = Double.NaN;
 		public double max = Double.NaN;
-		String path;
+		public final String path;
 		@Nullable
 		Method listener;
 

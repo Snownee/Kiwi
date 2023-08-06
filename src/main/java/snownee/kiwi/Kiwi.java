@@ -39,6 +39,7 @@ import com.mojang.serialization.Codec;
 
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.core.Registry;
@@ -109,6 +110,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
@@ -143,6 +145,7 @@ import snownee.kiwi.command.KiwiCommand;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfig.ConfigType;
 import snownee.kiwi.config.KiwiConfigManager;
+import snownee.kiwi.datagen.KiwiDataGen;
 import snownee.kiwi.loader.AnnotatedTypeLoader;
 import snownee.kiwi.loader.KiwiConfiguration;
 import snownee.kiwi.loader.Platform;
@@ -158,30 +161,15 @@ import snownee.kiwi.util.Util;
 public class Kiwi {
 	public static final String ID = "kiwi";
 	public static final String NAME = "Kiwi";
-
-	public static Logger logger = LogManager.getLogger(Kiwi.NAME);
-	static final Marker MARKER = MarkerManager.getMarker("Init");
-
-	private static final class Info {
-		final ResourceLocation id;
-		final String className;
-		final List<ResourceLocation> moduleRules = Lists.newLinkedList();
-
-		public Info(ResourceLocation id, String className) {
-			this.id = id;
-			this.className = className;
-		}
-	}
-
-	private static enum LoadingStage {
-		UNINITED, CONSTRUCTING, CONSTRUCTED, INITED;
-	}
-
-	private static Multimap<String, KiwiAnnotationData> moduleData = ArrayListMultimap.create();
-	public static Map<ResourceLocation, Boolean> defaultOptions = Maps.newHashMap();
-	private static Map<KiwiAnnotationData, String> conditions = Maps.newHashMap();
 	public static final RegistryLookup registryLookup = new RegistryLookup();
+	static final Marker MARKER = MarkerManager.getMarker("Init");
+	public static Logger logger = LogManager.getLogger(Kiwi.NAME);
+	public static Map<ResourceLocation, Boolean> defaultOptions = Maps.newHashMap();
+	private static Multimap<String, KiwiAnnotationData> moduleData = ArrayListMultimap.create();
+	private static Map<KiwiAnnotationData, String> conditions = Maps.newHashMap();
 	private static LoadingStage stage = LoadingStage.UNINITED;
+	private static Map<String, CreativeModeTab> GROUPS = Maps.newHashMap();
+	private static boolean tagsUpdated;
 
 	public Kiwi() throws Exception {
 		if (stage != LoadingStage.UNINITED) {
@@ -283,6 +271,9 @@ public class Kiwi {
 		MinecraftForge.EVENT_BUS.addListener(this::serverInit);
 		modEventBus.addListener(this::postInit);
 		modEventBus.addListener(this::loadComplete);
+		if (Platform.isModLoaded("fabric_api")) {
+			modEventBus.addListener(this::gatherData);
+		}
 		modEventBus.register(KiwiModules.class);
 		if (Platform.isPhysicalClient()) {
 			modEventBus.addListener(this::registerModelLoader);
@@ -346,7 +337,8 @@ public class Kiwi {
 						throw e;
 					}
 				}
-			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | ClassNotFoundException e) {
+			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException |
+					 ClassNotFoundException e) {
 				logger.error(MARKER, "Failed to access to LoadingCondition: {}", k);
 				logger.catching(e);
 			}
@@ -384,10 +376,10 @@ public class Kiwi {
 
 			String dependencies = (String) module.data().get("dependencies");
 			/* off */
-            List<String> rules = StringUtils.split(Strings.nullToEmpty(dependencies), ';').stream()
-                    .filter(s -> !Strings.isNullOrEmpty(s))
-                    .collect(Collectors.toList());
-            /* on */
+			List<String> rules = StringUtils.split(Strings.nullToEmpty(dependencies), ';').stream()
+					.filter(s -> !Strings.isNullOrEmpty(s))
+					.collect(Collectors.toList());
+			/* on */
 
 			for (String rule : rules) {
 				if (rule.startsWith("@")) {
@@ -455,7 +447,7 @@ public class Kiwi {
 		conditions.clear();
 		conditions = null;
 
-		Object2IntMap<Class<?>> counter = new Object2IntArrayMap<>();
+		Object2IntMap<ResourceKey<?>> counter = new Object2IntArrayMap<>();
 		for (ModuleInfo info : KiwiModules.get()) {
 			counter.clear();
 			info.context.setActiveContainer();
@@ -483,6 +475,7 @@ public class Kiwi {
 			}
 
 			String modid = info.module.uid.getNamespace();
+			String name = info.module.uid.getPath();
 
 			Item.Properties tmpBuilder = null;
 			Field tmpBuilderField = null;
@@ -557,13 +550,29 @@ public class Kiwi {
 						checkNoGroup(info, field, o);
 					} else if (useOwnGroup && info.groupSetting == null && o instanceof CreativeModeTab tab) {
 						//registerTab(id, tab);
-						info.groupSetting = new GroupSetting(new String[] { regName.toString() }, new String[0]);
+						info.groupSetting = new GroupSetting(new String[]{regName.toString()}, new String[0]);
 					}
-					info.register(o, regName, registry, field);
+					ResourceKey<?> superType = null;
+					if (registry instanceof Registry<?> reg) {
+						superType = reg.key();
+					} else if (registry instanceof IForgeRegistry<?> reg) {
+						superType = reg.getRegistryKey();
+					}
+					if (superType != null) {
+						int i = counter.getOrDefault(superType, 0);
+						counter.put(superType, i + 1);
+						info.register(o, regName, registry, field);
+					}
 				}
 
 				tmpBuilder = null;
 				tmpBuilderField = null;
+			}
+
+			logger.info(MARKER, "Module [{}:{}] initialized", modid, name);
+			for (ResourceKey<?> key : counter.keySet()) {
+				String keyName = Util.trimRL(key.location());
+				logger.info(MARKER, "    {}: {}", keyName, counter.getInt(key));
 			}
 		}
 
@@ -700,8 +709,6 @@ public class Kiwi {
 		registerTab(Categories.TOOLS_AND_UTILITIES, CreativeModeTabs.TOOLS_AND_UTILITIES);
 	}
 
-	private static Map<String, CreativeModeTab> GROUPS = Maps.newHashMap();
-
 	static CreativeModeTab getGroup(String path) {
 		return GROUPS.computeIfAbsent(path, $ -> BuiltInRegistries.CREATIVE_MODE_TAB.get(ResourceLocation.tryParse(path)));
 	}
@@ -710,6 +717,34 @@ public class Kiwi {
 		if (field.getAnnotation(NoCategory.class) != null) {
 			info.noCategories.add(o);
 		}
+	}
+
+	public static boolean isLoaded(ResourceLocation module) {
+		return KiwiModules.isLoaded(module);
+	}
+
+	private static ResourceLocation checkPrefix(String name, String defaultModid) {
+		if (name.contains(":")) {
+			return new ResourceLocation(name);
+		} else {
+			return new ResourceLocation(defaultModid, name);
+		}
+	}
+
+	public static void onTagsUpdated() {
+		tagsUpdated = true;
+	}
+
+	/**
+	 * @since 3.1.3
+	 */
+	public static boolean areTagsUpdated() {
+		return tagsUpdated;
+	}
+
+	private void gatherData(GatherDataEvent event) {
+		FabricDataGenerator dataGenerator = FabricDataGenerator.create(ID, event);
+		new KiwiDataGen().onInitializeDataGenerator(dataGenerator);
 	}
 
 	private void init(FMLCommonSetupEvent event) {
@@ -749,31 +784,6 @@ public class Kiwi {
 		registryLookup.cache.invalidateAll();
 	}
 
-	public static boolean isLoaded(ResourceLocation module) {
-		return KiwiModules.isLoaded(module);
-	}
-
-	private static ResourceLocation checkPrefix(String name, String defaultModid) {
-		if (name.contains(":")) {
-			return new ResourceLocation(name);
-		} else {
-			return new ResourceLocation(defaultModid, name);
-		}
-	}
-
-	private static boolean tagsUpdated;
-
-	public static void onTagsUpdated() {
-		tagsUpdated = true;
-	}
-
-	/**
-	 * @since 3.1.3
-	 */
-	public static boolean areTagsUpdated() {
-		return tagsUpdated;
-	}
-
 	@OnlyIn(Dist.CLIENT)
 	private void registerModelLoader(ModelEvent.RegisterGeometryLoaders event) {
 		event.register("retexture", RetextureModel.Loader.INSTANCE);
@@ -781,6 +791,21 @@ public class Kiwi {
 
 	private void onAttachEntity(AttackEntityEvent event) {
 		Util.onAttackEntity(event.getEntity(), event.getEntity().level(), InteractionHand.MAIN_HAND, event.getTarget(), null);
+	}
+
+	private static enum LoadingStage {
+		UNINITED, CONSTRUCTING, CONSTRUCTED, INITED;
+	}
+
+	private static final class Info {
+		final ResourceLocation id;
+		final String className;
+		final List<ResourceLocation> moduleRules = Lists.newLinkedList();
+
+		public Info(ResourceLocation id, String className) {
+			this.id = id;
+			this.className = className;
+		}
 	}
 
 }
