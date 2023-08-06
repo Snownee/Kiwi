@@ -240,7 +240,7 @@ public class ConfigHandler {
 			writer.append(dumperOptions.getLineBreak().getString());
 			yaml.dump(map, writer);
 		} catch (JsonSyntaxException | IOException e) {
-			Kiwi.logger.catching(e);
+			Kiwi.LOGGER.error("Failed to save config file: %s".formatted(configPath), e);
 		}
 	}
 
@@ -430,7 +430,7 @@ public class ConfigHandler {
 					listener.invoke(null, path);
 				}
 			} catch (Exception e1) {
-				Kiwi.logger.catching(e1);
+				Kiwi.LOGGER.error("Failed to set config value %s: %s".formatted(path, $), e1);
 			}
 		}
 

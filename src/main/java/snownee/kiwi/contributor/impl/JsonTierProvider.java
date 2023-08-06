@@ -56,10 +56,10 @@ public class JsonTierProvider implements ITierProvider {
 				users.forEach(user -> builder.put(user, reward));
 			});
 			contributors = builder.build();
-			Kiwi.logger.debug("Successfully loaded {} contributors.", contributors.keySet().size());
+			Kiwi.LOGGER.debug("Successfully loaded {} contributors", contributors.keySet().size());
 			return true;
 		} catch (Exception e) {
-			Kiwi.logger.catching(e);
+			Kiwi.LOGGER.debug("Failed to load contributors from %s".formatted(url), e);
 			return e instanceof UnknownHostException;
 		}
 	}

@@ -103,7 +103,7 @@ public class Contributors extends AbstractModule {
 				PLAYER_COSMETICS.remove(getPlayerName());
 			} else {
 				PLAYER_COSMETICS.put(getPlayerName(), cosmetic);
-				Kiwi.logger.info("Enabled contributor effect: {}", cosmetic);
+				Kiwi.LOGGER.info("Enabled contributor effect: {}", cosmetic);
 			}
 			CosmeticLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidate(getPlayerName()));
 		});
