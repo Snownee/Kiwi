@@ -28,11 +28,11 @@ public class KiwiLanguageProvider implements DataProvider {
 	protected final FabricDataOutput dataOutput;
 	protected final String languageCode;
 
-	protected KiwiLanguageProvider(FabricDataOutput dataOutput) {
+	public KiwiLanguageProvider(FabricDataOutput dataOutput) {
 		this(dataOutput, "en_us");
 	}
 
-	protected KiwiLanguageProvider(FabricDataOutput dataOutput, String languageCode) {
+	public KiwiLanguageProvider(FabricDataOutput dataOutput, String languageCode) {
 		this.dataOutput = dataOutput;
 		this.languageCode = languageCode;
 	}
@@ -97,10 +97,10 @@ public class KiwiLanguageProvider implements DataProvider {
 				continue;
 			}
 			if (handler.getFileName().equals("test") || handler.getFileName().equals("kiwi-modules")) {
-				continue;
+				continue; // skip test entries
 			}
 			String key = handler.getTranslationKey();
-			if (!Objects.equals(key, handler.getFileName())) {
+			if (Objects.equals(key, handler.getFileName())) {
 				translationEntries.put("kiwi.config." + key, Util.friendlyText(key));
 			}
 			Set<String> subCats = Sets.newHashSet();
