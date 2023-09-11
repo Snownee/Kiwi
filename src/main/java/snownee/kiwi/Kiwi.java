@@ -628,7 +628,8 @@ public class Kiwi implements ModInitializer {
 
 				Registry<?> registry;
 				if (o instanceof KiwiGO<?> kiwiGO) {
-					o = kiwiGO.create(regName);
+					kiwiGO.setKey(regName);
+					o = kiwiGO.getOrCreate();
 					registry = (Registry<?>) kiwiGO.registry();
 				} else {
 					registry = registryLookup.findRegistry(o);

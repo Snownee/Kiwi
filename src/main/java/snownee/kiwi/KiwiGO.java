@@ -27,10 +27,20 @@ public class KiwiGO<T> implements Supplier<T> {
 		return value;
 	}
 
-	public T create(ResourceLocation key) {
-		this.key = key;
-		value = factory.get();
+	public T getOrCreate() {
+		if (value == null) {
+			value = factory.get();
+			factory = null;
+		}
 		return get();
+	}
+
+	public void setKey(ResourceLocation key) {
+		Objects.requireNonNull(key);
+		if (this.key != null) {
+			throw new IllegalStateException("Key already set");
+		}
+		this.key = key;
 	}
 
 	public boolean is(Object value) {
