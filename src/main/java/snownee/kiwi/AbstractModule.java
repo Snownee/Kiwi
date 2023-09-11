@@ -10,7 +10,6 @@ import com.mojang.datafixers.types.Type;
 
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
-import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder.Factory;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -68,11 +67,11 @@ public abstract class AbstractModule {
 	/**
 	 * @since 5.2.0
 	 */
-	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(Factory<? extends T> factory, Type<?> datafixer, Supplier<? extends Block>... blocks) {
+	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(FabricBlockEntityTypeBuilder.Factory<? extends T> factory, Type<?> datafixer, Supplier<? extends Block>... blocks) {
 		return go(() -> FabricBlockEntityTypeBuilder.<T>create(factory, Stream.of(blocks).map(Supplier::get).toArray(Block[]::new)).build(datafixer));
 	}
 
-	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(Factory<? extends T> factory, Type<?> datafixer, TagKey<Block> blockTag) {
+	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(FabricBlockEntityTypeBuilder.Factory<? extends T> factory, Type<?> datafixer, TagKey<Block> blockTag) {
 		return go(() -> new TagBasedBlockEntityType<>(factory, blockTag, datafixer));
 	}
 
