@@ -34,7 +34,7 @@ public class ModMenuIntegration implements ModMenuApi {
 
 	@Override
 	public ConfigScreenFactory<?> getModConfigScreenFactory() {
-		return factories().getOrDefault(Kiwi.MODID, screen -> null);
+		return factories().getOrDefault(Kiwi.ID, screen -> null);
 	}
 
 	@Override

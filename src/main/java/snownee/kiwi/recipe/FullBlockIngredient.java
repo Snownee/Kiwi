@@ -80,7 +80,7 @@ public class FullBlockIngredient implements CustomIngredient {
 	public static class Serializer implements CustomIngredientSerializer<FullBlockIngredient> {
 		@Override
 		public ResourceLocation getIdentifier() {
-			return new ResourceLocation(Kiwi.MODID, "full_block");
+			return new ResourceLocation(Kiwi.ID, "full_block");
 		}
 
 		@Override

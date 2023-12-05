@@ -20,7 +20,7 @@ import snownee.kiwi.util.VanillaActions;
 public class TestModule2 extends AbstractModule {
 	public static final KiwiGO<CreativeModeTab> TAB = go(() -> itemCategory("my_mod", "items", () -> new ItemStack(Items.DANDELION)).build());
 
-	public static final TagKey<EntityType<?>> BAT = entityTag(Kiwi.MODID, "bat");
+	public static final TagKey<EntityType<?>> BAT = entityTag(Kiwi.ID, "bat");
 
 	@Name("kiwi:test_item")
 	public static final KiwiGO<TestItem> FIRST_ITEM = go(() -> new TestItem(itemProp().rarity(Rarity.EPIC)) {

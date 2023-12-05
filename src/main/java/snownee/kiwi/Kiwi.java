@@ -132,9 +132,9 @@ import snownee.kiwi.loader.event.ServerInitEvent;
 import snownee.kiwi.network.Networking;
 import snownee.kiwi.util.Util;
 
-@Mod(Kiwi.MODID)
+@Mod(Kiwi.ID)
 public class Kiwi implements ModInitializer {
-	public static final String MODID = "kiwi";
+	public static final String ID = "kiwi";
 	public static final RegistryLookup registryLookup = new RegistryLookup();
 	static final Marker MARKER = MarkerFactory.getMarker("INIT");
 	private static final Map<String, CreativeModeTab> GROUPS = Maps.newHashMap();
