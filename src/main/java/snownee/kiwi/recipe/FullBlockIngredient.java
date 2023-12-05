@@ -1,22 +1,38 @@
 package snownee.kiwi.recipe;
 
+import java.util.Arrays;
+import java.util.List;
+
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+
+import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredient;
+import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredientSerializer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
+import snownee.kiwi.Kiwi;
 
-public class FullBlockIngredient /*extends Ingredient*/ {
-	/*
+public class FullBlockIngredient implements CustomIngredient {
 	public static final Serializer SERIALIZER = new Serializer();
-	
+	private static final Codec<FullBlockIngredient> CODEC = createCodec(Ingredient.CODEC);
+	private static final Codec<FullBlockIngredient> CODEC_NONEMPTY = createCodec(Ingredient.CODEC_NONEMPTY);
 	private final Ingredient example;
-	
-	protected FullBlockIngredient(Stream<? extends Ingredient.Value> itemLists, Ingredient example) {
-		super(itemLists);
+
+	public FullBlockIngredient(Ingredient example) {
 		this.example = example;
 	}
-	*/
+
+	private static Codec<FullBlockIngredient> createCodec(Codec<Ingredient> ingredientCodec) {
+		return RecordCodecBuilder.create(instance -> instance.group(
+				ingredientCodec.fieldOf("example").forGetter(i -> i.example)
+		).apply(instance, FullBlockIngredient::new));
+	}
 
 	public static boolean isFullBlock(ItemStack stack) {
 		if (!isTextureBlock(stack)) {
@@ -41,53 +57,45 @@ public class FullBlockIngredient /*extends Ingredient*/ {
 		return state.isSolid() && state.getRenderShape() == RenderShape.MODEL;
 	}
 
-	/*
 	@Override
 	public boolean test(ItemStack stack) {
 		return isFullBlock(stack);
 	}
 
 	@Override
-	public Serializer getSerializer() {
+	public List<ItemStack> getMatchingStacks() {
+		return Arrays.asList(example.getItems());
+	}
+
+	@Override
+	public boolean requiresTesting() {
+		return true;
+	}
+
+	@Override
+	public CustomIngredientSerializer<?> getSerializer() {
 		return SERIALIZER;
 	}
 
-	@Override
-	public boolean isEmpty() {
-		return false;
-	}
-
-	@Override
-	public boolean isSimple() {
-		return false;
-	}
-
-	public static class Serializer implements IIngredientSerializer<FullBlockIngredient> {
-
+	public static class Serializer implements CustomIngredientSerializer<FullBlockIngredient> {
 		@Override
-		public FullBlockIngredient parse(FriendlyByteBuf buffer) {
-			Ingredient example = Ingredient.fromNetwork(buffer);
-			MultiItemValue stackList = new MultiItemValue(ImmutableList.copyOf(example.getItems()));
-			return new FullBlockIngredient(Stream.of(stackList), example);
+		public ResourceLocation getIdentifier() {
+			return new ResourceLocation(Kiwi.MODID, "full_block");
 		}
 
 		@Override
-		public FullBlockIngredient parse(JsonObject json) {
-			Ingredient example;
-			try {
-				example = CraftingHelper.getIngredient(json.get("example"));
-			} catch (JsonSyntaxException e) {
-				example = Ingredient.EMPTY;
-			}
-			MultiItemValue stackList = new MultiItemValue(ImmutableList.copyOf(example.getItems()));
-			return new FullBlockIngredient(Stream.of(stackList), example);
+		public Codec<FullBlockIngredient> getCodec(boolean allowEmpty) {
+			return allowEmpty ? CODEC : CODEC_NONEMPTY;
 		}
 
 		@Override
-		public void write(FriendlyByteBuf buffer, FullBlockIngredient ingredient) {
-			ingredient.example.toNetwork(buffer);
+		public FullBlockIngredient read(FriendlyByteBuf buf) {
+			return new FullBlockIngredient(Ingredient.fromNetwork(buf));
 		}
 
+		@Override
+		public void write(FriendlyByteBuf buf, FullBlockIngredient ingredient) {
+			ingredient.example.toNetwork(buf);
+		}
 	}
-	 */
 }

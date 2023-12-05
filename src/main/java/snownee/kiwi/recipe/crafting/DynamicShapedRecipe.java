@@ -2,40 +2,46 @@ package snownee.kiwi.recipe.crafting;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 
 import it.unimi.dsi.fastutil.chars.Char2ObjectArrayMap;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.CraftingRecipeCodecs;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.level.Level;
-import snownee.kiwi.mixin.ShapedRecipeAccess;
+import snownee.kiwi.recipe.KiwiRecipeSerializer;
+import snownee.kiwi.util.Util;
 
 public abstract class DynamicShapedRecipe extends CustomRecipe {
-	private int width;
-	private int height;
-	private NonNullList<Ingredient> recipeItems;
 	public String pattern;
 	public boolean differentInputs;
+	public boolean showNotification;
 	public ItemStack recipeOutput;
-	private String group;
+	public int width;
+	public int height;
+	public NonNullList<Ingredient> recipeItems;
+	public String group;
 
-	public DynamicShapedRecipe(ResourceLocation idIn, CraftingBookCategory category) {
-		super(idIn, category);
+	public DynamicShapedRecipe(CraftingBookCategory category) {
+		super(category);
 	}
 
 	@Override
@@ -48,7 +54,7 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 		for (int x = 0; x <= inv.getWidth() - getRecipeWidth(); ++x) {
 			for (int y = 0; y <= inv.getHeight() - getRecipeHeight(); ++y) {
 				if (checkMatch(inv, x, y) && checkEmpty(inv, x, y)) {
-					return new int[] { x, y };
+					return new int[]{x, y};
 				}
 			}
 		}
@@ -98,6 +104,11 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 	@Override
 	public String getGroup() {
 		return group;
+	}
+
+	@Override
+	public boolean showNotification() {
+		return showNotification;
 	}
 
 	@Override
@@ -152,7 +163,7 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 					continue;
 				}
 
-				if (!getEmpty().test(inv.getItem(x + y * inv.getWidth()))) {
+				if (!getEmptyPredicate().test(inv.getItem(x + y * inv.getWidth()))) {
 					return false;
 				}
 			}
@@ -160,21 +171,41 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 		return true;
 	}
 
-	protected Predicate<ItemStack> getEmpty() {
+	protected Predicate<ItemStack> getEmptyPredicate() {
 		return Ingredient.EMPTY;
 	}
 
-	public static abstract class Serializer<T extends DynamicShapedRecipe> implements RecipeSerializer<T> {
+	public static abstract class Serializer<T extends DynamicShapedRecipe> extends KiwiRecipeSerializer<T> {
 		public static void fromJson(DynamicShapedRecipe recipe, JsonObject json) {
 			recipe.group = GsonHelper.getAsString(json, "group", "");
-			Map<String, Ingredient> ingredientMap = ShapedRecipeAccess.callKeyFromJson(GsonHelper.getAsJsonObject(json, "key"));
-			String[] pattern = ShapedRecipeAccess.callShrink(ShapedRecipeAccess.callPatternFromJson(GsonHelper.getAsJsonArray(json, "pattern")));
+			Map<String, Ingredient> ingredientMap = Util.parseJson(ExtraCodecs.strictUnboundedMap(
+					ShapedRecipe.Serializer.SINGLE_CHARACTER_STRING_CODEC, Ingredient.CODEC_NONEMPTY
+			), GsonHelper.getAsJsonObject(json, "key"));
+			String[] pattern = ShapedRecipe.shrink(Util.parseJson(ShapedRecipe.Serializer.PATTERN_CODEC, GsonHelper.getAsJsonArray(json, "pattern")));
 			recipe.pattern = String.join("", pattern);
 			recipe.width = pattern[0].length();
 			recipe.height = pattern.length;
-			recipe.recipeItems = ShapedRecipeAccess.callDissolvePattern(pattern, ingredientMap, recipe.width, recipe.height);
-			recipe.recipeOutput = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(json, "result"));
-			recipe.differentInputs = GsonHelper.getAsBoolean(json, "differentInputs", false);
+			recipe.recipeItems = NonNullList.withSize(recipe.width * recipe.height, Ingredient.EMPTY);
+			Set<String> set = Sets.newHashSet(ingredientMap.keySet());
+
+			for (int k = 0; k < pattern.length; ++k) {
+				String string = pattern[k];
+
+				for (int l = 0; l < string.length(); ++l) {
+					String string2 = string.substring(l, l + 1);
+					Ingredient ingredient = string2.equals(" ") ? Ingredient.EMPTY : ingredientMap.get(string2);
+					if (ingredient == null) {
+						throw new JsonParseException("Pattern references symbol '" + string2 + "' but it's not defined in the key");
+					}
+
+					set.remove(string2);
+					recipe.recipeItems.set(l + recipe.width * k, ingredient);
+				}
+			}
+
+			recipe.recipeOutput = Util.parseJson(CraftingRecipeCodecs.ITEMSTACK_OBJECT_CODEC, GsonHelper.getAsJsonObject(json, "result"));
+			recipe.differentInputs = GsonHelper.getAsBoolean(json, "different_inputs", false);
+			recipe.showNotification = GsonHelper.getAsBoolean(json, "show_notification", true);
 		}
 
 		public static void fromNetwork(DynamicShapedRecipe recipe, FriendlyByteBuf buffer) {

@@ -1,2 +1,7 @@
 accessWidener   v1  named
-extendable  class   net/minecraft/world/level/block/entity/BlockEntityType$BlockEntitySupplier
+extendable class net/minecraft/world/level/block/entity/BlockEntityType$BlockEntitySupplier
+accessible field net/minecraft/world/item/crafting/ShapedRecipe result Lnet/minecraft/world/item/ItemStack;
+accessible field net/minecraft/world/item/crafting/ShapelessRecipe result Lnet/minecraft/world/item/ItemStack;
+accessible method net/minecraft/world/item/crafting/ShapedRecipe shrink (Ljava/util/List;)[Ljava/lang/String;
+accessible field net/minecraft/world/item/crafting/ShapedRecipe$Serializer SINGLE_CHARACTER_STRING_CODEC Lcom/mojang/serialization/Codec;
+accessible field net/minecraft/world/item/crafting/ShapedRecipe$Serializer PATTERN_CODEC Lcom/mojang/serialization/Codec;

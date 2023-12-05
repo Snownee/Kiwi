@@ -1,23 +1,11 @@
 package snownee.kiwi.recipe;
 
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 
-public abstract class Simple<C extends Container> implements Recipe<C> {
-
-	private final ResourceLocation id;
-
-	public Simple(ResourceLocation id) {
-		this.id = id;
-	}
-
-	@Override
-	public ResourceLocation getId() {
-		return id;
-	}
+public abstract class SimpleRecipe<C extends Container> implements Recipe<C> {
 
 	@Override
 	public boolean canCraftInDimensions(int width, int height) {

@@ -12,7 +12,6 @@ import it.unimi.dsi.fastutil.chars.Char2ObjectArrayMap;
 import it.unimi.dsi.fastutil.chars.Char2ObjectMap;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
@@ -26,14 +25,14 @@ import snownee.kiwi.recipe.FullBlockIngredient;
 public class RetextureRecipe extends DynamicShapedRecipe {
 	private Char2ObjectMap<String[]> textureKeys;
 
-	public RetextureRecipe(ResourceLocation idIn, CraftingBookCategory category) {
-		super(idIn, category);
+	public RetextureRecipe(CraftingBookCategory category) {
+		super(category);
 	}
 
 	@Override //FIXME
 	public boolean matches(CraftingContainer inv, int x, int y, int rx, int ry) {
 		ItemStack stack = inv.getItem(x + y * inv.getWidth());
-		return (getEmpty().test(stack) || FullBlockIngredient.isTextureBlock(stack)) && super.matches(inv, x, y, rx, ry);
+		return (getEmptyPredicate().test(stack) || FullBlockIngredient.isTextureBlock(stack)) && super.matches(inv, x, y, rx, ry);
 	}
 
 	@Override
@@ -62,11 +61,10 @@ public class RetextureRecipe extends DynamicShapedRecipe {
 
 	public static class Serializer extends DynamicShapedRecipe.Serializer<RetextureRecipe> {
 
-		@SuppressWarnings("deprecation")
 		@Override
-		public RetextureRecipe fromJson(ResourceLocation pRecipeId, JsonObject pSerializedRecipe) {
+		public RetextureRecipe fromJson(JsonObject pSerializedRecipe) {
 			CraftingBookCategory category = CraftingBookCategory.CODEC.byName(GsonHelper.getAsString(pSerializedRecipe, "category", null), CraftingBookCategory.MISC);
-			RetextureRecipe recipe = new RetextureRecipe(pRecipeId, category);
+			RetextureRecipe recipe = new RetextureRecipe(category);
 			fromJson(recipe, pSerializedRecipe);
 			JsonObject o = pSerializedRecipe.getAsJsonObject("texture");
 			recipe.textureKeys = new Char2ObjectArrayMap<>(o.size());
@@ -82,8 +80,13 @@ public class RetextureRecipe extends DynamicShapedRecipe {
 		}
 
 		@Override
-		public RetextureRecipe fromNetwork(ResourceLocation pRecipeId, FriendlyByteBuf pBuffer) {
-			RetextureRecipe recipe = new RetextureRecipe(pRecipeId, pBuffer.readEnum(CraftingBookCategory.class));
+		public void toJson(JsonObject json, RetextureRecipe recipe) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public RetextureRecipe fromNetwork(FriendlyByteBuf pBuffer) {
+			RetextureRecipe recipe = new RetextureRecipe(pBuffer.readEnum(CraftingBookCategory.class));
 			fromNetwork(recipe, pBuffer);
 			int size = pBuffer.readVarInt();
 			recipe.textureKeys = new Char2ObjectArrayMap<>(size);

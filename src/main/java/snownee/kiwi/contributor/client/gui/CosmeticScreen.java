@@ -56,7 +56,7 @@ public class CosmeticScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float pTicks) {
-		renderBackground(guiGraphics);
+		renderBackground(guiGraphics, mouseX, mouseY, pTicks);
 		super.render(guiGraphics, mouseX, mouseY, pTicks);
 		list.render(guiGraphics, mouseX, mouseY, pTicks);
 	}
@@ -80,9 +80,9 @@ public class CosmeticScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseScrolled(double p_mouseScrolled_1_, double p_mouseScrolled_3_, double p_mouseScrolled_5_) {
-		list.mouseScrolled(p_mouseScrolled_1_, p_mouseScrolled_3_, p_mouseScrolled_5_);
-		return super.mouseScrolled(p_mouseScrolled_1_, p_mouseScrolled_3_, p_mouseScrolled_5_);
+	public boolean mouseScrolled(double d, double e, double f, double g) {
+		list.mouseScrolled(d, e, f, g);
+		return super.mouseScrolled(d, e, f, g);
 	}
 
 	@Override

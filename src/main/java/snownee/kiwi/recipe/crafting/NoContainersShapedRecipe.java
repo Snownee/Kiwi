@@ -1,10 +1,9 @@
 package snownee.kiwi.recipe.crafting;
 
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -13,7 +12,7 @@ import snownee.kiwi.data.DataModule;
 
 public class NoContainersShapedRecipe extends ShapedRecipe {
 	public NoContainersShapedRecipe(ShapedRecipe rawRecipe) {
-		super(rawRecipe.getId(), rawRecipe.getGroup(), rawRecipe.category(), rawRecipe.getWidth(), rawRecipe.getHeight(), rawRecipe.getIngredients(), rawRecipe.getResultItem(null));
+		super(rawRecipe.getGroup(), rawRecipe.category(), rawRecipe.getWidth(), rawRecipe.getHeight(), rawRecipe.getIngredients(), rawRecipe.result, rawRecipe.showNotification());
 	}
 
 	@Override
@@ -28,13 +27,13 @@ public class NoContainersShapedRecipe extends ShapedRecipe {
 
 	public static class Serializer implements RecipeSerializer<NoContainersShapedRecipe> {
 		@Override
-		public NoContainersShapedRecipe fromJson(ResourceLocation recipeId, JsonObject json) {
-			return new NoContainersShapedRecipe(RecipeSerializer.SHAPED_RECIPE.fromJson(recipeId, json));
+		public Codec<NoContainersShapedRecipe> codec() {
+			return RecipeSerializer.SHAPED_RECIPE.codec().xmap(NoContainersShapedRecipe::new, recipe -> recipe);
 		}
 
 		@Override
-		public NoContainersShapedRecipe fromNetwork(ResourceLocation recipeId, FriendlyByteBuf buffer) {
-			return new NoContainersShapedRecipe(RecipeSerializer.SHAPED_RECIPE.fromNetwork(recipeId, buffer));
+		public NoContainersShapedRecipe fromNetwork(FriendlyByteBuf buffer) {
+			return new NoContainersShapedRecipe(RecipeSerializer.SHAPED_RECIPE.fromNetwork(buffer));
 		}
 
 		@Override

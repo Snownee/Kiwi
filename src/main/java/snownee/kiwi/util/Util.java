@@ -2,7 +2,6 @@ package snownee.kiwi.util;
 
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -10,6 +9,9 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -31,6 +33,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
@@ -40,11 +43,10 @@ import snownee.kiwi.block.def.BlockDefinition;
 import snownee.kiwi.loader.Platform;
 
 public final class Util {
+	public static final MessageFormat MESSAGE_FORMAT = new MessageFormat("{0,number,#.#}");
+	private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("###,###");
 	private Util() {
 	}
-
-	private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("###,###");
-	public static final MessageFormat MESSAGE_FORMAT = new MessageFormat("{0,number,#.#}");
 
 	public static String color(int color) {
 		return String.format("\u00A7x%06x", color & 0x00FFFFFF);
@@ -62,7 +64,7 @@ public final class Util {
 		int exp = (int) (Math.log(number) / Math.log(unit));
 		if (exp - 1 >= 0 && exp - 1 < 6) {
 			char pre = "kMGTPE".charAt(exp - 1);
-			return MESSAGE_FORMAT.format(new Double[] { number / Math.pow(unit, exp) }) + pre;
+			return MESSAGE_FORMAT.format(new Double[]{number / Math.pow(unit, exp)}) + pre;
 		}
 		return Long.toString(number);
 	}
@@ -140,10 +142,10 @@ public final class Util {
 		return null;
 	}
 
-	public static <C extends Container, T extends Recipe<C>> List<T> getRecipes(RecipeType<T> recipeTypeIn) {
+	public static <C extends Container, T extends Recipe<C>> List<RecipeHolder<T>> getRecipes(RecipeType<T> recipeTypeIn) {
 		RecipeManager manager = getRecipeManager();
 		if (manager == null) {
-			return Collections.EMPTY_LIST;
+			return List.of();
 		} else {
 			return getRecipeManager().getAllRecipesFor(recipeTypeIn);
 		}
@@ -304,5 +306,9 @@ public final class Util {
 			}
 		}
 		return InteractionResult.PASS;
+	}
+
+	public static <T> T parseJson(Codec<T> codec, JsonElement json) {
+		return net.minecraft.Util.getOrThrow(codec.parse(JsonOps.INSTANCE, json), JsonParseException::new);
 	}
 }
