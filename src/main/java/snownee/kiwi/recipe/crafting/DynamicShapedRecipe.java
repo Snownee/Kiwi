@@ -7,32 +7,37 @@ import java.util.function.Predicate;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.Lists;
-import com.google.gson.JsonObject;
 
 import it.unimi.dsi.fastutil.chars.Char2ObjectArrayMap;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapedRecipePattern;
 import net.minecraft.world.level.Level;
-import snownee.kiwi.recipe.KiwiRecipeSerializer;
-import snownee.kiwi.util.Util;
 
 public abstract class DynamicShapedRecipe extends CustomRecipe {
-	public ShapedRecipePattern pattern;
-	public String rawPattern;
-	public boolean differentInputs;
-	public boolean showNotification;
-	public ItemStack recipeOutput;
-	public String group;
+	protected ShapedRecipePattern pattern;
+	protected String rawPattern;
+	protected boolean differentInputs;
+	protected boolean showNotification;
+	protected ItemStack result;
+	protected String group;
+
+	public DynamicShapedRecipe(String group, CraftingBookCategory category, ShapedRecipePattern pattern, ItemStack result, boolean showNotification, boolean differentInputs) {
+		super(category);
+		this.group = group;
+		this.pattern = pattern;
+		this.rawPattern = String.join("", pattern.data().orElseThrow().pattern());
+		this.result = result;
+		this.showNotification = showNotification;
+		this.differentInputs = differentInputs;
+	}
 
 	public DynamicShapedRecipe(CraftingBookCategory category) {
 		super(category);
@@ -103,6 +108,18 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 		return showNotification;
 	}
 
+	public ItemStack result() {
+		return result;
+	}
+
+	public ShapedRecipePattern pattern() {
+		return pattern;
+	}
+
+	public boolean allowDifferentInputs() {
+		return differentInputs;
+	}
+
 	@Override
 	public NonNullList<Ingredient> getIngredients() {
 		return pattern.ingredients();
@@ -167,22 +184,11 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 		return Ingredient.EMPTY;
 	}
 
-	public static abstract class Serializer<T extends DynamicShapedRecipe> extends KiwiRecipeSerializer<T> {
-		public static <T extends DynamicShapedRecipe> T fromJson(Function<CraftingBookCategory, T> constructor, JsonObject json) {
-			ShapedRecipe rawRecipe = (ShapedRecipe) Util.parseJson(ShapedRecipe.CODEC, json);
-			T recipe = constructor.apply(rawRecipe.category());
-			recipe.group = rawRecipe.getGroup();
-			recipe.pattern = rawRecipe.pattern;
-			recipe.recipeOutput = rawRecipe.result;
-			recipe.showNotification = rawRecipe.showNotification();
-			recipe.differentInputs = GsonHelper.getAsBoolean(json, "different_inputs", false);
-			return recipe;
-		}
-
+	public static abstract class Serializer<T extends DynamicShapedRecipe> implements RecipeSerializer<T> {
 		public static <T extends DynamicShapedRecipe> T fromNetwork(Function<CraftingBookCategory, T> constructor, FriendlyByteBuf buffer) {
 			T recipe = constructor.apply(buffer.readEnum(CraftingBookCategory.class));
 			recipe.group = buffer.readUtf(256);
-			recipe.recipeOutput = buffer.readItem();
+			recipe.result = buffer.readItem();
 			recipe.pattern = ShapedRecipePattern.fromNetwork(buffer);
 			recipe.differentInputs = buffer.readBoolean();
 			return recipe;
@@ -192,7 +198,7 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 		public void toNetwork(FriendlyByteBuf buffer, T recipe) {
 			buffer.writeEnum(recipe.category());
 			buffer.writeUtf(recipe.getGroup(), 256);
-			buffer.writeItem(recipe.recipeOutput);
+			buffer.writeItem(recipe.result);
 			recipe.pattern.toNetwork(buffer);
 			recipe.rawPattern = String.join("", recipe.pattern.data().orElseThrow().pattern());
 			buffer.writeBoolean(recipe.differentInputs);

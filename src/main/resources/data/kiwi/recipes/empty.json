@@ -1,5 +1,5 @@
 {
-  "type": "kiwi:shapeless_no_containers",
+  "type": "kiwi:shapeless",
   "conditions": [
     {
       "type": "kiwi:is_loaded",
