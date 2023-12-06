@@ -99,7 +99,7 @@ public interface BlockDefinition {
 
 	void place(Level level, BlockPos pos);
 
-	ItemStack createItem(HitResult target, BlockGetter world, @Nullable BlockPos pos, @Nullable Player player);
+	ItemStack createItem(HitResult target, LevelReader world, @Nullable BlockPos pos, @Nullable Player player);
 
 	BlockState getBlockState();
 

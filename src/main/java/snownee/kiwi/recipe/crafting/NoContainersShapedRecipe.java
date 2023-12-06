@@ -12,7 +12,7 @@ import snownee.kiwi.data.DataModule;
 
 public class NoContainersShapedRecipe extends ShapedRecipe {
 	public NoContainersShapedRecipe(ShapedRecipe rawRecipe) {
-		super(rawRecipe.getGroup(), rawRecipe.category(), rawRecipe.getWidth(), rawRecipe.getHeight(), rawRecipe.getIngredients(), rawRecipe.result, rawRecipe.showNotification());
+		super(rawRecipe.getGroup(), rawRecipe.category(), rawRecipe.pattern, rawRecipe.result, rawRecipe.showNotification());
 	}
 
 	@Override

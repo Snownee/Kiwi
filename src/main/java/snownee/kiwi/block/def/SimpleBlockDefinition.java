@@ -34,7 +34,6 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Blocks;
@@ -216,7 +215,7 @@ public class SimpleBlockDefinition implements BlockDefinition {
 	}
 
 	@Override
-	public ItemStack createItem(HitResult target, BlockGetter world, BlockPos pos, Player player) {
+	public ItemStack createItem(HitResult target, LevelReader world, BlockPos pos, Player player) {
 		if (state.getBlock() instanceof BlockPickInteractionAware) {
 			return (((BlockPickInteractionAware) state.getBlock()).getPickedStack(state, world, pos, player, target));
 		}

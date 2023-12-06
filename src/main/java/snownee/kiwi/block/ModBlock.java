@@ -7,7 +7,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -15,9 +15,7 @@ import net.minecraft.world.phys.HitResult;
 import snownee.kiwi.block.entity.ModBlockEntity;
 
 /**
- *
  * @author Snownee
- *
  */
 public class ModBlock extends Block implements IKiwiBlock {
 
@@ -25,18 +23,9 @@ public class ModBlock extends Block implements IKiwiBlock {
 		super(builder);
 	}
 
-	public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
-		return pick(state, target, world, pos, player);
-	}
-
-	@Override
-	public ItemStack getPickedStack(BlockState state, BlockGetter view, BlockPos pos, @Nullable Player player, @Nullable HitResult result) {
-		return getCloneItemStack(state, result, view, pos, player);
-	}
-
-	public static ItemStack pick(BlockState state, @Nullable HitResult target, BlockGetter world, BlockPos pos, @Nullable Player player) {
-		ItemStack stack = state.getBlock().getCloneItemStack(world, pos, state);
-		BlockEntity tile = world.getBlockEntity(pos);
+	public static ItemStack pick(LevelReader level, BlockPos pos, BlockState state, @Nullable Player player, @Nullable HitResult hit) {
+		ItemStack stack = state.getBlock().getCloneItemStack(level, pos, state);
+		BlockEntity tile = level.getBlockEntity(pos);
 		if (tile instanceof ModBlockEntity && !tile.onlyOpCanSetNbt() && ((ModBlockEntity) tile).persistData) {
 			CompoundTag data = tile.saveWithFullMetadata();
 			data.remove("x");
@@ -47,4 +36,8 @@ public class ModBlock extends Block implements IKiwiBlock {
 		return stack;
 	}
 
+	@Override
+	public ItemStack getCloneItemStack(LevelReader level, BlockPos blockPos, BlockState blockState) {
+		return getCloneItemStack(level, blockPos, blockState, null, null);
+	}
 }

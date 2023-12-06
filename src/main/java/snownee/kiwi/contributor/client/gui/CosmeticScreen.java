@@ -4,8 +4,6 @@ import java.util.Objects;
 
 import org.jetbrains.annotations.Nullable;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -19,7 +17,6 @@ import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.contributor.Contributors;
 
-@Environment(EnvType.CLIENT)
 public class CosmeticScreen extends Screen {
 
 	private List list;
@@ -31,11 +28,15 @@ public class CosmeticScreen extends Screen {
 		super(Component.translatable("gui.kiwi.cosmetic"));
 	}
 
+	private static String getPlayerName() {
+		return Minecraft.getInstance().getUser().getName();
+	}
+
 	@Override
 	protected void init() {
 		currentCosmetic = Contributors.PLAYER_COSMETICS.get(getPlayerName());
-		list = new List(minecraft, 150, height, 0, height, 20);
-		list.setLeftPos(20);
+		list = new List(minecraft, 150, height, 0, 20);
+		list.setX(20);
 		list.addEntry(selectedEntry = new Entry(this, null));
 		String playerName = getPlayerName();
 		boolean added = false;
@@ -107,14 +108,10 @@ public class CosmeticScreen extends Screen {
 		}
 	}
 
-	private static String getPlayerName() {
-		return Minecraft.getInstance().getUser().getName();
-	}
-
 	private static class List extends ObjectSelectionList<Entry> {
 
-		public List(Minecraft mcIn, int widthIn, int heightIn, int topIn, int bottomIn, int slotHeightIn) {
-			super(mcIn, widthIn, heightIn, topIn, bottomIn, slotHeightIn);
+		public List(Minecraft mcIn, int widthIn, int heightIn, int topIn, int slotHeightIn) {
+			super(mcIn, widthIn, heightIn, topIn, slotHeightIn);
 		}
 
 		@Override

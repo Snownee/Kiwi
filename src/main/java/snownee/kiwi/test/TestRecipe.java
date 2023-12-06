@@ -13,8 +13,8 @@ import snownee.kiwi.recipe.crafting.DynamicShapedRecipe;
 
 public class TestRecipe extends DynamicShapedRecipe {
 
-	public TestRecipe() {
-		super(CraftingBookCategory.MISC);
+	public TestRecipe(CraftingBookCategory category) {
+		super(category);
 	}
 
 	// optional
@@ -48,10 +48,8 @@ public class TestRecipe extends DynamicShapedRecipe {
 
 		@Override
 		public TestRecipe fromJson(JsonObject pSerializedRecipe) {
-			TestRecipe recipe = new TestRecipe();
-			fromJson(recipe, pSerializedRecipe);
 			//TODO customize recipe
-			return recipe;
+			return fromJson(TestRecipe::new, pSerializedRecipe);
 		}
 
 		@Override
@@ -61,10 +59,8 @@ public class TestRecipe extends DynamicShapedRecipe {
 
 		@Override
 		public TestRecipe fromNetwork(FriendlyByteBuf pBuffer) {
-			TestRecipe recipe = new TestRecipe();
-			fromNetwork(recipe, pBuffer);
 			//TODO customize recipe
-			return recipe;
+			return fromNetwork(TestRecipe::new, pBuffer);
 		}
 
 	}

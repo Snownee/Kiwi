@@ -1,5 +1,7 @@
 package snownee.kiwi.test;
 
+import com.mojang.serialization.MapCodec;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -20,6 +22,11 @@ public class TexBlock extends BaseEntityBlock implements IKiwiBlock {
 
 	public TexBlock(Properties properties) {
 		super(properties);
+	}
+
+	@Override
+	protected MapCodec<? extends BaseEntityBlock> codec() {
+		return null;
 	}
 
 	@Override

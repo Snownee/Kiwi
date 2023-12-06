@@ -25,7 +25,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Fluid;
-import snownee.kiwi.block.entity.TagBasedBlockEntityType;
+import snownee.kiwi.block.entity.InheritanceBlockEntityType;
 import snownee.kiwi.loader.event.ClientInitEvent;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.loader.event.PostInitEvent;
@@ -61,7 +61,7 @@ public abstract class AbstractModule {
 	 * @since 2.5.2
 	 */
 	protected static BlockBehaviour.Properties blockProp(BlockBehaviour block) {
-		return BlockBehaviour.Properties.copy(block);
+		return BlockBehaviour.Properties.ofFullCopy(block);
 	}
 
 	/**
@@ -71,8 +71,8 @@ public abstract class AbstractModule {
 		return go(() -> FabricBlockEntityTypeBuilder.<T>create(factory, Stream.of(blocks).map(Supplier::get).toArray(Block[]::new)).build(datafixer));
 	}
 
-	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(FabricBlockEntityTypeBuilder.Factory<? extends T> factory, Type<?> datafixer, TagKey<Block> blockTag) {
-		return go(() -> new TagBasedBlockEntityType<>(factory, blockTag, datafixer));
+	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(FabricBlockEntityTypeBuilder.Factory<? extends T> factory, Type<?> datafixer, Class<? extends Block> blockClass) {
+		return go(() -> new InheritanceBlockEntityType<>(factory, blockClass, datafixer));
 	}
 
 	public static CreativeModeTab.Builder itemCategory(String namespace, String path, Supplier<ItemStack> icon) {
