@@ -20,7 +20,6 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
@@ -40,11 +39,12 @@ import snownee.kiwi.block.def.BlockDefinition;
 import snownee.kiwi.loader.Platform;
 
 public final class Util {
+	public static final MessageFormat MESSAGE_FORMAT = new MessageFormat("{0,number,#.#}");
+	private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("###,###");
+	private static RecipeManager recipeManager;
+
 	private Util() {
 	}
-
-	private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("###,###");
-	public static final MessageFormat MESSAGE_FORMAT = new MessageFormat("{0,number,#.#}");
 
 	public static String color(int color) {
 		return String.format("\u00A7x%06x", color & 0x00FFFFFF);
@@ -62,7 +62,7 @@ public final class Util {
 		int exp = (int) (Math.log(number) / Math.log(unit));
 		if (exp - 1 >= 0 && exp - 1 < 6) {
 			char pre = "kMGTPE".charAt(exp - 1);
-			return MESSAGE_FORMAT.format(new Double[] { number / Math.pow(unit, exp) }) + pre;
+			return MESSAGE_FORMAT.format(new Double[]{number / Math.pow(unit, exp)}) + pre;
 		}
 		return Long.toString(number);
 	}
@@ -128,16 +128,17 @@ public final class Util {
 
 	@Nullable
 	public static RecipeManager getRecipeManager() {
-		MinecraftServer server = Platform.getServer();
-		if (server != null) {
-			return server.getRecipeManager();
-		} else if (Platform.isPhysicalClient()) {
+		if (recipeManager == null && Platform.isPhysicalClient()) {
 			ClientPacketListener connection = Minecraft.getInstance().getConnection();
 			if (connection != null) {
 				return connection.getRecipeManager();
 			}
 		}
-		return null;
+		return recipeManager;
+	}
+
+	public static void setRecipeManager(RecipeManager recipeManager) {
+		Util.recipeManager = recipeManager;
 	}
 
 	public static <C extends Container, T extends Recipe<C>> List<T> getRecipes(RecipeType<T> recipeTypeIn) {
