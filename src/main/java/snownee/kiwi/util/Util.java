@@ -45,6 +45,8 @@ import snownee.kiwi.loader.Platform;
 public final class Util {
 	public static final MessageFormat MESSAGE_FORMAT = new MessageFormat("{0,number,#.#}");
 	private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("###,###");
+	private static RecipeManager recipeManager;
+
 	private Util() {
 	}
 
@@ -130,16 +132,17 @@ public final class Util {
 
 	@Nullable
 	public static RecipeManager getRecipeManager() {
-		MinecraftServer server = Platform.getServer();
-		if (server != null) {
-			return server.getRecipeManager();
-		} else if (Platform.isPhysicalClient()) {
+		if (recipeManager == null && Platform.isPhysicalClient()) {
 			ClientPacketListener connection = Minecraft.getInstance().getConnection();
 			if (connection != null) {
 				return connection.getRecipeManager();
 			}
 		}
-		return null;
+		return recipeManager;
+	}
+
+	public static void setRecipeManager(RecipeManager recipeManager) {
+		Util.recipeManager = recipeManager;
 	}
 
 	public static <C extends Container, T extends Recipe<C>> List<RecipeHolder<T>> getRecipes(RecipeType<T> recipeTypeIn) {
@@ -164,38 +167,26 @@ public final class Util {
 			bChar = b.charAt(i);
 			aNumber = aChar >= '0' && aChar <= '9';
 			bNumber = bChar >= '0' && bChar <= '9';
-			if (asNumeric)
-				if (aNumber && bNumber) {
-					if (lastNumericCompare == 0)
-						lastNumericCompare = aChar - bChar;
-				} else if (aNumber)
-					return 1;
-				else if (bNumber)
-					return -1;
-				else if (lastNumericCompare == 0) {
-					if (aChar != bChar)
-						return aChar - bChar;
-					asNumeric = false;
-				} else
-					return lastNumericCompare;
+			if (asNumeric) if (aNumber && bNumber) {
+				if (lastNumericCompare == 0) lastNumericCompare = aChar - bChar;
+			} else if (aNumber) return 1;
+			else if (bNumber) return -1;
+			else if (lastNumericCompare == 0) {
+				if (aChar != bChar) return aChar - bChar;
+				asNumeric = false;
+			} else return lastNumericCompare;
 			else if (aNumber && bNumber) {
 				asNumeric = true;
-				if (lastNumericCompare == 0)
-					lastNumericCompare = aChar - bChar;
-			} else if (aChar != bChar)
-				return aChar - bChar;
+				if (lastNumericCompare == 0) lastNumericCompare = aChar - bChar;
+			} else if (aChar != bChar) return aChar - bChar;
 		}
-		if (asNumeric)
-			if (aLength > bLength && a.charAt(bLength) >= '0' && a.charAt(bLength) <= '9') // as number
-				return 1; // a has bigger size, thus b is smaller
-			else if (bLength > aLength && b.charAt(aLength) >= '0' && b.charAt(aLength) <= '9') // as number
-				return -1; // b has bigger size, thus a is smaller
-			else if (lastNumericCompare == 0)
-				return aLength - bLength;
-			else
-				return lastNumericCompare;
-		else
-			return aLength - bLength;
+		if (asNumeric) if (aLength > bLength && a.charAt(bLength) >= '0' && a.charAt(bLength) <= '9') // as number
+			return 1; // a has bigger size, thus b is smaller
+		else if (bLength > aLength && b.charAt(aLength) >= '0' && b.charAt(aLength) <= '9') // as number
+			return -1; // b has bigger size, thus a is smaller
+		else if (lastNumericCompare == 0) return aLength - bLength;
+		else return lastNumericCompare;
+		else return aLength - bLength;
 	}
 
 	public static String friendlyText(String s) {
@@ -233,8 +224,7 @@ public final class Util {
 
 	public static int applyAlpha(int color, float alpha) {
 		int prevAlphaChannel = (color >> 24) & 0xFF;
-		if (prevAlphaChannel > 0)
-			alpha *= prevAlphaChannel / 256f;
+		if (prevAlphaChannel > 0) alpha *= prevAlphaChannel / 256f;
 		int alphaChannel = (int) (0xFF * Mth.clamp(alpha, 0, 1));
 		if (alphaChannel < 5) // fix font renderer bug
 			return 0;
