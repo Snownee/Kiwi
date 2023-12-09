@@ -20,12 +20,12 @@ import snownee.kiwi.util.Util;
 public class RecipeManagerMixin {
 
 	@Inject(at = @At("HEAD"), method = "apply(Ljava/util/Map;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/util/profiling/ProfilerFiller;)V")
-	private void lychee_apply(Map<ResourceLocation, JsonElement> pObject, ResourceManager pResourceManager, ProfilerFiller pProfiler, CallbackInfo ci) {
+	private void kiwi_apply(Map<ResourceLocation, JsonElement> pObject, ResourceManager pResourceManager, ProfilerFiller pProfiler, CallbackInfo ci) {
 		Util.setRecipeManager((RecipeManager) (Object) this);
 	}
 
 	@Inject(at = @At("HEAD"), method = "replaceRecipes")
-	private void lychee_replaceRecipes(Iterable<Recipe<?>> pRecipes, CallbackInfo ci) {
+	private void kiwi_replaceRecipes(Iterable<Recipe<?>> pRecipes, CallbackInfo ci) {
 		Util.setRecipeManager((RecipeManager) (Object) this);
 	}
 
