@@ -17,7 +17,6 @@ import snownee.kiwi.contributor.impl.client.layer.FoxTailLayer;
 import snownee.kiwi.contributor.impl.client.layer.PlanetLayer;
 import snownee.kiwi.contributor.impl.client.layer.SantaHatLayer;
 import snownee.kiwi.contributor.impl.client.layer.SunnyMilkLayer;
-import snownee.kiwi.loader.Platform;
 
 public class KiwiTierProvider extends JsonTierProvider {
 	private final List<String> renderableTiers = List.of("2020q3", "2020q4"/*, "2021q1"*/, "sunny_milk", "xmas");
@@ -44,7 +43,7 @@ public class KiwiTierProvider extends JsonTierProvider {
 
 	@Override
 	public Set<String> getPlayerTiers(String playerName) {
-		Set<String> ret = super.getPlayerTiers(Platform.isProduction() ? playerName : "Dev");
+		Set<String> ret = super.getPlayerTiers(playerName);
 		if (isInXmas()) {
 			ret = Sets.newHashSet(ret);
 			ret.add("xmas");

