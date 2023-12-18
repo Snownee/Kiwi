@@ -1,12 +1,15 @@
 package snownee.kiwi.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.Component;
 import snownee.kiwi.Kiwi;
+import snownee.kiwi.config.KiwiConfigManager;
 
 public class KiwiCommand {
 
@@ -14,10 +17,27 @@ public class KiwiCommand {
 		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal(Kiwi.MODID);
 		/* off */
         builder.then(Commands
-                .literal("debugLevelRules")
-                .requires(ctx -> ctx.hasPermission(2))
-                .executes(ctx -> cleanLevel(ctx.getSource()))
-        );
+				.literal("debugLevelRules")
+				.requires(ctx -> ctx.hasPermission(2))
+				.executes(ctx -> cleanLevel(ctx.getSource()))
+		);
+
+		builder.then(Commands
+				.literal("reload")
+				.requires(ctx -> ctx.hasPermission(2))
+				.then(Commands.argument("fileName", StringArgumentType.greedyString())
+						.executes(ctx -> {
+							String fileName = StringArgumentType.getString(ctx, "fileName");
+							if (KiwiConfigManager.refresh(fileName)) {
+								ctx.getSource().sendSuccess(() -> Component.translatable("commands.kiwi.reload.success", fileName), true);
+								return 1;
+							} else {
+								ctx.getSource().sendFailure(Component.translatable("commands.kiwi.reload.failed", fileName));
+								return 0;
+							}
+						})
+				)
+		);
         /* on */
 		dispatcher.register(builder);
 	}

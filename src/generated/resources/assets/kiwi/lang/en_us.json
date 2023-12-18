@@ -1,4 +1,6 @@
 {
+  "commands.kiwi.reload.failed": "Configuration %s is not found or not provided by Kiwi.",
+  "commands.kiwi.reload.success": "Configuration %s has been reloaded.",
   "cosmetic.snownee.2020q3": "Planets",
   "cosmetic.snownee.2020q4": "Fox",
   "cosmetic.snownee.2021q1": "Electronicat",
