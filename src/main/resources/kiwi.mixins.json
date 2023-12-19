@@ -5,8 +5,9 @@
   "compatibilityLevel": "JAVA_16",
   "refmap": "kiwi.refmap.json",
   "mixins": [
+    "ReloadableServerResourcesMixin",
     "ShapedRecipeAccess",
-    "ReloadableServerResourcesMixin"
+    "TokenizerMixin"
   ],
   "client": [
     "client.ClientPacketListenerMixin",

@@ -15,13 +15,13 @@ public enum ModuleLoadedCondition implements Predicate<JsonObject> {
 
 	public static final ResourceLocation ID = new ResourceLocation(Kiwi.MODID, "is_loaded");
 
+	public static Provider provider(ResourceLocation module) {
+		return new Provider(module);
+	}
+
 	@Override
 	public boolean test(JsonObject jsonObject) {
 		return Kiwi.isLoaded(Util.RL(GsonHelper.getAsString(jsonObject, "module")));
-	}
-
-	public static Provider provider(ResourceLocation module) {
-		return new Provider(module);
 	}
 
 	public static class Provider implements ConditionJsonProvider {

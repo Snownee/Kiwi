@@ -1,5 +1,9 @@
 package snownee.kiwi.command;
 
+import java.util.Objects;
+
+import com.ezylang.evalex.Expression;
+import com.ezylang.evalex.data.EvaluationValue;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -10,6 +14,8 @@ import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.config.KiwiConfigManager;
+import snownee.kiwi.loader.Platform;
+import snownee.kiwi.util.KEval;
 
 public class KiwiCommand {
 
@@ -38,6 +44,14 @@ public class KiwiCommand {
 						})
 				)
 		);
+
+		builder.then(Commands
+				.literal("eval")
+				.requires(ctx -> ctx.hasPermission(2))
+				.then(Commands.argument("expression", StringArgumentType.greedyString())
+						.executes(ctx -> eval(ctx.getSource(), StringArgumentType.getString(ctx, "expression")))
+				)
+		);
         /* on */
 		dispatcher.register(builder);
 	}
@@ -54,5 +68,25 @@ public class KiwiCommand {
 		commands.performPrefixedCommand(commandSourceStack, "weather clear");
 		commands.performPrefixedCommand(commandSourceStack, "gamerule doMobLoot true");
 		return 1;
+	}
+
+	private static int eval(CommandSourceStack source, String expString) {
+		try {
+			EvaluationValue value = new Expression(expString, KEval.config()).evaluate();
+			String s;
+			if (value.isNumberValue()) {
+				s = value.getNumberValue().toPlainString();
+			} else {
+				s = Objects.toString(value.getValue());
+			}
+			source.sendSuccess(() -> Component.literal(s), false);
+			return value.isNullValue() ? 0 : value.getNumberValue().intValue();
+		} catch (Throwable e) {
+			if (!Platform.isProduction()) {
+				Kiwi.LOGGER.error(expString, e);
+			}
+			source.sendFailure(Component.literal(e.getLocalizedMessage()));
+			return 0;
+		}
 	}
 }
