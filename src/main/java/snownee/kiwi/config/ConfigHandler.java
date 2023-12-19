@@ -30,7 +30,6 @@ import com.google.common.collect.Maps;
 import com.google.gson.JsonSyntaxException;
 
 import net.minecraft.util.Mth;
-import net.minecraftforge.fml.loading.FMLPaths;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiModule.Skip;
 import snownee.kiwi.config.KiwiConfig.AdvancedPath;
@@ -39,9 +38,11 @@ import snownee.kiwi.config.KiwiConfig.GameRestart;
 import snownee.kiwi.config.KiwiConfig.LevelRestart;
 import snownee.kiwi.config.KiwiConfig.Range;
 import snownee.kiwi.config.KiwiConfig.Translation;
+import snownee.kiwi.loader.Platform;
 
 public class ConfigHandler {
 
+	public static final String FILE_EXTENSION = ".yaml";
 	private final String modId;
 	private final String fileName;
 	private final ConfigType type;
@@ -160,7 +161,7 @@ public class ConfigHandler {
 	}
 
 	private Path getConfigPath() {
-		return FMLPaths.CONFIGDIR.get().resolve(fileName + ".yaml");
+		return Platform.getConfigDir().resolve(fileName + FILE_EXTENSION);
 	}
 
 	public void init() {

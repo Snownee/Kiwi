@@ -764,7 +764,7 @@ public class Kiwi {
 	}
 
 	private void onCommandsRegister(RegisterCommandsEvent event) {
-		KiwiCommand.register(event.getDispatcher(), event.getCommandSelection());
+		KiwiCommand.register(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection());
 	}
 
 	private void postInit(InterModProcessEvent event) {
