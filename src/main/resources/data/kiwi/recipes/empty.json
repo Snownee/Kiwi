@@ -2,8 +2,8 @@
   "type": "kiwi:shapeless",
   "conditions": [
     {
-      "type": "kiwi:is_loaded",
-      "module": "kiwi:test"
+      "type": "kiwi:eval",
+      "ex": "has('kiwi') && EmptyLavaBucket ?? false"
     }
   ],
   "ingredients": [
@@ -13,5 +13,6 @@
   ],
   "result": {
     "item": "minecraft:bucket"
-  }
+  },
+  "no_containers": true
 }
