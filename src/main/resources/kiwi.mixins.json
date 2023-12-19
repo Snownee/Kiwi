@@ -10,6 +10,7 @@
     "GameDataMixin",
     "HoeItemAccess",
     "RecipeManagerAccess",
+    "RecipeManagerMixin",
     "ReloadableServerResourcesMixin",
     "ShapedRecipeAccess",
     "ShovelItemAccess",
