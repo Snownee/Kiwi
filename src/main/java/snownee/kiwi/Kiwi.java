@@ -519,7 +519,8 @@ public class Kiwi {
 
 				Object registry;
 				if (o instanceof KiwiGO<?> kiwiGO) {
-					o = kiwiGO.create(regName);
+					kiwiGO.setKey(regName);
+					o = kiwiGO.getOrCreate();
 					registry = kiwiGO.registry();
 				} else {
 					registry = registryLookup.findRegistry(o);
