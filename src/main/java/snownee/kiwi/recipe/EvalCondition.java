@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.common.crafting.conditions.IConditionSerializer;
 import snownee.kiwi.Kiwi;
@@ -43,7 +44,7 @@ public class EvalCondition implements ICondition {
 
 		@Override
 		public EvalCondition read(JsonObject json) {
-			return null;
+			return new EvalCondition(GsonHelper.getAsString(json, "ex"));
 		}
 
 		@Override
