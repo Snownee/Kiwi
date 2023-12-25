@@ -1,10 +1,12 @@
 package snownee.kiwi.data;
 
+import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredientSerializer;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiGO;
 import snownee.kiwi.KiwiModule;
+import snownee.kiwi.recipe.AlternativesIngredient;
 import snownee.kiwi.recipe.EvalCondition;
 import snownee.kiwi.recipe.ModuleLoadedCondition;
 import snownee.kiwi.recipe.crafting.KiwiShapelessRecipe;
@@ -22,5 +24,6 @@ public final class DataModule extends AbstractModule {
 	protected void preInit() {
 		ResourceConditions.register(ModuleLoadedCondition.ID, ModuleLoadedCondition.INSTANCE);
 		ResourceConditions.register(EvalCondition.ID, EvalCondition.INSTANCE);
+		CustomIngredientSerializer.register(AlternativesIngredient.Serializer.INSTANCE);
 	}
 }
