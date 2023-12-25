@@ -174,7 +174,7 @@ public class Kiwi implements ModInitializer {
 	}
 
 	//	@SuppressWarnings("rawtypes")
-	private static <T> void registerRegistries() throws Exception {
+	private static void registerRegistries() throws Exception {
 		//		Map<String, Field> allFields = Maps.newHashMap();
 		//		for (Field field : BuiltInRegistries.class.getFields()) {
 		//			if (!Modifier.isStatic(field.getModifiers()) || !Modifier.isPublic(field.getModifiers())) {
