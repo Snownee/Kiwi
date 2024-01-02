@@ -15,10 +15,12 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.LootTable.Builder;
 import snownee.kiwi.KiwiModules;
 import snownee.kiwi.ModuleInfo;
 
 public abstract class KiwiBlockLoot extends FabricBlockLootTableProvider {
+	protected final ResourceLocation moduleId;
 	private final List<Block> knownBlocks;
 	private final Map<Class<?>, Function<Block, LootTable.Builder>> handlers = Maps.newIdentityHashMap();
 	private final Set<Block> added = Sets.newHashSet();
@@ -26,13 +28,14 @@ public abstract class KiwiBlockLoot extends FabricBlockLootTableProvider {
 
 	protected KiwiBlockLoot(ResourceLocation moduleId, FabricDataOutput dataOutput) {
 		super(dataOutput);
+		this.moduleId = moduleId;
 		ModuleInfo info = KiwiModules.get(moduleId);
 		Objects.requireNonNull(info);
 		knownBlocks = info.getRegistries(BuiltInRegistries.BLOCK);
 	}
 
-	protected void handle(Class<? extends Block> clazz, Function<Block, LootTable.Builder> handler) {
-		handlers.put(clazz, handler);
+	protected <T extends Block> void handle(Class<T> clazz, Function<T, LootTable.Builder> handler) {
+		handlers.put(clazz, (Function<Block, Builder>) handler);
 	}
 
 	protected void handleDefault(Function<Block, LootTable.Builder> handler) {
@@ -70,5 +73,10 @@ public abstract class KiwiBlockLoot extends FabricBlockLootTableProvider {
 
 	public List<Block> getKnownBlocks() {
 		return knownBlocks;
+	}
+
+	@Override
+	public String getName() {
+		return super.getName() + " - " + moduleId;
 	}
 }
