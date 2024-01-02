@@ -218,7 +218,7 @@ public class Kiwi implements ModInitializer {
 		registerRegistry(BuiltInRegistries.PARTICLE_TYPE, ParticleType.class);
 		registerRegistry(BuiltInRegistries.BLOCK_ENTITY_TYPE, BlockEntityType.class);
 		registerRegistry(BuiltInRegistries.PAINTING_VARIANT, PaintingVariant.class);
-		registerRegistry(BuiltInRegistries.CUSTOM_STAT, ResourceLocation.class);
+		//registerRegistry(BuiltInRegistries.CUSTOM_STAT, ResourceLocation.class);
 		registerRegistry(BuiltInRegistries.CHUNK_STATUS, ChunkStatus.class);
 		registerRegistry(BuiltInRegistries.RULE_TEST, RuleTestType.class);
 		registerRegistry(BuiltInRegistries.POS_RULE_TEST, PosRuleTestType.class);
