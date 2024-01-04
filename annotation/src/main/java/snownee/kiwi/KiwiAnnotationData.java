@@ -1,6 +1,5 @@
 package snownee.kiwi;
 
-import java.util.Collections;
 import java.util.Map;
 
 public class KiwiAnnotationData {
@@ -17,6 +16,6 @@ public class KiwiAnnotationData {
 	}
 
 	public Map<String, Object> data() {
-		return data == null ? Collections.EMPTY_MAP : data;
+		return data == null ? Map.of() : data;
 	}
 }
