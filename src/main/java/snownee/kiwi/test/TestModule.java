@@ -23,13 +23,18 @@ public class TestModule extends AbstractModule {
 	// Keep your fields `public static`
 
 	// Register a simple item
-	@Category(Categories.FOOD_AND_DRINKS)
+	@Category(value = Categories.FOOD_AND_DRINKS, after = "apple")
 	public static final KiwiGO<TestItem> FIRST_ITEM = go(() -> new TestItem(itemProp().rarity(Rarity.EPIC)));
+	public static final KiwiGO<TestItem> ITEM2 = go(() -> new TestItem(itemProp()));
+	@Category(value = Categories.FOOD_AND_DRINKS, after = "kiwi:item2")
+	public static final KiwiGO<TestItem> ITEM3 = go(() -> new TestItem(itemProp()));
+	public static final KiwiGO<TestItem> ITEM4 = go(() -> new TestItem(itemProp()));
 
 	// The next block will use this builder to build its BlockItem. After that this field will be null
 	public static Item.Properties FIRST_BLOCK_ITEM_BUILDER = itemProp().rarity(Rarity.RARE);
 	// Register a simple block and its BlockItem
 	//@RenderLayer(Layer.CUTOUT)
+	@Category
 	public static final KiwiGO<TestBlock> FIRST_BLOCK = go(() -> new TestBlock2(blockProp()));
 
 	// Register a simple effect
