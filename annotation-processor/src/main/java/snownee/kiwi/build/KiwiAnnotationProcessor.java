@@ -26,9 +26,10 @@ import javax.tools.Diagnostic.Kind;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 
-import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import com.google.common.io.Closeables;
 import com.google.gson.GsonBuilder;
 
@@ -66,7 +67,7 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 			return true;
 		}
 		messager.printMessage(Kind.NOTE, "KiwiAnnotationProcessor is processing");
-		Multimap<CharSequence, KiwiAnnotationData> map = ArrayListMultimap.create();
+		Multimap<String, KiwiAnnotationData> map = Multimaps.newMultimap(Maps.newTreeMap(), Lists::newArrayList);
 		for (TypeElement annotation : annotations) {
 			String className = annotation.toString();
 			ElementKind elementKind = ElementKind.CLASS;
@@ -103,7 +104,7 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 					target = ele.toString();
 				}
 				if (!target.startsWith("snownee.kiwi.test."))
-					map.put(annotation.getSimpleName(), new KiwiAnnotationData(target, o.isEmpty() ? null : o));
+					map.put(annotation.getSimpleName().toString(), new KiwiAnnotationData(target, o.isEmpty() ? null : o));
 			}
 		}
 		String json = new GsonBuilder().setPrettyPrinting().create().toJson(map.asMap());
