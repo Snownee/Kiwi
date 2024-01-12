@@ -11,7 +11,6 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder.ListMultimapBuilder;
@@ -108,7 +107,7 @@ public class ModuleInfo {
 				itemEntry.groupSetting = e.groupSetting;
 				entries.add(itemEntry);
 			});
-			List<GroupSetting> groupSettings = Lists.newArrayList();
+			Set<GroupSetting> groupSettings = Sets.newLinkedHashSet();
 			MutableObject<GroupSetting> prevSetting = new MutableObject<>();
 			if (groupSetting != null) {
 				prevSetting.setValue(groupSetting);
@@ -126,10 +125,7 @@ public class ModuleInfo {
 				} else {
 					filler = (tab, flags, hasPermissions, items) -> items.add(new ItemStack(item));
 				}
-				if (e.groupSetting != null && e.groupSetting.isEmpty()) {
-					groupSetting.apply(filler);
-					prevSetting.setValue(groupSetting);
-				} else if (e.groupSetting != null) {
+				if (e.groupSetting != null) {
 					e.groupSetting.apply(filler);
 					groupSettings.add(e.groupSetting);
 					prevSetting.setValue(e.groupSetting);

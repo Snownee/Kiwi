@@ -13,6 +13,7 @@ import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredient;
 import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredientSerializer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import snownee.kiwi.Kiwi;
@@ -78,7 +79,7 @@ public class AlternativesIngredient implements CustomIngredient {
 
 		@Override
 		public AlternativesIngredient read(JsonObject json) {
-			return new AlternativesIngredient(json.getAsJsonArray("options"));
+			return new AlternativesIngredient(GsonHelper.getAsJsonArray(json, "options"));
 		}
 
 		@Override
