@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -172,9 +173,9 @@ public class ModuleInfo {
 	}
 
 	public void preInit() {
-		KiwiModules.ALL_USED_REGISTRIES.addAll(registries.registries.keySet());
 		context.setActiveContainer();
 		module.preInit();
+		KiwiModules.ALL_USED_REGISTRIES.addAll(registries.registries.keySet());
 	}
 
 	public void init(InitEvent event) {
@@ -199,6 +200,10 @@ public class ModuleInfo {
 
 	public <T> List<T> getRegistries(Object registry) {
 		return registries.get(registry).stream().map($ -> (T) $.entry).collect(Collectors.toList());
+	}
+
+	public <T> Stream<NamedEntry<T>> getRegistryEntries(Object registry) {
+		return registries.get(registry).stream().map($ -> (NamedEntry<T>) $);
 	}
 
 }
