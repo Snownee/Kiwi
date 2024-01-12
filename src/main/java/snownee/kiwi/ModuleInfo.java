@@ -11,6 +11,9 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.mutable.MutableObject;
+
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder.ListMultimapBuilder;
@@ -112,21 +115,33 @@ public class ModuleInfo {
 				itemEntry.groupSetting = e.groupSetting;
 				entries.add(itemEntry);
 			});
+			Set<GroupSetting> groupSettings = Sets.newLinkedHashSet();
+			MutableObject<GroupSetting> prevSetting = new MutableObject<>();
+			if (groupSetting != null) {
+				prevSetting.setValue(groupSetting);
+				groupSettings.add(groupSetting);
+			}
 			entries.forEach(e -> {
-				if (!noCategories.contains(e.entry)) {
-					ItemCategoryFiller filler;
-					if (e.entry instanceof ItemCategoryFiller) {
-						filler = (ItemCategoryFiller) e.entry;
-					} else {
-						filler = (tab, flags, hasPermissions, items) -> items.add(new ItemStack((Item) e.entry));
-					}
-					if (e.groupSetting != null) {
-						e.groupSetting.apply(filler);
-					} else if (groupSetting != null) {
-						groupSetting.apply(filler);
-					}
+				Item item = (Item) e.entry;
+				if (noCategories.contains(item)) {
+					prevSetting.setValue(groupSetting);
+					return;
+				}
+				ItemCategoryFiller filler;
+				if (item instanceof ItemCategoryFiller) {
+					filler = (ItemCategoryFiller) item;
+				} else {
+					filler = (tab, flags, hasPermissions, items) -> items.add(new ItemStack(item));
+				}
+				if (e.groupSetting != null) {
+					e.groupSetting.apply(filler);
+					groupSettings.add(e.groupSetting);
+					prevSetting.setValue(e.groupSetting);
+				} else if (prevSetting.getValue() != null) {
+					prevSetting.getValue().apply(filler);
 				}
 			});
+			groupSettings.forEach(GroupSetting::postApply);
 		}
 		entries.forEach(e -> {
 			decorator.accept(this, e.entry);
@@ -155,7 +170,7 @@ public class ModuleInfo {
 				}
 				Class<?> klass = block.getClass();
 				RenderType type = cache.computeIfAbsent(klass, k -> {
-					RenderLayer layer = null;
+					RenderLayer layer;
 					while (k != Block.class) {
 						layer = k.getDeclaredAnnotation(RenderLayer.class);
 						if (layer != null) {
