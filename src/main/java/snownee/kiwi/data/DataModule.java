@@ -5,7 +5,7 @@ import net.minecraftforge.common.crafting.CraftingHelper;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiGO;
 import snownee.kiwi.KiwiModule;
-import snownee.kiwi.recipe.AlternativesIngredientSerializer;
+import snownee.kiwi.recipe.AlternativesIngredient;
 import snownee.kiwi.recipe.EvalCondition;
 import snownee.kiwi.recipe.FullBlockIngredient;
 import snownee.kiwi.recipe.ModuleLoadedCondition;
@@ -26,7 +26,7 @@ public final class DataModule extends AbstractModule {
 		CraftingHelper.register(ModuleLoadedCondition.Serializer.INSTANCE);
 		CraftingHelper.register(TryParseCondition.Serializer.INSTANCE);
 		CraftingHelper.register(EvalCondition.Serializer.INSTANCE);
-		CraftingHelper.register(RL("full_block"), FullBlockIngredient.SERIALIZER);
-		CraftingHelper.register(RL("alternatives"), AlternativesIngredientSerializer.INSTANCE);
+		CraftingHelper.register(FullBlockIngredient.ID, FullBlockIngredient.SERIALIZER);
+		CraftingHelper.register(AlternativesIngredient.ID, AlternativesIngredient.SERIALIZER);
 	}
 }

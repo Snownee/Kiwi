@@ -3,7 +3,7 @@
   "ingredients": [
     {
       "type": "kiwi:alternatives",
-      "list": [
+      "options": [
         {
           "tag": "forge:eggs"
         },

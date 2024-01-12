@@ -1,23 +1,31 @@
 package snownee.kiwi.recipe;
 
+import java.util.Objects;
 import java.util.stream.Stream;
 
+import org.jetbrains.annotations.NotNull;
+
 import com.google.common.collect.ImmutableList;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.common.crafting.AbstractIngredient;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.IIngredientSerializer;
 import net.minecraftforge.common.crafting.MultiItemValue;
+import snownee.kiwi.Kiwi;
 
-public class FullBlockIngredient extends Ingredient {
+public class FullBlockIngredient extends AbstractIngredient {
+	public static final ResourceLocation ID = new ResourceLocation(Kiwi.ID, "full_block");
 	public static final Serializer SERIALIZER = new Serializer();
 
 	private final Ingredient example;
@@ -56,8 +64,15 @@ public class FullBlockIngredient extends Ingredient {
 	}
 
 	@Override
-	public Serializer getSerializer() {
+	public @NotNull Serializer getSerializer() {
 		return SERIALIZER;
+	}
+
+	@Override
+	public @NotNull JsonElement toJson() {
+		JsonObject jsonObject = new JsonObject();
+		jsonObject.addProperty("type", Objects.requireNonNull(CraftingHelper.getID(SERIALIZER)).toString());
+		return jsonObject;
 	}
 
 	@Override

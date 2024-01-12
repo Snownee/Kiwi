@@ -15,15 +15,37 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
+import net.minecraft.world.level.Level;
 import snownee.kiwi.data.DataModule;
 
 public class KiwiShapelessRecipe extends ShapelessRecipe {
 
 	private boolean noContainers;
+	private boolean trimmed;
 
 	public KiwiShapelessRecipe(ShapelessRecipe rawRecipe, boolean noContainers) {
 		super(rawRecipe.getId(), rawRecipe.getGroup(), rawRecipe.category(), rawRecipe.getResultItem(null), rawRecipe.getIngredients());
 		this.noContainers = noContainers;
+	}
+
+	@Override
+	public boolean matches(CraftingContainer craftingContainer, Level level) {
+		trim();
+		return super.matches(craftingContainer, level);
+	}
+
+	@Override
+	public boolean canCraftInDimensions(int i, int j) {
+		trim();
+		return super.canCraftInDimensions(i, j);
+	}
+
+	private void trim() {
+		if (trimmed) {
+			return;
+		}
+		trimmed = true;
+		getIngredients().removeIf(Ingredient::isEmpty);
 	}
 
 	@Override
@@ -63,7 +85,7 @@ public class KiwiShapelessRecipe extends ShapelessRecipe {
 
 			for (int i = 0; i < a.size(); ++i) {
 				Ingredient ingredient = Ingredient.fromJson(a.get(i));
-				if (!ingredient.isEmpty()) {
+				if (ingredient != Ingredient.EMPTY) {
 					nonnulllist.add(ingredient);
 				}
 			}

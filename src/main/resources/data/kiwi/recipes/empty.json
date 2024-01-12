@@ -1,14 +1,19 @@
 {
   "type": "kiwi:shapeless",
-  "conditions": [
-    {
-      "type": "kiwi:eval",
-      "ex": "has('kiwi') && EmptyLavaBucket ?? false"
-    }
-  ],
   "ingredients": [
     {
-      "item": "minecraft:lava_bucket"
+      "type": "kiwi:alternatives",
+      "options": [
+        {
+          "type": "error"
+        },
+        {
+          "tag": "random_nonexistant_tag"
+        }
+      ]
+    },
+    {
+      "item": "lava_bucket"
     }
   ],
   "result": {

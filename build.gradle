@@ -245,6 +245,10 @@ dependencies {
     library shadowCommon("org.yaml:snakeyaml:${project.snakeyaml_version}")
     library shadowCommon("com.ezylang:EvalEx:${project.evalex_version}")
 
+    implementation fg.deobf("dev.architectury:architectury-forge:${project.architectury_version}")
+    compileOnly fg.deobf("me.shedaniel:RoughlyEnoughItems-forge:${project.rei_version}")
+    runtimeOnly fg.deobf("me.shedaniel:RoughlyEnoughItems-forge:${project.rei_version}")
+
     //implementation fg.deobf("curse.maven:jade-324717:4681833")
     implementation fg.deobf("dev.su5ed.sinytra.fabric-api:fabric-api:0.86.1+1.7.2+1.20.1")
     implementation fg.deobf("dev.su5ed.sinytra.fabric-api:fabric-data-generation-api-v1:12.2.1")
