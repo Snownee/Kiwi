@@ -630,7 +630,7 @@ public class Kiwi {
 		registerRegistry(ForgeRegistries.PARTICLE_TYPES, ParticleType.class);
 		registerRegistry(ForgeRegistries.BLOCK_ENTITY_TYPES, BlockEntityType.class);
 		registerRegistry(ForgeRegistries.PAINTING_VARIANTS, PaintingVariant.class);
-		registerRegistry(BuiltInRegistries.CUSTOM_STAT, ResourceLocation.class);
+		//registerRegistry(BuiltInRegistries.CUSTOM_STAT, ResourceLocation.class);
 		registerRegistry(ForgeRegistries.CHUNK_STATUS, ChunkStatus.class);
 		registerRegistry(BuiltInRegistries.RULE_TEST, RuleTestType.class);
 		registerRegistry(BuiltInRegistries.POS_RULE_TEST, PosRuleTestType.class);
