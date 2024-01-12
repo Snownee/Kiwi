@@ -4,7 +4,8 @@ import java.util.List;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.mojang.serialization.JsonOps;
 
 import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredient;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -55,10 +56,10 @@ public class AlternativesIngredientBuilder {
 	}
 
 	public AlternativesIngredient build() {
-		JsonArray jsonArray = new JsonArray(ingredients.size());
+		List<JsonElement> list = Lists.newArrayListWithExpectedSize(ingredients.size());
 		for (Ingredient ingredient : ingredients) {
-			jsonArray.add(ingredient.toJson());
+			list.add(Ingredient.CODEC.encodeStart(JsonOps.INSTANCE, ingredient).result().orElseThrow());
 		}
-		return new AlternativesIngredient(jsonArray);
+		return new AlternativesIngredient(list);
 	}
 }

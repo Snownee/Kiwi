@@ -1,4 +1,4 @@
-accessWidener   v1  named
+accessWidener   v2  named
 accessible class net/minecraft/world/level/block/entity/BlockEntityType$BlockEntitySupplier
 
 accessible field net/minecraft/world/item/crafting/ShapedRecipe result Lnet/minecraft/world/item/ItemStack;
@@ -16,3 +16,11 @@ accessible field net/minecraft/world/item/CreativeModeTabs OP_BLOCKS Lnet/minecr
 accessible field net/minecraft/world/item/CreativeModeTabs REDSTONE_BLOCKS Lnet/minecraft/resources/ResourceKey;
 accessible field net/minecraft/world/item/CreativeModeTabs SPAWN_EGGS Lnet/minecraft/resources/ResourceKey;
 accessible field net/minecraft/world/item/CreativeModeTabs TOOLS_AND_UTILITIES Lnet/minecraft/resources/ResourceKey;
+
+accessible field net/minecraft/data/recipes/ShapelessRecipeBuilder criteria Ljava/util/Map;
+accessible field net/minecraft/data/recipes/ShapelessRecipeBuilder group Ljava/lang/String;
+accessible field net/minecraft/data/recipes/ShapelessRecipeBuilder ingredients Lnet/minecraft/core/NonNullList;
+accessible field net/minecraft/data/recipes/ShapelessRecipeBuilder result Lnet/minecraft/world/item/Item;
+accessible field net/minecraft/data/recipes/ShapelessRecipeBuilder count I
+accessible field net/minecraft/data/recipes/ShapelessRecipeBuilder category Lnet/minecraft/data/recipes/RecipeCategory;
+accessible method net/minecraft/data/recipes/ShapelessRecipeBuilder ensureValid (Lnet/minecraft/resources/ResourceLocation;)V

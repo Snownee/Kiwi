@@ -1,5 +1,6 @@
 package snownee.kiwi;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -25,8 +26,13 @@ import snownee.kiwi.item.ItemCategoryFiller;
 public class GroupSetting {
 
 	public static GroupSetting of(Category category, GroupSetting preset) {
-		if (preset != null && category.value().length == 0) {
-			return new GroupSetting(preset.groups, category.after());
+		if (preset != null) {
+			if (category.value().length == 0 && category.after().length == 0) {
+				return preset;
+			}
+			if (category.value().length == 0) {
+				return new GroupSetting(preset.groups, category.after());
+			}
 		}
 		return new GroupSetting(category.value(), category.after());
 	}
@@ -75,7 +81,7 @@ public class GroupSetting {
 		}
 	}
 
-	private static void addAfter(List<ItemStack> toAdd, List<ItemStack> destination, Set<Item> afterItems) {
+	private static void addAfter(List<ItemStack> toAdd, List<ItemStack> destination, Collection<Item> afterItems) {
 		int lastFound = -1;
 		if (!afterItems.isEmpty()) {
 			for (int i = 0; i < destination.size(); i++) {
@@ -103,9 +109,5 @@ public class GroupSetting {
 
 	private static boolean isEnabled(ItemStack stack, FeatureFlagSet enabledFeatures) {
 		return stack.getItem().isEnabled(enabledFeatures);
-	}
-
-	public boolean isEmpty() {
-		return groups.length == 0 && after.length == 0;
 	}
 }

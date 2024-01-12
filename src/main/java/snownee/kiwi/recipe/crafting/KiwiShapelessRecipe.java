@@ -22,13 +22,19 @@ public class KiwiShapelessRecipe extends ShapelessRecipe {
 	private boolean trimmed;
 
 	public KiwiShapelessRecipe(String string, CraftingBookCategory craftingBookCategory, ItemStack itemStack, NonNullList<Ingredient> nonNullList, boolean noContainers) {
-		super(string, craftingBookCategory, itemStack, nonNullList);
+		super(string, craftingBookCategory, itemStack, mutableCopy(nonNullList));
 		this.noContainers = noContainers;
 	}
 
 	public KiwiShapelessRecipe(ShapelessRecipe rawRecipe, boolean noContainers) {
-		super(rawRecipe.getGroup(), rawRecipe.category(), rawRecipe.getResultItem(null), rawRecipe.getIngredients());
+		super(rawRecipe.getGroup(), rawRecipe.category(), rawRecipe.result, mutableCopy(rawRecipe.getIngredients()));
 		this.noContainers = noContainers;
+	}
+
+	private static NonNullList<Ingredient> mutableCopy(NonNullList<Ingredient> list) {
+		NonNullList<Ingredient> copy = NonNullList.create();
+		copy.addAll(list);
+		return copy;
 	}
 
 	@Override
