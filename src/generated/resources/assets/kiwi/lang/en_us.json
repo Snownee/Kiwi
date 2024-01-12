@@ -18,6 +18,8 @@
   "kiwi.config.debug.tagsPerPage.desc": "The number of tags to show per page in advanced tooltips",
   "kiwi.config.debug.tagsTooltip": "Tags Tooltip",
   "kiwi.config.debug.tagsTooltip.desc": "Shows item tags in advanced tooltips (F3+H)",
+  "kiwi.config.debug.tagsTooltipAppendKeybindHint": "Tags Tooltip Append Keybind Hint",
+  "kiwi.config.debug.tagsTooltipAppendKeybindHint.desc": "",
   "kiwi.config.globalTooltip": "Global Tooltip",
   "kiwi.config.globalTooltip.desc": "Enables the feature to globally add item tooltips",
   "kiwi.config.modules": "Modules",
