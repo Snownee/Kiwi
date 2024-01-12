@@ -218,7 +218,7 @@ public class Kiwi {
 				} catch (Throwable e) {
 				}
 				type = type == null ? ConfigType.COMMON : type;
-				if ((type != ConfigType.CLIENT || Platform.isPhysicalClient())) {
+				if (type != ConfigType.CLIENT || Platform.isPhysicalClient() || Platform.isDataGen()) {
 					try {
 						Class<?> clazz = Class.forName(config.target());
 						String fileName = (String) config.data().get("value");
