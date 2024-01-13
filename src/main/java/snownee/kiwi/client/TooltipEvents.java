@@ -1,17 +1,18 @@
 package snownee.kiwi.client;
 
 import java.util.List;
+import java.util.function.IntConsumer;
 import java.util.stream.Stream;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.InputConstants;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -23,7 +24,11 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.BucketItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -32,7 +37,6 @@ import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.item.ModItem;
 
-@Environment(EnvType.CLIENT)
 public final class TooltipEvents {
 	public static final String disableDebugTooltipCommand = "@kiwi disable debugTooltip";
 	private static final DebugTooltipCache cache = new DebugTooltipCache();
@@ -40,13 +44,15 @@ public final class TooltipEvents {
 	private static long latestPressF3;
 	private static boolean holdAlt;
 	private static long holdAltStart;
+	private static boolean showTagsBeforeAlt;
 
 	private TooltipEvents() {
 	}
 
 	public static void globalTooltip(ItemStack stack, List<Component> tooltip, TooltipFlag flag) {
-		if (KiwiClientConfig.globalTooltip)
+		if (KiwiClientConfig.globalTooltip) {
 			ModItem.addTip(stack, tooltip, flag);
+		}
 	}
 
 	public static void debugTooltip(ItemStack itemStack, List<Component> tooltip, TooltipFlag flag) {
@@ -57,20 +63,14 @@ public final class TooltipEvents {
 		CompoundTag nbt = itemStack.getTag();
 		Minecraft mc = Minecraft.getInstance();
 		long millis = Util.getMillis();
-		if (mc.player != null && millis - latestPressF3 > 500
-				&& InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), InputConstants.KEY_F3)
-		) {
+		if (mc.player != null && millis - latestPressF3 > 500 && InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), InputConstants.KEY_F3)) {
 			latestPressF3 = millis;
 			MutableComponent component = Component.literal(BuiltInRegistries.ITEM.getKey(itemStack.getItem()).toString());
 			mc.keyboardHandler.setClipboard(component.getString());
 			if (nbt != null) {
 				component.append(NbtUtils.toPrettyComponent(nbt));
 			}
-			component.withStyle(style -> style
-					.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, component.getString()))
-					.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click")))
-					.withInsertion(component.getString())
-			);
+			component.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, component.getString())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click"))).withInsertion(component.getString()));
 			mc.player.displayClientMessage(component, false);
 			mc.gui.getDebugOverlay().toggleOverlay();
 		}
@@ -88,15 +88,23 @@ public final class TooltipEvents {
 			boolean alt = Screen.hasAltDown();
 			if (!holdAlt && alt) {
 				holdAltStart = millis;
+				showTagsBeforeAlt = cache.showTags;
 			} else if (holdAlt && !alt) {
-				if (millis - holdAltStart < 500) {
+				if (cache.showTags && millis - holdAltStart < 500) {
 					cache.pageNow += Screen.hasControlDown() ? -1 : 1;
+					cache.needUpdatePreferredType = true;
 				}
+			}
+			if (alt && millis - holdAltStart >= 500) {
+				cache.showTags = !showTagsBeforeAlt;
+				cache.lastShowTags = millis;
 			}
 			holdAlt = alt;
 
 			if (!cache.pages.isEmpty()) {
-				trySendTipMsg(mc);
+				if (cache.showTags) {
+					trySendTipMsg(mc);
+				}
 				cache.appendTagsTooltip(tooltip);
 			}
 		}
@@ -121,6 +129,10 @@ public final class TooltipEvents {
 		private ItemStack itemStack = ItemStack.EMPTY;
 		private CompoundTag nbt;
 		private Component formattedNbt;
+		private boolean showTags;
+		private long lastShowTags;
+		private String preferredType;
+		public boolean needUpdatePreferredType;
 
 		public void maybeUpdateTags(ItemStack itemStack) {
 			if (this.itemStack == itemStack) {
@@ -131,10 +143,31 @@ public final class TooltipEvents {
 			pageTypes.clear();
 			pageNow = 0;
 			addPages("item", itemStack.getTags().map(TagKey::location));
-			Block block = Block.byItem(itemStack.getItem());
+			Item item = itemStack.getItem();
+			Block block = Block.byItem(item);
 			if (block != Blocks.AIR) {
-				addPages("block", block.defaultBlockState().getTags().map(TagKey::location));
+				addPages("block", getTags(BuiltInRegistries.BLOCK, block));
 			}
+			if (item instanceof SpawnEggItem spawnEggItem) {
+				EntityType<?> type = spawnEggItem.getType(itemStack.getTag());
+				addPages("entity_type", getTags(BuiltInRegistries.ENTITY_TYPE, type));
+			} else if (item instanceof BucketItem bucketItem) {
+				addPages("fluid", getTags(BuiltInRegistries.FLUID, bucketItem.content));
+			}
+			for (int i = 0; i < pages.size(); i++) {
+				if (pageTypes.get(i).equals(preferredType)) {
+					pageNow = i;
+					break;
+				}
+			}
+		}
+
+		private static <T> Stream<ResourceLocation> getTags(Registry<T> registry, T object) {
+			return registry.getResourceKey(object)
+					.flatMap(registry::getHolder)
+					.stream()
+					.flatMap(Holder::tags)
+					.map(TagKey::location);
 		}
 
 		public void addPages(String type, Stream<ResourceLocation> stream) {
@@ -163,24 +196,44 @@ public final class TooltipEvents {
 			if (pages.isEmpty()) {
 				return;
 			}
+			if (showTags && Util.getMillis() - lastShowTags > 60000) {
+				showTags = false;
+			}
+			if (!showTags) {
+				if (KiwiClientConfig.tagsTooltipAppendKeybindHint) {
+					findIdLine(tooltip, i -> tooltip.set(i, tooltip.get(i).copy().append(" (alt)")));
+				}
+				return;
+			}
+			lastShowTags = Util.getMillis();
 			List<Component> sub = Lists.newArrayList();
 			pageNow = Math.floorMod(pageNow, pages.size());
+			if (needUpdatePreferredType) {
+				needUpdatePreferredType = false;
+				preferredType = pageTypes.get(pageNow);
+			}
 			List<String> page = pages.get(pageNow);
 			for (String tag : page) {
 				sub.add(Component.literal(tag).withStyle(ChatFormatting.DARK_GRAY));
 			}
-			int index = tooltip.size();
+			int index = findIdLine(tooltip, i -> {
+				String type = pageTypes.get(pageNow);
+				tooltip.set(i, tooltip.get(i).copy().append(" (%s/%s...%s)".formatted(pageNow + 1, pages.size(), type)));
+			});
+			index = index == -1 ? tooltip.size() : index + 1;
+			tooltip.addAll(index, sub);
+		}
+
+		private int findIdLine(List<Component> tooltip, IntConsumer consumer) {
 			String id = BuiltInRegistries.ITEM.getKey(itemStack.getItem()).toString();
 			for (int i = 0; i < tooltip.size(); i++) {
 				Component component = tooltip.get(i);
 				if (component.getString().equals(id)) {
-					String type = pageTypes.get(pageNow);
-					tooltip.set(i, component.copy().append(" (%s/%s...%s)".formatted(pageNow + 1, pages.size(), type)));
-					index = i + 1;
-					break;
+					consumer.accept(i);
+					return i;
 				}
 			}
-			tooltip.addAll(index, sub);
+			return -1;
 		}
 	}
 }

@@ -24,3 +24,5 @@ accessible field net/minecraft/data/recipes/ShapelessRecipeBuilder result Lnet/m
 accessible field net/minecraft/data/recipes/ShapelessRecipeBuilder count I
 accessible field net/minecraft/data/recipes/ShapelessRecipeBuilder category Lnet/minecraft/data/recipes/RecipeCategory;
 accessible method net/minecraft/data/recipes/ShapelessRecipeBuilder ensureValid (Lnet/minecraft/resources/ResourceLocation;)V
+
+accessible field net/minecraft/world/item/BucketItem content Lnet/minecraft/world/level/material/Fluid;

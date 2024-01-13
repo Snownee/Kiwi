@@ -22,6 +22,9 @@ public final class KiwiClientConfig {
 	@KiwiConfig.Range(min = 0)
 	public static int tagsTooltipTagsPerPage = 6;
 
+	@KiwiConfig.Path("debug.tagsTooltipAppendKeybindHint")
+	public static boolean tagsTooltipAppendKeybindHint = true;
+
 	@KiwiConfig.Path("debug.NBTTooltip")
 	public static boolean nbtTooltip = true;
 
