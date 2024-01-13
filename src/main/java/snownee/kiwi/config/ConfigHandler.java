@@ -42,6 +42,7 @@ import snownee.kiwi.config.KiwiConfig.Translation;
 
 public class ConfigHandler {
 
+	public static final String FILE_EXTENSION = ".yaml";
 	private final String modId;
 	private final String fileName;
 	private final ConfigType type;
@@ -160,7 +161,7 @@ public class ConfigHandler {
 	}
 
 	private Path getConfigPath() {
-		return FabricLoader.getInstance().getConfigDir().resolve(fileName + ".yaml");
+		return FabricLoader.getInstance().getConfigDir().resolve(fileName + FILE_EXTENSION);
 	}
 
 	public void init() {

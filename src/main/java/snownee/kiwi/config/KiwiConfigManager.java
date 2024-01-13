@@ -23,9 +23,7 @@ public class KiwiConfigManager {
 
 	public static synchronized void register(ConfigHandler configHandler) {
 		allConfigs.add(configHandler);
-		if (configHandler.getClass() != null) {
-			clazz2Configs.put(configHandler.getClazz(), configHandler);
-		}
+		clazz2Configs.put(configHandler.getClazz(), configHandler);
 	}
 
 	public static void init() {
@@ -69,8 +67,20 @@ public class KiwiConfigManager {
 		allConfigs.forEach(ConfigHandler::refresh);
 	}
 
+	public static boolean refresh(String fileName) {
+		if (fileName.endsWith(ConfigHandler.FILE_EXTENSION)) {
+			fileName = fileName.substring(0, fileName.length() - ConfigHandler.FILE_EXTENSION.length());
+		}
+		for (ConfigHandler config : allConfigs) {
+			if (config.getFileName().equals(fileName)) {
+				config.refresh();
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public static ConfigHandler getHandler(Class<?> clazz) {
 		return clazz2Configs.get(clazz);
 	}
-
 }
