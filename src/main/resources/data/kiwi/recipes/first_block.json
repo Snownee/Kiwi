@@ -1,8 +1,8 @@
 {
   "type": "kiwi:retexture",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "kiwi:is_loaded",
+      "condition": "kiwi:is_loaded",
       "module": "kiwi:test"
     }
   ],

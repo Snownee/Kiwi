@@ -6,7 +6,8 @@
   "refmap": "kiwi.refmap.json",
   "mixins": [
     "RecipeManagerMixin",
-    "ReloadableServerResourcesMixin"
+    "ReloadableServerResourcesMixin",
+    "TokenizerMixin"
   ],
   "client": [
     "client.ClientPacketListenerMixin",

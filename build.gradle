@@ -75,6 +75,8 @@ dependencies {
 
     implementation "org.yaml:snakeyaml:${project.snakeyaml_version}"
     shadowCommon("org.yaml:snakeyaml:${project.snakeyaml_version}")
+    implementation "com.ezylang:EvalEx:${project.evalex_version}"
+    shadowCommon("com.ezylang:EvalEx:${project.evalex_version}")
 
     annotationProcessor project(':annotation-processor')
 }
@@ -123,6 +125,7 @@ shadowJar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     exclude(a)
     relocate "org.yaml.snakeyaml", "${project.group}.shadowed.org.yaml.snakeyaml"
+    relocate "com.ezylang.evalex", "${project.group}.shadowed.com.ezylang.evalex"
     configurations = [project.configurations.shadowCommon]
     archiveClassifier.set('shadow')
 }
