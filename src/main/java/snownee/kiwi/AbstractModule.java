@@ -26,10 +26,8 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Fluid;
 import snownee.kiwi.block.entity.InheritanceBlockEntityType;
-import snownee.kiwi.loader.event.ClientInitEvent;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.loader.event.PostInitEvent;
-import snownee.kiwi.loader.event.ServerInitEvent;
 
 /**
  * All your modules should extend {@code AbstractModule}
@@ -37,7 +35,7 @@ import snownee.kiwi.loader.event.ServerInitEvent;
  * @author Snownee
  */
 public abstract class AbstractModule {
-	protected final Map<Registry<?>, BiConsumer<ModuleInfo, ?>> decorators = Maps.newHashMap();
+	protected final Map<Registry<?>, BiConsumer<KiwiModuleContainer, ?>> decorators = Maps.newHashMap();
 	public ResourceLocation uid;
 
 	protected static <T> KiwiGO<T> go(Supplier<? extends T> factory) {
@@ -57,16 +55,11 @@ public abstract class AbstractModule {
 		return BlockBehaviour.Properties.of();
 	}
 
-	/**
-	 * @since 2.5.2
-	 */
 	protected static BlockBehaviour.Properties blockProp(BlockBehaviour block) {
 		return BlockBehaviour.Properties.ofFullCopy(block);
 	}
 
-	/**
-	 * @since 5.2.0
-	 */
+	@SafeVarargs
 	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(FabricBlockEntityTypeBuilder.Factory<? extends T> factory, Type<?> datafixer, Supplier<? extends Block>... blocks) {
 		return go(() -> FabricBlockEntityTypeBuilder.<T>create(factory, Stream.of(blocks).map(Supplier::get).toArray(Block[]::new)).build(datafixer));
 	}
@@ -107,24 +100,15 @@ public abstract class AbstractModule {
 		// NO-OP
 	}
 
-	@Deprecated
-	protected void clientInit(ClientInitEvent event) {
-		// NO-OP
-	}
-
-	@Deprecated
-	protected void serverInit(ServerInitEvent event) {
-		// NO-OP
-	}
-
 	protected void postInit(PostInitEvent event) {
 		// NO-OP
 	}
 
-	/**
-	 * @since 2.6.0
-	 */
-	public ResourceLocation RL(String path) {
+	public ResourceLocation id(String path) {
 		return new ResourceLocation(uid.getNamespace(), path);
+	}
+
+	public KiwiModuleContainer container() {
+		return KiwiModules.get(uid);
 	}
 }

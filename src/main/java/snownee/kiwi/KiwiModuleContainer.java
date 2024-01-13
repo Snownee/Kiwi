@@ -1,9 +1,12 @@
 package snownee.kiwi;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
@@ -16,12 +19,15 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder.ListMultimapBuilder;
 import com.google.common.collect.Sets;
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
@@ -31,12 +37,11 @@ import snownee.kiwi.block.IKiwiBlock;
 import snownee.kiwi.item.ItemCategoryFiller;
 import snownee.kiwi.item.ModBlockItem;
 import snownee.kiwi.loader.Platform;
-import snownee.kiwi.loader.event.ClientInitEvent;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.loader.event.PostInitEvent;
-import snownee.kiwi.loader.event.ServerInitEvent;
+import snownee.kiwi.util.Util;
 
-public class ModuleInfo {
+public final class KiwiModuleContainer {
 	public static final class RegistryHolder {
 		final Multimap<Registry<?>, NamedEntry<?>> registries = ListMultimapBuilder.linkedHashKeys().linkedListValues().build();
 
@@ -57,18 +62,12 @@ public class ModuleInfo {
 	final Set<Object> noCategories = Sets.newHashSet();
 	final Set<Block> noItems = Sets.newHashSet();
 
-	public ModuleInfo(ResourceLocation rl, AbstractModule module, ModContext context) {
+	public KiwiModuleContainer(ResourceLocation rl, AbstractModule module, ModContext context) {
 		this.module = module;
 		this.context = context;
 		module.uid = rl;
-		//		if (FabricDataGenHelper.ENABLED && context.modContainer instanceof FMLModContainer) {
-		//			((FMLModContainer) context.modContainer).getEventBus().addListener(module::gatherData);
-		//		}
 	}
 
-	/**
-	 * @since 2.5.2
-	 */
 	@SuppressWarnings("rawtypes")
 	public void register(Object object, ResourceLocation name, Registry<?> registry, @Nullable Field field) {
 		NamedEntry entry = new NamedEntry(name, object, registry, field);
@@ -81,11 +80,118 @@ public class ModuleInfo {
 		}
 	}
 
+	public void loadGameObjects(RegistryLookup registryLookup, Object2IntMap<ResourceKey<?>> counter) {
+		context.setActiveContainer();
+
+		boolean useOwnGroup = groupSetting == null;
+		if (useOwnGroup) {
+			Category group = module.getClass().getDeclaredAnnotation(Category.class);
+			if (group != null) {
+				if (group.value().length > 0) {
+					useOwnGroup = false;
+					groupSetting = GroupSetting.of(group, null);
+				}
+			}
+		}
+
+		String modid = module.uid.getNamespace();
+
+		Item.Properties tmpBuilder = null;
+		Field tmpBuilderField = null;
+		for (Field field : module.getClass().getFields()) {
+			if (field.getAnnotation(KiwiModule.Skip.class) != null) {
+				continue;
+			}
+
+			int mods = field.getModifiers();
+			if (!Modifier.isPublic(mods) || !Modifier.isStatic(mods)) {
+				continue;
+			}
+
+			ResourceLocation regName;
+			KiwiModule.Name nameAnnotation = field.getAnnotation(KiwiModule.Name.class);
+			if (nameAnnotation != null) {
+				regName = Util.RL(nameAnnotation.value(), modid);
+			} else {
+				regName = Util.RL(field.getName().toLowerCase(Locale.ENGLISH), modid);
+			}
+			Objects.requireNonNull(regName);
+
+			if (field.getType() == module.getClass() && "instance".equals(regName.getPath()) && regName.getNamespace().equals(modid)) {
+				try {
+					field.set(null, module);
+				} catch (IllegalArgumentException | IllegalAccessException e) {
+					Kiwi.LOGGER.error("Kiwi failed to inject module instance to module class: %s".formatted(module.uid), e);
+				}
+				continue;
+			}
+
+			Object o = null;
+			try {
+				o = field.get(null);
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				Kiwi.LOGGER.error("Kiwi failed to catch game object: %s".formatted(field), e);
+			}
+			if (o == null) {
+				continue;
+			}
+			if (o instanceof Item.Properties) {
+				tmpBuilder = (Item.Properties) o;
+				tmpBuilderField = field;
+				continue;
+			}
+
+			Registry<?> registry;
+			if (o instanceof KiwiGO<?> kiwiGO) {
+				kiwiGO.setKey(regName);
+				o = kiwiGO.getOrCreate();
+				registry = (Registry<?>) kiwiGO.registry();
+			} else {
+				registry = registryLookup.findRegistry(o);
+			}
+
+			if (registry != null) {
+				if (o instanceof Block) {
+					if (field.getAnnotation(KiwiModule.NoItem.class) != null) {
+						noItems.add((Block) o);
+					}
+					checkNoGroup(field, o);
+					if (tmpBuilder != null) {
+						blockItemBuilders.put((Block) o, tmpBuilder);
+						try {
+							tmpBuilderField.set(module, null);
+						} catch (Exception e) {
+							Kiwi.LOGGER.error("Kiwi failed to clean used item builder: %s".formatted(tmpBuilderField), e);
+						}
+					}
+				} else if (o instanceof Item) {
+					checkNoGroup(field, o);
+				} else if (useOwnGroup && groupSetting == null && o instanceof CreativeModeTab tab) {
+					//registerTab(id, tab);
+					groupSetting = new GroupSetting(new String[]{regName.toString()}, new String[0]);
+				}
+				ResourceKey<?> superType = registry.key();
+				int i = counter.getOrDefault(superType, 0);
+				counter.put(superType, i + 1);
+				register(o, regName, registry, field);
+			}
+
+			tmpBuilder = null;
+			tmpBuilderField = null;
+		}
+	}
+
+	private void checkNoGroup(Field field, Object o) {
+		if (field.getAnnotation(KiwiModule.NoCategory.class) != null) {
+			noCategories.add(o);
+		}
+	}
+
 	@SuppressWarnings("rawtypes")
-	public <T> void handleRegister(Object registry) {
+	public <T> void registerGameObjects(Object registry) {
 		context.setActiveContainer();
 		Collection<NamedEntry<T>> entries = registries.get((Registry<T>) registry);
-		BiConsumer<ModuleInfo, T> decorator = (BiConsumer<ModuleInfo, T>) module.decorators.getOrDefault(registry, (a, b) -> {
+		BiConsumer<KiwiModuleContainer, T> decorator = (BiConsumer<KiwiModuleContainer, T>) module.decorators.getOrDefault(registry, (a, b) -> {
 		});
 		if (registry == BuiltInRegistries.ITEM) {
 			registries.get(BuiltInRegistries.BLOCK).forEach(e -> {
@@ -177,22 +283,12 @@ public class ModuleInfo {
 		context.setActiveContainer();
 		module.preInit();
 		KiwiModules.ALL_USED_REGISTRIES.addAll(registries.registries.keySet());
-		KiwiModules.ALL_USED_REGISTRIES.forEach(this::handleRegister);
+		KiwiModules.ALL_USED_REGISTRIES.forEach(this::registerGameObjects);
 	}
 
 	public void init(InitEvent event) {
 		context.setActiveContainer();
 		module.init(event);
-	}
-
-	public void clientInit(ClientInitEvent event) {
-		context.setActiveContainer();
-		module.clientInit(event);
-	}
-
-	public void serverInit(ServerInitEvent event) {
-		context.setActiveContainer();
-		module.serverInit(event);
 	}
 
 	public void postInit(PostInitEvent event) {

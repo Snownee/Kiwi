@@ -16,8 +16,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.LootTable.Builder;
+import snownee.kiwi.KiwiModuleContainer;
 import snownee.kiwi.KiwiModules;
-import snownee.kiwi.ModuleInfo;
 
 public abstract class KiwiBlockLoot extends FabricBlockLootTableProvider {
 	protected final ResourceLocation moduleId;
@@ -29,9 +29,8 @@ public abstract class KiwiBlockLoot extends FabricBlockLootTableProvider {
 	protected KiwiBlockLoot(ResourceLocation moduleId, FabricDataOutput dataOutput) {
 		super(dataOutput);
 		this.moduleId = moduleId;
-		ModuleInfo info = KiwiModules.get(moduleId);
-		Objects.requireNonNull(info);
-		knownBlocks = info.getRegistries(BuiltInRegistries.BLOCK);
+		KiwiModuleContainer container = Objects.requireNonNull(KiwiModules.get(moduleId));
+		knownBlocks = container.getRegistries(BuiltInRegistries.BLOCK);
 	}
 
 	protected <T extends Block> void handle(Class<T> clazz, Function<T, LootTable.Builder> handler) {

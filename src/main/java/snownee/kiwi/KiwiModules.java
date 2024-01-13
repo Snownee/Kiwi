@@ -12,7 +12,7 @@ import com.google.common.collect.Sets;
 import net.minecraft.resources.ResourceLocation;
 
 public final class KiwiModules {
-	private static Map<ResourceLocation, ModuleInfo> MODULES = Maps.newLinkedHashMap();
+	private static Map<ResourceLocation, KiwiModuleContainer> MODULES = Maps.newLinkedHashMap();
 	private static final Set<ResourceLocation> LOADED_MODULES = Sets.newHashSet();
 
 	static final Set<Object> ALL_USED_REGISTRIES = Sets.newLinkedHashSet();
@@ -23,23 +23,18 @@ public final class KiwiModules {
 	public static void add(ResourceLocation resourceLocation, AbstractModule module, ModContext context) {
 		Preconditions.checkArgument(!isLoaded(resourceLocation), "Duplicate module: %s", resourceLocation);
 		LOADED_MODULES.add(resourceLocation);
-		MODULES.put(resourceLocation, new ModuleInfo(resourceLocation, module, context));
+		MODULES.put(resourceLocation, new KiwiModuleContainer(resourceLocation, module, context));
 	}
-
-	//	public static void handleRegister(RegistryEvent.Register<?> event) {
-	//		MODULES.values().forEach(info -> info.handleRegister(event));
-	//		ModLoadingContext.get().setActiveContainer(null);
-	//	}
 
 	public static boolean isLoaded(ResourceLocation module) {
 		return LOADED_MODULES.contains(module);
 	}
 
-	public static Collection<ModuleInfo> get() {
+	public static Collection<KiwiModuleContainer> get() {
 		return MODULES.values();
 	}
 
-	public static ModuleInfo get(ResourceLocation moduleId) {
+	public static KiwiModuleContainer get(ResourceLocation moduleId) {
 		return MODULES.get(moduleId);
 	}
 
@@ -51,7 +46,7 @@ public final class KiwiModules {
 		}
 	}
 
-	public static void fire(Consumer<ModuleInfo> consumer) {
+	public static void fire(Consumer<KiwiModuleContainer> consumer) {
 		MODULES.values().forEach(consumer);
 	}
 

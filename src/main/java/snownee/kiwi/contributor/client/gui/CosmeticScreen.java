@@ -16,6 +16,7 @@ import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.contributor.Contributors;
+import snownee.kiwi.contributor.ContributorsClient;
 
 public class CosmeticScreen extends Screen {
 
@@ -100,11 +101,11 @@ public class CosmeticScreen extends Screen {
 		if (currentCosmetic != null && selectedEntry.id == null) {
 			KiwiClientConfig.contributorCosmetic = "";
 			cfg.save();
-			Contributors.changeCosmetic();
+			ContributorsClient.changeCosmetic();
 		} else if (selectedEntry != null && !Objects.equals(selectedEntry.id, currentCosmetic)) {
 			KiwiClientConfig.contributorCosmetic = selectedEntry.id.toString();
 			cfg.save();
-			Contributors.changeCosmetic();
+			ContributorsClient.changeCosmetic();
 		}
 	}
 

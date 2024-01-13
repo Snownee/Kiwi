@@ -10,7 +10,7 @@ import com.google.common.collect.ImmutableMap;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import snownee.kiwi.contributor.Contributors;
+import snownee.kiwi.contributor.ContributorsClient;
 import snownee.kiwi.network.KPacketTarget;
 import snownee.kiwi.network.KiwiPacket;
 import snownee.kiwi.network.KiwiPacket.Direction;
@@ -31,7 +31,7 @@ public class SSyncCosmeticPacket extends PacketHandler {
 			String v = buf.readUtf();
 			builder.put(k, Util.RL(v));
 		}
-		return executor.apply(() -> Contributors.changeCosmetic(builder.build()));
+		return executor.apply(() -> ContributorsClient.changeCosmetic(builder.build()));
 	}
 
 	public static void send(Map<String, ResourceLocation> map, ServerPlayer player, boolean except) {

@@ -13,28 +13,19 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import snownee.kiwi.AbstractModule;
-import snownee.kiwi.Kiwi;
-import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.KiwiModule;
-import snownee.kiwi.config.ConfigHandler;
-import snownee.kiwi.config.KiwiConfigManager;
-import snownee.kiwi.contributor.client.CosmeticLayer;
 import snownee.kiwi.contributor.impl.KiwiTierProvider;
-import snownee.kiwi.contributor.network.CSetCosmeticPacket;
 import snownee.kiwi.contributor.network.SSyncCosmeticPacket;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.loader.event.InitEvent;
-import snownee.kiwi.util.Util;
 
 @KiwiModule("contributors")
+@KiwiModule.ClientCompanion(ContributorsClient.class)
 public class Contributors extends AbstractModule {
 
 	public static final Map<String, ITierProvider> REWARD_PROVIDERS = Maps.newConcurrentMap();
@@ -82,43 +73,6 @@ public class Contributors extends AbstractModule {
 		for (String tier : rewardProvider.getRenderableTiers()) {
 			RENDERABLES.add(new ResourceLocation(namespace, tier));
 		}
-	}
-
-	@Environment(EnvType.CLIENT)
-	public static void changeCosmetic() {
-		ResourceLocation id = Util.RL(KiwiClientConfig.contributorCosmetic);
-		if (id != null && id.getPath().isEmpty()) {
-			id = null;
-		}
-		ResourceLocation cosmetic = id;
-		canPlayerUseCosmetic(getPlayerName(), cosmetic).thenAccept(bl -> {
-			if (!bl) {
-				ConfigHandler cfg = KiwiConfigManager.getHandler(KiwiClientConfig.class);
-				KiwiClientConfig.contributorCosmetic = "";
-				cfg.save();
-				return;
-			}
-			CSetCosmeticPacket.send(cosmetic);
-			if (cosmetic == null) {
-				PLAYER_COSMETICS.remove(getPlayerName());
-			} else {
-				PLAYER_COSMETICS.put(getPlayerName(), cosmetic);
-				Kiwi.LOGGER.info("Enabled contributor effect: {}", cosmetic);
-			}
-			CosmeticLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidate(getPlayerName()));
-		});
-	}
-
-	@Environment(EnvType.CLIENT)
-	public static void changeCosmetic(Map<String, ResourceLocation> changes) {
-		changes.forEach((k, v) -> {
-			if (v == null) {
-				PLAYER_COSMETICS.remove(k);
-			} else {
-				PLAYER_COSMETICS.put(k, v);
-			}
-		});
-		CosmeticLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidateAll(changes.keySet()));
 	}
 
 	public static void changeCosmetic(ServerPlayer player, ResourceLocation cosmetic) {
@@ -177,11 +131,6 @@ public class Contributors extends AbstractModule {
 		return CompletableFuture.completedFuture(Boolean.TRUE);
 	}
 
-	@Environment(EnvType.CLIENT)
-	private static String getPlayerName() {
-		return Minecraft.getInstance().getUser().getName();
-	}
-
 	@Override
 	protected void init(InitEvent event) {
 		registerTierProvider(new KiwiTierProvider());
@@ -190,9 +139,7 @@ public class Contributors extends AbstractModule {
 				SSyncCosmeticPacket.send(PLAYER_COSMETICS, handler.player, false);
 			}
 		});
-		if (Platform.isPhysicalClient()) {
-			ContributorsClient.init();
-		} else {
+		if (!Platform.isPhysicalClient()) {
 			ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 				PLAYER_COSMETICS.remove(handler.player.getGameProfile().getName());
 			});
