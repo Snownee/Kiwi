@@ -6,6 +6,7 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiGO;
 import snownee.kiwi.KiwiModule;
+import snownee.kiwi.recipe.AlternativesIngredient;
 import snownee.kiwi.recipe.EvalCondition;
 import snownee.kiwi.recipe.FullBlockIngredient;
 import snownee.kiwi.recipe.ModuleLoadedCondition;
@@ -24,6 +25,7 @@ public final class DataModule extends AbstractModule {
 	protected void preInit() {
 		ResourceConditions.register(ModuleLoadedCondition.ID, ModuleLoadedCondition.INSTANCE);
 		ResourceConditions.register(EvalCondition.ID, EvalCondition.INSTANCE);
+		CustomIngredientSerializer.register(AlternativesIngredient.Serializer.INSTANCE);
 		CustomIngredientSerializer.register(FullBlockIngredient.SERIALIZER);
 	}
 }

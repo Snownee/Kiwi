@@ -20,18 +20,10 @@ import snownee.kiwi.Kiwi;
 
 public class FullBlockIngredient implements CustomIngredient {
 	public static final Serializer SERIALIZER = new Serializer();
-	private static final Codec<FullBlockIngredient> CODEC = createCodec(Ingredient.CODEC);
-	private static final Codec<FullBlockIngredient> CODEC_NONEMPTY = createCodec(Ingredient.CODEC_NONEMPTY);
 	private final Ingredient example;
 
 	public FullBlockIngredient(Ingredient example) {
 		this.example = example;
-	}
-
-	private static Codec<FullBlockIngredient> createCodec(Codec<Ingredient> ingredientCodec) {
-		return RecordCodecBuilder.create(instance -> instance.group(
-				ingredientCodec.fieldOf("example").forGetter(i -> i.example)
-		).apply(instance, FullBlockIngredient::new));
 	}
 
 	public static boolean isFullBlock(ItemStack stack) {
@@ -78,6 +70,13 @@ public class FullBlockIngredient implements CustomIngredient {
 	}
 
 	public static class Serializer implements CustomIngredientSerializer<FullBlockIngredient> {
+		private static final Codec<FullBlockIngredient> CODEC = createCodec(Ingredient.CODEC);
+		private static final Codec<FullBlockIngredient> CODEC_NONEMPTY = createCodec(Ingredient.CODEC_NONEMPTY);
+
+		private static Codec<FullBlockIngredient> createCodec(Codec<Ingredient> ingredientCodec) {
+			return RecordCodecBuilder.create(instance -> instance.group(ingredientCodec.fieldOf("example").forGetter(i -> i.example)).apply(instance, FullBlockIngredient::new));
+		}
+
 		@Override
 		public ResourceLocation getIdentifier() {
 			return new ResourceLocation(Kiwi.ID, "full_block");

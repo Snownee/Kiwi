@@ -13,11 +13,13 @@ import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
+import net.minecraft.world.level.Level;
 import snownee.kiwi.data.DataModule;
 
 public class KiwiShapelessRecipe extends ShapelessRecipe {
 
 	private final boolean noContainers;
+	private boolean trimmed;
 
 	public KiwiShapelessRecipe(String string, CraftingBookCategory craftingBookCategory, ItemStack itemStack, NonNullList<Ingredient> nonNullList, boolean noContainers) {
 		super(string, craftingBookCategory, itemStack, nonNullList);
@@ -25,7 +27,28 @@ public class KiwiShapelessRecipe extends ShapelessRecipe {
 	}
 
 	public KiwiShapelessRecipe(ShapelessRecipe rawRecipe, boolean noContainers) {
-		this(rawRecipe.getGroup(), rawRecipe.category(), rawRecipe.result, rawRecipe.getIngredients(), noContainers);
+		super(rawRecipe.getGroup(), rawRecipe.category(), rawRecipe.getResultItem(null), rawRecipe.getIngredients());
+		this.noContainers = noContainers;
+	}
+
+	@Override
+	public boolean matches(CraftingContainer craftingContainer, Level level) {
+		trim();
+		return super.matches(craftingContainer, level);
+	}
+
+	@Override
+	public boolean canCraftInDimensions(int i, int j) {
+		trim();
+		return super.canCraftInDimensions(i, j);
+	}
+
+	private void trim() {
+		if (trimmed) {
+			return;
+		}
+		trimmed = true;
+		getIngredients().removeIf(Ingredient::isEmpty);
 	}
 
 	@Override
@@ -43,28 +66,20 @@ public class KiwiShapelessRecipe extends ShapelessRecipe {
 	}
 
 	public static class Serializer implements RecipeSerializer<KiwiShapelessRecipe> {
-
-		private static final Codec<KiwiShapelessRecipe> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(ShapelessRecipe::getGroup),
-				CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(ShapelessRecipe::category),
-				ItemStack.ITEM_WITH_COUNT_CODEC.fieldOf("result").forGetter(recipe -> recipe.result),
-				Ingredient.CODEC.listOf().fieldOf("ingredients").flatXmap(list -> {
-					Ingredient[] ingredients = list.stream().filter(ingredient -> !ingredient.isEmpty()).toArray(Ingredient[]::new);
-					if (ingredients.length == 0) {
-						return DataResult.error(() -> "No ingredients for shapeless recipe");
-					}
-//					if (ingredients.length > 9) {
-//						return DataResult.error(() -> "Too many ingredients for shapeless recipe");
-//					}
-					return DataResult.success(NonNullList.of(Ingredient.EMPTY, ingredients));
-				}, DataResult::success).forGetter(ShapelessRecipe::getIngredients),
-				Codec.BOOL.optionalFieldOf("no_containers", false).forGetter(recipe -> recipe.noContainers)
-		).apply(instance, KiwiShapelessRecipe::new));
-
-		@Override
-		public Codec<KiwiShapelessRecipe> codec() {
-			return CODEC;
-		}
+		public static final Codec<KiwiShapelessRecipe> CODEC = RecordCodecBuilder.create(i -> i.group(
+						ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(ShapelessRecipe::getGroup),
+						CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(ShapelessRecipe::category),
+						ItemStack.ITEM_WITH_COUNT_CODEC.fieldOf("result").forGetter(recipe -> recipe.result),
+						Ingredient.CODEC_NONEMPTY.listOf().fieldOf("ingredients").flatXmap(list -> {
+							Ingredient[] ingredients = list.stream().filter(ingredient -> !ingredient.isEmpty()).toArray(Ingredient[]::new);
+							if (ingredients.length == 0) {
+								return DataResult.error(() -> "No ingredients for shapeless recipe");
+							} else {
+								return ingredients.length > 9 ? DataResult.error(() -> "Too many ingredients for shapeless recipe") : DataResult.success(NonNullList.of(Ingredient.EMPTY, ingredients));
+							}
+						}, DataResult::success).forGetter(ShapelessRecipe::getIngredients),
+						Codec.BOOL.optionalFieldOf("no_containers", false).forGetter(recipe -> recipe.noContainers))
+				.apply(i, KiwiShapelessRecipe::new));
 
 		@Override
 		public KiwiShapelessRecipe fromNetwork(FriendlyByteBuf buffer) {
@@ -75,6 +90,11 @@ public class KiwiShapelessRecipe extends ShapelessRecipe {
 		public void toNetwork(FriendlyByteBuf buffer, KiwiShapelessRecipe recipe) {
 			RecipeSerializer.SHAPELESS_RECIPE.toNetwork(buffer, recipe);
 			buffer.writeBoolean(recipe.noContainers);
+		}
+
+		@Override
+		public Codec<KiwiShapelessRecipe> codec() {
+			return CODEC;
 		}
 	}
 }

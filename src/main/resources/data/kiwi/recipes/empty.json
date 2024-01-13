@@ -8,7 +8,18 @@
   ],
   "ingredients": [
     {
-      "item": "minecraft:lava_bucket"
+      "fabric:type": "kiwi:alternatives",
+      "options": [
+        {
+          "fabric:type": "error"
+        },
+        {
+          "tag": "random_nonexistant_tag"
+        }
+      ]
+    },
+    {
+      "tag": "anvil"
     }
   ],
   "result": {

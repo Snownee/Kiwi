@@ -39,7 +39,7 @@ public class RetextureRecipe extends DynamicShapedRecipe {
 		super(category);
 	}
 
-	@Override //FIXME
+	@Override
 	public boolean matches(CraftingContainer inv, int x, int y, int rx, int ry) {
 		ItemStack stack = inv.getItem(x + y * inv.getWidth());
 		return (getEmptyPredicate().test(stack) || FullBlockIngredient.isTextureBlock(stack)) && super.matches(inv, x, y, rx, ry);
