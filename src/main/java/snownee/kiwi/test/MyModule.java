@@ -9,7 +9,7 @@ import snownee.kiwi.util.VanillaActions;
 public class MyModule extends AbstractModule {
 
 	@Override
-	protected void preInit() {
+	protected void addEntries() {
 	}
 
 	@Override

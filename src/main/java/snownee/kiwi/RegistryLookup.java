@@ -11,19 +11,20 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Maps;
 
 import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 
 public class RegistryLookup {
 
-	public final Map<Class<?>, Registry<?>> registries = Maps.newConcurrentMap();
-	public final Cache<Class<?>, Optional<Registry<?>>> cache = CacheBuilder.newBuilder().build();
+	public final Map<Class<?>, ResourceKey<? extends Registry<?>>> registries = Maps.newConcurrentMap();
+	public final Cache<Class<?>, Optional<ResourceKey<? extends Registry<?>>>> cache = CacheBuilder.newBuilder().build();
 
-	public Registry<?> findRegistry(Object o) {
+	public ResourceKey<? extends Registry<?>> findRegistry(Object o) {
 		try {
 			return cache.get(o.getClass(), () -> {
 				{
 					Class<?> clazz = o.getClass();
 					while (clazz != Object.class) {
-						Registry<?> registry = registries.get(clazz);
+						ResourceKey<? extends Registry<?>> registry = registries.get(clazz);
 						if (registry != null) {
 							return Optional.of(registry);
 						}
@@ -31,7 +32,7 @@ public class RegistryLookup {
 					}
 				}
 				for (Class<?> clazz : ClassUtils.getAllInterfaces(o.getClass())) {
-					Registry<?> registry = registries.get(clazz);
+					ResourceKey<? extends Registry<?>> registry = registries.get(clazz);
 					if (registry != null) {
 						return Optional.of(registry);
 					}

@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.MethodUtils;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -29,8 +30,6 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.mojang.logging.LogUtils;
 
-import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.api.ModInitializer;
@@ -47,7 +46,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleType;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -128,7 +127,7 @@ public class Kiwi implements ModInitializer {
 	public static final String ID = "kiwi";
 	public static final RegistryLookup registryLookup = new RegistryLookup();
 	static final Marker MARKER = MarkerFactory.getMarker("INIT");
-	private static final Map<String, CreativeModeTab> GROUPS = Maps.newHashMap();
+	private static final Map<String, ResourceKey<CreativeModeTab>> GROUPS = Maps.newHashMap();
 	public static final Logger LOGGER = LogUtils.getLogger();
 	public static Map<ResourceLocation, Boolean> defaultOptions = Maps.newHashMap();
 	public static MinecraftServer currentServer;
@@ -136,7 +135,7 @@ public class Kiwi implements ModInitializer {
 	private static Map<KiwiAnnotationData, String> conditions = Maps.newHashMap();
 	private static boolean tagsUpdated;
 
-	private static boolean checkDist(KiwiAnnotationData annotationData, String dist) {
+	private static boolean wrongDistribution(KiwiAnnotationData annotationData, String dist) {
 		try {
 			ClassNode clazz = new ClassNode(Opcodes.ASM7);
 			InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(annotationData.target().replace('.', '/') + ".class");
@@ -148,18 +147,18 @@ public class Kiwi implements ModInitializer {
 					if (node.values != null && ONLYIN.equals(node.desc)) {
 						int i = node.values.indexOf("value");
 						if (i != -1 && !node.values.get(i + 1).equals(dist)) {
-							return false;
+							return true;
 						}
 					}
 				}
 			}
 		} catch (Throwable e) {
-			return false;
+			return true;
 		}
-		return true;
+		return false;
 	}
 
-	public static <T> void registerRegistry(Registry<? extends T> registry, Class<? extends T> baseClass) {
+	public static void registerRegistry(ResourceKey<? extends Registry<?>> registry, Class<?> baseClass) {
 		Objects.requireNonNull(registryLookup);
 		registryLookup.registries.put(baseClass, registry);
 	}
@@ -191,79 +190,80 @@ public class Kiwi implements ModInitializer {
 		//				}
 		//				String className = matcher.group(1).replace('/', '.');
 		//				Class<?> baseClass = Class.forName(className);
-		//				sb.append("registerRegistry(BuiltInRegistries.%s, %s.class);\n".formatted(field.name, baseClass.getSimpleName()));
+		//				sb.append("registerRegistry(Registries.%s, %s.class);\n".formatted(field.name, baseClass.getSimpleName()));
 		//				registerRegistry((BuiltInRegistries) allFields.get(field.name).get(null), baseClass);
 		//			}
 		//		}
 		//		System.out.println(sb);
 
-		registerRegistry(BuiltInRegistries.GAME_EVENT, GameEvent.class);
-		registerRegistry(BuiltInRegistries.SOUND_EVENT, SoundEvent.class);
-		registerRegistry(BuiltInRegistries.FLUID, Fluid.class);
-		registerRegistry(BuiltInRegistries.MOB_EFFECT, MobEffect.class);
-		registerRegistry(BuiltInRegistries.BLOCK, Block.class);
-		registerRegistry(BuiltInRegistries.ENCHANTMENT, Enchantment.class);
-		registerRegistry(BuiltInRegistries.ENTITY_TYPE, EntityType.class);
-		registerRegistry(BuiltInRegistries.ITEM, Item.class);
-		registerRegistry(BuiltInRegistries.POTION, Potion.class);
-		registerRegistry(BuiltInRegistries.PARTICLE_TYPE, ParticleType.class);
-		registerRegistry(BuiltInRegistries.BLOCK_ENTITY_TYPE, BlockEntityType.class);
-		registerRegistry(BuiltInRegistries.PAINTING_VARIANT, PaintingVariant.class);
-		//registerRegistry(BuiltInRegistries.CUSTOM_STAT, ResourceLocation.class);
-		registerRegistry(BuiltInRegistries.CHUNK_STATUS, ChunkStatus.class);
-		registerRegistry(BuiltInRegistries.RULE_TEST, RuleTestType.class);
-		registerRegistry(BuiltInRegistries.POS_RULE_TEST, PosRuleTestType.class);
-		registerRegistry(BuiltInRegistries.MENU, MenuType.class);
-		registerRegistry(BuiltInRegistries.RECIPE_TYPE, RecipeType.class);
-		registerRegistry(BuiltInRegistries.RECIPE_SERIALIZER, RecipeSerializer.class);
-		registerRegistry(BuiltInRegistries.ATTRIBUTE, Attribute.class);
-		registerRegistry(BuiltInRegistries.POSITION_SOURCE_TYPE, PositionSourceType.class);
-		registerRegistry(BuiltInRegistries.COMMAND_ARGUMENT_TYPE, ArgumentTypeInfo.class);
-		registerRegistry(BuiltInRegistries.STAT_TYPE, StatType.class);
-		registerRegistry(BuiltInRegistries.VILLAGER_TYPE, VillagerType.class);
-		registerRegistry(BuiltInRegistries.VILLAGER_PROFESSION, VillagerProfession.class);
-		registerRegistry(BuiltInRegistries.POINT_OF_INTEREST_TYPE, PoiType.class);
-		registerRegistry(BuiltInRegistries.MEMORY_MODULE_TYPE, MemoryModuleType.class);
-		registerRegistry(BuiltInRegistries.SENSOR_TYPE, SensorType.class);
-		registerRegistry(BuiltInRegistries.SCHEDULE, Schedule.class);
-		registerRegistry(BuiltInRegistries.ACTIVITY, Activity.class);
-		registerRegistry(BuiltInRegistries.LOOT_POOL_ENTRY_TYPE, LootPoolEntryType.class);
-		registerRegistry(BuiltInRegistries.LOOT_FUNCTION_TYPE, LootItemFunctionType.class);
-		registerRegistry(BuiltInRegistries.LOOT_CONDITION_TYPE, LootItemConditionType.class);
-		registerRegistry(BuiltInRegistries.LOOT_NUMBER_PROVIDER_TYPE, LootNumberProviderType.class);
-		registerRegistry(BuiltInRegistries.LOOT_NBT_PROVIDER_TYPE, LootNbtProviderType.class);
-		registerRegistry(BuiltInRegistries.LOOT_SCORE_PROVIDER_TYPE, LootScoreProviderType.class);
-		registerRegistry(BuiltInRegistries.FLOAT_PROVIDER_TYPE, FloatProviderType.class);
-		registerRegistry(BuiltInRegistries.INT_PROVIDER_TYPE, IntProviderType.class);
-		registerRegistry(BuiltInRegistries.HEIGHT_PROVIDER_TYPE, HeightProviderType.class);
-		registerRegistry(BuiltInRegistries.BLOCK_PREDICATE_TYPE, BlockPredicateType.class);
-		registerRegistry(BuiltInRegistries.CARVER, WorldCarver.class);
-		registerRegistry(BuiltInRegistries.FEATURE, Feature.class);
-		registerRegistry(BuiltInRegistries.STRUCTURE_PLACEMENT, StructurePlacementType.class);
-		registerRegistry(BuiltInRegistries.STRUCTURE_PIECE, StructurePieceType.class);
-		registerRegistry(BuiltInRegistries.STRUCTURE_TYPE, StructureType.class);
-		registerRegistry(BuiltInRegistries.PLACEMENT_MODIFIER_TYPE, PlacementModifierType.class);
-		registerRegistry(BuiltInRegistries.BLOCKSTATE_PROVIDER_TYPE, BlockStateProviderType.class);
-		registerRegistry(BuiltInRegistries.FOLIAGE_PLACER_TYPE, FoliagePlacerType.class);
-		registerRegistry(BuiltInRegistries.TRUNK_PLACER_TYPE, TrunkPlacerType.class);
-		registerRegistry(BuiltInRegistries.ROOT_PLACER_TYPE, RootPlacerType.class);
-		registerRegistry(BuiltInRegistries.TREE_DECORATOR_TYPE, TreeDecoratorType.class);
-		registerRegistry(BuiltInRegistries.FEATURE_SIZE_TYPE, FeatureSizeType.class);
-		registerRegistry(BuiltInRegistries.STRUCTURE_PROCESSOR, StructureProcessorType.class);
-		registerRegistry(BuiltInRegistries.STRUCTURE_POOL_ELEMENT, StructurePoolElementType.class);
-		registerRegistry(BuiltInRegistries.CAT_VARIANT, CatVariant.class);
-		registerRegistry(BuiltInRegistries.FROG_VARIANT, FrogVariant.class);
-		registerRegistry(BuiltInRegistries.BANNER_PATTERN, BannerPattern.class);
-		registerRegistry(BuiltInRegistries.INSTRUMENT, Instrument.class);
-		registerRegistry(BuiltInRegistries.CREATIVE_MODE_TAB, CreativeModeTab.class);
+		registerRegistry(Registries.GAME_EVENT, GameEvent.class);
+		registerRegistry(Registries.SOUND_EVENT, SoundEvent.class);
+		registerRegistry(Registries.FLUID, Fluid.class);
+		registerRegistry(Registries.MOB_EFFECT, MobEffect.class);
+		registerRegistry(Registries.BLOCK, Block.class);
+		registerRegistry(Registries.ENCHANTMENT, Enchantment.class);
+		registerRegistry(Registries.ENTITY_TYPE, EntityType.class);
+		registerRegistry(Registries.ITEM, Item.class);
+		registerRegistry(Registries.POTION, Potion.class);
+		registerRegistry(Registries.PARTICLE_TYPE, ParticleType.class);
+		registerRegistry(Registries.BLOCK_ENTITY_TYPE, BlockEntityType.class);
+		registerRegistry(Registries.PAINTING_VARIANT, PaintingVariant.class);
+		//registerRegistry(Registries.CUSTOM_STAT, ResourceLocation.class);
+		registerRegistry(Registries.CHUNK_STATUS, ChunkStatus.class);
+		registerRegistry(Registries.RULE_TEST, RuleTestType.class);
+		registerRegistry(Registries.POS_RULE_TEST, PosRuleTestType.class);
+		registerRegistry(Registries.MENU, MenuType.class);
+		registerRegistry(Registries.RECIPE_TYPE, RecipeType.class);
+		registerRegistry(Registries.RECIPE_SERIALIZER, RecipeSerializer.class);
+		registerRegistry(Registries.ATTRIBUTE, Attribute.class);
+		registerRegistry(Registries.POSITION_SOURCE_TYPE, PositionSourceType.class);
+		registerRegistry(Registries.COMMAND_ARGUMENT_TYPE, ArgumentTypeInfo.class);
+		registerRegistry(Registries.STAT_TYPE, StatType.class);
+		registerRegistry(Registries.VILLAGER_TYPE, VillagerType.class);
+		registerRegistry(Registries.VILLAGER_PROFESSION, VillagerProfession.class);
+		registerRegistry(Registries.POINT_OF_INTEREST_TYPE, PoiType.class);
+		registerRegistry(Registries.MEMORY_MODULE_TYPE, MemoryModuleType.class);
+		registerRegistry(Registries.SENSOR_TYPE, SensorType.class);
+		registerRegistry(Registries.SCHEDULE, Schedule.class);
+		registerRegistry(Registries.ACTIVITY, Activity.class);
+		registerRegistry(Registries.LOOT_POOL_ENTRY_TYPE, LootPoolEntryType.class);
+		registerRegistry(Registries.LOOT_FUNCTION_TYPE, LootItemFunctionType.class);
+		registerRegistry(Registries.LOOT_CONDITION_TYPE, LootItemConditionType.class);
+		registerRegistry(Registries.LOOT_NUMBER_PROVIDER_TYPE, LootNumberProviderType.class);
+		registerRegistry(Registries.LOOT_NBT_PROVIDER_TYPE, LootNbtProviderType.class);
+		registerRegistry(Registries.LOOT_SCORE_PROVIDER_TYPE, LootScoreProviderType.class);
+		registerRegistry(Registries.FLOAT_PROVIDER_TYPE, FloatProviderType.class);
+		registerRegistry(Registries.INT_PROVIDER_TYPE, IntProviderType.class);
+		registerRegistry(Registries.HEIGHT_PROVIDER_TYPE, HeightProviderType.class);
+		registerRegistry(Registries.BLOCK_PREDICATE_TYPE, BlockPredicateType.class);
+		registerRegistry(Registries.CARVER, WorldCarver.class);
+		registerRegistry(Registries.FEATURE, Feature.class);
+		registerRegistry(Registries.STRUCTURE_PLACEMENT, StructurePlacementType.class);
+		registerRegistry(Registries.STRUCTURE_PIECE, StructurePieceType.class);
+		registerRegistry(Registries.STRUCTURE_TYPE, StructureType.class);
+		registerRegistry(Registries.PLACEMENT_MODIFIER_TYPE, PlacementModifierType.class);
+		registerRegistry(Registries.BLOCK_STATE_PROVIDER_TYPE, BlockStateProviderType.class);
+		registerRegistry(Registries.FOLIAGE_PLACER_TYPE, FoliagePlacerType.class);
+		registerRegistry(Registries.TRUNK_PLACER_TYPE, TrunkPlacerType.class);
+		registerRegistry(Registries.ROOT_PLACER_TYPE, RootPlacerType.class);
+		registerRegistry(Registries.TREE_DECORATOR_TYPE, TreeDecoratorType.class);
+		registerRegistry(Registries.FEATURE_SIZE_TYPE, FeatureSizeType.class);
+		registerRegistry(Registries.STRUCTURE_PROCESSOR, StructureProcessorType.class);
+		registerRegistry(Registries.STRUCTURE_POOL_ELEMENT, StructurePoolElementType.class);
+		registerRegistry(Registries.CAT_VARIANT, CatVariant.class);
+		registerRegistry(Registries.FROG_VARIANT, FrogVariant.class);
+		registerRegistry(Registries.BANNER_PATTERN, BannerPattern.class);
+		registerRegistry(Registries.INSTRUMENT, Instrument.class);
+		registerRegistry(Registries.CREATIVE_MODE_TAB, CreativeModeTab.class);
 	}
 
 	public static void registerTab(String id, ResourceKey<CreativeModeTab> tab) {
 		Validate.isTrue(!GROUPS.containsKey(id), "Already exists: %s", id);
-		GROUPS.put(id, BuiltInRegistries.CREATIVE_MODE_TAB.getOrThrow(tab));
+		GROUPS.put(id, tab);
 	}
 
 	private static void registerTabs() {
+		//TODO (1.21): use vanilla IDs
 		registerTab(Categories.BUILDING_BLOCKS, CreativeModeTabs.BUILDING_BLOCKS);
 		registerTab(Categories.COLORED_BLOCKS, CreativeModeTabs.COLORED_BLOCKS);
 		registerTab(Categories.COMBAT, CreativeModeTabs.COMBAT);
@@ -277,8 +277,9 @@ public class Kiwi implements ModInitializer {
 		registerTab(Categories.TOOLS_AND_UTILITIES, CreativeModeTabs.TOOLS_AND_UTILITIES);
 	}
 
-	static CreativeModeTab getGroup(String path) {
-		return GROUPS.computeIfAbsent(path, $ -> BuiltInRegistries.CREATIVE_MODE_TAB.get(ResourceLocation.tryParse(path)));
+	@Nullable
+	static ResourceKey<CreativeModeTab> getGroup(String path) {
+		return GROUPS.get(path);
 	}
 
 	public static boolean isLoaded(ResourceLocation module) {
@@ -316,23 +317,22 @@ public class Kiwi implements ModInitializer {
 			}
 
 			for (KiwiAnnotationData module : configuration.modules) {
-				if (!checkDist(module, dist))
+				if (wrongDistribution(module, dist))
 					continue;
 				moduleData.put(mod, module);
 			}
 			for (KiwiAnnotationData optional : configuration.optionals) {
-				if (!checkDist(optional, dist))
+				if (wrongDistribution(optional, dist))
 					continue;
 				classOptionalMap.put(optional.target(), optional);
 			}
 			for (KiwiAnnotationData condition : configuration.conditions) {
-				if (!checkDist(condition, dist))
+				if (wrongDistribution(condition, dist))
 					continue;
 				conditions.put(condition, mod);
 			}
-			//			if (CLOTH_CONFIG) {
 			for (KiwiAnnotationData config : configuration.configs) {
-				if (!checkDist(config, dist))
+				if (wrongDistribution(config, dist))
 					continue;
 				ConfigType type = null;
 				try {
@@ -354,9 +354,8 @@ public class Kiwi implements ModInitializer {
 					}
 				}
 			}
-			//			}
 			for (KiwiAnnotationData packet : configuration.packets) {
-				if (!checkDist(packet, dist))
+				if (wrongDistribution(packet, dist))
 					continue;
 				Networking.processClass(packet.target(), mod);
 			}
@@ -534,20 +533,21 @@ public class Kiwi implements ModInitializer {
 		conditions.clear();
 		conditions = null;
 
-		Object2IntMap<ResourceKey<?>> counter = new Object2IntArrayMap<>();
+		KiwiModules.fire(KiwiModuleContainer::addRegistries);
 		for (KiwiModuleContainer container : KiwiModules.get()) {
-			counter.clear();
-			container.loadGameObjects(registryLookup, counter);
-			LOGGER.info(MARKER, "Module [{}] initialized", container.module.uid);
-			for (ResourceKey<?> key : counter.keySet()) {
-				String keyName = Util.trimRL(key.location());
-				LOGGER.info(MARKER, "    {}: {}", keyName, counter.getInt(key));
-			}
+			container.loadGameObjects(registryLookup);
 		}
 
-		KiwiModules.ALL_USED_REGISTRIES.add(BuiltInRegistries.CREATIVE_MODE_TAB);
-		KiwiModules.ALL_USED_REGISTRIES.add(BuiltInRegistries.ITEM);
-		KiwiModules.fire(KiwiModuleContainer::preInit);
+		KiwiModules.ALL_USED_REGISTRIES.add(Registries.CREATIVE_MODE_TAB);
+		KiwiModules.ALL_USED_REGISTRIES.add(Registries.ITEM);
+		KiwiModules.fire(KiwiModuleContainer::addEntries);
+
+		for (KiwiModuleContainer container : KiwiModules.get()) {
+			LOGGER.info(MARKER, "Module [{}] initialized", container.module.uid);
+			container.registries.registries.asMap().forEach((key, values) -> {
+				LOGGER.info(MARKER, "\t\t{}: {}", Util.trimRL(key), values.size());
+			});
+		}
 	}
 
 	private static void instantiateModule(ResourceLocation id, Class<?> clazz, ModContext context) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {

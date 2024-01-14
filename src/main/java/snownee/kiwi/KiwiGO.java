@@ -5,6 +5,8 @@ import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
 
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
@@ -14,7 +16,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public class KiwiGO<T> implements Supplier<T> {
 
 	private Supplier<T> factory;
-	private ResourceLocation key;
+	private ResourceKey<T> key;
 	private T value;
 
 	public KiwiGO(Supplier<T> factory) {
@@ -35,10 +37,10 @@ public class KiwiGO<T> implements Supplier<T> {
 		return get();
 	}
 
-	public void setKey(ResourceLocation key) {
+	public void setKey(ResourceKey<T> key) {
 		Objects.requireNonNull(key);
 		if (this.key != null) {
-			throw new IllegalStateException("Key already set");
+			throw new IllegalStateException("Key already set: " + this.key + " -> " + key);
 		}
 		this.key = key;
 	}
@@ -72,26 +74,30 @@ public class KiwiGO<T> implements Supplier<T> {
 	}
 
 	public ResourceLocation key() {
+		return key.location();
+	}
+
+	public ResourceKey<T> resourceKey() {
 		return key;
 	}
 
 	@Nullable
-	public Object registry() {
+	public ResourceKey<? extends Registry<?>> findRegistry() {
 		return Kiwi.registryLookup.findRegistry(value);
 	}
 
 	public static class RegistrySpecified<T> extends KiwiGO<T> {
 
-		final Supplier<Object> registry;
+		final ResourceKey<? extends Registry<?>> registryKey;
 
-		public RegistrySpecified(Supplier<T> factory, Supplier<Object> registry) {
+		public RegistrySpecified(Supplier<T> factory, ResourceKey<? extends Registry<?>> registryKey) {
 			super(factory);
-			this.registry = registry;
+			this.registryKey = registryKey;
 		}
 
 		@Override
-		public Object registry() {
-			return registry.get();
+		public ResourceKey<? extends Registry<?>> findRegistry() {
+			return registryKey;
 		}
 	}
 

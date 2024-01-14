@@ -22,7 +22,7 @@ public final class DataModule extends AbstractModule {
 	public static final KiwiGO<RecipeSerializer<KiwiShapelessRecipe>> SHAPELESS = go(KiwiShapelessRecipe.Serializer::new);
 
 	@Override
-	protected void preInit() {
+	protected void addEntries() {
 		ResourceConditions.register(ModuleLoadedCondition.ID, ModuleLoadedCondition.INSTANCE);
 		ResourceConditions.register(EvalCondition.ID, EvalCondition.INSTANCE);
 		CustomIngredientSerializer.register(AlternativesIngredient.Serializer.INSTANCE);

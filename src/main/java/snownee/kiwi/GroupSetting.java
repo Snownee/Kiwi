@@ -53,13 +53,12 @@ public class GroupSetting {
 	public void postApply() {
 		List<ResourceKey<CreativeModeTab>> tabKeys = Stream.of(groups)
 				.map($ -> {
-					CreativeModeTab tab = Kiwi.getGroup($);
+					ResourceKey<CreativeModeTab> tab = Kiwi.getGroup($);
 					if (tab != null) {
-						return BuiltInRegistries.CREATIVE_MODE_TAB.getResourceKey(tab).orElse(null);
+						return tab;
 					}
 					return ResourceKey.create(Registries.CREATIVE_MODE_TAB, new ResourceLocation($));
 				})
-				.filter(Objects::nonNull)
 				.toList();
 		for (ResourceKey<CreativeModeTab> tabKey : tabKeys) {
 			ItemGroupEvents.modifyEntriesEvent(tabKey).register(entries -> {

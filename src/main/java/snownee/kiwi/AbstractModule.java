@@ -35,15 +35,15 @@ import snownee.kiwi.loader.event.PostInitEvent;
  * @author Snownee
  */
 public abstract class AbstractModule {
-	protected final Map<Registry<?>, BiConsumer<KiwiModuleContainer, ?>> decorators = Maps.newHashMap();
+	protected final Map<ResourceKey<? extends Registry<?>>, BiConsumer<KiwiModuleContainer, KiwiGOHolder<?>>> decorators = Maps.newHashMap();
 	public ResourceLocation uid;
 
 	protected static <T> KiwiGO<T> go(Supplier<? extends T> factory) {
 		return new KiwiGO<>((Supplier<T>) factory);
 	}
 
-	protected static <T> KiwiGO<T> go(Supplier<? extends T> factory, Supplier<Object> registry) {
-		return new KiwiGO.RegistrySpecified<>((Supplier<T>) factory, registry);
+	protected static <T> KiwiGO<T> go(Supplier<? extends T> factory, ResourceKey<? extends Registry<?>> registryKey) {
+		return new KiwiGO.RegistrySpecified<>((Supplier<T>) factory, registryKey);
 	}
 
 	/// helper methods:
@@ -92,7 +92,10 @@ public abstract class AbstractModule {
 		return TagKey.create(registryKey, new ResourceLocation(namespace, path));
 	}
 
-	protected void preInit() {
+	public void addRegistries() {
+	}
+
+	protected void addEntries() {
 		// NO-OP
 	}
 

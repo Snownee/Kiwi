@@ -9,13 +9,15 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 
 public final class KiwiModules {
 	private static Map<ResourceLocation, KiwiModuleContainer> MODULES = Maps.newLinkedHashMap();
 	private static final Set<ResourceLocation> LOADED_MODULES = Sets.newHashSet();
 
-	static final Set<Object> ALL_USED_REGISTRIES = Sets.newLinkedHashSet();
+	static final Set<ResourceKey<? extends Registry<?>>> ALL_USED_REGISTRIES = Sets.newLinkedHashSet();
 
 	private KiwiModules() {
 	}

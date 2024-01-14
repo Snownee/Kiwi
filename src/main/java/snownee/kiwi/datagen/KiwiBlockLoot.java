@@ -11,7 +11,7 @@ import com.google.common.collect.Sets;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootTableProvider;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -30,7 +30,7 @@ public abstract class KiwiBlockLoot extends FabricBlockLootTableProvider {
 		super(dataOutput);
 		this.moduleId = moduleId;
 		KiwiModuleContainer container = Objects.requireNonNull(KiwiModules.get(moduleId));
-		knownBlocks = container.getRegistries(BuiltInRegistries.BLOCK);
+		knownBlocks = container.getRegistries(Registries.BLOCK);
 	}
 
 	protected <T extends Block> void handle(Class<T> clazz, Function<T, LootTable.Builder> handler) {
