@@ -263,7 +263,6 @@ public class Kiwi implements ModInitializer {
 	}
 
 	private static void registerTabs() {
-		//TODO (1.21): use vanilla IDs
 		registerTab(Categories.BUILDING_BLOCKS, CreativeModeTabs.BUILDING_BLOCKS);
 		registerTab(Categories.COLORED_BLOCKS, CreativeModeTabs.COLORED_BLOCKS);
 		registerTab(Categories.COMBAT, CreativeModeTabs.COMBAT);

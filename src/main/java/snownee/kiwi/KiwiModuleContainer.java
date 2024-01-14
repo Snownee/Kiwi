@@ -19,7 +19,6 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder.ListMultimapBuilder;
 import com.google.common.collect.Sets;
 
-import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
@@ -33,6 +32,7 @@ import net.minecraft.world.level.block.Block;
 import snownee.kiwi.block.IKiwiBlock;
 import snownee.kiwi.item.ItemCategoryFiller;
 import snownee.kiwi.item.ModBlockItem;
+import snownee.kiwi.loader.ClientPlatform;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.loader.event.PostInitEvent;
@@ -261,7 +261,7 @@ public final class KiwiModuleContainer {
 					if (layer != null) {
 						RenderType type = (RenderType) layer.value().value;
 						if (type != solid && type != null) {
-							BlockRenderLayerMap.INSTANCE.putBlock(block, type);
+							ClientPlatform.setRenderType(block, type);
 							return;
 						}
 					}
@@ -279,7 +279,7 @@ public final class KiwiModuleContainer {
 					return solid;
 				});
 				if (type != solid && type != null) {
-					BlockRenderLayerMap.INSTANCE.putBlock(block, type);
+					ClientPlatform.setRenderType(block, type);
 				}
 			});
 		}

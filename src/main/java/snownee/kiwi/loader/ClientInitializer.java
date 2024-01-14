@@ -7,7 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.client.TooltipEvents;
 
-public class Initializer implements ClientModInitializer {
+public class ClientInitializer implements ClientModInitializer {
 
 	public static final ResourceLocation HIGH = new ResourceLocation(Kiwi.ID, "high");
 	public static final ResourceLocation LOW = new ResourceLocation(Kiwi.ID, "low");

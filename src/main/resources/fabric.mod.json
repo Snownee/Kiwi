@@ -20,7 +20,7 @@
       "snownee.kiwi.Kiwi"
     ],
     "client": [
-      "snownee.kiwi.loader.Initializer"
+      "snownee.kiwi.loader.ClientInitializer"
     ],
     "modmenu": [
       "snownee.kiwi.config.ModMenuIntegration"

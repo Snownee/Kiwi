@@ -29,7 +29,6 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonSyntaxException;
 
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Mth;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiModule.Skip;
@@ -39,6 +38,7 @@ import snownee.kiwi.config.KiwiConfig.GameRestart;
 import snownee.kiwi.config.KiwiConfig.LevelRestart;
 import snownee.kiwi.config.KiwiConfig.Range;
 import snownee.kiwi.config.KiwiConfig.Translation;
+import snownee.kiwi.loader.Platform;
 
 public class ConfigHandler {
 
@@ -161,7 +161,7 @@ public class ConfigHandler {
 	}
 
 	private Path getConfigPath() {
-		return FabricLoader.getInstance().getConfigDir().resolve(fileName + FILE_EXTENSION);
+		return Platform.getConfigDir().resolve(fileName + FILE_EXTENSION);
 	}
 
 	public void init() {
