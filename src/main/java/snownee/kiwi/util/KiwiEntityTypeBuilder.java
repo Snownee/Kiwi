@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
@@ -16,6 +17,8 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.flag.FeatureFlag;
+import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.Heightmap;
 
@@ -23,7 +26,7 @@ public class KiwiEntityTypeBuilder<T extends Entity> {
 	private final Class<?> type;
 	private EntityType.EntityFactory<T> factory;
 	private MobCategory category = MobCategory.MISC;
-	private Block[] immuneTo;
+	private ImmutableSet<Block> immuneTo = ImmutableSet.of();
 	private boolean serialize = true;
 	private boolean summon = true;
 	private boolean fireImmune;
@@ -31,7 +34,7 @@ public class KiwiEntityTypeBuilder<T extends Entity> {
 	private int clientTrackingRange = 5;
 	private int updateInterval = 3;
 	private EntityDimensions dimensions = EntityDimensions.scalable(-1.0f, -1.0f);
-	private FeatureFlag[] requiredFeatures;
+	private FeatureFlagSet requiredFeatures = FeatureFlags.VANILLA_SET;
 	private Boolean forceTrackedVelocityUpdates;
 	@Nullable
 	private Supplier<AttributeSupplier.Builder> defaultAttributeBuilder;
@@ -89,7 +92,7 @@ public class KiwiEntityTypeBuilder<T extends Entity> {
 	}
 
 	public KiwiEntityTypeBuilder<T> specificSpawnBlocks(Block... blocks) {
-		this.immuneTo = blocks;
+		this.immuneTo = ImmutableSet.copyOf(blocks);
 		return this;
 	}
 
@@ -109,7 +112,7 @@ public class KiwiEntityTypeBuilder<T extends Entity> {
 	}
 
 	public KiwiEntityTypeBuilder<T> requiredFeatures(FeatureFlag... featureFlags) {
-		this.requiredFeatures = featureFlags;
+		this.requiredFeatures = FeatureFlags.REGISTRY.subset(featureFlags);
 		return this;
 	}
 
@@ -134,51 +137,26 @@ public class KiwiEntityTypeBuilder<T extends Entity> {
 	}
 
 	public EntityType<T> build() {
-		EntityType.Builder<T> builder = EntityType.Builder.of(factory, category);
-//		if (type == Entity.class) {
-//			builder = FabricEntityTypeBuilder.create();
-//		} else if (type == LivingEntity.class) {
-//			FabricEntityTypeBuilder.Living<LivingEntity> rawBuilder = FabricEntityTypeBuilder.createLiving();
-//			if (this.defaultAttributeBuilder != null) {
-//				rawBuilder.defaultAttributes(this.defaultAttributeBuilder);
-//			}
-//			builder = (FabricEntityTypeBuilder<T>) rawBuilder;
-//		} else if (type == Mob.class) {
-//			FabricEntityTypeBuilder.Mob<Mob> rawBuilder = FabricEntityTypeBuilder.createMob();
-//			if (this.defaultAttributeBuilder != null) {
-//				rawBuilder.defaultAttributes(this.defaultAttributeBuilder);
-//			}
-//			if (this.spawnPredicate != null) {
-//				rawBuilder.spawnRestriction(this.restrictionLocation, this.restrictionHeightmap, (SpawnPlacements.SpawnPredicate<Mob>) this.spawnPredicate);
-//			}
-//			builder = (FabricEntityTypeBuilder<T>) rawBuilder;
-//		} else {
-//			throw new IllegalStateException("Unknown entity type: " + type);
-//		}
-		builder.sized(dimensions.width, dimensions.height);
-		builder.clientTrackingRange(clientTrackingRange);
-		builder.updateInterval(updateInterval);
-		if (!serialize) {
-			builder.noSave();
-		}
-		if (!summon) {
-			builder.noSummon();
-		}
-		if (fireImmune) {
-			builder.fireImmune();
-		}
-		if (immuneTo != null) {
-			builder.immuneTo(immuneTo);
-		}
-		if (canSpawnFarFromPlayer) {
-			builder.canSpawnFarFromPlayer();
-		}
-		if (forceTrackedVelocityUpdates != null) {
-			builder.setShouldReceiveVelocityUpdates(forceTrackedVelocityUpdates);
-		}
-		if (requiredFeatures != null) {
-			builder.requiredFeatures(requiredFeatures);
-		}
-		return builder.build(null);
+		//		if (type == Entity.class) {
+		//			builder = FabricEntityTypeBuilder.create();
+		//		} else if (type == LivingEntity.class) {
+		//			FabricEntityTypeBuilder.Living<LivingEntity> rawBuilder = FabricEntityTypeBuilder.createLiving();
+		//			if (this.defaultAttributeBuilder != null) {
+		//				rawBuilder.defaultAttributes(this.defaultAttributeBuilder);
+		//			}
+		//			builder = (FabricEntityTypeBuilder<T>) rawBuilder;
+		//		} else if (type == Mob.class) {
+		//			FabricEntityTypeBuilder.Mob<Mob> rawBuilder = FabricEntityTypeBuilder.createMob();
+		//			if (this.defaultAttributeBuilder != null) {
+		//				rawBuilder.defaultAttributes(this.defaultAttributeBuilder);
+		//			}
+		//			if (this.spawnPredicate != null) {
+		//				rawBuilder.spawnRestriction(this.restrictionLocation, this.restrictionHeightmap, (SpawnPlacements.SpawnPredicate<Mob>) this.spawnPredicate);
+		//			}
+		//			builder = (FabricEntityTypeBuilder<T>) rawBuilder;
+		//		} else {
+		//			throw new IllegalStateException("Unknown entity type: " + type);
+		//		}
+		return new EntityType<>(factory, category, serialize, summon, fireImmune, canSpawnFarFromPlayer, immuneTo, dimensions, clientTrackingRange, updateInterval, requiredFeatures);
 	}
 }
