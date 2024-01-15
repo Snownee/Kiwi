@@ -7,18 +7,29 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonObject;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
+import net.fabricmc.loader.api.ModContainer;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.level.block.Block;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.ConfigUI;
 import snownee.kiwi.config.KiwiConfigManager;
@@ -63,6 +74,7 @@ public class KiwiLanguageProvider implements DataProvider {
 	public CompletableFuture<?> run(CachedOutput writer) {
 		TreeMap<String, String> translationEntries = new TreeMap<>();
 
+		generateModNameAndDescription(translationEntries);
 		generateConfigEntries(translationEntries);
 		generateTranslations((String key, String value) -> {
 			Objects.requireNonNull(key);
@@ -90,8 +102,7 @@ public class KiwiLanguageProvider implements DataProvider {
 		return DataProvider.saveStable(writer, langEntryJson, getLangFilePath(this.languageCode));
 	}
 
-	private void generateConfigEntries(Map<String, String> translationEntries) {
-		Joiner joiner = Joiner.on('.');
+	protected void generateConfigEntries(Map<String, String> translationEntries) {
 		for (ConfigHandler handler : KiwiConfigManager.allConfigs) {
 			if (!Objects.equals(handler.getModId(), dataOutput.getModId())) {
 				continue;
@@ -111,7 +122,7 @@ public class KiwiLanguageProvider implements DataProvider {
 				}
 				List<String> path = Lists.newArrayList(value.path.split("\\."));
 				String title = Util.friendlyText(path.remove(path.size() - 1));
-				String subCatKey = joiner.join(path);
+				String subCatKey = String.join(".", path);
 				if (!path.isEmpty() && !subCats.contains(subCatKey)) {
 					subCats.add(subCatKey);
 					translationEntries.put(handler.getModId() + ".config." + subCatKey, Util.friendlyText(path.get(path.size() - 1)));
@@ -120,6 +131,39 @@ public class KiwiLanguageProvider implements DataProvider {
 				translationEntries.put(value.translation + ".desc", "");
 			}
 		}
+	}
+
+	protected void generateGameObjectsEntries(Map<String, String> translationEntries) {
+		generateGameObjectEntries(translationEntries, Registries.BLOCK, Block::getDescriptionId);
+		generateGameObjectEntries(translationEntries, Registries.ITEM, Item::getDescriptionId);
+		generateGameObjectEntries(translationEntries, Registries.ENTITY_TYPE, EntityType::getDescriptionId);
+		generateGameObjectEntries(translationEntries, Registries.CREATIVE_MODE_TAB, tab -> {
+			Component component = tab.getDisplayName();
+			if (component.getContents() instanceof TranslatableContents contents) {
+				return contents.getKey();
+			} else {
+				return null;
+			}
+		});
+		generateGameObjectEntries(translationEntries, Registries.ENCHANTMENT, Enchantment::getDescriptionId);
+		generateGameObjectEntries(translationEntries, Registries.CUSTOM_STAT, stat -> net.minecraft.Util.makeDescriptionId("stat", stat));
+		generateGameObjectEntries(translationEntries, Registries.MOB_EFFECT, MobEffect::getDescriptionId);
+	}
+
+	protected void generateModNameAndDescription(Map<String, String> translationEntries) {
+		ModContainer container = dataOutput.getModContainer();
+		String modId = dataOutput.getModId();
+		translationEntries.put("modmenu.nameTranslation.%s".formatted(modId), container.getMetadata().getName());
+		translationEntries.put("modmenu.descriptionTranslation.%s".formatted(modId), container.getMetadata().getDescription());
+	}
+
+	protected <T> void generateGameObjectEntries(Map<String, String> translationEntries, ResourceKey<Registry<T>> registryKey, Function<T, String> keyMapper) {
+		GameObjectLookup.allHolders(registryKey, dataOutput.getModId()).forEach(holder -> {
+			String key = keyMapper.apply(holder.value());
+			if (key != null) {
+				translationEntries.put(key, Util.friendlyText(holder.key().location().getPath()));
+			}
+		});
 	}
 
 	private Path getLangFilePath(String code) {
