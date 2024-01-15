@@ -30,9 +30,10 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.mojang.logging.LogUtils;
 
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -123,7 +124,7 @@ import snownee.kiwi.network.Networking;
 import snownee.kiwi.util.Util;
 
 @Mod(Kiwi.ID)
-public class Kiwi implements ModInitializer {
+public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer {
 	public static final String ID = "kiwi";
 	public static final RegistryLookup registryLookup = new RegistryLookup();
 	static final Marker MARKER = MarkerFactory.getMarker("INIT");
@@ -134,6 +135,7 @@ public class Kiwi implements ModInitializer {
 	private static Multimap<String, KiwiAnnotationData> moduleData = ArrayListMultimap.create();
 	private static Map<KiwiAnnotationData, String> conditions = Maps.newHashMap();
 	private static boolean tagsUpdated;
+	public static boolean enableDataModule;
 
 	private static boolean wrongDistribution(KiwiAnnotationData annotationData, String dist) {
 		try {
@@ -293,7 +295,22 @@ public class Kiwi implements ModInitializer {
 		return tagsUpdated;
 	}
 
+	public static void enableDataModule() {
+		enableDataModule = true;
+	}
+
+	// a hack to make sure our mod is loaded after all other mods,
+	// so that other mods can call `enableDataModule` in their `onInitialize` method
 	@Override
+	public void onInitializeClient() {
+		onInitialize();
+	}
+
+	@Override
+	public void onInitializeServer() {
+		onInitialize();
+	}
+
 	public void onInitialize() {
 		try {
 			registerRegistries();
@@ -445,11 +462,7 @@ public class Kiwi implements ModInitializer {
 
 			ResourceLocation rl = new ResourceLocation(modid, name);
 			if (disabledModules.contains(rl)) {
-				if (KiwiConfigManager.modules.containsKey(rl)) { // module is optional
-					continue;
-				} else {
-					throw new RuntimeException("Cannot load mandatory module: " + rl);
-				}
+				continue;
 			}
 			if (KiwiConfigManager.modules.containsKey(rl) && !KiwiConfigManager.modules.get(rl).get()) {
 				continue;

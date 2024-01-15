@@ -16,10 +16,11 @@
   "icon": "assets/kiwi/logo.png",
 
   "entrypoints": {
-    "main": [
+    "server": [
       "snownee.kiwi.Kiwi"
     ],
     "client": [
+      "snownee.kiwi.Kiwi",
       "snownee.kiwi.loader.ClientInitializer"
     ],
     "modmenu": [

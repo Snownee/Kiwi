@@ -8,27 +8,9 @@
     },
     {
       "target": "snownee.kiwi.KiwiCommonConfig"
-    },
-    {
-      "target": "snownee.kiwi.test.TestConfig",
-      "data": {
-        "value": "test"
-      }
     }
   ],
   "KiwiModule": [
-    {
-      "target": "snownee.kiwi.test.TestModule",
-      "data": {
-        "value": "test"
-      }
-    },
-    {
-      "target": "snownee.kiwi.test.TestModule2",
-      "data": {
-        "value": "test2"
-      }
-    },
     {
       "target": "snownee.kiwi.contributor.Contributors",
       "data": {
@@ -39,20 +21,6 @@
       "target": "snownee.kiwi.data.DataModule",
       "data": {
         "value": "data"
-      }
-    }
-  ],
-  "Optional": [
-    {
-      "target": "snownee.kiwi.test.TestModule",
-      "data": {
-        "defaultEnabled": false
-      }
-    },
-    {
-      "target": "snownee.kiwi.test.TestModule2",
-      "data": {
-        "defaultEnabled": false
       }
     }
   ],
@@ -68,6 +36,17 @@
       "data": {
         "dir": "PLAY_TO_CLIENT",
         "value": "sync_cosmetic"
+      }
+    }
+  ],
+  "LoadingCondition": [
+    {
+      "target": "snownee.kiwi.data.DataModule",
+      "data": {
+        "method": "shouldLoad",
+        "value": [
+          "data"
+        ]
       }
     }
   ]
