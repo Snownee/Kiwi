@@ -38,7 +38,6 @@ public class AlternativesIngredient extends AbstractIngredient {
 
 	public AlternativesIngredient(@Nullable JsonArray options) {
 		this.options = options;
-		internal(); // force load due to the networking bug
 	}
 
 	@Override
@@ -63,7 +62,7 @@ public class AlternativesIngredient extends AbstractIngredient {
 
 	public Ingredient internal() {
 		if (cached == null) {
-			Objects.requireNonNull(options);
+			Objects.requireNonNull(options, "Options in AlternativesIngredient is null");
 			cached = Ingredient.EMPTY;
 			for (JsonElement option : options) {
 				try {
@@ -140,7 +139,9 @@ public class AlternativesIngredient extends AbstractIngredient {
 
 		@Override
 		public AlternativesIngredient parse(JsonObject json) {
-			return new AlternativesIngredient(GsonHelper.getAsJsonArray(json, "options"));
+			AlternativesIngredient ingredient = new AlternativesIngredient(GsonHelper.getAsJsonArray(json, "options"));
+			ingredient.internal(); // force load due to the networking bug
+			return ingredient;
 		}
 
 		@Override
