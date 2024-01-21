@@ -95,12 +95,26 @@ public class KiwiShapelessRecipe extends ShapelessRecipe {
 
 		@Override
 		public KiwiShapelessRecipe fromNetwork(ResourceLocation recipeId, FriendlyByteBuf buffer) {
-			return new KiwiShapelessRecipe(RecipeSerializer.SHAPELESS_RECIPE.fromNetwork(recipeId, buffer), buffer.readBoolean());
+			String string = buffer.readUtf();
+			CraftingBookCategory craftingBookCategory = buffer.readEnum(CraftingBookCategory.class);
+			int i = buffer.readVarInt();
+			NonNullList<Ingredient> nonNullList = NonNullList.createWithCapacity(i);
+			for (int j = 0; j < i; ++j) {
+				nonNullList.add(Ingredient.fromNetwork(buffer));
+			}
+			ItemStack itemStack = buffer.readItem();
+			return new KiwiShapelessRecipe(new ShapelessRecipe(recipeId, string, craftingBookCategory, itemStack, nonNullList), buffer.readBoolean());
 		}
 
 		@Override
 		public void toNetwork(FriendlyByteBuf buffer, KiwiShapelessRecipe recipe) {
-			RecipeSerializer.SHAPELESS_RECIPE.toNetwork(buffer, recipe);
+			buffer.writeUtf(recipe.getGroup());
+			buffer.writeEnum(recipe.category());
+			buffer.writeVarInt(recipe.getIngredients().size());
+			for (Ingredient ingredient : recipe.getIngredients()) {
+				ingredient.toNetwork(buffer);
+			}
+			buffer.writeItem(recipe.result);
 			buffer.writeBoolean(recipe.noContainers);
 		}
 	}
