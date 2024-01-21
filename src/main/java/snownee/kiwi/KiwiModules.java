@@ -10,6 +10,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import net.minecraft.resources.ResourceLocation;
+import snownee.kiwi.loader.Platform;
 
 public final class KiwiModules {
 	private static Map<ResourceLocation, ModuleInfo> MODULES = Maps.newLinkedHashMap();
@@ -44,8 +45,7 @@ public final class KiwiModules {
 	}
 
 	public static void clear() {
-		// FabricDataGenHelper.ENABLED
-		if (System.getProperty("fabric-api.datagen") != null) {
+		if (!Platform.isDataGen()) {
 			MODULES.clear();
 			MODULES = Map.of();
 		}
