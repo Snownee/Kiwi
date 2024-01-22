@@ -189,6 +189,7 @@ public class ConfigHandler {
 		Path configPath = getConfigPath();
 		Map<String, Object> map;
 		try {
+			Kiwi.logger.debug("Trying loading config from file: {}", configPath);
 			Toml toml = new Toml().read(configPath.toFile());
 			map = toml.toMap();
 		} catch (IllegalStateException e) {
