@@ -32,7 +32,6 @@ import com.mojang.logging.LogUtils;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.DedicatedServerModInitializer;
-import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -136,6 +135,7 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 	private static Map<KiwiAnnotationData, String> conditions = Maps.newHashMap();
 	private static boolean tagsUpdated;
 	public static boolean enableDataModule;
+	private static boolean initialized;
 
 	private static boolean wrongDistribution(KiwiAnnotationData annotationData, String dist) {
 		try {
@@ -311,7 +311,12 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 		onInitialize();
 	}
 
-	public void onInitialize() {
+	public static void onInitialize() {
+		if (initialized) {
+			return;
+		}
+		initialized = true;
+
 		try {
 			registerRegistries();
 			registerTabs();
@@ -353,7 +358,7 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 				ConfigType type = null;
 				try {
 					type = ConfigType.valueOf((String) config.data().get("type"));
-				} catch (Throwable e) {
+				} catch (Throwable ignored) {
 				}
 				type = type == null ? ConfigType.COMMON : type;
 				if ((type != ConfigType.CLIENT || Platform.isPhysicalClient() || Platform.isDataGen())) {
@@ -402,7 +407,7 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 
 		KiwiConfigManager.init();
 		CommandRegistrationCallback.EVENT.register(KiwiCommand::register);
-		ServerLifecycleEvents.SERVER_STARTING.register(this::serverInit);
+		ServerLifecycleEvents.SERVER_STARTING.register(Kiwi::serverInit);
 		ServerLifecycleEvents.SERVER_STOPPED.register($ -> currentServer = null);
 		AttackEntityCallback.EVENT.register(Util::onAttackEntity);
 		if (Platform.isPhysicalClient()) {
@@ -410,12 +415,12 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 			Layer.CUTOUT_MIPPED.value = RenderType.cutoutMipped();
 			Layer.TRANSLUCENT.value = RenderType.translucent();
 
-			ClientLifecycleEvents.CLIENT_STARTED.register(this::clientInit);
+			ClientLifecycleEvents.CLIENT_STARTED.register(Kiwi::clientInit);
 		}
 		preInit();
 	}
 
-	private void preInit() {
+	private static void preInit() {
 		Set<ResourceLocation> disabledModules = Sets.newHashSet();
 		conditions.forEach((k, v) -> {
 			try {
@@ -567,21 +572,20 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 		KiwiModules.add(id, instance, context);
 	}
 
-	private void init() {
+	private static void init() {
 		KiwiConfigManager.refresh();
 		InitEvent e = new InitEvent();
 		KiwiModules.fire(m -> m.init(e));
 		BlockDefinition.registerFactory(SimpleBlockDefinition.Factory.INSTANCE);
 	}
 
-	@Environment(EnvType.CLIENT)
-	private void clientInit(Minecraft mc) {
+	private static void clientInit(Minecraft mc) {
 		init();
 		postInit();
 		loadComplete();
 	}
 
-	private void serverInit(MinecraftServer server) {
+	private static void serverInit(MinecraftServer server) {
 		currentServer = server;
 		if (server.isDedicatedServer()) {
 			init();
@@ -591,13 +595,13 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 		//server.getLevel(Level.OVERWORLD).getDataStorage().computeIfAbsent(Scheduler::load, () -> Scheduler.INSTANCE, Scheduler.ID);
 	}
 
-	private void postInit() {
+	private static void postInit() {
 		PostInitEvent e = new PostInitEvent();
 		KiwiModules.fire(m -> m.postInit(e));
 		KiwiModules.clear();
 	}
 
-	private void loadComplete() {
+	private static void loadComplete() {
 		registryLookup.cache.invalidateAll();
 	}
 

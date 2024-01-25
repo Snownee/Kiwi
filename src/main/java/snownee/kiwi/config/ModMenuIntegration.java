@@ -18,6 +18,7 @@ public class ModMenuIntegration implements ModMenuApi {
 
 	public Map<String, ConfigScreenFactory<?>> factories() {
 		if (cachedFactories == null) {
+			Kiwi.onInitialize();
 			if (Platform.isModLoaded("cloth-config")) {
 				Set<String> mods = KiwiConfigManager.allConfigs.stream().map(ConfigHandler::getModId).collect(Collectors.toSet());
 				Map<String, ConfigScreenFactory<?>> factories = Maps.newHashMap();
