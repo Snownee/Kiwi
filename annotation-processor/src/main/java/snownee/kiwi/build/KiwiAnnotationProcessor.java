@@ -2,10 +2,13 @@ package snownee.kiwi.build;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
@@ -26,25 +29,20 @@ import javax.tools.Diagnostic.Kind;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
-import com.google.common.io.Closeables;
 import com.google.gson.GsonBuilder;
 
 import snownee.kiwi.KiwiAnnotationData;
 
 /* off */
 @SupportedAnnotationTypes({
-	"snownee.kiwi.KiwiModule",
-	"snownee.kiwi.KiwiModule.Optional",
-	"snownee.kiwi.KiwiModule.LoadingCondition",
-	"snownee.kiwi.config.KiwiConfig",
-	"snownee.kiwi.network.KiwiPacket",
-	"snownee.kiwi.Mod",
+		"snownee.kiwi.KiwiModule",
+		"snownee.kiwi.KiwiModule.Optional",
+		"snownee.kiwi.KiwiModule.LoadingCondition",
+		"snownee.kiwi.config.KiwiConfig",
+		"snownee.kiwi.network.KiwiPacket",
+		"snownee.kiwi.Mod",
 })
-@SuppressWarnings(value = { "unchecked" })
+@SuppressWarnings(value = {"unchecked"})
 /* on */
 public class KiwiAnnotationProcessor extends AbstractProcessor {
 
@@ -67,7 +65,7 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 			return true;
 		}
 		messager.printMessage(Kind.NOTE, "KiwiAnnotationProcessor is processing");
-		Multimap<String, KiwiAnnotationData> map = Multimaps.newMultimap(Maps.newTreeMap(), Lists::newArrayList);
+		TreeMap<String, List<KiwiAnnotationData>> map = new TreeMap<>();
 		for (TypeElement annotation : annotations) {
 			String className = annotation.toString();
 			ElementKind elementKind = ElementKind.CLASS;
@@ -84,7 +82,7 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 					continue;
 				}
 				AnnotationMirror a = getAnnotation(ele, annotation);
-				Map<String, Object> o = Maps.newHashMap();
+				Map<String, Object> o = new TreeMap<>();
 				for (Entry<? extends ExecutableElement, ? extends AnnotationValue> e : a.getElementValues().entrySet()) {
 					o.put(e.getKey().getSimpleName().toString(), mapValue(e.getValue()));
 				}
@@ -104,24 +102,19 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 					target = ele.toString();
 				}
 				if (!target.startsWith("snownee.kiwi.test."))
-					map.put(annotation.getSimpleName().toString(), new KiwiAnnotationData(target, o.isEmpty() ? null : o));
+					map.computeIfAbsent(annotation.getSimpleName().toString(), $ -> new ArrayList<>()).add(new KiwiAnnotationData(target, o.isEmpty() ? null : o));
 			}
 		}
-		String json = new GsonBuilder().setPrettyPrinting().create().toJson(map.asMap());
+		String json = new GsonBuilder().setPrettyPrinting().create().toJson(map);
 		//		messager.printMessage(Kind.NOTE, json);
 
-		PrintWriter writer = null;
 		try {
 			FileObject file = filer.createResource(StandardLocation.CLASS_OUTPUT, "", modId + ".kiwi.json");
-			writer = new PrintWriter(file.openWriter());
-			writer.write(json);
+			try (PrintWriter writer = new PrintWriter(file.openWriter())) {
+				writer.write(json);
+			}
 		} catch (IOException e) {
 			messager.printMessage(Kind.ERROR, e.toString());
-		} finally {
-			try {
-				Closeables.close(writer, true);
-			} catch (IOException e) {
-			}
 		}
 		return true;
 	}
@@ -145,10 +138,9 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 
 		for (AnnotationMirror annotation : annotations) {
 			Element element = annotation.getAnnotationType().asElement();
-			if (!(element instanceof TypeElement)) {
+			if (!(element instanceof TypeElement annotationElement)) {
 				continue;
 			}
-			TypeElement annotationElement = (TypeElement) element;
 			if (annotationElement.equals(annotation2)) {
 				return annotation;
 			}
@@ -161,7 +153,7 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 		if (v instanceof VariableElement) {
 			v = v.toString();
 		} else if (v instanceof List) {
-			v = ((List<AnnotationValue>) v).stream().map($ -> mapValue($)).toList();
+			v = ((List<AnnotationValue>) v).stream().map(KiwiAnnotationProcessor::mapValue).toList();
 		}
 		return v;
 	}
