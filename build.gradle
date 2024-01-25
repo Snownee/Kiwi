@@ -1,6 +1,6 @@
 plugins {
     id "com.github.johnrengelman.shadow" version "7.0.0"
-    id 'fabric-loom' version '1.2-SNAPSHOT'
+    id 'fabric-loom' version '1.5.+'
     id 'maven-publish'
     id "me.shedaniel.unified-publishing" version "0.1.+"
 }
@@ -25,9 +25,6 @@ repositories {
 
 sourceSets {
     main.resources.srcDirs += "$rootDir/src/generated/resources"
-    main.java.srcDirs += "$rootDir/annotation/src/main/java"
-    main.resources.srcDirs += "$rootDir/annotation-processor/src/main/resources"
-    main.java.srcDirs += "$rootDir/annotation-processor/src/main/java"
 }
 
 loom {
@@ -73,11 +70,14 @@ dependencies {
     }
     modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
 
-    implementation "org.yaml:snakeyaml:${project.snakeyaml_version}"
-    shadowCommon("org.yaml:snakeyaml:${project.snakeyaml_version}")
-    implementation "com.ezylang:EvalEx:${project.evalex_version}"
-    shadowCommon("com.ezylang:EvalEx:${project.evalex_version}")
-
+    implementation shadowCommon("org.yaml:snakeyaml:${project.snakeyaml_version}")
+    implementation shadowCommon("com.ezylang:EvalEx:${project.evalex_version}")
+    implementation shadowCommon(project(':annotation')) {
+        transitive(false)
+    }
+    implementation shadowCommon(project(':annotation-processor')) {
+        transitive(false)
+    }
     annotationProcessor project(':annotation-processor')
 }
 
@@ -107,23 +107,23 @@ java {
     // withSourcesJar()
 }
 
-def a = [
-        "/assets/kiwi/blockstates",
-        "/assets/kiwi/models",
-        "/assets/kiwi/lang/en_us.existing.json",
-        "/snownee/kiwi/test",
-        "/data",
-        "/.cache",
-        "/third_party"
-]
+tasks.withType(Jar).configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    it.exclude([
+            "/assets/kiwi/blockstates",
+            "/assets/kiwi/models",
+            "/assets/kiwi/lang/en_us.existing.json",
+            "/snownee/kiwi/test",
+            "/data",
+            "/.cache",
+            "/third_party"
+    ])
+}
 
 jar {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 shadowJar {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    exclude(a)
     relocate "org.yaml.snakeyaml", "${project.group}.shadowed.org.yaml.snakeyaml"
     relocate "com.ezylang.evalex", "${project.group}.shadowed.com.ezylang.evalex"
     configurations = [project.configurations.shadowCommon]
@@ -131,10 +131,9 @@ shadowJar {
 }
 
 remapJar {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     dependsOn(shadowJar)
-    input.set(shadowJar.archiveFile)
-    archiveClassifier = ""
+    inputFile.set(shadowJar.archiveFile)
+    archiveClassifier.set("")
 
     from("LICENSE") {
         rename { "${it}_${project.archivesBaseName}" }
