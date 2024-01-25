@@ -28,7 +28,7 @@ sourceSets {
 }
 
 loom {
-    accessWidenerPath = file("src/main/resources/kiwi.accesswidener")
+    accessWidenerPath = file("src/main/resources/${project.mod_id}.accesswidener")
     mixin {
         defaultRefmapName = "${project.mod_id}.refmap.json"
     }
@@ -110,10 +110,10 @@ java {
 tasks.withType(Jar).configureEach {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     it.exclude([
-            "/assets/kiwi/blockstates",
-            "/assets/kiwi/models",
-            "/assets/kiwi/lang/en_us.existing.json",
-            "/snownee/kiwi/test",
+            "/assets/${project.mod_id}/blockstates",
+            "/assets/${project.mod_id}/models",
+            "/assets/${project.mod_id}/lang/en_us.existing.json",
+            "/snownee/${project.mod_id}/test",
             "/data",
             "/.cache",
             "/third_party"
