@@ -1,0 +1,20 @@
+conditions:
+- data:
+    method: shouldLoad
+    value: [data]
+  target: snownee.kiwi.data.DataModule
+configs:
+- data: {type: CLIENT}
+  target: snownee.kiwi.KiwiClientConfig
+- data: {}
+  target: snownee.kiwi.KiwiCommonConfig
+modules:
+- data: {value: contributors}
+  target: snownee.kiwi.contributor.Contributors
+- data: {value: data}
+  target: snownee.kiwi.data.DataModule
+packets:
+- data: {value: set_cosmetic}
+  target: snownee.kiwi.contributor.network.CSetCosmeticPacket
+- data: {dir: PLAY_TO_CLIENT, value: sync_cosmetic}
+  target: snownee.kiwi.contributor.network.SSyncCosmeticPacket

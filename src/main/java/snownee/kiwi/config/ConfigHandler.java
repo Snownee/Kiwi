@@ -171,21 +171,6 @@ public class ConfigHandler {
 			refresh();
 		}
 		save();
-		//		try {
-		//			Toml toml = new Toml().read(configPath.toFile());
-		//		} catch (IllegalStateException e) {
-		//			throw new SerializationException(e);
-		//		}
-
-		//		ConfigEntryBuilder builder = ConfigEntryBuilder.create();
-		//		ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
-		//		build(builder);
-		//		ModContainer modContainer = ModList.get().getModContainerById(modId).orElseThrow(NullPointerException::new);
-		//		config = new ModConfig(ModConfig.Type.valueOf(type.name()), builder.build(), modContainer, fileName);
-		//		modContainer.addConfig(config);
-		//		if (modContainer instanceof FMLModContainer) {
-		//			((FMLModContainer) modContainer).getEventBus().addListener(this::onFileChange);
-		//		}
 	}
 
 	@SuppressWarnings("rawtypes")

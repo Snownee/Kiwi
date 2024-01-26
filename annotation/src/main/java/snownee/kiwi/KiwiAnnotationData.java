@@ -3,19 +3,22 @@ package snownee.kiwi;
 import java.util.Map;
 
 public class KiwiAnnotationData {
-	String target;
-	Map<String, Object> data;
+	private String target;
+	private Map<String, Object> data;
 
-	public KiwiAnnotationData(String target, Map<String, Object> data) {
+	public void setTarget(String target) {
 		this.target = target;
+	}
+
+	public void setData(Map<String, Object> data) {
 		this.data = data;
 	}
 
-	public String target() {
+	public String getTarget() {
 		return target;
 	}
 
-	public Map<String, Object> data() {
+	public Map<String, Object> getData() {
 		return data == null ? Map.of() : data;
 	}
 }

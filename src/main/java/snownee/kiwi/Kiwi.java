@@ -110,12 +110,13 @@ import net.minecraft.world.level.storage.loot.providers.score.LootScoreProviderT
 import snownee.kiwi.KiwiModule.RenderLayer.Layer;
 import snownee.kiwi.block.def.BlockDefinition;
 import snownee.kiwi.block.def.SimpleBlockDefinition;
+import snownee.kiwi.build.KiwiMetadataParser;
 import snownee.kiwi.command.KiwiCommand;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfig.ConfigType;
 import snownee.kiwi.config.KiwiConfigManager;
-import snownee.kiwi.loader.AnnotatedTypeLoader;
-import snownee.kiwi.loader.KiwiConfiguration;
+import snownee.kiwi.loader.KiwiMetadataLoader;
+import snownee.kiwi.build.KiwiMetadata;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.loader.event.PostInitEvent;
@@ -140,7 +141,7 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 	private static boolean wrongDistribution(KiwiAnnotationData annotationData, String dist) {
 		try {
 			ClassNode clazz = new ClassNode(Opcodes.ASM7);
-			InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(annotationData.target().replace('.', '/') + ".class");
+			InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(annotationData.getTarget().replace('.', '/') + ".class");
 			final ClassReader classReader = new ClassReader(is);
 			classReader.accept(clazz, 0);
 			if (clazz.visibleAnnotations != null) {
@@ -327,77 +328,78 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 		Map<String, KiwiAnnotationData> classOptionalMap = Maps.newHashMap();
 		String dist = Platform.isPhysicalClient() ? "client" : "server";
 		List<String> mods = FabricLoader.getInstance().getAllMods().stream().map(ModContainer::getMetadata).filter($ -> !AbstractModMetadata.TYPE_BUILTIN.equals($.getType())).map(ModMetadata::getId).toList();
+		KiwiMetadataParser metadataParser = new KiwiMetadataParser();
 		for (String mod : mods) {
 			if (mod.startsWith("fabric")) {
 				continue;
 			}
-			AnnotatedTypeLoader loader = new AnnotatedTypeLoader(mod);
-			KiwiConfiguration configuration = loader.get();
-			if (configuration == null) {
+			KiwiMetadataLoader loader = new KiwiMetadataLoader(mod);
+			KiwiMetadata metadata = loader.apply(metadataParser);
+			if (metadata == null) {
 				continue;
 			}
 
-			for (KiwiAnnotationData module : configuration.modules) {
+			for (KiwiAnnotationData module : metadata.get("modules")) {
 				if (wrongDistribution(module, dist))
 					continue;
 				moduleData.put(mod, module);
 			}
-			for (KiwiAnnotationData optional : configuration.optionals) {
+			for (KiwiAnnotationData optional : metadata.get("optionals")) {
 				if (wrongDistribution(optional, dist))
 					continue;
-				classOptionalMap.put(optional.target(), optional);
+				classOptionalMap.put(optional.getTarget(), optional);
 			}
-			for (KiwiAnnotationData condition : configuration.conditions) {
+			for (KiwiAnnotationData condition : metadata.get("conditions")) {
 				if (wrongDistribution(condition, dist))
 					continue;
 				conditions.put(condition, mod);
 			}
-			for (KiwiAnnotationData config : configuration.configs) {
+			for (KiwiAnnotationData config : metadata.get("configs")) {
 				if (wrongDistribution(config, dist))
 					continue;
 				ConfigType type = null;
 				try {
-					type = ConfigType.valueOf((String) config.data().get("type"));
+					type = ConfigType.valueOf((String) config.getData().get("type"));
 				} catch (Throwable ignored) {
 				}
 				type = type == null ? ConfigType.COMMON : type;
 				if ((type != ConfigType.CLIENT || Platform.isPhysicalClient() || Platform.isDataGen())) {
 					try {
-						Class<?> clazz = Class.forName(config.target());
-						String fileName = (String) config.data().get("value");
+						Class<?> clazz = Class.forName(config.getTarget());
+						String fileName = (String) config.getData().get("value");
 						boolean hasModules = type == ConfigType.COMMON && Strings.isNullOrEmpty(fileName);
 						if (Strings.isNullOrEmpty(fileName)) {
 							fileName = String.format("%s-%s", mod, type.extension());
 						}
 						new ConfigHandler(mod, fileName, type, clazz, hasModules);
 					} catch (ClassNotFoundException e) {
-						LOGGER.error(MARKER, "Failed to load config class {}", config.target());
+						LOGGER.error(MARKER, "Failed to load config class {}", config.getTarget());
 					}
 				}
 			}
-			for (KiwiAnnotationData packet : configuration.packets) {
+			for (KiwiAnnotationData packet : metadata.get("packets")) {
 				if (wrongDistribution(packet, dist))
 					continue;
-				Networking.processClass(packet.target(), mod);
+				Networking.processClass(packet.getTarget(), mod);
 			}
 		}
 
 		LOGGER.info(MARKER, "Processing " + moduleData.size() + " KiwiModule annotations");
 
 		for (Entry<String, KiwiAnnotationData> entry : moduleData.entries()) {
-			KiwiAnnotationData optional = classOptionalMap.get(entry.getValue().target());
+			KiwiAnnotationData optional = classOptionalMap.get(entry.getValue().getTarget());
 			if (optional != null) {
 				String modid = entry.getKey();
 				if (!Platform.isModLoaded(modid)) {
 					continue;
 				}
 
-				String name = (String) entry.getValue().data().get("value");
+				String name = (String) entry.getValue().getData().get("value");
 				if (Strings.isNullOrEmpty(name)) {
 					name = "core";
 				}
 
-				Boolean defaultEnabled = (Boolean) optional.data().get("defaultEnabled");
+				Boolean defaultEnabled = (Boolean) optional.getData().get("defaultEnabled");
 				if (defaultEnabled == null) {
 					defaultEnabled = Boolean.TRUE;
 				}
@@ -424,9 +426,9 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 		Set<ResourceLocation> disabledModules = Sets.newHashSet();
 		conditions.forEach((k, v) -> {
 			try {
-				Class<?> clazz = Class.forName(k.target());
-				String methodName = (String) k.data().get("method");
-				List<String> values = (List<String>) k.data().get("value");
+				Class<?> clazz = Class.forName(k.getTarget());
+				String methodName = (String) k.getData().get("method");
+				List<String> values = (List<String>) k.getData().get("value");
 				if (values == null) {
 					values = List.of(v);
 				}
@@ -460,7 +462,7 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 				continue;
 			}
 
-			String name = (String) module.data().get("value");
+			String name = (String) module.getData().get("value");
 			if (Strings.isNullOrEmpty(name)) {
 				name = "core";
 			}
@@ -473,9 +475,9 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 				continue;
 			}
 
-			Info info = new Info(rl, module.target());
+			Info info = new Info(rl, module.getTarget());
 
-			String dependencies = (String) module.data().get("dependencies");
+			String dependencies = (String) module.getData().get("dependencies");
 			/* off */
 			List<String> rules = Stream.of(Strings.nullToEmpty(dependencies).split(";"))
 					.filter(s -> !Strings.isNullOrEmpty(s))

@@ -3,7 +3,6 @@ package snownee.kiwi.build;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -29,21 +28,16 @@ import javax.tools.Diagnostic.Kind;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 
-import com.google.gson.GsonBuilder;
-
 import snownee.kiwi.KiwiAnnotationData;
 
-/* off */
 @SupportedAnnotationTypes({
 		"snownee.kiwi.KiwiModule",
 		"snownee.kiwi.KiwiModule.Optional",
 		"snownee.kiwi.KiwiModule.LoadingCondition",
 		"snownee.kiwi.config.KiwiConfig",
 		"snownee.kiwi.network.KiwiPacket",
-		"snownee.kiwi.Mod",
-})
-@SuppressWarnings(value = {"unchecked"})
-/* on */
+		"snownee.kiwi.Mod"})
+@SuppressWarnings({"unchecked"})
 public class KiwiAnnotationProcessor extends AbstractProcessor {
 
 	Messager messager;
@@ -65,14 +59,12 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 			return true;
 		}
 		messager.printMessage(Kind.NOTE, "KiwiAnnotationProcessor is processing");
-		TreeMap<String, List<KiwiAnnotationData>> map = new TreeMap<>();
+		KiwiMetadata metadata = new KiwiMetadata();
+		Map<String, String> keyMap = Map.of("snownee.kiwi.KiwiModule", "modules", "snownee.kiwi.KiwiModule.Optional", "optionals", "snownee.kiwi.KiwiModule.LoadingCondition", "conditions", "snownee.kiwi.config.KiwiConfig", "configs", "snownee.kiwi.network.KiwiPacket", "packets");
 		for (TypeElement annotation : annotations) {
 			String className = annotation.toString();
 			ElementKind elementKind = ElementKind.CLASS;
-			if ("snownee.kiwi.KiwiModule.Optional".equals(className)) {
-				className = "snownee.kiwi.KiwiModule$Optional";
-			} else if ("snownee.kiwi.KiwiModule.LoadingCondition".equals(className)) {
-				className = "snownee.kiwi.KiwiModule$LoadingCondition";
+			if ("snownee.kiwi.KiwiModule.LoadingCondition".equals(className)) {
 				elementKind = ElementKind.METHOD;
 			}
 			Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(annotation);
@@ -101,17 +93,24 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 				} else {
 					target = ele.toString();
 				}
-				if (!target.startsWith("snownee.kiwi.test."))
-					map.computeIfAbsent(annotation.getSimpleName().toString(), $ -> new ArrayList<>()).add(new KiwiAnnotationData(target, o.isEmpty() ? null : o));
+				if (target.startsWith("snownee.kiwi.test.")) {
+					continue;
+				}
+				String key = keyMap.get(className);
+				KiwiAnnotationData value = new KiwiAnnotationData();
+				value.setTarget(target);
+				value.setData(o);
+				metadata.map().computeIfAbsent(key, $ -> new ArrayList<>()).add(value);
 			}
 		}
-		String json = new GsonBuilder().setPrettyPrinting().create().toJson(map);
-		//		messager.printMessage(Kind.NOTE, json);
+		String yaml = new KiwiMetadataParser().dump(metadata);
+//		new KiwiMetadataParser().load(yaml);
+//		messager.printMessage(Kind.NOTE, yaml);
 
 		try {
-			FileObject file = filer.createResource(StandardLocation.CLASS_OUTPUT, "", modId + ".kiwi.json");
+			FileObject file = filer.createResource(StandardLocation.CLASS_OUTPUT, "", modId + ".kiwi.yaml");
 			try (PrintWriter writer = new PrintWriter(file.openWriter())) {
-				writer.write(json);
+				writer.write(yaml);
 			}
 		} catch (IOException e) {
 			messager.printMessage(Kind.ERROR, e.toString());
