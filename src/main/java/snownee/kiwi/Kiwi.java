@@ -111,6 +111,7 @@ import net.minecraft.world.level.storage.loot.providers.score.LootScoreProviderT
 import snownee.kiwi.KiwiModule.RenderLayer.Layer;
 import snownee.kiwi.block.def.BlockDefinition;
 import snownee.kiwi.block.def.SimpleBlockDefinition;
+import snownee.kiwi.build.KiwiMetadata;
 import snownee.kiwi.build.KiwiMetadataParser;
 import snownee.kiwi.command.KiwiClientCommand;
 import snownee.kiwi.command.KiwiCommand;
@@ -118,7 +119,6 @@ import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfig.ConfigType;
 import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.loader.KiwiMetadataLoader;
-import snownee.kiwi.build.KiwiMetadata;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.loader.event.PostInitEvent;
@@ -564,11 +564,18 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 		KiwiModules.ALL_USED_REGISTRIES.add(Registries.ITEM);
 		KiwiModules.fire(KiwiModuleContainer::addEntries);
 
+		List<String> entries = Lists.newArrayList();
 		for (KiwiModuleContainer container : KiwiModules.get()) {
 			LOGGER.info(MARKER, "Module [{}] initialized", container.module.uid);
 			container.registries.registries.asMap().forEach((key, values) -> {
-				LOGGER.info(MARKER, "\t\t{}: {}", Util.trimRL(key), values.size());
+				if (!values.isEmpty()) {
+					entries.add("%s: %s".formatted(Util.trimRL(key), values.size()));
+				}
 			});
+			if (!entries.isEmpty()) {
+				LOGGER.info(MARKER, "\t\t" + String.join(", ", entries));
+				entries.clear();
+			}
 		}
 	}
 
