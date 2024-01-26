@@ -46,14 +46,23 @@ public class KiwiGO<T> implements Supplier<T> {
 	}
 
 	public boolean is(Object value) {
+		if (key == null) {
+			return false;
+		}
 		return Objects.equals(this.value, value);
 	}
 
 	public boolean is(ItemStack stack) {
+		if (key == null || stack.isEmpty()) {
+			return false;
+		}
 		return stack.is(((ItemLike) value).asItem());
 	}
 
 	public boolean is(BlockState state) {
+		if (key == null) {
+			return false;
+		}
 		return state.is((Block) value);
 	}
 
