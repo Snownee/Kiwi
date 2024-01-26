@@ -33,6 +33,7 @@ import com.mojang.logging.LogUtils;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -111,6 +112,7 @@ import snownee.kiwi.KiwiModule.RenderLayer.Layer;
 import snownee.kiwi.block.def.BlockDefinition;
 import snownee.kiwi.block.def.SimpleBlockDefinition;
 import snownee.kiwi.build.KiwiMetadataParser;
+import snownee.kiwi.command.KiwiClientCommand;
 import snownee.kiwi.command.KiwiCommand;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfig.ConfigType;
@@ -417,6 +419,7 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 			Layer.CUTOUT_MIPPED.value = RenderType.cutoutMipped();
 			Layer.TRANSLUCENT.value = RenderType.translucent();
 
+			ClientCommandRegistrationCallback.EVENT.register(KiwiClientCommand::register);
 			ClientLifecycleEvents.CLIENT_STARTED.register(Kiwi::clientInit);
 		}
 		preInit();

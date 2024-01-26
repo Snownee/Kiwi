@@ -31,7 +31,7 @@ public class KiwiCommand {
 		builder.then(Commands
 				.literal("reload")
 				.requires(ctx -> ctx.hasPermission(2))
-				.then(Commands.argument("fileName", StringArgumentType.greedyString())
+				.then(Commands.argument("configFile", StringArgumentType.greedyString())
 						.executes(ctx -> {
 							String fileName = StringArgumentType.getString(ctx, "fileName");
 							if (KiwiConfigManager.refresh(fileName)) {

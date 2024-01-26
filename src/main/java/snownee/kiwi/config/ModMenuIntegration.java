@@ -1,10 +1,8 @@
 package snownee.kiwi.config;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
@@ -20,14 +18,14 @@ public class ModMenuIntegration implements ModMenuApi {
 		if (cachedFactories == null) {
 			Kiwi.onInitialize();
 			if (Platform.isModLoaded("cloth-config")) {
-				Set<String> mods = KiwiConfigManager.allConfigs.stream().map(ConfigHandler::getModId).collect(Collectors.toSet());
+				List<String> mods = KiwiConfigManager.getModsWithScreen(ClothConfigIntegration.attributes());
 				Map<String, ConfigScreenFactory<?>> factories = Maps.newHashMap();
 				for (String mod : mods) {
 					factories.put(mod, $ -> ClothConfigIntegration.create($, mod));
 				}
-				cachedFactories = ImmutableMap.copyOf(factories);
+				cachedFactories = Map.copyOf(factories);
 			} else {
-				cachedFactories = ImmutableMap.of();
+				cachedFactories = Map.of();
 			}
 		}
 		return cachedFactories;

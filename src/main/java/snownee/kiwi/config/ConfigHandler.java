@@ -341,6 +341,47 @@ public class ConfigHandler {
 		return valueMap;
 	}
 
+	public boolean providesConfigScreen(ConfigLibAttributes attributes) {
+		for (Value<?> value : getValueMap().values()) {
+			if (value.getAnnotation(ConfigUI.Hide.class) != null) {
+				continue;
+			}
+			Class<?> type = value.getType();
+			if (List.class.isAssignableFrom(type)) {
+				if (!attributes.supportsList()) {
+					continue;
+				}
+				if (attributes.supportsOnlyString()) {
+					ConfigUI.Typed annotation = value.getAnnotation(ConfigUI.Typed.class);
+					if (annotation == null) {
+						continue;
+					}
+					Class<?> valueType = annotation.value();
+					if (valueType != String.class) {
+						continue;
+					}
+				}
+			} else if (Map.class.isAssignableFrom(type)) {
+				if (!attributes.supportsMap()) {
+					continue;
+				}
+				if (attributes.supportsOnlyString()) {
+					ConfigUI.Typed annotation = value.getAnnotation(ConfigUI.Typed.class);
+					if (annotation == null) {
+						continue;
+					}
+					Class<?> keyType = annotation.key();
+					Class<?> valueType = annotation.value();
+					if (keyType != String.class || valueType != String.class) {
+						continue;
+					}
+				}
+			}
+			return true;
+		}
+		return false;
+	}
+
 	public static class Value<T> {
 		@NotNull
 		public final T defValue;
@@ -353,8 +394,7 @@ public class ConfigHandler {
 		public double min = Double.NaN;
 		public double max = Double.NaN;
 		public final String path;
-		@Nullable
-		Method listener;
+		@Nullable Method listener;
 
 		public Value(String path, @Nullable Field field, T value, String translation) {
 			this.path = path;
@@ -420,6 +460,7 @@ public class ConfigHandler {
 			}
 		}
 
+		@Nullable
 		public <A extends Annotation> A getAnnotation(Class<A> clazz) {
 			return field == null ? null : field.getAnnotation(clazz);
 		}

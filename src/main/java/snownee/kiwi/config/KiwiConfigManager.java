@@ -83,4 +83,13 @@ public class KiwiConfigManager {
 	public static ConfigHandler getHandler(Class<?> clazz) {
 		return clazz2Configs.get(clazz);
 	}
+
+	public static List<String> getModsWithScreen(ConfigLibAttributes attributes) {
+		return allConfigs.stream().filter(c -> c.providesConfigScreen(attributes)).map(ConfigHandler::getModId).distinct().toList();
+	}
+
+	public static List<ConfigHandler> getModHandlersWithScreen(String modId, ConfigLibAttributes attributes) {
+		return allConfigs.stream().filter(c -> c.getModId().equals(modId) && c.providesConfigScreen(attributes)).toList();
+	}
+
 }

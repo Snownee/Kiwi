@@ -24,6 +24,8 @@
   "gui.kiwi.cosmetic": "Choose a cosmetic effect",
   "commands.kiwi.reload.success": "Configuration %s has been reloaded.",
   "commands.kiwi.reload.failed": "Configuration %s is not found or not provided by Kiwi.",
+  "commands.kiwi.configure.failed": "Unknown error occurred.",
+  "commands.kiwi.configure.install": "Please install Cloth Config API to use this command.",
   "cosmetic.snownee.2020q3": "Planets",
   "cosmetic.snownee.2020q4": "Fox",
   "cosmetic.snownee.2021q1": "Electronicat",

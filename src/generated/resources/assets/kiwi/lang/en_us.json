@@ -1,4 +1,6 @@
 {
+  "commands.kiwi.configure.failed": "Unknown error occurred.",
+  "commands.kiwi.configure.install": "Please install Cloth Config API to use this command.",
   "commands.kiwi.reload.failed": "Configuration %s is not found or not provided by Kiwi.",
   "commands.kiwi.reload.success": "Configuration %s has been reloaded.",
   "cosmetic.snownee.2020q3": "Planets",
@@ -23,10 +25,6 @@
   "kiwi.config.globalTooltip": "Global Tooltip",
   "kiwi.config.globalTooltip.desc": "Enables the feature to globally add item tooltips",
   "kiwi.config.modules": "Modules",
-  "kiwi.config.modules.test": "Test",
-  "kiwi.config.modules.test.desc": "",
-  "kiwi.config.modules.test2": "Test2",
-  "kiwi.config.modules.test2.desc": "",
   "kiwi.config.noMicrosoftTelemetry": "No Microsoft Telemetry",
   "kiwi.config.noMicrosoftTelemetry.desc": "Disables data collection added by Microsoft Mojang",
   "kiwi.config.requiresRestart": "Requires restart",

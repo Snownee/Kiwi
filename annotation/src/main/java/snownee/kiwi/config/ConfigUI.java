@@ -33,8 +33,12 @@ public @interface ConfigUI {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.FIELD)
-	@interface ItemType {
+	@interface Typed {
+
 		Class<?> value();
+
+		Class<?> key() default String.class;
+
 	}
 
 }
