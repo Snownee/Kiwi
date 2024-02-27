@@ -16,7 +16,12 @@ repositories {
     maven { url "https://maven.parchmentmc.org" }
     maven { url "https://maven.shedaniel.me/" }
     maven { url "https://maven.terraformersmc.com/releases/" }
-    maven { url 'https://jitpack.io' }
+    maven {
+        url 'https://jitpack.io'
+        content {
+            includeGroup "com.github.Snownee"
+        }
+    }
     // Add repositories to retrieve artifacts from in here.
     // You should only use this when depending on other mods because
     // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
