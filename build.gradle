@@ -216,6 +216,7 @@ repositories {
             includeGroup "curse.maven"
         }
     }
+    maven { url 'https://jitpack.io' }
 }
 
 configurations {
@@ -242,7 +243,7 @@ dependencies {
 
     implementation fg.deobf("me.shedaniel.cloth:cloth-config-forge:${project.cloth_config_version}")
     library shadowCommon("org.yaml:snakeyaml:${project.snakeyaml_version}")
-    library shadowCommon("com.ezylang:EvalEx:${project.evalex_version}")
+    library shadowCommon("com.github.Snownee:EvalEx:main-SNAPSHOT")
 
     implementation fg.deobf("dev.architectury:architectury-forge:${project.architectury_version}")
     compileOnly fg.deobf("me.shedaniel:RoughlyEnoughItems-forge:${project.rei_version}")
