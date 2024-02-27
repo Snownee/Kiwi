@@ -12,6 +12,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -31,7 +32,6 @@ import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.material.Fluid;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.config.KiwiConfigManager;
@@ -50,7 +50,9 @@ public final class TooltipEvents {
 	}
 
 	public static void globalTooltip(ItemStack stack, List<Component> tooltip, TooltipFlag flag) {
-		if (KiwiClientConfig.globalTooltip) ModItem.addTip(stack, tooltip, flag);
+		if (KiwiClientConfig.globalTooltip) {
+			ModItem.addTip(stack, tooltip, flag);
+		}
 	}
 
 	public static void debugTooltip(ItemStack itemStack, List<Component> tooltip, TooltipFlag flag) {
@@ -100,9 +102,7 @@ public final class TooltipEvents {
 			holdAlt = alt;
 
 			if (!cache.pages.isEmpty()) {
-				if (cache.showTags) {
-					trySendTipMsg(mc);
-				}
+				trySendTipMsg(mc);
 				cache.appendTagsTooltip(tooltip);
 			}
 		}
@@ -144,19 +144,13 @@ public final class TooltipEvents {
 			Item item = itemStack.getItem();
 			Block block = Block.byItem(item);
 			if (block != Blocks.AIR) {
-				addPages("block", block.defaultBlockState().getTags().map(TagKey::location));
+				addPages("block", getTags(BuiltInRegistries.BLOCK, block));
 			}
 			if (item instanceof SpawnEggItem spawnEggItem) {
 				EntityType<?> type = spawnEggItem.getType(itemStack.getTag());
-				addPages("entity_type", type.getTags().map(TagKey::location));
+				addPages("entity_type", getTags(BuiltInRegistries.ENTITY_TYPE, type));
 			} else if (item instanceof BucketItem bucketItem) {
-				Fluid fluid = bucketItem.getFluid();
-				Stream<ResourceLocation> tags = BuiltInRegistries.FLUID.getResourceKey(fluid)
-						.flatMap(BuiltInRegistries.FLUID::getHolder)
-						.stream()
-						.flatMap(Holder::tags)
-						.map(TagKey::location);
-				addPages("fluid", tags);
+				addPages("fluid", getTags(BuiltInRegistries.FLUID, bucketItem.getFluid()));
 			}
 			for (int i = 0; i < pages.size(); i++) {
 				if (pageTypes.get(i).equals(preferredType)) {
@@ -164,6 +158,14 @@ public final class TooltipEvents {
 					break;
 				}
 			}
+		}
+
+		private static <T> Stream<ResourceLocation> getTags(Registry<T> registry, T object) {
+			return registry.getResourceKey(object)
+					.flatMap(registry::getHolder)
+					.stream()
+					.flatMap(Holder::tags)
+					.map(TagKey::location);
 		}
 
 		public void addPages(String type, Stream<ResourceLocation> stream) {
