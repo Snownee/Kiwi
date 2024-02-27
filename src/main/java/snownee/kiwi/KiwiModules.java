@@ -14,11 +14,11 @@ import com.google.common.collect.Sets;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.data.loading.DatagenModLoader;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.CrashReportCallables;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.registries.RegisterEvent;
+import snownee.kiwi.loader.Platform;
 
 public final class KiwiModules {
 	private static Map<ResourceLocation, ModuleInfo> MODULES = Maps.newLinkedHashMap();
@@ -65,7 +65,7 @@ public final class KiwiModules {
 	}
 
 	public static void clear() {
-		if (!DatagenModLoader.isRunningDataGen()) {
+		if (!Platform.isDataGen()) {
 			MODULES.clear();
 			MODULES = Map.of();
 		}
