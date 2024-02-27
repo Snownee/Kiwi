@@ -37,7 +37,7 @@
   "modmenu.nameTranslation.kiwi": "Kiwi Library",
   "msg.kiwi.no_dependencies": "{1}: Module §e{2}§r requires the following modules to be enabled: §e{3}",
   "tip.kiwi.click_here": "[Click Here]",
-  "tip.kiwi.debug_tooltip": "==========\nThank you for using Kiwi and Snownee's other mods!\nNBT and tags tooltips are active. %s to disable.\nWhile tags are displayed, press Alt / Ctrl+Alt to navigate between pages.\n==========",
+  "tip.kiwi.debug_tooltip": "==========\nThank you for using Kiwi and Snownee's other mods!\nNBT and tags tooltips are active. %s to disable.\nHold Alt key for tag list. While tags are displayed, press Alt / Ctrl+Alt to navigate between pages.\n==========",
   "tip.kiwi.debug_tooltip.success": "Debug tooltips have been disabled. You can re-enable them in the configuration.",
   "tip.kiwi.press_ctrl": "§r§7<Press §f§oCtrl§r§7..>",
   "tip.kiwi.press_shift": "§r§7<Press §f§oShift§r§7..>",

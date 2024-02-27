@@ -2,7 +2,6 @@
   "tip.kiwi.press_shift": "§r§7<Натисніть §f§oShift§r§7..>",
   "tip.kiwi.press_ctrl": "§r§7<Натисніть §f§oCtrl§r§7..>",
   "tip.kiwi.press_shift_or_ctrl": "§r§7<Натисніть §f§oShift§r§7 або §f§oCtrl§r§7..>",
-  "tip.kiwi.debug_tooltip": "==========\nДякуємо за використання Kiwi та інших модів Snownee!\nNBT предмета та підказки тегів активні. %s, щоб вимкнути.\n<MISSING TRANSLATION>\n==========",
   "tip.kiwi.click_here": "[Натисніть тут]",
   "tip.kiwi.debug_tooltip.success": "Вимкнено підказки налагодження. Ви можете ввімкнути їх у конфігурації.",
 

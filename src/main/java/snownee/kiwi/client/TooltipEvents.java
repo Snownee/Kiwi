@@ -102,9 +102,7 @@ public final class TooltipEvents {
 			holdAlt = alt;
 
 			if (!cache.pages.isEmpty()) {
-				if (cache.showTags) {
-					trySendTipMsg(mc);
-				}
+				trySendTipMsg(mc);
 				cache.appendTagsTooltip(tooltip);
 			}
 		}

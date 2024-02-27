@@ -2,7 +2,7 @@
   "tip.kiwi.press_shift": "§r§7<按住§f§oShift§r§7..>",
   "tip.kiwi.press_ctrl": "§r§7<按住§f§oCtrl§r§7..>",
   "tip.kiwi.press_shift_or_ctrl": "§r§7<按住§f§oShift§r§7或§f§oCtrl§r§7..>",
-  "tip.kiwi.debug_tooltip": "==========\n感谢你使用Kiwi和Snownee的其他模组！\n物品NBT和标签调试气泡提示生效中。%s来禁用。\n显示标签时，按Alt或Ctrl+Alt键可在页面间导航。\n==========",
+  "tip.kiwi.debug_tooltip": "==========\n感谢你使用Kiwi和Snownee的其他模组！\n物品NBT和标签调试气泡提示生效中。%s来禁用。\n按住Alt键展开标签列表。显示标签时，按Alt或Ctrl+Alt键可在页面间导航。\n==========",
   "tip.kiwi.click_here": "[点击这里]",
   "tip.kiwi.debug_tooltip.success": "调试气泡提示已禁用。你可以在配置里打开它们。",
 
