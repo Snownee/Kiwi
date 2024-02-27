@@ -36,6 +36,7 @@ import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.item.ModItem;
+import snownee.kiwi.loader.Platform;
 
 public final class TooltipEvents {
 	public static final String disableDebugTooltipCommand = "@kiwi disable debugTooltip";
@@ -150,7 +151,7 @@ public final class TooltipEvents {
 				EntityType<?> type = spawnEggItem.getType(itemStack.getTag());
 				addPages("entity_type", getTags(BuiltInRegistries.ENTITY_TYPE, type));
 			} else if (item instanceof BucketItem bucketItem) {
-				addPages("fluid", getTags(BuiltInRegistries.FLUID, bucketItem.content));
+				addPages("fluid", getTags(BuiltInRegistries.FLUID, Platform.getFluidFromBucket(bucketItem)));
 			}
 			for (int i = 0; i < pages.size(); i++) {
 				if (pageTypes.get(i).equals(preferredType)) {

@@ -20,7 +20,9 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.material.Fluid;
 import snownee.kiwi.Kiwi;
 
 public final class Platform {
@@ -91,6 +93,10 @@ public final class Platform {
 
 	public static boolean isShearsRightClickable(ItemStack stack) {
 		return stack.is(ConventionalItemTags.SHEARS);
+	}
+
+	public static Fluid getFluidFromBucket(BucketItem item) {
+		return item.content;
 	}
 
 	public static MutableComponent format(String s, Object... objects) {

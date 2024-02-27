@@ -1,6 +1,7 @@
 package snownee.kiwi.loader;
 
 import java.util.List;
+import java.util.Locale;
 
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
@@ -60,5 +61,9 @@ public final class ClientPlatform {
 
 	public static void setRenderType(Block block, RenderType renderType) {
 		BlockRenderLayerMap.INSTANCE.putBlock(block, renderType);
+	}
+
+	public static Locale getLocale() {
+		return Locale.getDefault();
 	}
 }
