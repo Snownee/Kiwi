@@ -7,8 +7,7 @@
   "mixins": [
     "RecipeManagerMixin",
     "ReloadableServerResourcesMixin",
-    "ShapedRecipeAccess",
-    "TokenizerMixin"
+    "ShapedRecipeAccess"
   ],
   "client": [
     "client.ClientPacketListenerMixin",

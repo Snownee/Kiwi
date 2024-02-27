@@ -29,6 +29,7 @@ public class KEval {
 	private static final ExpressionConfiguration CONFIG = ExpressionConfiguration.builder()
 			.defaultConstants(generateConstants())
 			.dataAccessorSupplier(DataAccessor::new)
+			.singleQuoteStringLiteralsAllowed(true)
 			.build();
 
 	static {
