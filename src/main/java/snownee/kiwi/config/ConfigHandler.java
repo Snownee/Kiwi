@@ -183,7 +183,7 @@ public class ConfigHandler {
 			save();
 			return;
 		}
-		if (map.isEmpty()) {
+		if (map == null || map.isEmpty()) {
 			save();
 			return;
 		}
