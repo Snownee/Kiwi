@@ -216,7 +216,12 @@ repositories {
             includeGroup "curse.maven"
         }
     }
-    maven { url 'https://jitpack.io' }
+    maven {
+        url 'https://jitpack.io'
+        content {
+            includeGroup "com.github.Snownee"
+        }
+    }
 }
 
 configurations {
