@@ -44,8 +44,11 @@ import snownee.kiwi.util.Util;
 
 public class ClothConfigIntegration {
 
-	private static final ConfigLibAttributes ATTRIBUTES = new ConfigLibAttributes("cloth-config", namespace -> create(Minecraft.getInstance().screen, namespace),
-			true, false, true);
+	private static final ConfigLibAttributes ATTRIBUTES = new ConfigLibAttributes("cloth-config",
+			namespace -> create(Minecraft.getInstance().screen, namespace),
+			true,
+			false,
+			true);
 	private static final Component requiresRestart = Component.translatable("kiwi.config.requiresRestart").withStyle(ChatFormatting.RED);
 
 	@Nullable
@@ -115,7 +118,11 @@ public class ClothConfigIntegration {
 						field.setDefaultValue((Integer) value.defValue);
 						entry = field.build();
 					} else if (value.getAnnotation(Slider.class) != null) {
-						IntSliderBuilder field = entryBuilder.startIntSlider(title, (Integer) value.value, (int) value.min, (int) value.max);
+						IntSliderBuilder field = entryBuilder.startIntSlider(
+								title,
+								(Integer) value.value,
+								(int) value.min,
+								(int) value.max);
 						field.setTooltip(createComment(value));
 						field.setSaveConsumer(value::accept);
 						field.setDefaultValue((Integer) value.defValue);
@@ -159,7 +166,11 @@ public class ClothConfigIntegration {
 					entry = field.build();
 				} else if (type == long.class) {
 					if (value.getAnnotation(Slider.class) != null) {
-						LongSliderBuilder field = entryBuilder.startLongSlider(title, (Long) value.value, (long) value.min, (long) value.max);
+						LongSliderBuilder field = entryBuilder.startLongSlider(
+								title,
+								(Long) value.value,
+								(long) value.min,
+								(long) value.max);
 						field.setTooltip(createComment(value));
 						field.setSaveConsumer(value::accept);
 						field.setDefaultValue((Long) value.defValue);
@@ -184,7 +195,10 @@ public class ClothConfigIntegration {
 					field.setDefaultValue((String) value.defValue);
 					entry = field.build();
 				} else if (Enum.class.isAssignableFrom(type)) {
-					EnumSelectorBuilder<Enum<?>> field = entryBuilder.startEnumSelector(title, (Class<Enum<?>>) type, (Enum<?>) value.value);
+					EnumSelectorBuilder<Enum<?>> field = entryBuilder.startEnumSelector(
+							title,
+							(Class<Enum<?>>) type,
+							(Enum<?>) value.value);
 					field.setSaveConsumer(value::accept);
 					field.setDefaultValue((Enum<?>) value.defValue);
 					field.setEnumNameProvider($ -> {
@@ -226,7 +240,11 @@ public class ClothConfigIntegration {
 		return builder.build();
 	}
 
-	private static void putDescription(Consumer<AbstractConfigListEntry<?>> subCat, ConfigEntryBuilder entryBuilder, TextDescription description, boolean after) {
+	private static void putDescription(
+			Consumer<AbstractConfigListEntry<?>> subCat,
+			ConfigEntryBuilder entryBuilder,
+			TextDescription description,
+			boolean after) {
 		if (description == null || description.after() != after) {
 			return;
 		}

@@ -25,10 +25,25 @@ public final class PlayerUtil {
 	}
 
 	@Nullable
-	public static BlockPos tryPlace(Level world, BlockPos pos, Direction side, @Nullable Player player, InteractionHand hand, BlockState state, @Nullable ItemStack stack, boolean playSound, boolean skipCollisionCheck) {
+	public static BlockPos tryPlace(
+			Level world,
+			BlockPos pos,
+			Direction side,
+			@Nullable Player player,
+			InteractionHand hand,
+			BlockState state,
+			@Nullable ItemStack stack,
+			boolean playSound,
+			boolean skipCollisionCheck) {
 		BlockState worldState = world.getBlockState(pos);
-		if (worldState.getBlock() == Blocks.SNOW && worldState.hasProperty(SnowLayerBlock.LAYERS) && worldState.getValue(SnowLayerBlock.LAYERS) < 8) {
-		} else if (!state.canBeReplaced(new DirectionalPlaceContext(world, pos, side.getOpposite(), stack == null ? ItemStack.EMPTY : stack, side.getOpposite()))) {
+		if (worldState.getBlock() == Blocks.SNOW && worldState.hasProperty(SnowLayerBlock.LAYERS) &&
+				worldState.getValue(SnowLayerBlock.LAYERS) < 8) {
+		} else if (!state.canBeReplaced(new DirectionalPlaceContext(
+				world,
+				pos,
+				side.getOpposite(),
+				stack == null ? ItemStack.EMPTY : stack,
+				side.getOpposite()))) {
 			pos = pos.relative(side);
 		}
 		if (skipCollisionCheck) {
@@ -41,7 +56,15 @@ public final class PlayerUtil {
 		return null;
 	}
 
-	public static boolean tryPlace(Level world, BlockPos pos, Direction direction, @Nullable Player player, InteractionHand hand, BlockState state, @Nullable ItemStack stack, boolean playSound) {
+	public static boolean tryPlace(
+			Level world,
+			BlockPos pos,
+			Direction direction,
+			@Nullable Player player,
+			InteractionHand hand,
+			BlockState state,
+			@Nullable ItemStack stack,
+			boolean playSound) {
 		if (!world.mayInteract(player, pos)) {
 			return false;
 		}
@@ -78,7 +101,13 @@ public final class PlayerUtil {
 
 		if (playSound) {
 			SoundType soundtype = actualState.getBlock().getSoundType(actualState);
-			world.playSound(player, pos, soundtype.getPlaceSound(), SoundSource.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
+			world.playSound(
+					player,
+					pos,
+					soundtype.getPlaceSound(),
+					SoundSource.BLOCKS,
+					(soundtype.getVolume() + 1.0F) / 2.0F,
+					soundtype.getPitch() * 0.8F);
 		}
 
 		return true;

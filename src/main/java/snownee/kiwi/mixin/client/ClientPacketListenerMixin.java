@@ -15,10 +15,15 @@ public class ClientPacketListenerMixin {
 
 	@Inject(
 			at = @At(
-					value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BlockEntity;load(Lnet/minecraft/nbt/CompoundTag;)V", remap = true
+					value = "INVOKE",
+					target = "Lnet/minecraft/world/level/block/entity/BlockEntity;load(Lnet/minecraft/nbt/CompoundTag;)V",
+					remap = true
 			), method = {"method_38542", "lambda$handleBlockEntityData$5"}, cancellable = true, remap = false
 	)
-	private void kiwi$handleBlockEntityData(ClientboundBlockEntityDataPacket clientboundBlockEntityDataPacket, BlockEntity blockEntity, CallbackInfo ci) {
+	private void kiwi$handleBlockEntityData(
+			ClientboundBlockEntityDataPacket clientboundBlockEntityDataPacket,
+			BlockEntity blockEntity,
+			CallbackInfo ci) {
 		if (blockEntity instanceof ModBlockEntity) {
 			ClientPacketListener listener = (ClientPacketListener) (Object) this;
 			((ModBlockEntity) blockEntity).onDataPacket(listener.getConnection(), clientboundBlockEntityDataPacket);

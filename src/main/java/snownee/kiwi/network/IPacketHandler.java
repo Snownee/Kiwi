@@ -12,7 +12,10 @@ import snownee.kiwi.network.KiwiPacket.Direction;
 @FunctionalInterface
 public interface IPacketHandler {
 	@Nullable
-	CompletableFuture<FriendlyByteBuf> receive(Function<Runnable, CompletableFuture<FriendlyByteBuf>> executor, FriendlyByteBuf buf, @Nullable ServerPlayer sender);
+	CompletableFuture<FriendlyByteBuf> receive(
+			Function<Runnable, CompletableFuture<FriendlyByteBuf>> executor,
+			FriendlyByteBuf buf,
+			@Nullable ServerPlayer sender);
 
 	default Direction getDirection() {
 		return null;

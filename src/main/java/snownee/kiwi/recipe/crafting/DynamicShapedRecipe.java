@@ -29,7 +29,13 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 	protected ItemStack result;
 	protected String group;
 
-	public DynamicShapedRecipe(String group, CraftingBookCategory category, ShapedRecipePattern pattern, ItemStack result, boolean showNotification, boolean differentInputs) {
+	public DynamicShapedRecipe(
+			String group,
+			CraftingBookCategory category,
+			ShapedRecipePattern pattern,
+			ItemStack result,
+			boolean showNotification,
+			boolean differentInputs) {
 		super(category);
 		this.group = group;
 		this.pattern = pattern;

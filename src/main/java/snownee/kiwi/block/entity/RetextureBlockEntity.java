@@ -42,8 +42,9 @@ public abstract class RetextureBlockEntity extends ModBlockEntity {
 	}
 
 	public void setTexture(String key, BlockDefinition modelSupplier) {
-		if (modelSupplier == null || !isValidTexture(modelSupplier))
+		if (modelSupplier == null || !isValidTexture(modelSupplier)) {
 			return;
+		}
 		setTexture(textures, key, modelSupplier);
 	}
 
@@ -109,11 +110,13 @@ public abstract class RetextureBlockEntity extends ModBlockEntity {
 		NBTHelper helper = NBTHelper.of(data);
 		for (String k : textures.keySet()) {
 			CompoundTag v = helper.getTag(k);
-			if (v == null)
+			if (v == null) {
 				continue;
+			}
 			BlockDefinition supplier = BlockDefinition.fromNBT(v);
-			if (supplier != null && !validator.test(supplier))
+			if (supplier != null && !validator.test(supplier)) {
 				continue;
+			}
 			if (!Objects.equals(textures.get(k), supplier)) {
 				shouldRefresh = true;
 				textures.put(k, supplier);
@@ -132,8 +135,9 @@ public abstract class RetextureBlockEntity extends ModBlockEntity {
 		if (textures != null) {
 			NBTHelper tag = NBTHelper.of(data);
 			textures.forEach((k, v) -> {
-				if (v == null)
+				if (v == null) {
 					return;
+				}
 				CompoundTag compound = new CompoundTag();
 				v.save(compound);
 				compound.putString("Type", v.getFactory().getId());

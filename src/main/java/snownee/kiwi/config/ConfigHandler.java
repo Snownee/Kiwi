@@ -111,7 +111,9 @@ public class ConfigHandler {
 	private static Object convert(Field field) {
 		try {
 			Class<?> type = field.getType();
-			if (type != int.class && type != long.class && type != double.class && type != float.class && type != boolean.class && type != String.class && !Enum.class.isAssignableFrom(type) && !List.class.isAssignableFrom(type) && !Map.class.isAssignableFrom(type)) {
+			if (type != int.class && type != long.class && type != double.class && type != float.class && type != boolean.class &&
+					type != String.class && !Enum.class.isAssignableFrom(type) && !List.class.isAssignableFrom(type) &&
+					!Map.class.isAssignableFrom(type)) {
 				return null;
 			}
 			if (type == String.class) {

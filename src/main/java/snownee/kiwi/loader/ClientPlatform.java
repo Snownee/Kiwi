@@ -39,11 +39,15 @@ public final class ClientPlatform {
 		ModelLoadingPlugin.register(ctx -> ctx.addModels(ids));
 	}
 
-	public static <E extends Entity> void registerEntityRenderer(EntityType<? extends E> entityType, EntityRendererProvider<E> entityRendererFactory) {
+	public static <E extends Entity> void registerEntityRenderer(
+			EntityType<? extends E> entityType,
+			EntityRendererProvider<E> entityRendererFactory) {
 		EntityRendererRegistry.register(entityType, entityRendererFactory);
 	}
 
-	public static <T extends BlockEntity> void registerBlockEntityRenderer(BlockEntityType<? extends T> blockEntityType, BlockEntityRendererProvider<T> blockEntityRendererProvider) {
+	public static <T extends BlockEntity> void registerBlockEntityRenderer(
+			BlockEntityType<? extends T> blockEntityType,
+			BlockEntityRendererProvider<T> blockEntityRendererProvider) {
 		BlockEntityRenderers.register(blockEntityType, blockEntityRendererProvider);
 	}
 

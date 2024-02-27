@@ -61,7 +61,9 @@ public interface ITierProvider {
 
 		@Environment(EnvType.CLIENT)
 		@Override
-		public CosmeticLayer createRenderer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer, String tier) {
+		public CosmeticLayer createRenderer(
+				RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer,
+				String tier) {
 			return null;
 		}
 

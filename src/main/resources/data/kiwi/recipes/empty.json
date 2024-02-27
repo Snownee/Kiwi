@@ -1,29 +1,29 @@
 {
-  "type": "kiwi:shapeless",
-  "fabric:load_conditions": [
-    {
-      "condition": "kiwi:eval",
-      "ex": "has('kiwi') && EmptyLavaBucket ?? false"
-    }
-  ],
-  "ingredients": [
-    {
-      "fabric:type": "kiwi:alternatives",
-      "options": [
-        {
-          "fabric:type": "error"
-        },
-        {
-          "tag": "random_nonexistant_tag"
-        }
-      ]
-    },
-    {
-      "tag": "anvil"
-    }
-  ],
-  "result": {
-    "item": "minecraft:bucket"
-  },
-  "no_containers": true
+	"type": "kiwi:shapeless",
+	"fabric:load_conditions": [
+		{
+			"condition": "kiwi:eval",
+			"ex": "has('kiwi') && EmptyLavaBucket ?? false"
+		}
+	],
+	"ingredients": [
+		{
+			"fabric:type": "kiwi:alternatives",
+			"options": [
+				{
+					"fabric:type": "error"
+				},
+				{
+					"tag": "random_nonexistant_tag"
+				}
+			]
+		},
+		{
+			"tag": "anvil"
+		}
+	],
+	"result": {
+		"item": "minecraft:bucket"
+	},
+	"no_containers": true
 }

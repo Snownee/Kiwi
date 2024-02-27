@@ -63,7 +63,9 @@ public class KiwiTierProvider extends JsonTierProvider {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public CosmeticLayer createRenderer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer, String tier) {
+	public CosmeticLayer createRenderer(
+			RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer,
+			String tier) {
 		return switch (tier) {
 			case "2020q3" -> new PlanetLayer(entityRenderer);
 			case "2020q4" -> new FoxTailLayer(entityRenderer);

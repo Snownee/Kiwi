@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import snownee.kiwi.config.ConfigUI.Typed;
 import snownee.kiwi.config.ConfigUI.TextDescription;
+import snownee.kiwi.config.ConfigUI.Typed;
 import snownee.kiwi.config.KiwiConfig;
 import snownee.kiwi.config.KiwiConfig.ConfigType;
 import snownee.kiwi.config.KiwiConfig.LevelRestart;

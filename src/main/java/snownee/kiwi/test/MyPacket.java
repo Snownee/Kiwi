@@ -14,7 +14,10 @@ public class MyPacket extends PacketHandler {
 	public static MyPacket I;
 
 	@Override
-	public CompletableFuture<FriendlyByteBuf> receive(Function<Runnable, CompletableFuture<FriendlyByteBuf>> executor, FriendlyByteBuf buf, ServerPlayer responseSender) {
+	public CompletableFuture<FriendlyByteBuf> receive(
+			Function<Runnable, CompletableFuture<FriendlyByteBuf>> executor,
+			FriendlyByteBuf buf,
+			ServerPlayer responseSender) {
 		int number = buf.readVarInt();
 		// 在主线程上执行游戏相关行为
 		return executor.apply(() -> System.out.println(number));

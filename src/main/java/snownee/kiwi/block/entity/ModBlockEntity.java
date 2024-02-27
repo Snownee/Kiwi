@@ -30,8 +30,9 @@ public abstract class ModBlockEntity extends BlockEntity {
 
 	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
 		CompoundTag compoundtag = pkt.getTag();
-		if (compoundtag != null)
+		if (compoundtag != null) {
 			readPacketData(compoundtag);
+		}
 	}
 
 	// Used for syncing data at the time when the chunk is loaded
@@ -44,16 +45,14 @@ public abstract class ModBlockEntity extends BlockEntity {
 	/**
 	 * Read data for server-client syncing.
 	 *
-	 * @param data
-	 *            the data source
+	 * @param data the data source
 	 */
 	protected abstract void readPacketData(CompoundTag data);
 
 	/**
 	 * Write data for server-client syncing. ONLY write the necessary data!
 	 *
-	 * @param data
-	 *            the data sink
+	 * @param data the data sink
 	 * @return the parameter, or delegate to super method
 	 */
 	@NotNull

@@ -33,7 +33,17 @@ public class PlanetLayer extends CosmeticLayer {
 	}
 
 	@Override
-	public void render(PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, AbstractClientPlayer entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
+	public void render(
+			PoseStack matrixStackIn,
+			MultiBufferSource bufferIn,
+			int packedLightIn,
+			AbstractClientPlayer entitylivingbaseIn,
+			float limbSwing,
+			float limbSwingAmount,
+			float partialTicks,
+			float ageInTicks,
+			float netHeadYaw,
+			float headPitch) {
 		if (entitylivingbaseIn.isInvisible()) {
 			return;
 		}

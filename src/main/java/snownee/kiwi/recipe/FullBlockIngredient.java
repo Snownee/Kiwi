@@ -33,8 +33,9 @@ public class FullBlockIngredient implements CustomIngredient {
 		Block block = Block.byItem(stack.getItem());
 		BlockState state = block.defaultBlockState();
 		try {
-			if (Block.isShapeFullBlock(state.getOcclusionShape(null, BlockPos.ZERO)))
+			if (Block.isShapeFullBlock(state.getOcclusionShape(null, BlockPos.ZERO))) {
 				return true;
+			}
 		} catch (Throwable e) {
 		}
 		return false;
@@ -74,7 +75,8 @@ public class FullBlockIngredient implements CustomIngredient {
 		private static final Codec<FullBlockIngredient> CODEC_NONEMPTY = createCodec(Ingredient.CODEC_NONEMPTY);
 
 		private static Codec<FullBlockIngredient> createCodec(Codec<Ingredient> ingredientCodec) {
-			return RecordCodecBuilder.create(instance -> instance.group(ingredientCodec.fieldOf("example").forGetter(i -> i.example)).apply(instance, FullBlockIngredient::new));
+			return RecordCodecBuilder.create(instance -> instance.group(ingredientCodec.fieldOf("example").forGetter(i -> i.example))
+					.apply(instance, FullBlockIngredient::new));
 		}
 
 		@Override

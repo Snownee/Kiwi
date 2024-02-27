@@ -72,8 +72,9 @@ public class JsonTierProvider implements ITierProvider {
 			int tried = 0;
 			List<String> url = urlProvider.get();
 			while (tried < url.size()) {
-				if (load(url.get(tried)))
+				if (load(url.get(tried))) {
 					break;
+				}
 				++tried;
 			}
 			cf.complete(null);
@@ -105,7 +106,9 @@ public class JsonTierProvider implements ITierProvider {
 
 	@Environment(EnvType.CLIENT)
 	@Override
-	public CosmeticLayer createRenderer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer, String tier) {
+	public CosmeticLayer createRenderer(
+			RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer,
+			String tier) {
 		return null;
 	}
 

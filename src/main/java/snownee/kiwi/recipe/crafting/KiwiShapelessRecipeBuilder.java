@@ -37,11 +37,22 @@ public class KiwiShapelessRecipeBuilder extends ShapelessRecipeBuilder {
 	@Override
 	public void save(RecipeOutput recipeOutput, ResourceLocation resourceLocation) {
 		ensureValid(resourceLocation);
-		Advancement.Builder builder = recipeOutput.advancement().addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(resourceLocation)).rewards(AdvancementRewards.Builder.recipe(resourceLocation)).requirements(AdvancementRequirements.Strategy.OR);
+		Advancement.Builder builder = recipeOutput.advancement().addCriterion(
+				"has_the_recipe",
+				RecipeUnlockedTrigger.unlocked(resourceLocation)).rewards(AdvancementRewards.Builder.recipe(resourceLocation)).requirements(
+				AdvancementRequirements.Strategy.OR);
 		Objects.requireNonNull(builder);
 		criteria.forEach(builder::addCriterion);
-		KiwiShapelessRecipe shapelessRecipe = new KiwiShapelessRecipe(Objects.requireNonNullElse(group, ""), RecipeBuilder.determineBookCategory(category), new ItemStack(result, count), ingredients, noContainers);
-		recipeOutput.accept(resourceLocation, shapelessRecipe, builder.build(resourceLocation.withPrefix("recipes/" + category.getFolderName() + "/")));
+		KiwiShapelessRecipe shapelessRecipe = new KiwiShapelessRecipe(
+				Objects.requireNonNullElse(group, ""),
+				RecipeBuilder.determineBookCategory(category),
+				new ItemStack(result, count),
+				ingredients,
+				noContainers);
+		recipeOutput.accept(
+				resourceLocation,
+				shapelessRecipe,
+				builder.build(resourceLocation.withPrefix("recipes/" + category.getFolderName() + "/")));
 	}
 }
 

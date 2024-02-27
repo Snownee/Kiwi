@@ -43,7 +43,10 @@ public class KiwiClientCommand {
 		dispatcher.register(builder);
 	}
 
-	private static void putMods(ConfigLibAttributes attributes, Set<String> addedMods, LiteralArgumentBuilder<FabricClientCommandSource> node) {
+	private static void putMods(
+			ConfigLibAttributes attributes,
+			Set<String> addedMods,
+			LiteralArgumentBuilder<FabricClientCommandSource> node) {
 		for (String modId : KiwiConfigManager.getModsWithScreen(attributes)) {
 			if (addedMods.contains(modId)) {
 				continue;

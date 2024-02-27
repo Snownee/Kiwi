@@ -16,12 +16,13 @@ public final class MathUtil {
 	}
 
 	/*
-     * https://stackoverflow.com/questions/9600801/evenly-distributing-n-points-on-a-sphere/26127012#26127012
-     */
+	 * https://stackoverflow.com/questions/9600801/evenly-distributing-n-points-on-a-sphere/26127012#26127012
+	 */
 	public static List<Vec3> fibonacciSphere(Vec3 start, double radius, int samples, boolean randomize) {
 		double rnd = 1;
-		if (randomize)
+		if (randomize) {
 			rnd = Math.random() * samples;
+		}
 		double offset = 2d / samples;
 		double increment = Math.PI * (3 - Math.sqrt(5));
 		List<Vec3> points = Lists.newArrayListWithCapacity(samples);
@@ -92,6 +93,7 @@ public final class MathUtil {
 
 	/**
 	 * HSV to RGB: Mth
+	 *
 	 * @since 2.7.0
 	 */
 	public static Vector3f RGBtoHSV(int rgb) {
@@ -103,23 +105,25 @@ public final class MathUtil {
 		float v = max;
 		float delta = max - min;
 		float h, s;
-		if (max != 0)
+		if (max != 0) {
 			s = delta / max; // s
-		else {
+		} else {
 			// r = g = b = 0        // s = 0, v is undefined
 			s = 0;
 			h = -1;
 			return new Vector3f(h, s, 0 /*Float.NaN*/);
 		}
-		if (r == max)
+		if (r == max) {
 			h = (g - b) / delta; // between yellow & magenta
-		else if (g == max)
+		} else if (g == max) {
 			h = 2 + (b - r) / delta; // between cyan & yellow
-		else
+		} else {
 			h = 4 + (r - g) / delta; // between magenta & cyan
+		}
 		h /= 6; // degrees
-		if (h < 0)
+		if (h < 0) {
 			h += 1;
+		}
 		return new Vector3f(h, s, v / 255);
 	}
 }

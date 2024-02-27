@@ -3,7 +3,7 @@ package third_party.com.facebook.yoga;
 /**
  * Copyright (c) 2014-present, Facebook, Inc.
  * Copyright (c) 2018-present, Marius Klimantavičius
- *
+ * <p>
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
@@ -11,15 +11,17 @@ package third_party.com.facebook.yoga;
 public class YogaMath {
 
 	public static float Max(float a, float b) {
-		if (!Float.isNaN(a) && !Float.isNaN(b))
+		if (!Float.isNaN(a) && !Float.isNaN(b)) {
 			return Math.max(a, b);
+		}
 
 		return Float.isNaN(a) ? b : a;
 	}
 
 	public static float Min(float a, float b) {
-		if (!Float.isNaN(a) && !Float.isNaN(b))
+		if (!Float.isNaN(a) && !Float.isNaN(b)) {
 			return Math.min(a, b);
+		}
 
 		return Float.isNaN(a) ? b : a;
 	}
@@ -61,17 +63,22 @@ public class YogaMath {
 			scaledValue = scaledValue - fractial;
 		} else {
 			// Finally we just round the value
-			scaledValue = scaledValue - fractial + (!Float.isNaN(fractial) && (fractial > 0.5f || FloatsEqual(fractial, 0.5f)) ? 1.0f : 0.0f);
+			scaledValue = scaledValue - fractial + (
+					!Float.isNaN(fractial) && (fractial > 0.5f || FloatsEqual(fractial, 0.5f)) ?
+							1.0f :
+							0.0f);
 		}
 		return (Float.isNaN(scaledValue) || Float.isNaN(pointScaleFactor)) ? Float.NaN : scaledValue / pointScaleFactor;
 	}
 
 	public static boolean FloatsEqual(float a, float b) {
-		if (Float.isNaN(a))
+		if (Float.isNaN(a)) {
 			return Float.isNaN(b);
+		}
 
-		if (Float.isNaN(b))
+		if (Float.isNaN(b)) {
 			return false;
+		}
 
 		return Math.abs(a - b) < 0.0001f;
 	}

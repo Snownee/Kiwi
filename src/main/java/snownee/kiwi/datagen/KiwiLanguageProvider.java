@@ -157,7 +157,10 @@ public class KiwiLanguageProvider implements DataProvider {
 		translationEntries.put("modmenu.descriptionTranslation.%s".formatted(modId), container.getMetadata().getDescription());
 	}
 
-	protected <T> void generateGameObjectEntries(Map<String, String> translationEntries, ResourceKey<Registry<T>> registryKey, Function<T, String> keyMapper) {
+	protected <T> void generateGameObjectEntries(
+			Map<String, String> translationEntries,
+			ResourceKey<Registry<T>> registryKey,
+			Function<T, String> keyMapper) {
 		GameObjectLookup.allHolders(registryKey, dataOutput.getModId()).forEach(holder -> {
 			String key = keyMapper.apply(holder.value());
 			if (key != null) {

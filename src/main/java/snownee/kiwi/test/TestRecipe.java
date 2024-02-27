@@ -16,7 +16,13 @@ import snownee.kiwi.recipe.crafting.DynamicShapedRecipe;
 
 public class TestRecipe extends DynamicShapedRecipe {
 
-	public TestRecipe(String group, CraftingBookCategory category, ShapedRecipePattern pattern, ItemStack result, boolean showNotification, boolean differentInputs) {
+	public TestRecipe(
+			String group,
+			CraftingBookCategory category,
+			ShapedRecipePattern pattern,
+			ItemStack result,
+			boolean showNotification,
+			boolean differentInputs) {
 		super(group, category, pattern, result, showNotification, differentInputs);
 	}
 

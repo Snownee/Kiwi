@@ -56,7 +56,11 @@ public class KiwiConfigManager {
 		for (Entry<ResourceLocation, Boolean> entry : Kiwi.defaultOptions.entrySet()) {
 			ResourceLocation rl = entry.getKey();
 			if (rl.getNamespace().equals(modId)) {
-				Value<Boolean> value = builder.define(prefix + rl.getPath(), entry.getValue(), null, "%s.config.modules.%s".formatted(modId, rl.getPath()));
+				Value<Boolean> value = builder.define(
+						prefix + rl.getPath(),
+						entry.getValue(),
+						null,
+						"%s.config.modules.%s".formatted(modId, rl.getPath()));
 				value.requiresRestart = true;
 				modules.put(rl, value);
 			}

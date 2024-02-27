@@ -52,7 +52,11 @@ public class SimpleBlockDefinition implements BlockDefinition {
 		MethodHandle m = null;
 		try {
 			// getPlacementState
-			String methodName = FabricLoader.getInstance().getMappingResolver().mapMethodName("intermediary", "net.minecraft.class_1747", "method_7707", "(Lnet/minecraft/class_1750;)Lnet/minecraft/class_2680;");
+			String methodName = FabricLoader.getInstance().getMappingResolver().mapMethodName(
+					"intermediary",
+					"net.minecraft.class_1747",
+					"method_7707",
+					"(Lnet/minecraft/class_1750;)Lnet/minecraft/class_2680;");
 			m = MethodHandles.lookup().unreflect(BlockItem.class.getDeclaredMethod(methodName, BlockPlaceContext.class));
 		} catch (Exception e) {
 			throw new RuntimeException("Report this to author", e);
@@ -75,8 +79,9 @@ public class SimpleBlockDefinition implements BlockDefinition {
 		@Override
 		public SimpleBlockDefinition fromNBT(CompoundTag tag) {
 			BlockState state = NbtUtils.readBlockState(BuiltInRegistries.BLOCK.asLookup(), tag.getCompound(TYPE));
-			if (state.isAir())
+			if (state.isAir()) {
 				return null;
+			}
 			return of(state);
 		}
 
@@ -160,8 +165,9 @@ public class SimpleBlockDefinition implements BlockDefinition {
 			}
 			if (direction != null) {
 				List<BakedQuad> quads = model.getQuads(state, direction, random);
-				if (quads.isEmpty())
+				if (quads.isEmpty()) {
 					quads = model.getQuads(state, null, random);
+				}
 				for (BakedQuad quad : quads) {
 					sprite = quad.getSprite().contents().name();
 					if (sprite.equals(particleIcon)) {
@@ -209,8 +215,9 @@ public class SimpleBlockDefinition implements BlockDefinition {
 	@Override
 	public void place(Level level, BlockPos pos) {
 		BlockState state = this.state;
-		if (state.hasProperty(BlockStateProperties.LIT))
+		if (state.hasProperty(BlockStateProperties.LIT)) {
 			state = state.setValue(BlockStateProperties.LIT, false);
+		}
 		level.setBlockAndUpdate(pos, state);
 	}
 

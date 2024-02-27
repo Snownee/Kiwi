@@ -3,7 +3,7 @@ package third_party.com.facebook.yoga;
 /**
  * Copyright (c) 2014-present, Facebook, Inc.
  * Copyright (c) 2018-present, Marius Klimantavičius
- *
+ * <p>
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
@@ -40,16 +40,16 @@ public class YogaValue {
 	@Override
 	public String toString() {
 		switch (Unit) {
-		case Undefined:
-			return "undefined";
-		case Point:
-			return Float.toString(Value);
-		case Percent:
-			return Value + "%";
-		case Auto:
-			return "auto";
-		default:
-			throw new IllegalStateException();
+			case Undefined:
+				return "undefined";
+			case Point:
+				return Float.toString(Value);
+			case Percent:
+				return Value + "%";
+			case Auto:
+				return "auto";
+			default:
+				throw new IllegalStateException();
 		}
 	}
 
@@ -75,12 +75,12 @@ public class YogaValue {
 
 	public float Resolve(float ownerSize) {
 		switch (Unit) {
-		default:
-			return Float.NaN;
-		case Point:
-			return Value;
-		case Percent:
-			return Value * ownerSize * 0.01f;
+			default:
+				return Float.NaN;
+			case Point:
+				return Value;
+			case Percent:
+				return Value * ownerSize * 0.01f;
 		}
 	}
 

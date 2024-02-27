@@ -143,7 +143,8 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 	private static boolean wrongDistribution(KiwiAnnotationData annotationData, String dist) {
 		try {
 			ClassNode clazz = new ClassNode(Opcodes.ASM7);
-			InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(annotationData.getTarget().replace('.', '/') + ".class");
+			InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(
+					annotationData.getTarget().replace('.', '/') + ".class");
 			final ClassReader classReader = new ClassReader(is);
 			classReader.accept(clazz, 0);
 			if (clazz.visibleAnnotations != null) {
@@ -329,7 +330,13 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 
 		Map<String, KiwiAnnotationData> classOptionalMap = Maps.newHashMap();
 		String dist = Platform.isPhysicalClient() ? "client" : "server";
-		List<String> mods = FabricLoader.getInstance().getAllMods().stream().map(ModContainer::getMetadata).filter($ -> !AbstractModMetadata.TYPE_BUILTIN.equals($.getType())).map(ModMetadata::getId).toList();
+		List<String> mods = FabricLoader.getInstance()
+				.getAllMods()
+				.stream()
+				.map(ModContainer::getMetadata)
+				.filter($ -> !AbstractModMetadata.TYPE_BUILTIN.equals($.getType()))
+				.map(ModMetadata::getId)
+				.toList();
 		KiwiMetadataParser metadataParser = new KiwiMetadataParser();
 		for (String mod : mods) {
 			if (mod.startsWith("fabric")) {
@@ -342,23 +349,27 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 			}
 
 			for (KiwiAnnotationData module : metadata.get("modules")) {
-				if (wrongDistribution(module, dist))
+				if (wrongDistribution(module, dist)) {
 					continue;
+				}
 				moduleData.put(mod, module);
 			}
 			for (KiwiAnnotationData optional : metadata.get("optionals")) {
-				if (wrongDistribution(optional, dist))
+				if (wrongDistribution(optional, dist)) {
 					continue;
+				}
 				classOptionalMap.put(optional.getTarget(), optional);
 			}
 			for (KiwiAnnotationData condition : metadata.get("conditions")) {
-				if (wrongDistribution(condition, dist))
+				if (wrongDistribution(condition, dist)) {
 					continue;
+				}
 				conditions.put(condition, mod);
 			}
 			for (KiwiAnnotationData config : metadata.get("configs")) {
-				if (wrongDistribution(config, dist))
+				if (wrongDistribution(config, dist)) {
 					continue;
+				}
 				ConfigType type = null;
 				try {
 					type = ConfigType.valueOf((String) config.getData().get("type"));
@@ -380,8 +391,9 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 				}
 			}
 			for (KiwiAnnotationData packet : metadata.get("packets")) {
-				if (wrongDistribution(packet, dist))
+				if (wrongDistribution(packet, dist)) {
 					continue;
+				}
 				Networking.processClass(packet.getTarget(), mod);
 			}
 		}
@@ -579,7 +591,10 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 		}
 	}
 
-	private static void instantiateModule(ResourceLocation id, Class<?> clazz, ModContext context) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+	private static void instantiateModule(
+			ResourceLocation id,
+			Class<?> clazz,
+			ModContext context) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
 		AbstractModule instance = (AbstractModule) clazz.getDeclaredConstructor().newInstance();
 		KiwiModules.add(id, instance, context);
 	}

@@ -25,7 +25,12 @@ public interface IKiwiBlock {
 		return new ModBlockItem((Block) this, builder);
 	}
 
-	default ItemStack getCloneItemStack(LevelReader level, BlockPos blockPos, BlockState blockState, @Nullable Player player, @Nullable HitResult hit) {
+	default ItemStack getCloneItemStack(
+			LevelReader level,
+			BlockPos blockPos,
+			BlockState blockState,
+			@Nullable Player player,
+			@Nullable HitResult hit) {
 		return ModBlock.pick(level, blockPos, blockState, player, hit);
 	}
 }

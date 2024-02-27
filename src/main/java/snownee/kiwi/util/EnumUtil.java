@@ -28,7 +28,11 @@ public class EnumUtil {
 
 	static {
 		if (Platform.isPhysicalClient()) {
-			BLOCK_RENDER_TYPES = ImmutableSet.of(RenderType.solid(), RenderType.cutout(), RenderType.cutoutMipped(), RenderType.translucent());
+			BLOCK_RENDER_TYPES = ImmutableSet.of(
+					RenderType.solid(),
+					RenderType.cutout(),
+					RenderType.cutoutMipped(),
+					RenderType.translucent());
 		}
 	}
 }

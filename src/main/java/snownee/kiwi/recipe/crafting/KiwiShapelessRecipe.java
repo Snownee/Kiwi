@@ -21,7 +21,12 @@ public class KiwiShapelessRecipe extends ShapelessRecipe {
 	private final boolean noContainers;
 	private boolean trimmed;
 
-	public KiwiShapelessRecipe(String string, CraftingBookCategory craftingBookCategory, ItemStack itemStack, NonNullList<Ingredient> nonNullList, boolean noContainers) {
+	public KiwiShapelessRecipe(
+			String string,
+			CraftingBookCategory craftingBookCategory,
+			ItemStack itemStack,
+			NonNullList<Ingredient> nonNullList,
+			boolean noContainers) {
 		super(string, craftingBookCategory, itemStack, mutableCopy(nonNullList));
 		this.noContainers = noContainers;
 	}
@@ -81,7 +86,9 @@ public class KiwiShapelessRecipe extends ShapelessRecipe {
 							if (ingredients.length == 0) {
 								return DataResult.error(() -> "No ingredients for shapeless recipe");
 							} else {
-								return ingredients.length > 9 ? DataResult.error(() -> "Too many ingredients for shapeless recipe") : DataResult.success(NonNullList.of(Ingredient.EMPTY, ingredients));
+								return ingredients.length > 9 ?
+										DataResult.error(() -> "Too many ingredients for shapeless recipe") :
+										DataResult.success(NonNullList.of(Ingredient.EMPTY, ingredients));
 							}
 						}, DataResult::success).forGetter(ShapelessRecipe::getIngredients),
 						Codec.BOOL.optionalFieldOf("no_containers", false).forGetter(recipe -> recipe.noContainers))

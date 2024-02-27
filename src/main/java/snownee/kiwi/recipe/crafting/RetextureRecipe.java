@@ -27,7 +27,14 @@ import snownee.kiwi.recipe.FullBlockIngredient;
 public class RetextureRecipe extends DynamicShapedRecipe {
 	protected Char2ObjectMap<String[]> textureKeys;
 
-	public RetextureRecipe(String group, CraftingBookCategory category, ShapedRecipePattern pattern, ItemStack result, boolean showNotification, boolean differentInputs, Map<Character, List<String>> textureKeys) {
+	public RetextureRecipe(
+			String group,
+			CraftingBookCategory category,
+			ShapedRecipePattern pattern,
+			ItemStack result,
+			boolean showNotification,
+			boolean differentInputs,
+			Map<Character, List<String>> textureKeys) {
 		super(group, category, pattern, result, showNotification, differentInputs);
 		this.textureKeys = new Char2ObjectArrayMap<>(textureKeys.size());
 		for (Entry<Character, List<String>> e : textureKeys.entrySet()) {

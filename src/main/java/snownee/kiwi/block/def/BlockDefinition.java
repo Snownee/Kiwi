@@ -45,8 +45,9 @@ public interface BlockDefinition {
 
 	static BlockDefinition fromNBT(CompoundTag tag) {
 		Factory<?> factory = MAP.get(tag.getString("Type"));
-		if (factory == null)
+		if (factory == null) {
 			return null;
+		}
 		return factory.fromNBT(tag);
 	}
 

@@ -197,11 +197,13 @@ public final class KiwiModuleContainer {
 		});
 		if (registryKey == Registries.ITEM) {
 			registries.get(Registries.BLOCK).forEach(e -> {
-				if (noItems.contains(e.value))
+				if (noItems.contains(e.value)) {
 					return;
+				}
 				Item.Properties builder = blockItemBuilders.get(e.value);
-				if (builder == null)
+				if (builder == null) {
 					builder = new Item.Properties();
+				}
 				BlockItem item;
 				if (e.value instanceof IKiwiBlock kiwiBlock) {
 					item = kiwiBlock.createItem(builder);

@@ -70,7 +70,12 @@ public class CosmeticScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseDragged(double p_mouseDragged_1_, double p_mouseDragged_3_, int p_mouseDragged_5_, double p_mouseDragged_6_, double p_mouseDragged_8_) {
+	public boolean mouseDragged(
+			double p_mouseDragged_1_,
+			double p_mouseDragged_3_,
+			int p_mouseDragged_5_,
+			double p_mouseDragged_6_,
+			double p_mouseDragged_8_) {
 		list.mouseDragged(p_mouseDragged_1_, p_mouseDragged_3_, p_mouseDragged_5_, p_mouseDragged_6_, p_mouseDragged_8_);
 		return super.mouseDragged(p_mouseDragged_1_, p_mouseDragged_3_, p_mouseDragged_5_, p_mouseDragged_6_, p_mouseDragged_8_);
 	}
@@ -136,7 +141,17 @@ public class CosmeticScreen extends Screen {
 		}
 
 		@Override
-		public void render(GuiGraphics guiGraphics, int entryIdx, int top, int left, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hover, float partialTicks) {
+		public void render(
+				GuiGraphics guiGraphics,
+				int entryIdx,
+				int top,
+				int left,
+				int entryWidth,
+				int entryHeight,
+				int mouseX,
+				int mouseY,
+				boolean hover,
+				float partialTicks) {
 			int color = hover ? 0xFFFFAA : 0xFFFFFF;
 			if (this == parent.selectedEntry) {
 				color = 0xFFFF77;

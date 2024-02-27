@@ -38,7 +38,9 @@ public class Contributors extends AbstractModule {
 	}
 
 	public static boolean isContributor(String author, String playerName, String tier) {
-		return REWARD_PROVIDERS.getOrDefault(author.toLowerCase(Locale.ENGLISH), ITierProvider.Empty.INSTANCE).isContributor(playerName, tier);
+		return REWARD_PROVIDERS.getOrDefault(author.toLowerCase(Locale.ENGLISH), ITierProvider.Empty.INSTANCE).isContributor(
+				playerName,
+				tier);
 	}
 
 	public static boolean isContributor(String author, Player player) {
@@ -120,7 +122,9 @@ public class Contributors extends AbstractModule {
 		if (!isRenderable(cosmetic)) {
 			return CompletableFuture.completedFuture(Boolean.FALSE);
 		}
-		ITierProvider provider = REWARD_PROVIDERS.getOrDefault(cosmetic.getNamespace().toLowerCase(Locale.ENGLISH), ITierProvider.Empty.INSTANCE);
+		ITierProvider provider = REWARD_PROVIDERS.getOrDefault(
+				cosmetic.getNamespace().toLowerCase(Locale.ENGLISH),
+				ITierProvider.Empty.INSTANCE);
 		if (!provider.isContributor(playerName, cosmetic.getPath())) {
 			if (!Platform.isPhysicalClient()) {
 				return provider.refresh().thenApply($ -> provider.isContributor(playerName, cosmetic.getPath()));

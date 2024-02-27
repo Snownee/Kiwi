@@ -17,7 +17,13 @@ import snownee.kiwi.data.DataModule;
 public class NoContainersShapedRecipe extends ShapedRecipe {
 	private final boolean noContainers;
 
-	public NoContainersShapedRecipe(String group, CraftingBookCategory category, ShapedRecipePattern pattern, ItemStack result, boolean showNotification, boolean noContainers) {
+	public NoContainersShapedRecipe(
+			String group,
+			CraftingBookCategory category,
+			ShapedRecipePattern pattern,
+			ItemStack result,
+			boolean showNotification,
+			boolean noContainers) {
 		super(group, category, pattern, result);
 		this.noContainers = noContainers;
 	}
@@ -55,7 +61,13 @@ public class NoContainersShapedRecipe extends ShapedRecipe {
 		public NoContainersShapedRecipe fromNetwork(FriendlyByteBuf buffer) {
 			ShapedRecipe recipe = RecipeSerializer.SHAPED_RECIPE.fromNetwork(buffer);
 			boolean noContainers = buffer.readBoolean();
-			return new NoContainersShapedRecipe(recipe.getGroup(), recipe.category(), recipe.pattern, recipe.result, recipe.showNotification(), noContainers);
+			return new NoContainersShapedRecipe(
+					recipe.getGroup(),
+					recipe.category(),
+					recipe.pattern,
+					recipe.result,
+					recipe.showNotification(),
+					noContainers);
 		}
 
 		@Override

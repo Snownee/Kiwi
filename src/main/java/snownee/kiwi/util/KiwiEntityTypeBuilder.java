@@ -126,7 +126,10 @@ public class KiwiEntityTypeBuilder<T extends Entity> {
 		return this;
 	}
 
-	public KiwiEntityTypeBuilder<T> spawnRestriction(SpawnPlacements.Type location, Heightmap.Types heightmap, SpawnPlacements.SpawnPredicate<T> spawnPredicate) {
+	public KiwiEntityTypeBuilder<T> spawnRestriction(
+			SpawnPlacements.Type location,
+			Heightmap.Types heightmap,
+			SpawnPlacements.SpawnPredicate<T> spawnPredicate) {
 		Preconditions.checkState(type == Mob.class, "Only mobs can have spawn restrictions.");
 		this.restrictionLocation = Objects.requireNonNull(location, "Location cannot be null.");
 		this.restrictionHeightmap = Objects.requireNonNull(heightmap, "Heightmap type cannot be null.");
@@ -150,7 +153,10 @@ public class KiwiEntityTypeBuilder<T extends Entity> {
 				rawBuilder.defaultAttributes(this.defaultAttributeBuilder);
 			}
 			if (this.spawnPredicate != null) {
-				rawBuilder.spawnRestriction(this.restrictionLocation, this.restrictionHeightmap, (SpawnPlacements.SpawnPredicate<Mob>) this.spawnPredicate);
+				rawBuilder.spawnRestriction(
+						this.restrictionLocation,
+						this.restrictionHeightmap,
+						(SpawnPlacements.SpawnPredicate<Mob>) this.spawnPredicate);
 			}
 			builder = (FabricEntityTypeBuilder<T>) rawBuilder;
 		} else {

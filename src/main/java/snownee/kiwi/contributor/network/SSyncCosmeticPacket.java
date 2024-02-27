@@ -23,7 +23,10 @@ public class SSyncCosmeticPacket extends PacketHandler {
 	public static SSyncCosmeticPacket I;
 
 	@Override
-	public CompletableFuture<FriendlyByteBuf> receive(Function<Runnable, CompletableFuture<FriendlyByteBuf>> executor, FriendlyByteBuf buf, ServerPlayer sender) {
+	public CompletableFuture<FriendlyByteBuf> receive(
+			Function<Runnable, CompletableFuture<FriendlyByteBuf>> executor,
+			FriendlyByteBuf buf,
+			ServerPlayer sender) {
 		ImmutableMap.Builder<String, ResourceLocation> builder = ImmutableMap.builder();
 		int size = buf.readVarInt();
 		for (int i = 0; i < size; i++) {

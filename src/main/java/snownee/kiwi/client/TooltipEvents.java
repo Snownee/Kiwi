@@ -64,21 +64,26 @@ public final class TooltipEvents {
 		CompoundTag nbt = itemStack.getTag();
 		Minecraft mc = Minecraft.getInstance();
 		long millis = Util.getMillis();
-		if (mc.player != null && millis - latestPressF3 > 500 && InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), InputConstants.KEY_F3)) {
+		if (mc.player != null && millis - latestPressF3 > 500 && InputConstants.isKeyDown(
+				Minecraft.getInstance().getWindow().getWindow(),
+				InputConstants.KEY_F3)) {
 			latestPressF3 = millis;
 			MutableComponent component = Component.literal(BuiltInRegistries.ITEM.getKey(itemStack.getItem()).toString());
 			mc.keyboardHandler.setClipboard(component.getString());
 			if (nbt != null) {
 				component.append(NbtUtils.toPrettyComponent(nbt));
 			}
-			component.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, component.getString())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click"))).withInsertion(component.getString()));
+			component.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, component.getString()))
+					.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click")))
+					.withInsertion(component.getString()));
 			mc.player.displayClientMessage(component, false);
 			mc.gui.getDebugOverlay().toggleOverlay();
 		}
 
 		if (KiwiClientConfig.nbtTooltip && Screen.hasShiftDown() && nbt != null) {
 			trySendTipMsg(mc);
-			tooltip.removeIf(c -> c.getContents() instanceof TranslatableContents && "item.nbt_tags".equals(((TranslatableContents) c.getContents()).getKey()));
+			tooltip.removeIf(c -> c.getContents() instanceof TranslatableContents &&
+					"item.nbt_tags".equals(((TranslatableContents) c.getContents()).getKey()));
 			if (cache.nbt != nbt) {
 				cache.nbt = nbt;
 				cache.formattedNbt = NbtUtils.toPrettyComponent(cache.nbt);
@@ -113,7 +118,9 @@ public final class TooltipEvents {
 		if (firstSeenDebugTooltip && mc.player != null) {
 			firstSeenDebugTooltip = false;
 			if (KiwiClientConfig.debugTooltipMsg) {
-				MutableComponent clickHere = Component.translatable("tip.kiwi.click_here").withStyle($ -> $.withClickEvent(new ClickEvent(Action.COPY_TO_CLIPBOARD, disableDebugTooltipCommand)));
+				MutableComponent clickHere = Component.translatable("tip.kiwi.click_here").withStyle($ -> $.withClickEvent(new ClickEvent(
+						Action.COPY_TO_CLIPBOARD,
+						disableDebugTooltipCommand)));
 				mc.player.sendSystemMessage(Component.translatable("tip.kiwi.debug_tooltip", clickHere.withStyle(ChatFormatting.AQUA)));
 				KiwiClientConfig.debugTooltipMsg = false;
 				KiwiConfigManager.getHandler(KiwiClientConfig.class).save();

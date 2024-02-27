@@ -1,4 +1,4 @@
 {
-  "tip.kiwi.press_shift": "§r§7<Pressione §f§oShift§r§7..>",
-  "msg.kiwi.no_dependencies": "{1}: Módulo §e{2}§r requer que os seguintes módulos sejam ativados: §e{3}"
+	"tip.kiwi.press_shift": "§r§7<Pressione §f§oShift§r§7..>",
+	"msg.kiwi.no_dependencies": "{1}: Módulo §e{2}§r requer que os seguintes módulos sejam ativados: §e{3}"
 }

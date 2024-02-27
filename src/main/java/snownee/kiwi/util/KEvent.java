@@ -22,7 +22,10 @@ public class KEvent<T> {
 		return new KEvent<>(EventFactory.createArrayBacked(type, emptyInvoker, invokerFactory));
 	}
 
-	public static <T> KEvent<T> createWithPhases(Class<? super T> type, Function<T[], T> invokerFactory, ResourceLocation... defaultPhases) {
+	public static <T> KEvent<T> createWithPhases(
+			Class<? super T> type,
+			Function<T[], T> invokerFactory,
+			ResourceLocation... defaultPhases) {
 		return new KEvent<>(EventFactory.createWithPhases(type, invokerFactory, defaultPhases));
 	}
 

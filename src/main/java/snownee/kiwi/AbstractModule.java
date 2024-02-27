@@ -60,11 +60,18 @@ public abstract class AbstractModule {
 	}
 
 	@SafeVarargs
-	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(FabricBlockEntityTypeBuilder.Factory<? extends T> factory, Type<?> datafixer, Supplier<? extends Block>... blocks) {
-		return go(() -> FabricBlockEntityTypeBuilder.<T>create(factory, Stream.of(blocks).map(Supplier::get).toArray(Block[]::new)).build(datafixer));
+	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(
+			FabricBlockEntityTypeBuilder.Factory<? extends T> factory,
+			Type<?> datafixer,
+			Supplier<? extends Block>... blocks) {
+		return go(() -> FabricBlockEntityTypeBuilder.<T>create(factory, Stream.of(blocks).map(Supplier::get).toArray(Block[]::new))
+				.build(datafixer));
 	}
 
-	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(FabricBlockEntityTypeBuilder.Factory<? extends T> factory, Type<?> datafixer, Class<? extends Block> blockClass) {
+	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(
+			FabricBlockEntityTypeBuilder.Factory<? extends T> factory,
+			Type<?> datafixer,
+			Class<? extends Block> blockClass) {
 		return go(() -> new InheritanceBlockEntityType<>(factory, blockClass, datafixer));
 	}
 

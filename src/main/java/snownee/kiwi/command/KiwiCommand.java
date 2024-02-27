@@ -19,14 +19,17 @@ import snownee.kiwi.util.KEval;
 
 public class KiwiCommand {
 
-	public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+	public static void register(
+			CommandDispatcher<CommandSourceStack> dispatcher,
+			CommandBuildContext registryAccess,
+			Commands.CommandSelection environment) {
 		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal(Kiwi.ID);
 		/* off */
-        builder.then(Commands
-                .literal("debugLevelRules")
-                .requires(ctx -> ctx.hasPermission(2))
-                .executes(ctx -> cleanLevel(ctx.getSource()))
-        );
+		builder.then(Commands
+				.literal("debugLevelRules")
+				.requires(ctx -> ctx.hasPermission(2))
+				.executes(ctx -> cleanLevel(ctx.getSource()))
+		);
 
 		builder.then(Commands
 				.literal("reload")
@@ -52,7 +55,7 @@ public class KiwiCommand {
 						.executes(ctx -> eval(ctx.getSource(), StringArgumentType.getString(ctx, "expression")))
 				)
 		);
-        /* on */
+		/* on */
 		dispatcher.register(builder);
 	}
 

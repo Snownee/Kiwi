@@ -19,11 +19,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- *
  * Simple NBT helper. Use 'a.b.c' to access to values
  *
  * @author Snownee
- *
  */
 public class NBTHelper {
 

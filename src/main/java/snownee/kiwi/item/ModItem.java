@@ -26,8 +26,9 @@ public class ModItem extends Item {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
-		if (!KiwiClientConfig.globalTooltip)
+		if (!KiwiClientConfig.globalTooltip) {
 			addTip(stack, tooltip, flagIn);
+		}
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -52,13 +53,13 @@ public class ModItem extends Item {
 		if (hasKey) {
 			List<String> lines = Lists.newArrayList(I18n.get(key).split("\n"));
 			/* off */
-            tooltip.addAll(
-                    lines.stream()
-                    .map(Component::literal)
-                    .peek(c -> c.withStyle(ChatFormatting.GRAY))
-                    .toList()
-            );
-            /* on */
+			tooltip.addAll(
+					lines.stream()
+							.map(Component::literal)
+							.peek(c -> c.withStyle(ChatFormatting.GRAY))
+							.toList()
+			);
+			/* on */
 		}
 		if (shift == ctrl) {
 			boolean hasShiftKey = I18n.exists(key + ".shift");
