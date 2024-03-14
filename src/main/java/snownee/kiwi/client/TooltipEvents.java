@@ -13,9 +13,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.ClickEvent.Action;
 import net.minecraft.network.chat.Component;
@@ -61,8 +63,10 @@ public final class TooltipEvents {
 			return;
 		}
 
-		CompoundTag nbt = itemStack.getTag();
 		Minecraft mc = Minecraft.getInstance();
+		var nbt = Util.getOrThrow(DataComponentPatch.CODEC.encodeStart(mc.level.registryAccess()
+				.createSerializationContext(NbtOps.INSTANCE), itemStack.getComponentsPatch()), IllegalStateException::new);
+
 		long millis = Util.getMillis();
 		if (mc.player != null && millis - latestPressF3 > 500 && InputConstants.isKeyDown(
 				Minecraft.getInstance().getWindow().getWindow(),
@@ -70,7 +74,7 @@ public final class TooltipEvents {
 			latestPressF3 = millis;
 			MutableComponent component = Component.literal(BuiltInRegistries.ITEM.getKey(itemStack.getItem()).toString());
 			mc.keyboardHandler.setClipboard(component.getString());
-			if (nbt != null) {
+			if (!itemStack.getComponentsPatch().isEmpty()) {
 				component.append(NbtUtils.toPrettyComponent(nbt));
 			}
 			component.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, component.getString()))
@@ -80,7 +84,7 @@ public final class TooltipEvents {
 			mc.gui.getDebugOverlay().toggleOverlay();
 		}
 
-		if (KiwiClientConfig.nbtTooltip && Screen.hasShiftDown() && nbt != null) {
+		if (KiwiClientConfig.nbtTooltip && Screen.hasShiftDown() && !itemStack.getComponentsPatch().isEmpty()) {
 			trySendTipMsg(mc);
 			tooltip.removeIf(c -> c.getContents() instanceof TranslatableContents &&
 					"item.nbt_tags".equals(((TranslatableContents) c.getContents()).getKey()));
@@ -133,7 +137,7 @@ public final class TooltipEvents {
 		private final List<List<String>> pages = Lists.newArrayList();
 		private int pageNow = 0;
 		private ItemStack itemStack = ItemStack.EMPTY;
-		private CompoundTag nbt;
+		private Tag nbt;
 		private Component formattedNbt;
 		private boolean showTags;
 		private long lastShowTags;
@@ -155,7 +159,7 @@ public final class TooltipEvents {
 				addPages("block", getTags(BuiltInRegistries.BLOCK, block));
 			}
 			if (item instanceof SpawnEggItem spawnEggItem) {
-				EntityType<?> type = spawnEggItem.getType(itemStack.getTag());
+				EntityType<?> type = spawnEggItem.getType(itemStack);
 				addPages("entity_type", getTags(BuiltInRegistries.ENTITY_TYPE, type));
 			} else if (item instanceof BucketItem bucketItem) {
 				addPages("fluid", getTags(BuiltInRegistries.FLUID, Platform.getFluidFromBucket(bucketItem)));
