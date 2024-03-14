@@ -108,7 +108,6 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 import net.minecraft.world.level.storage.loot.providers.nbt.LootNbtProviderType;
 import net.minecraft.world.level.storage.loot.providers.number.LootNumberProviderType;
 import net.minecraft.world.level.storage.loot.providers.score.LootScoreProviderType;
-import snownee.kiwi.KiwiModule.RenderLayer.Layer;
 import snownee.kiwi.block.def.BlockDefinition;
 import snownee.kiwi.block.def.SimpleBlockDefinition;
 import snownee.kiwi.build.KiwiMetadata;
@@ -122,7 +121,7 @@ import snownee.kiwi.loader.KiwiMetadataLoader;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.loader.event.PostInitEvent;
-import snownee.kiwi.network.Networking;
+import snownee.kiwi.network.KNetworking;
 import snownee.kiwi.util.Util;
 
 @Mod(Kiwi.ID)
@@ -394,7 +393,7 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 				if (wrongDistribution(packet, dist)) {
 					continue;
 				}
-				Networking.processClass(packet.getTarget(), mod);
+				KNetworking.processClass(packet);
 			}
 		}
 
@@ -427,9 +426,9 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 		ServerLifecycleEvents.SERVER_STOPPED.register($ -> currentServer = null);
 		AttackEntityCallback.EVENT.register(Util::onAttackEntity);
 		if (Platform.isPhysicalClient()) {
-			Layer.CUTOUT.value = RenderType.cutout();
-			Layer.CUTOUT_MIPPED.value = RenderType.cutoutMipped();
-			Layer.TRANSLUCENT.value = RenderType.translucent();
+			RenderLayerEnum.CUTOUT.value = RenderType.cutout();
+			RenderLayerEnum.CUTOUT_MIPPED.value = RenderType.cutoutMipped();
+			RenderLayerEnum.TRANSLUCENT.value = RenderType.translucent();
 
 			ClientCommandRegistrationCallback.EVENT.register(KiwiClientCommand::register);
 			ClientLifecycleEvents.CLIENT_STARTED.register(Kiwi::clientInit);

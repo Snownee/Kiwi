@@ -1,55 +1,47 @@
 package snownee.kiwi.contributor.network;
 
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
 import com.google.common.collect.ImmutableMap;
 
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import snownee.kiwi.contributor.ContributorsClient;
-import snownee.kiwi.network.KPacketTarget;
 import snownee.kiwi.network.KiwiPacket;
-import snownee.kiwi.network.KiwiPacket.Direction;
-import snownee.kiwi.network.PacketHandler;
-import snownee.kiwi.util.Util;
+import snownee.kiwi.network.PayloadContext;
+import snownee.kiwi.network.PlayPacketHandler;
 
-@KiwiPacket(value = "sync_cosmetic", dir = Direction.PLAY_TO_CLIENT)
-public class SSyncCosmeticPacket extends PacketHandler {
-
-	public static SSyncCosmeticPacket I;
+@KiwiPacket
+public record SSyncCosmeticPacket(ImmutableMap<String, ResourceLocation> data) implements CustomPacketPayload {
+	public static final Type<SSyncCosmeticPacket> TYPE = CustomPacketPayload.createType("kiwi:sync_cosmetic");
 
 	@Override
-	public CompletableFuture<FriendlyByteBuf> receive(
-			Function<Runnable, CompletableFuture<FriendlyByteBuf>> executor,
-			FriendlyByteBuf buf,
-			ServerPlayer sender) {
-		ImmutableMap.Builder<String, ResourceLocation> builder = ImmutableMap.builder();
-		int size = buf.readVarInt();
-		for (int i = 0; i < size; i++) {
-			String k = buf.readUtf();
-			String v = buf.readUtf();
-			builder.put(k, Util.RL(v));
-		}
-		return executor.apply(() -> ContributorsClient.changeCosmetic(builder.build()));
+	public Type<? extends CustomPacketPayload> type() {
+		return TYPE;
 	}
 
-	public static void send(Map<String, ResourceLocation> map, ServerPlayer player, boolean except) {
-		Consumer<FriendlyByteBuf> consumer = buf -> {
-			buf.writeVarInt(map.size());
-			map.forEach((k, v) -> {
+	public static class Handler extends PlayPacketHandler<SSyncCosmeticPacket> {
+		@Override
+		public SSyncCosmeticPacket read(RegistryFriendlyByteBuf buf) {
+			int size = buf.readVarInt();
+			ImmutableMap.Builder<String, ResourceLocation> builder = ImmutableMap.builderWithExpectedSize(size);
+			for (int i = 0; i < size; i++) {
+				builder.put(buf.readUtf(), buf.readResourceLocation());
+			}
+			return new SSyncCosmeticPacket(builder.build());
+		}
+
+		@Override
+		public void write(SSyncCosmeticPacket packet, RegistryFriendlyByteBuf buf) {
+			buf.writeVarInt(packet.data.size());
+			packet.data.forEach((k, v) -> {
 				buf.writeUtf(k);
 				buf.writeResourceLocation(v);
 			});
-		};
-		if (except) {
-			I.send(KPacketTarget.allExcept(player), consumer);
-		} else {
-			I.send(player, consumer);
+		}
+
+		@Override
+		public void handle(SSyncCosmeticPacket packet, PayloadContext context) {
+			context.execute(() -> ContributorsClient.changeCosmetic(packet.data()));
 		}
 	}
-
 }

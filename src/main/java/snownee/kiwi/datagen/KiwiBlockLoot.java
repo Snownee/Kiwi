@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 import com.google.common.collect.Maps;
@@ -11,6 +12,7 @@ import com.google.common.collect.Sets;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootTableProvider;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
@@ -26,8 +28,8 @@ public abstract class KiwiBlockLoot extends FabricBlockLootTableProvider {
 	private final Set<Block> added = Sets.newHashSet();
 	private Function<Block, LootTable.Builder> defaultHandler;
 
-	protected KiwiBlockLoot(ResourceLocation moduleId, FabricDataOutput dataOutput) {
-		super(dataOutput);
+	protected KiwiBlockLoot(ResourceLocation moduleId, FabricDataOutput dataOutput, CompletableFuture<HolderLookup.Provider> registryLookup) {
+		super(dataOutput, registryLookup);
 		this.moduleId = moduleId;
 		KiwiModuleContainer container = Objects.requireNonNull(KiwiModules.get(moduleId));
 		knownBlocks = container.getRegistries(Registries.BLOCK);

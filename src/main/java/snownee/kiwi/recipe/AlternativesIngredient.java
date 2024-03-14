@@ -12,7 +12,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredient;
 import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredientSerializer;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
@@ -77,27 +78,34 @@ public class AlternativesIngredient implements CustomIngredient {
 				Codec.list(ExtraCodecs.JSON).fieldOf("options").forGetter(o -> o.options)
 		).apply(i, AlternativesIngredient::new));
 
+		public static final StreamCodec<RegistryFriendlyByteBuf, AlternativesIngredient> STREAM_CODEC = StreamCodec.of(
+				Serializer::write,
+				Serializer::read);
+
 		@Override
 		public ResourceLocation getIdentifier() {
 			return ID;
 		}
 
-		@Override
-		public AlternativesIngredient read(FriendlyByteBuf buf) {
-			Ingredient internal = Ingredient.fromNetwork(buf);
+		public static AlternativesIngredient read(RegistryFriendlyByteBuf buf) {
+			Ingredient internal = Ingredient.CONTENTS_STREAM_CODEC.decode(buf);
 			AlternativesIngredient ingredient = new AlternativesIngredient(null);
 			ingredient.cached = internal;
 			return ingredient;
 		}
 
-		@Override
-		public void write(FriendlyByteBuf buf, AlternativesIngredient ingredient) {
-			ingredient.internal().toNetwork(buf);
+		public static void write(RegistryFriendlyByteBuf buf, AlternativesIngredient ingredient) {
+			Ingredient.CONTENTS_STREAM_CODEC.encode(buf, ingredient.internal());
 		}
 
 		@Override
 		public Codec<AlternativesIngredient> getCodec(boolean allowEmpty) {
 			return CODEC;
+		}
+
+		@Override
+		public StreamCodec<RegistryFriendlyByteBuf, AlternativesIngredient> getPacketCodec() {
+			return STREAM_CODEC;
 		}
 	}
 }

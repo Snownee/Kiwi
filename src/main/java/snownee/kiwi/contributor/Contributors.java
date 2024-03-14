@@ -23,6 +23,7 @@ import snownee.kiwi.contributor.impl.KiwiTierProvider;
 import snownee.kiwi.contributor.network.SSyncCosmeticPacket;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.loader.event.InitEvent;
+import snownee.kiwi.network.KPacketSender;
 
 @KiwiModule("contributors")
 @KiwiModule.ClientCompanion(ContributorsClient.class)
@@ -86,7 +87,7 @@ public class Contributors extends AbstractModule {
 				} else {
 					PLAYER_COSMETICS.put(playerName, cosmetic);
 				}
-				SSyncCosmeticPacket.send(ImmutableMap.of(playerName, cosmetic), player, true);
+				KPacketSender.sendToAllExcept(new SSyncCosmeticPacket(ImmutableMap.of(playerName, cosmetic)), player);
 			}
 		});
 	}
@@ -140,7 +141,7 @@ public class Contributors extends AbstractModule {
 		registerTierProvider(new KiwiTierProvider());
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
 			if (!(server.isSingleplayerOwner(handler.player.getGameProfile()))) {
-				SSyncCosmeticPacket.send(PLAYER_COSMETICS, handler.player, false);
+				KPacketSender.send(new SSyncCosmeticPacket(ImmutableMap.copyOf(PLAYER_COSMETICS)), handler.player);
 			}
 		});
 		if (!Platform.isPhysicalClient()) {

@@ -12,6 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import snownee.kiwi.item.ModItem;
+import snownee.kiwi.network.KPacketSender;
 
 // Your class don't have to extend ModItem or ModBlock to be registered
 public class TestItem extends ModItem {
@@ -90,6 +91,11 @@ public class TestItem extends ModItem {
 //		} catch (Exception e) {
 //			e.printStackTrace();
 //		}
+
+		if (!worldIn.isClientSide) {
+			KPacketSender.send(new CMyPacket(5), playerIn);
+		}
+
 		return new InteractionResultHolder<>(InteractionResult.SUCCESS, stack);
 	}
 

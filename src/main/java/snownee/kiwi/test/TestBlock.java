@@ -3,7 +3,7 @@ package snownee.kiwi.test;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
@@ -17,7 +17,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import snownee.kiwi.block.IKiwiBlock;
 import snownee.kiwi.block.def.SimpleBlockDefinition;
 import snownee.kiwi.block.entity.RetextureBlockEntity;
-import snownee.kiwi.recipe.FullBlockIngredient;
 
 // fill ~-40 ~ ~-40 ~40 ~ ~40 kiwi:tex_block
 public class TestBlock extends StairBlock implements EntityBlock, IKiwiBlock {
@@ -27,21 +26,28 @@ public class TestBlock extends StairBlock implements EntityBlock, IKiwiBlock {
 	}
 
 	@Override
-	public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
+	protected ItemInteractionResult useItemOn(
+			ItemStack itemStack,
+			BlockState blockState,
+			Level worldIn,
+			BlockPos pos,
+			Player player,
+			InteractionHand handIn,
+			BlockHitResult blockHitResult) {
 		if (worldIn.isClientSide) {
-			return InteractionResult.SUCCESS;
+			return ItemInteractionResult.sidedSuccess(true);
 		}
 		BlockEntity tile = worldIn.getBlockEntity(pos);
 		ItemStack stack = player.getItemInHand(handIn);
 		if (tile instanceof RetextureBlockEntity && !stack.isEmpty()) {
-			if (FullBlockIngredient.isFullBlock(stack)) {
-				RetextureBlockEntity textureTile = (RetextureBlockEntity) tile;
-				BlockState state2 = ((BlockItem) stack.getItem()).getBlock().defaultBlockState();
-				textureTile.setTexture("0", SimpleBlockDefinition.of(state2));
-				textureTile.refresh();
-			}
+//			if (FullBlockIngredient.isFullBlock(stack)) {
+			RetextureBlockEntity textureTile = (RetextureBlockEntity) tile;
+			BlockState state2 = ((BlockItem) stack.getItem()).getBlock().defaultBlockState();
+			textureTile.setTexture("0", SimpleBlockDefinition.of(state2));
+			textureTile.refresh();
+//			}
 		}
-		return InteractionResult.SUCCESS;
+		return ItemInteractionResult.sidedSuccess(false);
 	}
 
 	@Override

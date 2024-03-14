@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
 
 import org.joml.Vector3d;
 
@@ -217,20 +218,17 @@ public final class VoxelUtil {
 		return simplify ? combinedShape.optimize() : combinedShape;
 	}
 
-	public static void setShape(VoxelShape shape, VoxelShape[] dest, boolean verticalAxis) {
-		setShape(shape, dest, verticalAxis, false);
-	}
-
-	public static void setShape(VoxelShape shape, VoxelShape[] dest, boolean verticalAxis, boolean invert) {
-		Direction[] dirs = verticalAxis ? EnumUtil.DIRECTIONS : EnumUtil.HORIZONTAL_DIRECTIONS;
-		for (Direction side : dirs) {
+	public static void setShape(VoxelShape shape, VoxelShape[] dest, boolean invert) {
+		boolean verticalAxis = dest.length == 4;
+		Stream<Direction> stream = verticalAxis ? Direction.Plane.HORIZONTAL.stream() : Direction.stream();
+		stream.forEach(side -> {
 			dest[verticalAxis ? side.ordinal() : side.ordinal() - 2] = verticalAxis ?
 					rotate(shape, invert ? side.getOpposite() : side) :
 					rotateHorizontal(shape, side);
-		}
+		});
 	}
 
 	public static void setShape(VoxelShape shape, VoxelShape[] dest) {
-		setShape(shape, dest, false, false);
+		setShape(shape, dest, false);
 	}
 }

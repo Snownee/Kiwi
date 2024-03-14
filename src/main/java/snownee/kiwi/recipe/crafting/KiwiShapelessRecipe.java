@@ -5,7 +5,8 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.NonNullList;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
@@ -80,7 +81,7 @@ public class KiwiShapelessRecipe extends ShapelessRecipe {
 		public static final Codec<KiwiShapelessRecipe> CODEC = RecordCodecBuilder.create(i -> i.group(
 						ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(ShapelessRecipe::getGroup),
 						CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(ShapelessRecipe::category),
-						ItemStack.ITEM_WITH_COUNT_CODEC.fieldOf("result").forGetter(recipe -> recipe.result),
+						ItemStack.CODEC.fieldOf("result").forGetter(recipe -> recipe.result),
 						Ingredient.CODEC_NONEMPTY.listOf().fieldOf("ingredients").flatXmap(list -> {
 							Ingredient[] ingredients = list.stream().filter(ingredient -> !ingredient.isEmpty()).toArray(Ingredient[]::new);
 							if (ingredients.length == 0) {
@@ -94,20 +95,27 @@ public class KiwiShapelessRecipe extends ShapelessRecipe {
 						Codec.BOOL.optionalFieldOf("no_containers", false).forGetter(recipe -> recipe.noContainers))
 				.apply(i, KiwiShapelessRecipe::new));
 
-		@Override
-		public KiwiShapelessRecipe fromNetwork(FriendlyByteBuf buffer) {
-			return new KiwiShapelessRecipe(RecipeSerializer.SHAPELESS_RECIPE.fromNetwork(buffer), buffer.readBoolean());
-		}
-
-		@Override
-		public void toNetwork(FriendlyByteBuf buffer, KiwiShapelessRecipe recipe) {
-			RecipeSerializer.SHAPELESS_RECIPE.toNetwork(buffer, recipe);
-			buffer.writeBoolean(recipe.noContainers);
-		}
+		public static final StreamCodec<RegistryFriendlyByteBuf, KiwiShapelessRecipe> STREAM_CODEC = StreamCodec.of(
+				Serializer::toNetwork,
+				Serializer::fromNetwork);
 
 		@Override
 		public Codec<KiwiShapelessRecipe> codec() {
 			return CODEC;
+		}
+
+		@Override
+		public StreamCodec<RegistryFriendlyByteBuf, KiwiShapelessRecipe> streamCodec() {
+			return STREAM_CODEC;
+		}
+
+		public static KiwiShapelessRecipe fromNetwork(RegistryFriendlyByteBuf buffer) {
+			return new KiwiShapelessRecipe(RecipeSerializer.SHAPELESS_RECIPE.streamCodec().decode(buffer), buffer.readBoolean());
+		}
+
+		public static void toNetwork(RegistryFriendlyByteBuf buffer, KiwiShapelessRecipe recipe) {
+			RecipeSerializer.SHAPELESS_RECIPE.streamCodec().encode(buffer, recipe);
+			buffer.writeBoolean(recipe.noContainers);
 		}
 	}
 }

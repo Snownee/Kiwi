@@ -4,10 +4,14 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipePattern;
@@ -38,7 +42,8 @@ public class TestRecipe extends DynamicShapedRecipe {
 			return false;
 		}
 		ItemStack stack = item('#', inv, pos);
-		return stack.hasTag() && stack.getTag().contains("Rarity");
+		CustomData customData = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
+		return customData.contains("Rarity");
 	}
 
 	@Override
@@ -46,7 +51,8 @@ public class TestRecipe extends DynamicShapedRecipe {
 		ItemStack res = result.copy();
 		int[] pos = search(inv);
 		ItemStack stack = item('#', inv, pos);
-		if ("SSR".equals(stack.getTag().getString("Rarity"))) {
+		CustomData customData = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
+		if ("SSR".equals(customData.copyTag().getString("Rarity"))) {
 			res.grow(res.getCount());
 		}
 		return res;
@@ -63,21 +69,32 @@ public class TestRecipe extends DynamicShapedRecipe {
 				ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(DynamicShapedRecipe::getGroup),
 				CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(DynamicShapedRecipe::category),
 				ShapedRecipePattern.MAP_CODEC.forGetter(DynamicShapedRecipe::pattern),
-				ItemStack.ITEM_WITH_COUNT_CODEC.fieldOf("result").forGetter(DynamicShapedRecipe::result),
+				ItemStack.CODEC.fieldOf("result").forGetter(DynamicShapedRecipe::result),
 				ExtraCodecs.strictOptionalField(Codec.BOOL, "show_notification", true).forGetter(DynamicShapedRecipe::showNotification),
 				Codec.BOOL.fieldOf("different_inputs").orElse(false).forGetter(TestRecipe::allowDifferentInputs)
 		).apply(instance, TestRecipe::new));
+
+		public static final StreamCodec<RegistryFriendlyByteBuf, TestRecipe> STREAM_CODEC = StreamCodec.of(
+				Serializer::toNetwork,
+				Serializer::fromNetwork);
 
 		@Override
 		public Codec<TestRecipe> codec() {
 			return CODEC;
 		}
 
-		@Override
-		public TestRecipe fromNetwork(FriendlyByteBuf pBuffer) {
-			//TODO customize recipe
-			return fromNetwork(TestRecipe::new, pBuffer);
+		public StreamCodec<RegistryFriendlyByteBuf, TestRecipe> streamCodec() {
+			return STREAM_CODEC;
 		}
 
+		public static TestRecipe fromNetwork(RegistryFriendlyByteBuf pBuffer) {
+			//TODO customize recipe
+			return DynamicShapedRecipe.Serializer.fromNetwork(TestRecipe::new, pBuffer);
+		}
+
+		public static void toNetwork(RegistryFriendlyByteBuf pBuffer, TestRecipe pRecipe) {
+			//TODO customize recipe
+			DynamicShapedRecipe.Serializer.toNetwork(pBuffer, pRecipe);
+		}
 	}
 }

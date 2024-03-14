@@ -100,7 +100,7 @@ public final class PlayerUtil {
 		}
 
 		if (playSound) {
-			SoundType soundtype = actualState.getBlock().getSoundType(actualState);
+			SoundType soundtype = actualState.getSoundType();
 			world.playSound(
 					player,
 					pos,

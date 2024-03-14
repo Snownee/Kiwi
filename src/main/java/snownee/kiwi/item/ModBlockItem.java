@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import com.google.common.collect.Sets;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlagSet;
@@ -17,6 +17,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -38,10 +39,9 @@ public class ModBlockItem extends BlockItem implements ItemCategoryFiller {
 		if (worldIn.isClientSide) {
 			BlockEntity tile = worldIn.getBlockEntity(pos);
 			if (tile != null && INSTANT_UPDATE_TILES.contains(tile.getType())) {
-				CompoundTag data = getBlockEntityData(stack);
-				if (data != null) {
-					data = data.copy();
-					tile.load(data);
+				CustomData data = stack.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY);
+				if (!data.isEmpty()) {
+					tile.load(data.copyTag(), worldIn.registryAccess());
 					tile.setChanged();
 				}
 			}

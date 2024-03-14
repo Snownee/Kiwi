@@ -1,4 +1,4 @@
-package snownee.kiwi.datagen;
+package snownee.kiwi.util;
 
 import java.util.Objects;
 import java.util.stream.Stream;

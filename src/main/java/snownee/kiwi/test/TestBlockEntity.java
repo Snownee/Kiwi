@@ -21,7 +21,7 @@ public class TestBlockEntity extends RetextureBlockEntity {
 	@Override
 	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		writePacketData(compoundTag, provider);
-		super.saveAdditional(compoundTag);
+		super.saveAdditional(compoundTag, provider);
 	}
 
 }

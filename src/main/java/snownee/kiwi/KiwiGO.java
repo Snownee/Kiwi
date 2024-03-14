@@ -1,11 +1,14 @@
 package snownee.kiwi;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
 
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -93,6 +96,18 @@ public class KiwiGO<T> implements Supplier<T> {
 	@Nullable
 	public ResourceKey<? extends Registry<?>> findRegistry() {
 		return Kiwi.registryLookup.findRegistry(value);
+	}
+
+	public Optional<? extends Holder<T>> holder() {
+		if (key == null) {
+			return Optional.empty();
+		}
+		//noinspection unchecked
+		Registry<T> registry = (Registry<T>) BuiltInRegistries.REGISTRY.get(key.registry());
+		if (registry == null) {
+			return Optional.empty();
+		}
+		return registry.getHolder(key);
 	}
 
 	public static class RegistrySpecified<T> extends KiwiGO<T> {

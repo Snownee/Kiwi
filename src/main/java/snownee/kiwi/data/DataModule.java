@@ -11,17 +11,14 @@ import snownee.kiwi.KiwiModule;
 import snownee.kiwi.LoadingContext;
 import snownee.kiwi.recipe.AlternativesIngredient;
 import snownee.kiwi.recipe.EvalCondition;
-import snownee.kiwi.recipe.FullBlockIngredient;
 import snownee.kiwi.recipe.ModuleLoadedCondition;
 import snownee.kiwi.recipe.crafting.KiwiShapelessRecipe;
 import snownee.kiwi.recipe.crafting.NoContainersShapedRecipe;
-import snownee.kiwi.recipe.crafting.RetextureRecipe;
 
 @KiwiModule("data")
 public final class DataModule extends AbstractModule {
 
 	public static final KiwiGO<RecipeSerializer<NoContainersShapedRecipe>> SHAPED_NO_CONTAINERS = go(NoContainersShapedRecipe.Serializer::new);
-	public static final KiwiGO<RecipeSerializer<RetextureRecipe>> RETEXTURE = go(RetextureRecipe.Serializer::new);
 	public static final KiwiGO<RecipeSerializer<KiwiShapelessRecipe>> SHAPELESS = go(KiwiShapelessRecipe.Serializer::new);
 
 	@Override
@@ -29,7 +26,6 @@ public final class DataModule extends AbstractModule {
 		ResourceConditions.register(ModuleLoadedCondition.ID, ModuleLoadedCondition.INSTANCE);
 		ResourceConditions.register(EvalCondition.ID, EvalCondition.INSTANCE);
 		CustomIngredientSerializer.register(AlternativesIngredient.Serializer.INSTANCE);
-		CustomIngredientSerializer.register(FullBlockIngredient.SERIALIZER);
 	}
 
 	@KiwiModule.LoadingCondition("data")

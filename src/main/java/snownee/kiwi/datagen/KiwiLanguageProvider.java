@@ -33,6 +33,7 @@ import net.minecraft.world.level.block.Block;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.ConfigUI;
 import snownee.kiwi.config.KiwiConfigManager;
+import snownee.kiwi.util.GameObjectLookup;
 import snownee.kiwi.util.Util;
 
 public class KiwiLanguageProvider implements DataProvider {

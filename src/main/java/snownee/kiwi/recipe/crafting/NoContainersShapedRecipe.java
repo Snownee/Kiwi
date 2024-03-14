@@ -4,7 +4,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.NonNullList;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
@@ -24,7 +25,7 @@ public class NoContainersShapedRecipe extends ShapedRecipe {
 			ItemStack result,
 			boolean showNotification,
 			boolean noContainers) {
-		super(group, category, pattern, result);
+		super(group, category, pattern, result, showNotification);
 		this.noContainers = noContainers;
 	}
 
@@ -47,10 +48,13 @@ public class NoContainersShapedRecipe extends ShapedRecipe {
 				ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(ShapedRecipe::getGroup),
 				CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(ShapedRecipe::category),
 				ShapedRecipePattern.MAP_CODEC.forGetter(shapedRecipe -> shapedRecipe.pattern),
-				ItemStack.ITEM_WITH_COUNT_CODEC.fieldOf("result").forGetter(shapedRecipe -> shapedRecipe.result),
+				ItemStack.CODEC.fieldOf("result").forGetter(shapedRecipe -> shapedRecipe.result),
 				ExtraCodecs.strictOptionalField(Codec.BOOL, "show_notification", true).forGetter(ShapedRecipe::showNotification),
 				Codec.BOOL.fieldOf("no_containers").orElse(false).forGetter(NoContainersShapedRecipe::noContainers)
 		).apply(instance, NoContainersShapedRecipe::new));
+		public static final StreamCodec<RegistryFriendlyByteBuf, NoContainersShapedRecipe> STREAM_CODEC = StreamCodec.of(
+				Serializer::toNetwork,
+				Serializer::fromNetwork);
 
 		@Override
 		public Codec<NoContainersShapedRecipe> codec() {
@@ -58,8 +62,12 @@ public class NoContainersShapedRecipe extends ShapedRecipe {
 		}
 
 		@Override
-		public NoContainersShapedRecipe fromNetwork(FriendlyByteBuf buffer) {
-			ShapedRecipe recipe = RecipeSerializer.SHAPED_RECIPE.fromNetwork(buffer);
+		public StreamCodec<RegistryFriendlyByteBuf, NoContainersShapedRecipe> streamCodec() {
+			return STREAM_CODEC;
+		}
+
+		public static NoContainersShapedRecipe fromNetwork(RegistryFriendlyByteBuf buffer) {
+			ShapedRecipe recipe = RecipeSerializer.SHAPED_RECIPE.streamCodec().decode(buffer);
 			boolean noContainers = buffer.readBoolean();
 			return new NoContainersShapedRecipe(
 					recipe.getGroup(),
@@ -70,9 +78,8 @@ public class NoContainersShapedRecipe extends ShapedRecipe {
 					noContainers);
 		}
 
-		@Override
-		public void toNetwork(FriendlyByteBuf buffer, NoContainersShapedRecipe recipe) {
-			RecipeSerializer.SHAPED_RECIPE.toNetwork(buffer, recipe);
+		public static void toNetwork(RegistryFriendlyByteBuf buffer, NoContainersShapedRecipe recipe) {
+			RecipeSerializer.SHAPED_RECIPE.streamCodec().encode(buffer, recipe);
 			buffer.writeBoolean(recipe.noContainers);
 		}
 	}

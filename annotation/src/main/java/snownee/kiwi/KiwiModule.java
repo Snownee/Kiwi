@@ -89,13 +89,8 @@ public @interface KiwiModule {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ElementType.TYPE, ElementType.FIELD})
 	@interface RenderLayer {
-		Layer value();
+		RenderLayerEnum value();
 
-		enum Layer {
-			CUTOUT_MIPPED, CUTOUT, TRANSLUCENT;
-
-			public Object value;
-		}
 	}
 
 	/**

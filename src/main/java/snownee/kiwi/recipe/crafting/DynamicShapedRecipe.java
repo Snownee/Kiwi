@@ -11,7 +11,7 @@ import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.chars.Char2ObjectArrayMap;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
@@ -154,7 +154,7 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 						ItemStack stack1 = ingredientsArrayMap.get(key);
 						if (stack1 == null) {
 							ingredientsArrayMap.put(key, stack0);
-						} else if (!ItemStack.isSameItemSameTags(stack1, stack0)) {
+						} else if (!ItemStack.isSameItemSameComponents(stack1, stack0)) {
 							return false;
 						}
 					}
@@ -191,21 +191,22 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 	}
 
 	public static abstract class Serializer<T extends DynamicShapedRecipe> implements RecipeSerializer<T> {
-		public static <T extends DynamicShapedRecipe> T fromNetwork(Function<CraftingBookCategory, T> constructor, FriendlyByteBuf buffer) {
+		public static <T extends DynamicShapedRecipe> T fromNetwork(
+				Function<CraftingBookCategory, T> constructor,
+				RegistryFriendlyByteBuf buffer) {
 			T recipe = constructor.apply(buffer.readEnum(CraftingBookCategory.class));
 			recipe.group = buffer.readUtf(256);
-			recipe.result = buffer.readItem();
-			recipe.pattern = ShapedRecipePattern.fromNetwork(buffer);
+			recipe.result = ItemStack.STREAM_CODEC.decode(buffer);
+			recipe.pattern = ShapedRecipePattern.STREAM_CODEC.decode(buffer);
 			recipe.differentInputs = buffer.readBoolean();
 			return recipe;
 		}
 
-		@Override
-		public void toNetwork(FriendlyByteBuf buffer, T recipe) {
+		public static <T extends DynamicShapedRecipe> void toNetwork(RegistryFriendlyByteBuf buffer, T recipe) {
 			buffer.writeEnum(recipe.category());
 			buffer.writeUtf(recipe.getGroup(), 256);
-			buffer.writeItem(recipe.result);
-			recipe.pattern.toNetwork(buffer);
+			ItemStack.STREAM_CODEC.encode(buffer, recipe.result);
+			ShapedRecipePattern.STREAM_CODEC.encode(buffer, recipe.pattern);
 			recipe.rawPattern = String.join("", recipe.pattern.data().orElseThrow().pattern());
 			buffer.writeBoolean(recipe.differentInputs);
 		}

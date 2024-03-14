@@ -20,6 +20,7 @@ import snownee.kiwi.contributor.client.CosmeticLayer;
 import snownee.kiwi.contributor.client.gui.CosmeticScreen;
 import snownee.kiwi.contributor.network.CSetCosmeticPacket;
 import snownee.kiwi.loader.event.InitEvent;
+import snownee.kiwi.network.KPacketSender;
 import snownee.kiwi.util.Util;
 
 public class ContributorsClient extends AbstractModule {
@@ -75,7 +76,7 @@ public class ContributorsClient extends AbstractModule {
 				cfg.save();
 				return;
 			}
-			CSetCosmeticPacket.send(cosmetic);
+			KPacketSender.sendToServer(new CSetCosmeticPacket(cosmetic));
 			if (cosmetic == null) {
 				Contributors.PLAYER_COSMETICS.remove(getPlayerName());
 			} else {
