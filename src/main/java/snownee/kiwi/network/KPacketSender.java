@@ -8,6 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -68,6 +69,6 @@ public final class KPacketSender {
 	}
 
 	public static void sendToServer(CustomPacketPayload payload) {
-		Objects.requireNonNull(Minecraft.getInstance().getConnection()).send(new ClientboundCustomPayloadPacket(payload));
+		Objects.requireNonNull(Minecraft.getInstance().getConnection()).send(new ServerboundCustomPayloadPacket(payload));
 	}
 }

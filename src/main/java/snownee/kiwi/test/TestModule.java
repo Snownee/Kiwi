@@ -11,6 +11,7 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.Categories;
+import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiGO;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModule.Category;
@@ -56,6 +57,10 @@ public class TestModule extends AbstractModule {
 		return new RecipeType<>() {
 		};
 	});
+
+	public TestModule() {
+		Kiwi.enableDataModule();
+	}
 
 	//	@Override
 	//	@Environment(EnvType.CLIENT)
