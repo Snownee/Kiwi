@@ -14,6 +14,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.SpawnPlacementType;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.flag.FeatureFlag;
@@ -36,7 +37,7 @@ public class KiwiEntityTypeBuilder<T extends Entity> {
 	private Boolean forceTrackedVelocityUpdates;
 	@Nullable
 	private Supplier<AttributeSupplier.Builder> defaultAttributeBuilder;
-	private SpawnPlacements.Type restrictionLocation;
+	private SpawnPlacementType restrictionLocation;
 	private Heightmap.Types restrictionHeightmap;
 	private SpawnPlacements.SpawnPredicate<T> spawnPredicate;
 
@@ -127,7 +128,7 @@ public class KiwiEntityTypeBuilder<T extends Entity> {
 	}
 
 	public KiwiEntityTypeBuilder<T> spawnRestriction(
-			SpawnPlacements.Type location,
+			SpawnPlacementType location,
 			Heightmap.Types heightmap,
 			SpawnPlacements.SpawnPredicate<T> spawnPredicate) {
 		Preconditions.checkState(type == Mob.class, "Only mobs can have spawn restrictions.");

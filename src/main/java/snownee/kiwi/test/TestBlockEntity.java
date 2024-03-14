@@ -1,6 +1,7 @@
 package snownee.kiwi.test;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.state.BlockState;
 import snownee.kiwi.block.entity.RetextureBlockEntity;
@@ -12,14 +13,14 @@ public class TestBlockEntity extends RetextureBlockEntity {
 	}
 
 	@Override
-	public void load(CompoundTag compound) {
+	public void load(CompoundTag compound, HolderLookup.Provider provider) {
 		readPacketData(compound);
-		super.load(compound);
+		super.load(compound, provider);
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag compoundTag) {
-		writePacketData(compoundTag);
+	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		writePacketData(compoundTag, provider);
 		super.saveAdditional(compoundTag);
 	}
 

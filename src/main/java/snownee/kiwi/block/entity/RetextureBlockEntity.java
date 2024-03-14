@@ -3,12 +3,14 @@ package snownee.kiwi.block.entity;
 import java.util.Map;
 import java.util.Objects;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Maps;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.Item;
@@ -126,7 +128,7 @@ public abstract class RetextureBlockEntity extends ModBlockEntity {
 	}
 
 	@Override
-	protected CompoundTag writePacketData(CompoundTag data) {
+	protected @NotNull CompoundTag writePacketData(CompoundTag data, HolderLookup.Provider provider) {
 		writeTextures(textures, data);
 		return data;
 	}

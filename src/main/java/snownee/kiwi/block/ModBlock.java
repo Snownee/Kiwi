@@ -27,7 +27,7 @@ public class ModBlock extends Block implements IKiwiBlock {
 		ItemStack stack = state.getBlock().getCloneItemStack(level, pos, state);
 		BlockEntity tile = level.getBlockEntity(pos);
 		if (tile instanceof ModBlockEntity && !tile.onlyOpCanSetNbt() && ((ModBlockEntity) tile).persistData) {
-			CompoundTag data = tile.saveWithFullMetadata();
+			CompoundTag data = tile.saveWithFullMetadata(level.registryAccess());
 			data.remove("x");
 			data.remove("y");
 			data.remove("z");

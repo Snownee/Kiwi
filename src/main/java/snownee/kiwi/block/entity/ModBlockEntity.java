@@ -3,6 +3,7 @@ package snownee.kiwi.block.entity;
 import org.jetbrains.annotations.NotNull;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
@@ -38,8 +39,8 @@ public abstract class ModBlockEntity extends BlockEntity {
 	// Used for syncing data at the time when the chunk is loaded
 	@NotNull
 	@Override
-	public CompoundTag getUpdateTag() {
-		return writePacketData(new CompoundTag());
+	public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
+		return writePacketData(new CompoundTag(), provider);
 	}
 
 	/**
@@ -56,7 +57,7 @@ public abstract class ModBlockEntity extends BlockEntity {
 	 * @return the parameter, or delegate to super method
 	 */
 	@NotNull
-	protected abstract CompoundTag writePacketData(CompoundTag data);
+	protected abstract CompoundTag writePacketData(CompoundTag data, HolderLookup.Provider provider);
 
 	public void refresh() {
 		if (hasLevel() && !level.isClientSide) {
