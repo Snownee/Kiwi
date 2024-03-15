@@ -66,12 +66,12 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 			String className = annotation.toString();
 			AnnotationType type = AnnotationType.MAP.get(className);
 			Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(annotation);
-			for (Element ele : elements) {
-				if (!type.isCorrectKind(ele, messager)) {
-					messager.printMessage(Kind.ERROR, "Annotated element is not matched", ele);
+			for (Element element : elements) {
+				if (!type.isCorrectKind(element, messager)) {
+					messager.printMessage(Kind.ERROR, "Annotated element is not matched", element);
 					continue;
 				}
-				AnnotationMirror a = getAnnotation(ele, annotation);
+				AnnotationMirror a = getAnnotation(element, annotation);
 				Map<String, Object> o = new TreeMap<>();
 				for (Entry<? extends ExecutableElement, ? extends AnnotationValue> e : a.getElementValues().entrySet()) {
 					o.put(e.getKey().getSimpleName().toString(), mapValue(e.getValue()));
@@ -86,13 +86,10 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 				}
 				String target;
 				if (type.allowedKinds.contains(ElementKind.METHOD)) {
-					target = ele.getEnclosingElement().toString();
-					o.put("method", ele.getSimpleName().toString());
+					target = element.getEnclosingElement().toString();
+					o.put("method", element.getSimpleName().toString());
 				} else {
-					target = ele.toString();
-				}
-				if (target.startsWith("snownee.kiwi.test.")) {
-					continue;
+					target = element.toString();
 				}
 				KiwiAnnotationData value = new KiwiAnnotationData();
 				value.setTarget(target);

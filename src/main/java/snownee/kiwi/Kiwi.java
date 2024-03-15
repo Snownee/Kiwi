@@ -41,11 +41,12 @@ import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
-import net.fabricmc.loader.impl.metadata.AbstractModMetadata;
+import net.minecraft.advancements.critereon.ItemSubPredicate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -55,6 +56,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.StatType;
 import net.minecraft.util.valueproviders.FloatProviderType;
 import net.minecraft.util.valueproviders.IntProviderType;
+import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -63,12 +65,14 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.animal.CatVariant;
 import net.minecraft.world.entity.animal.FrogVariant;
+import net.minecraft.world.entity.animal.WolfVariant;
 import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerType;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.entity.schedule.Schedule;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Instrument;
@@ -139,11 +143,15 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 	public static boolean enableDataModule;
 	private static boolean initialized;
 
-	private static boolean wrongDistribution(KiwiAnnotationData annotationData, String dist) {
+	private static boolean shouldLoad(KiwiAnnotationData annotationData, String dist) {
 		try {
+			String target = annotationData.getTarget();
+			if (Platform.isProduction() && target.startsWith("snownee.kiwi.test.")) {
+				return false;
+			}
 			ClassNode clazz = new ClassNode(Opcodes.ASM7);
 			InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(
-					annotationData.getTarget().replace('.', '/') + ".class");
+					target.replace('.', '/') + ".class");
 			final ClassReader classReader = new ClassReader(is);
 			classReader.accept(clazz, 0);
 			if (clazz.visibleAnnotations != null) {
@@ -152,15 +160,15 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 					if (node.values != null && ONLYIN.equals(node.desc)) {
 						int i = node.values.indexOf("value");
 						if (i != -1 && !node.values.get(i + 1).equals(dist)) {
-							return true;
+							return false;
 						}
 					}
 				}
 			}
-		} catch (Throwable e) {
 			return true;
+		} catch (Throwable e) {
+			return false;
 		}
-		return false;
 	}
 
 	public static void registerRegistry(ResourceKey<? extends Registry<?>> registry, Class<?> baseClass) {
@@ -257,9 +265,11 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 		registerRegistry(Registries.STRUCTURE_POOL_ELEMENT, StructurePoolElementType.class);
 		registerRegistry(Registries.CAT_VARIANT, CatVariant.class);
 		registerRegistry(Registries.FROG_VARIANT, FrogVariant.class);
-		registerRegistry(Registries.BANNER_PATTERN, BannerPattern.class);
 		registerRegistry(Registries.INSTRUMENT, Instrument.class);
 		registerRegistry(Registries.CREATIVE_MODE_TAB, CreativeModeTab.class);
+		registerRegistry(Registries.ARMOR_MATERIAL, ArmorMaterial.class);
+		registerRegistry(Registries.DATA_COMPONENT_TYPE, DataComponentType.class);
+		registerRegistry(Registries.ITEM_SUB_PREDICATE_TYPE, ItemSubPredicate.Type.class);
 	}
 
 	public static void registerTab(String id, ResourceKey<CreativeModeTab> tab) {
@@ -327,13 +337,17 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 			throw new RuntimeException(e);
 		}
 
+		if (!Platform.isProduction()) {
+			enableDataModule();
+		}
+
 		Map<String, KiwiAnnotationData> classOptionalMap = Maps.newHashMap();
 		String dist = Platform.isPhysicalClient() ? "client" : "server";
 		List<String> mods = FabricLoader.getInstance()
 				.getAllMods()
 				.stream()
 				.map(ModContainer::getMetadata)
-				.filter($ -> !AbstractModMetadata.TYPE_BUILTIN.equals($.getType()))
+				.filter($ -> !"builtin".equals($.getType()))
 				.map(ModMetadata::getId)
 				.toList();
 		KiwiMetadataParser metadataParser = new KiwiMetadataParser();
@@ -348,25 +362,22 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 			}
 
 			for (KiwiAnnotationData module : metadata.get("modules")) {
-				if (wrongDistribution(module, dist)) {
-					continue;
+				if (shouldLoad(module, dist)) {
+					moduleData.put(mod, module);
 				}
-				moduleData.put(mod, module);
 			}
 			for (KiwiAnnotationData optional : metadata.get("optionals")) {
-				if (wrongDistribution(optional, dist)) {
-					continue;
+				if (shouldLoad(optional, dist)) {
+					classOptionalMap.put(optional.getTarget(), optional);
 				}
-				classOptionalMap.put(optional.getTarget(), optional);
 			}
 			for (KiwiAnnotationData condition : metadata.get("conditions")) {
-				if (wrongDistribution(condition, dist)) {
-					continue;
+				if (shouldLoad(condition, dist)) {
+					conditions.put(condition, mod);
 				}
-				conditions.put(condition, mod);
 			}
 			for (KiwiAnnotationData config : metadata.get("configs")) {
-				if (wrongDistribution(config, dist)) {
+				if (!shouldLoad(config, dist)) {
 					continue;
 				}
 				ConfigType type = null;
@@ -390,10 +401,9 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 				}
 			}
 			for (KiwiAnnotationData packet : metadata.get("packets")) {
-				if (wrongDistribution(packet, dist)) {
-					continue;
+				if (shouldLoad(packet, dist)) {
+					KNetworking.processClass(packet);
 				}
-				KNetworking.processClass(packet);
 			}
 		}
 

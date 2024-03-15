@@ -3,18 +3,35 @@ conditions:
       method: shouldLoad
       value: [data]
     target: snownee.kiwi.data.DataModule
+  - data:
+      method: test
+      value: [test]
+    target: snownee.kiwi.test.TestCondition
 configs:
   - data: {type: CLIENT}
     target: snownee.kiwi.KiwiClientConfig
   - data: {}
     target: snownee.kiwi.KiwiCommonConfig
+  - data: {type: COMMON, value: test}
+    target: snownee.kiwi.test.TestConfig
 modules:
   - data: {value: contributors}
     target: snownee.kiwi.contributor.Contributors
   - data: {value: data}
     target: snownee.kiwi.data.DataModule
+  - data: {value: test}
+    target: snownee.kiwi.test.TestModule
+  - data: {value: test2}
+    target: snownee.kiwi.test.TestModule2
+optionals:
+  - data: {defaultEnabled: false}
+    target: snownee.kiwi.test.TestModule
+  - data: {defaultEnabled: false}
+    target: snownee.kiwi.test.TestModule2
 packets:
   - data: {}
     target: snownee.kiwi.contributor.network.CSetCosmeticPacket
   - data: {}
     target: snownee.kiwi.contributor.network.SSyncCosmeticPacket
+  - data: {}
+    target: snownee.kiwi.test.CMyPacket
