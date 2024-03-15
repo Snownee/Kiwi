@@ -35,7 +35,7 @@
 	"accessWidener": "kiwi.accesswidener",
 	"depends": {
 		"fabric-api": "*",
-		"minecraft": ">=1.20.3",
+		"minecraft": ">=1.20.5-",
 		"java": ">=17"
 	},
 	"custom": {
