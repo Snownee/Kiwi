@@ -16,6 +16,7 @@ import com.google.gson.JsonObject;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
 import net.fabricmc.loader.api.ModContainer;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.CachedOutput;
@@ -36,25 +37,22 @@ import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.util.GameObjectLookup;
 import snownee.kiwi.util.Util;
 
-public class KiwiLanguageProvider implements DataProvider {
-	protected final FabricDataOutput dataOutput;
+public class KiwiLanguageProvider extends FabricLanguageProvider {
 	protected final String languageCode;
+	protected final CompletableFuture<HolderLookup.Provider> registryLookup;
 
-	public KiwiLanguageProvider(FabricDataOutput dataOutput) {
-		this(dataOutput, "en_us");
+	public KiwiLanguageProvider(FabricDataOutput dataOutput, CompletableFuture<HolderLookup.Provider> registryLookup) {
+		this(dataOutput, "en_us", registryLookup);
 	}
 
-	public KiwiLanguageProvider(FabricDataOutput dataOutput, String languageCode) {
-		this.dataOutput = dataOutput;
+	public KiwiLanguageProvider(FabricDataOutput dataOutput, String languageCode, CompletableFuture<HolderLookup.Provider> registryLookup) {
+		super(dataOutput, languageCode, registryLookup);
 		this.languageCode = languageCode;
+		this.registryLookup = registryLookup;
 	}
 
-	/**
-	 * Implement this method to register languages.
-	 *
-	 * <p>Call {@link FabricLanguageProvider.TranslationBuilder#add(String, String)} to add a translation.
-	 */
-	public void generateTranslations(FabricLanguageProvider.TranslationBuilder translationBuilder) {
+	@Override
+	public void generateTranslations(HolderLookup.Provider registryLookup, TranslationBuilder translationBuilder) {
 
 	}
 
@@ -74,33 +72,33 @@ public class KiwiLanguageProvider implements DataProvider {
 	@Override
 	public CompletableFuture<?> run(CachedOutput writer) {
 		TreeMap<String, String> translationEntries = new TreeMap<>();
+		return this.registryLookup.thenCompose(lookup -> {
+			generateModNameAndDescription(translationEntries);
+			generateConfigEntries(translationEntries);
+			generateTranslations(lookup, (String key, String value) -> {
+				Objects.requireNonNull(key);
+				Objects.requireNonNull(value);
 
-		generateModNameAndDescription(translationEntries);
-		generateConfigEntries(translationEntries);
-		generateTranslations((String key, String value) -> {
-			Objects.requireNonNull(key);
-			Objects.requireNonNull(value);
+				if (translationEntries.containsKey(key)) {
+					throw new RuntimeException("Existing translation key found - " + key + " - Duplicate will be ignored.");
+				}
 
-			if (translationEntries.containsKey(key)) {
-				throw new RuntimeException("Existing translation key found - " + key + " - Duplicate will be ignored.");
+				translationEntries.put(key, value);
+			});
+			putExistingTranslations((String key, String value) -> {
+				Objects.requireNonNull(key);
+				Objects.requireNonNull(value);
+				translationEntries.put(key, value);
+			});
+
+			JsonObject langEntryJson = new JsonObject();
+
+			for (Map.Entry<String, String> entry : translationEntries.entrySet()) {
+				langEntryJson.addProperty(entry.getKey(), entry.getValue());
 			}
 
-			translationEntries.put(key, value);
+			return DataProvider.saveStable(writer, langEntryJson, getLangFilePath(this.languageCode));
 		});
-
-		putExistingTranslations((String key, String value) -> {
-			Objects.requireNonNull(key);
-			Objects.requireNonNull(value);
-			translationEntries.put(key, value);
-		});
-
-		JsonObject langEntryJson = new JsonObject();
-
-		for (Map.Entry<String, String> entry : translationEntries.entrySet()) {
-			langEntryJson.addProperty(entry.getKey(), entry.getValue());
-		}
-
-		return DataProvider.saveStable(writer, langEntryJson, getLangFilePath(this.languageCode));
 	}
 
 	protected void generateConfigEntries(Map<String, String> translationEntries) {
@@ -108,15 +106,19 @@ public class KiwiLanguageProvider implements DataProvider {
 			if (!Objects.equals(handler.getModId(), dataOutput.getModId())) {
 				continue;
 			}
-			if (handler.getFileName().equals("test") || handler.getFileName().equals("kiwi-modules")) {
+			String fileName = handler.getFileName();
+			if (fileName.equals("test")) {
 				continue; // skip test entries
 			}
 			String key = handler.getTranslationKey();
-			if (Objects.equals(key, handler.getFileName())) {
+			if (Objects.equals(key, fileName)) {
 				translationEntries.put("kiwi.config." + key, Util.friendlyText(key));
 			}
 			Set<String> subCats = Sets.newHashSet();
 			for (ConfigHandler.Value<?> value : handler.getValueMap().values()) {
+				if (value.path.startsWith("modules.test")) {
+					continue;
+				}
 				ConfigUI.Hide hide = value.getAnnotation(ConfigUI.Hide.class);
 				if (hide != null) {
 					continue;
@@ -175,10 +177,4 @@ public class KiwiLanguageProvider implements DataProvider {
 				.createPathProvider(PackOutput.Target.RESOURCE_PACK, "lang")
 				.json(new ResourceLocation(dataOutput.getModId(), code));
 	}
-
-	@Override
-	public String getName() {
-		return "Language (%s)".formatted(languageCode);
-	}
-
 }
