@@ -14,7 +14,6 @@
   "kiwi.config.client": "Client-side",
   "kiwi.config.common": "Common",
   "kiwi.config.debug": "Debug",
-  "kiwi.config.debug.NBTTooltip.desc": "Shows item NBT in advanced tooltips (F3+H) while holding shift",
   "kiwi.config.debug.tagsPerPage": "Tags Per Page",
   "kiwi.config.debug.tagsPerPage.desc": "The number of tags to show per page in advanced tooltips",
   "kiwi.config.debug.tagsTooltip": "Tags Tooltip",

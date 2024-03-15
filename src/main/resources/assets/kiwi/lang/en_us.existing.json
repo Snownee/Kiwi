@@ -19,7 +19,6 @@
 	"kiwi.config.noMicrosoftTelemetry.desc": "Disables data collection added by Microsoft Mojang",
 	"kiwi.config.debug.tagsTooltip.desc": "Shows item tags in advanced tooltips (F3+H)",
 	"kiwi.config.debug.tagsPerPage.desc": "The number of tags to show per page in advanced tooltips",
-	"kiwi.config.debug.NBTTooltip.desc": "Shows item NBT in advanced tooltips (F3+H) while holding shift",
 	"kiwi.config.qol": "Quality of Life",
 	"kiwi.config.qol.suppressExperimentalSettingsWarning.desc": "Skips the experimental settings warning screen when joining a world",
 	"gui.kiwi.cosmetic": "Choose a cosmetic effect",
