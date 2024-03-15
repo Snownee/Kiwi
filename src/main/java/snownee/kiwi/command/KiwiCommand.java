@@ -1,5 +1,6 @@
 package snownee.kiwi.command;
 
+import java.util.List;
 import java.util.Objects;
 
 import com.ezylang.evalex.Expression;
@@ -61,15 +62,23 @@ public class KiwiCommand {
 
 	private static int cleanLevel(CommandSourceStack commandSourceStack) {
 		Commands commands = commandSourceStack.getServer().getCommands();
-		commands.performPrefixedCommand(commandSourceStack, "gamerule doDaylightCycle false");
-		commands.performPrefixedCommand(commandSourceStack, "gamerule doWeatherCycle false");
-		commands.performPrefixedCommand(commandSourceStack, "gamerule doMobLoot false");
-		commands.performPrefixedCommand(commandSourceStack, "gamerule doMobSpawning false");
-		commands.performPrefixedCommand(commandSourceStack, "difficulty peaceful");
-		commands.performPrefixedCommand(commandSourceStack, "kill @e[type=!minecraft:player]");
-		commands.performPrefixedCommand(commandSourceStack, "time set day");
-		commands.performPrefixedCommand(commandSourceStack, "weather clear");
-		commands.performPrefixedCommand(commandSourceStack, "gamerule doMobLoot true");
+		List<String> rules = List.of(
+				"gamerule doDaylightCycle false",
+				"gamerule doWeatherCycle false",
+				"gamerule doMobLoot false",
+				"gamerule doMobSpawning false",
+				"gamerule keepInventory true",
+				"gamerule doTraderSpawning false",
+				"gamerule doInsomnia false",
+				"difficulty peaceful",
+				"kill @e[type=!minecraft:player]",
+				"time set day",
+				"weather clear",
+				"gamerule doMobLoot true"
+		);
+		for (String rule : rules) {
+			commands.performPrefixedCommand(commandSourceStack, rule);
+		}
 		return 1;
 	}
 
