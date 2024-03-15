@@ -37,7 +37,7 @@ public class KiwiCommand {
 				.requires(ctx -> ctx.hasPermission(2))
 				.then(Commands.argument("configFile", StringArgumentType.greedyString())
 						.executes(ctx -> {
-							String fileName = StringArgumentType.getString(ctx, "fileName");
+							String fileName = StringArgumentType.getString(ctx, "configFile");
 							if (KiwiConfigManager.refresh(fileName)) {
 								ctx.getSource().sendSuccess(() -> Component.translatable("commands.kiwi.reload.success", fileName), true);
 								return 1;
