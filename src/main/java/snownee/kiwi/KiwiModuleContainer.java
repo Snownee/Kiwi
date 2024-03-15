@@ -66,7 +66,7 @@ public final class KiwiModuleContainer {
 		module.uid = rl;
 	}
 
-	public <T> void register(T object, ResourceKey<T> key, @Nullable Field field) {
+	public <T> KiwiGOHolder<T> register(T object, ResourceKey<T> key, @Nullable Field field) {
 		KiwiGOHolder<T> entry = new KiwiGOHolder<>(object, key, field);
 		registries.put(entry);
 		if (field != null) {
@@ -75,6 +75,7 @@ public final class KiwiModuleContainer {
 				entry.groupSetting = GroupSetting.of(group, groupSetting);
 			}
 		}
+		return entry;
 	}
 
 	public void loadGameObjects(RegistryLookup registryLookup) {
@@ -177,7 +178,13 @@ public final class KiwiModuleContainer {
 				groupSetting = new GroupSetting(new String[]{id.toString()}, new String[0]);
 			}
 			//noinspection unchecked
-			register(o, resourceKey, field);
+			KiwiGOHolder<?> entry = register(o, resourceKey, field);
+			if (Registries.MOB_EFFECT == registryKey) {
+				BiConsumer<KiwiModuleContainer, KiwiGOHolder<?>> decorator = module.decorators.getOrDefault(registryKey, (a, b) -> {
+				});
+				decorator.accept(this, entry);
+				entry.register();
+			}
 
 			tmpBuilder = null;
 			tmpBuilderField = null;
@@ -191,11 +198,15 @@ public final class KiwiModuleContainer {
 	}
 
 	public void registerGameObjects(ResourceKey<? extends Registry<?>> registryKey) {
+		if (Registries.MOB_EFFECT == registryKey) {
+			// Potion's constructor wants a Holder<MobEffect>, early loading it
+			return;
+		}
 		context.setActiveContainer();
 		Collection<KiwiGOHolder<?>> entries = registries.registries.get(registryKey.location());
 		BiConsumer<KiwiModuleContainer, KiwiGOHolder<?>> decorator = module.decorators.getOrDefault(registryKey, (a, b) -> {
 		});
-		if (registryKey == Registries.ITEM) {
+		if (Registries.ITEM == registryKey) {
 			registries.get(Registries.BLOCK).forEach(e -> {
 				if (noItems.contains(e.value)) {
 					return;
@@ -249,11 +260,11 @@ public final class KiwiModuleContainer {
 			decorator.accept(this, e);
 			e.register();
 		});
-		if (registryKey == Registries.ITEM) {
+		if (Registries.ITEM == registryKey) {
 			blockItemBuilders = null;
 			noCategories = null;
 			noItems = null;
-		} else if (registryKey == Registries.BLOCK && Platform.isPhysicalClient() && !Platform.isDataGen()) {
+		} else if (Registries.BLOCK == registryKey && Platform.isPhysicalClient() && !Platform.isDataGen()) {
 			final RenderType solid = RenderType.solid();
 			Map<Class<?>, RenderType> cache = Maps.newHashMap();
 			entries.forEach(e -> {
