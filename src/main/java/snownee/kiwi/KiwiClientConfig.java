@@ -15,6 +15,12 @@ public final class KiwiClientConfig {
 	@KiwiConfig.GameRestart
 	public static boolean noMicrosoftTelemetry = true;
 
+	@KiwiConfig.Path("qol.suppressExperimentalSettingsWarning")
+	public static boolean suppressExperimentalWarning;
+
+	@KiwiConfig.Path("qol.hideDataComponentsTooltip")
+	public static boolean hideDataComponentsTooltip;
+
 	@KiwiConfig.Path("debug.tagsTooltip")
 	public static boolean tagsTooltip = true;
 
@@ -25,13 +31,7 @@ public final class KiwiClientConfig {
 	@KiwiConfig.Path("debug.tagsTooltipAppendKeybindHint")
 	public static boolean tagsTooltipAppendKeybindHint = true;
 
-	@KiwiConfig.Path("debug.NBTTooltip")
-	public static boolean nbtTooltip = true;
-
 	@ConfigUI.Hide
 	@KiwiConfig.Path("debug.debugTooltipMsg")
 	public static boolean debugTooltipMsg = true;
-
-	@KiwiConfig.Path("suppressExperimentalSettingsWarning")
-	public static boolean suppressExperimentalWarning;
 }

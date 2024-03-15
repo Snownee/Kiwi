@@ -13,11 +13,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.NbtUtils;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.ClickEvent.Action;
 import net.minecraft.network.chat.Component;
@@ -64,9 +60,6 @@ public final class TooltipEvents {
 		}
 
 		Minecraft mc = Minecraft.getInstance();
-		var nbt = Util.getOrThrow(DataComponentPatch.CODEC.encodeStart(mc.level.registryAccess()
-				.createSerializationContext(NbtOps.INSTANCE), itemStack.getComponentsPatch()), IllegalStateException::new);
-
 		long millis = Util.getMillis();
 		if (mc.player != null && millis - latestPressF3 > 500 && InputConstants.isKeyDown(
 				Minecraft.getInstance().getWindow().getWindow(),
@@ -74,9 +67,6 @@ public final class TooltipEvents {
 			latestPressF3 = millis;
 			MutableComponent component = Component.literal(BuiltInRegistries.ITEM.getKey(itemStack.getItem()).toString());
 			mc.keyboardHandler.setClipboard(component.getString());
-			if (!itemStack.getComponentsPatch().isEmpty()) {
-				component.append(NbtUtils.toPrettyComponent(nbt));
-			}
 			component.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, component.getString()))
 					.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click")))
 					.withInsertion(component.getString()));
@@ -84,16 +74,11 @@ public final class TooltipEvents {
 			mc.gui.getDebugOverlay().toggleOverlay();
 		}
 
-		if (KiwiClientConfig.nbtTooltip && Screen.hasShiftDown() && !itemStack.getComponentsPatch().isEmpty()) {
-			trySendTipMsg(mc);
+		if (KiwiClientConfig.hideDataComponentsTooltip) {
 			tooltip.removeIf(c -> c.getContents() instanceof TranslatableContents &&
-					"item.nbt_tags".equals(((TranslatableContents) c.getContents()).getKey()));
-			if (cache.nbt != nbt) {
-				cache.nbt = nbt;
-				cache.formattedNbt = NbtUtils.toPrettyComponent(cache.nbt);
-			}
-			tooltip.add(cache.formattedNbt);
-		} else if (KiwiClientConfig.tagsTooltip) {
+					"item.components".equals(((TranslatableContents) c.getContents()).getKey()));
+		}
+		if (KiwiClientConfig.tagsTooltip) {
 			cache.maybeUpdateTags(itemStack);
 			boolean alt = Screen.hasAltDown();
 			if (!holdAlt && alt) {
@@ -137,8 +122,6 @@ public final class TooltipEvents {
 		private final List<List<String>> pages = Lists.newArrayList();
 		private int pageNow = 0;
 		private ItemStack itemStack = ItemStack.EMPTY;
-		private Tag nbt;
-		private Component formattedNbt;
 		private boolean showTags;
 		private long lastShowTags;
 		private String preferredType;

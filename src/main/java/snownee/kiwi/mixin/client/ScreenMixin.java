@@ -30,9 +30,8 @@ public class ScreenMixin {
 				clickEvent.getValue())) {
 			return;
 		}
-		if (KiwiClientConfig.tagsTooltip || KiwiClientConfig.nbtTooltip) {
+		if (KiwiClientConfig.tagsTooltip) {
 			KiwiClientConfig.tagsTooltip = false;
-			KiwiClientConfig.nbtTooltip = false;
 			KiwiConfigManager.getHandler(KiwiClientConfig.class).save();
 		}
 		LocalPlayer player = Minecraft.getInstance().player;
