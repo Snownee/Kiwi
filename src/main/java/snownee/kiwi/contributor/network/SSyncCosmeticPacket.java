@@ -1,8 +1,11 @@
 package snownee.kiwi.contributor.network;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import snownee.kiwi.contributor.ContributorsClient;
@@ -19,24 +22,17 @@ public record SSyncCosmeticPacket(ImmutableMap<String, ResourceLocation> data) i
 		return TYPE;
 	}
 
-	public static class Handler extends PlayPacketHandler<SSyncCosmeticPacket> {
-		@Override
-		public SSyncCosmeticPacket read(RegistryFriendlyByteBuf buf) {
-			int size = buf.readVarInt();
-			ImmutableMap.Builder<String, ResourceLocation> builder = ImmutableMap.builderWithExpectedSize(size);
-			for (int i = 0; i < size; i++) {
-				builder.put(buf.readUtf(), buf.readResourceLocation());
-			}
-			return new SSyncCosmeticPacket(builder.build());
-		}
+	public static class Handler implements PlayPacketHandler<SSyncCosmeticPacket> {
+		public static final StreamCodec<RegistryFriendlyByteBuf, SSyncCosmeticPacket> STREAM_CODEC = StreamCodec.composite(
+				ByteBufCodecs.map(Maps::newHashMapWithExpectedSize, ByteBufCodecs.STRING_UTF8, ResourceLocation.STREAM_CODEC)
+						.map(ImmutableMap::copyOf, Maps::newHashMap),
+				SSyncCosmeticPacket::data,
+				SSyncCosmeticPacket::new
+		);
 
 		@Override
-		public void write(SSyncCosmeticPacket packet, RegistryFriendlyByteBuf buf) {
-			buf.writeVarInt(packet.data.size());
-			packet.data.forEach((k, v) -> {
-				buf.writeUtf(k);
-				buf.writeResourceLocation(v);
-			});
+		public StreamCodec<RegistryFriendlyByteBuf, SSyncCosmeticPacket> streamCodec() {
+			return STREAM_CODEC;
 		}
 
 		@Override

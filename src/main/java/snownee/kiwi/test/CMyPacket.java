@@ -3,6 +3,8 @@ package snownee.kiwi.test;
 import java.util.Objects;
 
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.network.KiwiPacket;
@@ -18,16 +20,16 @@ public record CMyPacket(int number) implements CustomPacketPayload {
 		return TYPE;
 	}
 
-	public static class Handler extends PlayPacketHandler<CMyPacket> {
+	public static class Handler implements PlayPacketHandler<CMyPacket> {
+		public static final StreamCodec<RegistryFriendlyByteBuf, CMyPacket> STREAM_CODEC = StreamCodec.composite(
+				ByteBufCodecs.VAR_INT,
+				CMyPacket::number,
+				CMyPacket::new
+		);
 
 		@Override
-		public CMyPacket read(RegistryFriendlyByteBuf buf) {
-			return new CMyPacket(buf.readVarInt());
-		}
-
-		@Override
-		public void write(CMyPacket packet, RegistryFriendlyByteBuf buf) {
-			buf.writeVarInt(packet.number());
+		public StreamCodec<RegistryFriendlyByteBuf, CMyPacket> streamCodec() {
+			return STREAM_CODEC;
 		}
 
 		@Override
@@ -35,5 +37,4 @@ public record CMyPacket(int number) implements CustomPacketPayload {
 			context.execute(() -> Kiwi.LOGGER.info(Objects.toString(packet.number())));
 		}
 	}
-
 }

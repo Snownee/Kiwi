@@ -4,18 +4,13 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-public abstract class PlayPacketHandler<T extends CustomPacketPayload> {
-	public abstract T read(RegistryFriendlyByteBuf buf);
+public interface PlayPacketHandler<T extends CustomPacketPayload> {
 
-	public abstract void write(T packet, RegistryFriendlyByteBuf buf);
+	void handle(T packet, PayloadContext context);
 
-	public abstract void handle(T packet, PayloadContext context);
+	StreamCodec<RegistryFriendlyByteBuf, T> streamCodec();
 
-	public StreamCodec<RegistryFriendlyByteBuf, T> streamCodec() {
-		return CustomPacketPayload.codec(this::write, this::read);
-	}
-
-	public void register(CustomPacketPayload.Type<?> type, KiwiPacket.Direction direction) {
+	default void register(CustomPacketPayload.Type<?> type, KiwiPacket.Direction direction) {
 		//noinspection unchecked
 		KNetworking.registerPlayHandler((CustomPacketPayload.Type<T>) type, this, direction);
 	}

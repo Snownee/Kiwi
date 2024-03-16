@@ -1,8 +1,11 @@
 package snownee.kiwi.contributor.network;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import snownee.kiwi.contributor.Contributors;
@@ -16,20 +19,20 @@ public record CSetCosmeticPacket(@Nullable ResourceLocation id) implements Custo
 	public static final Type<CSetCosmeticPacket> TYPE = CustomPacketPayload.createType("kiwi:set_cosmetic");
 
 	@Override
-	public Type<? extends CustomPacketPayload> type() {
+	public @NotNull Type<CSetCosmeticPacket> type() {
 		return TYPE;
 	}
 
-	public static class Handler extends PlayPacketHandler<CSetCosmeticPacket> {
-		@Override
-		public CSetCosmeticPacket read(RegistryFriendlyByteBuf buf) {
-			String s = buf.readUtf();
-			return new CSetCosmeticPacket(s.isEmpty() ? null : Util.RL(s));
-		}
+	public static class Handler implements PlayPacketHandler<CSetCosmeticPacket> {
+		public static final StreamCodec<RegistryFriendlyByteBuf, CSetCosmeticPacket> STREAM_CODEC = StreamCodec.composite(
+				ByteBufCodecs.STRING_UTF8.map(it -> it.isEmpty() ? null : Util.RL(it), it -> it == null ? "" : it.toString()),
+				CSetCosmeticPacket::id,
+				CSetCosmeticPacket::new
+		);
 
 		@Override
-		public void write(CSetCosmeticPacket packet, RegistryFriendlyByteBuf buf) {
-			buf.writeUtf(packet.id == null ? "" : packet.id.toString());
+		public StreamCodec<RegistryFriendlyByteBuf, CSetCosmeticPacket> streamCodec() {
+			return STREAM_CODEC;
 		}
 
 		@Override
