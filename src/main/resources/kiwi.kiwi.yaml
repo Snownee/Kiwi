@@ -34,4 +34,4 @@ packets:
   - data: {}
     target: snownee.kiwi.contributor.network.SSyncCosmeticPacket
   - data: {}
-    target: snownee.kiwi.test.CMyPacket
+    target: snownee.kiwi.test.SMyPacket
