@@ -93,7 +93,7 @@ public class TestItem extends ModItem {
 //		}
 
 		if (!worldIn.isClientSide) {
-			KPacketSender.send(new CMyPacket(5), playerIn);
+			KPacketSender.send(new SMyPacket(5), playerIn);
 		}
 
 		return new InteractionResultHolder<>(InteractionResult.SUCCESS, stack);

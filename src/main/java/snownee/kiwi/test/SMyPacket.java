@@ -12,7 +12,7 @@ import snownee.kiwi.network.PayloadContext;
 import snownee.kiwi.network.PlayPacketHandler;
 
 @KiwiPacket
-public record CMyPacket(int number) implements CustomPacketPayload {
+public record SMyPacket(int number) implements CustomPacketPayload {
 	public static final Type<CustomPacketPayload> TYPE = CustomPacketPayload.createType("kiwi:my");
 
 	@Override
@@ -20,20 +20,20 @@ public record CMyPacket(int number) implements CustomPacketPayload {
 		return TYPE;
 	}
 
-	public static class Handler implements PlayPacketHandler<CMyPacket> {
-		public static final StreamCodec<RegistryFriendlyByteBuf, CMyPacket> STREAM_CODEC = StreamCodec.composite(
+	public static class Handler implements PlayPacketHandler<SMyPacket> {
+		public static final StreamCodec<RegistryFriendlyByteBuf, SMyPacket> STREAM_CODEC = StreamCodec.composite(
 				ByteBufCodecs.VAR_INT,
-				CMyPacket::number,
-				CMyPacket::new
+				SMyPacket::number,
+				SMyPacket::new
 		);
 
 		@Override
-		public StreamCodec<RegistryFriendlyByteBuf, CMyPacket> streamCodec() {
+		public StreamCodec<RegistryFriendlyByteBuf, SMyPacket> streamCodec() {
 			return STREAM_CODEC;
 		}
 
 		@Override
-		public void handle(CMyPacket packet, PayloadContext context) {
+		public void handle(SMyPacket packet, PayloadContext context) {
 			context.execute(() -> Kiwi.LOGGER.info(Objects.toString(packet.number())));
 		}
 	}
