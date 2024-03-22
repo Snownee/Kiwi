@@ -11,7 +11,9 @@
 	"client": [
 		"client.ClientPacketListenerMixin",
 		"client.ClientTelemetryManagerMixin",
+		"client.LoadingOverlayMixin",
 		"client.ScreenMixin",
+		"client.TitleScreenMixin",
 		"client.WorldOpenFlowsMixin"
 	],
 	"injectors": {

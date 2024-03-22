@@ -21,6 +21,12 @@ public final class KiwiClientConfig {
 	@KiwiConfig.Path("qol.hideDataComponentsTooltip")
 	public static boolean hideDataComponentsTooltip;
 
+	@KiwiConfig.Path("qol.titleScreenNoFade")
+	public static boolean titleScreenNoFade;
+
+	@KiwiConfig.Path("qol.loadingOverlayNoFade")
+	public static boolean loadingOverlayNoFade;
+
 	@KiwiConfig.Path("debug.tagsTooltip")
 	public static boolean tagsTooltip = true;
 
