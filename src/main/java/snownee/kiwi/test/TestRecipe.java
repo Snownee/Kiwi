@@ -3,9 +3,8 @@ package snownee.kiwi.test;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ExtraCodecs;
@@ -47,7 +46,7 @@ public class TestRecipe extends DynamicShapedRecipe {
 	}
 
 	@Override
-	public ItemStack assemble(CraftingContainer inv, RegistryAccess registryAccess) {
+	public ItemStack assemble(CraftingContainer inv, HolderLookup.Provider registryAccess) {
 		ItemStack res = result.copy();
 		int[] pos = search(inv);
 		ItemStack stack = item('#', inv, pos);

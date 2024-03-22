@@ -1,6 +1,6 @@
 package snownee.kiwi.recipe;
 
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
@@ -13,12 +13,12 @@ public abstract class SimpleRecipe<C extends Container> implements Recipe<C> {
 	}
 
 	@Override
-	public ItemStack assemble(C inv, RegistryAccess registryAccess) {
+	public ItemStack assemble(C inv, HolderLookup.Provider registryAccess) {
 		return ItemStack.EMPTY;
 	}
 
 	@Override
-	public ItemStack getResultItem(RegistryAccess registryAccess) {
+	public ItemStack getResultItem(HolderLookup.Provider registryAccess) {
 		return ItemStack.EMPTY;
 	}
 

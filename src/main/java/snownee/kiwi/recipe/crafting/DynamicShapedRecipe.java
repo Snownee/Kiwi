@@ -9,8 +9,8 @@ import org.jetbrains.annotations.Nullable;
 import com.google.common.collect.Lists;
 
 import it.unimi.dsi.fastutil.chars.Char2ObjectArrayMap;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
@@ -89,7 +89,7 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 	}
 
 	@Override
-	public abstract ItemStack assemble(CraftingContainer inv, RegistryAccess registryAccess);
+	public abstract ItemStack assemble(CraftingContainer inv, HolderLookup.Provider registryAccess);
 
 	public int getWidth() {
 		return pattern.width();
