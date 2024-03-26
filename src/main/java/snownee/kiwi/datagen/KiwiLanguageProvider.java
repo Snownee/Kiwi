@@ -24,7 +24,7 @@ import snownee.kiwi.config.ConfigUI;
 import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.util.Util;
 
-public class KiwiLanguageProvider implements DataProvider {
+public class KiwiLanguageProvider extends FabricLanguageProvider {
 	protected final FabricDataOutput dataOutput;
 	protected final String languageCode;
 
@@ -33,6 +33,7 @@ public class KiwiLanguageProvider implements DataProvider {
 	}
 
 	public KiwiLanguageProvider(FabricDataOutput dataOutput, String languageCode) {
+		super(dataOutput, languageCode);
 		this.dataOutput = dataOutput;
 		this.languageCode = languageCode;
 	}
@@ -42,44 +43,52 @@ public class KiwiLanguageProvider implements DataProvider {
 	 *
 	 * <p>Call {@link FabricLanguageProvider.TranslationBuilder#add(String, String)} to add a translation.
 	 */
+	@Override
 	public void generateTranslations(FabricLanguageProvider.TranslationBuilder translationBuilder) {
+	}
 
+	public Path createPath(String path) {
+		return this.dataOutput.getForgeModContainer()
+				.getOwningFile()
+				.getFile()
+				.findResource("assets/%s/lang/%s.json".formatted(dataOutput.getModId(), path));
 	}
 
 	public void putExistingTranslations(FabricLanguageProvider.TranslationBuilder translationBuilder) {
+		putExistingTranslations(translationBuilder, languageCode + ".existing");
+	}
+
+	public void putExistingTranslations(FabricLanguageProvider.TranslationBuilder translationBuilder, String path) {
 		try {
-			Path existingFilePath = createPath(languageCode + ".existing");
+			Path existingFilePath = createPath(path);
 			translationBuilder.add(existingFilePath);
 		} catch (Exception e) {
 			throw new RuntimeException("Failed to add existing language file!", e);
 		}
 	}
 
-	public Path createPath(String path) {
-		return this.dataOutput.getForgeModContainer().getOwningFile().getFile().findResource("assets/%s/lang/%s.json".formatted(dataOutput.getModId(), path));
-	}
-
 	@Override
 	public CompletableFuture<?> run(CachedOutput writer) {
 		TreeMap<String, String> translationEntries = new TreeMap<>();
 
-		generateConfigEntries(translationEntries);
-		generateTranslations((String key, String value) -> {
-			Objects.requireNonNull(key);
-			Objects.requireNonNull(value);
+		if ("en_us".equals(languageCode)) {
+			generateConfigEntries(translationEntries);
+			generateTranslations((String key, String value) -> {
+				Objects.requireNonNull(key);
+				Objects.requireNonNull(value);
 
-			if (translationEntries.containsKey(key)) {
-				throw new RuntimeException("Existing translation key found - " + key + " - Duplicate will be ignored.");
-			}
+				if (translationEntries.containsKey(key)) {
+					throw new RuntimeException("Existing translation key found - " + key + " - Duplicate will be ignored.");
+				}
 
-			translationEntries.put(key, value);
-		});
-
-		putExistingTranslations((String key, String value) -> {
-			Objects.requireNonNull(key);
-			Objects.requireNonNull(value);
-			translationEntries.put(key, value);
-		});
+				translationEntries.put(key, value);
+			});
+			putExistingTranslations((String key, String value) -> {
+				Objects.requireNonNull(key);
+				Objects.requireNonNull(value);
+				translationEntries.put(key, value);
+			});
+		}
 
 		JsonObject langEntryJson = new JsonObject();
 
@@ -123,14 +132,9 @@ public class KiwiLanguageProvider implements DataProvider {
 	}
 
 	private Path getLangFilePath(String code) {
-		return dataOutput
-				.createPathProvider(PackOutput.Target.RESOURCE_PACK, "lang")
-				.json(new ResourceLocation(dataOutput.getModId(), code));
-	}
-
-	@Override
-	public String getName() {
-		return "Language (%s)".formatted(languageCode);
+		return dataOutput.createPathProvider(PackOutput.Target.RESOURCE_PACK, "lang").json(new ResourceLocation(
+				dataOutput.getModId(),
+				code));
 	}
 
 }
