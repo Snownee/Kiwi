@@ -18,7 +18,7 @@ public class KiwiTabBuilder extends CreativeModeTab.Builder {
 	public KiwiTabBuilder(ResourceLocation id) {
 		super(CreativeModeTab.Row.TOP, 0);
 		this.id = id;
-		title(Component.translatable("itemGroup.%s.%s", id.getNamespace(), id.getPath()));
+		title(Component.translatable("itemGroup.%s.%s".formatted(id.getNamespace(), id.getPath())));
 		BUILDERS.add(this);
 	}
 
