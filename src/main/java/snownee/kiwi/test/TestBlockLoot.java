@@ -1,14 +1,12 @@
 package snownee.kiwi.test;
 
-import java.util.Set;
-
-import net.minecraft.world.flag.FeatureFlags;
-import snownee.kiwi.datagen.provider.KiwiBlockLoot;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import snownee.kiwi.datagen.KiwiBlockLoot;
 
 public class TestBlockLoot extends KiwiBlockLoot {
 
-	public TestBlockLoot() {
-		super(TestModule.INSTANCE.uid, Set.of(), FeatureFlags.REGISTRY.allFlags());
+	public TestBlockLoot(FabricDataOutput dataOutput) {
+		super(TestModule.INSTANCE.uid, dataOutput);
 	}
 
 	@Override

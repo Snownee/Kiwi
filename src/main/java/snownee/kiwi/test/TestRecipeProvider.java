@@ -2,15 +2,14 @@ package snownee.kiwi.test;
 
 import java.util.function.Consumer;
 
-import net.minecraft.data.PackOutput;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
 import net.minecraft.data.recipes.FinishedRecipe;
-import snownee.kiwi.Kiwi;
-import snownee.kiwi.datagen.provider.KiwiRecipeProvider;
 
-public class TestRecipeProvider extends KiwiRecipeProvider {
+public class TestRecipeProvider extends FabricRecipeProvider {
 
-	public TestRecipeProvider(PackOutput output) {
-		super(Kiwi.ID, output);
+	public TestRecipeProvider(FabricDataOutput output) {
+		super(output);
 	}
 
 	@Override
