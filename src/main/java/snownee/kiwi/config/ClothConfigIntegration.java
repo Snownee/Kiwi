@@ -191,7 +191,7 @@ public class ClothConfigIntegration {
 					});
 					field.setTooltipSupplier($ -> {
 						List<Component> tooltip = Lists.newArrayList();
-						if ($ instanceof LocalizableItem item) {
+						if ($ instanceof LocalizableItem item && item.getDescription() != null) {
 							tooltip.add(item.getDisplayName().copy().append(" - ").append(item.getDescription()));
 						}
 						createComment(value).map(Arrays::asList).ifPresent(tooltip::addAll);
