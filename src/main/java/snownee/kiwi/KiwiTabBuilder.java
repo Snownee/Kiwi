@@ -8,8 +8,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 
+//TODO(1.21) move to util package
 public class KiwiTabBuilder extends CreativeModeTab.Builder {
 
+	//TODO(1.21) remove
 	public static final List<KiwiTabBuilder> BUILDERS = Lists.newArrayList();
 
 	public final ResourceLocation id;
