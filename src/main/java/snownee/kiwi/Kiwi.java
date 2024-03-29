@@ -148,7 +148,8 @@ public class Kiwi implements ModInitializer {
 	private static boolean checkDist(KiwiAnnotationData annotationData, String dist) {
 		try {
 			ClassNode clazz = new ClassNode(Opcodes.ASM7);
-			InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(annotationData.target().replace('.', '/') + ".class");
+			InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(
+					annotationData.target().replace('.', '/') + ".class");
 			final ClassReader classReader = new ClassReader(is);
 			classReader.accept(clazz, 0);
 			if (clazz.visibleAnnotations != null) {
@@ -330,7 +331,13 @@ public class Kiwi implements ModInitializer {
 
 		Map<String, KiwiAnnotationData> classOptionalMap = Maps.newHashMap();
 		String dist = Platform.isPhysicalClient() ? "client" : "server";
-		List<String> mods = FabricLoader.getInstance().getAllMods().stream().map(ModContainer::getMetadata).filter($ -> !AbstractModMetadata.TYPE_BUILTIN.equals($.getType())).map(ModMetadata::getId).toList();
+		List<String> mods = FabricLoader.getInstance()
+				.getAllMods()
+				.stream()
+				.map(ModContainer::getMetadata)
+				.filter($ -> !AbstractModMetadata.TYPE_BUILTIN.equals($.getType()))
+				.map(ModMetadata::getId)
+				.toList();
 		for (String mod : mods) {
 			if (mod.startsWith("fabric")) {
 				continue;
@@ -342,24 +349,28 @@ public class Kiwi implements ModInitializer {
 			}
 
 			for (KiwiAnnotationData module : configuration.modules) {
-				if (!checkDist(module, dist))
+				if (!checkDist(module, dist)) {
 					continue;
+				}
 				moduleData.put(mod, module);
 			}
 			for (KiwiAnnotationData optional : configuration.optionals) {
-				if (!checkDist(optional, dist))
+				if (!checkDist(optional, dist)) {
 					continue;
+				}
 				classOptionalMap.put(optional.target(), optional);
 			}
 			for (KiwiAnnotationData condition : configuration.conditions) {
-				if (!checkDist(condition, dist))
+				if (!checkDist(condition, dist)) {
 					continue;
+				}
 				conditions.put(condition, mod);
 			}
 			//			if (CLOTH_CONFIG) {
 			for (KiwiAnnotationData config : configuration.configs) {
-				if (!checkDist(config, dist))
+				if (!checkDist(config, dist)) {
 					continue;
+				}
 				ConfigType type = null;
 				try {
 					type = ConfigType.valueOf((String) config.data().get("type"));
@@ -382,8 +393,9 @@ public class Kiwi implements ModInitializer {
 			}
 			//			}
 			for (KiwiAnnotationData packet : configuration.packets) {
-				if (!checkDist(packet, dist))
+				if (!checkDist(packet, dist)) {
 					continue;
+				}
 				Networking.processClass(packet.target(), mod);
 			}
 		}
@@ -451,8 +463,7 @@ public class Kiwi implements ModInitializer {
 						throw e;
 					}
 				}
-			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException |
-					 ClassNotFoundException e) {
+			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | ClassNotFoundException e) {
 				LOGGER.error(MARKER, "Failed to access to LoadingCondition: %s".formatted(k), e);
 			}
 		});
@@ -489,7 +500,8 @@ public class Kiwi implements ModInitializer {
 
 			String dependencies = (String) module.data().get("dependencies");
 			/* off */
-			List<String> rules = List.of(Strings.nullToEmpty(dependencies).split(";")).stream()
+			List<String> rules = List.of(Strings.nullToEmpty(dependencies).split(";"))
+					.stream()
 					.filter(s -> !Strings.isNullOrEmpty(s))
 					.toList();
 			/* on */
@@ -602,7 +614,8 @@ public class Kiwi implements ModInitializer {
 					regName = checkPrefix(field.getName().toLowerCase(Locale.ENGLISH), modid);
 				}
 
-				if (field.getType() == info.module.getClass() && "instance".equals(regName.getPath()) && regName.getNamespace().equals(modid)) {
+				if (field.getType() == info.module.getClass() && "instance".equals(regName.getPath()) &&
+						regName.getNamespace().equals(modid)) {
 					try {
 						field.set(null, info.module);
 					} catch (IllegalArgumentException | IllegalAccessException e) {
@@ -666,9 +679,12 @@ public class Kiwi implements ModInitializer {
 			}
 
 			LOGGER.info(MARKER, "Module [{}:{}] initialized", modid, name);
+			List<String> entries = Lists.newArrayList();
 			for (ResourceKey<?> key : counter.keySet()) {
-				String keyName = Util.trimRL(key.location());
-				LOGGER.info(MARKER, "    {}: {}", keyName, counter.getInt(key));
+				entries.add("%s: %s".formatted(Util.trimRL(key.location()), counter.getInt(key)));
+			}
+			if (!entries.isEmpty()) {
+				LOGGER.info(MARKER, "\t\t" + String.join(", ", entries));
 			}
 		}
 
