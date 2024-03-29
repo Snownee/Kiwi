@@ -195,23 +195,27 @@ public class Kiwi {
 			}
 
 			for (KiwiAnnotationData module : configuration.modules) {
-				if (!checkDist(module, dist))
+				if (!checkDist(module, dist)) {
 					continue;
+				}
 				moduleData.put(mod, module);
 			}
 			for (KiwiAnnotationData optional : configuration.optionals) {
-				if (!checkDist(optional, dist))
+				if (!checkDist(optional, dist)) {
 					continue;
+				}
 				classOptionalMap.put(optional.target(), optional);
 			}
 			for (KiwiAnnotationData condition : configuration.conditions) {
-				if (!checkDist(condition, dist))
+				if (!checkDist(condition, dist)) {
 					continue;
+				}
 				conditions.put(condition, mod);
 			}
 			for (KiwiAnnotationData config : configuration.configs) {
-				if (!checkDist(config, dist))
+				if (!checkDist(config, dist)) {
 					continue;
+				}
 				ConfigType type = null;
 				try {
 					type = ConfigType.valueOf((String) config.data().get("type"));
@@ -233,8 +237,9 @@ public class Kiwi {
 				}
 			}
 			for (KiwiAnnotationData packet : configuration.packets) {
-				if (!checkDist(packet, dist))
+				if (!checkDist(packet, dist)) {
 					continue;
+				}
 				Networking.processClass(packet.target(), mod);
 			}
 		}
@@ -288,7 +293,8 @@ public class Kiwi {
 	private static boolean checkDist(KiwiAnnotationData annotationData, String dist) throws IOException {
 		try {
 			ClassNode clazz = new ClassNode(Opcodes.ASM7);
-			InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(annotationData.target().replace('.', '/') + ".class");
+			InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(
+					annotationData.target().replace('.', '/') + ".class");
 			final ClassReader classReader = new ClassReader(is);
 			classReader.accept(clazz, 0);
 			if (clazz.visibleAnnotations != null) {
@@ -335,8 +341,7 @@ public class Kiwi {
 						throw e;
 					}
 				}
-			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException |
-					 ClassNotFoundException e) {
+			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | ClassNotFoundException e) {
 				LOGGER.error(MARKER, "Failed to access to LoadingCondition: %s".formatted(k), e);
 			}
 		});
@@ -373,7 +378,8 @@ public class Kiwi {
 
 			String dependencies = (String) module.data().get("dependencies");
 			/* off */
-			List<String> rules = StringUtils.split(Strings.nullToEmpty(dependencies), ';').stream()
+			List<String> rules = StringUtils.split(Strings.nullToEmpty(dependencies), ';')
+					.stream()
 					.filter(s -> !Strings.isNullOrEmpty(s))
 					.collect(Collectors.toList());
 			/* on */
@@ -403,7 +409,11 @@ public class Kiwi {
 			for (Info i : errorList) {
 				IModInfo modInfo = ModList.get().getModContainerById(i.id.getNamespace()).get().getModInfo();
 				String dependencies = org.apache.commons.lang3.StringUtils.join(i.moduleRules, ", ");
-				ModLoader.get().addWarning(new ModLoadingWarning(modInfo, ModLoadingStage.ERROR, "msg.kiwi.no_dependencies", i.id, dependencies));
+				ModLoader.get().addWarning(new ModLoadingWarning(modInfo,
+						ModLoadingStage.ERROR,
+						"msg.kiwi.no_dependencies",
+						i.id,
+						dependencies));
 			}
 			if (!errorList.isEmpty()) {
 				return;
@@ -493,7 +503,8 @@ public class Kiwi {
 					regName = checkPrefix(field.getName().toLowerCase(Locale.ENGLISH), modid);
 				}
 
-				if (field.getType() == info.module.getClass() && "instance".equals(regName.getPath()) && regName.getNamespace().equals(modid)) {
+				if (field.getType() == info.module.getClass() && "instance".equals(regName.getPath()) &&
+						regName.getNamespace().equals(modid)) {
 					try {
 						field.set(null, info.module);
 					} catch (IllegalArgumentException | IllegalAccessException e) {
@@ -564,9 +575,12 @@ public class Kiwi {
 			}
 
 			LOGGER.info(MARKER, "Module [{}:{}] initialized", modid, name);
+			List<String> entries = Lists.newArrayList();
 			for (ResourceKey<?> key : counter.keySet()) {
-				String keyName = Util.trimRL(key.location());
-				LOGGER.info(MARKER, "    {}: {}", keyName, counter.getInt(key));
+				entries.add("%s: %s".formatted(Util.trimRL(key.location()), counter.getInt(key)));
+			}
+			if (!entries.isEmpty()) {
+				LOGGER.info(MARKER, "\t\t" + String.join(", ", entries));
 			}
 		}
 
@@ -759,7 +773,9 @@ public class Kiwi {
 	private void serverInit(ServerStartingEvent event) {
 		ServerInitEvent e = new ServerInitEvent();
 		KiwiModules.fire(m -> m.serverInit(e));
-		event.getServer().getLevel(Level.OVERWORLD).getDataStorage().computeIfAbsent(Scheduler::load, () -> Scheduler.INSTANCE, Scheduler.ID);
+		event.getServer().getLevel(Level.OVERWORLD).getDataStorage().computeIfAbsent(Scheduler::load,
+				() -> Scheduler.INSTANCE,
+				Scheduler.ID);
 		ModLoadingContext.get().setActiveContainer(null);
 	}
 
@@ -787,7 +803,7 @@ public class Kiwi {
 		Util.onAttackEntity(event.getEntity(), event.getEntity().level(), InteractionHand.MAIN_HAND, event.getTarget(), null);
 	}
 
-	private static enum LoadingStage {
+	private enum LoadingStage {
 		UNINITED, CONSTRUCTING, CONSTRUCTED, INITED;
 	}
 
