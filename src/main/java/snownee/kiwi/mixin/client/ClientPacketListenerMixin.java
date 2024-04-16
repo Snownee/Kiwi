@@ -16,7 +16,7 @@ public class ClientPacketListenerMixin {
 	@Inject(
 			at = @At(
 					value = "INVOKE",
-					target = "Lnet/minecraft/world/level/block/entity/BlockEntity;load(Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/core/HolderLookup$Provider;)V",
+					target = "Lnet/minecraft/world/level/block/entity/BlockEntity;loadWithComponents(Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/core/HolderLookup$Provider;)V",
 					remap = true
 			), method = {"method_38542", "lambda$handleBlockEntityData$5"}, cancellable = true, remap = false
 	)

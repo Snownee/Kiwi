@@ -328,6 +328,6 @@ public final class Util {
 	}
 
 	public static <T> T parseJson(Codec<T> codec, JsonElement json) {
-		return net.minecraft.Util.getOrThrow(codec.parse(JsonOps.INSTANCE, json), JsonParseException::new);
+		return codec.parse(JsonOps.INSTANCE, json).getOrThrow(JsonParseException::new);
 	}
 }

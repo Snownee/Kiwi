@@ -2,12 +2,12 @@ package snownee.kiwi.recipe.crafting;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
@@ -78,8 +78,8 @@ public class KiwiShapelessRecipe extends ShapelessRecipe {
 	}
 
 	public static class Serializer implements RecipeSerializer<KiwiShapelessRecipe> {
-		public static final Codec<KiwiShapelessRecipe> CODEC = RecordCodecBuilder.create(i -> i.group(
-						ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(ShapelessRecipe::getGroup),
+		public static final MapCodec<KiwiShapelessRecipe> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+						Codec.STRING.optionalFieldOf("group", "").forGetter(ShapelessRecipe::getGroup),
 						CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(ShapelessRecipe::category),
 						ItemStack.CODEC.fieldOf("result").forGetter(recipe -> recipe.result),
 						Ingredient.CODEC_NONEMPTY.listOf().fieldOf("ingredients").flatXmap(list -> {
@@ -100,7 +100,7 @@ public class KiwiShapelessRecipe extends ShapelessRecipe {
 				Serializer::fromNetwork);
 
 		@Override
-		public Codec<KiwiShapelessRecipe> codec() {
+		public MapCodec<KiwiShapelessRecipe> codec() {
 			return CODEC;
 		}
 

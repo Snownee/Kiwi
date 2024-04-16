@@ -23,9 +23,9 @@ public class MyBlockEntity extends ModBlockEntity {
 	}
 
 	@Override
-	public void load(CompoundTag data, HolderLookup.Provider provider) {
-		readPacketData(data);
-		super.load(data, provider);
+	protected void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		readPacketData(compoundTag);
+		super.loadAdditional(compoundTag, provider);
 	}
 
 	@Override
