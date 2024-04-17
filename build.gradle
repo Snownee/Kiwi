@@ -29,6 +29,8 @@ repositories {
     // for more information about repositories.
 }
 
+java.withSourcesJar()
+
 sourceSets {
     main.resources.srcDirs += "$rootDir/src/generated/resources"
 }
@@ -77,7 +79,7 @@ dependencies {
     modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
 
     implementation shadowCommon("org.yaml:snakeyaml:${project.snakeyaml_version}")
-    implementation shadowCommon("com.github.Snownee:EvalEx:main-SNAPSHOT")
+    implementation shadowCommon("com.ezylang:EvalEx:${project.evalex_version}")
     implementation shadowCommon(project(':annotation')) {
         transitive(false)
     }
