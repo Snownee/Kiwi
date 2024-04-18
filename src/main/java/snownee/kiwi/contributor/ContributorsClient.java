@@ -21,7 +21,7 @@ import snownee.kiwi.contributor.client.gui.CosmeticScreen;
 import snownee.kiwi.contributor.network.CSetCosmeticPacket;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.network.KPacketSender;
-import snownee.kiwi.util.Util;
+import snownee.kiwi.util.KUtil;
 
 public class ContributorsClient extends AbstractModule {
 
@@ -64,7 +64,7 @@ public class ContributorsClient extends AbstractModule {
 	}
 
 	public static void changeCosmetic() {
-		ResourceLocation id = Util.RL(KiwiClientConfig.contributorCosmetic);
+		ResourceLocation id = KUtil.RL(KiwiClientConfig.contributorCosmetic);
 		if (id != null && id.getPath().isEmpty()) {
 			id = null;
 		}

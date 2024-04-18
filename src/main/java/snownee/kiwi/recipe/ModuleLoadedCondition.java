@@ -8,7 +8,7 @@ import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import snownee.kiwi.Kiwi;
-import snownee.kiwi.util.Util;
+import snownee.kiwi.util.KUtil;
 
 public enum ModuleLoadedCondition implements Predicate<JsonObject> {
 	INSTANCE;
@@ -21,7 +21,7 @@ public enum ModuleLoadedCondition implements Predicate<JsonObject> {
 
 	@Override
 	public boolean test(JsonObject jsonObject) {
-		return Kiwi.isLoaded(Util.RL(GsonHelper.getAsString(jsonObject, "module")));
+		return Kiwi.isLoaded(KUtil.RL(GsonHelper.getAsString(jsonObject, "module")));
 	}
 
 	public static class Provider implements ConditionJsonProvider {

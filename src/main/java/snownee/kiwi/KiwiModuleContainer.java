@@ -36,7 +36,7 @@ import snownee.kiwi.loader.ClientPlatform;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.loader.event.PostInitEvent;
-import snownee.kiwi.util.Util;
+import snownee.kiwi.util.KUtil;
 
 public final class KiwiModuleContainer {
 	public static final class RegistryEntryStore {
@@ -108,9 +108,9 @@ public final class KiwiModuleContainer {
 			ResourceLocation id;
 			KiwiModule.Name nameAnnotation = field.getAnnotation(KiwiModule.Name.class);
 			if (nameAnnotation != null) {
-				id = Util.RL(nameAnnotation.value(), modid);
+				id = KUtil.RL(nameAnnotation.value(), modid);
 			} else {
-				id = Util.RL(field.getName().toLowerCase(Locale.ENGLISH), modid);
+				id = KUtil.RL(field.getName().toLowerCase(Locale.ENGLISH), modid);
 			}
 			Objects.requireNonNull(id);
 

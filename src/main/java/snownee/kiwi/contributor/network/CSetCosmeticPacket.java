@@ -12,7 +12,7 @@ import snownee.kiwi.contributor.Contributors;
 import snownee.kiwi.network.KiwiPacket;
 import snownee.kiwi.network.PayloadContext;
 import snownee.kiwi.network.PlayPacketHandler;
-import snownee.kiwi.util.Util;
+import snownee.kiwi.util.KUtil;
 
 @KiwiPacket
 public record CSetCosmeticPacket(@Nullable ResourceLocation id) implements CustomPacketPayload {
@@ -25,7 +25,7 @@ public record CSetCosmeticPacket(@Nullable ResourceLocation id) implements Custo
 
 	public static class Handler implements PlayPacketHandler<CSetCosmeticPacket> {
 		public static final StreamCodec<RegistryFriendlyByteBuf, CSetCosmeticPacket> STREAM_CODEC = StreamCodec.composite(
-				ByteBufCodecs.STRING_UTF8.map(it -> it.isEmpty() ? null : Util.RL(it), it -> it == null ? "" : it.toString()),
+				ByteBufCodecs.STRING_UTF8.map(it -> it.isEmpty() ? null : KUtil.RL(it), it -> it == null ? "" : it.toString()),
 				CSetCosmeticPacket::id,
 				CSetCosmeticPacket::new
 		);

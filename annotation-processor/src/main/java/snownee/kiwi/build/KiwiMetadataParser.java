@@ -8,6 +8,7 @@ import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Construct;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeTuple;
@@ -40,7 +41,7 @@ public class KiwiMetadataParser {
 		return new KiwiMetadata(yaml.loadAs(s, Map.class));
 	}
 
-	private static class Constructor extends org.yaml.snakeyaml.constructor.Constructor {
+	private static class Constructor extends SafeConstructor {
 		public Constructor(LoaderOptions loaderOptions, TypeDescription typeDescription) {
 			super(loaderOptions);
 			typeDefinitions.put(typeDescription.getType(), typeDescription);

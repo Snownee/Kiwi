@@ -3,24 +3,40 @@ package snownee.kiwi.util;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
-import java.util.stream.Stream;
-
-import org.joml.Vector3d;
 
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import snownee.kiwi.Kiwi;
 
-// https://github.com/mekanism/Mekanism/blob/v10.1/src/main/java/mekanism/common/util/VoxelShapeUtils.java
+// https://github.com/mekanism/Mekanism/blob/1.20.4/src/main/java/mekanism/common/util/VoxelUtil.java
 public final class VoxelUtil {
-	private VoxelUtil() {
+
+	private static final Vec3 fromOrigin = new Vec3(-0.5, -0.5, -0.5);
+
+	/**
+	 * Prints out an easy to copy-paste string representing the cuboid of a shape
+	 */
+	public static void print(double x1, double y1, double z1, double x2, double y2, double z2) {
+		Kiwi.LOGGER.info("box({}, {}, {}, {}, {}, {}),", Math.min(x1, x2), Math.min(y1, y2), Math.min(z1, z2),
+				Math.max(x1, x2), Math.max(y1, y2), Math.max(z1, z2));
 	}
 
-	private static final Vector3d fromOrigin = new Vector3d(-0.5, -0.5, -0.5);
+	/**
+	 * Prints out a set of strings that make copy-pasting easier, for simplifying a voxel shape
+	 */
+	public static void printSimplified(String name, VoxelShape shape) {
+		Kiwi.LOGGER.info("Simplified: {}", name);
+		for (AABB box : shape.optimize().toAabbs()) {
+			print(box.minX * 16, box.minY * 16, box.minZ * 16, box.maxX * 16, box.maxY * 16, box.maxZ * 16);
+		}
+	}
 
 	/**
 	 * Rotates an {@link AABB} to a specific side, similar to how the block states rotate models.
@@ -30,42 +46,30 @@ public final class VoxelUtil {
 	 * @return The rotated {@link AABB}
 	 */
 	public static AABB rotate(AABB box, Direction side) {
-		switch (side) {
-			case DOWN:
-				return box;
-			case UP:
-				return new AABB(box.minX, -box.minY, -box.minZ, box.maxX, -box.maxY, -box.maxZ);
-			case NORTH:
-				return new AABB(box.minX, -box.minZ, box.minY, box.maxX, -box.maxZ, box.maxY);
-			case SOUTH:
-				return new AABB(-box.minX, -box.minZ, -box.minY, -box.maxX, -box.maxZ, -box.maxY);
-			case WEST:
-				return new AABB(box.minY, -box.minZ, -box.minX, box.maxY, -box.maxZ, -box.maxX);
-			case EAST:
-				return new AABB(-box.minY, -box.minZ, box.minX, -box.maxY, -box.maxZ, box.maxX);
-		}
-		return box;
+		return switch (side) {
+			case DOWN -> box;
+			case UP -> new AABB(box.minX, -box.minY, -box.minZ, box.maxX, -box.maxY, -box.maxZ);
+			case NORTH -> new AABB(box.minX, -box.minZ, box.minY, box.maxX, -box.maxZ, box.maxY);
+			case SOUTH -> new AABB(-box.minX, -box.minZ, -box.minY, -box.maxX, -box.maxZ, -box.maxY);
+			case WEST -> new AABB(box.minY, -box.minZ, -box.minX, box.maxY, -box.maxZ, -box.maxX);
+			case EAST -> new AABB(-box.minY, -box.minZ, box.minX, -box.maxY, -box.maxZ, box.maxX);
+		};
 	}
 
 	/**
-	 * Rotates an {@link AABB} to a according to a specific rotation.
+	 * Rotates an {@link AABB} according to a specific rotation.
 	 *
 	 * @param box      The {@link AABB} to rotate
 	 * @param rotation The rotation we are performing.
 	 * @return The rotated {@link AABB}
 	 */
 	public static AABB rotate(AABB box, Rotation rotation) {
-		switch (rotation) {
-			case NONE:
-				return box;
-			case CLOCKWISE_90:
-				return new AABB(-box.minZ, box.minY, box.minX, -box.maxZ, box.maxY, box.maxX);
-			case CLOCKWISE_180:
-				return new AABB(-box.minX, box.minY, -box.minZ, -box.maxX, box.maxY, -box.maxZ);
-			case COUNTERCLOCKWISE_90:
-				return new AABB(box.minZ, box.minY, -box.minX, box.maxZ, box.maxY, -box.maxX);
-		}
-		return box;
+		return switch (rotation) {
+			case NONE -> box;
+			case CLOCKWISE_90 -> new AABB(-box.minZ, box.minY, box.minX, -box.maxZ, box.maxY, box.maxX);
+			case CLOCKWISE_180 -> new AABB(-box.minX, box.minY, -box.minZ, -box.maxX, box.maxY, -box.maxZ);
+			case COUNTERCLOCKWISE_90 -> new AABB(box.minZ, box.minY, -box.minX, box.maxZ, box.maxY, -box.maxX);
+		};
 	}
 
 	/**
@@ -76,18 +80,13 @@ public final class VoxelUtil {
 	 * @return The rotated {@link AABB}
 	 */
 	public static AABB rotateHorizontal(AABB box, Direction side) {
-		switch (side) {
-			case NORTH:
-				return rotate(box, Rotation.NONE);
-			case SOUTH:
-				return rotate(box, Rotation.CLOCKWISE_180);
-			case WEST:
-				return rotate(box, Rotation.COUNTERCLOCKWISE_90);
-			case EAST:
-				return rotate(box, Rotation.CLOCKWISE_90);
-			default:
-				return box;
-		}
+		return switch (side) {
+			case NORTH -> rotate(box, Rotation.NONE);
+			case SOUTH -> rotate(box, Rotation.CLOCKWISE_180);
+			case WEST -> rotate(box, Rotation.COUNTERCLOCKWISE_90);
+			case EAST -> rotate(box, Rotation.CLOCKWISE_90);
+			default -> box;
+		};
 	}
 
 	/**
@@ -98,21 +97,18 @@ public final class VoxelUtil {
 	 * @return The rotated {@link VoxelShape}
 	 */
 	public static VoxelShape rotate(VoxelShape shape, Direction side) {
-		if (shape.isEmpty() || shape == Shapes.block()) {
-			return shape;
-		}
-		return rotate(shape, box -> rotate(box, side));
+		return rotate(shape, side, VoxelUtil::rotate);
 	}
 
 	/**
-	 * Rotates a {@link VoxelShape} to a according to a specific rotation.
+	 * Rotates a {@link VoxelShape} according to a specific rotation.
 	 *
 	 * @param shape    The {@link VoxelShape} to rotate
 	 * @param rotation The rotation we are performing.
 	 * @return The rotated {@link VoxelShape}
 	 */
 	public static VoxelShape rotate(VoxelShape shape, Rotation rotation) {
-		return rotate(shape, box -> rotate(box, rotation));
+		return rotate(shape, rotation, VoxelUtil::rotate);
 	}
 
 	/**
@@ -123,10 +119,7 @@ public final class VoxelUtil {
 	 * @return The rotated {@link VoxelShape}
 	 */
 	public static VoxelShape rotateHorizontal(VoxelShape shape, Direction side) {
-		if (shape.isEmpty() || shape == Shapes.block()) {
-			return shape;
-		}
-		return rotate(shape, box -> rotateHorizontal(box, side));
+		return rotate(shape, side, VoxelUtil::rotateHorizontal);
 	}
 
 	/**
@@ -151,10 +144,31 @@ public final class VoxelUtil {
 	}
 
 	/**
+	 * Rotates a {@link VoxelShape} using a specific transformation function for each {@link AABB} in the {@link VoxelShape}.
+	 *
+	 * @param shape          The {@link VoxelShape} to rotate
+	 * @param rotateFunction The transformation function to apply to each {@link AABB} in the {@link VoxelShape}.
+	 * @return The rotated {@link VoxelShape}
+	 */
+	public static <DATA> VoxelShape rotate(VoxelShape shape, DATA data, BiFunction<AABB, DATA, AABB> rotateFunction) {
+		List<VoxelShape> rotatedPieces = new ArrayList<>();
+		//Explode the voxel shape into bounding boxes
+		List<AABB> sourceBoundingBoxes = shape.toAabbs();
+		//Rotate them and convert them each back into a voxel shape
+		for (AABB sourceBoundingBox : sourceBoundingBoxes) {
+			//Make the bounding box be centered around the middle, and then move it back after rotating
+			rotatedPieces.add(Shapes.create(rotateFunction.apply(sourceBoundingBox.move(fromOrigin.x, fromOrigin.y, fromOrigin.z), data)
+					.move(-fromOrigin.x, -fromOrigin.z, -fromOrigin.z)));
+		}
+		//return the recombined rotated voxel shape
+		return combine(rotatedPieces);
+	}
+
+	/**
 	 * Used for mass combining shapes
 	 *
 	 * @param shapes The list of {@link VoxelShape}s to include
-	 * @return A simplified {@link VoxelShape} including everything that is part of any of the input shapes.
+	 * @return A simplified {@link VoxelShape} including everything that is part of the input shapes.
 	 */
 	public static VoxelShape combine(VoxelShape... shapes) {
 		return batchCombine(Shapes.empty(), BooleanOp.OR, true, shapes);
@@ -164,7 +178,7 @@ public final class VoxelUtil {
 	 * Used for mass combining shapes
 	 *
 	 * @param shapes The collection of {@link VoxelShape}s to include
-	 * @return A simplified {@link VoxelShape} including everything that is part of any of the input shapes.
+	 * @return A simplified {@link VoxelShape} including everything that is part of the input shapes.
 	 */
 	public static VoxelShape combine(Collection<VoxelShape> shapes) {
 		return batchCombine(Shapes.empty(), BooleanOp.OR, true, shapes);
@@ -174,7 +188,7 @@ public final class VoxelUtil {
 	 * Used for cutting shapes out of a full cube
 	 *
 	 * @param shapes The list of {@link VoxelShape}s to cut out
-	 * @return A {@link VoxelShape} including everything that is not part of any of the input shapes.
+	 * @return A {@link VoxelShape} including everything that is not part of the input shapes.
 	 */
 	public static VoxelShape exclude(VoxelShape... shapes) {
 		return batchCombine(Shapes.block(), BooleanOp.ONLY_FIRST, true, shapes);
@@ -218,17 +232,20 @@ public final class VoxelUtil {
 		return simplify ? combinedShape.optimize() : combinedShape;
 	}
 
-	public static void setShape(VoxelShape shape, VoxelShape[] dest, boolean invert) {
-		boolean verticalAxis = dest.length == 4;
-		Stream<Direction> stream = verticalAxis ? Direction.Plane.HORIZONTAL.stream() : Direction.stream();
-		stream.forEach(side -> {
-			dest[verticalAxis ? side.ordinal() : side.ordinal() - 2] = verticalAxis ?
-					rotate(shape, invert ? side.getOpposite() : side) :
-					rotateHorizontal(shape, side);
-		});
+	public static void setShape(VoxelShape shape, VoxelShape[] dest, boolean verticalAxis) {
+		setShape(shape, dest, verticalAxis, false);
+	}
+
+	public static void setShape(VoxelShape shape, VoxelShape[] dest, boolean verticalAxis, boolean invert) {
+		List<Direction> dirs = verticalAxis ? KUtil.DIRECTIONS : KUtil.HORIZONTAL_DIRECTIONS;
+		for (Direction side : dirs) {
+			dest[verticalAxis ? side.ordinal() : side.ordinal() - 2] = verticalAxis ? VoxelUtil.rotate(
+					shape,
+					invert ? side.getOpposite() : side) : VoxelUtil.rotateHorizontal(shape, side);
+		}
 	}
 
 	public static void setShape(VoxelShape shape, VoxelShape[] dest) {
-		setShape(shape, dest, false);
+		setShape(shape, dest, false, false);
 	}
 }

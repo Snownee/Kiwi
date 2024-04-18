@@ -40,7 +40,7 @@ import snownee.kiwi.config.ConfigUI.Slider;
 import snownee.kiwi.config.ConfigUI.TextDescription;
 import snownee.kiwi.config.ConfigUI.Typed;
 import snownee.kiwi.util.LocalizableItem;
-import snownee.kiwi.util.Util;
+import snownee.kiwi.util.KUtil;
 
 public class ClothConfigIntegration {
 
@@ -84,7 +84,7 @@ public class ClothConfigIntegration {
 					if (I18n.exists(key0)) {
 						title0 = Component.translatable(key0);
 					} else {
-						title0 = Component.literal(Util.friendlyText(path.get(path.size() - 1)));
+						title0 = Component.literal(KUtil.friendlyText(path.get(path.size() - 1)));
 					}
 					SubCategoryBuilder builder0 = entryBuilder.startSubCategory(title0);
 					builder0.setExpanded(true);
@@ -98,7 +98,7 @@ public class ClothConfigIntegration {
 				if (I18n.exists(value.translation)) {
 					title = Component.translatable(value.translation);
 				} else {
-					title = Component.literal(Util.friendlyText(titleKey));
+					title = Component.literal(KUtil.friendlyText(titleKey));
 				}
 				AbstractConfigListEntry<?> entry = null;
 				Class<?> type = value.getType();

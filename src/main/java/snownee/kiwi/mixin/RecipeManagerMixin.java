@@ -14,7 +14,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
-import snownee.kiwi.util.Util;
+import snownee.kiwi.util.KUtil;
 
 @Mixin(value = RecipeManager.class, priority = 9)
 public class RecipeManagerMixin {
@@ -27,12 +27,12 @@ public class RecipeManagerMixin {
 			ResourceManager pResourceManager,
 			ProfilerFiller pProfiler,
 			CallbackInfo ci) {
-		Util.setRecipeManager((RecipeManager) (Object) this);
+		KUtil.setRecipeManager((RecipeManager) (Object) this);
 	}
 
 	@Inject(at = @At("HEAD"), method = "replaceRecipes")
 	private void kiwi_replaceRecipes(Iterable<Recipe<?>> pRecipes, CallbackInfo ci) {
-		Util.setRecipeManager((RecipeManager) (Object) this);
+		KUtil.setRecipeManager((RecipeManager) (Object) this);
 	}
 
 }

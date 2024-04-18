@@ -56,7 +56,6 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.StatType;
 import net.minecraft.util.valueproviders.FloatProviderType;
 import net.minecraft.util.valueproviders.IntProviderType;
-import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -65,7 +64,6 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.animal.CatVariant;
 import net.minecraft.world.entity.animal.FrogVariant;
-import net.minecraft.world.entity.animal.WolfVariant;
 import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerType;
@@ -82,7 +80,6 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -126,7 +123,7 @@ import snownee.kiwi.loader.Platform;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.loader.event.PostInitEvent;
 import snownee.kiwi.network.KNetworking;
-import snownee.kiwi.util.Util;
+import snownee.kiwi.util.KUtil;
 
 @Mod(Kiwi.ID)
 public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer {
@@ -142,6 +139,10 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 	private static boolean tagsUpdated;
 	public static boolean enableDataModule;
 	private static boolean initialized;
+
+	public static ResourceLocation id(String path) {
+		return new ResourceLocation(ID, path);
+	}
 
 	private static boolean shouldLoad(KiwiAnnotationData annotationData, String dist) {
 		try {
@@ -434,7 +435,7 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 		CommandRegistrationCallback.EVENT.register(KiwiCommand::register);
 		ServerLifecycleEvents.SERVER_STARTING.register(Kiwi::serverInit);
 		ServerLifecycleEvents.SERVER_STOPPED.register($ -> currentServer = null);
-		AttackEntityCallback.EVENT.register(Util::onAttackEntity);
+		AttackEntityCallback.EVENT.register(KUtil::onAttackEntity);
 		if (Platform.isPhysicalClient()) {
 			RenderLayerEnum.CUTOUT.value = RenderType.cutout();
 			RenderLayerEnum.CUTOUT_MIPPED.value = RenderType.cutoutMipped();
@@ -456,7 +457,7 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 				if (values == null) {
 					values = List.of(v);
 				}
-				List<ResourceLocation> ids = values.stream().map(s -> Util.RL(s, v)).toList();
+				List<ResourceLocation> ids = values.stream().map(s -> KUtil.RL(s, v)).toList();
 				for (ResourceLocation id : ids) {
 					LoadingContext context = new LoadingContext(id);
 					try {
@@ -510,7 +511,7 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 
 			for (String rule : rules) {
 				if (rule.startsWith("@")) {
-					info.moduleRules.add(Util.RL(rule.substring(1), modid));
+					info.moduleRules.add(KUtil.RL(rule.substring(1), modid));
 					checkDep = true;
 				} else if (!Platform.isModLoaded(rule)) {
 					continue load;
@@ -590,7 +591,7 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 			LOGGER.info(MARKER, "Module [{}] initialized", container.module.uid);
 			container.registries.registries.asMap().forEach((key, values) -> {
 				if (!values.isEmpty()) {
-					entries.add("%s: %s".formatted(Util.trimRL(key), values.size()));
+					entries.add("%s: %s".formatted(KUtil.trimRL(key), values.size()));
 				}
 			});
 			if (!entries.isEmpty()) {

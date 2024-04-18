@@ -35,7 +35,7 @@ import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.ConfigUI;
 import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.util.GameObjectLookup;
-import snownee.kiwi.util.Util;
+import snownee.kiwi.util.KUtil;
 
 public class KiwiLanguageProvider extends FabricLanguageProvider {
 	protected final String languageCode;
@@ -112,7 +112,7 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 			}
 			String key = handler.getTranslationKey();
 			if (Objects.equals(key, fileName)) {
-				translationEntries.put("kiwi.config." + key, Util.friendlyText(key));
+				translationEntries.put("kiwi.config." + key, KUtil.friendlyText(key));
 			}
 			Set<String> subCats = Sets.newHashSet();
 			for (ConfigHandler.Value<?> value : handler.getValueMap().values()) {
@@ -124,11 +124,11 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 					continue;
 				}
 				List<String> path = Lists.newArrayList(value.path.split("\\."));
-				String title = Util.friendlyText(path.remove(path.size() - 1));
+				String title = KUtil.friendlyText(path.remove(path.size() - 1));
 				String subCatKey = String.join(".", path);
 				if (!path.isEmpty() && !subCats.contains(subCatKey)) {
 					subCats.add(subCatKey);
-					translationEntries.put(handler.getModId() + ".config." + subCatKey, Util.friendlyText(path.get(path.size() - 1)));
+					translationEntries.put(handler.getModId() + ".config." + subCatKey, KUtil.friendlyText(path.get(path.size() - 1)));
 				}
 				translationEntries.put(value.translation, title);
 				translationEntries.put(value.translation + ".desc", "");
@@ -167,7 +167,7 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 		GameObjectLookup.allHolders(registryKey, dataOutput.getModId()).forEach(holder -> {
 			String key = keyMapper.apply(holder.value());
 			if (key != null) {
-				translationEntries.put(key, Util.friendlyText(holder.key().location().getPath()));
+				translationEntries.put(key, KUtil.friendlyText(holder.key().location().getPath()));
 			}
 		});
 	}
