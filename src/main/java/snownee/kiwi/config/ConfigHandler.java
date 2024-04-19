@@ -22,7 +22,6 @@ import java.util.Set;
 import org.apache.commons.lang3.EnumUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
 import com.google.common.base.Joiner;
@@ -39,6 +38,7 @@ import snownee.kiwi.config.KiwiConfig.LevelRestart;
 import snownee.kiwi.config.KiwiConfig.Range;
 import snownee.kiwi.config.KiwiConfig.Translation;
 import snownee.kiwi.loader.Platform;
+import snownee.kiwi.util.Util;
 
 public class ConfigHandler {
 
@@ -111,7 +111,9 @@ public class ConfigHandler {
 	private static Object convert(Field field) {
 		try {
 			Class<?> type = field.getType();
-			if (type != int.class && type != long.class && type != double.class && type != float.class && type != boolean.class && type != String.class && !Enum.class.isAssignableFrom(type) && !List.class.isAssignableFrom(type) && !Map.class.isAssignableFrom(type)) {
+			if (type != int.class && type != long.class && type != double.class && type != float.class && type != boolean.class &&
+					type != String.class && !Enum.class.isAssignableFrom(type) && !List.class.isAssignableFrom(type) &&
+					!Map.class.isAssignableFrom(type)) {
 				return null;
 			}
 			if (type == String.class) {
@@ -230,16 +232,11 @@ public class ConfigHandler {
 			getEndMap(map, path).put(path.get(path.size() - 1), v);
 		}
 		try (FileWriter writer = new FileWriter(configPath.toFile(), StandardCharsets.UTF_8)) {
-			DumperOptions dumperOptions = new DumperOptions();
-			dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-			//			Representer representer = new Representer();
-			//			representer.addTypeDescription(new TypeDescription(Map.class, Tag.OMAP));
-			Yaml yaml = new Yaml(dumperOptions);
 			writer.append("# Use Cloth Config mod for the descriptions.");
-			writer.append(dumperOptions.getLineBreak().getString());
+			writer.append('\n');
 			writer.append("---");
-			writer.append(dumperOptions.getLineBreak().getString());
-			yaml.dump(map, writer);
+			writer.append('\n');
+			Util.dumpYaml(map, writer);
 		} catch (JsonSyntaxException | IOException e) {
 			Kiwi.LOGGER.error("Failed to save config file: %s".formatted(configPath), e);
 		}
@@ -368,8 +365,7 @@ public class ConfigHandler {
 		public double min = Double.NaN;
 		public double max = Double.NaN;
 		public final String path;
-		@Nullable
-		Method listener;
+		@Nullable Method listener;
 
 		public Value(String path, @Nullable Field field, T value, String translation) {
 			this.path = path;
