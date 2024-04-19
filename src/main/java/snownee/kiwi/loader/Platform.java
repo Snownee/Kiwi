@@ -1,5 +1,6 @@
 package snownee.kiwi.loader;
 
+import java.nio.file.Path;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,6 +36,10 @@ public class Platform {
 
 	public static boolean isDataGen() {
 		return FabricDataGenHelper.ENABLED;
+	}
+
+	public static Path getConfigDir() {
+		return FabricLoader.getInstance().getConfigDir();
 	}
 
 	public static int getVersionNumber(String id) {

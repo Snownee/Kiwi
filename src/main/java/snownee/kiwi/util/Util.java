@@ -1,19 +1,35 @@
 package snownee.kiwi.util;
 
+import java.io.Reader;
+import java.io.Writer;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.jetbrains.annotations.Nullable;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
+import org.yaml.snakeyaml.error.YAMLException;
+import org.yaml.snakeyaml.nodes.MappingNode;
+import org.yaml.snakeyaml.nodes.Node;
+import org.yaml.snakeyaml.nodes.NodeId;
+import org.yaml.snakeyaml.nodes.SequenceNode;
+import org.yaml.snakeyaml.representer.Representer;
 
 import com.google.gson.JsonElement;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -41,7 +57,17 @@ import snownee.kiwi.loader.Platform;
 public final class Util {
 	public static final MessageFormat MESSAGE_FORMAT = new MessageFormat("{0,number,#.#}");
 	private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("###,###");
+	private static final Yaml YAML;
 	private static RecipeManager recipeManager;
+	public static final List<Direction> DIRECTIONS = Direction.stream().toList();
+	public static final List<Direction> HORIZONTAL_DIRECTIONS = Direction.Plane.HORIZONTAL.stream().toList();
+
+	static {
+		DumperOptions dumperOptions = new DumperOptions();
+		dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+		YAML = new Yaml(new ResafeConstructor(new LoaderOptions()), new Representer(dumperOptions), dumperOptions);
+	}
+
 	private Util() {
 	}
 
@@ -162,38 +188,47 @@ public final class Util {
 			bChar = b.charAt(i);
 			aNumber = aChar >= '0' && aChar <= '9';
 			bNumber = bChar >= '0' && bChar <= '9';
-			if (asNumeric)
+			if (asNumeric) {
 				if (aNumber && bNumber) {
-					if (lastNumericCompare == 0)
+					if (lastNumericCompare == 0) {
 						lastNumericCompare = aChar - bChar;
-				} else if (aNumber)
+					}
+				} else if (aNumber) {
 					return 1;
-				else if (bNumber)
+				} else if (bNumber) {
 					return -1;
-				else if (lastNumericCompare == 0) {
-					if (aChar != bChar)
+				} else if (lastNumericCompare == 0) {
+					if (aChar != bChar) {
 						return aChar - bChar;
+					}
 					asNumeric = false;
-				} else
+				} else {
 					return lastNumericCompare;
-			else if (aNumber && bNumber) {
+				}
+			} else if (aNumber && bNumber) {
 				asNumeric = true;
-				if (lastNumericCompare == 0)
+				if (lastNumericCompare == 0) {
 					lastNumericCompare = aChar - bChar;
-			} else if (aChar != bChar)
+				}
+			} else if (aChar != bChar) {
 				return aChar - bChar;
+			}
 		}
-		if (asNumeric)
+		if (asNumeric) {
 			if (aLength > bLength && a.charAt(bLength) >= '0' && a.charAt(bLength) <= '9') // as number
+			{
 				return 1; // a has bigger size, thus b is smaller
-			else if (bLength > aLength && b.charAt(aLength) >= '0' && b.charAt(aLength) <= '9') // as number
+			} else if (bLength > aLength && b.charAt(aLength) >= '0' && b.charAt(aLength) <= '9') // as number
+			{
 				return -1; // b has bigger size, thus a is smaller
-			else if (lastNumericCompare == 0)
+			} else if (lastNumericCompare == 0) {
 				return aLength - bLength;
-			else
+			} else {
 				return lastNumericCompare;
-		else
+			}
+		} else {
 			return aLength - bLength;
+		}
 	}
 
 	public static String friendlyText(String s) {
@@ -231,11 +266,14 @@ public final class Util {
 
 	public static int applyAlpha(int color, float alpha) {
 		int prevAlphaChannel = (color >> 24) & 0xFF;
-		if (prevAlphaChannel > 0)
+		if (prevAlphaChannel > 0) {
 			alpha *= prevAlphaChannel / 256f;
+		}
 		int alphaChannel = (int) (0xFF * Mth.clamp(alpha, 0, 1));
 		if (alphaChannel < 5) // fix font renderer bug
+		{
 			return 0;
+		}
 		return (color & 0xFFFFFF) | alphaChannel << 24;
 	}
 
@@ -295,7 +333,8 @@ public final class Util {
 		tag.put(key, list);
 	}
 
-	public static InteractionResult onAttackEntity(Player player, Level world, InteractionHand hand, Entity entity, @Nullable EntityHitResult hitResult) {
+	public static InteractionResult onAttackEntity(
+			Player player, Level world, InteractionHand hand, Entity entity, @Nullable EntityHitResult hitResult) {
 		if (entity instanceof ItemFrame frame && !frame.getItem().isEmpty() && !frame.isNoGravity() && !frame.isInvulnerable()) {
 			ItemStack stack = player.getItemInHand(hand);
 			if (stack.is(Items.END_PORTAL_FRAME)) {
@@ -304,5 +343,69 @@ public final class Util {
 			}
 		}
 		return InteractionResult.PASS;
+	}
+
+
+	public static <T> T loadYaml(String yaml, Class<? super T> type) {
+		return YAML.loadAs(yaml, type);
+	}
+
+	public static <T> T loadYaml(Reader reader, Class<? super T> type) {
+		return YAML.loadAs(reader, type);
+	}
+
+	public static void dumpYaml(Object object, Writer writer) {
+		YAML.dump(object, writer);
+	}
+
+	public static class ResafeConstructor extends Constructor {
+		public ResafeConstructor(LoaderOptions loaderOptions) {
+			super(loaderOptions);
+			yamlClassConstructors.put(NodeId.scalar, undefinedConstructor);
+			yamlClassConstructors.put(NodeId.mapping, new ConstructSafeMapping());
+			yamlClassConstructors.put(NodeId.sequence, new ConstructSafeSequence());
+		}
+
+		private class ConstructSafeMapping extends ConstructMapping {
+			public Object construct(Node node) {
+				MappingNode mnode = (MappingNode) node;
+				if (node.isTwoStepsConstruction()) {
+					return newMap(mnode);
+				} else {
+					return constructMapping(mnode);
+				}
+			}
+
+			@SuppressWarnings("unchecked")
+			public void construct2ndStep(Node node, Object object) {
+				constructMapping2ndStep((MappingNode) node, (Map<Object, Object>) object);
+			}
+		}
+
+		private class ConstructSafeSequence extends ConstructSequence {
+			@Override
+			public Object construct(Node node) {
+				SequenceNode snode = (SequenceNode) node;
+				if (Set.class.isAssignableFrom(node.getType())) {
+					if (node.isTwoStepsConstruction()) {
+						throw new YAMLException("Set cannot be recursive.");
+					} else {
+						return constructSet(snode);
+					}
+				} else if (Collection.class.isAssignableFrom(node.getType())) {
+					if (node.isTwoStepsConstruction()) {
+						return newList(snode);
+					} else {
+						return constructSequence(snode);
+					}
+				} else {
+					if (node.isTwoStepsConstruction()) {
+						return createArray(node.getType(), snode.getValue().size());
+					} else {
+						return constructArray(snode);
+					}
+				}
+			}
+		}
 	}
 }
