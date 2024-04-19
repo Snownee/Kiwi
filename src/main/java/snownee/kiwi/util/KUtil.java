@@ -4,14 +4,22 @@ import java.io.Reader;
 import java.io.Writer;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.jetbrains.annotations.Nullable;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.SafeConstructor;
+import org.yaml.snakeyaml.constructor.Constructor;
+import org.yaml.snakeyaml.error.YAMLException;
+import org.yaml.snakeyaml.nodes.MappingNode;
+import org.yaml.snakeyaml.nodes.Node;
+import org.yaml.snakeyaml.nodes.NodeId;
+import org.yaml.snakeyaml.nodes.SequenceNode;
 import org.yaml.snakeyaml.representer.Representer;
 
 import net.minecraft.client.Minecraft;
@@ -49,7 +57,7 @@ public final class KUtil {
 	static {
 		DumperOptions dumperOptions = new DumperOptions();
 		dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-		YAML = new Yaml(new SafeConstructor(new LoaderOptions()), new Representer(dumperOptions), dumperOptions);
+		YAML = new Yaml(new ResafeConstructor(new LoaderOptions()), new Representer(dumperOptions), dumperOptions);
 	}
 
 	private KUtil() {
@@ -280,5 +288,56 @@ public final class KUtil {
 
 	public static void dumpYaml(Object object, Writer writer) {
 		YAML.dump(object, writer);
+	}
+
+	public static class ResafeConstructor extends Constructor {
+		public ResafeConstructor(LoaderOptions loaderOptions) {
+			super(loaderOptions);
+			yamlClassConstructors.put(NodeId.scalar, undefinedConstructor);
+			yamlClassConstructors.put(NodeId.mapping, new ConstructSafeMapping());
+			yamlClassConstructors.put(NodeId.sequence, new ConstructSafeSequence());
+		}
+
+		private class ConstructSafeMapping extends ConstructMapping {
+			public Object construct(Node node) {
+				MappingNode mnode = (MappingNode) node;
+				if (node.isTwoStepsConstruction()) {
+					return newMap(mnode);
+				} else {
+					return constructMapping(mnode);
+				}
+			}
+
+			@SuppressWarnings("unchecked")
+			public void construct2ndStep(Node node, Object object) {
+				constructMapping2ndStep((MappingNode) node, (Map<Object, Object>) object);
+			}
+		}
+
+		private class ConstructSafeSequence extends ConstructSequence {
+			@Override
+			public Object construct(Node node) {
+				SequenceNode snode = (SequenceNode) node;
+				if (Set.class.isAssignableFrom(node.getType())) {
+					if (node.isTwoStepsConstruction()) {
+						throw new YAMLException("Set cannot be recursive.");
+					} else {
+						return constructSet(snode);
+					}
+				} else if (Collection.class.isAssignableFrom(node.getType())) {
+					if (node.isTwoStepsConstruction()) {
+						return newList(snode);
+					} else {
+						return constructSequence(snode);
+					}
+				} else {
+					if (node.isTwoStepsConstruction()) {
+						return createArray(node.getType(), snode.getValue().size());
+					} else {
+						return constructArray(snode);
+					}
+				}
+			}
+		}
 	}
 }

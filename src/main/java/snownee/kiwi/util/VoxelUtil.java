@@ -248,4 +248,12 @@ public final class VoxelUtil {
 	public static void setShape(VoxelShape shape, VoxelShape[] dest) {
 		setShape(shape, dest, false, false);
 	}
+
+	public static boolean isIsotropicHorizontally(VoxelShape shape) {
+		if (shape.isEmpty() || shape == Shapes.block()) {
+			return true;
+		}
+		VoxelShape rotated = VoxelUtil.rotateHorizontal(shape, Direction.EAST);
+		return !Shapes.joinIsNotEmpty(shape, rotated, BooleanOp.ONLY_FIRST);
+	}
 }

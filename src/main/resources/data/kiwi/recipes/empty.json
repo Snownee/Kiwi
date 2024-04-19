@@ -23,7 +23,7 @@
 		}
 	],
 	"result": {
-		"item": "minecraft:bucket"
+		"id": "minecraft:bucket"
 	},
 	"no_containers": true
 }
