@@ -23,8 +23,8 @@ public final class DataModule extends AbstractModule {
 
 	@Override
 	protected void addEntries() {
-		ResourceConditions.register(ModuleLoadedCondition.ID, ModuleLoadedCondition.INSTANCE);
-		ResourceConditions.register(EvalCondition.ID, EvalCondition.INSTANCE);
+		ResourceConditions.register(ModuleLoadedCondition.TYPE);
+		ResourceConditions.register(EvalCondition.TYPE);
 		CustomIngredientSerializer.register(AlternativesIngredient.Serializer.INSTANCE);
 	}
 

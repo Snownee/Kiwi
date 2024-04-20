@@ -2,8 +2,6 @@ package snownee.kiwi.item;
 
 import java.util.List;
 
-import org.jetbrains.annotations.Nullable;
-
 import com.google.common.collect.Lists;
 
 import net.fabricmc.api.EnvType;
@@ -15,8 +13,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.level.Level;
 import snownee.kiwi.KiwiClientConfig;
+import snownee.kiwi.loader.Platform;
 
 public class ModItem extends Item {
 	public ModItem(Item.Properties builder) {
@@ -24,10 +22,10 @@ public class ModItem extends Item {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
-		if (!KiwiClientConfig.globalTooltip) {
-			addTip(stack, tooltip, flagIn);
+	public void appendHoverText(ItemStack itemStack, TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag tooltipFlag) {
+		super.appendHoverText(itemStack, tooltipContext, tooltip, tooltipFlag);
+		if (Platform.isPhysicalClient() && !KiwiClientConfig.globalTooltip) {
+			ModItem.addTip(itemStack, tooltip, tooltipFlag);
 		}
 	}
 

@@ -1,45 +1,30 @@
 package snownee.kiwi.recipe;
 
-import java.util.function.Predicate;
+import org.jetbrains.annotations.Nullable;
 
-import com.google.gson.JsonObject;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
+import net.fabricmc.fabric.api.resource.conditions.v1.ResourceCondition;
+import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditionType;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import snownee.kiwi.Kiwi;
-import snownee.kiwi.util.KUtil;
 
-public enum ModuleLoadedCondition implements Predicate<JsonObject> {
-	INSTANCE;
+public record ModuleLoadedCondition(ResourceLocation module) implements ResourceCondition {
+	public static final ResourceConditionType<ModuleLoadedCondition> TYPE = ResourceConditionType.create(
+			new ResourceLocation(Kiwi.ID, "is_loaded"),
+			RecordCodecBuilder.mapCodec(instance ->
+					instance.group(ResourceLocation.CODEC.fieldOf("module").forGetter(ModuleLoadedCondition::module))
+							.apply(instance, ModuleLoadedCondition::new))
+	);
 
-	public static final ResourceLocation ID = new ResourceLocation(Kiwi.ID, "is_loaded");
-
-	public static Provider provider(ResourceLocation module) {
-		return new Provider(module);
+	@Override
+	public ResourceConditionType<?> getType() {
+		return TYPE;
 	}
 
 	@Override
-	public boolean test(JsonObject jsonObject) {
-		return Kiwi.isLoaded(KUtil.RL(GsonHelper.getAsString(jsonObject, "module")));
+	public boolean test(@Nullable HolderLookup.Provider registryLookup) {
+		return Kiwi.isLoaded(module);
 	}
-
-	public static class Provider implements ConditionJsonProvider {
-		private final ResourceLocation module;
-
-		protected Provider(ResourceLocation module) {
-			this.module = module;
-		}
-
-		@Override
-		public void writeParameters(JsonObject json) {
-			json.addProperty("module", module.toString());
-		}
-
-		@Override
-		public ResourceLocation getConditionId() {
-			return ModuleLoadedCondition.ID;
-		}
-	}
-
 }

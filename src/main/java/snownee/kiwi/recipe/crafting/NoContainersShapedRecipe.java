@@ -1,12 +1,12 @@
 package snownee.kiwi.recipe.crafting;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
@@ -44,12 +44,12 @@ public class NoContainersShapedRecipe extends ShapedRecipe {
 	}
 
 	public static class Serializer implements RecipeSerializer<NoContainersShapedRecipe> {
-		public static final Codec<NoContainersShapedRecipe> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(ShapedRecipe::getGroup),
+		public static final MapCodec<NoContainersShapedRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+				Codec.STRING.optionalFieldOf("group", "").forGetter(ShapedRecipe::getGroup),
 				CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(ShapedRecipe::category),
 				ShapedRecipePattern.MAP_CODEC.forGetter(shapedRecipe -> shapedRecipe.pattern),
 				ItemStack.CODEC.fieldOf("result").forGetter(shapedRecipe -> shapedRecipe.result),
-				ExtraCodecs.strictOptionalField(Codec.BOOL, "show_notification", true).forGetter(ShapedRecipe::showNotification),
+				Codec.BOOL.optionalFieldOf("show_notification", true).forGetter(ShapedRecipe::showNotification),
 				Codec.BOOL.fieldOf("no_containers").orElse(false).forGetter(NoContainersShapedRecipe::noContainers)
 		).apply(instance, NoContainersShapedRecipe::new));
 		public static final StreamCodec<RegistryFriendlyByteBuf, NoContainersShapedRecipe> STREAM_CODEC = StreamCodec.of(
@@ -57,7 +57,7 @@ public class NoContainersShapedRecipe extends ShapedRecipe {
 				Serializer::fromNetwork);
 
 		@Override
-		public Codec<NoContainersShapedRecipe> codec() {
+		public MapCodec<NoContainersShapedRecipe> codec() {
 			return CODEC;
 		}
 

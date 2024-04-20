@@ -1,52 +1,40 @@
 package snownee.kiwi.recipe;
 
-import java.util.function.Predicate;
+import org.jetbrains.annotations.Nullable;
 
+import com.ezylang.evalex.EvaluationException;
 import com.ezylang.evalex.Expression;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
+import com.ezylang.evalex.parser.ParseException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
+import net.fabricmc.fabric.api.resource.conditions.v1.ResourceCondition;
+import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditionType;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.util.KEval;
 
-public enum EvalCondition implements Predicate<JsonObject> {
-	INSTANCE;
+public record EvalCondition(String expression) implements ResourceCondition {
+	public static final ResourceConditionType<EvalCondition> TYPE = ResourceConditionType.create(
+			new ResourceLocation(Kiwi.ID, "eval"),
+			RecordCodecBuilder.mapCodec(instance ->
+					instance.group(Codec.STRING.fieldOf("ex").forGetter(EvalCondition::expression)).apply(instance, EvalCondition::new))
+	);
 
 	public static final ResourceLocation ID = new ResourceLocation(Kiwi.ID, "eval");
 
-	public static Provider provider(String expression) {
-		return new Provider(expression);
+	@Override
+	public ResourceConditionType<?> getType() {
+		return TYPE;
 	}
 
 	@Override
-	public boolean test(JsonObject jsonObject) {
+	public boolean test(@Nullable HolderLookup.Provider registryLookup) {
 		try {
-			String ex = GsonHelper.getAsString(jsonObject, "ex");
-			return new Expression(ex, KEval.config()).evaluate().getBooleanValue();
-		} catch (Throwable e) {
-			throw new JsonSyntaxException(e);
+			return new Expression(expression, KEval.config()).evaluate().getBooleanValue();
+		} catch (EvaluationException | ParseException e) {
+			throw new RuntimeException(e);
 		}
 	}
-
-	public static class Provider implements ConditionJsonProvider {
-		private final String expression;
-
-		protected Provider(String expression) {
-			this.expression = expression;
-		}
-
-		@Override
-		public void writeParameters(JsonObject json) {
-			json.addProperty("ex", expression);
-		}
-
-		@Override
-		public ResourceLocation getConditionId() {
-			return EvalCondition.ID;
-		}
-	}
-
 }

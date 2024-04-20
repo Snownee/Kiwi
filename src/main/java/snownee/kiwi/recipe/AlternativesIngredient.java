@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredient;
@@ -74,7 +75,7 @@ public class AlternativesIngredient implements CustomIngredient {
 	public enum Serializer implements CustomIngredientSerializer<AlternativesIngredient> {
 		INSTANCE;
 
-		public static final Codec<AlternativesIngredient> CODEC = RecordCodecBuilder.create(i -> i.group(
+		public static final MapCodec<AlternativesIngredient> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
 				Codec.list(ExtraCodecs.JSON).fieldOf("options").forGetter(o -> o.options)
 		).apply(i, AlternativesIngredient::new));
 
@@ -99,7 +100,7 @@ public class AlternativesIngredient implements CustomIngredient {
 		}
 
 		@Override
-		public Codec<AlternativesIngredient> getCodec(boolean allowEmpty) {
+		public MapCodec<AlternativesIngredient> getCodec(boolean allowEmpty) {
 			return CODEC;
 		}
 

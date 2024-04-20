@@ -13,9 +13,9 @@ public class TestBlockEntity extends RetextureBlockEntity {
 	}
 
 	@Override
-	public void load(CompoundTag compound, HolderLookup.Provider provider) {
-		readPacketData(compound);
-		super.load(compound, provider);
+	protected void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		readPacketData(compoundTag);
+		super.loadAdditional(compoundTag, provider);
 	}
 
 	@Override

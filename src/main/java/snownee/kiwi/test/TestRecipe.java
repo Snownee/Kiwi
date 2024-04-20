@@ -1,13 +1,13 @@
 package snownee.kiwi.test;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
@@ -64,12 +64,12 @@ public class TestRecipe extends DynamicShapedRecipe {
 
 	public static class Serializer extends DynamicShapedRecipe.Serializer<TestRecipe> {
 
-		public static final Codec<TestRecipe> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(DynamicShapedRecipe::getGroup),
+		public static final MapCodec<TestRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+				Codec.STRING.optionalFieldOf("group", "").forGetter(DynamicShapedRecipe::getGroup),
 				CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(DynamicShapedRecipe::category),
 				ShapedRecipePattern.MAP_CODEC.forGetter(DynamicShapedRecipe::pattern),
 				ItemStack.CODEC.fieldOf("result").forGetter(DynamicShapedRecipe::result),
-				ExtraCodecs.strictOptionalField(Codec.BOOL, "show_notification", true).forGetter(DynamicShapedRecipe::showNotification),
+				Codec.BOOL.optionalFieldOf("show_notification", true).forGetter(DynamicShapedRecipe::showNotification),
 				Codec.BOOL.fieldOf("different_inputs").orElse(false).forGetter(TestRecipe::allowDifferentInputs)
 		).apply(instance, TestRecipe::new));
 
@@ -78,7 +78,7 @@ public class TestRecipe extends DynamicShapedRecipe {
 				Serializer::fromNetwork);
 
 		@Override
-		public Codec<TestRecipe> codec() {
+		public MapCodec<TestRecipe> codec() {
 			return CODEC;
 		}
 

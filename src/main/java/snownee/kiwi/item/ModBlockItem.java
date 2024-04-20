@@ -3,8 +3,6 @@ package snownee.kiwi.item;
 import java.util.List;
 import java.util.Set;
 
-import org.jetbrains.annotations.Nullable;
-
 import com.google.common.collect.Sets;
 
 import net.minecraft.core.BlockPos;
@@ -41,7 +39,7 @@ public class ModBlockItem extends BlockItem implements ItemCategoryFiller {
 			if (tile != null && INSTANT_UPDATE_TILES.contains(tile.getType())) {
 				CustomData data = stack.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY);
 				if (!data.isEmpty()) {
-					tile.load(data.copyTag(), worldIn.registryAccess());
+					tile.loadWithComponents(data.copyTag(), worldIn.registryAccess());
 					tile.setChanged();
 				}
 			}
@@ -50,10 +48,10 @@ public class ModBlockItem extends BlockItem implements ItemCategoryFiller {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
-		super.appendHoverText(stack, worldIn, tooltip, flagIn);
+	public void appendHoverText(ItemStack itemStack, TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag tooltipFlag) {
+		super.appendHoverText(itemStack, tooltipContext, tooltip, tooltipFlag);
 		if (Platform.isPhysicalClient() && !KiwiClientConfig.globalTooltip) {
-			ModItem.addTip(stack, tooltip, flagIn);
+			ModItem.addTip(itemStack, tooltip, tooltipFlag);
 		}
 	}
 
