@@ -26,3 +26,8 @@ accessible field net/minecraft/data/recipes/ShapelessRecipeBuilder category Lnet
 accessible method net/minecraft/data/recipes/ShapelessRecipeBuilder ensureValid (Lnet/minecraft/resources/ResourceLocation;)V
 
 accessible field net/minecraft/world/item/BucketItem content Lnet/minecraft/world/level/material/Fluid;
+
+accessible field net/minecraft/server/packs/repository/FolderRepositorySource folder Ljava/nio/file/Path;
+accessible field net/minecraft/server/packs/repository/FolderRepositorySource validator Lnet/minecraft/world/level/validation/DirectoryValidator;
+accessible field net/minecraft/server/packs/repository/FolderRepositorySource packType Lnet/minecraft/server/packs/PackType;
+accessible method net/minecraft/server/packs/repository/FolderRepositorySource createDiscoveredFilePackInfo (Ljava/nio/file/Path;)Lnet/minecraft/server/packs/PackLocationInfo;

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -24,8 +23,6 @@ public class YogaNode implements Iterable<YogaNode> {
 	public static final float DefaultFlexGrow = 0.0f;
 	public static final float DefaultFlexShrink = 0.0f;
 	public static final float WebDefaultFlexShrink = 1.0f;
-
-	private static final AtomicInteger _instanceCount = new AtomicInteger();
 
 	public Consumer<YogaNode> _print;
 	public boolean _hasNewLayout;
@@ -62,8 +59,6 @@ public class YogaNode implements Iterable<YogaNode> {
 		_config = defaultConfig;
 		_isDirty = false;
 		_resolvedDimensions = new YogaValue[]{YogaValue.UNDEFINED, YogaValue.UNDEFINED};
-
-		_instanceCount.incrementAndGet();
 	}
 
 	public YogaNode(YogaNode node) {
@@ -82,8 +77,6 @@ public class YogaNode implements Iterable<YogaNode> {
 		_config = node._config;
 		_isDirty = node._isDirty;
 		_resolvedDimensions = Arrays.copyOf(node._resolvedDimensions, 2);
-
-		_instanceCount.incrementAndGet();
 	}
 
 	public YogaNode(YogaNode node, YogaNode owner) {
@@ -122,8 +115,6 @@ public class YogaNode implements Iterable<YogaNode> {
 		_config = config;
 		_isDirty = isDirty;
 		_resolvedDimensions = Arrays.copyOf(resolvedDimensions, 2);
-
-		_instanceCount.incrementAndGet();
 	}
 
 	public YogaNode(YogaConfig config) {
@@ -136,16 +127,7 @@ public class YogaNode implements Iterable<YogaNode> {
 		}
 	}
 
-	@Override
-	protected void finalize() throws Throwable {
-		_instanceCount.decrementAndGet();
-	}
-
 	// Getters
-
-	public static int GetInstanceCount() {
-		return _instanceCount.get();
-	}
 
 	public YogaMeasure GetMeasure() {
 		return _measure;

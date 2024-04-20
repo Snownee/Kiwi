@@ -4,7 +4,6 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -101,7 +100,7 @@ public class JsonTierProvider implements ITierProvider {
 
 	@Override
 	public List<String> getRenderableTiers() {
-		return Collections.EMPTY_LIST;
+		return List.of();
 	}
 
 	@Environment(EnvType.CLIENT)

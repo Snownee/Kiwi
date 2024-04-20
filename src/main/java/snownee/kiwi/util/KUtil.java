@@ -1,25 +1,31 @@
 package snownee.kiwi.util;
 
+import java.io.Reader;
+import java.io.Writer;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
+import java.util.Collection;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.jetbrains.annotations.Nullable;
-
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.JsonOps;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
+import org.yaml.snakeyaml.error.YAMLException;
+import org.yaml.snakeyaml.nodes.MappingNode;
+import org.yaml.snakeyaml.nodes.Node;
+import org.yaml.snakeyaml.nodes.NodeId;
+import org.yaml.snakeyaml.nodes.SequenceNode;
+import org.yaml.snakeyaml.representer.Representer;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -38,19 +44,23 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.EntityHitResult;
-import snownee.kiwi.block.def.BlockDefinition;
 import snownee.kiwi.loader.Platform;
 
-public final class Util {
-	public static final MessageFormat MESSAGE_FORMAT = new MessageFormat("{0,number,#.#}");
+public final class KUtil {
+	public static final MessageFormat MESSAGE_FORMAT = new MessageFormat("{0,number,0.#}");
 	private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("###,###");
+	private static final Yaml YAML;
 	private static RecipeManager recipeManager;
+	public static final List<Direction> DIRECTIONS = Direction.stream().toList();
+	public static final List<Direction> HORIZONTAL_DIRECTIONS = Direction.Plane.HORIZONTAL.stream().toList();
 
-	private Util() {
+	static {
+		DumperOptions dumperOptions = new DumperOptions();
+		dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+		YAML = new Yaml(new ResafeConstructor(new LoaderOptions()), new Representer(dumperOptions), dumperOptions);
 	}
 
-	public static String color(int color) {
-		return String.format("\u00A7x%06x", color & 0x00FFFFFF);
+	private KUtil() {
 	}
 
 	public static String formatComma(long number) {
@@ -117,19 +127,6 @@ public final class Util {
 	}
 
 	@Nullable
-	public static Component getBlockDefName(ItemStack stack, String key) {
-		NBTHelper data = NBTHelper.of(stack);
-		CompoundTag tag = data.getTag("BlockEntityTag.Overrides." + key);
-		if (tag != null) {
-			BlockDefinition def = BlockDefinition.fromNBT(tag);
-			if (def != null) {
-				return def.getDescription();
-			}
-		}
-		return null;
-	}
-
-	@Nullable
 	public static RecipeManager getRecipeManager() {
 		if (recipeManager == null && Platform.isPhysicalClient()) {
 			ClientPacketListener connection = Minecraft.getInstance().getConnection();
@@ -141,7 +138,7 @@ public final class Util {
 	}
 
 	public static void setRecipeManager(RecipeManager recipeManager) {
-		Util.recipeManager = recipeManager;
+		KUtil.recipeManager = recipeManager;
 	}
 
 	public static <C extends Container, T extends Recipe<C>> List<RecipeHolder<T>> getRecipes(RecipeType<T> recipeTypeIn) {
@@ -255,12 +252,6 @@ public final class Util {
 		return (color & 0xFFFFFF) | alphaChannel << 24;
 	}
 
-	// GameRenderer.pick
-	public static float getPickRange(Player player) {
-		float attrib = 5;
-		return player.isCreative() ? attrib : attrib - 0.5F;
-	}
-
 	public static void displayClientMessage(@Nullable Player player, boolean client, String key, Object... args) {
 		if (player == null) {
 			return;
@@ -269,46 +260,6 @@ public final class Util {
 			return;
 		}
 		player.sendSystemMessage(Component.translatable(key, args));
-	}
-
-	public static void jsonList(JsonElement json, Consumer<JsonElement> collector) {
-		if (json.isJsonArray()) {
-			for (JsonElement e : json.getAsJsonArray()) {
-				collector.accept(e);
-			}
-		} else {
-			collector.accept(json);
-		}
-	}
-
-	@Nullable
-	public static String[] readNBTStrings(CompoundTag tag, String key, @Nullable String[] strings) {
-		if (!tag.contains(key, Tag.TAG_LIST)) {
-			return null;
-		}
-		ListTag list = tag.getList(key, Tag.TAG_STRING);
-		if (list.isEmpty()) {
-			return null;
-		}
-		if (strings == null || strings.length != list.size()) {
-			strings = new String[list.size()];
-		}
-		for (int i = 0; i < strings.length; i++) {
-			String s = list.getString(i);
-			strings[i] = s;
-		}
-		return strings;
-	}
-
-	public static void writeNBTStrings(CompoundTag tag, String key, @Nullable String[] strings) {
-		if (strings == null || strings.length == 0) {
-			return;
-		}
-		ListTag list = new ListTag();
-		for (String s : strings) {
-			list.add(StringTag.valueOf(s));
-		}
-		tag.put(key, list);
 	}
 
 	public static InteractionResult onAttackEntity(
@@ -327,7 +278,66 @@ public final class Util {
 		return InteractionResult.PASS;
 	}
 
-	public static <T> T parseJson(Codec<T> codec, JsonElement json) {
-		return codec.parse(JsonOps.INSTANCE, json).getOrThrow(JsonParseException::new);
+	public static <T> T loadYaml(String yaml, Class<? super T> type) {
+		return YAML.loadAs(yaml, type);
+	}
+
+	public static <T> T loadYaml(Reader reader, Class<? super T> type) {
+		return YAML.loadAs(reader, type);
+	}
+
+	public static void dumpYaml(Object object, Writer writer) {
+		YAML.dump(object, writer);
+	}
+
+	public static class ResafeConstructor extends Constructor {
+		public ResafeConstructor(LoaderOptions loaderOptions) {
+			super(loaderOptions);
+			yamlClassConstructors.put(NodeId.scalar, undefinedConstructor);
+			yamlClassConstructors.put(NodeId.mapping, new ConstructSafeMapping());
+			yamlClassConstructors.put(NodeId.sequence, new ConstructSafeSequence());
+		}
+
+		private class ConstructSafeMapping extends ConstructMapping {
+			public Object construct(Node node) {
+				MappingNode mnode = (MappingNode) node;
+				if (node.isTwoStepsConstruction()) {
+					return newMap(mnode);
+				} else {
+					return constructMapping(mnode);
+				}
+			}
+
+			@SuppressWarnings("unchecked")
+			public void construct2ndStep(Node node, Object object) {
+				constructMapping2ndStep((MappingNode) node, (Map<Object, Object>) object);
+			}
+		}
+
+		private class ConstructSafeSequence extends ConstructSequence {
+			@Override
+			public Object construct(Node node) {
+				SequenceNode snode = (SequenceNode) node;
+				if (Set.class.isAssignableFrom(node.getType())) {
+					if (node.isTwoStepsConstruction()) {
+						throw new YAMLException("Set cannot be recursive.");
+					} else {
+						return constructSet(snode);
+					}
+				} else if (Collection.class.isAssignableFrom(node.getType())) {
+					if (node.isTwoStepsConstruction()) {
+						return newList(snode);
+					} else {
+						return constructSequence(snode);
+					}
+				} else {
+					if (node.isTwoStepsConstruction()) {
+						return createArray(node.getType(), snode.getValue().size());
+					} else {
+						return constructArray(snode);
+					}
+				}
+			}
+		}
 	}
 }
