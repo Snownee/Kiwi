@@ -12,7 +12,7 @@ import snownee.kiwi.Kiwi;
 
 public record ModuleLoadedCondition(ResourceLocation module) implements ResourceCondition {
 	public static final ResourceConditionType<ModuleLoadedCondition> TYPE = ResourceConditionType.create(
-			new ResourceLocation(Kiwi.ID, "is_loaded"),
+			Kiwi.id("is_loaded"),
 			RecordCodecBuilder.mapCodec(instance ->
 					instance.group(ResourceLocation.CODEC.fieldOf("module").forGetter(ModuleLoadedCondition::module))
 							.apply(instance, ModuleLoadedCondition::new))

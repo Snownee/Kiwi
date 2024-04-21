@@ -27,9 +27,9 @@ public class KiwiCommand {
 		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal(Kiwi.ID);
 		/* off */
 		builder.then(Commands
-				.literal("debugLevelRules")
+				.literal("debug_rules")
 				.requires(ctx -> ctx.hasPermission(2))
-				.executes(ctx -> cleanLevel(ctx.getSource()))
+				.executes(ctx -> debugRules(ctx.getSource()))
 		);
 
 		builder.then(Commands
@@ -60,7 +60,7 @@ public class KiwiCommand {
 		dispatcher.register(builder);
 	}
 
-	private static int cleanLevel(CommandSourceStack commandSourceStack) {
+	private static int debugRules(CommandSourceStack commandSourceStack) {
 		Commands commands = commandSourceStack.getServer().getCommands();
 		List<String> rules = List.of(
 				"gamerule doDaylightCycle false",

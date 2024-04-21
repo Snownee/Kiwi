@@ -1,9 +1,8 @@
 package snownee.kiwi.contributor.impl;
 
 import java.io.InputStreamReader;
-import java.net.URL;
+import java.net.URI;
 import java.net.UnknownHostException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -12,9 +11,11 @@ import java.util.function.Supplier;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
-import com.google.common.collect.ImmutableSetMultimap.Builder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -26,8 +27,9 @@ import snownee.kiwi.contributor.ITierProvider;
 import snownee.kiwi.contributor.client.CosmeticLayer;
 
 public class JsonTierProvider implements ITierProvider {
+	public static final Gson GSON = new GsonBuilder().setLenient().create();
+	public static final Codec<Map<String, List<String>>> CODEC = Codec.unboundedMap(Codec.STRING, Codec.STRING.listOf());
 
-	private static final Gson GSON = new GsonBuilder().disableHtmlEscaping()/*.registerTypeAdapter(type, typeAdapter)*/.create();
 	private final String author;
 	private ImmutableSetMultimap<String, String> contributors = ImmutableSetMultimap.of();
 	protected ImmutableSet<String> superusers = ImmutableSet.of();
@@ -40,23 +42,26 @@ public class JsonTierProvider implements ITierProvider {
 	}
 
 	public boolean load(String url) {
-		try (InputStreamReader reader = new InputStreamReader(new URL(url).openStream())) {
-			Map<String, Collection<String>> map = GSON.fromJson(reader, Map.class);
+		try (InputStreamReader reader = new InputStreamReader(URI.create(url).toURL().openStream())) {
+			JsonElement json = GSON.fromJson(reader, JsonElement.class);
+			Map<String, List<String>> map = CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
+			ImmutableSet.Builder<String> superusers = ImmutableSet.builder();
 			if (map.containsKey("*")) {
-				map.get("*").add("Dev");
-				superusers = ImmutableSet.copyOf(map.get("*"));
+				superusers.addAll(map.get("*"));
+				superusers.add("Dev");
 			} else {
-				superusers = ImmutableSet.of(getAuthor());
+				superusers.add(getAuthor());
 			}
-			Builder<String, String> builder = ImmutableSetMultimap.builder();
+			ImmutableSetMultimap.Builder<String, String> contributors = ImmutableSetMultimap.builder();
 			map.forEach((reward, users) -> {
 				if ("*".equals(reward)) {
 					return;
 				}
-				users.forEach(user -> builder.put(user, reward));
+				users.forEach(user -> contributors.put(user, reward));
 			});
-			contributors = builder.build();
-			Kiwi.LOGGER.debug("Successfully loaded {} contributors", contributors.keySet().size());
+			this.contributors = contributors.build();
+			this.superusers = superusers.build();
+			Kiwi.LOGGER.debug("Successfully loaded {} contributors", this.contributors.keySet().size());
 			return true;
 		} catch (Exception e) {
 			Kiwi.LOGGER.debug("Failed to load contributors from %s".formatted(url), e);
@@ -66,8 +71,7 @@ public class JsonTierProvider implements ITierProvider {
 
 	@Override
 	public CompletableFuture<Void> refresh() {
-		CompletableFuture<Void> cf = new CompletableFuture<>();
-		Thread thread = new Thread(() -> {
+		return CompletableFuture.runAsync(() -> {
 			int tried = 0;
 			List<String> url = urlProvider.get();
 			while (tried < url.size()) {
@@ -76,11 +80,7 @@ public class JsonTierProvider implements ITierProvider {
 				}
 				++tried;
 			}
-			cf.complete(null);
-		}, String.format("[Kiwi > %s] Loading Contributors", author));
-		thread.setDaemon(true);
-		thread.start();
-		return cf;
+		});
 	}
 
 	@Override

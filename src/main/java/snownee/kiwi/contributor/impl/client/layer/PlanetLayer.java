@@ -23,7 +23,7 @@ import snownee.kiwi.contributor.impl.client.model.PlanetModel;
 
 @Environment(EnvType.CLIENT)
 public class PlanetLayer extends CosmeticLayer {
-	private static final ResourceLocation TEXTURE = new ResourceLocation(Kiwi.ID, "textures/reward/planet.png");
+	private static final ResourceLocation TEXTURE = Kiwi.id("textures/reward/planet.png");
 	private static final Supplier<LayerDefinition> definition = Suppliers.memoize(PlanetModel::create);
 	private final PlanetModel<AbstractClientPlayer> modelPlanet;
 

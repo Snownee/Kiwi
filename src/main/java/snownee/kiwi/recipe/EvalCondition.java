@@ -17,12 +17,12 @@ import snownee.kiwi.util.KEval;
 
 public record EvalCondition(String expression) implements ResourceCondition {
 	public static final ResourceConditionType<EvalCondition> TYPE = ResourceConditionType.create(
-			new ResourceLocation(Kiwi.ID, "eval"),
+			Kiwi.id("eval"),
 			RecordCodecBuilder.mapCodec(instance ->
 					instance.group(Codec.STRING.fieldOf("ex").forGetter(EvalCondition::expression)).apply(instance, EvalCondition::new))
 	);
 
-	public static final ResourceLocation ID = new ResourceLocation(Kiwi.ID, "eval");
+	public static final ResourceLocation ID = Kiwi.id("eval");
 
 	@Override
 	public ResourceConditionType<?> getType() {

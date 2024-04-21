@@ -588,7 +588,11 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 
 		List<String> entries = Lists.newArrayList();
 		for (KiwiModuleContainer container : KiwiModules.get()) {
-			LOGGER.info(MARKER, "Module [{}] initialized", container.module.uid);
+			ResourceLocation uid = container.module.uid;
+			if (ID.equals(uid.getNamespace()) && uid.getPath().startsWith("contributors")) {
+				continue;
+			}
+			LOGGER.info(MARKER, "Module [{}] initialized", uid);
 			container.registries.registries.asMap().forEach((key, values) -> {
 				if (!values.isEmpty()) {
 					entries.add("%s: %s".formatted(KUtil.trimRL(key), values.size()));
