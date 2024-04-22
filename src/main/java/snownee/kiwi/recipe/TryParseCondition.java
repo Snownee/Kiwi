@@ -18,7 +18,7 @@ import snownee.kiwi.Kiwi;
 @Deprecated
 public class TryParseCondition implements ICondition {
 
-	private static final ResourceLocation ID = new ResourceLocation(Kiwi.ID, "try_parse");
+	private static final ResourceLocation ID = Kiwi.id("try_parse");
 
 	private final JsonElement e;
 

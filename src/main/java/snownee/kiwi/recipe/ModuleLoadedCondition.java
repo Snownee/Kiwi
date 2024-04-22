@@ -9,7 +9,7 @@ import net.minecraftforge.common.crafting.conditions.IConditionSerializer;
 import snownee.kiwi.Kiwi;
 
 public class ModuleLoadedCondition implements ICondition {
-	public static final ResourceLocation ID = new ResourceLocation(Kiwi.ID, "is_loaded");
+	public static final ResourceLocation ID = Kiwi.id("is_loaded");
 
 	final ResourceLocation module;
 

@@ -30,7 +30,7 @@ import snownee.kiwi.mixin.RecipeManagerAccess;
 import snownee.kiwi.util.Util;
 
 public class AlternativesIngredient extends AbstractIngredient {
-	public static final ResourceLocation ID = new ResourceLocation(Kiwi.ID, "alternatives");
+	public static final ResourceLocation ID = Kiwi.id("alternatives");
 	public static final Serializer SERIALIZER = new Serializer();
 	@Nullable
 	private JsonArray options;

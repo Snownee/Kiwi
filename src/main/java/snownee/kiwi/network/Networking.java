@@ -33,7 +33,7 @@ public final class Networking {
 	static {
 		/* off */
 		channel = NetworkRegistry.ChannelBuilder
-				.named(new ResourceLocation(Kiwi.ID, "main"))
+				.named(Kiwi.id("main"))
 				.clientAcceptedVersions(protocol::equals)
 				.serverAcceptedVersions(protocol::equals)
 				.networkProtocolVersion(() -> protocol)
@@ -59,7 +59,10 @@ public final class Networking {
 		}
 		Direction direction = handler.getDirection();
 		if (direction != null) {
-			NetworkHooks.validatePacketDirection(ctx.get().getDirection(), Optional.of(NetworkDirection.valueOf(direction.name())), ctx.get().getNetworkManager());
+			NetworkHooks.validatePacketDirection(
+					ctx.get().getDirection(),
+					Optional.of(NetworkDirection.valueOf(direction.name())),
+					ctx.get().getNetworkManager());
 		}
 		handler.receive($ -> ctx.get().enqueueWork($).thenApply($$ -> null), msg, ctx.get().getSender());
 		ctx.get().setPacketHandled(true);
@@ -81,11 +84,12 @@ public final class Networking {
 		send(PacketDistributor.PLAYER.with(() -> player), buf);
 	}
 
-	public static final PacketDistributor<ServerPlayer> ALL_EXCEPT = new PacketDistributor<>((dist, player) -> (p -> Platform.getServer().getPlayerList().getPlayers().forEach(player2 -> {
-		if (player.get() != player2) {
-			player2.connection.connection.send(p);
-		}
-	})), NetworkDirection.PLAY_TO_CLIENT);
+	public static final PacketDistributor<ServerPlayer> ALL_EXCEPT = new PacketDistributor<>((dist, player) -> (
+			p -> Platform.getServer().getPlayerList().getPlayers().forEach(player2 -> {
+				if (player.get() != player2) {
+					player2.connection.connection.send(p);
+				}
+			})), NetworkDirection.PLAY_TO_CLIENT);
 
 	public static void processClass(String className, String modId) throws Exception {
 		Class<? extends PacketHandler> clazz = (Class<? extends PacketHandler>) Class.forName(className);

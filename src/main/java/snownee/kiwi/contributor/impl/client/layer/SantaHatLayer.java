@@ -25,7 +25,7 @@ import snownee.kiwi.contributor.impl.client.model.SantaHatModel;
 
 @OnlyIn(Dist.CLIENT)
 public class SantaHatLayer extends CosmeticLayer {
-	private static final ResourceLocation TEXTURE = new ResourceLocation(Kiwi.ID, "textures/reward/santa.png");
+	private static final ResourceLocation TEXTURE = Kiwi.id("textures/reward/santa.png");
 	private static final Supplier<LayerDefinition> definition = Suppliers.memoize(SantaHatModel::create);
 	private final SantaHatModel<AbstractClientPlayer> modelSantaHat;
 

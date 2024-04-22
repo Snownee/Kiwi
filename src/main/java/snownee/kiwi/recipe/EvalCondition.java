@@ -12,7 +12,7 @@ import snownee.kiwi.Kiwi;
 import snownee.kiwi.util.KEval;
 
 public class EvalCondition implements ICondition {
-	public static final ResourceLocation ID = new ResourceLocation(Kiwi.ID, "eval");
+	public static final ResourceLocation ID = Kiwi.id("eval");
 
 	private final String expression;
 

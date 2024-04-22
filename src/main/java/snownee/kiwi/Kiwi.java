@@ -169,6 +169,10 @@ public class Kiwi {
 	private static Map<String, CreativeModeTab> GROUPS = Maps.newHashMap();
 	private static boolean tagsUpdated;
 
+	public static ResourceLocation id(String path) {
+		return new ResourceLocation(ID, path);
+	}
+
 	public Kiwi() throws Exception {
 		if (stage != LoadingStage.UNINITED) {
 			return;
@@ -409,7 +413,8 @@ public class Kiwi {
 			for (Info i : errorList) {
 				IModInfo modInfo = ModList.get().getModContainerById(i.id.getNamespace()).get().getModInfo();
 				String dependencies = org.apache.commons.lang3.StringUtils.join(i.moduleRules, ", ");
-				ModLoader.get().addWarning(new ModLoadingWarning(modInfo,
+				ModLoader.get().addWarning(new ModLoadingWarning(
+						modInfo,
 						ModLoadingStage.ERROR,
 						"msg.kiwi.no_dependencies",
 						i.id,
@@ -574,6 +579,9 @@ public class Kiwi {
 				tmpBuilderField = null;
 			}
 
+			if (ID.equals(modid) && name.startsWith("contributors")) {
+				continue;
+			}
 			LOGGER.info(MARKER, "Module [{}:{}] initialized", modid, name);
 			List<String> entries = Lists.newArrayList();
 			for (ResourceKey<?> key : counter.keySet()) {
@@ -773,7 +781,8 @@ public class Kiwi {
 	private void serverInit(ServerStartingEvent event) {
 		ServerInitEvent e = new ServerInitEvent();
 		KiwiModules.fire(m -> m.serverInit(e));
-		event.getServer().getLevel(Level.OVERWORLD).getDataStorage().computeIfAbsent(Scheduler::load,
+		event.getServer().getLevel(Level.OVERWORLD).getDataStorage().computeIfAbsent(
+				Scheduler::load,
 				() -> Scheduler.INSTANCE,
 				Scheduler.ID);
 		ModLoadingContext.get().setActiveContainer(null);

@@ -25,7 +25,7 @@ import net.minecraftforge.common.crafting.MultiItemValue;
 import snownee.kiwi.Kiwi;
 
 public class FullBlockIngredient extends AbstractIngredient {
-	public static final ResourceLocation ID = new ResourceLocation(Kiwi.ID, "full_block");
+	public static final ResourceLocation ID = Kiwi.id("full_block");
 	public static final Serializer SERIALIZER = new Serializer();
 
 	private final Ingredient example;
@@ -42,8 +42,9 @@ public class FullBlockIngredient extends AbstractIngredient {
 		Block block = Block.byItem(stack.getItem());
 		BlockState state = block.defaultBlockState();
 		try {
-			if (Block.isShapeFullBlock(state.getOcclusionShape(null, BlockPos.ZERO)))
+			if (Block.isShapeFullBlock(state.getOcclusionShape(null, BlockPos.ZERO))) {
 				return true;
+			}
 		} catch (Throwable e) {
 		}
 		return false;

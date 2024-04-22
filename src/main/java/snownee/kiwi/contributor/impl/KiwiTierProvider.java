@@ -2,7 +2,6 @@ package snownee.kiwi.contributor.impl;
 
 import java.util.Calendar;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 import com.google.common.collect.Sets;
@@ -28,12 +27,7 @@ public class KiwiTierProvider extends JsonTierProvider {
 	private static List<String> getURLs() {
 		String cdn = "https://cdn.jsdelivr.net/gh/Snownee/Kiwi@master/contributors.json";
 		String github = "https://raw.githubusercontent.com/Snownee/Kiwi/master/contributors.json";
-		Locale locale = Locale.getDefault();
-		if ("CN".equals(locale.getCountry()) && Calendar.getInstance().get(Calendar.ZONE_OFFSET) == 28800000) {
-			return List.of(cdn, github);
-		} else {
-			return List.of(cdn, github);
-		}
+		return List.of(cdn, github);
 	}
 
 	private static boolean isInXmas() {
@@ -63,11 +57,13 @@ public class KiwiTierProvider extends JsonTierProvider {
 
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public CosmeticLayer createRenderer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer, String tier) {
+	public CosmeticLayer createRenderer(
+			RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer,
+			String tier) {
 		return switch (tier) {
 			case "2020q3" -> new PlanetLayer(entityRenderer);
 			case "2020q4" -> new FoxTailLayer(entityRenderer);
-			// case "2021q2" -> new ElectronicatLayer(entityRenderer);
+			// case "2021q1" -> new ElectronicatLayer(entityRenderer);
 			case "xmas" -> new SantaHatLayer(entityRenderer);
 			case "sunny_milk" -> new SunnyMilkLayer(entityRenderer);
 			default -> null;
