@@ -1,6 +1,7 @@
 package snownee.kiwi.config;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -27,7 +28,7 @@ public class KiwiConfigManager {
 	}
 
 	public static void init() {
-		Collections.sort(allConfigs, (a, b) -> a.getFileName().compareTo(b.getFileName()));
+		allConfigs.sort(Comparator.comparing(ConfigHandler::getFileName));
 		Set<String> settledMods = Sets.newHashSet();
 		for (ConfigHandler config : allConfigs) {
 			if (config.hasModules()) {
