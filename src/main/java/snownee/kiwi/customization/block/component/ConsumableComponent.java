@@ -1,14 +1,13 @@
 package snownee.kiwi.customization.block.component;
 
-import org.jetbrains.annotations.Nullable;
-import snownee.kiwi.customization.block.behavior.BlockBehaviorRegistry;
-import snownee.kiwi.customization.block.loader.KBlockComponents;
-import snownee.kiwi.customization.block.KBlockUtils;
+import java.util.Optional;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.ExtraCodecs;
@@ -21,22 +20,29 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.gameevent.GameEvent;
+import snownee.kiwi.customization.block.KBlockUtils;
+import snownee.kiwi.customization.block.behavior.BlockBehaviorRegistry;
+import snownee.kiwi.customization.block.loader.KBlockComponents;
+import snownee.kiwi.util.codec.CustomizationCodecs;
 
 public record ConsumableComponent(
 		IntegerProperty property,
-		@Nullable FoodProperties food,
-		@Nullable ResourceLocation stat) implements KBlockComponent, LayeredComponent {
+		Optional<FoodProperties> food,
+		Optional<ResourceKey<ResourceLocation>> stat) implements KBlockComponent, LayeredComponent {
 	public static final Codec<ConsumableComponent> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			ExtraCodecs.intRange(0, 1).fieldOf("min").forGetter(ConsumableComponent::minValue),
-			ExtraCodecs.POSITIVE_INT.fieldOf("max").forGetter(ConsumableComponent::maxValue)
+			ExtraCodecs.POSITIVE_INT.fieldOf("max").forGetter(ConsumableComponent::maxValue),
+			CustomizationCodecs.FOOD.optionalFieldOf("food").forGetter(ConsumableComponent::food),
+			ResourceKey.codec(Registries.CUSTOM_STAT).optionalFieldOf("stat").forGetter(ConsumableComponent::stat)
 	).apply(instance, ConsumableComponent::create));
 
-	public static ConsumableComponent create(int min, int max) {
-		return new ConsumableComponent(KBlockUtils.internProperty(IntegerProperty.create("uses", min, max)), null, null);
-	}
-
-	public ConsumableComponent withFood(FoodProperties food, @Nullable ResourceLocation stat) {
-		return new ConsumableComponent(property, food, stat);
+	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+	public static ConsumableComponent create(
+			int min,
+			int max,
+			Optional<FoodProperties> food,
+			Optional<ResourceKey<ResourceLocation>> stat) {
+		return new ConsumableComponent(KBlockUtils.internProperty(IntegerProperty.create("uses", min, max)), food, stat);
 	}
 
 	@Override
@@ -79,11 +85,10 @@ public record ConsumableComponent(
 			if (value == 0) {
 				return InteractionResult.PASS;
 			}
-			if (stat != null) {
-				pPlayer.awardStat(stat);
-			}
+			stat.map(ResourceKey::location).ifPresent(pPlayer::awardStat);
 			BlockPos pos = pHit.getBlockPos();
-			if (food != null) { //TODO block tag based drinking type
+			if (this.food.isPresent()) { //TODO block tag based drinking type
+				FoodProperties food = this.food.get();
 				if (!pPlayer.canEat(food.canAlwaysEat())) {
 					return InteractionResult.FAIL;
 				}

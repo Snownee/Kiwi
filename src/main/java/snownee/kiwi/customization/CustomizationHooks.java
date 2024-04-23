@@ -69,7 +69,6 @@ import net.minecraftforge.resource.ResourcePackLoader;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.customization.block.BlockFundamentals;
-import snownee.kiwi.customization.block.CustomizationRenderSettings;
 import snownee.kiwi.customization.block.GlassType;
 import snownee.kiwi.customization.block.KBlockSettings;
 import snownee.kiwi.customization.block.behavior.BlockBehaviorRegistry;
@@ -289,7 +288,10 @@ public final class CustomizationHooks {
 		blockFundamentals.placeChoices().attachChoicesB();
 		blockFundamentals.slotLinks().finish();
 		if (Platform.isPhysicalClient()) {
-			CustomizationRenderSettings.init(blockFundamentals.blocks(), new ClientProxy.Context(ClientModLoader.isLoading(), modEventBus));
+			CustomizationClient.afterRegister(
+					itemFundamentals.items(),
+					blockFundamentals.blocks(),
+					new ClientProxy.Context(ClientModLoader.isLoading(), modEventBus));
 		}
 		var tabs = OneTimeLoader.load(resourceManager, "kiwi/creative_tab", KCreativeTab.CODEC);
 		tabs.entrySet().stream().sorted(Comparator.comparingInt($ -> $.getValue()

@@ -9,6 +9,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
@@ -16,6 +17,7 @@ import snownee.kiwi.util.codec.CustomizationCodecs;
 import snownee.kiwi.util.codec.JavaOps;
 
 public record ItemDefinitionProperties(
+		Optional<ResourceLocation> colorProvider,
 		PartialVanillaProperties vanillaProperties) {
 
 	private static final ItemDefinitionProperties EMPTY;
@@ -26,11 +28,13 @@ public record ItemDefinitionProperties(
 				.getOrThrow(false, e -> {
 					throw new IllegalStateException("Failed to parse empty ItemDefinitionProperties: " + e);
 				});
-		EMPTY = new ItemDefinitionProperties(vanillaProperties);
+		EMPTY = new ItemDefinitionProperties(Optional.empty(), vanillaProperties);
 	}
 
 	public static MapCodec<ItemDefinitionProperties> mapCodec() {
 		return RecordCodecBuilder.mapCodec(instance -> instance.group(
+				CustomizationCodecs.strictOptionalField(ResourceLocation.CODEC, "color_provider")
+						.forGetter(ItemDefinitionProperties::colorProvider),
 				PartialVanillaProperties.MAP_CODEC.forGetter(ItemDefinitionProperties::vanillaProperties)
 		).apply(instance, ItemDefinitionProperties::new));
 	}
@@ -44,7 +48,9 @@ public record ItemDefinitionProperties(
 	}
 
 	public ItemDefinitionProperties merge(ItemDefinitionProperties templateProps) {
-		return new ItemDefinitionProperties(vanillaProperties.merge(templateProps.vanillaProperties));
+		return new ItemDefinitionProperties(
+				or(this.colorProvider, templateProps.colorProvider),
+				vanillaProperties.merge(templateProps.vanillaProperties));
 	}
 
 	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
