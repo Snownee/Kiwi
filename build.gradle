@@ -125,6 +125,7 @@ minecraft {
 def excludes = [
         "/assets/kiwi/blockstates",
         "/assets/kiwi/models",
+        "/assets/kaleidos",
         "/snownee/kiwi/test",
         "/data",
         "/.cache",

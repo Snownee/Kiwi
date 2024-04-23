@@ -25,6 +25,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
@@ -48,6 +49,7 @@ import net.minecraftforge.client.loading.ClientModLoader;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.event.AddPackFindersEvent;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -76,9 +78,9 @@ import snownee.kiwi.customization.block.behavior.SitManager;
 import snownee.kiwi.customization.block.component.KBlockComponent;
 import snownee.kiwi.customization.block.family.BlockFamilies;
 import snownee.kiwi.customization.block.loader.KBlockTemplate;
-import snownee.kiwi.customization.block.loader.KCreativeTab;
 import snownee.kiwi.customization.builder.BuilderRules;
 import snownee.kiwi.customization.item.ItemFundamentals;
+import snownee.kiwi.customization.item.loader.KCreativeTab;
 import snownee.kiwi.customization.item.loader.KItemTemplate;
 import snownee.kiwi.customization.placement.PlacementSystem;
 import snownee.kiwi.loader.Platform;
@@ -296,8 +298,12 @@ public final class CustomizationHooks {
 		var tabs = OneTimeLoader.load(resourceManager, "kiwi/creative_tab", KCreativeTab.CODEC);
 		tabs.entrySet().stream().sorted(Comparator.comparingInt($ -> $.getValue()
 				.order())).forEach(entry -> {
-			ResourceLocation key = entry.getKey();
 			KCreativeTab value = entry.getValue();
+			if (value.insert().isPresent()) {
+				insertToTab(modEventBus, value);
+				return;
+			}
+			ResourceLocation key = entry.getKey();
 			CreativeModeTab tab = AbstractModule.itemCategory(key.getNamespace(), key.getPath(), () -> BuiltInRegistries.ITEM.getOptional(
 							value.icon()).orElse(Items.BARRIER).getDefaultInstance())
 					.displayItems((params, output) -> {
@@ -315,6 +321,24 @@ public final class CustomizationHooks {
 		if (!Platform.isDataGen()) {
 			BuilderRules.reload(resourceManager);
 		}
+	}
+
+	private static void insertToTab(IEventBus modEventBus, KCreativeTab kCreativeTab) {
+		if (!Platform.isPhysicalClient()) {
+			return;
+		}
+		modEventBus.addListener((BuildCreativeModeTabContentsEvent event) -> {
+			if (event.getTabKey() != kCreativeTab.insert().orElseThrow()) {
+				return;
+			}
+			for (ResourceKey<Item> content : kCreativeTab.contents()) {
+				Item item = BuiltInRegistries.ITEM.get(content);
+				if (item == null) {
+					return;
+				}
+				event.accept(item);
+			}
+		});
 	}
 
 	public static ResourceManager collectKiwiPacks() {
