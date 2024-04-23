@@ -122,7 +122,7 @@ minecraft {
     }
 }
 
-def a = [
+def excludes = [
         "/assets/kiwi/blockstates",
         "/assets/kiwi/models",
         "/snownee/kiwi/test",
@@ -162,7 +162,7 @@ sourceSets {
 
 shadowJar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    exclude(a)
+    exclude(excludes)
     manifest { attributes(b) }
     relocate "org.yaml.snakeyaml", "${project.group}.shadowed.org.yaml.snakeyaml"
     relocate "com.ezylang.evalex", "${project.group}.shadowed.com.ezylang.evalex"
@@ -173,13 +173,13 @@ shadowJar {
 
 task APJar(type: Jar) {
     //include "/snownee/kiwi/build"
-    //exclude(a)
+    //exclude(excludes)
     from(sourceSets.processor.output)
     archiveName = "${archivesBaseName}-${version}-processor.${extension}"
 }
 
 task sourcesJar(type: Jar) {
-    //exclude(a)
+    //exclude(excludes)
     manifest { attributes(b) }
     from(sourceSets.main.allJava)
     archiveName = "${archivesBaseName}-${version}-sources.${extension}"
@@ -187,14 +187,14 @@ task sourcesJar(type: Jar) {
 
 task deobfJar(type: Jar) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    //exclude(a)
+    //exclude(excludes)
     manifest { attributes(b) }
     archiveName = "${archivesBaseName}-${version}-deobf.${extension}"
 }
 
 jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    exclude(a)
+    exclude(excludes)
     manifest { attributes(b) }
 }
 
@@ -207,7 +207,6 @@ reobf {
 }
 
 repositories {
-    maven { url "https://maven.shedaniel.me/" }
     maven { url "https://maven.su5ed.dev/releases" }
     maven { url "https://api.modrinth.com/maven" }
     maven {
@@ -216,11 +215,16 @@ repositories {
             includeGroup "curse.maven"
         }
     }
+    maven { url "https://maven.shedaniel.me/" }
     maven {
-        url 'https://jitpack.io'
-        content {
-            includeGroup "com.github.Snownee"
-        }
+        // location of the maven that hosts JEI files
+        name = "Progwml6 maven"
+        url = "https://dvs1.progwml6.com/files/maven/"
+    }
+    maven {
+        // location of a maven mirror for JEI files, as a fallback
+        name = "ModMaven"
+        url = "https://modmaven.dev"
     }
 }
 
@@ -242,13 +246,17 @@ dependencies {
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.3.2"))
+    implementation(jarJar("io.github.llamalad7:mixinextras-forge:0.3.2")) {
+        jarJar.ranged(it, "[0.3.2,)")
+    }
 
     implementation project(':annotation')
     annotationProcessor project(':annotation-processor')
 
     implementation fg.deobf("me.shedaniel.cloth:cloth-config-forge:${project.cloth_config_version}")
     library shadowCommon("org.yaml:snakeyaml:${project.snakeyaml_version}")
-    library shadowCommon("com.github.Snownee:EvalEx:main-SNAPSHOT")
+    library shadowCommon("com.ezylang:EvalEx:${project.evalex_version}")
 
     implementation fg.deobf("dev.architectury:architectury-forge:${project.architectury_version}")
     compileOnly fg.deobf("me.shedaniel:RoughlyEnoughItems-forge:${project.rei_version}")
@@ -258,6 +266,14 @@ dependencies {
     implementation fg.deobf("dev.su5ed.sinytra.fabric-api:fabric-api:0.86.1+1.7.2+1.20.1")
     implementation fg.deobf("dev.su5ed.sinytra.fabric-api:fabric-data-generation-api-v1:12.2.1")
     implementation fg.deobf("dev.su5ed.sinytra:fabric-loader:2.2.1+0.14.21+1.20.1")
+
+    implementation fg.deobf("maven.modrinth:jade:11.8.0")
+
+    // compile against the JEI API but do not include it at runtime
+    compileOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}"))
+    compileOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}"))
+    //// at runtime, use the full JEI jar for Forge
+    implementation(fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}"))
 }
 
 processResources {

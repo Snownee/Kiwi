@@ -1,29 +1,55 @@
 {
-  "required": true,
-  "minVersion": "0.8",
-  "package": "snownee.kiwi.mixin",
-  "compatibilityLevel": "JAVA_16",
-  "refmap": "kiwi.refmap.json",
-  "mixins": [
-    "AxeItemAccess",
-    "FireBlockAccess",
-    "GameDataMixin",
-    "HoeItemAccess",
-    "RecipeManagerAccess",
-    "RecipeManagerMixin",
-    "ReloadableServerResourcesMixin",
-    "ShapedRecipeAccess",
-    "ShovelItemAccess",
-    "TagsProviderAccess",
-    "VillagerAccess",
-    "WorkAtComposterAccess"
-  ],
-  "client": [
-    "client.ClientTelemetryManagerMixin",
-    "client.ScreenMixin",
-    "client.WorldOpenFlowsMixin"
-  ],
-  "injectors": {
-    "defaultRequire": 1
-  }
+	"required": true,
+	"minVersion": "0.8",
+	"package": "snownee.kiwi.mixin",
+	"plugin": "snownee.kiwi.mixin.MixinPlugin",
+	"compatibilityLevel": "JAVA_17",
+	"refmap": "kiwi.refmap.json",
+	"mixins": [
+		"AxeItemAccess",
+		"FireBlockAccess",
+		"GameDataMixin",
+		"HoeItemAccess",
+		"RecipeManagerAccess",
+		"RecipeManagerMixin",
+		"ReloadableServerResourcesMixin",
+		"ShapedRecipeAccess",
+		"ShovelItemAccess",
+		"TagsProviderAccess",
+		"VillagerAccess",
+		"WorkAtComposterAccess",
+		"customization.AbstractContainerMenuMixin",
+		"customization.BlockBehaviourMixin",
+		"customization.BlockEntityTypeMixin",
+		"customization.BlockMixin",
+		"customization.BlockPropertiesMixin",
+		"customization.BlockStateMixin",
+		"customization.BushBlockMixin",
+		"customization.HalfTransparentBlockMixin",
+		"customization.family.RecipeManagerMixin",
+		"customization.forge.BlockMixin",
+		"customization.forge.GameDataMixin",
+		"customization.placement.BlockItemGetPlacementStateMixin",
+		"customization.placement.BlockItemPlaceBlockMixin",
+		"customization.placement.PlayerMixin",
+		"customization.property_inject.BlockMixin",
+		"customization.property_inject.StateDefinitionBuilderMixin",
+		"customization.sit.DisplayMixin",
+		"customization.sit.EntityMixin"
+	],
+	"client": [
+		"client.ClientTelemetryManagerMixin",
+		"client.ScreenMixin",
+		"client.WorldOpenFlowsMixin",
+		"customization.client.DebugRendererMixin",
+		"customization.client.GameRendererMixin",
+		"customization.client.MultiPlayerGameModeMixin",
+		"customization.forge.BlockColorsAccess",
+		"customization.forge.ItemColorsAccess",
+		"customization.sit.ClientPacketListenerMixin",
+		"customization.sit.LocalPlayerMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
 }

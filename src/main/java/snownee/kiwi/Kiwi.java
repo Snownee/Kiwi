@@ -144,6 +144,7 @@ import snownee.kiwi.command.KiwiCommand;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfig.ConfigType;
 import snownee.kiwi.config.KiwiConfigManager;
+import snownee.kiwi.customization.CustomizationHooks;
 import snownee.kiwi.datagen.KiwiDataGen;
 import snownee.kiwi.loader.AnnotatedTypeLoader;
 import snownee.kiwi.loader.KiwiConfiguration;
@@ -185,11 +186,13 @@ public class Kiwi {
 			throw new RuntimeException(e);
 		}
 
+		CustomizationHooks.init();
+
 		Map<String, KiwiAnnotationData> classOptionalMap = Maps.newHashMap();
 		String dist = Platform.isPhysicalClient() ? "client" : "server";
 		List<String> mods = ModList.get().getMods().stream().map(IModInfo::getModId).toList();
 		for (String mod : mods) {
-			if ("minecraft".equals(mod) || "forge".equals(mod)) {
+			if (ResourceLocation.DEFAULT_NAMESPACE.equals(mod) || "forge".equals(mod)) {
 				continue;
 			}
 			AnnotatedTypeLoader loader = new AnnotatedTypeLoader(mod);
