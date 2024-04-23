@@ -52,8 +52,8 @@ import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import snownee.kiwi.Kiwi;
+import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.KiwiModule;
-import snownee.kiwi.customization.CustomizationClientConfig;
 import snownee.kiwi.customization.CustomizationRegistries;
 import snownee.kiwi.customization.block.KBlockSettings;
 import snownee.kiwi.customization.block.component.KBlockComponent;
@@ -125,7 +125,7 @@ public class ExportBlocksCommand {
 			row.put("BaseComponent", "");
 			row.put("ExtraComponents", "");
 			KBlockSettings.MoreInfo fallbackMoreInfo = new KBlockSettings.MoreInfo(null, null, null);
-			if (CustomizationClientConfig.exportBlocksMore) {
+			if (KiwiClientConfig.exportBlocksMore) {
 				row.put("Shape", "");
 				row.put("CollisionShape", "");
 				row.put("InteractionShape", "");
@@ -217,7 +217,7 @@ public class ExportBlocksCommand {
 				} else {
 					row.put("ExtraComponents", toYaml(componentsCodec, components, null));
 				}
-				if (CustomizationClientConfig.exportBlocksMore) {
+				if (KiwiClientConfig.exportBlocksMore) {
 					KBlockSettings.MoreInfo moreInfo = MORE_INFO.getOrDefault(settings, fallbackMoreInfo);
 					row.put("Shape", Optional.ofNullable(moreInfo.shape()).map(Object::toString).orElse(""));
 					row.put("CollisionShape", Optional.ofNullable(moreInfo.collisionShape()).map(Object::toString).orElse(""));

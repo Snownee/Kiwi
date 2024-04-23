@@ -22,6 +22,7 @@ import snownee.kiwi.customization.CustomizationClient;
 import snownee.kiwi.customization.block.family.BlockFamilies;
 import snownee.kiwi.customization.block.family.BlockFamily;
 import snownee.kiwi.customization.network.CApplyBuilderRulePacket;
+import snownee.kiwi.util.ClientProxy;
 import snownee.kiwi.util.KHolder;
 
 public class BuildersButton {
@@ -68,7 +69,7 @@ public class BuildersButton {
 			return true;
 		}
 		if (screen instanceof AbstractContainerScreen<?> containerScreen && containerScreen.getMenu().getCarried().isEmpty()) {
-			Slot slot = CustomizationClient.getSlotUnderMouse(containerScreen);
+			Slot slot = ClientProxy.getSlotUnderMouse(containerScreen);
 			if (slot == null || !slot.hasItem() || !slot.allowModification(mc.player)) {
 				return false;
 			}
@@ -79,7 +80,7 @@ public class BuildersButton {
 			if (families.isEmpty()) {
 				return false;
 			}
-			CustomizationClient.pushScreen(mc, new ConvertScreen(screen, slot, slot.index, families));
+			ClientProxy.pushScreen(mc, new ConvertScreen(screen, slot, slot.index, families));
 			return true;
 		}
 		if (screen != null) {

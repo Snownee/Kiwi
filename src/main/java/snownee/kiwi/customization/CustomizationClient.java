@@ -1,18 +1,13 @@
 package snownee.kiwi.customization;
 
-import org.jetbrains.annotations.Nullable;
-
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.world.inventory.Slot;
 import net.minecraftforge.client.event.CustomizeGuiOverlayEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.client.event.RenderHighlightEvent;
@@ -33,13 +28,14 @@ import snownee.kiwi.customization.command.ReloadSlotsCommand;
 import snownee.kiwi.util.SmartKey;
 
 public final class CustomizationClient {
-	public static final SmartKey buildersButtonKey = new SmartKey.Builder("key.kiwi.builders_button", KeyMapping.CATEGORY_GAMEPLAY)
-			.key(InputConstants.getKey("key.mouse.4"))
-			.onLongPress(BuildersButton::onLongPress)
-			.onShortPress(BuildersButton::onShortPress)
-			.build();
+	public static SmartKey buildersButtonKey;
 
 	public static void init() {
+		buildersButtonKey = new SmartKey.Builder("key.kiwi.builders_button", KeyMapping.CATEGORY_GAMEPLAY)
+				.key(InputConstants.getKey("key.mouse.4"))
+				.onLongPress(BuildersButton::onLongPress)
+				.onShortPress(BuildersButton::onShortPress)
+				.build();
 		var modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 		var forgeEventBus = MinecraftForge.EVENT_BUS;
 		modEventBus.addListener((RegisterKeyMappingsEvent event) -> {
@@ -104,12 +100,4 @@ public final class CustomizationClient {
 		});
 	}
 
-	public static void pushScreen(Minecraft mc, Screen screen) {
-		mc.pushGuiLayer(screen);
-	}
-
-	@Nullable
-	public static Slot getSlotUnderMouse(AbstractContainerScreen<?> containerScreen) {
-		return containerScreen.getSlotUnderMouse();
-	}
 }
