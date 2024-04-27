@@ -296,16 +296,23 @@ public final class CustomizationHooks {
 					new ClientProxy.Context(ClientModLoader.isLoading(), modEventBus));
 		}
 		var tabs = OneTimeLoader.load(resourceManager, "kiwi/creative_tab", KCreativeTab.CODEC);
-		tabs.entrySet().stream().sorted(Comparator.comparingInt($ -> $.getValue()
-				.order())).forEach(entry -> {
+		List<Map.Entry<ResourceLocation, KCreativeTab>> newTabs = tabs.entrySet().stream().sorted(Comparator.comparingInt($ -> $.getValue()
+				.order())).filter(entry -> {
 			KCreativeTab value = entry.getValue();
 			if (value.insert().isPresent()) {
 				insertToTab(modEventBus, value);
-				return;
+				return false;
 			}
+			return true;
+		}).toList();
+		for (int i = 0; i < newTabs.size(); i++) {
+			Map.Entry<ResourceLocation, KCreativeTab> entry = newTabs.get(i);
 			ResourceLocation key = entry.getKey();
-			CreativeModeTab tab = AbstractModule.itemCategory(key.getNamespace(), key.getPath(), () -> BuiltInRegistries.ITEM.getOptional(
-							value.icon()).orElse(Items.BARRIER).getDefaultInstance())
+			KCreativeTab value = entry.getValue();
+			CreativeModeTab.Builder tab = AbstractModule.itemCategory(
+							key.getNamespace(),
+							key.getPath(),
+							() -> BuiltInRegistries.ITEM.getOptional(value.icon()).orElse(Items.BARRIER).getDefaultInstance())
 					.displayItems((params, output) -> {
 						output.acceptAll(value.contents()
 								.stream()
@@ -313,10 +320,15 @@ public final class CustomizationHooks {
 								.filter(Objects::nonNull)
 								.map(Item::getDefaultInstance)
 								.toList());
-					})
-					.build();
-			Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, key, tab);
-		});
+					});
+			if (i > 0) {
+				tab.withTabsBefore(newTabs.get(i - 1).getKey());
+			}
+			if (i < newTabs.size() - 1) {
+				tab.withTabsAfter(newTabs.get(i + 1).getKey());
+			}
+			Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, key, tab.build());
+		}
 		BlockFamilies.reload(resourceManager); // might be useful for data-gen
 		if (!Platform.isDataGen()) {
 			BuilderRules.reload(resourceManager);
