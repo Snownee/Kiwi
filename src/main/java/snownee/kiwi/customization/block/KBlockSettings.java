@@ -25,7 +25,6 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import snownee.kiwi.KiwiGO;
 import snownee.kiwi.customization.block.behavior.CanSurviveHandler;
 import snownee.kiwi.customization.block.component.DirectionalComponent;
 import snownee.kiwi.customization.block.component.HorizontalComponent;
@@ -123,14 +122,17 @@ public class KBlockSettings {
 		return state;
 	}
 
-	public BlockState getStateForPlacement(BlockState state, BlockPlaceContext context) {
+	public BlockState getStateForPlacement(BlockState blockState, BlockPlaceContext context) {
 		for (KBlockComponent component : components.values()) {
-			state = component.getStateForPlacement(this, state, context);
-			if (state == null || !state.is(state.getBlock())) {
-				return state;
+			blockState = component.getStateForPlacement(this, blockState, context);
+			if (blockState == null || !blockState.is(blockState.getBlock())) {
+				return blockState;
 			}
 		}
-		return state;
+		if (placeChoices != null && (!placeChoices.skippable() || !context.isSecondaryUseActive())) {
+			blockState = placeChoices.getStateForPlacement(context.getLevel(), context.getClickedPos(), blockState);
+		}
+		return blockState;
 	}
 
 	public BlockState updateShape(

@@ -1,0 +1,35 @@
+target: '@kaleidos:chair'
+transform_with: facing
+flow:
+  - when:
+      west:
+        type: has_tags
+        tags:
+          - '*kaleidos.chair:side'
+          - '@facing'
+      east:
+        type: has_tags
+        tags:
+          - '*kaleidos.chair:side'
+          - '@facing'
+    set_properties:
+      type: both
+    end: true
+  - when:
+      west:
+        type: has_tags
+        tags:
+          - '*kaleidos.chair:side'
+          - '@facing'
+    set_properties:
+      type: left
+    end: true
+  - when:
+      east:
+        type: has_tags
+        tags:
+          - '*kaleidos.chair:side'
+          - '@facing'
+    set_properties:
+      type: right
+    end: true

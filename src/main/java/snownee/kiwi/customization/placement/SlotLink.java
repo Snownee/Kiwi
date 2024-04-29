@@ -7,8 +7,6 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
-import snownee.kiwi.util.codec.CustomizationCodecs;
-import snownee.kiwi.customization.block.KBlockUtils;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -18,12 +16,17 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import snownee.kiwi.Kiwi;
+import snownee.kiwi.customization.block.KBlockSettings;
+import snownee.kiwi.customization.block.KBlockUtils;
 import snownee.kiwi.loader.Platform;
+import snownee.kiwi.util.codec.CustomizationCodecs;
 
 public record SlotLink(
 		String from,
@@ -116,16 +119,25 @@ public record SlotLink(
 		).apply(instance, TagTest::new)), ExtraCodecs.NON_EMPTY_STRING.xmap(s -> new TagTest(s, TagTestOperator.EQUAL), TagTest::key));
 	}
 
-	public record ResultAction(Map<String, String> setProperties) {
-		public static final Codec<ResultAction> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				Codec.unboundedMap(Codec.STRING, Codec.STRING).fieldOf("set_properties").forGetter(ResultAction::setProperties)
+	public record ResultAction(Map<String, String> setProperties, boolean reflow) {
+		public static final MapCodec<ResultAction> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+				CustomizationCodecs.strictOptionalField(Codec.unboundedMap(Codec.STRING, Codec.STRING), "set_properties", Map.of())
+						.forGetter(ResultAction::setProperties),
+				Codec.BOOL.optionalFieldOf("reflow", false).forGetter(ResultAction::reflow)
 		).apply(instance, ResultAction::new));
+		public static final Codec<ResultAction> CODEC = MAP_CODEC.codec();
 
-		private static final ResultAction EMPTY = new ResultAction(Map.of());
+		private static final ResultAction EMPTY = new ResultAction(Map.of(), false);
 
-		public BlockState apply(BlockState blockState) {
+		public BlockState apply(Level level, BlockPos pos, BlockState blockState) {
 			for (Map.Entry<String, String> entry : setProperties.entrySet()) {
 				blockState = KBlockUtils.setValueByString(blockState, entry.getKey(), entry.getValue());
+			}
+			if (reflow) {
+				KBlockSettings settings = KBlockSettings.of(blockState.getBlock());
+				if (settings != null && settings.placeChoices != null) {
+					blockState = settings.placeChoices.getStateForPlacement(level, pos, blockState);
+				}
 			}
 			return blockState;
 		}
@@ -146,7 +158,7 @@ public record SlotLink(
 		if (slots1.isEmpty() || slots2.isEmpty()) {
 			return null;
 		}
-		int maxInterest = 0;
+		int maxInterest = -1;
 		SlotLink matchedLink = null;
 		boolean isUpright = false;
 		for (PlaceSlot slot1 : slots1) {

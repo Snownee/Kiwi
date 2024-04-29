@@ -99,6 +99,8 @@ public class PlacementSystem {
 		List<PlaceMatchResult> results = Lists.newArrayList();
 		boolean waterLoggable = blockState.hasProperty(BlockStateProperties.WATERLOGGED);
 		boolean hasWater = waterLoggable && blockState.getValue(BlockStateProperties.WATERLOGGED);
+		BlockState noWaterBlockState = hasWater ? blockState.setValue(BlockStateProperties.WATERLOGGED, false) : blockState;
+		PlaceMatchResult originalResult = null;
 		for (BlockState possibleState : blockState.getBlock().getStateDefinition().getPossibleStates()) {
 			if (waterLoggable && hasWater != possibleState.getValue(BlockStateProperties.WATERLOGGED)) {
 				continue;
@@ -113,6 +115,9 @@ public class PlacementSystem {
 			PlaceMatchResult result = getPlaceMatchResultAt(possibleState, neighborSlots, bonusInterest);
 			if (result != null) {
 				results.add(result);
+				if (possibleState == noWaterBlockState) {
+					originalResult = result;
+				}
 			}
 		}
 		if (results.isEmpty()) {
@@ -124,8 +129,8 @@ public class PlacementSystem {
 		}
 		results.sort(null);
 		int resultIndex = 0;
-		if (results.size() > 1 && context.getPlayer() instanceof KPlayer player) {
-			int maxInterest = results.get(0).interest();
+		int maxInterest = results.get(0).interest();
+		if (maxInterest > 0 && results.size() > 1 && context.getPlayer() instanceof KPlayer player) {
 			for (int i = 1; i < results.size(); i++) {
 				if (results.get(i).interest() < maxInterest) {
 					break;
@@ -136,8 +141,11 @@ public class PlacementSystem {
 				resultIndex = player.kiwi$getPlaceCount() % (resultIndex + 1);
 			}
 		}
-		PlaceMatchResult result = results.get(resultIndex);
-		if (debug && !level.isClientSide) {
+		PlaceMatchResult result = maxInterest == 0 ? originalResult : results.get(resultIndex);
+		if (result == null) {
+			return blockState;
+		}
+		if (debug && maxInterest > 0 && !level.isClientSide) {
 			mutable.setWithOffset(pos, Direction.UP);
 			Kiwi.LOGGER.info("Interest: %d".formatted(result.interest()));
 			results.forEach($ -> {
@@ -150,7 +158,7 @@ public class PlacementSystem {
 		}
 		BlockState resultState = result.blockState();
 		for (SlotLink.MatchResult link : result.links()) {
-			resultState = link.onLinkFrom().apply(resultState);
+			resultState = link.onLinkFrom().apply(level, pos, resultState);
 		}
 		RESULT_CONTEXT.put(context, result);
 		return resultState;
@@ -163,8 +171,8 @@ public class PlacementSystem {
 			Map<Direction, Collection<PlaceSlot>> theirSlotsMap,
 			int bonusInterest) {
 		int interest = 0;
-		List<SlotLink.MatchResult> results = null;
-		List<Vec3i> offsets = null;
+		List<SlotLink.MatchResult> results = List.of();
+		List<Vec3i> offsets = List.of();
 		for (Direction side : Util.DIRECTIONS) {
 			Collection<PlaceSlot> theirSlots = theirSlotsMap.get(side);
 			if (theirSlots == null) {
@@ -175,7 +183,7 @@ public class PlacementSystem {
 			if (result != null) {
 				SlotLink link = result.link();
 				interest += link.interest();
-				if (results == null) {
+				if (results.isEmpty()) {
 					results = Lists.newArrayListWithExpectedSize(theirSlotsMap.size());
 					offsets = Lists.newArrayListWithExpectedSize(theirSlotsMap.size());
 				}
@@ -183,7 +191,7 @@ public class PlacementSystem {
 				offsets.add(side.getNormal());
 			}
 		}
-		if (interest <= 0) {
+		if (interest < 0) {
 			return null;
 		}
 		return new PlaceMatchResult(blockState, interest + bonusInterest, results, offsets);
@@ -200,7 +208,7 @@ public class PlacementSystem {
 			BlockPos theirPos = mutable.setWithOffset(context.getClickedPos(), result.offsets().get(i));
 			BlockState theirState = context.getLevel().getBlockState(theirPos);
 			SlotLink.MatchResult link = result.links().get(i);
-			theirState = link.onLinkTo().apply(theirState);
+			theirState = link.onLinkTo().apply(context.getLevel(), theirPos, theirState);
 			context.getLevel().setBlock(theirPos, theirState, 11);
 		}
 		Player player = context.getPlayer();
@@ -224,7 +232,7 @@ public class PlacementSystem {
 			}
 			SlotLink.MatchResult result = SlotLink.find(oldState, neighborState, direction);
 			if (result != null) {
-				neighborState = result.onUnlinkTo().apply(neighborState);
+				neighborState = result.onUnlinkTo().apply(level, mutable, neighborState);
 				level.setBlockAndUpdate(mutable, neighborState);
 			}
 		}

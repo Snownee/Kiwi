@@ -1,8 +1,6 @@
 package snownee.kiwi.customization.block;
 
 import org.jetbrains.annotations.Nullable;
-import snownee.kiwi.customization.block.KBlockSettings;
-
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.Interner;

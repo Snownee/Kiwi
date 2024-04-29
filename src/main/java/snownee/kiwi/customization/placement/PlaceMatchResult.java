@@ -2,8 +2,6 @@ package snownee.kiwi.customization.placement;
 
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
-
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.block.state.BlockState;
 
