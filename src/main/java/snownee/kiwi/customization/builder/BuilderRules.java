@@ -32,12 +32,12 @@ public class BuilderRules {
 //		BlockFamily family = Objects.requireNonNull(BlockFamilies.get(new ResourceLocation("xkdeco:black_roof_end")));
 //		families.put(new ResourceLocation("test"), new ReplaceBuilderRule(Map.of(family, family), blockSpread));
 
-		byId = ImmutableMap.copyOf(families.entrySet()
+		byId = families.entrySet()
 				.stream()
 				.map(e -> new KHolder<>(e.getKey(), e.getValue()))
 				.collect(ImmutableMap.toImmutableMap(
 						KHolder::key,
-						Function.identity())));
+						Function.identity()));
 		ImmutableListMultimap.Builder<Block, KHolder<BuilderRule>> byBlockBuilder = ImmutableListMultimap.builder();
 		for (var holder : byId.values()) {
 			holder.value().relatedBlocks().forEach(block -> byBlockBuilder.put(block, holder));

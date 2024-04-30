@@ -23,7 +23,8 @@ public class ReloadFamiliesAndRulesCommand {
 	private static int reload(CommandSourceStack source) {
 		Stopwatch stopwatch = Stopwatch.createStarted();
 		ResourceManager resourceManager = CustomizationHooks.collectKiwiPacks();
-		int familyCount = BlockFamilies.reload(resourceManager);
+		BlockFamilies.reloadResources(resourceManager);
+		int familyCount = BlockFamilies.reloadTags();
 		int ruleCount = BuilderRules.reload(resourceManager);
 		long reloadTime = stopwatch.elapsed().toMillis();
 		Kiwi.LOGGER.info("Reload time: %dms".formatted(reloadTime));

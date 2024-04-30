@@ -50,6 +50,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.event.AddPackFindersEvent;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
+import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -91,6 +92,7 @@ import snownee.kiwi.util.resource.RequiredFolderRepositorySource;
 public final class CustomizationHooks {
 	private static final Set<String> namespaces = Sets.newLinkedHashSet();
 	private static boolean enabled = true;
+	public static boolean kswitch = Platform.isModLoaded("kswitch") || !Platform.isProduction();
 
 	private CustomizationHooks() {
 	}
@@ -233,6 +235,9 @@ public final class CustomizationHooks {
 				event.setCanceled(true);
 			}
 		});
+		forgeEventBus.addListener((TagsUpdatedEvent event) -> {
+			BlockFamilies.reloadTags();
+		});
 		if (Platform.isPhysicalClient()) {
 			CustomizationClient.init();
 		}
@@ -329,7 +334,7 @@ public final class CustomizationHooks {
 			}
 			Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, key, tab.build());
 		}
-		BlockFamilies.reload(resourceManager); // might be useful for data-gen
+		BlockFamilies.reloadResources(resourceManager); // might be useful for data-gen
 		if (!Platform.isDataGen()) {
 			BuilderRules.reload(resourceManager);
 		}

@@ -3,20 +3,23 @@ package snownee.kiwi.customization.block.family;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import snownee.kiwi.customization.CustomizationHooks;
 import snownee.kiwi.util.KHolder;
 import snownee.kiwi.util.resource.OneTimeLoader;
 
 public class BlockFamilies {
 	private static ImmutableListMultimap<Item, KHolder<BlockFamily>> byItem = ImmutableListMultimap.of();
+	private static ImmutableList<KHolder<BlockFamily>> fromResources = ImmutableList.of();
 	private static ImmutableMap<ResourceLocation, KHolder<BlockFamily>> byId = ImmutableMap.of();
 	private static ImmutableListMultimap<Item, KHolder<BlockFamily>> byStonecutterSource = ImmutableListMultimap.of();
 
@@ -35,17 +38,28 @@ public class BlockFamilies {
 		return byStonecutterSource.get(item);
 	}
 
-	public static int reload(ResourceManager resourceManager) {
+	public static void reloadResources(ResourceManager resourceManager) {
 		Map<ResourceLocation, BlockFamily> families = OneTimeLoader.load(resourceManager, "kiwi/family", BlockFamily.CODEC);
-		byId = ImmutableMap.copyOf(families.entrySet()
+		fromResources = families.entrySet()
 				.stream()
 				.map(e -> new KHolder<>(e.getKey(), e.getValue()))
-				.collect(ImmutableMap.toImmutableMap(
-						KHolder::key,
-						Function.identity())));
+				.collect(ImmutableList.toImmutableList());
+	}
+
+	public static int reloadTags() {
+		reloadComplete(List.of()); // we need the byItem cache for automatically generating families
+		if (CustomizationHooks.kswitch) {
+			reloadComplete(new BlockFamilyInferrer().generate());
+		}
+		return byId.size();
+	}
+
+	private static void reloadComplete(Collection<KHolder<BlockFamily>> additional) {
+		ImmutableMap.Builder<ResourceLocation, KHolder<BlockFamily>> byIdBuilder = ImmutableMap.builder();
 		ImmutableListMultimap.Builder<Item, KHolder<BlockFamily>> byItemBuilder = ImmutableListMultimap.builder();
 		ImmutableListMultimap.Builder<Item, KHolder<BlockFamily>> byStonecutterBuilder = ImmutableListMultimap.builder();
-		for (var family : byId.values()) {
+		for (var family : Iterables.concat(fromResources, additional)) {
+			byIdBuilder.put(family.key(), family);
 			for (var item : family.value().itemHolders()) {
 				byItemBuilder.put(item.value(), family);
 			}
@@ -54,10 +68,10 @@ public class BlockFamilies {
 				byStonecutterBuilder.put(stonecutterFrom, family);
 			}
 		}
+		byId = byIdBuilder.build();
 		byItem = byItemBuilder.build();
 		byStonecutterSource = byStonecutterBuilder.build();
 		StonecutterRecipeMaker.invalidateCache();
-		return byId.size();
 	}
 
 	public static BlockFamily get(ResourceLocation id) {
