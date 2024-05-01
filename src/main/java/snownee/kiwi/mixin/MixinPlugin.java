@@ -7,15 +7,19 @@ import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.LoadingModList;
 import snownee.kiwi.customization.CustomizationServiceFinder;
 
 public class MixinPlugin implements IMixinConfigPlugin {
 	private boolean customization;
+	private boolean persistentCreativeInventory;
 
 	@Override
 	public void onLoad(String mixinPackage) {
 		customization = CustomizationServiceFinder.shouldEnable(LoadingModList.get().getMods());
+		persistentCreativeInventory =
+				customization || LoadingModList.get().getModFileById("persistentcreativeinventory") != null || !FMLEnvironment.production;
 	}
 
 	@Override
@@ -27,6 +31,9 @@ public class MixinPlugin implements IMixinConfigPlugin {
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
 		if (mixinClassName.startsWith("snownee.kiwi.mixin.customization.")) {
 			return customization;
+		}
+		if (mixinClassName.equals("snownee.kiwi.mixin.client.CreativeModeInventoryScreenMixin")) {
+			return persistentCreativeInventory;
 		}
 		return true;
 	}

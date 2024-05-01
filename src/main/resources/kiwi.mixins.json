@@ -39,6 +39,7 @@
 	],
 	"client": [
 		"client.ClientTelemetryManagerMixin",
+		"client.CreativeModeInventoryScreenMixin",
 		"client.ScreenMixin",
 		"client.WorldOpenFlowsMixin",
 		"customization.client.DebugRendererMixin",
