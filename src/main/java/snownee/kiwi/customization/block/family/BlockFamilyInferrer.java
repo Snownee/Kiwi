@@ -61,7 +61,7 @@ public class BlockFamilyInferrer {
 			}
 			if (key.getPath().endsWith("_log") && holder.is(BlockTags.LOGS)) {
 				ResourceLocation id = key.withPath(key.getPath().substring(0, key.getPath().length() - 4));
-				fromTemplates(id, logs);
+				fromTemplates(id, logs, true);
 				continue;
 			}
 			if (key.getPath().endsWith("_stairs") && block instanceof StairBlock stairBlock) {
@@ -79,7 +79,7 @@ public class BlockFamilyInferrer {
 					ResourceLocation altId = id.withPath(id.getPath().substring(0, id.getPath().length() - 6));
 					blocks.addAll(collectBlocks(altId, variants));
 				}
-				family(id, blocks);
+				family(id, blocks, true);
 			}
 		}
 		if (!Platform.isProduction()) {
@@ -103,12 +103,12 @@ public class BlockFamilyInferrer {
 		return blocks;
 	}
 
-	private void fromTemplates(ResourceLocation id, List<String> templates) {
+	private void fromTemplates(ResourceLocation id, List<String> templates, boolean cascading) {
 		List<Holder<Block>> blocks = collectBlocks(id, templates);
 		if (blocks.size() < 2) {
 			return;
 		}
-		family(id, blocks);
+		family(id, blocks, cascading);
 	}
 
 	private void generateColored(ResourceLocation id, List<String> templates) {
@@ -116,13 +116,13 @@ public class BlockFamilyInferrer {
 		if (blocks.size() != templates.size()) {
 			return;
 		}
-		family(id, blocks);
+		family(id, blocks, false);
 	}
 
-	private void family(ResourceLocation id, List<Holder<Block>> blocks) {
+	private void family(ResourceLocation id, List<Holder<Block>> blocks, boolean cascading) {
 		KHolder<BlockFamily> family = new KHolder<>(
 				id.withPrefix("auto/"),
-				new BlockFamily(blocks, List.of(), List.of(), false, Items.AIR, 1, true));
+				new BlockFamily(blocks, List.of(), List.of(), false, Items.AIR, 1, true, cascading));
 		families.add(family);
 		family.value().blocks().forEach(capturedBlocks::add);
 	}

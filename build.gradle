@@ -193,10 +193,15 @@ task deobfJar(type: Jar) {
     archiveName = "${archivesBaseName}-${version}-deobf.${extension}"
 }
 
+tasks.jarJar.configure {
+    finalizedBy('reobfJarJar')
+}
+
 jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     exclude(excludes)
     manifest { attributes(b) }
+    finalizedBy('reobfJar')
 }
 
 artifacts {
@@ -283,10 +288,6 @@ processResources {
     }
 }
 
-jar {
-    finalizedBy('reobfJar')
-}
-
 publishing {
     publications {
         mavenJava(MavenPublication) {
@@ -309,7 +310,7 @@ unifiedPublishing {
         gameVersions = ["1.20.1"]
         gameLoaders = ["forge", "neoforge"]
 
-        mainPublication tasks.jar // Declares the publicated jar
+        mainPublication tasks.jarJar // Declares the publicated jar
 
         if (System.getenv("CURSE_TOKEN") != null) {
             curseforge {

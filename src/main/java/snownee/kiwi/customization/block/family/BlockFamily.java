@@ -34,7 +34,8 @@ public class BlockFamily {
 			Codec.BOOL.optionalFieldOf("stonecutter_exchange", false).forGetter(BlockFamily::stonecutterExchange),
 			BuiltInRegistries.ITEM.byNameCodec().optionalFieldOf("stonecutter_from", Items.AIR).forGetter(BlockFamily::stonecutterSource),
 			Codec.intRange(1, 64).optionalFieldOf("stonecutter_from_multiplier", 1).forGetter(BlockFamily::stonecutterSourceMultiplier),
-			Codec.BOOL.optionalFieldOf("quick_switch", false).forGetter(BlockFamily::quickSwitch)
+			Codec.BOOL.optionalFieldOf("quick_switch", false).forGetter(BlockFamily::quickSwitch),
+			Codec.BOOL.optionalFieldOf("cascading_switch", false).forGetter(BlockFamily::cascadingSwitch)
 	).apply(instance, BlockFamily::new));
 
 	private final List<Holder<Block>> blocks;
@@ -44,6 +45,7 @@ public class BlockFamily {
 	private final Item stonecutterFrom;
 	private final int stonecutterFromMultiplier;
 	private final boolean quickSwitch;
+	private final boolean cascadingSwitch;
 	private Ingredient ingredient;
 	private Ingredient ingredientInViewer;
 
@@ -54,7 +56,8 @@ public class BlockFamily {
 			boolean stonecutterExchange,
 			Item stonecutterFrom,
 			int stonecutterFromMultiplier,
-			boolean quickSwitch) {
+			boolean quickSwitch,
+			boolean cascadingSwitch) {
 		this.blocks = blocks;
 		this.items = Stream.concat(blocks.stream()
 				.map(Holder::value)
@@ -69,6 +72,7 @@ public class BlockFamily {
 		this.stonecutterFrom = stonecutterFrom;
 		this.stonecutterFromMultiplier = stonecutterFromMultiplier;
 		this.quickSwitch = quickSwitch;
+		this.cascadingSwitch = cascadingSwitch;
 		Preconditions.checkArgument(!blocks.isEmpty() || !items.isEmpty(), "No entries found in family");
 		Preconditions.checkArgument(
 				blocks().distinct().count() == this.blocks.size(),
@@ -116,8 +120,12 @@ public class BlockFamily {
 		return stonecutterFrom == Items.AIR ? Ingredient.EMPTY : Ingredient.of(stonecutterFrom);
 	}
 
-	public Boolean quickSwitch() {
+	public boolean quickSwitch() {
 		return quickSwitch;
+	}
+
+	private boolean cascadingSwitch() {
+		return cascadingSwitch;
 	}
 
 	protected Ingredient toIngredient(List<Holder<Item>> items) {
