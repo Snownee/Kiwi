@@ -17,11 +17,15 @@ public class PanelLayout {
 	private final Vector2i lastPos = new Vector2i();
 	//	private final Vector2f anchor = new Vector2f(0, 0);
 	private final Rect2i bounds = new Rect2i(0, 0, 0, 0);
-	private final int padding;
+	private final int[] padding;
 	private final List<AbstractWidget> widgets = Lists.newArrayList();
 
 	public PanelLayout(int padding) {
-		this.padding = padding;
+		this(padding, padding, padding, padding);
+	}
+
+	public PanelLayout(int left, int top, int right, int bottom) {
+		padding = new int[]{left, top, right, bottom};
 	}
 
 	public void addWidget(AbstractWidget widget) {
@@ -45,13 +49,13 @@ public class PanelLayout {
 			maxX = Math.max(maxX, widget.getX() + widget.getWidth());
 			maxY = Math.max(maxY, widget.getY() + widget.getHeight());
 		}
-		bounds.setWidth(maxX - minX + padding * 2);
-		bounds.setHeight(maxY - minY + padding * 2);
-		bounds.setX(bounds.getX() - padding);
-		bounds.setY(bounds.getY() - padding);
+		bounds.setWidth(maxX - minX + padding[0] + padding[2]);
+		bounds.setHeight(maxY - minY + padding[1] + padding[3]);
+		bounds.setX(bounds.getX() - padding[0]);
+		bounds.setY(bounds.getY() - padding[1]);
 //		this.anchor.set(anchor);
 		this.pos.set(pos);
-		this.lastPos.set((int) (bounds.getWidth() * anchor.x) - padding, (int) (bounds.getHeight() * anchor.y) - padding);
+		this.lastPos.set((int) (bounds.getWidth() * anchor.x) - padding[0], (int) (bounds.getHeight() * anchor.y) - padding[1]);
 		update();
 	}
 
@@ -73,7 +77,11 @@ public class PanelLayout {
 		bounds.setY(bounds.getY() + deltaY);
 	}
 
-	public Rect2i getBounds() {
+	public Rect2i bounds() {
 		return bounds;
+	}
+
+	public List<AbstractWidget> widgets() {
+		return widgets;
 	}
 }

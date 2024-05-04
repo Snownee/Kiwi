@@ -1,11 +1,17 @@
 package snownee.kiwi.customization.network;
 
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
 import org.jetbrains.annotations.Nullable;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
@@ -20,22 +26,26 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import snownee.kiwi.customization.block.family.BlockFamilies;
 import snownee.kiwi.customization.block.family.BlockFamily;
-import snownee.kiwi.util.KHolder;
 import snownee.kiwi.network.KiwiPacket;
 import snownee.kiwi.network.PacketHandler;
+import snownee.kiwi.util.KHolder;
 
 @KiwiPacket(value = "convert_item", dir = KiwiPacket.Direction.PLAY_TO_SERVER)
 public class CConvertItemPacket extends PacketHandler {
+	public static final int MAX_STEPS = 4;
 	public static CConvertItemPacket I;
 
-	public static void send(boolean inContainer, int slot, KHolder<BlockFamily> family, Item from, Item to, boolean convertOne) {
+	public static void send(boolean inContainer, int slot, Entry entry, Item from, boolean convertOne) {
 		I.sendToServer(buf -> {
 			buf.writeBoolean(inContainer);
 			buf.writeBoolean(convertOne);
 			buf.writeVarInt(slot);
-			buf.writeResourceLocation(family.key());
 			buf.writeId(BuiltInRegistries.ITEM, from);
-			buf.writeId(BuiltInRegistries.ITEM, to);
+			buf.writeVarInt(entry.steps().size());
+			for (Pair<KHolder<BlockFamily>, Item> step : entry.steps()) {
+				buf.writeResourceLocation(step.getFirst().key());
+				buf.writeId(BuiltInRegistries.ITEM, step.getSecond());
+			}
 		});
 	}
 
@@ -47,20 +57,41 @@ public class CConvertItemPacket extends PacketHandler {
 		boolean inContainer = buf.readBoolean();
 		boolean convertOne = buf.readBoolean();
 		int slotIndex = buf.readVarInt();
-		ResourceLocation familyId = buf.readResourceLocation();
 		Item from = buf.readById(BuiltInRegistries.ITEM);
-		Item to = buf.readById(BuiltInRegistries.ITEM);
-		if (from == null || to == null) {
+		if (from == null) {
 			return null;
 		}
-		if (from.equals(to)) {
+		int size = buf.readVarInt();
+		List<Pair<ResourceLocation, Item>> steps = Lists.newArrayListWithExpectedSize(size);
+		for (int i = 0; i < size; i++) {
+			ResourceLocation familyId = buf.readResourceLocation();
+			Item item = buf.readById(BuiltInRegistries.ITEM);
+			if (item == null) {
+				return null;
+			}
+			steps.add(Pair.of(familyId, item));
+		}
+		if (steps.isEmpty() || steps.size() > MAX_STEPS) {
+			return null;
+		}
+		Item to = steps.get(steps.size() - 1).getSecond();
+		if (from == to) {
 			return null;
 		}
 		return function.apply(() -> {
 			Objects.requireNonNull(player);
-			BlockFamily family = BlockFamilies.get(familyId);
-			if (family == null || !family.quickSwitch() || !family.contains(from) || !family.contains(to)) {
-				return;
+			Item item = from;
+			int index = 0;
+			for (Pair<ResourceLocation, Item> step : steps) {
+				BlockFamily family = BlockFamilies.get(step.getFirst());
+				if (family == null || !family.quickSwitch() || !family.contains(item) || !family.contains(step.getSecond())) {
+					return;
+				}
+				if (!family.cascadingSwitch() && index == steps.size() - 1) {
+					return;
+				}
+				item = step.getSecond();
+				++index;
 			}
 			ItemStack sourceItem;
 			Slot slot = null;
@@ -148,5 +179,21 @@ public class CConvertItemPacket extends PacketHandler {
 				SoundSource.PLAYERS,
 				0.2F,
 				((player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F);
+	}
+
+	public record Group(LinkedHashSet<CConvertItemPacket.Entry> entries) {
+		public Group() {
+			this(Sets.newLinkedHashSet());
+		}
+	}
+
+	public record Entry(List<Pair<KHolder<BlockFamily>, Item>> steps) {
+		public Entry() {
+			this(Lists.newArrayList());
+		}
+
+		public Item item() {
+			return steps.get(steps.size() - 1).getSecond();
+		}
 	}
 }

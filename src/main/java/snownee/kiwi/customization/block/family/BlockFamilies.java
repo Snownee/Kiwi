@@ -4,10 +4,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -55,11 +57,12 @@ public class BlockFamilies {
 	}
 
 	private static void reloadComplete(Collection<KHolder<BlockFamily>> additional) {
-		ImmutableMap.Builder<ResourceLocation, KHolder<BlockFamily>> byIdBuilder = ImmutableMap.builder();
+		Map<ResourceLocation, KHolder<BlockFamily>> byIdBuilder = Maps.newHashMapWithExpectedSize(fromResources.size() + additional.size());
 		ImmutableListMultimap.Builder<Item, KHolder<BlockFamily>> byItemBuilder = ImmutableListMultimap.builder();
 		ImmutableListMultimap.Builder<Item, KHolder<BlockFamily>> byStonecutterBuilder = ImmutableListMultimap.builder();
 		for (var family : Iterables.concat(fromResources, additional)) {
-			byIdBuilder.put(family.key(), family);
+			KHolder<BlockFamily> old = byIdBuilder.put(family.key(), family);
+			Preconditions.checkState(old == null, "Duplicate family %s", family.key());
 			for (var item : family.value().itemHolders()) {
 				byItemBuilder.put(item.value(), family);
 			}
@@ -68,7 +71,7 @@ public class BlockFamilies {
 				byStonecutterBuilder.put(stonecutterFrom, family);
 			}
 		}
-		byId = byIdBuilder.build();
+		byId = ImmutableMap.copyOf(byIdBuilder);
 		byItem = byItemBuilder.build();
 		byStonecutterSource = byStonecutterBuilder.build();
 		StonecutterRecipeMaker.invalidateCache();

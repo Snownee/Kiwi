@@ -1,6 +1,7 @@
 package snownee.kiwi.customization.builder;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -12,14 +13,15 @@ import org.lwjgl.glfw.GLFW;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.datafixers.util.Pair;
 
-import net.minecraft.Util;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.StringWidget;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
@@ -30,6 +32,7 @@ import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
@@ -38,10 +41,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.SlabBlock;
-import snownee.kiwi.customization.block.family.BlockFamily;
 import snownee.kiwi.customization.network.CConvertItemPacket;
+import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.KHolder;
 import snownee.kiwi.util.LerpedFloat;
+import snownee.kiwi.util.MultilineTooltip;
 import snownee.kiwi.util.NotNullByDefault;
 
 @NotNullByDefault
@@ -52,12 +56,9 @@ public class ConvertScreen extends Screen {
 	@Nullable
 	private final Slot slot;
 	private final int slotIndex;
-	private final Collection<KHolder<BlockFamily>> families;
+	private final Collection<CConvertItemPacket.Group> groups;
 	private final LerpedFloat openProgress = LerpedFloat.linear();
 	private PanelLayout layout;
-	private ClientTooltipPositioner tooltipPositioner;
-	private Tooltip lastTooltip;
-	private long lastTooltipTime;
 	private final Vector2i originalMousePos;
 	private final ItemStack sourceItem;
 
@@ -67,11 +68,11 @@ public class ConvertScreen extends Screen {
 		return new Vector2i((int) mouseHandler.xpos(), (int) mouseHandler.ypos());
 	}
 
-	public ConvertScreen(@Nullable Screen parent, @Nullable Slot slot, int slotIndex, Collection<KHolder<BlockFamily>> families) {
+	public ConvertScreen(@Nullable Screen parent, @Nullable Slot slot, int slotIndex, List<CConvertItemPacket.Group> groups) {
 		super(Component.translatable("gui.kiwi.builder.convert"));
 		this.slot = slot;
 		this.slotIndex = slotIndex;
-		this.families = families;
+		this.groups = groups;
 		inContainer = parent instanceof AbstractContainerScreen;
 		inCreativeContainer = parent instanceof CreativeModeInventoryScreen;
 		originalMousePos = getMousePos();
@@ -96,28 +97,28 @@ public class ConvertScreen extends Screen {
 		int yStart = 0;
 		int curX = xStart;
 		int curY = yStart;
-		Set<Item> items = Sets.newHashSet();
+		Set<CConvertItemPacket.Entry> accepted = Sets.newHashSet();
 		LocalPlayer player = Objects.requireNonNull(getMinecraft().player);
-		for (KHolder<BlockFamily> family : families) {
-			for (Item item : family.value().items().toList()) {
+		for (CConvertItemPacket.Group group : groups) {
+			for (CConvertItemPacket.Entry entry : group.entries()) {
 				if (!player.isCreative()) {
-					Block block = Block.byItem(item);
+					Block block = Block.byItem(entry.item());
 					if (block instanceof SlabBlock || block instanceof DoorBlock) {
 						continue;
 					}
 				}
-				items.add(item);
+				accepted.add(entry);
 			}
 		}
-		int itemsPerLine = items.size() > 30 ? 11 : 4;
+		int itemsPerLine = accepted.size() > 30 ? 11 : 4;
 		Button cursorOn = null;
-		for (KHolder<BlockFamily> family : families) {
-			for (Item item : family.value().items().toList()) {
-				if (!items.contains(item)) {
+		for (CConvertItemPacket.Group group : groups) {
+			for (CConvertItemPacket.Entry entry : group.entries()) {
+				if (!accepted.contains(entry)) {
 					continue;
 				}
-				ItemStack itemStack = new ItemStack(item);
-				Button button = ItemButton.builder(itemStack, btn -> {
+				ItemStack itemStack = new ItemStack(entry.item());
+				Button button = ItemButton.builder(itemStack, inContainer, btn -> {
 					Item from = sourceItem.getItem();
 					Item to = ((ItemButton) btn).getItem().getItem();
 					if (from == to) {
@@ -128,7 +129,7 @@ public class ConvertScreen extends Screen {
 					LocalPlayer player0 = Objects.requireNonNull(getMinecraft().player);
 					if (inCreativeContainer && convertOne) {
 						// magic number time
-						CConvertItemPacket.send(false, -500, family, from, to, true);
+						CConvertItemPacket.send(false, -500, entry, from, true);
 					} else if (inCreativeContainer) {
 						Objects.requireNonNull(slot);
 						ItemStack newItem = to.getDefaultInstance();
@@ -144,7 +145,7 @@ public class ConvertScreen extends Screen {
 							}
 						}
 					} else {
-						CConvertItemPacket.send(inContainer, slotIndex, family, from, to, convertOne);
+						CConvertItemPacket.send(inContainer, slotIndex, entry, from, convertOne);
 					}
 					if (convertOne && player0.isCreative()) {
 						return;
@@ -153,8 +154,18 @@ public class ConvertScreen extends Screen {
 						GLFW.glfwSetCursorPos(getMinecraft().getWindow().getWindow(), originalMousePos.x, originalMousePos.y);
 					}
 					onClose();
-				}).bounds(curX, curY, 20, 20).build();
+				}).bounds(curX, curY, 21, 21).build();
 				button.setAlpha(inContainer ? 0.2f : 0.8f);
+				List<Component> tooltip;
+				if (Platform.isProduction()) {
+					tooltip = List.of(itemStack.getHoverName());
+				} else {
+					String steps = String.join(
+							" -> ",
+							entry.steps().stream().map(Pair::getFirst).map(KHolder::key).map(Objects::toString).toList());
+					tooltip = List.of(itemStack.getHoverName(), Component.literal(steps).withStyle(ChatFormatting.GRAY));
+				}
+				button.setTooltip(MultilineTooltip.create(tooltip));
 				if (cursorOn == null && itemStack.is(sourceItem.getItem())) {
 					cursorOn = button;
 				}
@@ -193,7 +204,7 @@ public class ConvertScreen extends Screen {
 			double scale = window.getGuiScale();
 			GLFW.glfwSetCursorPos(window.getWindow(), (cursorOn.getX() + 15) * scale, (cursorOn.getY() + 15) * scale);
 		}
-		Rect2i bounds = layout.getBounds();
+		Rect2i bounds = layout.bounds();
 		StringWidget dummySpacer = new StringWidget(
 				bounds.getX() - 2,
 				bounds.getY() - 2,
@@ -201,13 +212,18 @@ public class ConvertScreen extends Screen {
 				10000,
 				Component.empty(),
 				getMinecraft().font);
-		tooltipPositioner = new BelowOrAboveWidgetTooltipPositioner(dummySpacer);
+		ClientTooltipPositioner tooltipPositioner = new BelowOrAboveWidgetTooltipPositioner(dummySpacer);
+		for (AbstractWidget widget : layout.widgets()) {
+			if (widget instanceof ItemButton button) {
+				button.setTooltipPositioner(tooltipPositioner);
+			}
+		}
 	}
 
 	@Override
 	public void tick() {
 		openProgress.tickChaser();
-		if (!ItemStack.isSameItemSameTags(sourceItem, getSourceItem())) {
+		if (!isClosing() && !ItemStack.isSameItemSameTags(sourceItem, getSourceItem())) {
 			onClose();
 		}
 	}
@@ -218,7 +234,7 @@ public class ConvertScreen extends Screen {
 			return true;
 		}
 		if (pButton == 0) {
-			Rect2i bounds = layout.getBounds();
+			Rect2i bounds = layout.bounds();
 			Rect2i tolerance = new Rect2i(bounds.getX() - 10, bounds.getY() - 10, bounds.getWidth() + 20, bounds.getHeight() + 20);
 			if (!tolerance.contains((int) pMouseX, (int) pMouseY)) {
 				onClose();
@@ -240,7 +256,7 @@ public class ConvertScreen extends Screen {
 		pose.scale(openValue, openValue, openValue);
 		pose.translate(-pos.x, -pos.y, 0);
 		if (inContainer) {
-			Rect2i bounds = layout.getBounds();
+			Rect2i bounds = layout.bounds();
 			pGuiGraphics.blitNineSliced(
 					new ResourceLocation("textures/gui/demo_background.png"),
 					bounds.getX() - 2,
@@ -256,31 +272,28 @@ public class ConvertScreen extends Screen {
 		}
 		super.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
 		pose.popPose();
+	}
+
+	@Override
+	public void setTooltipForNextRenderPass(List<FormattedCharSequence> list, ClientTooltipPositioner tooltipPositioner, boolean force) {
+		float openValue = openProgress.getValue(Objects.requireNonNull(minecraft).getPartialTick());
 		if (openValue > 0.95f) {
-			ItemButton button = null;
-			if (getChildAt(pMouseX, pMouseY).orElse(null) instanceof ItemButton b) {
-				button = b;
-			} else if (getFocused() instanceof ItemButton b) {
-				button = b;
-			}
-			Tooltip tooltip = null;
-			if (button != null) {
-				lastTooltip = tooltip = Tooltip.create(button.getItem().getHoverName());
-				lastTooltipTime = Util.getMillis();
-			} else if (lastTooltip != null && Util.getMillis() - lastTooltipTime < 150) {
-				tooltip = lastTooltip;
-			}
-			if (tooltip != null) {
-				setTooltipForNextRenderPass(tooltip, tooltipPositioner, true);
-			}
+			super.setTooltipForNextRenderPass(list, tooltipPositioner, force);
 		}
 	}
 
 	@Override
 	public void onClose() {
+		if (isClosing()) {
+			return;
+		}
 		openProgress.chase(0, 0.8, LerpedFloat.Chaser.EXP);
 		lingeringScreen = this;
 		super.onClose();
+	}
+
+	public boolean isClosing() {
+		return openProgress.getChaseTarget() == 0;
 	}
 
 	@Override
@@ -305,4 +318,5 @@ public class ConvertScreen extends Screen {
 			lingeringScreen.tick();
 		}
 	}
+
 }

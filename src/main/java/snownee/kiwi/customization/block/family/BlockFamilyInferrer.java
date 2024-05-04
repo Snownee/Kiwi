@@ -28,8 +28,9 @@ public class BlockFamilyInferrer {
 	private final List<String> colorPrefixed = Lists.newArrayList();
 	private final List<String> colorSuffixed = Lists.newArrayList();
 	private final List<String> logs = List.of("%s_log", "%s_wood", "stripped_%s_log", "stripped_%s_wood");
-	private final List<String> general = List.of("%s_stairs", "%s_slab", "%s_wall", "%s_fence", "%s_fence_gate");
+	private final List<String> general = List.of("%s", "%s_stairs", "%s_slab", "%s_wall", "%s_fence", "%s_fence_gate");
 	private final List<String> variants = List.of(
+			"%s",
 			"chiseled_%s",
 			"polished_%s",
 			"cut_%s",
@@ -46,29 +47,52 @@ public class BlockFamilyInferrer {
 	}
 
 	public Collection<KHolder<BlockFamily>> generate() {
+		List<Holder<Block>> sorted = Lists.newArrayList();
 		for (Holder<Block> holder : BuiltInRegistries.BLOCK.asHolderIdMap()) {
+			String path = holder.unwrapKey().orElseThrow().location().getPath();
+			if (path.startsWith("pink_") || path.endsWith("_pink") || path.endsWith("_log") || path.endsWith("_stairs") || path.endsWith(
+					"_slab") || path.startsWith("smooth_")) {
+				sorted.add(holder);
+			}
+		}
+		// make stairs come first
+		sorted.sort((a, b) -> {
+			String aPath = a.unwrapKey().orElseThrow().location().getPath();
+			String bPath = b.unwrapKey().orElseThrow().location().getPath();
+			boolean aIsStairs = aPath.endsWith("_stairs");
+			boolean bIsStairs = bPath.endsWith("_stairs");
+			return Boolean.compare(bIsStairs, aIsStairs);
+		});
+		for (Holder<Block> holder : sorted) {
 			Block block = holder.value();
 			if (capturedBlocks.contains(block) || !BlockFamilies.findQuickSwitch(block.asItem()).isEmpty()) {
 				continue;
 			}
 			ResourceLocation key = holder.unwrapKey().orElseThrow().location();
-			if (key.getPath().startsWith("pink_")) {
-				ResourceLocation id = key.withPath(key.getPath().substring(5));
+			String path = key.getPath();
+			boolean captured = false;
+			if (path.startsWith("pink_")) {
+				ResourceLocation id = key.withPath(path.substring(5));
 				generateColored(id, colorPrefixed);
-			} else if (key.getPath().endsWith("_pink")) {
-				ResourceLocation id = key.withPath(key.getPath().substring(0, key.getPath().length() - 5));
+				captured = true;
+			} else if (path.endsWith("_pink")) {
+				ResourceLocation id = key.withPath(path.substring(0, path.length() - 5));
 				generateColored(id, colorSuffixed);
+				captured = true;
 			}
-			if (key.getPath().endsWith("_log") && holder.is(BlockTags.LOGS)) {
-				ResourceLocation id = key.withPath(key.getPath().substring(0, key.getPath().length() - 4));
-				fromTemplates(id, logs, true);
+			if (path.endsWith("_log") && holder.is(BlockTags.LOGS)) {
+				ResourceLocation id = key.withPath(path.substring(0, path.length() - 4));
+				fromTemplates(id, "logs", logs, true);
 				continue;
 			}
-			if (key.getPath().endsWith("_stairs") && block instanceof StairBlock stairBlock) {
+			if (path.endsWith("_stairs")) {
+				if (!(block instanceof StairBlock stairBlock)) {
+					continue;
+				}
 				if (stairBlock.baseState.isAir()) {
 					continue;
 				}
-				ResourceLocation id = key.withPath(key.getPath().substring(0, key.getPath().length() - 7));
+				ResourceLocation id = key.withPath(path.substring(0, path.length() - 7));
 				List<Holder<Block>> blocks = collectBlocks(id, general);
 				//noinspection deprecation
 				Holder.Reference<Block> baseHolder = stairBlock.baseState.getBlock().builtInRegistryHolder();
@@ -79,14 +103,27 @@ public class BlockFamilyInferrer {
 					ResourceLocation altId = id.withPath(id.getPath().substring(0, id.getPath().length() - 6));
 					blocks.addAll(collectBlocks(altId, variants));
 				}
-				family(id, blocks, true);
+				family(id, "variants", blocks.stream().distinct().toList(), true);
+				continue;
+			}
+			if (path.endsWith("_slab")) {
+				ResourceLocation id = key.withPath(path.substring(0, path.length() - 5));
+				fromTemplates(id, "general", general, true);
+				captured = true;
+			} else if (path.startsWith("smooth_")) {
+				ResourceLocation id = key.withPath(path.substring(7));
+				fromTemplates(id, "variants", variants, true);
+				captured = true;
+			}
+			if (!captured) {
+				throw new IllegalStateException("Unrecognized block: " + holder);
 			}
 		}
 		if (!Platform.isProduction()) {
 			for (KHolder<BlockFamily> family : families) {
 				Kiwi.LOGGER.info(family.key().toString() + ":");
 				for (Holder<Block> holder : family.value().blockHolders()) {
-					Kiwi.LOGGER.info("  - " + holder.unwrapKey().orElseThrow());
+					Kiwi.LOGGER.info("  - " + holder.unwrapKey().orElseThrow().location());
 				}
 			}
 		}
@@ -103,12 +140,12 @@ public class BlockFamilyInferrer {
 		return blocks;
 	}
 
-	private void fromTemplates(ResourceLocation id, List<String> templates, boolean cascading) {
+	private void fromTemplates(ResourceLocation id, String desc, List<String> templates, boolean cascading) {
 		List<Holder<Block>> blocks = collectBlocks(id, templates);
 		if (blocks.size() < 2) {
 			return;
 		}
-		family(id, blocks, cascading);
+		family(id, desc, blocks, cascading);
 	}
 
 	private void generateColored(ResourceLocation id, List<String> templates) {
@@ -116,12 +153,12 @@ public class BlockFamilyInferrer {
 		if (blocks.size() != templates.size()) {
 			return;
 		}
-		family(id, blocks, false);
+		family(id, "colored", blocks, false);
 	}
 
-	private void family(ResourceLocation id, List<Holder<Block>> blocks, boolean cascading) {
+	private void family(ResourceLocation id, String desc, List<Holder<Block>> blocks, boolean cascading) {
 		KHolder<BlockFamily> family = new KHolder<>(
-				id.withPrefix("auto/"),
+				id.withPrefix("auto/%s/".formatted(desc)),
 				new BlockFamily(blocks, List.of(), List.of(), false, Items.AIR, 1, true, cascading));
 		families.add(family);
 		family.value().blocks().forEach(capturedBlocks::add);

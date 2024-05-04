@@ -1,6 +1,11 @@
 package snownee.kiwi.customization.builder;
 
 import java.util.List;
+import java.util.Set;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -15,13 +20,15 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import snownee.kiwi.customization.CustomizationClient;
 import snownee.kiwi.customization.block.family.BlockFamilies;
 import snownee.kiwi.customization.block.family.BlockFamily;
 import snownee.kiwi.customization.network.CApplyBuilderRulePacket;
+import snownee.kiwi.customization.network.CConvertItemPacket;
 import snownee.kiwi.util.ClientProxy;
 import snownee.kiwi.util.KHolder;
 
@@ -76,27 +83,85 @@ public class BuildersButton {
 			if (screen instanceof CreativeModeInventoryScreen && slot.container != mc.player.getInventory()) {
 				return false;
 			}
-			List<KHolder<BlockFamily>> families = BlockFamilies.findQuickSwitch(slot.getItem().getItem());
-			if (families.isEmpty()) {
+			List<CConvertItemPacket.Group> groups = findConvertGroups(slot.getItem());
+			if (groups.isEmpty()) {
 				return false;
 			}
-			ClientProxy.pushScreen(mc, new ConvertScreen(screen, slot, slot.index, families));
+			ClientProxy.pushScreen(mc, new ConvertScreen(screen, slot, slot.index, groups));
 			return true;
 		}
 		if (screen != null) {
 			return false;
 		}
-		List<KHolder<BlockFamily>> families = BlockFamilies.findQuickSwitch(mc.player.getMainHandItem().getItem());
-		if (!families.isEmpty()) {
-			mc.setScreen(new ConvertScreen(null, null, mc.player.getInventory().selected, families));
+		List<CConvertItemPacket.Group> groups = findConvertGroups(mc.player.getMainHandItem());
+		if (!groups.isEmpty()) {
+			mc.setScreen(new ConvertScreen(null, null, mc.player.getInventory().selected, groups));
 			return true;
 		}
-		families = BlockFamilies.findQuickSwitch(mc.player.getOffhandItem().getItem());
-		if (!families.isEmpty()) {
-			mc.setScreen(new ConvertScreen(null, null, Inventory.SLOT_OFFHAND, families));
+		groups = findConvertGroups(mc.player.getOffhandItem());
+		if (!groups.isEmpty()) {
+			mc.setScreen(new ConvertScreen(null, null, Inventory.SLOT_OFFHAND, groups));
 			return true;
 		}
 		return false;
+	}
+
+	public static List<CConvertItemPacket.Group> findConvertGroups(ItemStack itemStack) {
+		List<KHolder<BlockFamily>> families = BlockFamilies.findQuickSwitch(itemStack.getItem());
+		if (families.isEmpty()) {
+			return List.of();
+		}
+		List<CConvertItemPacket.Group> groups = Lists.newArrayListWithExpectedSize(families.size());
+		Set<Item> addedItems = Sets.newHashSet();
+		for (KHolder<BlockFamily> family : families) {
+			CConvertItemPacket.Group group = new CConvertItemPacket.Group();
+			boolean cascadingSwitch = family.value().cascadingSwitch();
+			List<List<Pair<KHolder<BlockFamily>, Item>>> toResolve = cascadingSwitch ? Lists.newLinkedList() : List.of();
+			Set<BlockFamily> iteratedFamilies = cascadingSwitch ? Sets.newHashSet(family.value()) : Set.of();
+			Set<Item> iteratedItems = cascadingSwitch ? Sets.newHashSet() : Set.of();
+			for (Item item : family.value().items().toList()) {
+				CConvertItemPacket.Entry entry = new CConvertItemPacket.Entry();
+				Pair<KHolder<BlockFamily>, Item> pair = Pair.of(family, item);
+				entry.steps().add(pair);
+				if (cascadingSwitch) {
+					toResolve.add(List.of(pair));
+					iteratedItems.add(item);
+				}
+				if (!addedItems.contains(item)) {
+					group.entries().add(entry);
+				}
+				addedItems.add(item);
+			}
+			while (!toResolve.isEmpty()) {
+				List<Pair<KHolder<BlockFamily>, Item>> steps = toResolve.remove(0);
+				Pair<KHolder<BlockFamily>, Item> lastStep = steps.get(steps.size() - 1);
+				Item lastItem = lastStep.getSecond();
+				for (KHolder<BlockFamily> nextFamily : BlockFamilies.findQuickSwitch(lastItem)) {
+					if (!iteratedFamilies.add(nextFamily.value())) {
+						continue;
+					}
+					for (Item nextItem : nextFamily.value().items().toList()) {
+						if (!iteratedItems.add(nextItem)) {
+							continue;
+						}
+						CConvertItemPacket.Entry entry = new CConvertItemPacket.Entry();
+						entry.steps().addAll(steps);
+						entry.steps().add(Pair.of(nextFamily, nextItem));
+						if (!addedItems.contains(nextItem)) {
+							group.entries().add(entry);
+							addedItems.add(nextItem);
+						}
+						if (entry.steps().size() < CConvertItemPacket.MAX_STEPS && nextFamily.value().cascadingSwitch()) {
+							toResolve.add(entry.steps());
+						}
+					}
+				}
+			}
+			if (!group.entries().isEmpty()) {
+				groups.add(group);
+			}
+		}
+		return groups;
 	}
 
 	public static boolean startDestroyBlock(BlockPos pos, Direction face) {
@@ -104,7 +169,7 @@ public class BuildersButton {
 		if (player == null) {
 			return false;
 		}
-		BlockState blockState = player.level().getBlockState(pos);
+//		BlockState blockState = player.level().getBlockState(pos);
 		return true;
 	}
 

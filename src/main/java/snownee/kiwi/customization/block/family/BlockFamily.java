@@ -124,7 +124,7 @@ public class BlockFamily {
 		return quickSwitch;
 	}
 
-	private boolean cascadingSwitch() {
+	public boolean cascadingSwitch() {
 		return cascadingSwitch;
 	}
 
