@@ -162,6 +162,7 @@ sourceSets {
 }
 
 shadowJar {
+    from(tasks.jarJar.archiveFile)
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     exclude(excludes)
     manifest { attributes(b) }
@@ -176,25 +177,21 @@ task APJar(type: Jar) {
     //include "/snownee/kiwi/build"
     //exclude(excludes)
     from(sourceSets.processor.output)
-    archiveName = "${archivesBaseName}-${version}-processor.${extension}"
+    archiveFileName = "${archivesBaseName}-${archiveVersion}-processor.${archiveExtension}"
 }
 
 task sourcesJar(type: Jar) {
     //exclude(excludes)
     manifest { attributes(b) }
     from(sourceSets.main.allJava)
-    archiveName = "${archivesBaseName}-${version}-sources.${extension}"
+    archiveFileName = "${archivesBaseName}-${archiveVersion}-sources.${archiveExtension}"
 }
 
 task deobfJar(type: Jar) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     //exclude(excludes)
     manifest { attributes(b) }
-    archiveName = "${archivesBaseName}-${version}-deobf.${extension}"
-}
-
-tasks.jarJar.configure {
-    finalizedBy('reobfJarJar')
+    archiveFileName = "${archivesBaseName}-${archiveVersion}-deobf.${archiveExtension}"
 }
 
 jar {

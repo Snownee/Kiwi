@@ -18,9 +18,11 @@ import snownee.kiwi.customization.CustomizationHooks;
 public class AbstractContainerMenuMixin {
 	@WrapOperation(
 			method = {"lambda$stillValid$0", "m_38913_", "method_17696"},
+			remap = false,
 			at = @At(
 					value = "INVOKE",
-					target = "Lnet/minecraft/world/level/block/state/BlockState;is(Lnet/minecraft/world/level/block/Block;)Z"))
+					target = "Lnet/minecraft/world/level/block/state/BlockState;is(Lnet/minecraft/world/level/block/Block;)Z",
+					remap = true))
 	private static boolean is(
 			BlockState instance,
 			Block block,
