@@ -161,6 +161,10 @@ sourceSets {
     }
 }
 
+tasks.jarJar {
+    exclude(excludes)
+}
+
 shadowJar {
     from(tasks.jarJar.archiveFile)
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
