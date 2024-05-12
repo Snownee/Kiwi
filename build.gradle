@@ -30,6 +30,7 @@ configurations {
 version = project.mod_version
 group = "snownee.kiwi"
 archivesBaseName = "Kiwi-${minecraft_version}-Forge"
+var realVersion = project.mod_version + '+forge'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
@@ -137,7 +138,7 @@ def b = [
         "Specification-Vendor"    : 'Snownee',
         "Specification-Version"   : '1',
         "Implementation-Title"    : project.name,
-        "Implementation-Version"  : "${project.version}",
+        "Implementation-Version"  : realVersion,
         "Implementation-Vendor"   : 'Snownee',
         "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
 ]
@@ -306,7 +307,7 @@ publishing {
 unifiedPublishing {
     project {
         displayName = "[Forge $project.supported_version] $project.mod_version"
-        version = project.mod_version // Optional, Inferred from project by default
+        version = realVersion // Optional, Inferred from project by default
         changelog = file("CHANGELOG.md").exists() ? file("CHANGELOG.md").text : "" // Optional, in markdown format
         releaseType = project.release_type // Optional, use "release", "beta" or "alpha"
         gameVersions = ["1.20.1"]
