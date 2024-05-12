@@ -14,8 +14,8 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.registries.ForgeRegistries;
-import snownee.kiwi.mixin.customization.forge.BlockColorsAccess;
-import snownee.kiwi.mixin.customization.forge.ItemColorsAccess;
+import snownee.kiwi.mixin.forge.BlockColorsAccess;
+import snownee.kiwi.mixin.forge.ItemColorsAccess;
 
 public class ColorProviderUtil {
 	public static BlockColor delegate(Block block) {

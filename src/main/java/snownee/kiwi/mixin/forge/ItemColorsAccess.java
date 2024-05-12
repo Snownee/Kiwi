@@ -1,4 +1,4 @@
-package snownee.kiwi.mixin.customization.forge;
+package snownee.kiwi.mixin.forge;
 
 import java.util.Map;
 

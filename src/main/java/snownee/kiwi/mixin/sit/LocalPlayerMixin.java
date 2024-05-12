@@ -1,4 +1,4 @@
-package snownee.kiwi.mixin.customization.sit;
+package snownee.kiwi.mixin.sit;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
