@@ -312,7 +312,7 @@ unifiedPublishing {
         gameVersions = ["1.20.1"]
         gameLoaders = ["forge", "neoforge"]
 
-        mainPublication tasks.shadow // Declares the publicated jar
+        mainPublication tasks.shadowJar // Declares the publicated jar
 
 /*
         if (System.getenv("CURSE_TOKEN") != null) {
