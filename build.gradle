@@ -312,8 +312,9 @@ unifiedPublishing {
         gameVersions = ["1.20.1"]
         gameLoaders = ["forge", "neoforge"]
 
-        mainPublication tasks.jarJar // Declares the publicated jar
+        mainPublication tasks.shadow // Declares the publicated jar
 
+/*
         if (System.getenv("CURSE_TOKEN") != null) {
             curseforge {
                 token = System.getenv("CURSE_TOKEN")
@@ -324,6 +325,7 @@ unifiedPublishing {
                 }
             }
         }
+*/
 
         if (System.getenv("MODRINTH_TOKEN") != null) {
             modrinth {
