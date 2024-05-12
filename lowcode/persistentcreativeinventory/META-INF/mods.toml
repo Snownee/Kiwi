@@ -1,0 +1,18 @@
+modLoader = "lowcodefml"
+loaderVersion = "[46,)"
+license = "ARR"
+issueTrackerURL = "https://github.com/Snownee/Kiwi/issues"
+
+[[mods]]
+modId = "persistentcreativeinventory"
+version = "${version}"
+displayName = "Persistent Creative Inventory"
+authors = "Snownee"
+displayURL = "https://www.curseforge.com/minecraft/mc-mods/persistent-creative-inventory"
+description = "Restore the location of the creative inventory you last scrolled to."
+
+[[dependencies.persistentcreativeinventory]]
+modId = "kiwi"
+versionRange = "[11.8,12)"
+mandatory = true
+ordering = "NONE"

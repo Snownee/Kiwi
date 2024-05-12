@@ -14,12 +14,14 @@ import snownee.kiwi.customization.CustomizationServiceFinder;
 public class MixinPlugin implements IMixinConfigPlugin {
 	private boolean customization;
 	private boolean persistentCreativeInventory;
+	private boolean fastScrolling;
 
 	@Override
 	public void onLoad(String mixinPackage) {
 		customization = CustomizationServiceFinder.shouldEnable(LoadingModList.get().getMods());
 		persistentCreativeInventory =
 				customization || LoadingModList.get().getModFileById("persistentcreativeinventory") != null || !FMLEnvironment.production;
+		fastScrolling = LoadingModList.get().getModFileById("fastscroll") != null || !FMLEnvironment.production;
 	}
 
 	@Override
@@ -34,6 +36,9 @@ public class MixinPlugin implements IMixinConfigPlugin {
 		}
 		if (mixinClassName.equals("snownee.kiwi.mixin.client.CreativeModeInventoryScreenMixin")) {
 			return persistentCreativeInventory;
+		}
+		if (mixinClassName.equals("snownee.kiwi.mixin.client.OptionInstanceMixin")) {
+			return fastScrolling;
 		}
 		return true;
 	}

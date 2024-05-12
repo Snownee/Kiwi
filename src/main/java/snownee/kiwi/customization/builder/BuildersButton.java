@@ -2,6 +2,7 @@ package snownee.kiwi.customization.builder;
 
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -19,6 +20,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -67,7 +69,8 @@ public class BuildersButton {
 
 	public static boolean onShortPress() {
 		Minecraft mc = Minecraft.getInstance();
-		if (mc.player == null) {
+		LocalPlayer player = mc.player;
+		if (player == null) {
 			return false;
 		}
 		Screen screen = mc.screen;
@@ -77,13 +80,13 @@ public class BuildersButton {
 		}
 		if (screen instanceof AbstractContainerScreen<?> containerScreen && containerScreen.getMenu().getCarried().isEmpty()) {
 			Slot slot = ClientProxy.getSlotUnderMouse(containerScreen);
-			if (slot == null || !slot.hasItem() || !slot.allowModification(mc.player)) {
+			if (slot == null || !slot.hasItem() || !slot.allowModification(player)) {
 				return false;
 			}
-			if (screen instanceof CreativeModeInventoryScreen && slot.container != mc.player.getInventory()) {
+			if (screen instanceof CreativeModeInventoryScreen && slot.container != player.getInventory()) {
 				return false;
 			}
-			List<CConvertItemPacket.Group> groups = findConvertGroups(slot.getItem());
+			List<CConvertItemPacket.Group> groups = findConvertGroups(player, slot.getItem());
 			if (groups.isEmpty()) {
 				return false;
 			}
@@ -93,12 +96,12 @@ public class BuildersButton {
 		if (screen != null) {
 			return false;
 		}
-		List<CConvertItemPacket.Group> groups = findConvertGroups(mc.player.getMainHandItem());
+		List<CConvertItemPacket.Group> groups = findConvertGroups(player, player.getMainHandItem());
 		if (!groups.isEmpty()) {
-			mc.setScreen(new ConvertScreen(null, null, mc.player.getInventory().selected, groups));
+			mc.setScreen(new ConvertScreen(null, null, player.getInventory().selected, groups));
 			return true;
 		}
-		groups = findConvertGroups(mc.player.getOffhandItem());
+		groups = findConvertGroups(player, player.getOffhandItem());
 		if (!groups.isEmpty()) {
 			mc.setScreen(new ConvertScreen(null, null, Inventory.SLOT_OFFHAND, groups));
 			return true;
@@ -106,25 +109,27 @@ public class BuildersButton {
 		return false;
 	}
 
-	public static List<CConvertItemPacket.Group> findConvertGroups(ItemStack itemStack) {
-		List<KHolder<BlockFamily>> families = BlockFamilies.findQuickSwitch(itemStack.getItem());
+	public static List<CConvertItemPacket.Group> findConvertGroups(Player player, ItemStack itemStack) {
+		List<KHolder<BlockFamily>> families = BlockFamilies.findQuickSwitch(itemStack.getItem(), player.isCreative());
 		if (families.isEmpty()) {
 			return List.of();
 		}
 		List<CConvertItemPacket.Group> groups = Lists.newArrayListWithExpectedSize(families.size());
 		Set<Item> addedItems = Sets.newHashSet();
+		float ratio = BlockFamilies.getConvertRatio(itemStack.getItem());
 		for (KHolder<BlockFamily> family : families) {
 			CConvertItemPacket.Group group = new CConvertItemPacket.Group();
-			boolean cascadingSwitch = family.value().cascadingSwitch();
-			List<List<Pair<KHolder<BlockFamily>, Item>>> toResolve = cascadingSwitch ? Lists.newLinkedList() : List.of();
-			Set<BlockFamily> iteratedFamilies = cascadingSwitch ? Sets.newHashSet(family.value()) : Set.of();
-			Set<Item> iteratedItems = cascadingSwitch ? Sets.newHashSet() : Set.of();
+			boolean cascading = family.value().switchAttrs().cascading();
+			List<CConvertItemPacket.Entry> unresolved = cascading ? Lists.newLinkedList() : List.of();
+			Set<BlockFamily> iteratedFamilies = cascading ? Sets.newHashSet(family.value()) : Set.of();
+			Set<Item> iteratedItems = cascading ? Sets.newHashSet() : Set.of();
 			for (Item item : family.value().items().toList()) {
-				CConvertItemPacket.Entry entry = new CConvertItemPacket.Entry();
+				float convertRatio = BlockFamilies.getConvertRatio(item);
+				CConvertItemPacket.Entry entry = new CConvertItemPacket.Entry(ratio / convertRatio);
 				Pair<KHolder<BlockFamily>, Item> pair = Pair.of(family, item);
 				entry.steps().add(pair);
-				if (cascadingSwitch) {
-					toResolve.add(List.of(pair));
+				if (cascading) {
+					unresolved.add(entry);
 					iteratedItems.add(item);
 				}
 				if (!addedItems.contains(item)) {
@@ -132,11 +137,12 @@ public class BuildersButton {
 				}
 				addedItems.add(item);
 			}
-			while (!toResolve.isEmpty()) {
-				List<Pair<KHolder<BlockFamily>, Item>> steps = toResolve.remove(0);
-				Pair<KHolder<BlockFamily>, Item> lastStep = steps.get(steps.size() - 1);
+			while (!unresolved.isEmpty()) {
+				CConvertItemPacket.Entry parentEntry = unresolved.remove(0);
+				Pair<KHolder<BlockFamily>, Item> lastStep = parentEntry.steps().get(parentEntry.steps().size() - 1);
 				Item lastItem = lastStep.getSecond();
-				for (KHolder<BlockFamily> nextFamily : BlockFamilies.findQuickSwitch(lastItem)) {
+				ratio = BlockFamilies.getConvertRatio(lastItem);
+				for (KHolder<BlockFamily> nextFamily : BlockFamilies.findQuickSwitch(lastItem, player.isCreative())) {
 					if (!iteratedFamilies.add(nextFamily.value())) {
 						continue;
 					}
@@ -144,15 +150,16 @@ public class BuildersButton {
 						if (!iteratedItems.add(nextItem)) {
 							continue;
 						}
-						CConvertItemPacket.Entry entry = new CConvertItemPacket.Entry();
-						entry.steps().addAll(steps);
+						float convertRatio = BlockFamilies.getConvertRatio(nextItem);
+						CConvertItemPacket.Entry entry = new CConvertItemPacket.Entry(parentEntry.ratio() * ratio / convertRatio);
+						entry.steps().addAll(parentEntry.steps());
 						entry.steps().add(Pair.of(nextFamily, nextItem));
 						if (!addedItems.contains(nextItem)) {
 							group.entries().add(entry);
 							addedItems.add(nextItem);
 						}
-						if (entry.steps().size() < CConvertItemPacket.MAX_STEPS && nextFamily.value().cascadingSwitch()) {
-							toResolve.add(entry.steps());
+						if (entry.steps().size() < CConvertItemPacket.MAX_STEPS && nextFamily.value().switchAttrs().cascading()) {
+							unresolved.add(entry);
 						}
 					}
 				}
@@ -161,6 +168,24 @@ public class BuildersButton {
 				groups.add(group);
 			}
 		}
+		if (player.isCreative()) {
+			return groups;
+		}
+		Predicate<CConvertItemPacket.Entry> filter = entry -> {
+			if (entry.ratio() >= 1) {
+				return false;
+			}
+			return !player.getInventory().hasAnyMatching($ -> $.is(entry.item()));
+		};
+		int count = 0;
+		for (CConvertItemPacket.Group group : groups) {
+			group.entries().removeIf(filter);
+			count += group.entries().size();
+		}
+		if (count <= 1) {
+			return List.of();
+		}
+		groups.removeIf(group -> group.entries().isEmpty());
 		return groups;
 	}
 

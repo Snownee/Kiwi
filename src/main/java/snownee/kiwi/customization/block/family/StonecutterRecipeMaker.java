@@ -16,14 +16,13 @@ import com.google.common.collect.Streams;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.DoorBlock;
-import net.minecraft.world.level.block.SlabBlock;
 import snownee.kiwi.util.KHolder;
 
 public class StonecutterRecipeMaker {
@@ -100,10 +99,11 @@ public class StonecutterRecipeMaker {
 			Block block = Block.byItem(item);
 			if ("to".equals(type)) {
 				count = family.value().stonecutterSourceMultiplier();
-			} else if (block instanceof SlabBlock) {
-				count = 2;
-			} else if (block instanceof DoorBlock) {
-				return null;
+			} else {
+				count = Mth.floor(1 / BlockFamilies.getConvertRatio(item));
+				if (count < 1) {
+					return null;
+				}
 			}
 			ResourceLocation itemKey = BuiltInRegistries.ITEM.getKey(item);
 			return new StonecutterRecipe(

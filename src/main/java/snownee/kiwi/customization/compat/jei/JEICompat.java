@@ -9,7 +9,6 @@ import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.customization.block.family.BlockFamilies;
@@ -33,7 +32,7 @@ public class JEICompat implements IModPlugin {
 		List<StonecutterRecipe> recipes = Lists.newArrayList();
 		for (KHolder<BlockFamily> holder : BlockFamilies.all()) {
 			BlockFamily family = holder.value();
-			if (family.stonecutterSource() != Items.AIR) {
+			if (family.stonecutterSource().isPresent()) {
 				recipes.addAll(StonecutterRecipeMaker.makeRecipes("to", holder));
 			}
 			if (family.stonecutterExchange()) {

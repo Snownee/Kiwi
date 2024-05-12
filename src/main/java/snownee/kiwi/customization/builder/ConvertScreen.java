@@ -38,9 +38,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.DoorBlock;
-import net.minecraft.world.level.block.SlabBlock;
 import snownee.kiwi.customization.network.CConvertItemPacket;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.KHolder;
@@ -100,15 +97,7 @@ public class ConvertScreen extends Screen {
 		Set<CConvertItemPacket.Entry> accepted = Sets.newHashSet();
 		LocalPlayer player = Objects.requireNonNull(getMinecraft().player);
 		for (CConvertItemPacket.Group group : groups) {
-			for (CConvertItemPacket.Entry entry : group.entries()) {
-				if (!player.isCreative()) {
-					Block block = Block.byItem(entry.item());
-					if (block instanceof SlabBlock || block instanceof DoorBlock) {
-						continue;
-					}
-				}
-				accepted.add(entry);
-			}
+			accepted.addAll(group.entries());
 		}
 		int itemsPerLine = accepted.size() > 30 ? 11 : 4;
 		Button cursorOn = null;
@@ -147,8 +136,10 @@ public class ConvertScreen extends Screen {
 					} else {
 						CConvertItemPacket.send(inContainer, slotIndex, entry, from, convertOne);
 					}
-					if (convertOne && player0.isCreative()) {
-						return;
+					if (convertOne) {
+						if (player0.isCreative() || sourceItem.getCount() > 1) {
+							return;
+						}
 					}
 					if (inContainer) {
 						GLFW.glfwSetCursorPos(getMinecraft().getWindow().getWindow(), originalMousePos.x, originalMousePos.y);
@@ -284,9 +275,6 @@ public class ConvertScreen extends Screen {
 
 	@Override
 	public void onClose() {
-		if (isClosing()) {
-			return;
-		}
 		openProgress.chase(0, 0.8, LerpedFloat.Chaser.EXP);
 		lingeringScreen = this;
 		super.onClose();

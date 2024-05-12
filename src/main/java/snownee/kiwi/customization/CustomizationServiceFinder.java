@@ -16,7 +16,7 @@ public final class CustomizationServiceFinder {
 			return true;
 		}
 		for (IModInfo mod : mods) {
-			if (mod.getModProperties().containsKey("kiwi_customization")) {
+			if (mod.getModProperties().containsKey("kiwiCustomization")) {
 				return true;
 			}
 		}

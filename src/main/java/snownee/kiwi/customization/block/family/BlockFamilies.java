@@ -3,6 +3,8 @@ package snownee.kiwi.customization.block.family;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
@@ -11,10 +13,15 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import snownee.kiwi.customization.CustomizationHooks;
 import snownee.kiwi.util.KHolder;
 import snownee.kiwi.util.resource.OneTimeLoader;
@@ -32,8 +39,14 @@ public class BlockFamilies {
 		return byItem.get(item);
 	}
 
-	public static List<KHolder<BlockFamily>> findQuickSwitch(Item item) {
-		return find(item).stream().filter(f -> f.value().quickSwitch()).toList();
+	public static List<KHolder<BlockFamily>> findQuickSwitch(Item item, boolean creative) {
+		Stream<KHolder<BlockFamily>> stream = find(item).stream();
+		if (creative) {
+			stream = stream.filter(f -> f.value().switchAttrs().enabled());
+		} else {
+			stream = stream.filter(f -> f.value().switchAttrs().enabled() && !f.value().switchAttrs().creativeOnly());
+		}
+		return stream.toList();
 	}
 
 	public static Collection<KHolder<BlockFamily>> findByStonecutterSource(Item item) {
@@ -66,9 +79,10 @@ public class BlockFamilies {
 			for (var item : family.value().itemHolders()) {
 				byItemBuilder.put(item.value(), family);
 			}
-			Item stonecutterFrom = family.value().stonecutterSource();
-			if (stonecutterFrom != Items.AIR) {
-				byStonecutterBuilder.put(stonecutterFrom, family);
+			Optional<Holder.Reference<Item>> stonecutterSource = family.value().stonecutterSource();
+			//noinspection OptionalIsPresent
+			if (stonecutterSource.isPresent()) {
+				byStonecutterBuilder.put(stonecutterSource.get().value(), family);
 			}
 		}
 		byId = ImmutableMap.copyOf(byIdBuilder);
@@ -84,5 +98,29 @@ public class BlockFamilies {
 
 	public static Collection<KHolder<BlockFamily>> all() {
 		return byId.values();
+	}
+
+	public static float getConvertRatio(Item item) {
+		Block block = Block.byItem(item);
+		if (block == Blocks.AIR) {
+			return 1;
+		}
+		Holder<Block> holder = BuiltInRegistries.BLOCK.wrapAsHolder(block);
+		if (holder.is(BlockTags.SLABS)) {
+			return 0.5f;
+		}
+		if (holder.is(BlockTags.DOORS)) {
+			return 2;
+		}
+		if (holder.is(BlockTags.TRAPDOORS)) {
+			return 3;
+		}
+		if (holder.is(BlockTags.FENCE_GATES)) {
+			return 4;
+		}
+		if (holder.is(BlockTags.PRESSURE_PLATES)) {
+			return 2;
+		}
+		return 1;
 	}
 }

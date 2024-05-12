@@ -29,7 +29,7 @@ configurations {
 
 version = project.mod_version
 group = "snownee.kiwi"
-archivesBaseName = "Kiwi-${minecraft_version}-forge"
+archivesBaseName = "Kiwi-${minecraft_version}-Forge"
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
@@ -126,6 +126,7 @@ def excludes = [
         "/assets/kiwi/blockstates",
         "/assets/kiwi/models",
         "/assets/kaleidos",
+        "/assets/kswitch",
         "/snownee/kiwi/test",
         "/data",
         "/.cache",

@@ -19,6 +19,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
@@ -82,19 +83,24 @@ public class CConvertItemPacket extends PacketHandler {
 			Objects.requireNonNull(player);
 			Item item = from;
 			int index = 0;
+			float ratio = 1;
 			for (Pair<ResourceLocation, Item> step : steps) {
 				BlockFamily family = BlockFamilies.get(step.getFirst());
-				if (family == null || !family.quickSwitch() || !family.contains(item) || !family.contains(step.getSecond())) {
+				if (family == null || !family.switchAttrs().enabled() || !family.contains(item) || !family.contains(step.getSecond())) {
 					return;
 				}
-				if (!family.cascadingSwitch() && index == steps.size() - 1) {
+				if (!family.switchAttrs().cascading() && index == steps.size() - 1) {
 					return;
+				}
+				if (!player.isCreative()) {
+					ratio *= BlockFamilies.getConvertRatio(item) / BlockFamilies.getConvertRatio(step.getSecond());
 				}
 				item = step.getSecond();
 				++index;
 			}
 			ItemStack sourceItem;
 			Slot slot = null;
+			Inventory playerInventory = player.getInventory();
 			try {
 				if (slotIndex == -500) {
 					if (player.isCreative()) {
@@ -109,7 +115,7 @@ public class CConvertItemPacket extends PacketHandler {
 					}
 					sourceItem = slot.getItem();
 				} else {
-					sourceItem = player.getInventory().getItem(slotIndex);
+					sourceItem = playerInventory.getItem(slotIndex);
 				}
 			} catch (Exception e) {
 				return;
@@ -118,18 +124,43 @@ public class CConvertItemPacket extends PacketHandler {
 				return;
 			}
 			boolean skipSettingSlot = false;
-			ItemStack newItem = to.getDefaultInstance();
+			ItemStack newItem;
+			int inventorySwap = Integer.MIN_VALUE;
+			if (ratio >= 1) {
+				newItem = to.getDefaultInstance();
+			} else if (convertOne) {
+				return;
+			} else {
+				for (int i = 0; i < playerInventory.getContainerSize(); i++) {
+					ItemStack stack = playerInventory.getItem(i);
+					if (stack.is(to)) {
+						inventorySwap = i;
+						break;
+					}
+				}
+				if (inventorySwap == Integer.MIN_VALUE) {
+					return;
+				}
+				newItem = playerInventory.getItem(inventorySwap);
+			}
 			newItem.setPopTime(5);
+			int ratioInt = Mth.floor(ratio);
 			if (convertOne) {
 				if (!player.isCreative()) {
 					sourceItem.shrink(1);
+					newItem.setCount(ratioInt);
 				}
 				if (!sourceItem.isEmpty()) {
 					addToPlayer(player, newItem, !inContainer);
 					skipSettingSlot = true;
 				}
-			} else {
-				newItem.setCount(sourceItem.getCount()); // check max stack size?
+			} else if (inventorySwap == Integer.MIN_VALUE) {
+				int maxSize = newItem.getMaxStackSize();
+				int count = Math.min(sourceItem.getCount(), maxSize / ratioInt);
+				newItem.setCount(count * ratioInt);
+				if (!player.isCreative()) {
+					sourceItem.shrink(count);
+				}
 			}
 			if (slotIndex != -500 && !skipSettingSlot) {
 				try {
@@ -139,11 +170,16 @@ public class CConvertItemPacket extends PacketHandler {
 						}
 						slot.setByPlayer(newItem);
 					} else {
-						player.getInventory().setItem(slotIndex, newItem);
+						playerInventory.setItem(slotIndex, newItem);
 					}
 				} catch (Exception e) {
 					return;
 				}
+			}
+			if (inventorySwap != Integer.MIN_VALUE) {
+				playerInventory.setItem(inventorySwap, sourceItem);
+			} else if (!skipSettingSlot && !player.isCreative()) {
+				addToPlayer(player, sourceItem.copy(), !inContainer);
 			}
 			playPickupSound(player);
 			player.containerMenu.broadcastChanges();
@@ -164,7 +200,7 @@ public class CConvertItemPacket extends PacketHandler {
 			}
 			return stack.getCount() < stack.getMaxStackSize() && ItemStack.isSameItemSameTags(stack, itemStack);
 		}).findFirst().orElse(-1);
-		if (!player.getInventory().add(slot, itemStack) && !player.isCreative()) {
+		if (!inventory.add(slot, itemStack) && !player.isCreative()) {
 			player.drop(itemStack, true);
 		}
 	}
@@ -187,9 +223,9 @@ public class CConvertItemPacket extends PacketHandler {
 		}
 	}
 
-	public record Entry(List<Pair<KHolder<BlockFamily>, Item>> steps) {
-		public Entry() {
-			this(Lists.newArrayList());
+	public record Entry(float ratio, List<Pair<KHolder<BlockFamily>, Item>> steps) {
+		public Entry(float ratio) {
+			this(ratio, Lists.newArrayList());
 		}
 
 		public Item item() {

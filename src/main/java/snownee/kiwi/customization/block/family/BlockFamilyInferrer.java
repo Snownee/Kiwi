@@ -14,21 +14,34 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.StairBlock;
+import snownee.kiwi.AbstractModule;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.KHolder;
 
 public class BlockFamilyInferrer {
+	public static final TagKey<Block> IGNORE = AbstractModule.blockTag("kswitch", "ignore");
 	private final List<KHolder<BlockFamily>> families = Lists.newArrayList();
 	private final Set<Block> capturedBlocks = Sets.newHashSet();
 	private final List<String> colorPrefixed = Lists.newArrayList();
 	private final List<String> colorSuffixed = Lists.newArrayList();
 	private final List<String> logs = List.of("%s_log", "%s_wood", "stripped_%s_log", "stripped_%s_wood");
-	private final List<String> general = List.of("%s", "%s_stairs", "%s_slab", "%s_wall", "%s_fence", "%s_fence_gate");
+	private final List<String> netherLogs = List.of("%s_stem", "%s_hyphae", "stripped_%s_stem", "stripped_%s_hyphae");
+	private final List<String> general = List.of(
+			"%s",
+			"%s_stairs",
+			"%s_slab",
+			"%s_wall",
+			"%s_fence",
+			"%s_fence_gate",
+			"%s_door",
+			"%s_trapdoor",
+			"%s_button",
+			"%s_pressure_plate");
 	private final List<String> variants = List.of(
 			"%s",
 			"chiseled_%s",
@@ -50,8 +63,11 @@ public class BlockFamilyInferrer {
 		List<Holder<Block>> sorted = Lists.newArrayList();
 		for (Holder<Block> holder : BuiltInRegistries.BLOCK.asHolderIdMap()) {
 			String path = holder.unwrapKey().orElseThrow().location().getPath();
-			if (path.startsWith("pink_") || path.endsWith("_pink") || path.endsWith("_log") || path.endsWith("_stairs") || path.endsWith(
-					"_slab") || path.startsWith("smooth_")) {
+			if (path.startsWith("pink_") || path.endsWith("_pink") || path.endsWith("_log") || path.endsWith("_stem") || path.endsWith(
+					"_stairs") || path.endsWith("_slab") || path.startsWith("smooth_")) {
+				if (holder.is(IGNORE)) {
+					continue;
+				}
 				sorted.add(holder);
 			}
 		}
@@ -65,7 +81,7 @@ public class BlockFamilyInferrer {
 		});
 		for (Holder<Block> holder : sorted) {
 			Block block = holder.value();
-			if (capturedBlocks.contains(block) || !BlockFamilies.findQuickSwitch(block.asItem()).isEmpty()) {
+			if (capturedBlocks.contains(block) || !BlockFamilies.findQuickSwitch(block.asItem(), true).isEmpty()) {
 				continue;
 			}
 			ResourceLocation key = holder.unwrapKey().orElseThrow().location();
@@ -80,9 +96,17 @@ public class BlockFamilyInferrer {
 				generateColored(id, colorSuffixed);
 				captured = true;
 			}
-			if (path.endsWith("_log") && holder.is(BlockTags.LOGS)) {
-				ResourceLocation id = key.withPath(path.substring(0, path.length() - 4));
-				fromTemplates(id, "logs", logs, true);
+			if (path.endsWith("_log")) {
+				if (holder.is(BlockTags.LOGS)) {
+					ResourceLocation id = key.withPath(path.substring(0, path.length() - 4));
+					fromTemplates(id, "logs", logs, true);
+				}
+				continue;
+			} else if (path.endsWith("_stem")) {
+				if (holder.is(BlockTags.LOGS)) {
+					ResourceLocation id = key.withPath(path.substring(0, path.length() - 5));
+					fromTemplates(id, "logs", netherLogs, true);
+				}
 				continue;
 			}
 			if (path.endsWith("_stairs")) {
@@ -93,7 +117,7 @@ public class BlockFamilyInferrer {
 					continue;
 				}
 				ResourceLocation id = key.withPath(path.substring(0, path.length() - 7));
-				List<Holder<Block>> blocks = collectBlocks(id, general);
+				List<Holder.Reference<Block>> blocks = collectBlocks(id, general);
 				//noinspection deprecation
 				Holder.Reference<Block> baseHolder = stairBlock.baseState.getBlock().builtInRegistryHolder();
 				id = baseHolder.key().location();
@@ -116,13 +140,23 @@ public class BlockFamilyInferrer {
 				captured = true;
 			}
 			if (!captured) {
-				throw new IllegalStateException("Unrecognized block: " + holder);
+				throw new IllegalStateException("Unrecognized block: " + holder.value());
+			}
+		}
+		List<String> normalCopperTemplate = List.of("%s_block", "cut_%s", "chiseled_%s", "%s_grate");
+		List<String> otherCopperTemplate = List.of("%s", "cut_%s", "chiseled_%s", "%s_grate");
+		ResourceLocation copperId = new ResourceLocation("copper");
+		for (String waxed : List.of("", "waxed_")) {
+			for (String variant : List.of("", "exposed_", "weathered_", "oxidized_")) {
+				List<String> template = variant.isEmpty() ? normalCopperTemplate : otherCopperTemplate;
+				template = template.stream().map($ -> waxed + variant + $).toList();
+				fromTemplates(copperId, waxed + variant + "copper", template, true);
 			}
 		}
 		if (!Platform.isProduction()) {
 			for (KHolder<BlockFamily> family : families) {
 				Kiwi.LOGGER.info(family.key().toString() + ":");
-				for (Holder<Block> holder : family.value().blockHolders()) {
+				for (Holder.Reference<Block> holder : family.value().blockHolders()) {
 					Kiwi.LOGGER.info("  - " + holder.unwrapKey().orElseThrow().location());
 				}
 			}
@@ -130,8 +164,8 @@ public class BlockFamilyInferrer {
 		return families;
 	}
 
-	private List<Holder<Block>> collectBlocks(ResourceLocation id, List<String> templates) {
-		List<Holder<Block>> blocks = Lists.newArrayList();
+	private List<Holder.Reference<Block>> collectBlocks(ResourceLocation id, List<String> templates) {
+		List<Holder.Reference<Block>> blocks = Lists.newArrayList();
 		for (String template : templates) {
 			ResourceLocation blockId = id.withPath(String.format(template, id.getPath()));
 			Optional<Holder.Reference<Block>> holder = BuiltInRegistries.BLOCK.getHolder(ResourceKey.create(Registries.BLOCK, blockId));
@@ -141,7 +175,7 @@ public class BlockFamilyInferrer {
 	}
 
 	private void fromTemplates(ResourceLocation id, String desc, List<String> templates, boolean cascading) {
-		List<Holder<Block>> blocks = collectBlocks(id, templates);
+		List<Holder.Reference<Block>> blocks = collectBlocks(id, templates);
 		if (blocks.size() < 2) {
 			return;
 		}
@@ -149,17 +183,26 @@ public class BlockFamilyInferrer {
 	}
 
 	private void generateColored(ResourceLocation id, List<String> templates) {
-		List<Holder<Block>> blocks = collectBlocks(id, templates);
+		List<Holder.Reference<Block>> blocks = collectBlocks(id, templates);
 		if (blocks.size() != templates.size()) {
 			return;
 		}
 		family(id, "colored", blocks, false);
 	}
 
-	private void family(ResourceLocation id, String desc, List<Holder<Block>> blocks, boolean cascading) {
+	private void family(ResourceLocation id, String desc, List<Holder.Reference<Block>> blocks, boolean cascading) {
+		List<ResourceKey<Block>> blockKeys = blocks.stream().filter($ -> !$.is(IGNORE)).map(Holder.Reference::key).toList();
 		KHolder<BlockFamily> family = new KHolder<>(
 				id.withPrefix("auto/%s/".formatted(desc)),
-				new BlockFamily(blocks, List.of(), List.of(), false, Items.AIR, 1, true, cascading));
+				new BlockFamily(
+						false,
+						blockKeys,
+						List.of(),
+						List.of(),
+						false,
+						Optional.empty(),
+						1,
+						BlockFamily.SwitchAttrs.create(true, cascading, false)));
 		families.add(family);
 		family.value().blocks().forEach(capturedBlocks::add);
 	}
