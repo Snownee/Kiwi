@@ -122,6 +122,7 @@ tasks.withType(Jar).configureEach {
             "/assets/${project.mod_id}/blockstates",
             "/assets/${project.mod_id}/models",
             "/assets/${project.mod_id}/lang/en_us.existing.json",
+            "/assets/kaleidos",
             "/snownee/${project.mod_id}/test",
             "/data",
             "/.cache",
