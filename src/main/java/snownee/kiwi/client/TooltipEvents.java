@@ -1,5 +1,6 @@
 package snownee.kiwi.client;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.IntConsumer;
 import java.util.stream.Stream;
@@ -11,6 +12,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -20,7 +22,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.TranslatableContents;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.BucketItem;
@@ -120,6 +121,7 @@ public final class TooltipEvents {
 	private static class DebugTooltipCache {
 		private final List<String> pageTypes = Lists.newArrayList();
 		private final List<List<String>> pages = Lists.newArrayList();
+		private final List<List<String>> translatedPages = Lists.newArrayList();
 		private int pageNow = 0;
 		private ItemStack itemStack = ItemStack.EMPTY;
 		private boolean showTags;
@@ -133,9 +135,10 @@ public final class TooltipEvents {
 			}
 			this.itemStack = itemStack;
 			pages.clear();
+			translatedPages.clear();
 			pageTypes.clear();
 			pageNow = 0;
-			addPages("item", itemStack.getTags().map(TagKey::location));
+			addPages("item", itemStack.getTags());
 			Item item = itemStack.getItem();
 			Block block = Block.byItem(item);
 			if (block != Blocks.AIR) {
@@ -155,32 +158,41 @@ public final class TooltipEvents {
 			}
 		}
 
-		private static <T> Stream<ResourceLocation> getTags(Registry<T> registry, T object) {
+		private static <T> Stream<TagKey<T>> getTags(Registry<T> registry, T object) {
 			return registry.getResourceKey(object)
 					.flatMap(registry::getHolder)
 					.stream()
-					.flatMap(Holder::tags)
-					.map(TagKey::location);
+					.flatMap(Holder::tags);
 		}
 
-		public void addPages(String type, Stream<ResourceLocation> stream) {
-			List<String> tags = stream.map(Object::toString).sorted().toList();
+		public void addPages(String type, Stream<? extends TagKey<?>> stream) {
+			List<? extends TagKey<?>> tags = stream.sorted(Comparator.comparing((TagKey<?> $) -> $.location())).toList();
 			if (tags.isEmpty()) {
 				return;
 			}
 			int i = 0;
 			List<String> page = Lists.newArrayList();
-			for (String tag : tags) {
-				page.add("#" + tag);
+			List<String> translatedPage = Lists.newArrayList();
+			for (TagKey<?> tag : tags) {
+				page.add("#" + tag.location());
+				String translationKey = Platform.getTagTranslationKey(tag);
+				if (I18n.exists(translationKey)) {
+					translatedPage.add("#" + I18n.get(translationKey));
+				} else {
+					translatedPage.add("#" + tag.location());
+				}
 				if (++i == KiwiClientConfig.tagsTooltipTagsPerPage) {
 					pages.add(page);
+					translatedPages.add(translatedPage);
 					pageTypes.add(type);
 					page = Lists.newArrayList();
+					translatedPage = Lists.newArrayList();
 					i = 0;
 				}
 			}
 			if (!page.isEmpty()) {
 				pages.add(page);
+				translatedPages.add(translatedPage);
 				pageTypes.add(type);
 			}
 		}
@@ -205,7 +217,8 @@ public final class TooltipEvents {
 				needUpdatePreferredType = false;
 				preferredType = pageTypes.get(pageNow);
 			}
-			List<String> page = pages.get(pageNow);
+			boolean showTranslatedTags = KiwiClientConfig.showTranslatedTagsByDefault ^ Screen.hasControlDown();
+			List<String> page = showTranslatedTags ? translatedPages.get(pageNow) : pages.get(pageNow);
 			for (String tag : page) {
 				sub.add(Component.literal(tag).withStyle(ChatFormatting.DARK_GRAY));
 			}

@@ -30,6 +30,9 @@ public final class KiwiClientConfig {
 	@KiwiConfig.Path("debug.tagsTooltip")
 	public static boolean tagsTooltip = true;
 
+	@KiwiConfig.Path("debug.showTranslatedTagsByDefault")
+	public static boolean showTranslatedTagsByDefault = false;
+
 	@KiwiConfig.Path("debug.tagsPerPage")
 	@KiwiConfig.Range(min = 0)
 	public static int tagsTooltipTagsPerPage = 6;

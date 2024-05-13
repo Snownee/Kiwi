@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.entity.FakePlayer;
-import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags;
+import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
 import net.fabricmc.fabric.impl.datagen.FabricDataGenHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
@@ -17,6 +17,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -67,6 +68,10 @@ public final class Platform {
 		return result;
 	}
 
+	public static Path getGameDir() {
+		return FabricLoader.getInstance().getGameDir();
+	}
+
 	public static Path getConfigDir() {
 		return FabricLoader.getInstance().getConfigDir();
 	}
@@ -88,11 +93,11 @@ public final class Platform {
 	}
 
 	public static boolean isShearsLeftClickable(ItemStack stack) {
-		return stack.is(ConventionalItemTags.SHEARS);
+		return stack.is(ConventionalItemTags.SHEARS_TOOLS);
 	}
 
 	public static boolean isShearsRightClickable(ItemStack stack) {
-		return stack.is(ConventionalItemTags.SHEARS);
+		return stack.is(ConventionalItemTags.SHEARS_TOOLS);
 	}
 
 	public static Fluid getFluidFromBucket(BucketItem item) {
@@ -105,6 +110,10 @@ public final class Platform {
 		} catch (Exception e) {
 			return Component.translatable(s, objects);
 		}
+	}
+
+	public static String getTagTranslationKey(TagKey<?> tagKey) {
+		return tagKey.getTranslationKey();
 	}
 
 	public static Platform.Type getPlatform() {

@@ -14,6 +14,8 @@
   "kiwi.config.client": "Client-side",
   "kiwi.config.common": "Common",
   "kiwi.config.debug": "Debug",
+  "kiwi.config.debug.showTranslatedTagsByDefault": "Show Translated Tags By Default",
+  "kiwi.config.debug.showTranslatedTagsByDefault.desc": "",
   "kiwi.config.debug.tagsPerPage": "Tags Per Page",
   "kiwi.config.debug.tagsPerPage.desc": "The number of tags to show per page in advanced tooltips",
   "kiwi.config.debug.tagsTooltip": "Tags Tooltip",
