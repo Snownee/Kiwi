@@ -137,7 +137,7 @@ public @interface KiwiModule {
 	 *
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.FIELD)
+	@Target({ElementType.TYPE, ElementType.FIELD})
 	@interface Skip {
 	}
 

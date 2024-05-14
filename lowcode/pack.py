@@ -7,6 +7,8 @@ import tempfile
 def main():
     if len(sys.argv) < 2:
         pack('kswitch')
+        pack('ksit')
+        pack('kiwicustomization')
         pack('persistentcreativeinventory')
         pack('fastscroll')
         return

@@ -2,3 +2,9 @@ type: simple
 class: net.minecraft.world.level.block.LeavesBlock
 properties:
   render_type: cutout_mipped
+  no_occlusion: false
+  is_redstone_conductor: false
+  is_suffocating: false
+  is_view_blocking: false
+  is_valid_spawn: ocelot_or_parrot
+  push_reaction: destroy

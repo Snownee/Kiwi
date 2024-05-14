@@ -34,8 +34,8 @@
 		"customization.placement.PlayerMixin",
 		"customization.property_inject.BlockMixin",
 		"customization.property_inject.StateDefinitionBuilderMixin",
-		"sit.DisplayMixin",
-		"sit.EntityMixin"
+		"customization.sit.DisplayMixin",
+		"customization.sit.EntityMixin"
 	],
 	"client": [
 		"client.ClientTelemetryManagerMixin",
@@ -46,10 +46,10 @@
 		"customization.client.DebugRendererMixin",
 		"customization.client.GameRendererMixin",
 		"customization.client.MultiPlayerGameModeMixin",
+		"customization.sit.ClientPacketListenerMixin",
+		"customization.sit.LocalPlayerMixin",
 		"forge.BlockColorsAccess",
-		"forge.ItemColorsAccess",
-		"sit.ClientPacketListenerMixin",
-		"sit.LocalPlayerMixin"
+		"forge.ItemColorsAccess"
 	],
 	"injectors": {
 		"defaultRequire": 1

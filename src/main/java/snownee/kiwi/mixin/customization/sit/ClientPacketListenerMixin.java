@@ -1,4 +1,4 @@
-package snownee.kiwi.mixin.sit;
+package snownee.kiwi.mixin.customization.sit;
 
 import java.util.Objects;
 

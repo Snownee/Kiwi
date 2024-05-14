@@ -8,6 +8,8 @@ import org.jetbrains.annotations.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
@@ -16,6 +18,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BedBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.CarpetBlock;
+import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -31,7 +36,7 @@ import snownee.kiwi.customization.block.component.KBlockComponent;
 
 public class SitManager {
 	public static final Component ENTITY_NAME = Component.literal("Seat from Kiwi");
-	public static final double VERTICAL_OFFSET = 0.15;
+	public static final double VERTICAL_OFFSET = 0.23;
 
 	public static void tick(Display.BlockDisplay display) {
 		if (display.tickCount < 7) {
@@ -51,16 +56,35 @@ public class SitManager {
 		if (hitResult.getDirection() == Direction.DOWN || player.isSecondaryUseActive()) {
 			return false;
 		}
-		if (player.getEyePosition().distanceToSqr(hitResult.getLocation()) > 12) {
-			return false;
-		}
 		Level level = player.level();
 		BlockPos pos = hitResult.getBlockPos();
 		BlockState blockState = level.getBlockState(pos);
 		if (!blockState.is(CustomFeatureTags.SITTABLE)) {
 			return false;
 		}
-		if (!level.getEntities(EntityType.BLOCK_DISPLAY, new AABB(pos, pos.above()), SitManager::isSeatEntity).isEmpty()) {
+		Block block = blockState.getBlock();
+		if (block instanceof BedBlock) {
+			if (blockState.getValue(BedBlock.OCCUPIED) || !BedBlock.canSetSpawn(level)) {
+				return false;
+			}
+			Direction direction = blockState.getValue(BedBlock.FACING);
+			if (player instanceof ServerPlayer serverPlayer && serverPlayer.bedInRange(pos, direction)) {
+				return false;
+			}
+		} else if (player.getEyePosition().distanceToSqr(hitResult.getLocation()) > 12) {
+			return false;
+		}
+		if (!player.getMainHandItem().isEmpty() && player.getMainHandItem().is(block.asItem())) {
+			return false;
+		} else if (!KSitCommonConfig.sitOnStairs && block instanceof StairBlock) {
+			return false;
+		} else if (!KSitCommonConfig.sitOnSlab && block instanceof SlabBlock) {
+			return false;
+		} else if (!KSitCommonConfig.sitOnCarpet && block instanceof CarpetBlock) {
+			return false;
+		} else if (!KSitCommonConfig.sitOnBed && block instanceof BedBlock) {
+			return false;
+		} else if (!level.getEntities(EntityType.BLOCK_DISPLAY, new AABB(pos).expandTowards(0, 1, 0), SitManager::isSeatEntity).isEmpty()) {
 			return false;
 		}
 		if (!level.isClientSide) {
@@ -80,7 +104,7 @@ public class SitManager {
 					x += facing.getStepX() * 0.1;
 					z += facing.getStepZ() * 0.1;
 				}
-				Vec3 traceStart = new Vec3(x, y, z);
+				Vec3 traceStart = new Vec3(pos.getX() + x, pos.getY() + y, pos.getZ() + z);
 				Vec3 traceEnd = traceStart.add(0, -2, 0);
 				BlockHitResult hit = shape.clip(traceStart, traceEnd, pos);
 				if (hit != null && hit.getType() == BlockHitResult.Type.BLOCK) {
@@ -95,7 +119,8 @@ public class SitManager {
 			if (seatPos == null) {
 				seatPos = Vec3.atCenterOf(pos);
 			}
-			display.setPos(seatPos.x, seatPos.y - VERTICAL_OFFSET, seatPos.z);
+			double clampedY = Mth.clamp(seatPos.y, pos.getY(), pos.getY() + 0.999);
+			display.setPos(seatPos.x, clampedY - VERTICAL_OFFSET, seatPos.z);
 			if (level.addFreshEntity(display)) {
 				player.startRiding(display, true);
 			}
@@ -105,6 +130,9 @@ public class SitManager {
 
 	@Nullable
 	public static Direction guessBlockFacing(BlockState blockState, @Nullable Player player) {
+		if (blockState.is(BlockTags.BEDS)) {
+			return null;
+		}
 		KBlockSettings settings = KBlockSettings.of(blockState.getBlock());
 		if (settings != null) {
 			for (KBlockComponent component : settings.components.values()) {
@@ -176,6 +204,6 @@ public class SitManager {
 				pos,
 				direction,
 				passenger.getYRot());
-		return vec3.isPresent() ? vec3.get() : Vec3.atBottomCenterOf(pos.above());
+		return vec3.orElseGet(() -> Vec3.atBottomCenterOf(pos.above()));
 	}
 }
