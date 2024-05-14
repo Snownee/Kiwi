@@ -2,19 +2,37 @@ name: New Issue
 description: Do not write different problems/ideas in one issue. Separate them
 body:
   - type: dropdown
+    id: project
+    attributes:
+      label: Project
+      options:
+        - Please select
+        - Kiwi
+        - Kiwi Customization
+        - KSwitch
+        - KSit
+        - Fast Scrolling
+        - Persistent Creative Inventory
+        - Lava Clear View
+    validations:
+      required: true
+  - type: dropdown
     id: modloader
     attributes:
       label: Mod loader
       options:
-        - Forge
+        - Please select
         - Fabric
+        - NeoForge
+        - Forge
+        - Quilt
     validations:
       required: true
   - type: input
     id: mc-version
     attributes:
       label: Minecraft version
-      placeholder: eg. 1.17.1
+      placeholder: eg. 1.20.1
     validations:
       required: true
   - type: input
@@ -43,14 +61,14 @@ body:
   - type: checkboxes
     id: reproducible
     attributes:
-      label: "If bug:"
+      label: "[IMPORTANT] If bug:"
       options:
-        - label: "Can you reproduce this issue with relevant mods only?"
+        - label: "I have confirmed this bug is reproducible on a minimal setup, not a modpack with many other mods."
   - type: input
     attributes:
-      label: "If bug: The latest.log file"
+      label: "[IMPORTANT] If bug: The **latest.log** file"
       description: "Please use a paste site such as [gist](https://gist.github.com/) / [pastebin](https://pastebin.com/) / etc."
   - type: textarea
     attributes:
       label: Issue description
-      placeholder: A description of the issue.
+      placeholder: A description of the bug/suggestion.
