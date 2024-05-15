@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import com.mojang.authlib.GameProfile;
 
@@ -28,7 +28,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public class NBTHelper {
 
 	@Nullable
-	private ItemStack stack;
+	private final ItemStack stack;
 	@Nullable
 	private CompoundTag tag;
 
@@ -369,6 +369,7 @@ public class NBTHelper {
 		return null;
 	}
 
+	@Nullable
 	public ListTag getTagList(String key, int type) {
 		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {

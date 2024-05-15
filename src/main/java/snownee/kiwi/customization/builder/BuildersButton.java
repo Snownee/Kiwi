@@ -44,7 +44,7 @@ public class BuildersButton {
 	private static boolean builderMode;
 
 	public static boolean isBuilderModeOn() {
-		if (builderMode && CustomizationClient.buildersButtonKey.isUnbound()) {
+		if (builderMode && CustomizationClient.buildersButtonKey != null && CustomizationClient.buildersButtonKey.isUnbound()) {
 			builderMode = false;
 		}
 		return builderMode;

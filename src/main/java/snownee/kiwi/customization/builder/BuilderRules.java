@@ -2,8 +2,6 @@ package snownee.kiwi.customization.builder;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Function;
 
 import com.google.common.collect.ImmutableListMultimap;
@@ -12,8 +10,6 @@ import com.google.common.collect.ImmutableMap;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.level.block.Block;
-import snownee.kiwi.customization.block.family.BlockFamilies;
-import snownee.kiwi.customization.block.family.BlockFamily;
 import snownee.kiwi.util.KHolder;
 import snownee.kiwi.util.resource.OneTimeLoader;
 
@@ -49,5 +45,9 @@ public class BuilderRules {
 	public static BuilderRule get(ResourceLocation id) {
 		KHolder<BuilderRule> holder = byId.get(id);
 		return holder == null ? null : holder.value();
+	}
+
+	public static Collection<KHolder<BuilderRule>> all() {
+		return byId.values();
 	}
 }

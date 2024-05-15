@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
 
+import com.google.common.base.Preconditions;
 import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.client.Minecraft;
@@ -15,6 +16,9 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
+import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 
 public class ClientProxy {
@@ -43,6 +47,36 @@ public class ClientProxy {
 	@Nullable
 	public static Slot getSlotUnderMouse(AbstractContainerScreen<?> containerScreen) {
 		return containerScreen.getSlotUnderMouse();
+	}
+
+	public static void afterRegisterSmartKey(SmartKey smartKey) {
+		Preconditions.checkNotNull(smartKey);
+		var forgeEventBus = MinecraftForge.EVENT_BUS;
+		forgeEventBus.addListener((TickEvent.ClientTickEvent event) -> {
+			if (event.phase == TickEvent.Phase.END) {
+				smartKey.tick();
+			}
+		});
+		forgeEventBus.addListener((ScreenEvent.MouseButtonPressed.Pre event) -> {
+			if (smartKey.matchesMouse(event.getButton()) && smartKey.setDownWithResult(true)) {
+				event.setCanceled(true);
+			}
+		});
+		forgeEventBus.addListener((ScreenEvent.MouseButtonReleased.Pre event) -> {
+			if (smartKey.matchesMouse(event.getButton()) && smartKey.setDownWithResult(false)) {
+				event.setCanceled(true);
+			}
+		});
+		forgeEventBus.addListener((ScreenEvent.KeyPressed.Pre event) -> {
+			if (smartKey.matches(event.getKeyCode(), event.getScanCode()) && smartKey.setDownWithResult(true)) {
+				event.setCanceled(true);
+			}
+		});
+		forgeEventBus.addListener((ScreenEvent.KeyReleased.Pre event) -> {
+			if (smartKey.matches(event.getKeyCode(), event.getScanCode()) && smartKey.setDownWithResult(false)) {
+				event.setCanceled(true);
+			}
+		});
 	}
 
 	public record Context(boolean loading, IEventBus modEventBus) {

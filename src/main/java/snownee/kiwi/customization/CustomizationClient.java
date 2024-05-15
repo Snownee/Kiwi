@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -29,7 +31,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.client.event.CustomizeGuiOverlayEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.client.event.RenderHighlightEvent;
-import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
@@ -38,8 +39,10 @@ import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.customization.block.GlassType;
 import snownee.kiwi.customization.block.behavior.SitManager;
+import snownee.kiwi.customization.block.family.BlockFamilies;
 import snownee.kiwi.customization.block.loader.BlockDefinitionProperties;
 import snownee.kiwi.customization.block.loader.KBlockDefinition;
+import snownee.kiwi.customization.builder.BuilderRules;
 import snownee.kiwi.customization.builder.BuildersButton;
 import snownee.kiwi.customization.builder.ConvertScreen;
 import snownee.kiwi.customization.command.ExportBlocksCommand;
@@ -54,43 +57,27 @@ import snownee.kiwi.util.ColorProviderUtil;
 import snownee.kiwi.util.SmartKey;
 
 public final class CustomizationClient {
+	@Nullable
 	public static SmartKey buildersButtonKey;
 
 	public static void init() {
-		buildersButtonKey = new SmartKey.Builder("key.kiwi.builders_button", KeyMapping.CATEGORY_GAMEPLAY)
-				.key(InputConstants.getKey("key.mouse.4"))
-				.onLongPress(BuildersButton::onLongPress)
-				.onShortPress(BuildersButton::onShortPress)
-				.build();
 		var modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 		var forgeEventBus = MinecraftForge.EVENT_BUS;
 		modEventBus.addListener((RegisterKeyMappingsEvent event) -> {
+			if (!CustomizationHooks.kswitch && BlockFamilies.all().isEmpty() && BuilderRules.all().isEmpty()) {
+				return;
+			}
+			buildersButtonKey = new SmartKey.Builder("key.kiwi.builders_button", KeyMapping.CATEGORY_GAMEPLAY)
+					.key(InputConstants.getKey("key.mouse.4"))
+					.onLongPress(BuildersButton::onLongPress)
+					.onShortPress(BuildersButton::onShortPress)
+					.build();
 			event.register(buildersButtonKey);
+			ClientProxy.afterRegisterSmartKey(buildersButtonKey);
 		});
 		forgeEventBus.addListener((TickEvent.ClientTickEvent event) -> {
 			if (event.phase == TickEvent.Phase.END) {
-				buildersButtonKey.tick();
 				ConvertScreen.tickLingering();
-			}
-		});
-		forgeEventBus.addListener((ScreenEvent.MouseButtonPressed.Pre event) -> {
-			if (buildersButtonKey.matchesMouse(event.getButton()) && buildersButtonKey.setDownWithResult(true)) {
-				event.setCanceled(true);
-			}
-		});
-		forgeEventBus.addListener((ScreenEvent.MouseButtonReleased.Pre event) -> {
-			if (buildersButtonKey.matchesMouse(event.getButton()) && buildersButtonKey.setDownWithResult(false)) {
-				event.setCanceled(true);
-			}
-		});
-		forgeEventBus.addListener((ScreenEvent.KeyPressed.Pre event) -> {
-			if (buildersButtonKey.matches(event.getKeyCode(), event.getScanCode()) && buildersButtonKey.setDownWithResult(true)) {
-				event.setCanceled(true);
-			}
-		});
-		forgeEventBus.addListener((ScreenEvent.KeyReleased.Pre event) -> {
-			if (buildersButtonKey.matches(event.getKeyCode(), event.getScanCode()) && buildersButtonKey.setDownWithResult(false)) {
-				event.setCanceled(true);
 			}
 		});
 		forgeEventBus.addListener((RegisterCommandsEvent event) -> {

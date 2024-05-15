@@ -63,6 +63,6 @@ public class Platform {
 	}
 
 	public enum Type {
-		Vanilla, Fabric, Quilt, Forge, NeoForge
+		Vanilla, Fabric, Quilt, Forge, NeoForge, Unknown
 	}
 }
