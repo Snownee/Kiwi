@@ -33,7 +33,6 @@ import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.repository.RepositorySource;
-import net.minecraft.server.packs.resources.MultiPackResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -372,7 +371,7 @@ public final class CustomizationHooks {
 		selected.remove("mod_resources");
 		selected.add(0, "mod_resources");
 		packRepository.setSelected(selected);
-		return new MultiPackResourceManager(PackType.CLIENT_RESOURCES, packRepository.openAllSelected());
+		return new KiwiPackResourceManager(packRepository.openAllSelected());
 	}
 
 	private static RepositorySource buildPackFinder(Map<IModFile, ? extends PathPackResources> modResourcePacks) {
