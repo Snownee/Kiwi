@@ -2,6 +2,7 @@
 	"required": true,
 	"minVersion": "0.8",
 	"package": "snownee.kiwi.mixin",
+	"plugin": "snownee.kiwi.mixin.MixinPlugin",
 	"compatibilityLevel": "JAVA_16",
 	"refmap": "kiwi.refmap.json",
 	"mixins": [
@@ -11,7 +12,11 @@
 	"client": [
 		"client.ClientPacketListenerMixin",
 		"client.ClientTelemetryManagerMixin",
+		"client.CreativeModeInventoryScreenMixin",
+		"client.FogRendererMixin",
 		"client.LoadingOverlayMixin",
+		"client.OptionInstanceMixin",
+		"client.ScreenEffectRendererMixin",
 		"client.ScreenMixin",
 		"client.TitleScreenMixin",
 		"client.WorldOpenFlowsMixin"
