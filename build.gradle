@@ -315,7 +315,6 @@ unifiedPublishing {
 
         mainPublication tasks.shadowJar // Declares the publicated jar
 
-/*
         if (System.getenv("CURSE_TOKEN") != null) {
             curseforge {
                 token = System.getenv("CURSE_TOKEN")
@@ -326,7 +325,6 @@ unifiedPublishing {
                 }
             }
         }
-*/
 
         if (System.getenv("MODRINTH_TOKEN") != null) {
             modrinth {
