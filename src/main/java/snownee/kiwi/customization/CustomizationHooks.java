@@ -5,16 +5,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -245,19 +241,11 @@ public final class CustomizationHooks {
 	public static void initLoader(IEventBus modEventBus) {
 		ResourceManager resourceManager = collectKiwiPacks();
 		BlockFundamentals blockFundamentals = BlockFundamentals.reload(resourceManager, true);
-		ItemFundamentals itemFundamentals = ItemFundamentals.reload(resourceManager, true);
 		namespaces.clear();
 		blockFundamentals.blocks().keySet().stream().map(ResourceLocation::getNamespace).forEach(namespaces::add);
-		itemFundamentals.items().keySet().stream().map(ResourceLocation::getNamespace).forEach(namespaces::add);
-		CustomizationMetadata emptyMetadata = new CustomizationMetadata(ImmutableListMultimap.of());
-		Map<String, CustomizationMetadata> metadataMap = namespaces.stream().collect(Collectors.toUnmodifiableMap(
-				Function.identity(),
-				$ -> Optional.ofNullable(OneTimeLoader.loadFile(
-						resourceManager,
-						"kiwi",
-						new ResourceLocation($, "metadata"),
-						CustomizationMetadata.CODEC)).orElse(emptyMetadata)
-		));
+		int namespaceCount = namespaces.size();
+		Map<String, CustomizationMetadata> metadataMap = CustomizationMetadata.loadMap(resourceManager, namespaces);
+		List<ResourceLocation> blockIds = Lists.newArrayList();
 		CustomizationMetadata.sortedForEach(metadataMap, "block", blockFundamentals.blocks(), (id, definition) -> {
 			try {
 				Block block = definition.createBlock(id, blockFundamentals.shapes());
@@ -267,13 +255,21 @@ public final class CustomizationHooks {
 				ForgeRegistries.BLOCKS.register(id, block);
 				blockFundamentals.slotProviders().attachSlotsA(block, definition);
 				blockFundamentals.placeChoices().attachChoicesA(block, definition);
-				if (!itemFundamentals.items().containsKey(id)) {
-					itemFundamentals.addDefaultBlockItem(id);
-				}
+				blockIds.add(id);
 			} catch (Exception e) {
 				Kiwi.LOGGER.error("Failed to create block %s".formatted(id), e);
 			}
 		});
+		ItemFundamentals itemFundamentals = ItemFundamentals.reload(resourceManager, true);
+		itemFundamentals.items().keySet().stream().map(ResourceLocation::getNamespace).forEach(namespaces::add);
+		if (namespaces.size() != namespaceCount) {
+			metadataMap = CustomizationMetadata.loadMap(resourceManager, namespaces);
+		}
+		for (ResourceLocation blockId : blockIds) {
+			if (!itemFundamentals.items().containsKey(blockId)) {
+				itemFundamentals.addDefaultBlockItem(blockId);
+			}
+		}
 		KItemTemplate none = itemFundamentals.templates().get(new ResourceLocation("none"));
 		Preconditions.checkNotNull(none, "Missing 'none' item definition");
 		CustomizationMetadata.sortedForEach(metadataMap, "item", itemFundamentals.items(), (id, definition) -> {

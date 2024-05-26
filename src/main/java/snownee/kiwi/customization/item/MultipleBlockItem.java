@@ -3,6 +3,7 @@ package snownee.kiwi.customization.item;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.base.Preconditions;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -30,6 +31,10 @@ public class MultipleBlockItem extends BlockItem {
 	public MultipleBlockItem(List<Pair<String, Block>> blocks, Properties properties) {
 		super(blocks.get(0).getSecond(), properties);
 		this.blocks = blocks;
+		Preconditions.checkArgument(blocks.size() > 1, "MultipleBlockItem must have more than one block");
+		Preconditions.checkArgument(
+				blocks.stream().map(Pair::getSecond).allMatch(block -> block != Blocks.AIR),
+				"MultipleBlockItem cannot have AIR block");
 	}
 
 	@Override

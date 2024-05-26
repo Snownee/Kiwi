@@ -3,8 +3,11 @@ package snownee.kiwi.customization;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Maps;
@@ -13,7 +16,10 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
+import snownee.kiwi.Kiwi;
 import snownee.kiwi.util.Util;
+import snownee.kiwi.util.resource.OneTimeLoader;
 
 public record CustomizationMetadata(ImmutableListMultimap<String, String> registryOrder) {
 	public static final Codec<CustomizationMetadata> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
@@ -32,6 +38,18 @@ public record CustomizationMetadata(ImmutableListMultimap<String, String> regist
 		ImmutableListMultimap.Builder<String, String> builder = ImmutableListMultimap.builder();
 		map.forEach(builder::putAll);
 		return new CustomizationMetadata(builder.build());
+	}
+
+	public static Map<String, CustomizationMetadata> loadMap(ResourceManager resourceManager, Set<String> namespaces) {
+		CustomizationMetadata emptyMetadata = new CustomizationMetadata(ImmutableListMultimap.of());
+		return namespaces.stream().collect(Collectors.toUnmodifiableMap(
+				Function.identity(),
+				$ -> Optional.ofNullable(OneTimeLoader.loadFile(
+						resourceManager,
+						Kiwi.ID,
+						new ResourceLocation($, "metadata"),
+						CustomizationMetadata.CODEC)).orElse(emptyMetadata)
+		));
 	}
 
 	public static <T> void sortedForEach(
