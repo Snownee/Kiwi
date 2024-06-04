@@ -16,6 +16,7 @@ import snownee.kiwi.customization.CustomizationHooks;
 import snownee.kiwi.customization.block.BlockFundamentals;
 import snownee.kiwi.customization.shape.ShapeGenerator;
 import snownee.kiwi.customization.shape.UnbakedShapeCodec;
+import snownee.kiwi.util.resource.OneTimeLoader;
 
 public class ExportShapesCommand {
 	public static void register(LiteralArgumentBuilder<CommandSourceStack> builder) {
@@ -27,7 +28,10 @@ public class ExportShapesCommand {
 	private static int exportShapes(CommandSourceStack source) {
 		Map<String, String> data = Maps.newTreeMap();
 		try (BufferedWriter writer = Files.newBufferedWriter(Paths.get("exported_shapes.json"))) {
-			BlockFundamentals fundamentals = BlockFundamentals.reload(CustomizationHooks.collectKiwiPacks(), false);
+			BlockFundamentals fundamentals = BlockFundamentals.reload(
+					CustomizationHooks.collectKiwiPacks(),
+					new OneTimeLoader.Context(),
+					false);
 			fundamentals.shapes().forEach((key, value) -> {
 				if (value.getClass() != ShapeGenerator.Unit.class) {
 					return;

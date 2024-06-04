@@ -15,6 +15,7 @@ import snownee.kiwi.customization.block.BlockFundamentals;
 import snownee.kiwi.customization.block.loader.KBlockDefinition;
 import snownee.kiwi.customization.placement.PlaceChoices;
 import snownee.kiwi.customization.placement.PlaceSlot;
+import snownee.kiwi.util.resource.OneTimeLoader;
 
 public class ReloadSlotsCommand {
 
@@ -26,7 +27,8 @@ public class ReloadSlotsCommand {
 
 	private static int reload(CommandSourceStack source) {
 		Stopwatch stopwatch = Stopwatch.createStarted();
-		BlockFundamentals fundamentals = BlockFundamentals.reload(CustomizationHooks.collectKiwiPacks(), false);
+		OneTimeLoader.Context context = new OneTimeLoader.Context();
+		BlockFundamentals fundamentals = BlockFundamentals.reload(CustomizationHooks.collectKiwiPacks(), context, false);
 		long parseTime = stopwatch.elapsed().toMillis();
 		stopwatch.reset().start();
 		int choicesCount = reload(fundamentals);

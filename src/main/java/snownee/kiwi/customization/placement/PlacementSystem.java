@@ -57,7 +57,7 @@ public class PlacementSystem {
 			return true;
 		}
 		String namespace = BuiltInRegistries.BLOCK.getKey(blockState.getBlock()).getNamespace();
-		return CustomizationHooks.getNamespaces().contains(namespace);
+		return CustomizationHooks.getBlockNamespaces().contains(namespace);
 	}
 
 	public static BlockState onPlace(BlockItem blockItem, BlockState blockState, BlockPlaceContext context) {

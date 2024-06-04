@@ -53,8 +53,8 @@ public class BlockFamilies {
 		return byStonecutterSource.get(item);
 	}
 
-	public static void reloadResources(ResourceManager resourceManager) {
-		Map<ResourceLocation, BlockFamily> families = OneTimeLoader.load(resourceManager, "kiwi/family", BlockFamily.CODEC);
+	public static void reloadResources(ResourceManager resourceManager, OneTimeLoader.Context context) {
+		Map<ResourceLocation, BlockFamily> families = OneTimeLoader.load(resourceManager, "kiwi/family", BlockFamily.CODEC, context);
 		fromResources = families.entrySet()
 				.stream()
 				.map(e -> new KHolder<>(e.getKey(), e.getValue()))

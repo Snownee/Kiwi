@@ -17,15 +17,16 @@ public record ItemFundamentals(
 		Map<ResourceLocation, KItemDefinition> items,
 		ConfiguredItemTemplate blockItemTemplate,
 		ItemDefinitionProperties defaultProperties) {
-	public static ItemFundamentals reload(ResourceManager resourceManager, boolean booting) {
-		var templates = OneTimeLoader.load(resourceManager, "kiwi/template/item", KItemTemplate.codec());
+	public static ItemFundamentals reload(ResourceManager resourceManager, OneTimeLoader.Context context, boolean booting) {
+		var templates = OneTimeLoader.load(resourceManager, "kiwi/template/item", KItemTemplate.codec(), context);
 		if (booting) {
 			templates.forEach((key, value) -> value.resolve(key));
 		}
 		var items = OneTimeLoader.load(
 				resourceManager,
 				"kiwi/item",
-				KItemDefinition.codec(templates));
+				KItemDefinition.codec(templates),
+				context);
 		var blockItemTemplate = templates.get(new ResourceLocation("block"));
 		Preconditions.checkNotNull(blockItemTemplate, "Default block item template not found");
 		return new ItemFundamentals(

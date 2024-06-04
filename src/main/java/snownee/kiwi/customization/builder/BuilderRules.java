@@ -21,8 +21,8 @@ public class BuilderRules {
 		return byBlock.get(block);
 	}
 
-	public static int reload(ResourceManager resourceManager) {
-		Map<ResourceLocation, BuilderRule> families = OneTimeLoader.load(resourceManager, "kiwi/builder_rule", BuilderRule.CODEC);
+	public static int reload(ResourceManager resourceManager, OneTimeLoader.Context context) {
+		Map<ResourceLocation, BuilderRule> families = OneTimeLoader.load(resourceManager, "kiwi/builder_rule", BuilderRule.CODEC, context);
 
 //		BlockSpread blockSpread = new BlockSpread(BlockSpread.Type.PLANE_XZ, Optional.empty(), FacingLimitation.FrontAndBack, 16);
 //		BlockFamily family = Objects.requireNonNull(BlockFamilies.get(new ResourceLocation("xkdeco:black_roof_end")));

@@ -85,7 +85,7 @@ import snownee.kiwi.util.resource.OneTimeLoader;
 import snownee.kiwi.util.resource.RequiredFolderRepositorySource;
 
 public final class CustomizationHooks {
-	private static final Set<String> namespaces = Sets.newLinkedHashSet();
+	private static final Set<String> blockNamespaces = Sets.newLinkedHashSet();
 	private static boolean enabled = true;
 	public static boolean kswitch = Platform.isModLoaded("kswitch") || !Platform.isProduction();
 
@@ -240,11 +240,11 @@ public final class CustomizationHooks {
 
 	public static void initLoader(IEventBus modEventBus) {
 		ResourceManager resourceManager = collectKiwiPacks();
-		BlockFundamentals blockFundamentals = BlockFundamentals.reload(resourceManager, true);
-		namespaces.clear();
-		blockFundamentals.blocks().keySet().stream().map(ResourceLocation::getNamespace).forEach(namespaces::add);
-		int namespaceCount = namespaces.size();
-		Map<String, CustomizationMetadata> metadataMap = CustomizationMetadata.loadMap(resourceManager, namespaces);
+		OneTimeLoader.Context context = new OneTimeLoader.Context();
+		Map<String, CustomizationMetadata> metadataMap = CustomizationMetadata.loadMap(resourceManager, context);
+		BlockFundamentals blockFundamentals = BlockFundamentals.reload(resourceManager, context, true);
+		blockNamespaces.clear();
+		blockFundamentals.blocks().keySet().stream().map(ResourceLocation::getNamespace).forEach(blockNamespaces::add);
 		List<ResourceLocation> blockIds = Lists.newArrayList();
 		CustomizationMetadata.sortedForEach(metadataMap, "block", blockFundamentals.blocks(), (id, definition) -> {
 			try {
@@ -260,11 +260,7 @@ public final class CustomizationHooks {
 				Kiwi.LOGGER.error("Failed to create block %s".formatted(id), e);
 			}
 		});
-		ItemFundamentals itemFundamentals = ItemFundamentals.reload(resourceManager, true);
-		itemFundamentals.items().keySet().stream().map(ResourceLocation::getNamespace).forEach(namespaces::add);
-		if (namespaces.size() != namespaceCount) {
-			metadataMap = CustomizationMetadata.loadMap(resourceManager, namespaces);
-		}
+		ItemFundamentals itemFundamentals = ItemFundamentals.reload(resourceManager, context, true);
 		for (ResourceLocation blockId : blockIds) {
 			if (!itemFundamentals.items().containsKey(blockId)) {
 				itemFundamentals.addDefaultBlockItem(blockId);
@@ -295,7 +291,7 @@ public final class CustomizationHooks {
 					blockFundamentals.blocks(),
 					new ClientProxy.Context(ClientModLoader.isLoading(), modEventBus));
 		}
-		var tabs = OneTimeLoader.load(resourceManager, "kiwi/creative_tab", KCreativeTab.CODEC);
+		var tabs = OneTimeLoader.load(resourceManager, "kiwi/creative_tab", KCreativeTab.CODEC, context);
 		List<Map.Entry<ResourceLocation, KCreativeTab>> newTabs = tabs.entrySet().stream().sorted(Comparator.comparingInt($ -> $.getValue()
 				.order())).filter(entry -> {
 			KCreativeTab value = entry.getValue();
@@ -329,9 +325,9 @@ public final class CustomizationHooks {
 			}
 			Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, key, tab.build());
 		}
-		BlockFamilies.reloadResources(resourceManager); // might be useful for data-gen
+		BlockFamilies.reloadResources(resourceManager, context); // might be useful for data-gen
 		if (!Platform.isDataGen()) {
-			BuilderRules.reload(resourceManager);
+			BuilderRules.reload(resourceManager, context);
 		}
 	}
 
@@ -409,8 +405,8 @@ public final class CustomizationHooks {
 		packAcceptor.accept(modResourcesPack);
 	}
 
-	public static Set<String> getNamespaces() {
-		return namespaces;
+	public static Set<String> getBlockNamespaces() {
+		return blockNamespaces;
 	}
 
 	public static boolean isColorlessGlass(BlockState blockState) {

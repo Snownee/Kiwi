@@ -17,6 +17,7 @@ import snownee.kiwi.customization.CustomizationHooks;
 import snownee.kiwi.customization.block.BlockFundamentals;
 import snownee.kiwi.customization.block.KBlockSettings;
 import snownee.kiwi.customization.block.loader.KBlockDefinition;
+import snownee.kiwi.util.resource.OneTimeLoader;
 
 public class ReloadBlockSettingsCommand {
 
@@ -28,7 +29,8 @@ public class ReloadBlockSettingsCommand {
 
 	private static int reload(CommandSourceStack source) {
 		Stopwatch stopwatch = Stopwatch.createStarted();
-		BlockFundamentals fundamentals = BlockFundamentals.reload(CustomizationHooks.collectKiwiPacks(), false);
+		OneTimeLoader.Context context = new OneTimeLoader.Context();
+		BlockFundamentals fundamentals = BlockFundamentals.reload(CustomizationHooks.collectKiwiPacks(), context, false);
 		long parseTime = stopwatch.elapsed().toMillis();
 		stopwatch.reset().start();
 		Set<Block> set = Sets.newHashSet();
