@@ -89,7 +89,7 @@ public class CConvertItemPacket extends PacketHandler {
 				if (family == null || !family.switchAttrs().enabled() || !family.contains(item) || !family.contains(step.getSecond())) {
 					return;
 				}
-				if (!family.switchAttrs().cascading() && index == steps.size() - 1) {
+				if (!family.switchAttrs().cascading() && index != steps.size() - 1) {
 					return;
 				}
 				if (!player.isCreative()) {
