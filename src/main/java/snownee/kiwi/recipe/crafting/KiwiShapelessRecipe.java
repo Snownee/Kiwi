@@ -8,9 +8,9 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
@@ -44,9 +44,9 @@ public class KiwiShapelessRecipe extends ShapelessRecipe {
 	}
 
 	@Override
-	public boolean matches(CraftingContainer craftingContainer, Level level) {
+	public boolean matches(CraftingInput input, Level level) {
 		trim();
-		return super.matches(craftingContainer, level);
+		return super.matches(input, level);
 	}
 
 	@Override
@@ -64,11 +64,11 @@ public class KiwiShapelessRecipe extends ShapelessRecipe {
 	}
 
 	@Override
-	public NonNullList<ItemStack> getRemainingItems(CraftingContainer inv) {
+	public NonNullList<ItemStack> getRemainingItems(CraftingInput input) {
 		if (noContainers) {
-			return NonNullList.withSize(inv.getContainerSize(), ItemStack.EMPTY);
+			return NonNullList.withSize(input.size(), ItemStack.EMPTY);
 		} else {
-			return super.getRemainingItems(inv);
+			return super.getRemainingItems(input);
 		}
 	}
 

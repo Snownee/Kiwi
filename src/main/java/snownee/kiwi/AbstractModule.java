@@ -96,7 +96,7 @@ public abstract class AbstractModule {
 	}
 
 	public static <T> TagKey<T> tag(ResourceKey<? extends Registry<T>> registryKey, String namespace, String path) {
-		return TagKey.create(registryKey, new ResourceLocation(namespace, path));
+		return TagKey.create(registryKey, ResourceLocation.fromNamespaceAndPath(namespace, path));
 	}
 
 	public void addRegistries() {
@@ -115,7 +115,7 @@ public abstract class AbstractModule {
 	}
 
 	public ResourceLocation id(String path) {
-		return new ResourceLocation(uid.getNamespace(), path);
+		return ResourceLocation.fromNamespaceAndPath(uid.getNamespace(), path);
 	}
 
 	public KiwiModuleContainer container() {

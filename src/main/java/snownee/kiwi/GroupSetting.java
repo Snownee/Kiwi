@@ -57,7 +57,7 @@ public class GroupSetting {
 					if (tab != null) {
 						return tab;
 					}
-					return ResourceKey.create(Registries.CREATIVE_MODE_TAB, new ResourceLocation($));
+					return ResourceKey.create(Registries.CREATIVE_MODE_TAB, ResourceLocation.parse($));
 				})
 				.toList();
 		for (ResourceKey<CreativeModeTab> tabKey : tabKeys) {

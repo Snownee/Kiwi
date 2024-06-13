@@ -27,7 +27,7 @@ public interface GameObjectLookup {
 	static <T> Stream<OptionalEntry<T>> fromModules(ResourceKey<Registry<T>> registryKey, String... ids) {
 		/* off */
 		return Stream.of(ids)
-				.map(ResourceLocation::new)
+				.map(ResourceLocation::parse)
 				.map(KiwiModules::get)
 				.mapMulti(($, consumer) -> {
 					boolean optional = $.module.getClass().getDeclaredAnnotation(KiwiModule.Optional.class) != null;

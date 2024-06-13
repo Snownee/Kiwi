@@ -60,7 +60,7 @@ public class KEval {
 				EvaluationValue... parameterValues) throws EvaluationException {
 			String string = parameterValues[0].getStringValue();
 			if (string.startsWith("@")) {
-				return EvaluationValue.booleanValue(KiwiModules.isLoaded(new ResourceLocation(string.substring(1))));
+				return EvaluationValue.booleanValue(KiwiModules.isLoaded(ResourceLocation.parse(string.substring(1))));
 			} else {
 				return EvaluationValue.booleanValue(Platform.isModLoaded(string));
 			}

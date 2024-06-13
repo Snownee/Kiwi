@@ -1,11 +1,11 @@
 package snownee.kiwi.recipe;
 
 import net.minecraft.core.HolderLookup;
-import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeInput;
 
-public abstract class SimpleRecipe<C extends Container> implements Recipe<C> {
+public abstract class SimpleRecipe<T extends RecipeInput> implements Recipe<T> {
 
 	@Override
 	public boolean canCraftInDimensions(int width, int height) {
@@ -13,7 +13,7 @@ public abstract class SimpleRecipe<C extends Container> implements Recipe<C> {
 	}
 
 	@Override
-	public ItemStack assemble(C inv, HolderLookup.Provider registryAccess) {
+	public ItemStack assemble(T input, HolderLookup.Provider registryAccess) {
 		return ItemStack.EMPTY;
 	}
 

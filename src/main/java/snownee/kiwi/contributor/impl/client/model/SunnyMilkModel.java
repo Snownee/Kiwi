@@ -59,7 +59,7 @@ public class SunnyMilkModel<T extends LivingEntity> extends AgeableListModel<T> 
 	@Override
 	public void setupAnim(T entityIn, float limbSwing, float limbSwingAmount, float partialTicks, float netHeadYaw, float headPitch) {
 		float f = ((float) entityIn.getDeltaMovement().length()) * 10;
-		ticks += Minecraft.getInstance().getDeltaFrameTime() * (1 + Math.min(9, f * f * f)) * 0.1f;
+		ticks += Minecraft.getInstance().getTimer().getGameTimeDeltaTicks() * (1 + Math.min(9, f * f * f)) * 0.1f;
 		wingLeft.yRot = -1.0472F + Mth.sin(ticks) * 0.25f;
 		wingRight.yRot = -wingLeft.yRot;
 	}

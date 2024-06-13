@@ -13,7 +13,7 @@ import snownee.kiwi.network.PlayPacketHandler;
 
 @KiwiPacket
 public record SMyPacket(int number) implements CustomPacketPayload {
-	public static final Type<CustomPacketPayload> TYPE = CustomPacketPayload.createType("kiwi:my");
+	public static final Type<CustomPacketPayload> TYPE = new CustomPacketPayload.Type<>(Kiwi.id("my"));
 
 	@Override
 	public Type<? extends CustomPacketPayload> type() {

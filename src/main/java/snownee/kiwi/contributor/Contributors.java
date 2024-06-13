@@ -56,7 +56,7 @@ public class Contributors extends AbstractModule {
 		/* off */
 		return REWARD_PROVIDERS.values().stream()
 				.flatMap(tp -> tp.getPlayerTiers(playerName).stream()
-						.map(s -> new ResourceLocation(tp.getAuthor().toLowerCase(Locale.ENGLISH), s)))
+						.map(s -> ResourceLocation.fromNamespaceAndPath(tp.getAuthor().toLowerCase(Locale.ENGLISH), s)))
 				.collect(Collectors.toSet());
 		/* on */
 	}
@@ -65,7 +65,7 @@ public class Contributors extends AbstractModule {
 		/* off */
 		return REWARD_PROVIDERS.values().stream()
 				.flatMap(tp -> tp.getTiers().stream()
-						.map(s -> new ResourceLocation(tp.getAuthor().toLowerCase(Locale.ENGLISH), s)))
+						.map(s -> ResourceLocation.fromNamespaceAndPath(tp.getAuthor().toLowerCase(Locale.ENGLISH), s)))
 				.collect(Collectors.toSet());
 		/* on */
 	}
@@ -74,7 +74,7 @@ public class Contributors extends AbstractModule {
 		String namespace = rewardProvider.getAuthor().toLowerCase(Locale.ENGLISH);
 		REWARD_PROVIDERS.put(namespace, rewardProvider);
 		for (String tier : rewardProvider.getRenderableTiers()) {
-			RENDERABLES.add(new ResourceLocation(namespace, tier));
+			RENDERABLES.add(ResourceLocation.fromNamespaceAndPath(namespace, tier));
 		}
 	}
 
@@ -110,7 +110,7 @@ public class Contributors extends AbstractModule {
 			for (Entry<String, ITierProvider> entry : REWARD_PROVIDERS.entrySet()) {
 				String namespace = entry.getKey();
 				for (String tier : entry.getValue().getRenderableTiers()) {
-					RENDERABLES.add(new ResourceLocation(namespace, tier));
+					RENDERABLES.add(ResourceLocation.fromNamespaceAndPath(namespace, tier));
 				}
 			}
 		}

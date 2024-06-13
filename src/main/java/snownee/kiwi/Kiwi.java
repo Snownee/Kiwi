@@ -141,7 +141,7 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 	private static boolean initialized;
 
 	public static ResourceLocation id(String path) {
-		return new ResourceLocation(ID, path);
+		return ResourceLocation.fromNamespaceAndPath(ID, path);
 	}
 
 	private static boolean shouldLoad(KiwiAnnotationData annotationData, String dist) {
@@ -215,7 +215,6 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 		registerRegistry(Registries.FLUID, Fluid.class);
 		registerRegistry(Registries.MOB_EFFECT, MobEffect.class);
 		registerRegistry(Registries.BLOCK, Block.class);
-		registerRegistry(Registries.ENCHANTMENT, Enchantment.class);
 		registerRegistry(Registries.ENTITY_TYPE, EntityType.class);
 		registerRegistry(Registries.ITEM, Item.class);
 		registerRegistry(Registries.POTION, Potion.class);
@@ -427,7 +426,7 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 				if (defaultEnabled == null) {
 					defaultEnabled = Boolean.TRUE;
 				}
-				defaultOptions.put(new ResourceLocation(modid, name), defaultEnabled);
+				defaultOptions.put(ResourceLocation.fromNamespaceAndPath(modid, name), defaultEnabled);
 			}
 		}
 
@@ -492,7 +491,7 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 				name = "core";
 			}
 
-			ResourceLocation rl = new ResourceLocation(modid, name);
+			ResourceLocation rl = ResourceLocation.fromNamespaceAndPath(modid, name);
 			if (disabledModules.contains(rl)) {
 				continue;
 			}

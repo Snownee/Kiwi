@@ -56,7 +56,7 @@ public class SantaHatLayer extends CosmeticLayer {
 		modelSantaHat.young = entitylivingbaseIn.isBaby();
 		modelSantaHat.setupAnim(entitylivingbaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
 		VertexConsumer ivertexbuilder = ItemRenderer.getFoilBuffer(bufferIn, RenderType.entitySolid(TEXTURE), false, false);
-		modelSantaHat.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+		modelSantaHat.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY);
 		matrixStackIn.popPose();
 	}
 

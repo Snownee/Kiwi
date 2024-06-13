@@ -26,8 +26,8 @@ import snownee.kiwi.contributor.impl.client.model.FoxTailModel;
 
 @Environment(EnvType.CLIENT)
 public class FoxTailLayer extends CosmeticLayer {
-	private static final ResourceLocation FOX = new ResourceLocation("textures/entity/fox/fox.png");
-	private static final ResourceLocation SNOW_FOX = new ResourceLocation("textures/entity/fox/snow_fox.png");
+	private static final ResourceLocation FOX = ResourceLocation.withDefaultNamespace("textures/entity/fox/fox.png");
+	private static final ResourceLocation SNOW_FOX = ResourceLocation.withDefaultNamespace("textures/entity/fox/snow_fox.png");
 	private static final Supplier<LayerDefinition> definition = Suppliers.memoize(FoxTailModel::create);
 	private final FoxTailModel<AbstractClientPlayer> modelFoxTail;
 
@@ -61,7 +61,7 @@ public class FoxTailLayer extends CosmeticLayer {
 		modelFoxTail.young = entitylivingbaseIn.isBaby();
 		modelFoxTail.setupAnim(entitylivingbaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
 		VertexConsumer ivertexbuilder = ItemRenderer.getFoilBuffer(bufferIn, RenderType.entitySolid(texture), false, false);
-		modelFoxTail.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+		modelFoxTail.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY);
 		matrixStackIn.popPose();
 	}
 

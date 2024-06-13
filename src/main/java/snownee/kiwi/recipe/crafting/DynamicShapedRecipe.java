@@ -12,9 +12,9 @@ import it.unimi.dsi.fastutil.chars.Char2ObjectArrayMap;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -39,7 +39,7 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 		super(category);
 		this.group = group;
 		this.pattern = pattern;
-		this.rawPattern = String.join("", pattern.data().orElseThrow().pattern());
+		this.rawPattern = String.join("", pattern.data.orElseThrow().pattern());
 		this.result = result;
 		this.showNotification = showNotification;
 		this.differentInputs = differentInputs;
@@ -50,15 +50,15 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 	}
 
 	@Override
-	public boolean matches(CraftingContainer inv, Level worldIn) {
-		return search(inv) != null;
+	public boolean matches(CraftingInput input, Level worldIn) {
+		return search(input) != null;
 	}
 
 	@Nullable
-	public int[] search(CraftingContainer inv) {
-		for (int x = 0; x <= inv.getWidth() - getWidth(); ++x) {
-			for (int y = 0; y <= inv.getHeight() - getHeight(); ++y) {
-				if (checkMatch(inv, x, y) && checkEmpty(inv, x, y)) {
+	public int[] search(CraftingInput input) {
+		for (int x = 0; x <= input.width() - getWidth(); ++x) {
+			for (int y = 0; y <= input.height() - getHeight(); ++y) {
+				if (checkMatch(input, x, y) && checkEmpty(input, x, y)) {
 					return new int[]{x, y};
 				}
 			}
@@ -66,30 +66,30 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 		return null;
 	}
 
-	public ItemStack item(char key, CraftingContainer inv, int[] matchPos) {
+	public ItemStack item(char key, CraftingInput inv, int[] matchPos) {
 		int i = rawPattern.indexOf(key);
 		if (i != -1) {
 			int x = matchPos[0] + i % getWidth();
 			int y = matchPos[1] + i / getWidth();
-			return inv.getItem(x + y * inv.getWidth());
+			return inv.getItem(x + y * inv.width());
 		}
 		return ItemStack.EMPTY;
 	}
 
-	public List<ItemStack> items(char key, CraftingContainer inv, int[] matchPos) {
+	public List<ItemStack> items(char key, CraftingInput inv, int[] matchPos) {
 		List<ItemStack> items = Lists.newArrayList();
 		for (int i = 0; i < rawPattern.length(); i++) {
 			if (key == rawPattern.charAt(i)) {
 				int x = matchPos[0] + i % getWidth();
 				int y = matchPos[1] + i / getWidth();
-				items.add(inv.getItem(x + y * inv.getWidth()));
+				items.add(inv.getItem(x + y * inv.width()));
 			}
 		}
 		return items;
 	}
 
 	@Override
-	public abstract ItemStack assemble(CraftingContainer inv, HolderLookup.Provider registryAccess);
+	public abstract ItemStack assemble(CraftingInput inv, HolderLookup.Provider registryAccess);
 
 	public int getWidth() {
 		return pattern.width();
@@ -134,7 +134,7 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 	@Override
 	public abstract RecipeSerializer<?> getSerializer();
 
-	protected boolean checkMatch(CraftingContainer inv, int startX, int startY) {
+	protected boolean checkMatch(CraftingInput input, int startX, int startY) {
 		Char2ObjectArrayMap<ItemStack> ingredientsArrayMap = null;
 		if (!differentInputs) {
 			ingredientsArrayMap = new Char2ObjectArrayMap<>();
@@ -143,14 +143,14 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 			for (int x = startX; x < startX + getWidth(); ++x) {
 				int rx = x - startX;
 				int ry = y - startY;
-				if (!matches(inv, x, y, rx, ry)) {
+				if (!matches(input, x, y, rx, ry)) {
 					return false;
 				}
 				if (!differentInputs) {
 					int i = rx + ry * getWidth();
 					char key = rawPattern.charAt(i);
 					if (key != ' ') {
-						ItemStack stack0 = inv.getItem(x + y * inv.getWidth());
+						ItemStack stack0 = input.getItem(x + y * input.width());
 						ItemStack stack1 = ingredientsArrayMap.get(key);
 						if (stack1 == null) {
 							ingredientsArrayMap.put(key, stack0);
@@ -164,21 +164,21 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 		return true;
 	}
 
-	public boolean matches(CraftingContainer inv, int x, int y, int rx, int ry) {
+	public boolean matches(CraftingInput inv, int x, int y, int rx, int ry) {
 		Ingredient ingredient = getIngredients().get(rx + ry * getWidth());
-		return ingredient.test(inv.getItem(x + y * inv.getWidth()));
+		return ingredient.test(inv.getItem(x + y * inv.width()));
 	}
 
-	protected boolean checkEmpty(CraftingContainer inv, int startX, int startY) {
-		for (int y = 0; y < inv.getHeight(); ++y) {
+	protected boolean checkEmpty(CraftingInput inv, int startX, int startY) {
+		for (int y = 0; y < inv.height(); ++y) {
 			int subY = y - startY;
-			for (int x = 0; x < inv.getWidth(); ++x) {
+			for (int x = 0; x < inv.width(); ++x) {
 				int subX = x - startX;
 				if (subX >= 0 && subY >= 0 && subX < getWidth() && subY < getHeight()) {
 					continue;
 				}
 
-				if (!getEmptyPredicate().test(inv.getItem(x + y * inv.getWidth()))) {
+				if (!getEmptyPredicate().test(inv.getItem(x + y * inv.width()))) {
 					return false;
 				}
 			}
@@ -207,7 +207,7 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 			buffer.writeUtf(recipe.getGroup(), 256);
 			ItemStack.STREAM_CODEC.encode(buffer, recipe.result);
 			ShapedRecipePattern.STREAM_CODEC.encode(buffer, recipe.pattern);
-			recipe.rawPattern = String.join("", recipe.pattern.data().orElseThrow().pattern());
+			recipe.rawPattern = String.join("", recipe.pattern.data.orElseThrow().pattern());
 			buffer.writeBoolean(recipe.differentInputs);
 		}
 	}

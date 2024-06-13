@@ -46,9 +46,9 @@ public class AlternativesIngredientBuilder {
 
 	public AlternativesIngredientBuilder add(String tagOrItem) {
 		if (tagOrItem.startsWith("#")) {
-			add(TagKey.create(Registries.ITEM, new ResourceLocation(tagOrItem.substring(1))));
+			add(TagKey.create(Registries.ITEM, ResourceLocation.parse(tagOrItem.substring(1))));
 		} else {
-			Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(tagOrItem));
+			Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(tagOrItem));
 			Preconditions.checkState(item != Items.AIR);
 			add(item);
 		}

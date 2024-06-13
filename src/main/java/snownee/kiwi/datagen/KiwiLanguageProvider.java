@@ -29,7 +29,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Block;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.ConfigUI;
@@ -148,7 +147,6 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 				return null;
 			}
 		});
-		generateGameObjectEntries(translationEntries, Registries.ENCHANTMENT, Enchantment::getDescriptionId);
 		generateGameObjectEntries(translationEntries, Registries.CUSTOM_STAT, stat -> net.minecraft.Util.makeDescriptionId("stat", stat));
 		generateGameObjectEntries(translationEntries, Registries.MOB_EFFECT, MobEffect::getDescriptionId);
 	}
@@ -175,6 +173,6 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 	private Path getLangFilePath(String code) {
 		return dataOutput
 				.createPathProvider(PackOutput.Target.RESOURCE_PACK, "lang")
-				.json(new ResourceLocation(dataOutput.getModId(), code));
+				.json(ResourceLocation.fromNamespaceAndPath(dataOutput.getModId(), code));
 	}
 }
