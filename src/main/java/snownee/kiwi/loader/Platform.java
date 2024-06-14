@@ -16,6 +16,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerEntity;
 import net.minecraft.tags.TagKey;
@@ -85,8 +86,8 @@ public final class Platform {
 		return player instanceof FakePlayer;
 	}
 
-	public static Packet<ClientGamePacketListener> getAddEntityPacket(Entity entity, ServerEntity serverEntity) {
-		return entity.getAddEntityPacket(serverEntity);
+	public static Packet<ClientGamePacketListener> defaultAddEntityPacket(Entity entity, ServerEntity serverEntity) {
+		return new ClientboundAddEntityPacket(entity, serverEntity);
 	}
 
 	public static boolean isCurativeItem(MobEffectInstance effectInstance, ItemStack stack) {
