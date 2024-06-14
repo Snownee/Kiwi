@@ -1,0 +1,19 @@
+modLoader = "lowcodefml"
+loaderVersion = "[46,)"
+license = "ARR"
+issueTrackerURL = "https://github.com/Snownee/Kiwi/issues"
+
+[[mods]]
+modId = "kiwicustomization"
+version = "${version}"
+displayName = "Kiwi Customization"
+authors = "Snownee"
+displayURL = "https://www.curseforge.com/minecraft/mc-mods/kiwi-customization"
+description = "A prototyping tool for creating blocks or items from Excel/Google Sheets/YAML."
+
+[modproperties.kiwicustomization]
+kiwiCustomization=true
+
+[[dependencies.kiwicustomization]]
+modId = "kiwi"
+versionRange = "[15,)"

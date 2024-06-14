@@ -1,0 +1,17 @@
+modLoader = "lowcodefml"
+loaderVersion = "[46,)"
+license = "Apache-2.0"
+issueTrackerURL = "https://github.com/Snownee/Kiwi/issues"
+
+[[mods]]
+modId = "lavaclearview"
+version = "${version}"
+displayName = "Lava Clear View"
+authors = "Snownee"
+displayURL = "https://www.curseforge.com/minecraft/mc-mods/lava-clear-view"
+description = "Allow you to see more easily under lava when you have fire resistance."
+
+[[dependencies.lavaclearview]]
+modId = "kiwi"
+versionRange = "[15,)"
+ordering = "CLIENT"

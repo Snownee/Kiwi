@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"id": "kiwicustomization",
+	"version": "${version}",
+	"name": "Kiwi Customization",
+	"description": "A prototyping tool for creating blocks or items from Excel/Google Sheets/YAML.",
+	"authors": [
+		"Snownee"
+	],
+	"contact": {
+		"homepage": "https://www.curseforge.com/minecraft/mc-mods/kiwi-customization",
+		"sources": "https://github.com/Snownee/Kiwi",
+		"issues": "https://github.com/Snownee/Kiwi/issues"
+	},
+	"license": "ARR",
+	"depends": {
+		"kiwi": ">=15"
+	},
+	"custom": {
+		"modmenu": {
+			"links": {
+				"modmenu.discord": "https://discord.gg/KzGQW7a",
+				"modmenu.donate": "https://ko-fi.com/snownee"
+			}
+		},
+		"kiwi": {
+			"customization": true
+		}
+	}
+}

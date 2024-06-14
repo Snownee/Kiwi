@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"id": "ksit",
+	"version": "${version}",
+	"name": "KSit",
+	"description": "Data-driven \"sit\" mod that allows you to sit on stairs, slabs, or any other blocks.",
+	"authors": [
+		"Snownee"
+	],
+	"contact": {
+		"homepage": "https://www.curseforge.com/minecraft/mc-mods/ksit",
+		"sources": "https://github.com/Snownee/Kiwi",
+		"issues": "https://github.com/Snownee/Kiwi/issues"
+	},
+	"license": "ARR",
+	"depends": {
+		"kiwi": ">=15"
+	},
+	"custom": {
+		"modmenu": {
+			"links": {
+				"modmenu.discord": "https://discord.gg/KzGQW7a",
+				"modmenu.donate": "https://ko-fi.com/snownee"
+			}
+		},
+		"kiwi": {
+			"customization": true
+		}
+	}
+}

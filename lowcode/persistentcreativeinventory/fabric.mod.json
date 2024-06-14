@@ -1,0 +1,27 @@
+{
+	"schemaVersion": 1,
+	"id": "persistentcreativeinventory",
+	"version": "${version}",
+	"name": "Persistent Creative Inventory",
+	"description": "Restore the location of the creative inventory you last scrolled to.",
+	"authors": [
+		"Snownee"
+	],
+	"contact": {
+		"homepage": "https://www.curseforge.com/minecraft/mc-mods/persistent-creative-inventory",
+		"sources": "https://github.com/Snownee/Kiwi",
+		"issues": "https://github.com/Snownee/Kiwi/issues"
+	},
+	"license": "ARR",
+	"depends": {
+		"kiwi": ">=15"
+	},
+	"custom": {
+		"modmenu": {
+			"links": {
+				"modmenu.discord": "https://discord.gg/KzGQW7a",
+				"modmenu.donate": "https://ko-fi.com/snownee"
+			}
+		}
+	}
+}

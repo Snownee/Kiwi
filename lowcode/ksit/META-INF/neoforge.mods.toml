@@ -1,0 +1,19 @@
+modLoader = "lowcodefml"
+loaderVersion = "[46,)"
+license = "ARR"
+issueTrackerURL = "https://github.com/Snownee/Kiwi/issues"
+
+[[mods]]
+modId = "ksit"
+version = "${version}"
+displayName = "KSit"
+authors = "Snownee"
+displayURL = "https://www.curseforge.com/minecraft/mc-mods/ksit"
+description = "Data-driven \"sit\" mod that allows you to sit on stairs, slabs, or any other blocks."
+
+[modproperties.ksit]
+kiwiCustomization=true
+
+[[dependencies.ksit]]
+modId = "kiwi"
+versionRange = "[15,)"

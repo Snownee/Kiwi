@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"id": "kswitch",
+	"version": "${version}",
+	"name": "KSwitch",
+	"description": "A handy tool for switching between different items in the same slot.",
+	"authors": [
+		"Snownee"
+	],
+	"contact": {
+		"homepage": "https://www.curseforge.com/minecraft/mc-mods/kswitch",
+		"sources": "https://github.com/Snownee/Kiwi",
+		"issues": "https://github.com/Snownee/Kiwi/issues"
+	},
+	"license": "ARR",
+	"depends": {
+		"kiwi": ">=15"
+	},
+	"custom": {
+		"modmenu": {
+			"links": {
+				"modmenu.discord": "https://discord.gg/KzGQW7a",
+				"modmenu.donate": "https://ko-fi.com/snownee"
+			}
+		},
+		"kiwi": {
+			"customization": true
+		}
+	}
+}
