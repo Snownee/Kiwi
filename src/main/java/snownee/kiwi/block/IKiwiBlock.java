@@ -33,7 +33,7 @@ public interface IKiwiBlock extends BlockPickInteractionAware {
 			BlockState blockState,
 			@Nullable Player player,
 			@Nullable HitResult hit) {
-		return ModBlock.pick(level, blockPos, blockState, player, hit);
+		return ModBlock.pickBlockEntityData(level, blockPos, blockState, blockState.getBlock().getCloneItemStack(level, blockPos, blockState));
 	}
 
 	@Override
