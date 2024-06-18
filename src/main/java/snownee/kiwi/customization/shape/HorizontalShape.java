@@ -8,11 +8,10 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import snownee.kiwi.util.VoxelUtil;
 
-public record HorizontalShape(VoxelShape[] shapes) implements ShapeGenerator {
+public record HorizontalShape(VoxelShape[] shapes) implements AbstractHorizontalShape {
 	public static ShapeGenerator create(ShapeGenerator northGenerator) {
 		VoxelShape north = Unit.unboxOrThrow(northGenerator);
 		if (VoxelUtil.isIsotropicHorizontally(north)) {
@@ -24,19 +23,8 @@ public record HorizontalShape(VoxelShape[] shapes) implements ShapeGenerator {
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, CollisionContext context) {
-		Direction direction = blockState.getValue(BlockStateProperties.HORIZONTAL_FACING);
-		int index = direction.get2DDataValue();
-		VoxelShape shape = shapes[index];
-		if (shape == null) {
-			synchronized (shapes) {
-				shape = shapes[index];
-				if (shape == null) {
-					shapes[index] = shape = VoxelUtil.rotateHorizontal(shapes[Direction.NORTH.get2DDataValue()], direction);
-				}
-			}
-		}
-		return shape;
+	public Direction getDirection(BlockState blockState) {
+		return blockState.getValue(BlockStateProperties.HORIZONTAL_FACING);
 	}
 
 	public record Unbaked(UnbakedShape wrapped) implements UnbakedShape {
