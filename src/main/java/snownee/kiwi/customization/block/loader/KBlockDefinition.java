@@ -26,10 +26,10 @@ import snownee.kiwi.customization.shape.HorizontalShape;
 import snownee.kiwi.customization.shape.MouldingShape;
 import snownee.kiwi.customization.shape.ShapeGenerator;
 import snownee.kiwi.customization.shape.ShapeStorage;
-import snownee.kiwi.util.codec.CustomizationCodecs;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.VanillaActions;
 import snownee.kiwi.util.VoxelUtil;
+import snownee.kiwi.util.codec.CustomizationCodecs;
 
 public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinitionProperties properties) {
 	public KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinitionProperties properties) {
@@ -70,7 +70,7 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 			if (vanilla.noCollision().orElse(false)) {
 				$.noCollission();
 			}
-			if (vanilla.noOcclusion().orElse(false)) {
+			if (vanilla.noOcclusion().orElse(properties.glassType().isPresent())) {
 				$.noOcclusion();
 			}
 			if (vanilla.isRandomlyTicking().orElse(false)) {
