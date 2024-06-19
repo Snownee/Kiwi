@@ -48,6 +48,7 @@ import snownee.kiwi.customization.builder.ConvertScreen;
 import snownee.kiwi.customization.command.ExportBlocksCommand;
 import snownee.kiwi.customization.command.ExportCreativeTabsCommand;
 import snownee.kiwi.customization.command.ExportShapesCommand;
+import snownee.kiwi.customization.command.PrintFamiliesCommand;
 import snownee.kiwi.customization.command.ReloadBlockSettingsCommand;
 import snownee.kiwi.customization.command.ReloadFamiliesAndRulesCommand;
 import snownee.kiwi.customization.command.ReloadSlotsCommand;
@@ -92,6 +93,7 @@ public final class CustomizationClient {
 			ReloadSlotsCommand.register(reload);
 			ReloadBlockSettingsCommand.register(reload);
 			ReloadFamiliesAndRulesCommand.register(reload);
+			PrintFamiliesCommand.register(customization);
 			event.getDispatcher().register(kiwi.then(customization.then(export).then(reload)));
 		});
 		forgeEventBus.addListener((CustomizeGuiOverlayEvent.DebugText event) -> {

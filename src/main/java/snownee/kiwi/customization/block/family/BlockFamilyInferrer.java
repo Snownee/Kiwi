@@ -19,8 +19,6 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.StairBlock;
 import snownee.kiwi.AbstractModule;
-import snownee.kiwi.Kiwi;
-import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.KHolder;
 
 public class BlockFamilyInferrer {
@@ -151,14 +149,6 @@ public class BlockFamilyInferrer {
 				List<String> template = variant.isEmpty() ? normalCopperTemplate : otherCopperTemplate;
 				template = template.stream().map($ -> waxed + variant + $).toList();
 				fromTemplates(copperId, waxed + variant + "copper", template, true);
-			}
-		}
-		if (!Platform.isProduction()) {
-			for (KHolder<BlockFamily> family : families) {
-				Kiwi.LOGGER.info(family.key().toString() + ":");
-				for (Holder.Reference<Block> holder : family.value().blockHolders()) {
-					Kiwi.LOGGER.info("  - " + holder.unwrapKey().orElseThrow().location());
-				}
 			}
 		}
 		return families;
