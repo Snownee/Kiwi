@@ -12,11 +12,10 @@ import java.util.TreeMap;
 import java.util.stream.Stream;
 
 import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.annotation.processing.SupportedOptions;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
@@ -25,7 +24,6 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
-import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
@@ -39,29 +37,22 @@ import snownee.kiwi.KiwiAnnotationData;
 				"snownee.kiwi.config.KiwiConfig",
 				"snownee.kiwi.network.KiwiPacket",
 				"snownee.kiwi.Mod"})
+@SupportedOptions(
+		{
+				"kiwi.clientOnlyMod"
+		})
 @SuppressWarnings({"unchecked"})
 public class KiwiAnnotationProcessor extends AbstractProcessor {
-
-	Messager messager;
-	Filer filer;
-	String modId;
-	Elements elementUtils;
-
-	@Override
-	public synchronized void init(ProcessingEnvironment processingEnv) {
-		super.init(processingEnv);
-		messager = processingEnv.getMessager();
-		filer = processingEnv.getFiler();
-		elementUtils = processingEnv.getElementUtils();
-	}
 
 	@Override
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 		if (annotations.isEmpty()) {
 			return true;
 		}
+		Messager messager = processingEnv.getMessager();
 		messager.printMessage(Kind.NOTE, "KiwiAnnotationProcessor is processing");
-		KiwiMetadata metadata = new KiwiMetadata();
+		KiwiMetadata metadata = new KiwiMetadata(processingEnv.getOptions().containsKey("kiwi.clientOnlyMod"));
+		String modId = null;
 		for (TypeElement annotation : annotations) {
 			String className = annotation.toString();
 			AnnotationType type = AnnotationType.MAP.get(className);
@@ -102,7 +93,7 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 //		messager.printMessage(Kind.NOTE, yaml);
 
 		try {
-			FileObject file = filer.createResource(StandardLocation.CLASS_OUTPUT, "", modId + ".kiwi.yaml");
+			FileObject file = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", modId + ".kiwi.yaml");
 			try (PrintWriter writer = new PrintWriter(file.openWriter())) {
 				writer.write(yaml);
 			}

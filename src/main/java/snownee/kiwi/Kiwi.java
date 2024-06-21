@@ -78,7 +78,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
@@ -361,6 +360,9 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 				continue;
 			}
 
+			if (!metadata.clientOnly()) {
+				enableDataModule();
+			}
 			for (KiwiAnnotationData module : metadata.get("modules")) {
 				if (shouldLoad(module, dist)) {
 					moduleData.put(mod, module);
