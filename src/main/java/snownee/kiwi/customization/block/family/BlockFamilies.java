@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
@@ -22,6 +21,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import snownee.kiwi.Kiwi;
 import snownee.kiwi.customization.CustomizationHooks;
 import snownee.kiwi.util.KHolder;
 import snownee.kiwi.util.resource.OneTimeLoader;
@@ -74,8 +74,11 @@ public class BlockFamilies {
 		ImmutableListMultimap.Builder<Item, KHolder<BlockFamily>> byItemBuilder = ImmutableListMultimap.builder();
 		ImmutableListMultimap.Builder<Item, KHolder<BlockFamily>> byStonecutterBuilder = ImmutableListMultimap.builder();
 		for (var family : Iterables.concat(fromResources, additional)) {
-			KHolder<BlockFamily> old = byIdBuilder.put(family.key(), family);
-			Preconditions.checkState(old == null, "Duplicate family %s", family.key());
+			KHolder<BlockFamily> old = byIdBuilder.putIfAbsent(family.key(), family);
+			if (old != null) {
+				Kiwi.LOGGER.error("Duplicate family {}", family);
+				continue;
+			}
 			for (var item : family.value().itemHolders()) {
 				byItemBuilder.put(item.value(), family);
 			}

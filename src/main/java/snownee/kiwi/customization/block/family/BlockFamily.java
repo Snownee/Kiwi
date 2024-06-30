@@ -179,6 +179,14 @@ public class BlockFamily {
 		return items.stream().anyMatch(h -> h.value().asItem() == item);
 	}
 
+	@Override
+	public String toString() {
+		return "BlockFamily{" +
+				"blocks=" + blocks +
+				", stonecutterFrom=" + stonecutterFrom +
+				'}';
+	}
+
 	public record SwitchAttrs(boolean enabled, boolean cascading, boolean creativeOnly) {
 		public static final Codec<SwitchAttrs> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.BOOL.optionalFieldOf("enabled", true).forGetter(SwitchAttrs::enabled),
