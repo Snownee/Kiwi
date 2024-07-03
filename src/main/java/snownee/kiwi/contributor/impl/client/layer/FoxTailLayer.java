@@ -1,8 +1,8 @@
 package snownee.kiwi.contributor.impl.client.layer;
 
 import java.util.Locale;
-import java.util.function.Supplier;
 
+import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -19,15 +19,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.kiwi.contributor.client.CosmeticLayer;
 import snownee.kiwi.contributor.impl.client.model.FoxTailModel;
 
-@OnlyIn(Dist.CLIENT)
 public class FoxTailLayer extends CosmeticLayer {
-	private static final ResourceLocation FOX = new ResourceLocation("textures/entity/fox/fox.png");
-	private static final ResourceLocation SNOW_FOX = new ResourceLocation("textures/entity/fox/snow_fox.png");
+	private static final ResourceLocation FOX = ResourceLocation.withDefaultNamespace("textures/entity/fox/fox.png");
+	private static final ResourceLocation SNOW_FOX = ResourceLocation.withDefaultNamespace("textures/entity/fox/snow_fox.png");
 	private static final Supplier<LayerDefinition> definition = Suppliers.memoize(FoxTailModel::create);
 	private final FoxTailModel<AbstractClientPlayer> modelFoxTail;
 
@@ -37,7 +34,17 @@ public class FoxTailLayer extends CosmeticLayer {
 	}
 
 	@Override
-	public void render(PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, AbstractClientPlayer entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
+	public void render(
+			PoseStack matrixStackIn,
+			MultiBufferSource bufferIn,
+			int packedLightIn,
+			AbstractClientPlayer entitylivingbaseIn,
+			float limbSwing,
+			float limbSwingAmount,
+			float partialTicks,
+			float ageInTicks,
+			float netHeadYaw,
+			float headPitch) {
 		if (entitylivingbaseIn.isInvisible() || entitylivingbaseIn.isSleeping()) {
 			return;
 		}
@@ -51,7 +58,7 @@ public class FoxTailLayer extends CosmeticLayer {
 		modelFoxTail.young = entitylivingbaseIn.isBaby();
 		modelFoxTail.setupAnim(entitylivingbaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
 		VertexConsumer ivertexbuilder = ItemRenderer.getFoilBuffer(bufferIn, RenderType.entitySolid(texture), false, false);
-		modelFoxTail.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+		modelFoxTail.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY);
 		matrixStackIn.popPose();
 	}
 

@@ -2,16 +2,15 @@ package snownee.kiwi.loader;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Collections;
 import java.util.Map;
 import java.util.function.Supplier;
 
 import com.google.common.io.Closeables;
 import com.google.gson.Gson;
 
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.forgespi.language.IModInfo;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
+import net.neoforged.neoforgespi.language.IModInfo;
 
 public class AnnotatedTypeLoader implements Supplier<KiwiConfiguration> {
 
@@ -23,8 +22,12 @@ public class AnnotatedTypeLoader implements Supplier<KiwiConfiguration> {
 
 	@Override
 	public KiwiConfiguration get() {
-		Map<String, Object> properties = ModList.get().getModContainerById(modId).map(ModContainer::getModInfo).map(IModInfo::getModProperties).orElse(Collections.EMPTY_MAP);
-		boolean useJson = (Boolean) properties.getOrDefault("kiwiJsonMap", Boolean.valueOf(Platform.isProduction()));
+		Map<String, Object> properties = ModList.get()
+				.getModContainerById(modId)
+				.map(ModContainer::getModInfo)
+				.map(IModInfo::getModProperties)
+				.orElse(Map.of());
+		boolean useJson = (Boolean) properties.getOrDefault("kiwiJsonMap", Platform.isProduction());
 		if (!useJson) {
 			return new DevEnvAnnotatedTypeLoader(modId).get();
 		}

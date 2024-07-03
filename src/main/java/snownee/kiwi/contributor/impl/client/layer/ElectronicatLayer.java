@@ -1,4 +1,4 @@
-//package snownee.kiwi.contributor.impl.client.layer;
+package snownee.kiwi.contributor.impl.client.layer;//package snownee.kiwi.contributor.impl.client.layer;
 //
 //import com.mojang.blaze3d.vertex.PoseStack;
 //import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -20,7 +20,7 @@
 //import snownee.kiwi.contributor.client.RewardLayer;
 //import snownee.kiwi.contributor.impl.client.model.ElectronicatModel;
 //
-//@OnlyIn(Dist.CLIENT)
+//@Environment(EnvType.CLIENT)
 //public class ElectronicatLayer extends CosmeticLayer {
 //	private static final ResourceLocation TEXTURE = new ResourceLocation(Kiwi.MODID, "textures/reward/electronicat.png");
 //	private final ElectronicatModel<AbstractClientPlayer> model;

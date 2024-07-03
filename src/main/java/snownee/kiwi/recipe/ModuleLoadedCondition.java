@@ -1,50 +1,24 @@
 package snownee.kiwi.recipe;
 
-import com.google.gson.JsonObject;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
-import net.minecraftforge.common.crafting.conditions.ICondition;
-import net.minecraftforge.common.crafting.conditions.IConditionSerializer;
+import net.neoforged.neoforge.common.conditions.ICondition;
 import snownee.kiwi.Kiwi;
 
-public class ModuleLoadedCondition implements ICondition {
-	public static final ResourceLocation ID = Kiwi.id("is_loaded");
-
-	final ResourceLocation module;
-
-	public ModuleLoadedCondition(ResourceLocation module) {
-		this.module = module;
-	}
-
-	@Override
-	public ResourceLocation getID() {
-		return ID;
-	}
+public record ModuleLoadedCondition(ResourceLocation module) implements ICondition {
+	public static final MapCodec<ModuleLoadedCondition> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+			ResourceLocation.CODEC.fieldOf("module").forGetter(ModuleLoadedCondition::module)
+	).apply(instance, ModuleLoadedCondition::new));
 
 	@Override
 	public boolean test(IContext ctx) {
 		return Kiwi.isLoaded(module);
 	}
 
-	public enum Serializer implements IConditionSerializer<ModuleLoadedCondition> {
-		INSTANCE;
-
-		@Override
-		public void write(JsonObject json, ModuleLoadedCondition condition) {
-			json.addProperty("module", condition.module.toString());
-		}
-
-		@Override
-		public ModuleLoadedCondition read(JsonObject json) {
-			ResourceLocation module = new ResourceLocation(GsonHelper.getAsString(json, "module"));
-			return new ModuleLoadedCondition(module);
-		}
-
-		@Override
-		public ResourceLocation getID() {
-			return ModuleLoadedCondition.ID;
-		}
+	@Override
+	public MapCodec<? extends ICondition> codec() {
+		return CODEC;
 	}
-
 }

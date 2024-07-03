@@ -2,8 +2,6 @@ package snownee.kiwi.item;
 
 import java.util.List;
 
-import org.jetbrains.annotations.Nullable;
-
 import com.google.common.collect.Lists;
 
 import net.minecraft.ChatFormatting;
@@ -13,20 +11,25 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import snownee.kiwi.KiwiClientConfig;
+import snownee.kiwi.loader.Platform;
 
 public class ModItem extends Item {
-	public ModItem(Item.Properties builder) {
+	public ModItem(Properties builder) {
 		super(builder);
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
-		if (!KiwiClientConfig.globalTooltip)
-			addTip(stack, tooltip, flagIn);
+	public void appendHoverText(ItemStack itemStack, TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag tooltipFlag) {
+		super.appendHoverText(itemStack, tooltipContext, tooltip, tooltipFlag);
+		if (Platform.isPhysicalClient() && !KiwiClientConfig.globalTooltip) {
+			ModItem.addTip(itemStack, tooltip, tooltipFlag);
+		}
 	}
 
+	@OnlyIn(Dist.CLIENT)
 	public static void addTip(ItemStack stack, List<Component> tooltip, TooltipFlag flagIn) {
 		if (tooltip.isEmpty()) {
 			return;
@@ -48,13 +51,13 @@ public class ModItem extends Item {
 		if (hasKey) {
 			List<String> lines = Lists.newArrayList(I18n.get(key).split("\n"));
 			/* off */
-            tooltip.addAll(
-                    lines.stream()
-                    .map(Component::literal)
-                    .peek(c -> c.withStyle(ChatFormatting.GRAY))
-                    .toList()
-            );
-            /* on */
+			tooltip.addAll(
+					lines.stream()
+							.map(Component::literal)
+							.peek(c -> c.withStyle(ChatFormatting.GRAY))
+							.toList()
+			);
+			/* on */
 		}
 		if (shift == ctrl) {
 			boolean hasShiftKey = I18n.exists(key + ".shift");

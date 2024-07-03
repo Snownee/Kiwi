@@ -2,7 +2,7 @@ package snownee.kiwi.contributor.client.gui;
 
 import java.util.Objects;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -16,6 +16,7 @@ import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.contributor.Contributors;
+import snownee.kiwi.contributor.ContributorsClient;
 
 public class CosmeticScreen extends Screen {
 
@@ -28,11 +29,15 @@ public class CosmeticScreen extends Screen {
 		super(Component.translatable("gui.kiwi.cosmetic"));
 	}
 
+	private static String getPlayerName() {
+		return Minecraft.getInstance().getUser().getName();
+	}
+
 	@Override
 	protected void init() {
 		currentCosmetic = Contributors.PLAYER_COSMETICS.get(getPlayerName());
-		list = new List(minecraft, 150, height, 0, height, 20);
-		list.setLeftPos(20);
+		list = new List(minecraft, 150, height, 0, 20);
+		list.setX(20);
 		list.addEntry(selectedEntry = new Entry(this, null));
 		String playerName = getPlayerName();
 		boolean added = false;
@@ -53,7 +58,7 @@ public class CosmeticScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float pTicks) {
-		renderBackground(guiGraphics);
+		renderBackground(guiGraphics, mouseX, mouseY, pTicks);
 		super.render(guiGraphics, mouseX, mouseY, pTicks);
 		list.render(guiGraphics, mouseX, mouseY, pTicks);
 	}
@@ -65,7 +70,12 @@ public class CosmeticScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseDragged(double p_mouseDragged_1_, double p_mouseDragged_3_, int p_mouseDragged_5_, double p_mouseDragged_6_, double p_mouseDragged_8_) {
+	public boolean mouseDragged(
+			double p_mouseDragged_1_,
+			double p_mouseDragged_3_,
+			int p_mouseDragged_5_,
+			double p_mouseDragged_6_,
+			double p_mouseDragged_8_) {
 		list.mouseDragged(p_mouseDragged_1_, p_mouseDragged_3_, p_mouseDragged_5_, p_mouseDragged_6_, p_mouseDragged_8_);
 		return super.mouseDragged(p_mouseDragged_1_, p_mouseDragged_3_, p_mouseDragged_5_, p_mouseDragged_6_, p_mouseDragged_8_);
 	}
@@ -77,9 +87,9 @@ public class CosmeticScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseScrolled(double p_mouseScrolled_1_, double p_mouseScrolled_3_, double p_mouseScrolled_5_) {
-		list.mouseScrolled(p_mouseScrolled_1_, p_mouseScrolled_3_, p_mouseScrolled_5_);
-		return super.mouseScrolled(p_mouseScrolled_1_, p_mouseScrolled_3_, p_mouseScrolled_5_);
+	public boolean mouseScrolled(double d, double e, double f, double g) {
+		list.mouseScrolled(d, e, f, g);
+		return super.mouseScrolled(d, e, f, g);
 	}
 
 	@Override
@@ -96,26 +106,22 @@ public class CosmeticScreen extends Screen {
 		if (currentCosmetic != null && selectedEntry.id == null) {
 			KiwiClientConfig.contributorCosmetic = "";
 			cfg.save();
-			Contributors.changeCosmetic();
+			ContributorsClient.changeCosmetic();
 		} else if (selectedEntry != null && !Objects.equals(selectedEntry.id, currentCosmetic)) {
 			KiwiClientConfig.contributorCosmetic = selectedEntry.id.toString();
 			cfg.save();
-			Contributors.changeCosmetic();
+			ContributorsClient.changeCosmetic();
 		}
-	}
-
-	private static String getPlayerName() {
-		return Minecraft.getInstance().getUser().getName();
 	}
 
 	private static class List extends ObjectSelectionList<Entry> {
 
-		public List(Minecraft mcIn, int widthIn, int heightIn, int topIn, int bottomIn, int slotHeightIn) {
-			super(mcIn, widthIn, heightIn, topIn, bottomIn, slotHeightIn);
+		public List(Minecraft mcIn, int widthIn, int heightIn, int topIn, int slotHeightIn) {
+			super(mcIn, widthIn, heightIn, topIn, slotHeightIn);
 		}
 
 		@Override
-		public int addEntry(snownee.kiwi.contributor.client.gui.CosmeticScreen.Entry p_93487_) {
+		public int addEntry(CosmeticScreen.Entry p_93487_) {
 			return super.addEntry(p_93487_);
 		}
 
@@ -135,7 +141,17 @@ public class CosmeticScreen extends Screen {
 		}
 
 		@Override
-		public void render(GuiGraphics guiGraphics, int entryIdx, int top, int left, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hover, float partialTicks) {
+		public void render(
+				GuiGraphics guiGraphics,
+				int entryIdx,
+				int top,
+				int left,
+				int entryWidth,
+				int entryHeight,
+				int mouseX,
+				int mouseY,
+				boolean hover,
+				float partialTicks) {
 			int color = hover ? 0xFFFFAA : 0xFFFFFF;
 			if (this == parent.selectedEntry) {
 				color = 0xFFFF77;
@@ -151,7 +167,7 @@ public class CosmeticScreen extends Screen {
 
 		@Override
 		public Component getNarration() {
-			return Component.literal(name);
+			return Component.translatable(name);
 		}
 
 	}

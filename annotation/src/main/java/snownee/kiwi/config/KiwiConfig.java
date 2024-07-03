@@ -12,8 +12,8 @@ import java.util.Locale;
 public @interface KiwiConfig {
 
 	/**
-     * File name of this config. modid-type.toml by default
-     */
+	 * File name of this config. modid-type.toml by default
+	 */
 	String value() default "";
 
 	ConfigType type() default ConfigType.COMMON;

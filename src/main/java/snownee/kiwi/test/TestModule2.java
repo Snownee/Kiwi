@@ -1,5 +1,6 @@
 package snownee.kiwi.test;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.CreativeModeTab;
@@ -9,16 +10,18 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.block.Blocks;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.Kiwi;
+import snownee.kiwi.KiwiGO;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModule.Name;
-import snownee.kiwi.KiwiGO;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.util.VanillaActions;
 
 @KiwiModule(value = "test2", dependencies = "forge;@kiwi:test")
 @KiwiModule.Optional(defaultEnabled = false)
 public class TestModule2 extends AbstractModule {
-	public static final KiwiGO<CreativeModeTab> TAB = go(() -> itemCategory("my_mod", "items", () -> new ItemStack(Items.DANDELION)).build());
+	public static final KiwiGO<CreativeModeTab> TAB = go(() -> itemCategory(
+			ResourceLocation.fromNamespaceAndPath("my_mod", "items"),
+			() -> new ItemStack(Items.DANDELION)).build());
 
 	public static final TagKey<EntityType<?>> BAT = entityTag(Kiwi.ID, "bat");
 

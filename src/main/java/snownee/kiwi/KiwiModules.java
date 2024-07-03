@@ -4,31 +4,21 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.CrashReportCallables;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.registries.RegisterEvent;
 import snownee.kiwi.loader.Platform;
 
 public final class KiwiModules {
-	private static Map<ResourceLocation, ModuleInfo> MODULES = Maps.newLinkedHashMap();
+	private static Map<ResourceLocation, KiwiModuleContainer> MODULES = Maps.newLinkedHashMap();
 	private static final Set<ResourceLocation> LOADED_MODULES = Sets.newHashSet();
 
-	static final Set<Object> ALL_USED_REGISTRIES = Sets.newLinkedHashSet();
-
-	static {
-		CrashReportCallables.registerCrashCallable("Kiwi Modules", () -> ("\n" + LOADED_MODULES.stream().map(ResourceLocation::toString).sorted(StringUtils::compare).collect(Collectors.joining("\n\t\t", "\t\t", ""))));
-	}
+	static final Set<ResourceKey<? extends Registry<?>>> ALL_USED_REGISTRIES = Sets.newLinkedHashSet();
 
 	private KiwiModules() {
 	}
@@ -36,42 +26,28 @@ public final class KiwiModules {
 	public static void add(ResourceLocation resourceLocation, AbstractModule module, ModContext context) {
 		Preconditions.checkArgument(!isLoaded(resourceLocation), "Duplicate module: %s", resourceLocation);
 		LOADED_MODULES.add(resourceLocation);
-		MODULES.put(resourceLocation, new ModuleInfo(resourceLocation, module, context));
-	}
-
-	@SubscribeEvent
-	public static void handleRegister(RegisterEvent event) {
-		Object registry = event.getForgeRegistry();
-		if (registry == null)
-			registry = event.getVanillaRegistry();
-		if (registry == BuiltInRegistries.CREATIVE_MODE_TAB || !ALL_USED_REGISTRIES.contains(registry))
-			return;
-		for (ModuleInfo info : MODULES.values()) {
-			info.handleRegister(registry);
-		}
-		ModLoadingContext.get().setActiveContainer(null);
+		MODULES.put(resourceLocation, new KiwiModuleContainer(resourceLocation, module, context));
 	}
 
 	public static boolean isLoaded(ResourceLocation module) {
 		return LOADED_MODULES.contains(module);
 	}
 
-	public static Collection<ModuleInfo> get() {
+	public static Collection<KiwiModuleContainer> get() {
 		return MODULES.values();
 	}
 
-	public static ModuleInfo get(ResourceLocation moduleId) {
+	public static KiwiModuleContainer get(ResourceLocation moduleId) {
 		return MODULES.get(moduleId);
 	}
 
 	public static void clear() {
 		if (!Platform.isDataGen()) {
-			MODULES.clear();
 			MODULES = Map.of();
 		}
 	}
 
-	public static void fire(Consumer<ModuleInfo> consumer) {
+	public static void fire(Consumer<KiwiModuleContainer> consumer) {
 		MODULES.values().forEach(consumer);
 	}
 

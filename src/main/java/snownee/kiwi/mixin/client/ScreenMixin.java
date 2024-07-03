@@ -21,17 +21,17 @@ public class ScreenMixin {
 
 	@Inject(
 			method = "handleComponentClicked", at = @At(
-					value = "INVOKE", target = "Lnet/minecraft/client/KeyboardHandler;setClipboard(Ljava/lang/String;)V"
-			), cancellable = true
+			value = "INVOKE", target = "Lnet/minecraft/client/KeyboardHandler;setClipboard(Ljava/lang/String;)V"
+	), cancellable = true
 	)
 	private void kiwi$handleComponentClicked(Style style, CallbackInfoReturnable<Boolean> ci) {
 		ClickEvent clickEvent = style.getClickEvent();
-		if (clickEvent == null || clickEvent.getAction() != Action.COPY_TO_CLIPBOARD || !TooltipEvents.disableDebugTooltipCommand.equals(clickEvent.getValue())) {
+		if (clickEvent == null || clickEvent.getAction() != Action.COPY_TO_CLIPBOARD || !TooltipEvents.disableDebugTooltipCommand.equals(
+				clickEvent.getValue())) {
 			return;
 		}
-		if (KiwiClientConfig.tagsTooltip || KiwiClientConfig.nbtTooltip) {
+		if (KiwiClientConfig.tagsTooltip) {
 			KiwiClientConfig.tagsTooltip = false;
-			KiwiClientConfig.nbtTooltip = false;
 			KiwiConfigManager.getHandler(KiwiClientConfig.class).save();
 		}
 		LocalPlayer player = Minecraft.getInstance().player;

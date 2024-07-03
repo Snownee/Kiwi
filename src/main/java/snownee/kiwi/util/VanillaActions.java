@@ -11,71 +11,70 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
 
+import net.minecraft.world.entity.ai.behavior.WorkAtComposter;
+import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.item.AxeItem;
+import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.ComposterBlock;
+import net.minecraft.world.level.block.FireBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import snownee.kiwi.mixin.AxeItemAccess;
-import snownee.kiwi.mixin.FireBlockAccess;
-import snownee.kiwi.mixin.HoeItemAccess;
-import snownee.kiwi.mixin.ShovelItemAccess;
-import snownee.kiwi.mixin.VillagerAccess;
-import snownee.kiwi.mixin.WorkAtComposterAccess;
 
 /**
  * @since 5.0.0
  */
-public final class VanillaActions { //TODO brewing
+public final class VanillaActions {
 	private VanillaActions() {
 	}
 
-	public static void setFireInfo(Block blockIn, int encouragement, int flammability) {
-		((FireBlockAccess) Blocks.FIRE).callSetFlammable(blockIn, encouragement, flammability);
+	public static void setFireInfo(Block blockIn, int spread, int burn) {
+		((FireBlock) Blocks.FIRE).setFlammable(blockIn, spread, burn);
 	}
 
 	public static void registerHoeConversion(Block k, Pair<Predicate<UseOnContext>, Consumer<UseOnContext>> v) {
-		HoeItemAccess.getTILLABLES().put(k, v);
+		//noinspection deprecation
+		HoeItem.TILLABLES.put(k, v);
 	}
 
 	public static void registerAxeConversion(Block k, Block v) {
-		if (AxeItemAccess.getSTRIPPABLES() instanceof ImmutableMap) {
-			AxeItemAccess.setSTRIPPABLES(Maps.newHashMap(AxeItemAccess.getSTRIPPABLES()));
+		if (AxeItem.STRIPPABLES instanceof ImmutableMap) {
+			AxeItem.STRIPPABLES = Maps.newHashMap(AxeItem.STRIPPABLES);
 		}
-		AxeItemAccess.getSTRIPPABLES().put(k, v);
+		AxeItem.STRIPPABLES.put(k, v);
 	}
 
 	public static void registerShovelConversion(Block k, BlockState v) {
-		if (ShovelItemAccess.getFLATTENABLES() instanceof ImmutableMap) {
-			ShovelItemAccess.setFLATTENABLES(Maps.newHashMap(ShovelItemAccess.getFLATTENABLES()));
+		if (AxeItem.STRIPPABLES instanceof ImmutableMap) {
+			AxeItem.STRIPPABLES = Maps.newHashMap(AxeItem.STRIPPABLES);
 		}
-		ShovelItemAccess.getFLATTENABLES().put(k, v);
+		AxeItem.STRIPPABLES.put(k, v.getBlock());
 	}
 
 	public static void registerCompostable(float chance, ItemLike itemIn) {
-		ComposterBlock.COMPOSTABLES.put(itemIn.asItem(), chance);
+		// do nothing. use DataMapProvider
 	}
 
 	public static void registerVillagerPickupable(ItemLike item) {
-		if (VillagerAccess.getWANTED_ITEMS() instanceof ImmutableSet) {
-			VillagerAccess.setWANTED_ITEMS(Sets.newHashSet(VillagerAccess.getWANTED_ITEMS()));
+		if (Villager.WANTED_ITEMS instanceof ImmutableSet) {
+			Villager.WANTED_ITEMS = Sets.newHashSet(Villager.WANTED_ITEMS);
 		}
-		VillagerAccess.getWANTED_ITEMS().add(item.asItem());
+		Villager.WANTED_ITEMS.add(item.asItem());
 	}
 
 	public static void registerVillagerCompostable(ItemLike item) {
-		if (WorkAtComposterAccess.getCOMPOSTABLE_ITEMS() instanceof ImmutableList) {
-			WorkAtComposterAccess.setCOMPOSTABLE_ITEMS(Lists.newArrayList(WorkAtComposterAccess.getCOMPOSTABLE_ITEMS()));
+		if (WorkAtComposter.COMPOSTABLE_ITEMS instanceof ImmutableList) {
+			WorkAtComposter.COMPOSTABLE_ITEMS = Lists.newArrayList(WorkAtComposter.COMPOSTABLE_ITEMS);
 		}
-		WorkAtComposterAccess.getCOMPOSTABLE_ITEMS().add(item.asItem());
+		WorkAtComposter.COMPOSTABLE_ITEMS.add(item.asItem());
 	}
 
 	public static void registerVillagerFood(ItemLike item, int value) {
-		if (VillagerAccess.getFOOD_POINTS() instanceof ImmutableMap) {
-			VillagerAccess.setFOOD_POINTS(Maps.newHashMap(VillagerAccess.getFOOD_POINTS()));
+		if (Villager.FOOD_POINTS instanceof ImmutableMap) {
+			Villager.FOOD_POINTS = Maps.newHashMap(Villager.FOOD_POINTS);
 		}
-		VillagerAccess.getFOOD_POINTS().put(item.asItem(), value);
+		Villager.FOOD_POINTS.put(item.asItem(), value);
 	}
 
 }

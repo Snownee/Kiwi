@@ -1,8 +1,9 @@
 package snownee.kiwi.block.entity;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
@@ -28,37 +29,35 @@ public abstract class ModBlockEntity extends BlockEntity {
 		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
-	@Override
 	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
 		CompoundTag compoundtag = pkt.getTag();
-		if (compoundtag != null)
+		if (compoundtag != null) {
 			readPacketData(compoundtag);
+		}
 	}
 
 	// Used for syncing data at the time when the chunk is loaded
-	@Nonnull
+	@NotNull
 	@Override
-	public CompoundTag getUpdateTag() {
-		return writePacketData(new CompoundTag());
+	public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
+		return writePacketData(new CompoundTag(), provider);
 	}
 
 	/**
 	 * Read data for server-client syncing.
 	 *
-	 * @param data
-	 *            the data source
+	 * @param data the data source
 	 */
 	protected abstract void readPacketData(CompoundTag data);
 
 	/**
 	 * Write data for server-client syncing. ONLY write the necessary data!
 	 *
-	 * @param data
-	 *            the data sink
+	 * @param data the data sink
 	 * @return the parameter, or delegate to super method
 	 */
-	@Nonnull
-	protected abstract CompoundTag writePacketData(CompoundTag data);
+	@NotNull
+	protected abstract CompoundTag writePacketData(CompoundTag data, HolderLookup.Provider provider);
 
 	public void refresh() {
 		if (hasLevel() && !level.isClientSide) {

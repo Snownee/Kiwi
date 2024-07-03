@@ -8,12 +8,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface KiwiPacket {
-
-	String value();
-
-	Direction dir() default Direction.PLAY_TO_SERVER;
+	Direction dir() default Direction.AUTO;
 
 	enum Direction {
-		PLAY_TO_SERVER, PLAY_TO_CLIENT, LOGIN_TO_SERVER, LOGIN_TO_CLIENT;
+		AUTO, TO_SERVER, TO_CLIENT, CUSTOM;
 	}
 }

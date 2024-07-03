@@ -15,8 +15,23 @@ public final class KiwiClientConfig {
 	@KiwiConfig.GameRestart
 	public static boolean noMicrosoftTelemetry = true;
 
+	@KiwiConfig.Path("qol.suppressExperimentalSettingsWarning")
+	public static boolean suppressExperimentalWarning;
+
+	@KiwiConfig.Path("qol.hideDataComponentsTooltip")
+	public static boolean hideDataComponentsTooltip;
+
+	@KiwiConfig.Path("qol.titleScreenNoFade")
+	public static boolean titleScreenNoFade;
+
+	@KiwiConfig.Path("qol.loadingOverlayNoFade")
+	public static boolean loadingOverlayNoFade;
+
 	@KiwiConfig.Path("debug.tagsTooltip")
 	public static boolean tagsTooltip = true;
+
+	@KiwiConfig.Path("debug.showTranslatedTagsByDefault")
+	public static boolean showTranslatedTagsByDefault = false;
 
 	@KiwiConfig.Path("debug.tagsPerPage")
 	@KiwiConfig.Range(min = 0)
@@ -25,16 +40,7 @@ public final class KiwiClientConfig {
 	@KiwiConfig.Path("debug.tagsTooltipAppendKeybindHint")
 	public static boolean tagsTooltipAppendKeybindHint = true;
 
-	@KiwiConfig.Path("debug.NBTTooltip")
-	public static boolean nbtTooltip = true;
-
 	@ConfigUI.Hide
 	@KiwiConfig.Path("debug.debugTooltipMsg")
 	public static boolean debugTooltipMsg = true;
-
-	@KiwiConfig.Path("suppressExperimentalSettingsWarning")
-	public static boolean suppressExperimentalWarning;
-
-	@KiwiModule.Skip
-	public static boolean exportBlocksMore;
 }

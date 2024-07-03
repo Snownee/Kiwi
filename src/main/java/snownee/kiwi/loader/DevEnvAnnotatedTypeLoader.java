@@ -8,10 +8,10 @@ import org.objectweb.asm.Type;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.loading.moddiscovery.ModAnnotation.EnumHolder;
-import net.minecraftforge.forgespi.language.IModFileInfo;
-import net.minecraftforge.forgespi.language.ModFileScanData.AnnotationData;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.loading.modscan.ModAnnotation;
+import net.neoforged.neoforgespi.language.IModFileInfo;
+import net.neoforged.neoforgespi.language.ModFileScanData;
 import snownee.kiwi.KiwiAnnotationData;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.config.KiwiConfig;
@@ -26,8 +26,9 @@ public class DevEnvAnnotatedTypeLoader extends AnnotatedTypeLoader {
 	@Override
 	public KiwiConfiguration get() {
 		IModFileInfo modFileInfo = ModList.get().getModFileById(modId);
-		if (modFileInfo == null)
+		if (modFileInfo == null) {
 			return null;
+		}
 
 		final Type KIWI_MODULE = Type.getType(KiwiModule.class);
 		final Type KIWI_CONFIG = Type.getType(KiwiConfig.class);
@@ -42,7 +43,7 @@ public class DevEnvAnnotatedTypeLoader extends AnnotatedTypeLoader {
 		configuration.packets = Lists.newArrayList();
 		configuration.configs = Lists.newArrayList();
 
-		for (AnnotationData annotationData : modFileInfo.getFile().getScanResult().getAnnotations()) {
+		for (ModFileScanData.AnnotationData annotationData : modFileInfo.getFile().getScanResult().getAnnotations()) {
 			Type annotationType = annotationData.annotationType();
 			if (KIWI_MODULE.equals(annotationType)) {
 				configuration.modules.add(map(annotationData));
@@ -58,7 +59,7 @@ public class DevEnvAnnotatedTypeLoader extends AnnotatedTypeLoader {
 					throw new IllegalArgumentException();
 				}
 				methodName = methodName.substring(0, p);
-				mapped.data().put("method", methodName);
+				mapped.getData().put("method", methodName);
 				configuration.conditions.add(mapped);
 			} else if (KIWI_PACKET.equals(annotationType)) {
 				configuration.packets.add(map(annotationData));
@@ -67,15 +68,18 @@ public class DevEnvAnnotatedTypeLoader extends AnnotatedTypeLoader {
 		return configuration;
 	}
 
-	private static KiwiAnnotationData map(AnnotationData data) {
+	private static KiwiAnnotationData map(ModFileScanData.AnnotationData data) {
 		Map<String, Object> annotationData = Maps.newHashMap();
 		for (Entry<String, Object> e : data.annotationData().entrySet()) {
-			if (e.getValue() instanceof EnumHolder) {
-				annotationData.put(e.getKey(), ((EnumHolder) e.getValue()).getValue());
+			if (e.getValue() instanceof ModAnnotation.EnumHolder) {
+				annotationData.put(e.getKey(), ((ModAnnotation.EnumHolder) e.getValue()).value());
 			} else {
 				annotationData.put(e.getKey(), e.getValue());
 			}
 		}
-		return new KiwiAnnotationData(data.clazz().getClassName(), annotationData);
+		KiwiAnnotationData kiwiAnnotationData = new KiwiAnnotationData();
+		kiwiAnnotationData.setTarget(data.clazz().getClassName());
+		kiwiAnnotationData.setData(annotationData);
+		return kiwiAnnotationData;
 	}
 }

@@ -3,7 +3,7 @@ package snownee.kiwi.handler;
 import java.util.function.Supplier;
 
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.IItemHandler;
+import net.neoforged.neoforge.items.IItemHandler;
 
 /**
  * @since 2.7.0

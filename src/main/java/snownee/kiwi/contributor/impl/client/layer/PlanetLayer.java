@@ -1,7 +1,6 @@
 package snownee.kiwi.contributor.impl.client.layer;
 
-import java.util.function.Supplier;
-
+import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -16,13 +15,10 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.contributor.client.CosmeticLayer;
 import snownee.kiwi.contributor.impl.client.model.PlanetModel;
 
-@OnlyIn(Dist.CLIENT)
 public class PlanetLayer extends CosmeticLayer {
 	private static final ResourceLocation TEXTURE = Kiwi.id("textures/reward/planet.png");
 	private static final Supplier<LayerDefinition> definition = Suppliers.memoize(PlanetModel::create);
@@ -34,7 +30,17 @@ public class PlanetLayer extends CosmeticLayer {
 	}
 
 	@Override
-	public void render(PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, AbstractClientPlayer entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
+	public void render(
+			PoseStack matrixStackIn,
+			MultiBufferSource bufferIn,
+			int packedLightIn,
+			AbstractClientPlayer entitylivingbaseIn,
+			float limbSwing,
+			float limbSwingAmount,
+			float partialTicks,
+			float ageInTicks,
+			float netHeadYaw,
+			float headPitch) {
 		if (entitylivingbaseIn.isInvisible()) {
 			return;
 		}
@@ -44,7 +50,7 @@ public class PlanetLayer extends CosmeticLayer {
 		matrixStackIn.scale(1.2f, 1.2f, 1.2f);
 		modelPlanet.setupAnim(entitylivingbaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
 		VertexConsumer ivertexbuilder = ItemRenderer.getFoilBuffer(bufferIn, RenderType.entityTranslucent(TEXTURE), false, false);
-		modelPlanet.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+		modelPlanet.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY);
 		matrixStackIn.popPose();
 	}
 

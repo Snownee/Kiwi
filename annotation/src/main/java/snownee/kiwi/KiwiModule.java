@@ -12,25 +12,20 @@ public @interface KiwiModule {
 	/**
 	 * Unique id of module. "core" by default
 	 */
-	String value()
-
-	default "core";
+	String value() default "core";
 
 	/**
-     * Module will be registered only if dependent mods or modules are loaded.
-     * You can use ";" to separate multiple mod ids.
-     * You can use "@mod:module" to announce a dependent module
-     */
-	String dependencies()
-
-	default "";
+	 * Module will be registered only if dependent mods or modules are loaded.
+	 * You can use ";" to separate multiple mod ids.
+	 * You can use "@mod:module" to announce a dependent module
+	 */
+	String dependencies() default "";
 
 	/**
-     *
-     * Optional module can be disabled in Kiwi's configuration
-     * @author Snownee
-     *
-     */
+	 * Optional module can be disabled in Kiwi's configuration
+	 *
+	 * @author Snownee
+	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
 	@interface Optional {
@@ -38,40 +33,18 @@ public @interface KiwiModule {
 	}
 
 	/**
-     *
-     * Item group this module belongs to.
-     * You can input vanilla group id, such as 'buildingBlocks', 'misc'
-     * If empty, Kiwi will catch the first CreativeModeTab in this module.
-     *
-     * @author Snownee
-     *
-     */
+	 * Item group this module belongs to.
+	 * You can input vanilla group id, such as 'buildingBlocks', 'misc'
+	 * If empty, Kiwi will catch the first CreativeModeTab in this module.
+	 *
+	 * @author Snownee
+	 */
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.TYPE, ElementType.FIELD })
+	@Target({ElementType.TYPE, ElementType.FIELD})
 	@interface Category {
 		String[] value() default {};
 
 		String[] after() default {};
-	}
-
-	@Deprecated
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.TYPE)
-	@interface Subscriber {
-		/**
-         * Specify targets to load this event subscriber on. Can be used to avoid loading Client specific events
-         * on a dedicated server, for example.
-         *
-         * @return an array of Dist to load this event subscriber on
-         */
-		boolean clientOnly() default false;
-
-		/**
-		 * Specify an alternative bus to listen to
-		 *
-		 * @return the bus you wish to listen to
-		 */
-		boolean modBus() default false;
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -81,12 +54,10 @@ public @interface KiwiModule {
 	}
 
 	/**
-	 *
 	 * Rename the entry's registry name. It will be useful if you want to custom
 	 * your own BlockItem
 	 *
 	 * @author Snownee
-	 *
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.FIELD)
@@ -95,12 +66,10 @@ public @interface KiwiModule {
 	}
 
 	/**
-	 *
 	 * Set group of this item/block to null
 	 *
-	 * @see KiwiModule.Category
 	 * @author Snownee
-	 *
+	 * @see Category
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.FIELD)
@@ -108,10 +77,9 @@ public @interface KiwiModule {
 	}
 
 	/**
-	 *
 	 * Only used by block. Kiwi will not automatically register its BlockItem
-	 * @author Snownee
 	 *
+	 * @author Snownee
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.FIELD)
@@ -119,26 +87,26 @@ public @interface KiwiModule {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.TYPE, ElementType.FIELD })
+	@Target({ElementType.TYPE, ElementType.FIELD})
 	@interface RenderLayer {
-		Layer value();
+		RenderLayerEnum value();
 
-		enum Layer {
-			CUTOUT_MIPPED, CUTOUT, TRANSLUCENT;
-
-			public Object value;
-		}
 	}
 
 	/**
-	 *
 	 * Prevent this field being cached by Kiwi
-	 * @author Snownee
 	 *
+	 * @author Snownee
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ElementType.TYPE, ElementType.FIELD})
+	@Target(ElementType.FIELD)
 	@interface Skip {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	@interface ClientCompanion {
+		Class<?> value();
 	}
 
 }

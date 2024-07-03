@@ -22,7 +22,6 @@ import java.util.Set;
 import org.apache.commons.lang3.EnumUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.yaml.snakeyaml.Yaml;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
@@ -38,7 +37,7 @@ import snownee.kiwi.config.KiwiConfig.LevelRestart;
 import snownee.kiwi.config.KiwiConfig.Range;
 import snownee.kiwi.config.KiwiConfig.Translation;
 import snownee.kiwi.loader.Platform;
-import snownee.kiwi.util.Util;
+import snownee.kiwi.util.KUtil;
 
 public class ConfigHandler {
 
@@ -89,7 +88,7 @@ public class ConfigHandler {
 	 * @return the annotated path, or {@code null} if there is none.
 	 */
 	static List<String> getPath(AnnotatedElement annotatedElement) {
-		var path = annotatedElement.getDeclaredAnnotation(snownee.kiwi.config.KiwiConfig.Path.class);
+		var path = annotatedElement.getDeclaredAnnotation(KiwiConfig.Path.class);
 		if (path != null) {
 			return List.of(path.value().split("\\."));
 		}
@@ -173,21 +172,6 @@ public class ConfigHandler {
 			refresh();
 		}
 		save();
-		//		try {
-		//			Toml toml = new Toml().read(configPath.toFile());
-		//		} catch (IllegalStateException e) {
-		//			throw new SerializationException(e);
-		//		}
-
-		//		ConfigEntryBuilder builder = ConfigEntryBuilder.create();
-		//		ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
-		//		build(builder);
-		//		ModContainer modContainer = ModList.get().getModContainerById(modId).orElseThrow(NullPointerException::new);
-		//		config = new ModConfig(ModConfig.Type.valueOf(type.name()), builder.build(), modContainer, fileName);
-		//		modContainer.addConfig(config);
-		//		if (modContainer instanceof FMLModContainer) {
-		//			((FMLModContainer) modContainer).getEventBus().addListener(this::onFileChange);
-		//		}
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -195,7 +179,7 @@ public class ConfigHandler {
 		Path configPath = getConfigPath();
 		Map<String, Object> map;
 		try (FileReader reader = new FileReader(configPath.toFile(), StandardCharsets.UTF_8)) {
-			map = new Yaml().loadAs(reader, Map.class);
+			map = KUtil.loadYaml(reader, Map.class);
 		} catch (Exception e) {
 			save();
 			return;
@@ -236,7 +220,7 @@ public class ConfigHandler {
 			writer.append('\n');
 			writer.append("---");
 			writer.append('\n');
-			Util.dumpYaml(map, writer);
+			KUtil.dumpYaml(map, writer);
 		} catch (JsonSyntaxException | IOException e) {
 			Kiwi.LOGGER.error("Failed to save config file: %s".formatted(configPath), e);
 		}
@@ -353,6 +337,47 @@ public class ConfigHandler {
 		return valueMap;
 	}
 
+	public boolean providesConfigScreen(ConfigLibAttributes attributes) {
+		for (Value<?> value : getValueMap().values()) {
+			if (value.getAnnotation(ConfigUI.Hide.class) != null) {
+				continue;
+			}
+			Class<?> type = value.getType();
+			if (List.class.isAssignableFrom(type)) {
+				if (!attributes.supportsList()) {
+					continue;
+				}
+				if (attributes.supportsOnlyString()) {
+					ConfigUI.Typed annotation = value.getAnnotation(ConfigUI.Typed.class);
+					if (annotation == null) {
+						continue;
+					}
+					Class<?> valueType = annotation.value();
+					if (valueType != String.class) {
+						continue;
+					}
+				}
+			} else if (Map.class.isAssignableFrom(type)) {
+				if (!attributes.supportsMap()) {
+					continue;
+				}
+				if (attributes.supportsOnlyString()) {
+					ConfigUI.Typed annotation = value.getAnnotation(ConfigUI.Typed.class);
+					if (annotation == null) {
+						continue;
+					}
+					Class<?> keyType = annotation.key();
+					Class<?> valueType = annotation.value();
+					if (keyType != String.class || valueType != String.class) {
+						continue;
+					}
+				}
+			}
+			return true;
+		}
+		return false;
+	}
+
 	public static class Value<T> {
 		@NotNull
 		public final T defValue;
@@ -431,6 +456,7 @@ public class ConfigHandler {
 			}
 		}
 
+		@Nullable
 		public <A extends Annotation> A getAnnotation(Class<A> clazz) {
 			return field == null ? null : field.getAnnotation(clazz);
 		}

@@ -1,0 +1,19 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+license = "MIT"
+
+[[mods]]
+modId = "kiwi"
+version = "${file.jarVersion}"
+displayName = "Kiwi Library"
+authors = "Snownee"
+displayURL = "https://www.curseforge.com/minecraft/mc-mods/kiwi"
+description = "Minecraft modding library"
+logoFile = "assets/kiwi/logo.png"
+credits = "3TUSK, SettingDust"
+
+[[mixins]]
+config = "kiwi.mixins.json"
+
+[modproperties.kiwi]
+catalogueItemIcon = "minecraft:bookshelf" #Support for Catalogue mod

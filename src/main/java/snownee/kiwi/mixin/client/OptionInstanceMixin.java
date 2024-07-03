@@ -8,8 +8,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
-import net.minecraft.client.gui.screens.MouseSettingsScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.options.MouseSettingsScreen;
 
 @Mixin(OptionInstance.class)
 public class OptionInstanceMixin {
@@ -17,7 +17,7 @@ public class OptionInstanceMixin {
 	Object value;
 
 	@Inject(at = @At("HEAD"), method = "get", cancellable = true)
-	private void fastscroll_get(CallbackInfoReturnable<Object> ci) {
+	private void kiwi$get(CallbackInfoReturnable<Object> ci) {
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.screen instanceof MouseSettingsScreen) {
 			return;

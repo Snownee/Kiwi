@@ -1,31 +1,44 @@
 package snownee.kiwi.contributor.network;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
+import snownee.kiwi.Kiwi;
 import snownee.kiwi.contributor.Contributors;
 import snownee.kiwi.network.KiwiPacket;
-import snownee.kiwi.network.PacketHandler;
-import snownee.kiwi.util.Util;
+import snownee.kiwi.network.PayloadContext;
+import snownee.kiwi.network.PlayPacketHandler;
+import snownee.kiwi.util.KUtil;
 
-@KiwiPacket("set_cosmetic")
-public class CSetCosmeticPacket extends PacketHandler {
-
-	public static CSetCosmeticPacket I;
+@KiwiPacket
+public record CSetCosmeticPacket(@Nullable ResourceLocation id) implements CustomPacketPayload {
+	public static final Type<CSetCosmeticPacket> TYPE = new Type<>(Kiwi.id("set_cosmetic"));
 
 	@Override
-	public CompletableFuture<FriendlyByteBuf> receive(Function<Runnable, CompletableFuture<FriendlyByteBuf>> executor, FriendlyByteBuf buf, ServerPlayer sender) {
-		ResourceLocation id = Util.RL(buf.readUtf(32767));
-		Contributors.changeCosmetic(sender, id);
-		return CompletableFuture.completedFuture(null);
+	public @NotNull Type<CSetCosmeticPacket> type() {
+		return TYPE;
 	}
 
-	public static void send(ResourceLocation cosmetic) {
-		String id = cosmetic == null ? "" : cosmetic.toString();
-		I.sendToServer($ -> $.writeUtf(id));
-	}
+	public static class Handler implements PlayPacketHandler<CSetCosmeticPacket> {
+		public static final StreamCodec<RegistryFriendlyByteBuf, CSetCosmeticPacket> STREAM_CODEC = StreamCodec.composite(
+				ByteBufCodecs.STRING_UTF8.map(it -> it.isEmpty() ? null : KUtil.RL(it), it -> it == null ? "" : it.toString()),
+				CSetCosmeticPacket::id,
+				CSetCosmeticPacket::new
+		);
 
+		@Override
+		public StreamCodec<RegistryFriendlyByteBuf, CSetCosmeticPacket> streamCodec() {
+			return STREAM_CODEC;
+		}
+
+		@Override
+		public void handle(CSetCosmeticPacket packet, PayloadContext context) {
+			context.execute(() -> Contributors.changeCosmetic(context.serverPlayer(), packet.id));
+		}
+	}
 }

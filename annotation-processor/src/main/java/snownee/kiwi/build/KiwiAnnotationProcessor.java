@@ -2,25 +2,20 @@ package snownee.kiwi.build;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Set;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
-import com.google.common.io.Closeables;
-import com.google.gson.GsonBuilder;
+import java.util.TreeMap;
+import java.util.stream.Stream;
 
 import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.annotation.processing.SupportedOptions;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
@@ -29,7 +24,6 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
-import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
@@ -42,58 +36,38 @@ import snownee.kiwi.KiwiAnnotationData;
 				"snownee.kiwi.KiwiModule.LoadingCondition",
 				"snownee.kiwi.config.KiwiConfig",
 				"snownee.kiwi.network.KiwiPacket",
-				"net.minecraftforge.fml.common.Mod",
+				"snownee.kiwi.Mod"})
+@SupportedOptions(
+		{
+				"kiwi.clientOnlyMod"
 		})
-@SuppressWarnings(value = {"unchecked"})
+@SuppressWarnings({"unchecked"})
 public class KiwiAnnotationProcessor extends AbstractProcessor {
-
-	Messager messager;
-	Filer filer;
-	String modId;
-	Elements elementUtils;
-	TypeElement skipType;
-
-	@Override
-	public synchronized void init(ProcessingEnvironment processingEnv) {
-		super.init(processingEnv);
-		messager = processingEnv.getMessager();
-		filer = processingEnv.getFiler();
-		elementUtils = processingEnv.getElementUtils();
-		skipType = processingEnv.getElementUtils().getTypeElement("snownee.kiwi.KiwiModule.Skip");
-		Objects.requireNonNull(skipType);
-	}
 
 	@Override
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 		if (annotations.isEmpty()) {
 			return true;
 		}
+		Messager messager = processingEnv.getMessager();
 		messager.printMessage(Kind.NOTE, "KiwiAnnotationProcessor is processing");
-		Multimap<String, KiwiAnnotationData> map = Multimaps.newMultimap(Maps.newTreeMap(), Lists::newArrayList);
+		KiwiMetadata metadata = new KiwiMetadata(processingEnv.getOptions().containsKey("kiwi.clientOnlyMod"));
+		String modId = null;
 		for (TypeElement annotation : annotations) {
-			String className = annotation.getQualifiedName().toString();
-			ElementKind elementKind = ElementKind.CLASS;
-			if ("snownee.kiwi.KiwiModule.Optional".equals(className)) {
-				className = "snownee.kiwi.KiwiModule$Optional";
-			} else if ("snownee.kiwi.KiwiModule.LoadingCondition".equals(className)) {
-				className = "snownee.kiwi.KiwiModule$LoadingCondition";
-				elementKind = ElementKind.METHOD;
-			}
+			String className = annotation.toString();
+			AnnotationType type = AnnotationType.MAP.get(className);
 			Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(annotation);
-			for (Element ele : elements) {
-				if (ele.getKind() != elementKind) {
-					messager.printMessage(Kind.ERROR, "Annotated element is not matched", ele);
+			for (Element element : elements) {
+				if (!type.isCorrectKind(element, messager)) {
+					messager.printMessage(Kind.ERROR, "Annotated element is not matched", element);
 					continue;
 				}
-				AnnotationMirror a = getAnnotation(ele, annotation);
-				if (a == null) {
-					continue;
-				}
-				Map<String, Object> o = Maps.newHashMap();
+				AnnotationMirror a = getAnnotation(element, annotation);
+				Map<String, Object> o = new TreeMap<>();
 				for (Entry<? extends ExecutableElement, ? extends AnnotationValue> e : a.getElementValues().entrySet()) {
 					o.put(e.getKey().getSimpleName().toString(), mapValue(e.getValue()));
 				}
-				if ("net.minecraftforge.fml.common.Mod".equals(className)) {
+				if (type == AnnotationType.MOD) {
 					if (modId == null) {
 						modId = (String) o.get("value");
 					} else {
@@ -102,32 +76,29 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 					continue;
 				}
 				String target;
-				if (elementKind == ElementKind.METHOD) {
-					target = ele.getEnclosingElement().toString();
-					o.put("method", ele.getSimpleName().toString());
+				if (type.allowedKinds.contains(ElementKind.METHOD)) {
+					target = element.getEnclosingElement().toString();
+					o.put("method", element.getSimpleName().toString());
 				} else {
-					target = ele.toString();
+					target = element.toString();
 				}
-				if (!target.startsWith("snownee.kiwi.test.")) {
-					map.put(annotation.getSimpleName().toString(), new KiwiAnnotationData(target, o.isEmpty() ? null : o));
-				}
+				KiwiAnnotationData value = new KiwiAnnotationData();
+				value.setTarget(target);
+				value.setData(o);
+				metadata.map().computeIfAbsent(type.yamlKey, $ -> new ArrayList<>()).add(value);
 			}
 		}
-		String json = new GsonBuilder().setPrettyPrinting().create().toJson(map.asMap());
-		//		messager.printMessage(Kind.NOTE, json);
+		String yaml = new KiwiMetadataParser().dump(metadata);
+//		new KiwiMetadataParser().load(yaml);
+//		messager.printMessage(Kind.NOTE, yaml);
 
-		PrintWriter writer = null;
 		try {
-			FileObject file = filer.createResource(StandardLocation.CLASS_OUTPUT, "", modId + ".kiwi.json");
-			writer = new PrintWriter(file.openWriter());
-			writer.write(json);
+			FileObject file = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", modId + ".kiwi.yaml");
+			try (PrintWriter writer = new PrintWriter(file.openWriter())) {
+				writer.write(yaml);
+			}
 		} catch (IOException e) {
 			messager.printMessage(Kind.ERROR, e.toString());
-		} finally {
-			try {
-				Closeables.close(writer, true);
-			} catch (IOException e) {
-			}
 		}
 		return true;
 	}
@@ -138,7 +109,7 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 	}
 
 	// modified from Mixin
-	private AnnotationMirror getAnnotation(Element elem, TypeElement annotation2) {
+	private static AnnotationMirror getAnnotation(Element elem, TypeElement annotation2) {
 		if (elem == null) {
 			return null;
 		}
@@ -149,20 +120,16 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 			return null;
 		}
 
-		AnnotationMirror found = null;
 		for (AnnotationMirror annotation : annotations) {
 			Element element = annotation.getAnnotationType().asElement();
 			if (!(element instanceof TypeElement annotationElement)) {
 				continue;
 			}
-			if (annotationElement.equals(skipType)) {
-				return null;
-			}
 			if (annotationElement.equals(annotation2)) {
-				found = annotation;
+				return annotation;
 			}
 		}
-		return found;
+		return null;
 	}
 
 	private static Object mapValue(AnnotationValue av) {
@@ -173,6 +140,37 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 			v = ((List<AnnotationValue>) v).stream().map(KiwiAnnotationProcessor::mapValue).toList();
 		}
 		return v;
+	}
+
+	private record AnnotationType(String className, String yamlKey, Set<ElementKind> allowedKinds) {
+		private static final AnnotationType MODULE = new AnnotationType("snownee.kiwi.KiwiModule", "modules", Set.of(ElementKind.CLASS));
+		private static final AnnotationType OPTIONAL = new AnnotationType(
+				"snownee.kiwi.KiwiModule.Optional",
+				"optionals",
+				Set.of(ElementKind.CLASS));
+		private static final AnnotationType LOADING_CONDITION = new AnnotationType(
+				"snownee.kiwi.KiwiModule.LoadingCondition",
+				"conditions",
+				Set.of(ElementKind.METHOD));
+		private static final AnnotationType CONFIG = new AnnotationType(
+				"snownee.kiwi.config.KiwiConfig",
+				"configs",
+				Set.of(ElementKind.CLASS));
+		private static final AnnotationType PACKET = new AnnotationType(
+				"snownee.kiwi.network.KiwiPacket",
+				"packets",
+				Set.of(ElementKind.RECORD, ElementKind.CLASS));
+		private static final AnnotationType MOD = new AnnotationType("snownee.kiwi.Mod", "mod", Set.of());
+		private static final Map<String, AnnotationType> MAP = Stream.of(MODULE, OPTIONAL, LOADING_CONDITION, CONFIG, PACKET, MOD).collect(
+				HashMap::new, (m, t) -> m.put(t.className, t), Map::putAll);
+
+		boolean isCorrectKind(Element element, Messager messager) {
+			if (!allowedKinds.isEmpty() && !allowedKinds.contains(element.getKind())) {
+				messager.printMessage(Kind.ERROR, "Annotated element is not matched to expected kind", element);
+				return false;
+			}
+			return true;
+		}
 	}
 
 }

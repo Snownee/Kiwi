@@ -14,14 +14,12 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.CreativeModeTab.TabVisibility;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.common.util.MutableHashedLinkedMap;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.common.util.MutableHashedLinkedMap;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import snownee.kiwi.KiwiModule.Category;
 import snownee.kiwi.item.ItemCategoryFiller;
 
@@ -55,15 +53,14 @@ public class GroupSetting {
 	public void postApply() {
 		List<ResourceKey<CreativeModeTab>> tabKeys = Stream.of(groups)
 				.map($ -> {
-					CreativeModeTab tab = Kiwi.getGroup($);
+					ResourceKey<CreativeModeTab> tab = Kiwi.getGroup($);
 					if (tab != null) {
-						return BuiltInRegistries.CREATIVE_MODE_TAB.getResourceKey(tab).orElse(null);
+						return tab;
 					}
-					return ResourceKey.create(Registries.CREATIVE_MODE_TAB, new ResourceLocation($));
+					return ResourceKey.create(Registries.CREATIVE_MODE_TAB, ResourceLocation.parse($));
 				})
-				.filter(Objects::nonNull)
 				.toList();
-		IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
+		IEventBus eventBus = Objects.requireNonNull(ModContext.get(Kiwi.ID).modContainer.getEventBus());
 		for (ResourceKey<CreativeModeTab> tabKey : tabKeys) {
 			eventBus.addListener((BuildCreativeModeTabContentsEvent event) -> {
 				if (!event.getTabKey().equals(tabKey)) {
@@ -86,7 +83,10 @@ public class GroupSetting {
 		}
 	}
 
-	private static void addAfter(List<ItemStack> toAdd, MutableHashedLinkedMap<ItemStack, TabVisibility> map, Collection<Item> afterItems) {
+	private static void addAfter(
+			List<ItemStack> toAdd,
+			MutableHashedLinkedMap<ItemStack, CreativeModeTab.TabVisibility> map,
+			Collection<Item> afterItems) {
 		ItemStack lastFound = ItemStack.EMPTY;
 		for (Item item : afterItems) {
 			ItemStack stack = new ItemStack(item);
@@ -99,12 +99,12 @@ public class GroupSetting {
 			ItemStack item = toAdd.get(i);
 			if (i == 0) {
 				if (lastFound.isEmpty()) {
-					map.put(item, TabVisibility.PARENT_AND_SEARCH_TABS);
+					map.put(item, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
 				} else {
-					map.putAfter(lastFound, item, TabVisibility.PARENT_AND_SEARCH_TABS);
+					map.putAfter(lastFound, item, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
 				}
 			} else {
-				map.putAfter(prev, item, TabVisibility.PARENT_AND_SEARCH_TABS);
+				map.putAfter(prev, item, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
 			}
 			prev = item;
 		}

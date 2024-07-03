@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import snownee.kiwi.config.ConfigUI.ItemType;
 import snownee.kiwi.config.ConfigUI.TextDescription;
+import snownee.kiwi.config.ConfigUI.Typed;
 import snownee.kiwi.config.KiwiConfig;
 import snownee.kiwi.config.KiwiConfig.ConfigType;
 import snownee.kiwi.config.KiwiConfig.LevelRestart;
@@ -28,7 +28,7 @@ public class TestConfig {
 
 	public static boolean booleanValue = true;
 
-	@ItemType(String.class)
+	@Typed(String.class)
 	@TextDescription(value = "1\n2\n3", after = true)
 	public static List<String> listValue = Arrays.asList("test");
 

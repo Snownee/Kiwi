@@ -15,11 +15,12 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.client.event.RegisterColorHandlersEvent;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import snownee.kiwi.util.client.SmartKey;
 
 public class ClientProxy {
 	public static void registerColors(Context context, List<Pair<Block, BlockColor>> blocksToAdd, List<Pair<Item, ItemColor>> itemsToAdd) {
@@ -51,11 +52,9 @@ public class ClientProxy {
 
 	public static void afterRegisterSmartKey(SmartKey smartKey) {
 		Preconditions.checkNotNull(smartKey);
-		var forgeEventBus = MinecraftForge.EVENT_BUS;
-		forgeEventBus.addListener((TickEvent.ClientTickEvent event) -> {
-			if (event.phase == TickEvent.Phase.END) {
-				smartKey.tick();
-			}
+		var forgeEventBus = NeoForge.EVENT_BUS;
+		forgeEventBus.addListener((ClientTickEvent.Post event) -> {
+			smartKey.tick();
 		});
 		forgeEventBus.addListener((ScreenEvent.MouseButtonPressed.Pre event) -> {
 			if (smartKey.matchesMouse(event.getButton()) && smartKey.setDownWithResult(true)) {

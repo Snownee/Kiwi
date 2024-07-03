@@ -5,7 +5,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraftforge.registries.GameData;
+import net.neoforged.neoforge.registries.GameData;
 import snownee.kiwi.Kiwi;
 
 @Mixin(value = GameData.class, remap = false)

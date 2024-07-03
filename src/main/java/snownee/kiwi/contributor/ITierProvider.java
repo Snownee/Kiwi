@@ -8,8 +8,8 @@ import java.util.concurrent.CompletableFuture;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import snownee.kiwi.contributor.client.CosmeticLayer;
 
 public interface ITierProvider {
@@ -61,7 +61,9 @@ public interface ITierProvider {
 
 		@OnlyIn(Dist.CLIENT)
 		@Override
-		public CosmeticLayer createRenderer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer, String tier) {
+		public CosmeticLayer createRenderer(
+				RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer,
+				String tier) {
 			return null;
 		}
 

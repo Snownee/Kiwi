@@ -6,9 +6,9 @@ import java.util.Objects;
 
 import com.google.common.collect.Maps;
 
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.ModLoadingContext;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.ModLoadingContext;
 
 public class ModContext {
 	public static final Map<String, ModContext> ALL_CONTEXTS = Maps.newHashMap();
@@ -28,7 +28,7 @@ public class ModContext {
 	private ModContext(String modid) {
 		Objects.requireNonNull(modid, "Cannot get name of kiwi module.");
 		try {
-			modContainer = ModList.get().getModContainerById(modid).get();
+			modContainer = ModList.get().getModContainerById(modid).orElseThrow();
 		} catch (NoSuchElementException e) {
 			Kiwi.LOGGER.error("Cannot find mod container for modid {}", modid);
 		}

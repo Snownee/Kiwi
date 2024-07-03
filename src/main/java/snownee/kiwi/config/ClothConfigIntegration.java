@@ -6,7 +6,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import com.google.common.base.Joiner;
+import org.jetbrains.annotations.Nullable;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -28,30 +29,37 @@ import me.shedaniel.clothconfig2.impl.builders.SubCategoryBuilder;
 import me.shedaniel.clothconfig2.impl.builders.TextDescriptionBuilder;
 import me.shedaniel.clothconfig2.impl.builders.TextFieldBuilder;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.client.ConfigScreenHandler.ConfigScreenFactory;
-import net.minecraftforge.fml.ModList;
 import snownee.kiwi.config.ConfigHandler.Value;
 import snownee.kiwi.config.ConfigUI.Color;
 import snownee.kiwi.config.ConfigUI.Hide;
-import snownee.kiwi.config.ConfigUI.ItemType;
 import snownee.kiwi.config.ConfigUI.Slider;
 import snownee.kiwi.config.ConfigUI.TextDescription;
+import snownee.kiwi.config.ConfigUI.Typed;
 import snownee.kiwi.util.LocalizableItem;
-import snownee.kiwi.util.Util;
+import snownee.kiwi.util.KUtil;
 
 public class ClothConfigIntegration {
 
+	private static final ConfigLibAttributes ATTRIBUTES = new ConfigLibAttributes("cloth-config",
+			namespace -> create(Minecraft.getInstance().screen, namespace),
+			true,
+			false,
+			true);
 	private static final Component requiresRestart = Component.translatable("kiwi.config.requiresRestart").withStyle(ChatFormatting.RED);
 
+	@Nullable
 	public static Screen create(Screen parent, String namespace) {
 		ConfigBuilder builder = ConfigBuilder.create();
 		ConfigEntryBuilder entryBuilder = builder.entryBuilder();
 		builder.setParentScreen(parent);
-		List<ConfigHandler> configs = KiwiConfigManager.allConfigs.stream().filter($ -> $.getModId().equals(namespace)).toList();
-		Joiner joiner = Joiner.on('.');
+		List<ConfigHandler> configs = KiwiConfigManager.getModHandlersWithScreen(namespace, ATTRIBUTES);
+		if (configs.isEmpty()) {
+			return null;
+		}
 		for (ConfigHandler config : configs) {
 			String titleKey = "kiwi.config." + config.getTranslationKey();
 			Component title = Component.translatable(titleKey);
@@ -69,14 +77,14 @@ public class ClothConfigIntegration {
 
 				List<String> path = Lists.newArrayList(value.path.split("\\."));
 				titleKey = path.remove(path.size() - 1);
-				String subCatKey = joiner.join(path);
+				String subCatKey = String.join(".", path);
 				Consumer<AbstractConfigListEntry<?>> subCat = subCatsMap.computeIfAbsent(subCatKey, $ -> {
 					String key0 = namespace + ".config." + $;
 					Component title0;
 					if (I18n.exists(key0)) {
 						title0 = Component.translatable(key0);
 					} else {
-						title0 = Component.literal(Util.friendlyText(path.get(path.size() - 1)));
+						title0 = Component.literal(KUtil.friendlyText(path.get(path.size() - 1)));
 					}
 					SubCategoryBuilder builder0 = entryBuilder.startSubCategory(title0);
 					builder0.setExpanded(true);
@@ -90,7 +98,7 @@ public class ClothConfigIntegration {
 				if (I18n.exists(value.translation)) {
 					title = Component.translatable(value.translation);
 				} else {
-					title = Component.literal(Util.friendlyText(titleKey));
+					title = Component.literal(KUtil.friendlyText(titleKey));
 				}
 				AbstractConfigListEntry<?> entry = null;
 				Class<?> type = value.getType();
@@ -110,7 +118,11 @@ public class ClothConfigIntegration {
 						field.setDefaultValue((Integer) value.defValue);
 						entry = field.build();
 					} else if (value.getAnnotation(Slider.class) != null) {
-						IntSliderBuilder field = entryBuilder.startIntSlider(title, (Integer) value.value, (int) value.min, (int) value.max);
+						IntSliderBuilder field = entryBuilder.startIntSlider(
+								title,
+								(Integer) value.value,
+								(int) value.min,
+								(int) value.max);
 						field.setTooltip(createComment(value));
 						field.setSaveConsumer(value::accept);
 						field.setDefaultValue((Integer) value.defValue);
@@ -154,7 +166,11 @@ public class ClothConfigIntegration {
 					entry = field.build();
 				} else if (type == long.class) {
 					if (value.getAnnotation(Slider.class) != null) {
-						LongSliderBuilder field = entryBuilder.startLongSlider(title, (Long) value.value, (long) value.min, (long) value.max);
+						LongSliderBuilder field = entryBuilder.startLongSlider(
+								title,
+								(Long) value.value,
+								(long) value.min,
+								(long) value.max);
 						field.setTooltip(createComment(value));
 						field.setSaveConsumer(value::accept);
 						field.setDefaultValue((Long) value.defValue);
@@ -179,7 +195,10 @@ public class ClothConfigIntegration {
 					field.setDefaultValue((String) value.defValue);
 					entry = field.build();
 				} else if (Enum.class.isAssignableFrom(type)) {
-					EnumSelectorBuilder<Enum<?>> field = entryBuilder.startEnumSelector(title, (Class<Enum<?>>) type, (Enum<?>) value.value);
+					EnumSelectorBuilder<Enum<?>> field = entryBuilder.startEnumSelector(
+							title,
+							(Class<Enum<?>>) type,
+							(Enum<?>) value.value);
 					field.setSaveConsumer(value::accept);
 					field.setDefaultValue((Enum<?>) value.defValue);
 					field.setEnumNameProvider($ -> {
@@ -198,9 +217,9 @@ public class ClothConfigIntegration {
 						return tooltip.isEmpty() ? Optional.empty() : Optional.of(tooltip.toArray(Component[]::new));
 					});
 					entry = field.build();
-				} else if (List.class.isAssignableFrom(type)) {
-					ItemType itemType = value.field.getAnnotation(ItemType.class);
-					if (itemType.value() == String.class) {
+				} else if (value.field != null && List.class.isAssignableFrom(type)) {
+					Typed typed = value.field.getAnnotation(Typed.class);
+					if (typed.value() == String.class) {
 						StringListBuilder field = entryBuilder.startStrList(title, (List<String>) value.value);
 						field.setTooltip(createComment(value));
 						field.setSaveConsumer(value::accept);
@@ -217,13 +236,15 @@ public class ClothConfigIntegration {
 			}
 			subCats.forEach($ -> category.addEntry($.build()));
 		}
-		builder.setSavingRunnable(() -> {
-			configs.forEach(ConfigHandler::save);
-		});
+		builder.setSavingRunnable(() -> configs.forEach(ConfigHandler::save));
 		return builder.build();
 	}
 
-	private static void putDescription(Consumer<AbstractConfigListEntry<?>> subCat, ConfigEntryBuilder entryBuilder, TextDescription description, boolean after) {
+	private static void putDescription(
+			Consumer<AbstractConfigListEntry<?>> subCat,
+			ConfigEntryBuilder entryBuilder,
+			TextDescription description,
+			boolean after) {
 		if (description == null || description.after() != after) {
 			return;
 		}
@@ -244,11 +265,7 @@ public class ClothConfigIntegration {
 		return tooltip.isEmpty() ? Optional.empty() : Optional.of(tooltip.toArray(Component[]::new));
 	}
 
-	static void init() {
-		List<String> mods = KiwiConfigManager.allConfigs.stream().map(ConfigHandler::getModId).distinct().toList();
-		for (String mod : mods) {
-			ModList.get().getModContainerById(mod).ifPresent($ -> $.registerExtensionPoint(ConfigScreenFactory.class, () -> new ConfigScreenFactory((minecraft, screen) -> ClothConfigIntegration.create(screen, mod))));
-		}
+	public static ConfigLibAttributes attributes() {
+		return ATTRIBUTES;
 	}
-
 }

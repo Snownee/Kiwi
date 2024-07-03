@@ -9,11 +9,14 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityAttachment;
+import net.minecraft.world.entity.EntityAttachments;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.SpawnPlacementType;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.flag.FeatureFlag;
@@ -21,6 +24,7 @@ import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.phys.Vec3;
 
 public class KiwiEntityTypeBuilder<T extends Entity> {
 	private final Class<?> type;
@@ -33,12 +37,14 @@ public class KiwiEntityTypeBuilder<T extends Entity> {
 	private boolean canSpawnFarFromPlayer;
 	private int clientTrackingRange = 5;
 	private int updateInterval = 3;
-	private EntityDimensions dimensions = EntityDimensions.scalable(-1.0f, -1.0f);
+	private EntityDimensions dimensions = EntityDimensions.scalable(0.6F, 1.8F);
+	private float spawnDimensionsScale = 1.0F;
+	private EntityAttachments.Builder attachments = EntityAttachments.builder();
 	private FeatureFlagSet requiredFeatures = FeatureFlags.VANILLA_SET;
 	private Boolean forceTrackedVelocityUpdates;
 	@Nullable
 	private Supplier<AttributeSupplier.Builder> defaultAttributeBuilder;
-	private SpawnPlacements.Type restrictionLocation;
+	private SpawnPlacementType restrictionLocation;
 	private Heightmap.Types restrictionHeightmap;
 	private SpawnPlacements.SpawnPredicate<T> spawnPredicate;
 
@@ -73,6 +79,54 @@ public class KiwiEntityTypeBuilder<T extends Entity> {
 	public KiwiEntityTypeBuilder<T> dimensions(EntityDimensions dimensions) {
 		Objects.requireNonNull(dimensions, "Cannot set null dimensions");
 		this.dimensions = dimensions;
+		return this;
+	}
+
+	public KiwiEntityTypeBuilder<T> spawnDimensionsScale(float p_338311_) {
+		this.spawnDimensionsScale = p_338311_;
+		return this;
+	}
+
+	public KiwiEntityTypeBuilder<T> eyeHeight(float p_316663_) {
+		this.dimensions = this.dimensions.withEyeHeight(p_316663_);
+		return this;
+	}
+
+	public KiwiEntityTypeBuilder<T> passengerAttachments(float... p_316352_) {
+		for (float f : p_316352_) {
+			this.attachments = this.attachments.attach(EntityAttachment.PASSENGER, 0.0F, f, 0.0F);
+		}
+
+		return this;
+	}
+
+	public KiwiEntityTypeBuilder<T> passengerAttachments(Vec3... p_316160_) {
+		for (Vec3 vec3 : p_316160_) {
+			this.attachments = this.attachments.attach(EntityAttachment.PASSENGER, vec3);
+		}
+
+		return this;
+	}
+
+	public KiwiEntityTypeBuilder<T> vehicleAttachment(Vec3 p_316758_) {
+		return this.attach(EntityAttachment.VEHICLE, p_316758_);
+	}
+
+	public KiwiEntityTypeBuilder<T> ridingOffset(float p_316455_) {
+		return this.attach(EntityAttachment.VEHICLE, 0.0F, -p_316455_, 0.0F);
+	}
+
+	public KiwiEntityTypeBuilder<T> nameTagOffset(float p_316662_) {
+		return this.attach(EntityAttachment.NAME_TAG, 0.0F, p_316662_, 0.0F);
+	}
+
+	public KiwiEntityTypeBuilder<T> attach(EntityAttachment p_320654_, float p_320819_, float p_320871_, float p_320278_) {
+		this.attachments = this.attachments.attach(p_320654_, p_320819_, p_320871_, p_320278_);
+		return this;
+	}
+
+	public KiwiEntityTypeBuilder<T> attach(EntityAttachment p_320601_, Vec3 p_320745_) {
+		this.attachments = this.attachments.attach(p_320601_, p_320745_);
 		return this;
 	}
 
@@ -128,7 +182,10 @@ public class KiwiEntityTypeBuilder<T extends Entity> {
 		return this;
 	}
 
-	public KiwiEntityTypeBuilder<T> spawnRestriction(SpawnPlacements.Type location, Heightmap.Types heightmap, SpawnPlacements.SpawnPredicate<T> spawnPredicate) {
+	public KiwiEntityTypeBuilder<T> spawnRestriction(
+			SpawnPlacementType location,
+			Heightmap.Types heightmap,
+			SpawnPlacements.SpawnPredicate<T> spawnPredicate) {
 		Preconditions.checkState(type == Mob.class, "Only mobs can have spawn restrictions.");
 		this.restrictionLocation = Objects.requireNonNull(location, "Location cannot be null.");
 		this.restrictionHeightmap = Objects.requireNonNull(heightmap, "Heightmap type cannot be null.");
@@ -157,6 +214,18 @@ public class KiwiEntityTypeBuilder<T extends Entity> {
 		//		} else {
 		//			throw new IllegalStateException("Unknown entity type: " + type);
 		//		}
-		return new EntityType<>(factory, category, serialize, summon, fireImmune, canSpawnFarFromPlayer, immuneTo, dimensions, clientTrackingRange, updateInterval, requiredFeatures);
+		return new EntityType<>(
+				factory,
+				category,
+				serialize,
+				summon,
+				fireImmune,
+				canSpawnFarFromPlayer,
+				immuneTo,
+				dimensions.withAttachments(attachments),
+				spawnDimensionsScale,
+				clientTrackingRange,
+				updateInterval,
+				requiredFeatures);
 	}
 }

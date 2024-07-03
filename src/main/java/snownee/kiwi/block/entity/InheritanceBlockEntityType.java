@@ -13,8 +13,11 @@ public class InheritanceBlockEntityType<T extends BlockEntity> extends BlockEnti
 
 	private final Class<? extends Block> clazz;
 
-	public InheritanceBlockEntityType(BlockEntitySupplier<? extends T> factory, Class<? extends Block> clazz, Type<?> datafixer) {
-		super(factory, Set.of(), datafixer);
+	public InheritanceBlockEntityType(
+			BlockEntityType.BlockEntitySupplier<? extends T> factory,
+			Class<? extends Block> clazz,
+			Type<?> datafixer) {
+		super(factory::create, Set.of(), datafixer);
 		this.clazz = clazz;
 	}
 

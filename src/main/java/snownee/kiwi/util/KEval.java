@@ -54,10 +54,13 @@ public class KEval {
 	@FunctionParameter(name = "id")
 	private static class HasFunction extends AbstractFunction {
 		@Override
-		public EvaluationValue evaluate(Expression expression, Token functionToken, EvaluationValue... parameterValues) throws EvaluationException {
+		public EvaluationValue evaluate(
+				Expression expression,
+				Token functionToken,
+				EvaluationValue... parameterValues) throws EvaluationException {
 			String string = parameterValues[0].getStringValue();
 			if (string.startsWith("@")) {
-				return EvaluationValue.booleanValue(KiwiModules.isLoaded(new ResourceLocation(string.substring(1))));
+				return EvaluationValue.booleanValue(KiwiModules.isLoaded(ResourceLocation.parse(string.substring(1))));
 			} else {
 				return EvaluationValue.booleanValue(Platform.isModLoaded(string));
 			}
@@ -69,9 +72,14 @@ public class KEval {
 		private final Object2IntMap<String> cache = new Object2IntAVLTreeMap<>();
 
 		@Override
-		public EvaluationValue evaluate(Expression expression, Token functionToken, EvaluationValue... parameterValues) throws EvaluationException {
+		public EvaluationValue evaluate(
+				Expression expression,
+				Token functionToken,
+				EvaluationValue... parameterValues) throws EvaluationException {
 			String string = parameterValues[0].getStringValue();
-			return EvaluationValue.numberValue(new BigDecimal(cache.computeIfAbsent(string, (ToIntFunction<String>) Platform::getVersionNumber)));
+			return EvaluationValue.numberValue(new BigDecimal(cache.computeIfAbsent(
+					string,
+					(ToIntFunction<String>) Platform::getVersionNumber)));
 		}
 	}
 
@@ -91,7 +99,10 @@ public class KEval {
 	private static class NullishCoalescingOperator extends AbstractOperator {
 
 		@Override
-		public EvaluationValue evaluate(Expression expression, Token operatorToken, EvaluationValue... operands) throws EvaluationException {
+		public EvaluationValue evaluate(
+				Expression expression,
+				Token operatorToken,
+				EvaluationValue... operands) throws EvaluationException {
 			if (operands[0].isNullValue()) {
 				return operands[1];
 			} else {

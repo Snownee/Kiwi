@@ -14,12 +14,9 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.kiwi.contributor.Contributors;
 import snownee.kiwi.contributor.ITierProvider;
 
-@OnlyIn(Dist.CLIENT)
 public class CosmeticLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
 
 	public static final Collection<CosmeticLayer> ALL_LAYERS = Lists.newLinkedList();
@@ -37,11 +34,22 @@ public class CosmeticLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
 	}
 
 	@Override
-	public void render(PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, AbstractClientPlayer entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
+	public void render(
+			PoseStack matrixStackIn,
+			MultiBufferSource bufferIn,
+			int packedLightIn,
+			AbstractClientPlayer entitylivingbaseIn,
+			float limbSwing,
+			float limbSwingAmount,
+			float partialTicks,
+			float ageInTicks,
+			float netHeadYaw,
+			float headPitch) {
 		if (player2renderer == null) {
 			return;
 		}
-		RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> renderer = player2renderer.getIfPresent(entitylivingbaseIn.getGameProfile().getName());
+		RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> renderer = player2renderer.getIfPresent(entitylivingbaseIn.getGameProfile()
+				.getName());
 		if (renderer == null) {
 			String name = entitylivingbaseIn.getGameProfile().getName();
 			ResourceLocation id = Contributors.PLAYER_COSMETICS.get(name);
@@ -51,13 +59,24 @@ public class CosmeticLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
 					Contributors.PLAYER_COSMETICS.remove(name);
 				} else {
 					renderer = provider.createRenderer(this.renderer, id.getPath());
-					if (renderer != null)
+					if (renderer != null) {
 						player2renderer.put(name, renderer);
+					}
 				}
 			}
 		}
 		if (renderer != null) {
-			renderer.render(matrixStackIn, bufferIn, packedLightIn, entitylivingbaseIn, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch);
+			renderer.render(
+					matrixStackIn,
+					bufferIn,
+					packedLightIn,
+					entitylivingbaseIn,
+					limbSwing,
+					limbSwingAmount,
+					partialTicks,
+					ageInTicks,
+					netHeadYaw,
+					headPitch);
 		}
 	}
 

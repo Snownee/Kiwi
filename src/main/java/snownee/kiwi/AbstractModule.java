@@ -20,16 +20,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.entity.BlockEntityType.BlockEntitySupplier;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.data.event.GatherDataEvent;
 import snownee.kiwi.block.entity.InheritanceBlockEntityType;
-import snownee.kiwi.block.entity.TagBasedBlockEntityType;
-import snownee.kiwi.loader.event.ClientInitEvent;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.loader.event.PostInitEvent;
-import snownee.kiwi.loader.event.ServerInitEvent;
+import snownee.kiwi.util.KiwiTabBuilder;
 
 /**
  * All your modules should extend {@code AbstractModule}
@@ -37,15 +33,15 @@ import snownee.kiwi.loader.event.ServerInitEvent;
  * @author Snownee
  */
 public abstract class AbstractModule {
-	protected final Map<Object, BiConsumer<ModuleInfo, ?>> decorators = Maps.newHashMap();
+	protected final Map<ResourceKey<? extends Registry<?>>, BiConsumer<KiwiModuleContainer, KiwiGOHolder<?>>> decorators = Maps.newHashMap();
 	public ResourceLocation uid;
 
 	protected static <T> KiwiGO<T> go(Supplier<? extends T> factory) {
 		return new KiwiGO<>((Supplier<T>) factory);
 	}
 
-	protected static <T> KiwiGO<T> go(Supplier<? extends T> factory, Supplier<Object> registry) {
-		return new KiwiGO.RegistrySpecified<>((Supplier<T>) factory, registry);
+	protected static <T> KiwiGO<T> go(Supplier<? extends T> factory, ResourceKey<? extends Registry<?>> registryKey) {
+		return new KiwiGO.RegistrySpecified<>((Supplier<T>) factory, registryKey);
 	}
 
 	/// helper methods:
@@ -57,31 +53,28 @@ public abstract class AbstractModule {
 		return BlockBehaviour.Properties.of();
 	}
 
-	/**
-	 * @since 2.5.2
-	 */
 	protected static BlockBehaviour.Properties blockProp(BlockBehaviour block) {
-		return BlockBehaviour.Properties.copy(block);
+		return BlockBehaviour.Properties.ofFullCopy(block);
 	}
 
-	/**
-	 * @since 5.2.0
-	 */
-	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(BlockEntitySupplier<? extends T> factory, Type<?> datafixer, Supplier<? extends Block>... blocks) {
-		return go(() -> BlockEntityType.Builder.<T>of(factory, Stream.of(blocks).map(Supplier::get).toArray(Block[]::new)).build(datafixer));
+	@SafeVarargs
+	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(
+			BlockEntityType.BlockEntitySupplier<? extends T> factory,
+			Type<?> datafixer,
+			Supplier<? extends Block>... blocks) {
+		return go(() -> BlockEntityType.Builder.<T>of(factory, Stream.of(blocks).map(Supplier::get).toArray(Block[]::new))
+				.build(datafixer));
 	}
 
-	@Deprecated
-	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(BlockEntitySupplier<? extends T> factory, Type<?> datafixer, TagKey<Block> blockTag) {
-		return go(() -> new TagBasedBlockEntityType<>(factory, blockTag, datafixer));
-	}
-
-	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(BlockEntitySupplier<? extends T> factory, Type<?> datafixer, Class<? extends Block> blockClass) {
+	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(
+			BlockEntityType.BlockEntitySupplier<? extends T> factory,
+			Type<?> datafixer,
+			Class<? extends Block> blockClass) {
 		return go(() -> new InheritanceBlockEntityType<>(factory, blockClass, datafixer));
 	}
 
-	public static CreativeModeTab.Builder itemCategory(String namespace, String path, Supplier<ItemStack> icon) {
-		return new KiwiTabBuilder(new ResourceLocation(namespace, path)).icon(icon);
+	public static CreativeModeTab.Builder itemCategory(ResourceLocation id, Supplier<ItemStack> icon) {
+		return new KiwiTabBuilder(id).icon(icon);
 	}
 
 	public static TagKey<Item> itemTag(String namespace, String path) {
@@ -101,10 +94,13 @@ public abstract class AbstractModule {
 	}
 
 	public static <T> TagKey<T> tag(ResourceKey<? extends Registry<T>> registryKey, String namespace, String path) {
-		return TagKey.create(registryKey, new ResourceLocation(namespace, path));
+		return TagKey.create(registryKey, ResourceLocation.fromNamespaceAndPath(namespace, path));
 	}
 
-	protected void preInit() {
+	public void addRegistries() {
+	}
+
+	protected void addEntries() {
 		// NO-OP
 	}
 
@@ -112,30 +108,15 @@ public abstract class AbstractModule {
 		// NO-OP
 	}
 
-	protected void clientInit(ClientInitEvent event) {
-		// NO-OP
-	}
-
-	protected void serverInit(ServerInitEvent event) {
-		// NO-OP
-	}
-
 	protected void postInit(PostInitEvent event) {
 		// NO-OP
 	}
 
-	/**
-	 * @since 4.1.0
-	 */
-	@Deprecated
-	protected void gatherData(GatherDataEvent event) {
-		// NO-OP
+	public ResourceLocation id(String path) {
+		return ResourceLocation.fromNamespaceAndPath(uid.getNamespace(), path);
 	}
 
-	/**
-	 * @since 2.6.0
-	 */
-	public ResourceLocation RL(String path) {
-		return new ResourceLocation(uid.getNamespace(), path);
+	public KiwiModuleContainer container() {
+		return KiwiModules.get(uid);
 	}
 }

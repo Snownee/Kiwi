@@ -13,10 +13,7 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
-@OnlyIn(Dist.CLIENT)
 public class FoxTailModel<T extends LivingEntity> extends AgeableListModel<T> {
 
 	private PlayerModel<AbstractClientPlayer> playerModel;
@@ -45,8 +42,14 @@ public class FoxTailModel<T extends LivingEntity> extends AgeableListModel<T> {
 		//		this.tail.addBox(0F, 0F, 0F, 4.0F, 9.0F, 5.0F);
 
 		//PartDefinition partdefinition1 = root.addOrReplaceChild("head", CubeListBuilder.create().texOffs(1, 5).addBox(-3.0F, -2.0F, -5.0F, 8.0F, 6.0F, 6.0F), PartPose.offset(-1.0F, 16.5F, -3.0F));
-		root.addOrReplaceChild("right_ear", CubeListBuilder.create().texOffs(8, 1).addBox(-4.0F, -10.0F, -4.0F, 2.0F, 2.0F, 1.0F), PartPose.ZERO);
-		root.addOrReplaceChild("left_ear", CubeListBuilder.create().texOffs(15, 1).addBox(2.0F, -10.0F, -4.0F, 2.0F, 2.0F, 1.0F), PartPose.ZERO);
+		root.addOrReplaceChild(
+				"right_ear",
+				CubeListBuilder.create().texOffs(8, 1).addBox(-4.0F, -10.0F, -4.0F, 2.0F, 2.0F, 1.0F),
+				PartPose.ZERO);
+		root.addOrReplaceChild(
+				"left_ear",
+				CubeListBuilder.create().texOffs(15, 1).addBox(2.0F, -10.0F, -4.0F, 2.0F, 2.0F, 1.0F),
+				PartPose.ZERO);
 
 		//PartDefinition partdefinition2 = root.addOrReplaceChild("body", CubeListBuilder.create().texOffs(24, 15).addBox(-3.0F, 3.999F, -3.5F, 6.0F, 11.0F, 6.0F), PartPose.offsetAndRotation(0.0F, 16.0F, -6.0F, ((float) Math.PI / 2F), 0.0F, 0.0F));
 		root.addOrReplaceChild("tail", CubeListBuilder.create().texOffs(30, 0).addBox(0F, 0F, 0F, 4.0F, 9.0F, 5.0F), PartPose.ZERO);

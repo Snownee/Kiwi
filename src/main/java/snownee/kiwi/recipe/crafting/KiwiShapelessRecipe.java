@@ -1,37 +1,52 @@
 package snownee.kiwi.recipe.crafting;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.NonNullList;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
-import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.level.Level;
 import snownee.kiwi.data.DataModule;
 
 public class KiwiShapelessRecipe extends ShapelessRecipe {
 
-	private boolean noContainers;
+	private final boolean noContainers;
 	private boolean trimmed;
 
-	public KiwiShapelessRecipe(ShapelessRecipe rawRecipe, boolean noContainers) {
-		super(rawRecipe.getId(), rawRecipe.getGroup(), rawRecipe.category(), rawRecipe.getResultItem(null), rawRecipe.getIngredients());
+	public KiwiShapelessRecipe(
+			String string,
+			CraftingBookCategory craftingBookCategory,
+			ItemStack itemStack,
+			NonNullList<Ingredient> nonNullList,
+			boolean noContainers) {
+		super(string, craftingBookCategory, itemStack, mutableCopy(nonNullList));
 		this.noContainers = noContainers;
 	}
 
+	public KiwiShapelessRecipe(ShapelessRecipe rawRecipe, boolean noContainers) {
+		super(rawRecipe.getGroup(), rawRecipe.category(), rawRecipe.result, mutableCopy(rawRecipe.getIngredients()));
+		this.noContainers = noContainers;
+	}
+
+	private static NonNullList<Ingredient> mutableCopy(NonNullList<Ingredient> list) {
+		NonNullList<Ingredient> copy = NonNullList.create();
+		copy.addAll(list);
+		return copy;
+	}
+
 	@Override
-	public boolean matches(CraftingContainer craftingContainer, Level level) {
+	public boolean matches(CraftingInput input, Level level) {
 		trim();
-		return super.matches(craftingContainer, level);
+		return super.matches(input, level);
 	}
 
 	@Override
@@ -49,11 +64,11 @@ public class KiwiShapelessRecipe extends ShapelessRecipe {
 	}
 
 	@Override
-	public NonNullList<ItemStack> getRemainingItems(CraftingContainer inv) {
+	public NonNullList<ItemStack> getRemainingItems(CraftingInput input) {
 		if (noContainers) {
-			return NonNullList.withSize(inv.getContainerSize(), ItemStack.EMPTY);
+			return NonNullList.withSize(input.size(), ItemStack.EMPTY);
 		} else {
-			return super.getRemainingItems(inv);
+			return super.getRemainingItems(input);
 		}
 	}
 
@@ -63,44 +78,43 @@ public class KiwiShapelessRecipe extends ShapelessRecipe {
 	}
 
 	public static class Serializer implements RecipeSerializer<KiwiShapelessRecipe> {
+		public static final MapCodec<KiwiShapelessRecipe> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+						Codec.STRING.optionalFieldOf("group", "").forGetter(ShapelessRecipe::getGroup),
+						CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(ShapelessRecipe::category),
+						ItemStack.CODEC.fieldOf("result").forGetter(recipe -> recipe.result),
+						Ingredient.CODEC_NONEMPTY.listOf().fieldOf("ingredients").flatXmap(list -> {
+							Ingredient[] ingredients = list.stream().filter(ingredient -> !ingredient.isEmpty()).toArray(Ingredient[]::new);
+							if (ingredients.length == 0) {
+								return DataResult.error(() -> "No ingredients for shapeless recipe");
+							} else {
+								return ingredients.length > 9 ?
+										DataResult.error(() -> "Too many ingredients for shapeless recipe") :
+										DataResult.success(NonNullList.of(Ingredient.EMPTY, ingredients));
+							}
+						}, DataResult::success).forGetter(ShapelessRecipe::getIngredients),
+						Codec.BOOL.optionalFieldOf("no_containers", false).forGetter(recipe -> recipe.noContainers))
+				.apply(i, KiwiShapelessRecipe::new));
+
+		public static final StreamCodec<RegistryFriendlyByteBuf, KiwiShapelessRecipe> STREAM_CODEC = StreamCodec.of(
+				Serializer::toNetwork,
+				Serializer::fromNetwork);
 
 		@Override
-		public KiwiShapelessRecipe fromJson(ResourceLocation id, JsonObject o) {
-			String s = GsonHelper.getAsString(o, "group", "");
-			NonNullList<Ingredient> nonnulllist = itemsFromJson(GsonHelper.getAsJsonArray(o, "ingredients"));
-			if (nonnulllist.isEmpty()) {
-				throw new JsonParseException("No ingredients for shapeless recipe");
-				//		} else if (nonnulllist.size() > ShapedRecipe.MAX_WIDTH * ShapedRecipe.MAX_HEIGHT) {
-				//			throw new JsonParseException("Too many ingredients for shapeless recipe. The maximum is " + (ShapedRecipe.MAX_WIDTH * ShapedRecipe.MAX_HEIGHT));
-			} else {
-				@SuppressWarnings("deprecation")
-				CraftingBookCategory category = CraftingBookCategory.CODEC.byName(GsonHelper.getAsString(o, "category", null), CraftingBookCategory.MISC);
-				ItemStack itemstack = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(o, "result"));
-				return new KiwiShapelessRecipe(new ShapelessRecipe(id, s, category, itemstack, nonnulllist), GsonHelper.getAsBoolean(o, "no_containers", false));
-			}
-		}
-
-		private static NonNullList<Ingredient> itemsFromJson(JsonArray a) {
-			NonNullList<Ingredient> nonnulllist = NonNullList.create();
-
-			for (int i = 0; i < a.size(); ++i) {
-				Ingredient ingredient = Ingredient.fromJson(a.get(i));
-				if (ingredient != Ingredient.EMPTY) {
-					nonnulllist.add(ingredient);
-				}
-			}
-
-			return nonnulllist;
+		public MapCodec<KiwiShapelessRecipe> codec() {
+			return CODEC;
 		}
 
 		@Override
-		public KiwiShapelessRecipe fromNetwork(ResourceLocation recipeId, FriendlyByteBuf buffer) {
-			return new KiwiShapelessRecipe(RecipeSerializer.SHAPELESS_RECIPE.fromNetwork(recipeId, buffer), buffer.readBoolean());
+		public StreamCodec<RegistryFriendlyByteBuf, KiwiShapelessRecipe> streamCodec() {
+			return STREAM_CODEC;
 		}
 
-		@Override
-		public void toNetwork(FriendlyByteBuf buffer, KiwiShapelessRecipe recipe) {
-			RecipeSerializer.SHAPELESS_RECIPE.toNetwork(buffer, recipe);
+		public static KiwiShapelessRecipe fromNetwork(RegistryFriendlyByteBuf buffer) {
+			return new KiwiShapelessRecipe(RecipeSerializer.SHAPELESS_RECIPE.streamCodec().decode(buffer), buffer.readBoolean());
+		}
+
+		public static void toNetwork(RegistryFriendlyByteBuf buffer, KiwiShapelessRecipe recipe) {
+			RecipeSerializer.SHAPELESS_RECIPE.streamCodec().encode(buffer, recipe);
 			buffer.writeBoolean(recipe.noContainers);
 		}
 	}

@@ -3,7 +3,7 @@ package snownee.kiwi.loader.event;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
-import net.minecraftforge.fml.event.lifecycle.ParallelDispatchEvent;
+import net.neoforged.fml.event.lifecycle.ParallelDispatchEvent;
 
 public class ParallelEvent {
 	ParallelDispatchEvent delegate;

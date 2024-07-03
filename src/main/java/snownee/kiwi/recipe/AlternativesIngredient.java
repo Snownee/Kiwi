@@ -1,42 +1,32 @@
 package snownee.kiwi.recipe;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.minecraft.core.registries.Registries;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
-import net.minecraft.util.GsonHelper;
-import net.minecraft.world.item.Item;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeManager;
-import net.minecraftforge.common.crafting.AbstractIngredient;
-import net.minecraftforge.common.crafting.CompoundIngredient;
-import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.common.crafting.IIngredientSerializer;
-import net.minecraftforge.common.crafting.conditions.ConditionContext;
-import net.minecraftforge.common.crafting.conditions.ICondition;
-import snownee.kiwi.Kiwi;
-import snownee.kiwi.mixin.RecipeManagerAccess;
-import snownee.kiwi.util.Util;
+import net.neoforged.neoforge.common.crafting.ICustomIngredient;
+import net.neoforged.neoforge.common.crafting.IngredientType;
 
-public class AlternativesIngredient extends AbstractIngredient {
-	public static final ResourceLocation ID = Kiwi.id("alternatives");
-	public static final Serializer SERIALIZER = new Serializer();
+public class AlternativesIngredient implements ICustomIngredient {
+	public static final IngredientType<AlternativesIngredient> SERIALIZER = new IngredientType<>(Serializer.CODEC, Serializer.STREAM_CODEC);
 	@Nullable
-	private JsonArray options;
+	private List<JsonElement> options;
 	private Ingredient cached;
 
-	public AlternativesIngredient(@Nullable JsonArray options) {
+	public AlternativesIngredient(@Nullable List<JsonElement> options) {
 		this.options = options;
 	}
 
@@ -46,8 +36,8 @@ public class AlternativesIngredient extends AbstractIngredient {
 	}
 
 	@Override
-	public ItemStack @NotNull [] getItems() {
-		return internal().getItems();
+	public Stream<ItemStack> getItems() {
+		return Stream.of(internal().getItems());
 	}
 
 	@Override
@@ -56,97 +46,49 @@ public class AlternativesIngredient extends AbstractIngredient {
 	}
 
 	@Override
-	public boolean isEmpty() {
-		return false;
+	public IngredientType<?> getType() {
+		return SERIALIZER;
 	}
 
 	public Ingredient internal() {
 		if (cached == null) {
-			Objects.requireNonNull(options, "Options in AlternativesIngredient is null");
+			Objects.requireNonNull(options);
 			cached = Ingredient.EMPTY;
 			for (JsonElement option : options) {
+				Ingredient ingredient;
 				try {
-					cached = getIngredient(option);
-					if (!cached.isEmpty()) {
-						options = null;
-						break;
-					}
-				} catch (IllegalStateException e) {
-					Kiwi.LOGGER.info("Failed to parse ingredient: %s".formatted(options), e);
-					cached = null;
-					return Ingredient.EMPTY;
-				} catch (Exception ignored) {
+					ingredient = Ingredient.CODEC.parse(JsonOps.INSTANCE, option).result().orElseThrow();
+				} catch (Exception e) {
+					continue;
 				}
+				if (ingredient.getItems().length == 0) {
+					continue;
+				}
+				cached = ingredient;
+				break;
 			}
 		}
 		return cached;
 	}
 
-	private Ingredient getIngredient(JsonElement element) {
-		if (element.isJsonObject()) {
-			JsonObject jsonObject = element.getAsJsonObject();
-			if (jsonObject.size() == 1 && jsonObject.has("tag")) {
-				RecipeManager recipeManager = Util.getRecipeManager();
-				if (recipeManager == null) {
-					throw new IllegalStateException("Unable to get recipe manager");
-				}
-				ICondition.IContext ctx = ((RecipeManagerAccess) recipeManager).getContext();
-				if (!(ctx instanceof ConditionContext)) {
-					throw new IllegalStateException("Unable to get real condition context");
-				}
-				String s = jsonObject.get("tag").getAsString();
-				TagKey<Item> tagKey = TagKey.create(Registries.ITEM, new ResourceLocation(s));
-				if (ctx.getTag(tagKey).isEmpty()) {
-					throw new JsonSyntaxException("Tag not found: " + s);
-				}
-			}
-			return CraftingHelper.getIngredient(element, false);
-		} else if (element.isJsonArray()) {
-			JsonArray jsonArray = element.getAsJsonArray();
-			if (jsonArray.isEmpty()) {
-				throw new JsonSyntaxException("Empty array");
-			}
-			Ingredient[] ingredients = new Ingredient[jsonArray.size()];
-			for (int i = 0; i < jsonArray.size(); i++) {
-				ingredients[i] = getIngredient(jsonArray.get(i));
-			}
-			return CompoundIngredient.of(ingredients);
-		}
-		throw new JsonSyntaxException("Expected item to be object or array of objects");
-	}
+	public static final class Serializer {
+		public static final MapCodec<AlternativesIngredient> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+				Codec.list(ExtraCodecs.JSON).fieldOf("options").forGetter(o -> o.options)
+		).apply(i, AlternativesIngredient::new));
 
-	@Override
-	public IIngredientSerializer<? extends Ingredient> getSerializer() {
-		return SERIALIZER;
-	}
+		public static final StreamCodec<RegistryFriendlyByteBuf, AlternativesIngredient> STREAM_CODEC = StreamCodec.of(
+				Serializer::write,
+				Serializer::read);
 
-	@Override
-	public @NotNull JsonElement toJson() {
-		JsonObject jsonObject = new JsonObject();
-		jsonObject.addProperty("type", Objects.requireNonNull(CraftingHelper.getID(SERIALIZER)).toString());
-		jsonObject.add("options", Objects.requireNonNull(options));
-		return jsonObject;
-	}
-
-	public static class Serializer implements IIngredientSerializer<AlternativesIngredient> {
-		@Override
-		public @NotNull AlternativesIngredient parse(FriendlyByteBuf buf) {
-			Ingredient internal = Ingredient.fromNetwork(buf);
+		public static AlternativesIngredient read(RegistryFriendlyByteBuf buf) {
+			Ingredient internal = Ingredient.CONTENTS_STREAM_CODEC.decode(buf);
 			AlternativesIngredient ingredient = new AlternativesIngredient(null);
 			ingredient.cached = internal;
 			return ingredient;
 		}
 
-		@Override
-		public AlternativesIngredient parse(JsonObject json) {
-			AlternativesIngredient ingredient = new AlternativesIngredient(GsonHelper.getAsJsonArray(json, "options"));
-			ingredient.internal(); // force load due to the networking bug
-			return ingredient;
-		}
-
-		@Override
-		public void write(FriendlyByteBuf buf, AlternativesIngredient ingredient) {
-			ingredient.internal().toNetwork(buf);
+		public static void write(RegistryFriendlyByteBuf buf, AlternativesIngredient ingredient) {
+			Ingredient.CONTENTS_STREAM_CODEC.encode(buf, ingredient.internal());
 		}
 	}
 }

@@ -6,29 +6,30 @@ import java.util.UUID;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.mojang.authlib.GameProfile;
+import com.google.common.base.Preconditions;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- *
  * Simple NBT helper. Use 'a.b.c' to access to values
  *
  * @author Snownee
- *
  */
 public class NBTHelper {
 
 	@Nullable
-	private final ItemStack stack;
+	private ItemStack stack;
 	@Nullable
 	private CompoundTag tag;
 
@@ -50,9 +51,6 @@ public class NBTHelper {
 		if (tag == null) {
 			if (createIfNull) {
 				tag = new CompoundTag();
-				if (stack != null) {
-					stack.setTag(tag);
-				}
 			} else {
 				return null;
 			}
@@ -248,9 +246,7 @@ public class NBTHelper {
 		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
 			String actualKey = getLastNode(key);
-			if (subTag.contains(actualKey, Tag.TAG_COMPOUND)) {
-				return NbtUtils.readBlockPos(getTag(actualKey));
-			}
+			return NbtUtils.readBlockPos(subTag, actualKey).orElse(null);
 		}
 		return null;
 	}
@@ -276,27 +272,12 @@ public class NBTHelper {
 		return setTag(key, NbtUtils.writeBlockState(value));
 	}
 
-	@SuppressWarnings("deprecation")
 	public BlockState getBlockState(String key) {
 		CompoundTag subTag = getTagInternal(key, false, false);
 		if (subTag != null) {
 			return NbtUtils.readBlockState(BuiltInRegistries.BLOCK.asLookup(), subTag);
 		}
 		return Blocks.AIR.defaultBlockState();
-	}
-
-	public NBTHelper setGameProfile(String key, GameProfile value) {
-		NbtUtils.writeGameProfile(getTag(key, true), value);
-		return this;
-	}
-
-	@Nullable
-	public GameProfile getGameProfile(String key) {
-		CompoundTag subTag = getTagInternal(key, false, false);
-		if (subTag != null) {
-			return NbtUtils.readGameProfile(subTag);
-		}
-		return null;
 	}
 
 	public NBTHelper setString(String key, String value) {
@@ -362,14 +343,13 @@ public class NBTHelper {
 		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
 			String actualKey = getLastNode(key);
-			if (!subTag.contains(actualKey + "Most", Tag.TAG_LONG) || !subTag.contains(actualKey + "Least", Tag.TAG_LONG)) {
+			if (subTag.hasUUID(actualKey)) {
 				return subTag.getUUID(actualKey);
 			}
 		}
 		return null;
 	}
 
-	@Nullable
 	public ListTag getTagList(String key, int type) {
 		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
@@ -416,8 +396,23 @@ public class NBTHelper {
 		return stack == null ? ItemStack.EMPTY : stack;
 	}
 
+	public NBTHelper updateItemData() {
+		return updateItemData(DataComponents.CUSTOM_DATA);
+	}
+
+	public NBTHelper updateItemData(DataComponentType<CustomData> componentType) {
+		Preconditions.checkNotNull(stack);
+		if (tag == null) {
+			stack.remove(componentType);
+		} else {
+			CustomData.set(componentType, stack, tag);
+		}
+		return this;
+	}
+
 	public static NBTHelper of(ItemStack stack) {
-		return new NBTHelper(stack.getTag(), stack);
+		Preconditions.checkState(!stack.isEmpty());
+		return new NBTHelper(stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag(), stack);
 	}
 
 	public static NBTHelper of(CompoundTag tag) {
