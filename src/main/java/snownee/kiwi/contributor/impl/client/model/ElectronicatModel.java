@@ -12,7 +12,6 @@
 //import net.minecraftforge.api.distmarker.Dist;
 //import net.minecraftforge.api.distmarker.OnlyIn;
 //
-//@Environment(EnvType.CLIENT)
 //public class ElectronicatModel<T extends LivingEntity> extends AgeableListModel<T> {
 //
 //	private static final Random RANDOM = new Random();

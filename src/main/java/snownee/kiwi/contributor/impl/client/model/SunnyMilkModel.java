@@ -2,8 +2,6 @@ package snownee.kiwi.contributor.impl.client.model;
 
 import com.google.common.collect.ImmutableList;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.AgeableListModel;
 import net.minecraft.client.model.geom.ModelPart;
@@ -15,7 +13,6 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 
-@Environment(EnvType.CLIENT)
 public class SunnyMilkModel<T extends LivingEntity> extends AgeableListModel<T> {
 
 	private float ticks;

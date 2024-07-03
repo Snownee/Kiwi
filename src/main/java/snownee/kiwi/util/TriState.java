@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
 
-import net.fabricmc.fabric.api.util.BooleanFunction;
+import it.unimi.dsi.fastutil.booleans.Boolean2ObjectFunction;
 
 /**
  * Represents a boolean value which can be true, false or refer to a default value.
@@ -98,7 +98,7 @@ public enum TriState {
 	 * @return an optional containing the mapped value; {@link Optional#empty()} if the tri-state is
 	 * {@link TriState#DEFAULT} or the value provided by the mapper is {@code null}.
 	 */
-	public <T> Optional<T> map(BooleanFunction<? extends T> mapper) {
+	public <T> Optional<T> map(Boolean2ObjectFunction<? extends T> mapper) {
 		Objects.requireNonNull(mapper, "Mapper function cannot be null");
 
 		if (this == DEFAULT) {

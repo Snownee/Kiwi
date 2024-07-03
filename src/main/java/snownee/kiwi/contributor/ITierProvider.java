@@ -1,6 +1,5 @@
 package snownee.kiwi.contributor;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -46,17 +45,17 @@ public interface ITierProvider {
 
 		@Override
 		public Set<String> getTiers() {
-			return Collections.EMPTY_SET;
+			return Set.of();
 		}
 
 		@Override
 		public Set<String> getPlayerTiers(String playerName) {
-			return Collections.EMPTY_SET;
+			return Set.of();
 		}
 
 		@Override
 		public List<String> getRenderableTiers() {
-			return Collections.EMPTY_LIST;
+			return List.of();
 		}
 
 		@Environment(EnvType.CLIENT)

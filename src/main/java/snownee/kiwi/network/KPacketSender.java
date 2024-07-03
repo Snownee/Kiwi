@@ -3,6 +3,8 @@ package snownee.kiwi.network;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import org.jetbrains.annotations.Nullable;
+
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -47,16 +49,35 @@ public final class KPacketSender {
 		send(payload, PlayerLookup.all(server).stream());
 	}
 
+	@Deprecated
 	public static void sendToAllExcept(CustomPacketPayload payload, ServerPlayer player) {
 		send(payload, PlayerLookup.all(player.server).stream().filter(p -> p != player));
 	}
 
-	public static void sendToAround(CustomPacketPayload payload, ServerLevel world, Vec3 pos, double radius) {
-		send(payload, PlayerLookup.around(world, pos, radius).stream());
+	public static void sendToAround(
+			CustomPacketPayload payload,
+			ServerLevel world,
+			@Nullable ServerPlayer excluded,
+			Vec3 pos,
+			double radius) {
+		Stream<ServerPlayer> stream = PlayerLookup.around(world, pos, radius).stream();
+		if (excluded != null) {
+			stream = stream.filter(p -> p != excluded);
+		}
+		send(payload, stream);
 	}
 
-	public static void sendToAround(CustomPacketPayload payload, ServerLevel world, Vec3i pos, double radius) {
-		send(payload, PlayerLookup.around(world, pos, radius).stream());
+	public static void sendToAround(
+			CustomPacketPayload payload,
+			ServerLevel world,
+			@Nullable ServerPlayer excluded,
+			Vec3i pos,
+			double radius) {
+		Stream<ServerPlayer> stream = PlayerLookup.around(world, pos, radius).stream();
+		if (excluded != null) {
+			stream = stream.filter(p -> p != excluded);
+		}
+		send(payload, stream);
 	}
 
 	public static void send(CustomPacketPayload payload, Player player) {

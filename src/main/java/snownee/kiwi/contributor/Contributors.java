@@ -87,7 +87,7 @@ public class Contributors extends AbstractModule {
 				} else {
 					PLAYER_COSMETICS.put(playerName, cosmetic);
 				}
-				KPacketSender.sendToAllExcept(new SSyncCosmeticPacket(ImmutableMap.of(playerName, cosmetic)), player);
+				KPacketSender.sendToAll(new SSyncCosmeticPacket(ImmutableMap.of(playerName, cosmetic)), player.server);
 			}
 		});
 	}

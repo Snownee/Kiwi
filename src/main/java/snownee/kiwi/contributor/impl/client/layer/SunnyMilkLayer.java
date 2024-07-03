@@ -5,8 +5,6 @@ import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -23,7 +21,6 @@ import snownee.kiwi.Kiwi;
 import snownee.kiwi.contributor.client.CosmeticLayer;
 import snownee.kiwi.contributor.impl.client.model.SunnyMilkModel;
 
-@Environment(EnvType.CLIENT)
 public class SunnyMilkLayer extends CosmeticLayer {
 	private static final ResourceLocation TEXTURE = Kiwi.id("textures/reward/sunny_milk.png");
 	private static final Supplier<LayerDefinition> definition = Suppliers.memoize(SunnyMilkModel::create);
