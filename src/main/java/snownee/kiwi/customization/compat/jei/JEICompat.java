@@ -11,6 +11,7 @@ import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
 import snownee.kiwi.Kiwi;
+import snownee.kiwi.customization.CustomizationHooks;
 import snownee.kiwi.customization.block.family.BlockFamilies;
 import snownee.kiwi.customization.block.family.BlockFamily;
 import snownee.kiwi.customization.block.family.StonecutterRecipeMaker;
@@ -29,16 +30,18 @@ public class JEICompat implements IModPlugin {
 
 	@Override
 	public void registerRecipes(IRecipeRegistration registration) {
-		List<StonecutterRecipe> recipes = Lists.newArrayList();
-		for (KHolder<BlockFamily> holder : BlockFamilies.all()) {
-			BlockFamily family = holder.value();
-			if (family.stonecutterSource().isPresent()) {
-				recipes.addAll(StonecutterRecipeMaker.makeRecipes("to", holder));
+		if (CustomizationHooks.isEnabled()) {
+			List<StonecutterRecipe> recipes = Lists.newArrayList();
+			for (KHolder<BlockFamily> holder : BlockFamilies.all()) {
+				BlockFamily family = holder.value();
+				if (family.stonecutterSource().isPresent()) {
+					recipes.addAll(StonecutterRecipeMaker.makeRecipes("to", holder));
+				}
+				if (family.stonecutterExchange()) {
+					recipes.addAll(StonecutterRecipeMaker.makeRecipes("exchange_in_viewer", holder));
+				}
 			}
-			if (family.stonecutterExchange()) {
-				recipes.addAll(StonecutterRecipeMaker.makeRecipes("exchange_in_viewer", holder));
-			}
+			registration.addRecipes(RecipeTypes.STONECUTTING, recipes);
 		}
-		registration.addRecipes(RecipeTypes.STONECUTTING, recipes);
 	}
 }

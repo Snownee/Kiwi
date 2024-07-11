@@ -183,6 +183,7 @@ public class BlockFamily {
 	public String toString() {
 		return "BlockFamily{" +
 				"blocks=" + blocks +
+				", items=" + items +
 				", stonecutterFrom=" + stonecutterFrom +
 				'}';
 	}

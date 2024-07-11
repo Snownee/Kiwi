@@ -22,7 +22,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
-import net.minecraft.world.level.block.Block;
 import snownee.kiwi.util.KHolder;
 
 public class StonecutterRecipeMaker {
@@ -95,8 +94,7 @@ public class StonecutterRecipeMaker {
 				family.key().getPath(),
 				"exchange_in_viewer".equals(type) ? "exchange" : type));
 		return family.value().items().map(item -> {
-			int count = 1;
-			Block block = Block.byItem(item);
+			int count;
 			if ("to".equals(type)) {
 				count = family.value().stonecutterSourceMultiplier();
 			} else {
@@ -110,7 +108,7 @@ public class StonecutterRecipeMaker {
 					prefix.withSuffix("/%s/%s".formatted(itemKey.getNamespace(), itemKey.getPath())),
 					prefix.toString(),
 					input,
-					new ItemStack(block, count));
+					new ItemStack(item, count));
 		}).filter(Objects::nonNull).toList();
 	}
 
