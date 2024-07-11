@@ -23,61 +23,11 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import snownee.kiwi.customization.CustomizationHooks;
 import snownee.kiwi.customization.block.KBlockSettings;
-import snownee.kiwi.customization.shape.BlockShapeType;
 
 @Mixin(BlockBehaviour.class)
 public class BlockBehaviourMixin {
 	@Shadow
-	@Final
-	protected boolean hasCollision;
-	@Shadow
 	public BlockBehaviour.Properties properties;
-
-	@Inject(method = "getShape", at = @At("HEAD"), cancellable = true)
-	private void kiwi$getShape(
-			BlockState pState,
-			BlockGetter pLevel,
-			BlockPos pPos,
-			CollisionContext pContext,
-			CallbackInfoReturnable<VoxelShape> cir) {
-		KBlockSettings settings = KBlockSettings.of(this);
-		if (settings != null && settings.getShape(BlockShapeType.MAIN) != null) {
-			try {
-				cir.setReturnValue(settings.getShape(BlockShapeType.MAIN).getShape(pState, pContext));
-			} catch (Exception ignored) {
-			}
-		}
-	}
-
-	@Inject(method = "getCollisionShape", at = @At("HEAD"), cancellable = true)
-	private void kiwi$getCollisionShape(
-			BlockState pState,
-			BlockGetter pLevel,
-			BlockPos pPos,
-			CollisionContext pContext,
-			CallbackInfoReturnable<VoxelShape> cir) {
-		if (!hasCollision) {
-			return;
-		}
-		KBlockSettings settings = KBlockSettings.of(this);
-		if (settings != null && settings.getShape(BlockShapeType.COLLISION) != null) {
-			try {
-				cir.setReturnValue(settings.getShape(BlockShapeType.COLLISION).getShape(pState, pContext));
-			} catch (Exception ignored) {
-			}
-		}
-	}
-
-	@Inject(method = "getInteractionShape", at = @At("HEAD"), cancellable = true)
-	private void kiwi$getInteractionShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CallbackInfoReturnable<VoxelShape> cir) {
-		KBlockSettings settings = KBlockSettings.of(this);
-		if (settings != null && settings.getShape(BlockShapeType.INTERACTION) != null) {
-			try {
-				cir.setReturnValue(settings.getShape(BlockShapeType.INTERACTION).getShape(pState, CollisionContext.empty()));
-			} catch (Exception ignored) {
-			}
-		}
-	}
 
 	@Inject(method = "getShadeBrightness", at = @At("HEAD"), cancellable = true)
 	private void kiwi$getShadeBrightness(BlockState state, BlockGetter world, BlockPos pos, CallbackInfoReturnable<Float> cir) {
