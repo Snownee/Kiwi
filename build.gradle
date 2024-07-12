@@ -283,6 +283,9 @@ dependencies {
     compileOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}"))
     //// at runtime, use the full JEI jar for Forge
     implementation(fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}"))
+
+    implementation fg.deobf("curse.maven:fastsuite-475117:4711435")
+    implementation fg.deobf("curse.maven:placebo-283644:5414631")
 }
 
 processResources {

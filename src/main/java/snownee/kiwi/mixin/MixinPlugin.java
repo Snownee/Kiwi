@@ -16,12 +16,14 @@ public class MixinPlugin implements IMixinConfigPlugin {
 	private boolean persistentCreativeInventory;
 	private boolean fastScrolling;
 	private boolean ksit;
+	private boolean fastsuite;
 
 	@Override
 	public void onLoad(String mixinPackage) {
 		customization = CustomizationServiceFinder.shouldEnable(LoadingModList.get().getMods());
 		persistentCreativeInventory =
 				customization || LoadingModList.get().getModFileById("persistentcreativeinventory") != null || !FMLEnvironment.production;
+		fastsuite = customization && LoadingModList.get().getModFileById("fastsuite") != null;
 		fastScrolling = LoadingModList.get().getModFileById("fastscroll") != null || !FMLEnvironment.production;
 	}
 
@@ -32,6 +34,9 @@ public class MixinPlugin implements IMixinConfigPlugin {
 
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
+		if (mixinClassName.startsWith("snownee.kiwi.mixin.customization.fastsuite.")) {
+			return fastsuite;
+		}
 		if (mixinClassName.startsWith("snownee.kiwi.mixin.customization.")) {
 			return customization;
 		}

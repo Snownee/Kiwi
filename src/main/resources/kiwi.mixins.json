@@ -27,6 +27,7 @@
 		"customization.BushBlockMixin",
 		"customization.HalfTransparentBlockMixin",
 		"customization.family.RecipeManagerMixin",
+		"customization.fastsuite.AuxRecipeManagerMixin",
 		"customization.forge.BlockMixin",
 		"customization.forge.GameDataMixin",
 		"customization.placement.BlockItemGetPlacementStateMixin",
