@@ -309,15 +309,13 @@ public class Kiwi implements ModInitializer {
 		}
 	}
 
+	@Deprecated
 	public static void onTagsUpdated() {
-		tagsUpdated = true;
 	}
 
-	/**
-	 * @since 3.1.3
-	 */
+	@Deprecated
 	public static boolean areTagsUpdated() {
-		return tagsUpdated;
+		return true;
 	}
 
 	@Override

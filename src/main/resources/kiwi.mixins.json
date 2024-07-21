@@ -6,7 +6,6 @@
   "refmap": "kiwi.refmap.json",
   "mixins": [
     "RecipeManagerMixin",
-    "ReloadableServerResourcesMixin",
     "ShapedRecipeAccess"
   ],
   "client": [
