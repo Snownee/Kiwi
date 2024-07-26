@@ -57,7 +57,7 @@ public record BlockDefinitionProperties(
 	}
 
 	public static MapCodec<Optional<BlockDefinitionProperties>> mapCodecField(MapCodec<Optional<KMaterial>> materialCodec) {
-		return mapCodec(materialCodec).codec().optionalFieldOf(BlockCodecs.BLOCK_PROPERTIES_KEY);
+		return CustomizationCodecs.strictOptionalField(mapCodec(materialCodec).codec(), BlockCodecs.BLOCK_PROPERTIES_KEY);
 	}
 
 	public BlockDefinitionProperties merge(BlockDefinitionProperties templateProps) {
