@@ -168,7 +168,6 @@ public class Kiwi {
 	private static Map<KiwiAnnotationData, String> conditions = Maps.newHashMap();
 	private static LoadingStage stage = LoadingStage.UNINITED;
 	private static Map<String, CreativeModeTab> GROUPS = Maps.newHashMap();
-	private static boolean tagsUpdated;
 
 	public static ResourceLocation id(String path) {
 		return new ResourceLocation(ID, path);
@@ -750,15 +749,12 @@ public class Kiwi {
 		}
 	}
 
-	public static void onTagsUpdated() {
-		tagsUpdated = true;
-	}
+	@Deprecated
+	public static void onTagsUpdated() {}
 
-	/**
-	 * @since 3.1.3
-	 */
+	@Deprecated
 	public static boolean areTagsUpdated() {
-		return tagsUpdated;
+		return true;
 	}
 
 	private void gatherData(GatherDataEvent event) {

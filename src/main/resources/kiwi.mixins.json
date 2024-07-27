@@ -12,7 +12,6 @@
 		"HoeItemAccess",
 		"RecipeManagerAccess",
 		"RecipeManagerMixin",
-		"ReloadableServerResourcesMixin",
 		"ShapedRecipeAccess",
 		"ShovelItemAccess",
 		"TagsProviderAccess",
