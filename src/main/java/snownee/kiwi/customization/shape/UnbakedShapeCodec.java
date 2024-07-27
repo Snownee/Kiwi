@@ -99,7 +99,8 @@ public class UnbakedShapeCodec implements Codec<UnbakedShape> {
 		if (s.isEmpty()) {
 			throw new IllegalArgumentException("Empty shape string");
 		}
-		if (ResourceLocation.isValidResourceLocation(s)) {
+		// blame mods that modify the vanilla rules (OptiFine, AAA Particles)
+		if (ResourceLocation.isValidResourceLocation(s) && s.indexOf('(') == -1 && s.indexOf(',') == -1) {
 			return refInterner.computeIfAbsent(new ResourceLocation(s), ShapeRef::new);
 		}
 		return new UnbakedShape.Inlined(recursiveDecodeVoxelShape(s));
