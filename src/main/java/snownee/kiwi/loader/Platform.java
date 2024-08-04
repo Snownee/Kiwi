@@ -27,6 +27,8 @@ import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import snownee.kiwi.Kiwi;
+import snownee.kiwi.util.resource.FabricMappingResolver;
+import snownee.kiwi.util.resource.MappingResolver;
 
 public final class Platform {
 
@@ -138,6 +140,10 @@ public final class Platform {
 
 	public static Platform.Type getPlatformSeries() {
 		return Type.Fabric;
+	}
+
+	public static MappingResolver newMappingResolver() {
+		return FabricMappingResolver.create();
 	}
 
 	public enum Type {

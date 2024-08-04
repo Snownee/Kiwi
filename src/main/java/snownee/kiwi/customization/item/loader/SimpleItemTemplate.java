@@ -41,7 +41,7 @@ public final class SimpleItemTemplate extends KItemTemplate {
 			return;
 		}
 		try {
-			Class<?> clazz = Class.forName(this.clazz);
+			Class<?> clazz = Class.forName(context.mappingResolver().unmapClass(this.clazz));
 			this.constructor = $ -> {
 				try {
 					return (Item) clazz.getConstructor(Item.Properties.class).newInstance($);

@@ -43,7 +43,7 @@ public final class SimpleBlockTemplate extends KBlockTemplate {
 			return;
 		}
 		try {
-			Class<?> clazz = Class.forName(this.clazz);
+			Class<?> clazz = Class.forName(context.mappingResolver().unmapClass(this.clazz));
 			this.constructor = $ -> {
 				try {
 					return (Block) clazz.getConstructor(BlockBehaviour.Properties.class).newInstance($);
