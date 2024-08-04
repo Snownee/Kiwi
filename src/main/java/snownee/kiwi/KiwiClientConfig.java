@@ -34,4 +34,7 @@ public final class KiwiClientConfig {
 
 	@KiwiConfig.Path("suppressExperimentalSettingsWarning")
 	public static boolean suppressExperimentalWarning;
+
+	@KiwiModule.Skip
+	public static boolean exportBlocksMore;
 }

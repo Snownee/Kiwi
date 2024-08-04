@@ -122,6 +122,7 @@ import snownee.kiwi.command.KiwiCommand;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfig.ConfigType;
 import snownee.kiwi.config.KiwiConfigManager;
+import snownee.kiwi.customization.CustomizationHooks;
 import snownee.kiwi.loader.AnnotatedTypeLoader;
 import snownee.kiwi.loader.KiwiConfiguration;
 import snownee.kiwi.loader.Platform;
@@ -132,9 +133,11 @@ import snownee.kiwi.loader.event.ServerInitEvent;
 import snownee.kiwi.network.Networking;
 import snownee.kiwi.util.Util;
 
-@Mod(Kiwi.MODID)
+@Mod(Kiwi.ID)
 public class Kiwi implements ModInitializer {
-	public static final String MODID = "kiwi";
+	public static final String ID = "kiwi";
+	@Deprecated
+	public static final String MODID = ID;
 	public static final RegistryLookup registryLookup = new RegistryLookup();
 	static final Marker MARKER = MarkerFactory.getMarker("INIT");
 	private static final Map<String, CreativeModeTab> GROUPS = Maps.newHashMap();
@@ -143,7 +146,10 @@ public class Kiwi implements ModInitializer {
 	public static MinecraftServer currentServer;
 	private static Multimap<String, KiwiAnnotationData> moduleData = ArrayListMultimap.create();
 	private static Map<KiwiAnnotationData, String> conditions = Maps.newHashMap();
-	private static boolean tagsUpdated;
+
+	public static ResourceLocation id(String path) {
+		return new ResourceLocation(ID, path);
+	}
 
 	private static boolean checkDist(KiwiAnnotationData annotationData, String dist) {
 		try {
@@ -326,6 +332,8 @@ public class Kiwi implements ModInitializer {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+
+		CustomizationHooks.init();
 
 		Map<String, KiwiAnnotationData> classOptionalMap = Maps.newHashMap();
 		String dist = Platform.isPhysicalClient() ? "client" : "server";
@@ -689,6 +697,9 @@ public class Kiwi implements ModInitializer {
 		KiwiModules.ALL_USED_REGISTRIES.add(BuiltInRegistries.CREATIVE_MODE_TAB);
 		KiwiModules.ALL_USED_REGISTRIES.add(BuiltInRegistries.ITEM);
 		KiwiModules.fire(ModuleInfo::preInit);
+		if (CustomizationHooks.isEnabled()) {
+			CustomizationHooks.initLoader();
+		}
 	}
 
 	private void init() {

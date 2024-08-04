@@ -19,7 +19,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import snownee.kiwi.Kiwi;
 
 public class AlternativesIngredient implements CustomIngredient {
-	public static final ResourceLocation ID = new ResourceLocation(Kiwi.MODID, "alternatives");
+	public static final ResourceLocation ID = Kiwi.id("alternatives");
 	@Nullable
 	private final JsonArray options;
 	private Ingredient cached;

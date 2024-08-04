@@ -1,0 +1,6 @@
+switch:
+  enabled: true
+  cascading: true
+blocks:
+  - bamboo_block
+  - stripped_bamboo_block

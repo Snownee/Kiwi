@@ -23,7 +23,7 @@ import snownee.kiwi.contributor.impl.client.model.PlanetModel;
 
 @Environment(EnvType.CLIENT)
 public class PlanetLayer extends CosmeticLayer {
-	private static final ResourceLocation TEXTURE = new ResourceLocation(Kiwi.MODID, "textures/reward/planet.png");
+	private static final ResourceLocation TEXTURE = Kiwi.id("textures/reward/planet.png");
 	private static final Supplier<LayerDefinition> definition = Suppliers.memoize(PlanetModel::create);
 	private final PlanetModel<AbstractClientPlayer> modelPlanet;
 
@@ -33,7 +33,17 @@ public class PlanetLayer extends CosmeticLayer {
 	}
 
 	@Override
-	public void render(PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, AbstractClientPlayer entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
+	public void render(
+			PoseStack matrixStackIn,
+			MultiBufferSource bufferIn,
+			int packedLightIn,
+			AbstractClientPlayer entitylivingbaseIn,
+			float limbSwing,
+			float limbSwingAmount,
+			float partialTicks,
+			float ageInTicks,
+			float netHeadYaw,
+			float headPitch) {
 		if (entitylivingbaseIn.isInvisible()) {
 			return;
 		}

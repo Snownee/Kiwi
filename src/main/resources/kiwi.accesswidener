@@ -1,4 +1,4 @@
-accessWidener   v1  named
+accessWidener v2 named
 extendable class net/minecraft/world/level/block/entity/BlockEntityType$BlockEntitySupplier
 
 accessible field net/minecraft/world/item/crafting/ShapelessRecipe result Lnet/minecraft/world/item/ItemStack;
@@ -16,3 +16,72 @@ accessible field net/minecraft/world/item/CreativeModeTabs SPAWN_EGGS Lnet/minec
 accessible field net/minecraft/world/item/CreativeModeTabs TOOLS_AND_UTILITIES Lnet/minecraft/resources/ResourceKey;
 
 accessible field net/minecraft/world/item/BucketItem content Lnet/minecraft/world/level/material/Fluid;
+
+accessible class net/minecraft/util/ExtraCodecs$EitherCodec
+
+accessible field net/minecraft/world/level/block/WallBlock shapeByIndex Ljava/util/Map;
+mutable field net/minecraft/world/level/block/WallBlock shapeByIndex Ljava/util/Map;
+accessible field net/minecraft/world/level/block/WallBlock collisionShapeByIndex Ljava/util/Map;
+mutable field net/minecraft/world/level/block/WallBlock collisionShapeByIndex Ljava/util/Map;
+accessible method net/minecraft/world/level/block/WallBlock makeShapes (FFFFFF)Ljava/util/Map;
+
+accessible field net/minecraft/world/level/block/CrossCollisionBlock shapeByIndex [Lnet/minecraft/world/phys/shapes/VoxelShape;
+mutable field net/minecraft/world/level/block/CrossCollisionBlock shapeByIndex [Lnet/minecraft/world/phys/shapes/VoxelShape;
+accessible field net/minecraft/world/level/block/CrossCollisionBlock collisionShapeByIndex [Lnet/minecraft/world/phys/shapes/VoxelShape;
+mutable field net/minecraft/world/level/block/CrossCollisionBlock collisionShapeByIndex [Lnet/minecraft/world/phys/shapes/VoxelShape;
+accessible method net/minecraft/world/level/block/CrossCollisionBlock makeShapes (FFFFF)[Lnet/minecraft/world/phys/shapes/VoxelShape;
+
+accessible field net/minecraft/world/level/block/state/BlockBehaviour properties Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;
+mutable field net/minecraft/world/level/block/state/BlockBehaviour properties Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;
+accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties hasCollision Z
+accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties canOcclude Z
+
+accessible field net/minecraft/world/level/block/state/properties/IntegerProperty min I
+accessible field net/minecraft/world/level/block/state/properties/IntegerProperty max I
+
+accessible field net/minecraft/world/level/block/StairBlock baseState Lnet/minecraft/world/level/block/state/BlockState;
+transitive-accessible method net/minecraft/world/level/block/StairBlock <init> (Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;)V
+
+accessible field net/minecraft/world/level/block/TrapDoorBlock type Lnet/minecraft/world/level/block/state/properties/BlockSetType;
+transitive-accessible method net/minecraft/world/level/block/TrapDoorBlock <init> (Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;Lnet/minecraft/world/level/block/state/properties/BlockSetType;)V
+
+transitive-accessible method net/minecraft/world/level/block/DoorBlock <init> (Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;Lnet/minecraft/world/level/block/state/properties/BlockSetType;)V
+
+transitive-accessible method net/minecraft/world/level/block/ButtonBlock <init> (Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;Lnet/minecraft/world/level/block/state/properties/BlockSetType;IZ)V
+
+transitive-accessible method net/minecraft/world/level/block/PressurePlateBlock <init> (Lnet/minecraft/world/level/block/PressurePlateBlock$Sensitivity;Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;Lnet/minecraft/world/level/block/state/properties/BlockSetType;)V
+
+transitive-accessible method net/minecraft/client/gui/components/Button <init> (IIIILnet/minecraft/network/chat/Component;Lnet/minecraft/client/gui/components/Button$OnPress;Lnet/minecraft/client/gui/components/Button$CreateNarration;)V
+accessible field net/minecraft/client/gui/components/Button$Builder x I
+accessible field net/minecraft/client/gui/components/Button$Builder y I
+accessible field net/minecraft/client/gui/components/Button$Builder width I
+accessible field net/minecraft/client/gui/components/Button$Builder height I
+accessible field net/minecraft/client/gui/components/Button$Builder message Lnet/minecraft/network/chat/Component;
+accessible field net/minecraft/client/gui/components/Button$Builder onPress Lnet/minecraft/client/gui/components/Button$OnPress;
+accessible field net/minecraft/client/gui/components/Button$Builder createNarration Lnet/minecraft/client/gui/components/Button$CreateNarration;
+
+accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen hoveredSlot Lnet/minecraft/world/inventory/Slot;
+
+accessible field net/minecraft/server/packs/repository/FolderRepositorySource folder Ljava/nio/file/Path;
+accessible field net/minecraft/server/packs/repository/FolderRepositorySource packType Lnet/minecraft/server/packs/PackType;
+accessible field net/minecraft/server/packs/repository/FolderRepositorySource packSource Lnet/minecraft/server/packs/repository/PackSource;
+accessible method net/minecraft/server/packs/repository/FolderRepositorySource nameFromPath (Ljava/nio/file/Path;)Ljava/lang/String;
+
+accessible method net/minecraft/world/level/block/Blocks always (Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)Z
+accessible method net/minecraft/world/level/block/Blocks never (Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)Z
+
+accessible method net/minecraft/world/entity/Display$BlockDisplay getBlockState ()Lnet/minecraft/world/level/block/state/BlockState;
+accessible method net/minecraft/world/entity/Display$BlockDisplay setBlockState (Lnet/minecraft/world/level/block/state/BlockState;)V
+
+accessible field net/minecraft/client/gui/screens/Screen children Ljava/util/List;
+accessible field net/minecraft/client/gui/screens/Screen narratables Ljava/util/List;
+accessible field net/minecraft/client/gui/screens/Screen renderables Ljava/util/List;
+
+accessible field net/minecraft/advancements/critereon/BlockPredicate tag Lnet/minecraft/tags/TagKey;
+accessible field net/minecraft/advancements/critereon/BlockPredicate blocks Ljava/util/Set;
+accessible field net/minecraft/advancements/critereon/BlockPredicate properties Lnet/minecraft/advancements/critereon/StatePropertiesPredicate;
+accessible field net/minecraft/advancements/critereon/BlockPredicate nbt Lnet/minecraft/advancements/critereon/NbtPredicate;
+
+accessible method net/minecraft/world/food/FoodProperties <init> (IFZZZLjava/util/List;)V
+
+accessible method net/minecraft/server/level/ServerPlayer bedInRange (Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Direction;)Z

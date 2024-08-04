@@ -9,8 +9,8 @@ import snownee.kiwi.client.TooltipEvents;
 
 public class Initializer implements ClientModInitializer {
 
-	public static final ResourceLocation HIGH = new ResourceLocation(Kiwi.MODID, "high");
-	public static final ResourceLocation LOW = new ResourceLocation(Kiwi.MODID, "low");
+	public static final ResourceLocation HIGH = Kiwi.id("high");
+	public static final ResourceLocation LOW = Kiwi.id("low");
 
 	@Override
 	public void onInitializeClient() {

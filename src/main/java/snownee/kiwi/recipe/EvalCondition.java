@@ -15,7 +15,7 @@ import snownee.kiwi.util.KEval;
 public enum EvalCondition implements Predicate<JsonObject> {
 	INSTANCE;
 
-	public static final ResourceLocation ID = new ResourceLocation(Kiwi.MODID, "eval");
+	public static final ResourceLocation ID = Kiwi.id("eval");
 
 	public static Provider provider(String expression) {
 		return new Provider(expression);

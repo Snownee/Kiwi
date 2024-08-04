@@ -1,51 +1,51 @@
 {
-  "schemaVersion": 1,
-  "id": "kiwi",
-  "version": "${version}",
-
-  "name": "Kiwi Library",
-  "description": "Minecraft modding library",
-  "authors": ["Snownee"],
-  "contact": {
-    "homepage": "https://www.curseforge.com/minecraft/mc-mods/kiwi-fabric",
-    "sources": "https://github.com/Snownee/Kiwi",
-    "issues": "https://github.com/Snownee/Kiwi/issues"
-  },
-
-  "license": "MIT",
-  "icon": "assets/kiwi/logo.png",
-
-  "entrypoints": {
-    "main": [
-      "snownee.kiwi.Kiwi"
-    ],
-    "client": [
-      "snownee.kiwi.loader.Initializer"
-    ],
-    "modmenu": [
-      "snownee.kiwi.config.ModMenuIntegration"
-    ],
-    "fabric-datagen": [
-      "snownee.kiwi.datagen.KiwiDataGen"
-    ]
-  },
-  "mixins": ["kiwi.mixins.json"],
-  "accessWidener" : "kiwi.accesswidener",
-
-  "depends": {
-    "fabric-api": "*",
-    "minecraft": ">=1.20-",
-    "java": ">=17"
-  },
-
-  "custom": {
-    "modmenu": {
-      "links": {
-        "modmenu.discord": "https://discord.gg/rRBvGkz"
-      },
-      "badges": [
-        "library"
-      ]
-    }
-  }
+	"schemaVersion": 1,
+	"id": "kiwi",
+	"version": "${version}",
+	"name": "Kiwi Library",
+	"description": "Minecraft modding library",
+	"authors": [
+		"Snownee"
+	],
+	"contact": {
+		"homepage": "https://www.curseforge.com/minecraft/mc-mods/kiwi-fabric",
+		"sources": "https://github.com/Snownee/Kiwi",
+		"issues": "https://github.com/Snownee/Kiwi/issues"
+	},
+	"license": "MIT",
+	"icon": "assets/kiwi/logo.png",
+	"entrypoints": {
+		"main": [
+			"snownee.kiwi.Kiwi"
+		],
+		"client": [
+			"snownee.kiwi.loader.Initializer"
+		],
+		"modmenu": [
+			"snownee.kiwi.config.ModMenuIntegration"
+		],
+		"fabric-datagen": [
+			"snownee.kiwi.datagen.KiwiDataGen"
+		]
+	},
+	"mixins": [
+		"kiwi.mixins.json"
+	],
+	"accessWidener": "kiwi.accesswidener",
+	"depends": {
+		"fabricloader": ">=0.15",
+		"fabric-api": "*",
+		"minecraft": ">=1.20-",
+		"fabric-screen-layers": "*"
+	},
+	"custom": {
+		"modmenu": {
+			"links": {
+				"modmenu.discord": "https://discord.gg/rRBvGkz"
+			},
+			"badges": [
+				"library"
+			]
+		}
+	}
 }

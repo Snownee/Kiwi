@@ -5,7 +5,15 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+import com.google.common.io.Closeables;
+import com.google.gson.GsonBuilder;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
@@ -25,33 +33,25 @@ import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
-import com.google.common.io.Closeables;
-import com.google.gson.GsonBuilder;
-
 import snownee.kiwi.KiwiAnnotationData;
 
-/* off */
-@SupportedAnnotationTypes({
-	"snownee.kiwi.KiwiModule",
-	"snownee.kiwi.KiwiModule.Optional",
-	"snownee.kiwi.KiwiModule.LoadingCondition",
-	"snownee.kiwi.config.KiwiConfig",
-	"snownee.kiwi.network.KiwiPacket",
-	"snownee.kiwi.Mod",
-})
-@SuppressWarnings(value = { "unchecked" })
-/* on */
+@SupportedAnnotationTypes(
+		{
+				"snownee.kiwi.KiwiModule",
+				"snownee.kiwi.KiwiModule.Optional",
+				"snownee.kiwi.KiwiModule.LoadingCondition",
+				"snownee.kiwi.config.KiwiConfig",
+				"snownee.kiwi.network.KiwiPacket",
+				"snownee.kiwi.Mod",
+		})
+@SuppressWarnings(value = {"unchecked"})
 public class KiwiAnnotationProcessor extends AbstractProcessor {
 
 	Messager messager;
 	Filer filer;
 	String modId;
 	Elements elementUtils;
+	TypeElement skipType;
 
 	@Override
 	public synchronized void init(ProcessingEnvironment processingEnv) {
@@ -59,6 +59,8 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 		messager = processingEnv.getMessager();
 		filer = processingEnv.getFiler();
 		elementUtils = processingEnv.getElementUtils();
+		skipType = processingEnv.getElementUtils().getTypeElement("snownee.kiwi.KiwiModule.Skip");
+		Objects.requireNonNull(skipType);
 	}
 
 	@Override
@@ -69,7 +71,7 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 		messager.printMessage(Kind.NOTE, "KiwiAnnotationProcessor is processing");
 		Multimap<String, KiwiAnnotationData> map = Multimaps.newMultimap(Maps.newTreeMap(), Lists::newArrayList);
 		for (TypeElement annotation : annotations) {
-			String className = annotation.toString();
+			String className = annotation.getQualifiedName().toString();
 			ElementKind elementKind = ElementKind.CLASS;
 			if ("snownee.kiwi.KiwiModule.Optional".equals(className)) {
 				className = "snownee.kiwi.KiwiModule$Optional";
@@ -84,6 +86,9 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 					continue;
 				}
 				AnnotationMirror a = getAnnotation(ele, annotation);
+				if (a == null) {
+					continue;
+				}
 				Map<String, Object> o = Maps.newHashMap();
 				for (Entry<? extends ExecutableElement, ? extends AnnotationValue> e : a.getElementValues().entrySet()) {
 					o.put(e.getKey().getSimpleName().toString(), mapValue(e.getValue()));
@@ -103,8 +108,9 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 				} else {
 					target = ele.toString();
 				}
-				if (!target.startsWith("snownee.kiwi.test."))
+				if (!target.startsWith("snownee.kiwi.test.")) {
 					map.put(annotation.getSimpleName().toString(), new KiwiAnnotationData(target, o.isEmpty() ? null : o));
+				}
 			}
 		}
 		String json = new GsonBuilder().setPrettyPrinting().create().toJson(map.asMap());
@@ -132,7 +138,7 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 	}
 
 	// modified from Mixin
-	private static AnnotationMirror getAnnotation(Element elem, TypeElement annotation2) {
+	private AnnotationMirror getAnnotation(Element elem, TypeElement annotation2) {
 		if (elem == null) {
 			return null;
 		}
@@ -143,17 +149,20 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 			return null;
 		}
 
+		AnnotationMirror found = null;
 		for (AnnotationMirror annotation : annotations) {
 			Element element = annotation.getAnnotationType().asElement();
-			if (!(element instanceof TypeElement)) {
+			if (!(element instanceof TypeElement annotationElement)) {
 				continue;
 			}
-			TypeElement annotationElement = (TypeElement) element;
+			if (annotationElement.equals(skipType)) {
+				return null;
+			}
 			if (annotationElement.equals(annotation2)) {
-				return annotation;
+				found = annotation;
 			}
 		}
-		return null;
+		return found;
 	}
 
 	private static Object mapValue(AnnotationValue av) {
@@ -161,7 +170,7 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 		if (v instanceof VariableElement) {
 			v = v.toString();
 		} else if (v instanceof List) {
-			v = ((List<AnnotationValue>) v).stream().map($ -> mapValue($)).toList();
+			v = ((List<AnnotationValue>) v).stream().map(KiwiAnnotationProcessor::mapValue).toList();
 		}
 		return v;
 	}

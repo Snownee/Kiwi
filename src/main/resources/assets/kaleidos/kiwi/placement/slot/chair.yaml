@@ -1,0 +1,16 @@
+target: '@kaleidos:chair'
+tag:
+  - '*kaleidos.chair:side'
+  - '@facing'
+transform_with: facing
+slots:
+  - when:
+      type:
+        - single
+        - left
+        - right
+        - both
+      facing: north
+    sides:
+      west: { }
+      east: { }

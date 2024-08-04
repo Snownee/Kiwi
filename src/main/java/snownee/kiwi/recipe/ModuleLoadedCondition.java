@@ -13,7 +13,7 @@ import snownee.kiwi.util.Util;
 public enum ModuleLoadedCondition implements Predicate<JsonObject> {
 	INSTANCE;
 
-	public static final ResourceLocation ID = new ResourceLocation(Kiwi.MODID, "is_loaded");
+	public static final ResourceLocation ID = Kiwi.id("is_loaded");
 
 	public static Provider provider(ResourceLocation module) {
 		return new Provider(module);
