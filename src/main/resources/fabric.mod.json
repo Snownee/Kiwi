@@ -21,11 +21,17 @@
 		"client": [
 			"snownee.kiwi.loader.Initializer"
 		],
+		"fabric-datagen": [
+			"snownee.kiwi.datagen.KiwiDataGen"
+		],
 		"modmenu": [
 			"snownee.kiwi.config.ModMenuIntegration"
 		],
-		"fabric-datagen": [
-			"snownee.kiwi.datagen.KiwiDataGen"
+		"jade": [
+			"snownee.kiwi.customization.compat.jade.JadeCompat"
+		],
+		"jei_mod_plugin": [
+			"snownee.kiwi.customization.compat.jei.JEICompat"
 		]
 	},
 	"mixins": [
@@ -35,8 +41,7 @@
 	"depends": {
 		"fabricloader": ">=0.15",
 		"fabric-api": "*",
-		"minecraft": ">=1.20-",
-		"fabric-screen-layers": "*"
+		"minecraft": ">=1.20-"
 	},
 	"custom": {
 		"modmenu": {
