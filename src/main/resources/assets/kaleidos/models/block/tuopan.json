@@ -1,0 +1,9 @@
+{
+  "parent": "kaleidos:custom/tuopan",
+  "textures": {
+    "all": "kaleidos:block/tuopan",
+    "particle": "kaleidos:block/tuopan",
+    "1": "kaleidos:block/tuopan"
+  },
+  "render_type": "cutout"
+}

@@ -1,0 +1,10 @@
+{
+  "parent": "kaleidos:custom/tuopan_watermelon2",
+  "textures": {
+    "all": "kaleidos:block/tuopan_watermalon",
+    "particle": "kaleidos:block/tuopan_watermalon",
+    "0": "kaleidos:block/tuopan_watermalon",
+    "1": "kaleidos:block/tuopan"
+  },
+  "render_type": "cutout"
+}

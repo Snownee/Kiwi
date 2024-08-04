@@ -1,0 +1,9 @@
+{
+  "parent": "kaleidos:custom/choujiangji",
+  "textures": {
+    "all": "kaleidos:block/choujiangji",
+    "particle": "kaleidos:block/choujiangji",
+    "1": "kaleidos:block/choujiangji"
+  },
+  "render_type": "cutout"
+}

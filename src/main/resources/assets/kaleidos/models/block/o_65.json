@@ -1,0 +1,9 @@
+{
+  "parent": "kaleidos:custom/o65",
+  "textures": {
+    "all": "kaleidos:block/o65",
+    "particle": "kaleidos:block/o65",
+    "0": "kaleidos:block/o65"
+  },
+  "render_type": "cutout"
+}

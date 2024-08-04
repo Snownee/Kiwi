@@ -1,0 +1,87 @@
+{
+	"credit": "Made by YSBB with Blockbench",
+	"render_type": "translucent",
+	"textures": {
+		"1": "kaleidos:block/jiu/b",
+		"particle": "kaleidos:block/jiu/b"
+	},
+	"elements": [
+		{
+			"from": [5.29095, 10.5, 6.5384],
+			"to": [7.34095, 16.5, 8.5884],
+			"rotation": {"angle": 0, "axis": "y", "origin": [7.30345, 9.625, 7.5509]},
+			"faces": {
+				"north": {"uv": [7, 5, 10, 13], "texture": "#1"},
+				"east": {"uv": [7, 5, 10, 13], "texture": "#1"},
+				"south": {"uv": [7, 5, 10, 13], "texture": "#1"},
+				"west": {"uv": [7, 5, 10, 13], "texture": "#1"},
+				"up": {"uv": [7, 13, 10, 16], "rotation": 270, "texture": "#1"},
+				"down": {"uv": [7, 5, 10, 8], "rotation": 90, "texture": "#1"}
+			}
+		},
+		{
+			"from": [4.29095, 0, 5.5384],
+			"to": [8.29095, 10.5, 9.5384],
+			"rotation": {"angle": 0, "axis": "y", "origin": [7.30345, 9.625, 7.5509]},
+			"faces": {
+				"north": {"uv": [11, 0, 16, 14], "texture": "#1"},
+				"east": {"uv": [11, 0, 16, 14], "texture": "#1"},
+				"south": {"uv": [11, 0, 16, 14], "texture": "#1"},
+				"west": {"uv": [11, 0, 16, 14], "texture": "#1"},
+				"up": {"uv": [0, 0, 1, 1], "rotation": 270, "texture": "#1"},
+				"down": {"uv": [13, 10, 16, 13], "rotation": 90, "texture": "#1"}
+			}
+		}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [45, 0, 0],
+			"translation": [0, 3, 1],
+			"scale": [0.55, 0.55, 0.55]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [45, 0, 0],
+			"translation": [0, 3, 1],
+			"scale": [0.55, 0.55, 0.55]
+		},
+		"firstperson_righthand": {
+			"rotation": [0, 225, 0],
+			"scale": [0.75, 0.75, 0.75]
+		},
+		"firstperson_lefthand": {
+			"rotation": [0, 225, 0],
+			"scale": [0.75, 0.75, 0.75]
+		},
+		"ground": {
+			"translation": [0, 2, 0],
+			"scale": [0.7, 0.7, 0.7]
+		},
+		"gui": {
+			"rotation": [30, 225, 0],
+			"translation": [-1.25, 1, 0],
+			"scale": [1.1, 1.1, 1.1]
+		},
+		"head": {
+			"translation": [1, 15, -2]
+		},
+		"fixed": {
+			"rotation": [-90, 180, 0],
+			"translation": [2, 0.25, -13.25],
+			"scale": [1.7, 1.7, 1.7]
+		}
+	},
+	"groups": [
+		{
+			"name": "group",
+			"origin": [11.0125, 9.3, 5.9875],
+			"color": 0,
+			"children": [0, 1]
+		},
+		{
+			"name": "group",
+			"origin": [0, 0, 0],
+			"color": 0,
+			"children": []
+		}
+	]
+}

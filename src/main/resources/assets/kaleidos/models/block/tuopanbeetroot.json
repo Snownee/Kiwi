@@ -1,0 +1,10 @@
+{
+  "parent": "kaleidos:custom/tuopan_beetroot",
+  "textures": {
+    "all": "kaleidos:block/tuopan_beetroot",
+    "particle": "kaleidos:block/tuopan_beetroot",
+    "1": "kaleidos:block/tuopan_beetroot",
+    "2": "kaleidos:block/tuopan"
+  },
+  "render_type": "cutout"
+}

@@ -1,0 +1,10 @@
+{
+  "parent": "kaleidos:custom/tuopan_dried_kelp",
+  "textures": {
+    "all": "kaleidos:block/tuopan_dried_kelp",
+    "particle": "kaleidos:block/tuopan_dried_kelp",
+    "1": "kaleidos:block/tuopan",
+    "2": "kaleidos:block/tuopan_dried_kelp"
+  },
+  "render_type": "cutout"
+}

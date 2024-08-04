@@ -1,0 +1,10 @@
+{
+  "parent": "kaleidos:custom/tuopan_bread",
+  "textures": {
+    "all": "kaleidos:block/tuopan_bread",
+    "particle": "kaleidos:block/tuopan_bread",
+    "1": "kaleidos:block/tuopan_bread",
+    "4": "kaleidos:block/tuopan"
+  },
+  "render_type": "cutout"
+}

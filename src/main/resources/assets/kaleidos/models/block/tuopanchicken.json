@@ -1,0 +1,10 @@
+{
+  "parent": "kaleidos:custom/tuopan_chicken",
+  "textures": {
+    "all": "kaleidos:block/tuopan_chicken",
+    "particle": "kaleidos:block/tuopan_chicken",
+    "1": "kaleidos:block/tuopan_chicken",
+    "4": "kaleidos:block/tuopan"
+  },
+  "render_type": "cutout"
+}

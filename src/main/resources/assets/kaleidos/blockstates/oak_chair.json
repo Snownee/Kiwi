@@ -1,0 +1,79 @@
+{
+	"variants": {
+		"facing=north,type=left": {
+			"model": "kaleidos:block/changyia_1"
+		},
+		"facing=east,type=left": {
+			"model": "kaleidos:block/changyia_1",
+			"y": 90
+		},
+		"facing=south,type=left": {
+			"model": "kaleidos:block/changyia_1",
+			"y": 180
+		},
+		"facing=west,type=left": {
+			"model": "kaleidos:block/changyia_1",
+			"y": 270
+		},
+		"facing=north,type=both": {
+			"model": "kaleidos:block/changyib_1"
+		},
+		"facing=east,type=both": {
+			"model": "kaleidos:block/changyib_1",
+			"y": 90
+		},
+		"facing=south,type=both": {
+			"model": "kaleidos:block/changyib_1",
+			"y": 180
+		},
+		"facing=west,type=both": {
+			"model": "kaleidos:block/changyib_1",
+			"y": 270
+		},
+		"facing=north,type=right": {
+			"model": "kaleidos:block/changyic_1"
+		},
+		"facing=east,type=right": {
+			"model": "kaleidos:block/changyic_1",
+			"y": 90
+		},
+		"facing=south,type=right": {
+			"model": "kaleidos:block/changyic_1",
+			"y": 180
+		},
+		"facing=west,type=right": {
+			"model": "kaleidos:block/changyic_1",
+			"y": 270
+		},
+		"facing=north,type=single": {
+			"model": "kaleidos:block/chair_1a",
+			"y": 180
+		},
+		"facing=east,type=single": {
+			"model": "kaleidos:block/chair_1a",
+			"y": 270
+		},
+		"facing=south,type=single": {
+			"model": "kaleidos:block/chair_1a"
+		},
+		"facing=west,type=single": {
+			"model": "kaleidos:block/chair_1a",
+			"y": 90
+		},
+		"facing=north,type=pushed": {
+			"model": "kaleidos:block/chair_1b",
+			"y": 180
+		},
+		"facing=east,type=pushed": {
+			"model": "kaleidos:block/chair_1b",
+			"y": 270
+		},
+		"facing=south,type=pushed": {
+			"model": "kaleidos:block/chair_1b"
+		},
+		"facing=west,type=pushed": {
+			"model": "kaleidos:block/chair_1b",
+			"y": 90
+		}
+	}
+}

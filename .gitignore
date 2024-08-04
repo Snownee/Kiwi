@@ -25,7 +25,7 @@ run
 # Files from Forge MDK
 forge*changelog.txt
 /CHANGELOG.md
-/src/main/resources/assets/kaleidos/blockstates
-/src/main/resources/assets/kaleidos/models
-/src/main/resources/assets/kaleidos/textures
+#/src/main/resources/assets/kaleidos/blockstates
+#/src/main/resources/assets/kaleidos/models
+#/src/main/resources/assets/kaleidos/textures
 /lowcode/*.jar

@@ -1,0 +1,9 @@
+{
+  "parent": "kaleidos:custom/dao_cao_ren_",
+  "textures": {
+    "all": "kaleidos:block/dao_cao_ren_",
+    "particle": "kaleidos:block/dao_cao_ren_",
+    "1": "kaleidos:block/dao_cao_ren_"
+  },
+  "render_type": "cutout"
+}

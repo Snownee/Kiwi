@@ -1,0 +1,10 @@
+{
+  "parent": "kaleidos:custom/tuopan_mutton",
+  "textures": {
+    "all": "kaleidos:block/tuopan_mutton",
+    "particle": "kaleidos:block/tuopan_mutton",
+    "0": "kaleidos:block/tuopan_mutton",
+    "1": "kaleidos:block/tuopan"
+  },
+  "render_type": "cutout"
+}

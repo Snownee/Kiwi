@@ -1,0 +1,10 @@
+{
+  "parent": "kaleidos:custom/tuopan_apple",
+  "textures": {
+    "all": "kaleidos:block/tuopan_apple",
+    "particle": "kaleidos:block/tuopan_apple",
+    "0": "kaleidos:block/tuopan_apple",
+    "1": "kaleidos:block/tuopan"
+  },
+  "render_type": "cutout"
+}

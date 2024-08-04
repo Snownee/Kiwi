@@ -1,0 +1,9 @@
+{
+  "parent": "kaleidos:custom/guopen2",
+  "textures": {
+    "all": "kaleidos:block/gp1",
+    "particle": "kaleidos:block/gp1",
+    "missing": "kaleidos:block/gp1"
+  },
+  "render_type": "cutout"
+}

@@ -1,0 +1,9 @@
+{
+  "parent": "kaleidos:custom/tuopan_cake2",
+  "textures": {
+    "all": "kaleidos:block/tuopan_dangao",
+    "particle": "kaleidos:block/tuopan_dangao",
+    "0": "kaleidos:block/tuopan_dangao"
+  },
+  "render_type": "cutout"
+}

@@ -1,0 +1,88 @@
+{
+	"credit": "Made by YSBB with Blockbench",
+	"render_type": "cutout",
+	"texture_size": [64, 64],
+	"textures": {
+		"2": "kaleidos:block/tv",
+		"particle": "kaleidos:block/tv"
+	},
+	"elements": [
+		{
+			"from": [-4, 2, 2],
+			"to": [20, 18, 16],
+			"faces": {
+				"north": {"uv": [0, 0, 6, 4], "texture": "#2"},
+				"east": {"uv": [12.5, 0, 16, 4], "texture": "#2"},
+				"south": {"uv": [0, 4.75, 6, 8.75], "texture": "#2"},
+				"west": {"uv": [16, 0, 12.5, 4], "texture": "#2"},
+				"up": {"uv": [12.25, 3.5, 6.25, 0], "texture": "#2"},
+				"down": {"uv": [0, 0, 6, 3.5], "texture": "#2"}
+			}
+		},
+		{
+			"from": [-4, 0, 1],
+			"to": [20, 2, 16],
+			"faces": {
+				"north": {"uv": [0, 4, 6, 4.5], "texture": "#2"},
+				"east": {"uv": [0, 4, 3.75, 4.5], "texture": "#2"},
+				"south": {"uv": [0, 4, 6, 4.5], "texture": "#2"},
+				"west": {"uv": [0, 4, 3.75, 4.5], "texture": "#2"},
+				"up": {"uv": [0, 4, 6, 7.75], "texture": "#2"},
+				"down": {"uv": [0, 4, 6, 7.75], "texture": "#2"}
+			}
+		}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"translation": [0, 3, 1],
+			"scale": [0.55, 0.55, 0.55]
+		},
+		"thirdperson_lefthand": {
+			"translation": [0, 3, 1],
+			"scale": [0.55, 0.55, 0.55]
+		},
+		"firstperson_righthand": {
+			"rotation": [0, 45, 0],
+			"translation": [2, 2, 0],
+			"scale": [0.5, 0.5, 0.5]
+		},
+		"firstperson_lefthand": {
+			"rotation": [0, 45, 0],
+			"translation": [2, 2, 0],
+			"scale": [0.5, 0.5, 0.5]
+		},
+		"ground": {
+			"translation": [0, 2, 0],
+			"scale": [0.5, 0.5, 0.5]
+		},
+		"gui": {
+			"rotation": [30, 225, 0],
+			"translation": [0, 0.25, 0],
+			"scale": [0.9, 0.9, 0.9]
+		},
+		"head": {
+			"translation": [0, 14.75, 0]
+		},
+		"fixed": {
+			"rotation": [-90, 0, 0],
+			"translation": [0, 0, -14],
+			"scale": [2, 2, 2]
+		}
+	},
+	"groups": [
+		0,
+		1,
+		{
+			"name": "group",
+			"origin": [1.5, 23, 7.5],
+			"color": 0,
+			"children": []
+		},
+		{
+			"name": "group",
+			"origin": [1.5, 23, 7.5],
+			"color": 0,
+			"children": []
+		}
+	]
+}

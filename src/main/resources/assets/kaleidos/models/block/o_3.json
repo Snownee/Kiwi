@@ -1,0 +1,9 @@
+{
+  "parent": "kaleidos:custom/o3",
+  "textures": {
+    "all": "kaleidos:block/o3",
+    "particle": "kaleidos:block/o3",
+    "3": "kaleidos:block/o3"
+  },
+  "render_type": "cutout"
+}

@@ -1,0 +1,10 @@
+{
+  "parent": "kaleidos:custom/tuopan_nanguaquan",
+  "textures": {
+    "all": "kaleidos:block/tuopan_nanguaquan",
+    "particle": "kaleidos:block/tuopan_nanguaquan",
+    "1": "kaleidos:block/tuopan_nanguaquan",
+    "4": "kaleidos:block/tuopan"
+  },
+  "render_type": "cutout"
+}
