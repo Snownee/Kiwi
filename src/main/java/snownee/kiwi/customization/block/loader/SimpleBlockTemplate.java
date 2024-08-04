@@ -11,6 +11,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import snownee.kiwi.util.resource.OneTimeLoader;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public final class SimpleBlockTemplate extends KBlockTemplate {
@@ -35,13 +36,13 @@ public final class SimpleBlockTemplate extends KBlockTemplate {
 	}
 
 	@Override
-	public void resolve(ResourceLocation key) {
+	public void resolve(ResourceLocation key, OneTimeLoader.Context context) {
 		if (clazz.isEmpty()) {
 			constructor = BlockCodecs.SIMPLE_BLOCK_FACTORY;
 			return;
 		}
 		try {
-			Class<?> clazz = Class.forName(this.clazz);
+			Class<?> clazz = Class.forName(context.mappingResolver().unmapClass(this.clazz));
 			this.constructor = $ -> {
 				try {
 					return (Block) clazz.getConstructor(BlockBehaviour.Properties.class).newInstance($);

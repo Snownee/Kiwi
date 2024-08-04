@@ -20,7 +20,7 @@ public record ItemFundamentals(
 	public static ItemFundamentals reload(ResourceManager resourceManager, OneTimeLoader.Context context, boolean booting) {
 		var templates = OneTimeLoader.load(resourceManager, "kiwi/template/item", KItemTemplate.codec(), context);
 		if (booting) {
-			templates.forEach((key, value) -> value.resolve(key));
+			templates.forEach((key, value) -> value.resolve(key, context));
 		}
 		var items = OneTimeLoader.load(
 				resourceManager,

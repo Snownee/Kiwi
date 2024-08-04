@@ -33,7 +33,7 @@ public record BlockFundamentals(
 				materials), "material");
 		var templates = OneTimeLoader.load(resourceManager, "kiwi/template/block", KBlockTemplate.codec(materialCodec), context);
 		if (booting) {
-			templates.forEach((key, value) -> value.resolve(key));
+			templates.forEach((key, value) -> value.resolve(key, context));
 		}
 		var slotProviders = PlaceSlotProvider.Preparation.of(() -> OneTimeLoader.load(
 				resourceManager,

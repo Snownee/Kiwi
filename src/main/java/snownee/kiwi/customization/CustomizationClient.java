@@ -46,10 +46,12 @@ import snownee.kiwi.customization.command.ExportBlocksCommand;
 import snownee.kiwi.customization.command.ExportCreativeTabsCommand;
 import snownee.kiwi.customization.command.ExportShapesCommand;
 import snownee.kiwi.customization.command.PrintFamiliesCommand;
+import snownee.kiwi.customization.command.ExportMappingsCommand;
 import snownee.kiwi.customization.command.ReloadBlockSettingsCommand;
 import snownee.kiwi.customization.command.ReloadFamiliesAndRulesCommand;
 import snownee.kiwi.customization.command.ReloadSlotsCommand;
 import snownee.kiwi.customization.item.loader.KItemDefinition;
+import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.ClientProxy;
 import snownee.kiwi.util.ColorProviderUtil;
 import snownee.kiwi.util.SmartKey;
@@ -75,6 +77,9 @@ public final class CustomizationClient {
 			ReloadBlockSettingsCommand.register(reload);
 			ReloadFamiliesAndRulesCommand.register(reload);
 			PrintFamiliesCommand.register(customization);
+			if (!Platform.isProduction()) {
+				ExportMappingsCommand.register(export);
+			}
 			dispatcher.register(kiwi.then(customization.then(export).then(reload)));
 		});
 //		forgeEventBus.addListener((CustomizeGuiOverlayEvent.DebugText event) -> {

@@ -12,6 +12,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import snownee.kiwi.util.resource.OneTimeLoader;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public final class BuiltInBlockTemplate extends KBlockTemplate {
@@ -36,7 +37,7 @@ public final class BuiltInBlockTemplate extends KBlockTemplate {
 	}
 
 	@Override
-	public void resolve(ResourceLocation key) {
+	public void resolve(ResourceLocation key, OneTimeLoader.Context context) {
 		codec = BlockCodecs.get(this.key.orElse(key));
 	}
 

@@ -10,6 +10,8 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.server.MinecraftServer;
 import snownee.kiwi.Kiwi;
+import snownee.kiwi.util.resource.FabricMappingResolver;
+import snownee.kiwi.util.resource.MappingResolver;
 
 public class Platform {
 
@@ -63,6 +65,10 @@ public class Platform {
 
 	public static Platform.Type getPlatformSeries() {
 		return Type.Fabric;
+	}
+
+	public static MappingResolver newMappingResolver() {
+		return FabricMappingResolver.create();
 	}
 
 	public enum Type {

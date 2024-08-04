@@ -22,6 +22,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import snownee.kiwi.Kiwi;
+import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.KEval;
 import snownee.kiwi.util.Util;
 import snownee.kiwi.util.codec.JavaOps;
@@ -113,6 +114,7 @@ public class OneTimeLoader {
 	public static class Context {
 		private Map<String, Expression> cachedExpressions;
 		private Set<String> disabledNamespaces;
+		private MappingResolver mappingResolver;
 
 		public Expression getExpression(String expression) {
 			if (cachedExpressions == null) {
@@ -130,6 +132,13 @@ public class OneTimeLoader {
 
 		public boolean isNamespaceDisabled(String namespace) {
 			return disabledNamespaces != null && disabledNamespaces.contains(namespace);
+		}
+
+		public MappingResolver mappingResolver() {
+			if (mappingResolver == null) {
+				mappingResolver = Platform.newMappingResolver();
+			}
+			return mappingResolver;
 		}
 	}
 }

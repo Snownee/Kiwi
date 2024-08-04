@@ -19,10 +19,6 @@ public class AnnotatedTypeLoader implements Supplier<KiwiConfiguration> {
 	public KiwiConfiguration get() {
 		String name = "/%s.kiwi.json".formatted(modId);
 		InputStream is = getClass().getResourceAsStream(name);
-		//		InputStream is = FabricLoader.getInstance().getModContainer(modId).get().getRootPath() .getResourceAsStream(name);
-		//		InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(name);
-
-		//		System.out.println(is);
 		if (is == null) {
 			return null;
 		}
@@ -31,6 +27,7 @@ public class AnnotatedTypeLoader implements Supplier<KiwiConfiguration> {
 			return new Gson().fromJson(isr, KiwiConfiguration.class);
 		} finally {
 			Closeables.closeQuietly(isr);
+			Closeables.closeQuietly(is);
 		}
 	}
 
