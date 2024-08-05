@@ -32,6 +32,9 @@
 		],
 		"jei_mod_plugin": [
 			"snownee.kiwi.customization.compat.jei.JEICompat"
+		],
+		"rei_client": [
+			"snownee.kiwi.customization.compat.rei.REICompat"
 		]
 	},
 	"mixins": [
