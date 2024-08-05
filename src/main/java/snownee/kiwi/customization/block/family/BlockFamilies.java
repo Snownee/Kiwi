@@ -103,6 +103,10 @@ public class BlockFamilies {
 		return byId.values();
 	}
 
+	public static boolean isEmpty() {
+		return byId.isEmpty() && fromResources.isEmpty();
+	}
+
 	public static float getConvertRatio(Item item) {
 		Block block = Block.byItem(item);
 		if (block == Blocks.AIR) {

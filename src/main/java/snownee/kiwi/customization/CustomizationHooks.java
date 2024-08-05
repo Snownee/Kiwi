@@ -213,12 +213,6 @@ public final class CustomizationHooks {
 		blockFundamentals.slotProviders().attachSlotsB();
 		blockFundamentals.placeChoices().attachChoicesB();
 		blockFundamentals.slotLinks().finish();
-		if (Platform.isPhysicalClient()) {
-			CustomizationClient.afterRegister(
-					itemFundamentals.items(),
-					blockFundamentals.blocks(),
-					new ClientProxy.Context(true));
-		}
 		var tabs = OneTimeLoader.load(resourceManager, "kiwi/creative_tab", KCreativeTab.CODEC, context);
 		List<Map.Entry<ResourceLocation, KCreativeTab>> newTabs = tabs.entrySet().stream().sorted(Comparator.comparingInt($ -> $.getValue()
 				.order())).filter(entry -> {
@@ -257,6 +251,12 @@ public final class CustomizationHooks {
 		BlockFamilies.reloadResources(resourceManager, context); // might be useful for data-gen
 		if (!Platform.isDataGen()) {
 			BuilderRules.reload(resourceManager, context);
+		}
+		if (Platform.isPhysicalClient()) {
+			CustomizationClient.afterRegister(
+					itemFundamentals.items(),
+					blockFundamentals.blocks(),
+					new ClientProxy.Context(true));
 		}
 	}
 

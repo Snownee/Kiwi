@@ -44,9 +44,9 @@ import snownee.kiwi.customization.builder.BuildersButton;
 import snownee.kiwi.customization.builder.ConvertScreen;
 import snownee.kiwi.customization.command.ExportBlocksCommand;
 import snownee.kiwi.customization.command.ExportCreativeTabsCommand;
+import snownee.kiwi.customization.command.ExportMappingsCommand;
 import snownee.kiwi.customization.command.ExportShapesCommand;
 import snownee.kiwi.customization.command.PrintFamiliesCommand;
-import snownee.kiwi.customization.command.ExportMappingsCommand;
 import snownee.kiwi.customization.command.ReloadBlockSettingsCommand;
 import snownee.kiwi.customization.command.ReloadFamiliesAndRulesCommand;
 import snownee.kiwi.customization.command.ReloadSlotsCommand;
@@ -100,7 +100,7 @@ public final class CustomizationClient {
 			Map<ResourceLocation, KItemDefinition> items,
 			Map<ResourceLocation, KBlockDefinition> blocks,
 			ClientProxy.Context context) {
-		if (CustomizationHooks.kswitch || !BlockFamilies.all().isEmpty() || !BuilderRules.all().isEmpty()) {
+		if (CustomizationHooks.kswitch || !BlockFamilies.isEmpty() || !BuilderRules.all().isEmpty()) {
 			buildersButtonKey = new SmartKey.Builder("key.kiwi.builders_button", KeyMapping.CATEGORY_GAMEPLAY)
 					.key(InputConstants.getKey("key.mouse.4"))
 					.onLongPress(BuildersButton::onLongPress)
