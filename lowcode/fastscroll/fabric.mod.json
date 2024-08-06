@@ -1,0 +1,26 @@
+{
+	"schemaVersion": 1,
+	"id": "fastscroll",
+	"version": "${version}",
+	"name": "Fast Scrolling",
+	"description": "Let you scroll faster when holding CTRL.",
+	"authors": [
+		"Snownee"
+	],
+	"contact": {
+		"homepage": "https://www.curseforge.com/minecraft/mc-mods/fast-scrolling",
+		"sources": "https://github.com/Snownee/Kiwi",
+		"issues": "https://github.com/Snownee/Kiwi/issues"
+	},
+	"license": "Apache-2.0",
+	"depends": {
+		"kiwi": ">=11.8"
+	},
+	"custom": {
+		"modmenu": {
+			"links": {
+				"modmenu.discord": "https://discord.gg/rRBvGkz"
+			}
+		}
+	}
+}

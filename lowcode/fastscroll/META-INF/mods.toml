@@ -1,0 +1,18 @@
+modLoader = "lowcodefml"
+loaderVersion = "[46,)"
+license = "Apache-2.0"
+issueTrackerURL = "https://github.com/Snownee/Kiwi/issues"
+
+[[mods]]
+modId = "fastscroll"
+version = "${version}"
+displayName = "Fast Scrolling"
+authors = "Snownee"
+displayURL = "https://www.curseforge.com/minecraft/mc-mods/fast-scrolling"
+description = "Let you scroll faster when holding CTRL."
+
+[[dependencies.fastscroll]]
+modId = "kiwi"
+versionRange = "[11.8,12)"
+mandatory = true
+ordering = "NONE"

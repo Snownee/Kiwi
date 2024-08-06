@@ -1,0 +1,21 @@
+modLoader = "lowcodefml"
+loaderVersion = "[46,)"
+license = "ARR"
+issueTrackerURL = "https://github.com/Snownee/Kiwi/issues"
+
+[[mods]]
+modId = "kswitch"
+version = "${version}"
+displayName = "KSwitch"
+authors = "Snownee"
+displayURL = "https://www.curseforge.com/minecraft/mc-mods/kswitch"
+description = "A handy tool for switching between different items in the same slot."
+
+[modproperties.kswitch]
+kiwiCustomization=true
+
+[[dependencies.kswitch]]
+modId = "kiwi"
+versionRange = "[11.8,12)"
+mandatory = true
+ordering = "NONE"
