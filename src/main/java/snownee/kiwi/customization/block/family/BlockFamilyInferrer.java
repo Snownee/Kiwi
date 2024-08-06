@@ -31,6 +31,8 @@ public class BlockFamilyInferrer {
 	private final List<String> netherLogs = List.of("%s_stem", "%s_hyphae", "stripped_%s_stem", "stripped_%s_hyphae");
 	private final List<String> general = List.of(
 			"%s",
+			"%s_planks",
+			"%s_bricks",
 			"%s_block",
 			"%s_stairs",
 			"%s_slab",
@@ -80,7 +82,7 @@ public class BlockFamilyInferrer {
 		});
 		for (Holder<Block> holder : sorted) {
 			Block block = holder.value();
-			if (capturedBlocks.contains(block) || !BlockFamilies.findQuickSwitch(block.asItem(), true).isEmpty()) {
+			if (capturedBlocks.contains(block)) {
 				continue;
 			}
 //			Kiwi.LOGGER.info(holder.unwrapKey().orElseThrow().location().toString());
@@ -118,6 +120,16 @@ public class BlockFamilyInferrer {
 				}
 				ResourceLocation id = key.withPath(path.substring(0, path.length() - 7));
 				List<Holder.Reference<Block>> blocks = collectBlocks(id, general);
+				if (id.getPath().endsWith("brick")) {
+					ResourceLocation id1 = id.withSuffix("s");
+					Optional<Holder.Reference<Block>> holder1 = BuiltInRegistries.BLOCK.getHolder(ResourceKey.create(
+							Registries.BLOCK,
+							id1));
+					if (holder1.isPresent()) {
+						id = id1;
+						blocks.add(0, holder1.get());
+					}
+				}
 				blocks.addAll(collectBlocks(id, variants));
 				family(id, "variants", blocks.stream().distinct().toList(), true);
 				continue;
