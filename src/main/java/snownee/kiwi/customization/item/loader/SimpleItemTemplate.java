@@ -9,6 +9,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import snownee.kiwi.util.resource.OneTimeLoader;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public final class SimpleItemTemplate extends KItemTemplate {
@@ -33,13 +34,13 @@ public final class SimpleItemTemplate extends KItemTemplate {
 	}
 
 	@Override
-	public void resolve(ResourceLocation key) {
+	public void resolve(ResourceLocation key, OneTimeLoader.Context context) {
 		if (clazz.isEmpty()) {
 			constructor = ItemCodecs.SIMPLE_ITEM_FACTORY;
 			return;
 		}
 		try {
-			Class<?> clazz = Class.forName(this.clazz);
+			Class<?> clazz = Class.forName(context.mappingResolver().unmapClass(this.clazz));
 			this.constructor = $ -> {
 				try {
 					return (Item) clazz.getConstructor(Item.Properties.class).newInstance($);

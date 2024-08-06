@@ -12,6 +12,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import snownee.kiwi.util.codec.CustomizationCodecs;
+import snownee.kiwi.util.resource.OneTimeLoader;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public final class BuiltInItemTemplate extends KItemTemplate {
@@ -36,7 +37,7 @@ public final class BuiltInItemTemplate extends KItemTemplate {
 	}
 
 	@Override
-	public void resolve(ResourceLocation key) {
+	public void resolve(ResourceLocation key, OneTimeLoader.Context context) {
 		codec = ItemCodecs.get(this.key.orElse(key));
 	}
 

@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.ScaffoldingBlock;
+import snownee.kiwi.util.resource.OneTimeLoader;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public final class BlockItemTemplate extends KItemTemplate {
@@ -51,7 +52,7 @@ public final class BlockItemTemplate extends KItemTemplate {
 	}
 
 	@Override
-	public void resolve(ResourceLocation key) {
+	public void resolve(ResourceLocation key, OneTimeLoader.Context context) {
 		if (clazz.isEmpty()) {
 			constructor = (block, properties) -> {
 				if (block instanceof DoorBlock || block instanceof DoublePlantBlock) {

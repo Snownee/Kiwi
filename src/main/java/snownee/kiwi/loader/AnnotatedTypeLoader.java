@@ -38,6 +38,7 @@ public class AnnotatedTypeLoader implements Supplier<KiwiConfiguration> {
 			return new Gson().fromJson(isr, KiwiConfiguration.class);
 		} finally {
 			Closeables.closeQuietly(isr);
+			Closeables.closeQuietly(is);
 		}
 	}
 

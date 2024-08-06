@@ -12,6 +12,7 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.server.ServerLifecycleHooks;
+import snownee.kiwi.util.resource.MappingResolver;
 
 public class Platform {
 
@@ -60,6 +61,10 @@ public class Platform {
 
 	public static Platform.Type getPlatformSeries() {
 		return Type.Forge;
+	}
+
+	public static MappingResolver newMappingResolver() {
+		return new StubMappingResolver();
 	}
 
 	public enum Type {
