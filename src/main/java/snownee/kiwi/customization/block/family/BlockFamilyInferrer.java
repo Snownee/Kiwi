@@ -115,9 +115,6 @@ public class BlockFamilyInferrer {
 				if (!(block instanceof StairBlock stairBlock)) {
 					continue;
 				}
-				if (stairBlock.baseState.isAir()) {
-					continue;
-				}
 				ResourceLocation id = key.withPath(path.substring(0, path.length() - 7));
 				List<Holder.Reference<Block>> blocks = collectBlocks(id, general);
 				if (id.getPath().endsWith("brick")) {

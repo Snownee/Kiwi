@@ -73,7 +73,8 @@ public class BlockCodecs {
 	public static final MapCodec<Block> BLOCK = simpleCodec(SIMPLE_BLOCK_FACTORY);
 
 	public static final MapCodec<StairBlock> STAIR = RecordCodecBuilder.mapCodec(instance -> instance.group(
-			BlockState.CODEC.optionalFieldOf("base_state", Blocks.AIR.defaultBlockState()).forGetter(block -> block.baseState),
+			BlockState.CODEC.optionalFieldOf("base_state", Blocks.AIR.defaultBlockState())
+					.forGetter(block -> {throw new UnsupportedOperationException();}),
 			propertiesCodec()
 	).apply(instance, StairBlock::new));
 
@@ -165,7 +166,7 @@ public class BlockCodecs {
 
 	public static final MapCodec<WeatheringCopperStairBlock> WEATHERING_COPPER_STAIR = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			CustomizationCodecs.WEATHER_STATE.fieldOf("weather_state").forGetter(ChangeOverTimeBlock::getAge),
-			BlockState.CODEC.fieldOf("base_state").forGetter($ -> $.baseState),
+			BlockState.CODEC.fieldOf("base_state").forGetter($ -> {throw new UnsupportedOperationException();}),
 			propertiesCodec()
 	).apply(instance, WeatheringCopperStairBlock::new));
 
