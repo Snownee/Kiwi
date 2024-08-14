@@ -1,0 +1,66 @@
+# This file is used to provide special translations and comments
+# Full English translation file is located at src/generated/resources
+modmenu.nameTranslation.kiwi: Kiwi Library
+modmenu.descriptionTranslation.kiwi: Minecraft modding library
+tip.kiwi.press_shift: §r§7<Press §f§oShift§r§7..>
+tip.kiwi.press_ctrl: §r§7<Press §f§oCtrl§r§7..>
+tip.kiwi.press_shift_or_ctrl: §r§7<Press §f§oShift§r§7 or §f§oCtrl§r§7..>
+tip.kiwi.debug_tooltip: >-
+  ==========
+
+  Thank you for using Kiwi and Snownee's other mods!
+
+  NBT and tags tooltips are active. %s to disable.
+
+  Hold Alt key for tag list. While tags are displayed, press Alt / Ctrl+Alt to
+  navigate between pages.
+
+  ==========
+tip.kiwi.click_here: '[Click Here]'
+tip.kiwi.debug_tooltip.success: >-
+  Debug tooltips have been disabled. You can re-enable them in the
+  configuration.
+msg.kiwi.no_dependencies: '{1}: Module §e{2}§r requires the following modules to be enabled: §e{3}'
+item.kiwi.first_item.tip: >-
+  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+  incididunt ut labore et dolore magna aliqua.
+
+
+  Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+  aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in
+  voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+
+
+  Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
+  deserunt mollit anim id est laborum.
+item.kiwi.first_item.tip.shift: >-
+  §2Curabitur pretium tincidunt lacus. Nulla gravida orci a odio.
+
+
+  Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus
+  magna felis sollicitudin mauris.
+
+
+  Integer in mauris eu nibh euismod gravida.
+kiwi.config.common: Common
+kiwi.config.client: Client-side
+kiwi.config.server: Server-side
+kiwi.config.modules: Modules
+kiwi.config.requiresRestart: Requires restart
+kiwi.config.globalTooltip.desc: Enables the feature to globally add item tooltips
+kiwi.config.noMicrosoftTelemetry.desc: Disables data collection added by Microsoft Mojang
+kiwi.config.debug.tagsTooltip.desc: Shows item tags in advanced tooltips (F3+H)
+kiwi.config.debug.tagsPerPage.desc: The number of tags to show per page in advanced tooltips
+kiwi.config.debug.NBTTooltip.desc: Shows item NBT in advanced tooltips (F3+H) while holding shift
+kiwi.config.suppressExperimentalSettingsWarning.desc: Skips the experimental settings warning screen when joining a world
+kiwi.config.vars: Variables
+commands.kiwi.reload.success: Configuration %s has been reloaded.
+commands.kiwi.reload.failed: Configuration %s is not found or not provided by Kiwi.
+gui.kiwi.cosmetic: Choose a cosmetic effect
+cosmetic.snownee.2020q3: Planets
+cosmetic.snownee.2020q4: Fox
+cosmetic.snownee.2021q1: Electronicat
+cosmetic.snownee.xmas: Santa Hat
+cosmetic.snownee.sunny_milk: Sunny Milk
+key.kiwi.builders_button: Builder's Button
+gui.kiwi.builder.convert: Convert items
