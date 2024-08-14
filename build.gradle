@@ -118,7 +118,7 @@ java {
 }
 
 def a = [
-        "/assets/kiwi/lang/en_us.existing.json",
+        "/assets/kiwi/lang/en_us.existing.yaml",
         "/assets/kiwi/blockstates",
         "/assets/kiwi/models",
         "/assets/kaleidos",

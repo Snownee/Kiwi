@@ -1,5 +1,7 @@
 package snownee.kiwi.datagen;
 
+import java.io.Reader;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +21,7 @@ import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
+import snownee.kiwi.KiwiModule;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.ConfigUI;
 import snownee.kiwi.config.KiwiConfigManager;
@@ -47,8 +50,10 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 	public void generateTranslations(FabricLanguageProvider.TranslationBuilder translationBuilder) {
 	}
 
-	public Path createPath(String path) {
-		return this.dataOutput.getModContainer().findPath("assets/%s/lang/%s.json".formatted(dataOutput.getModId(), path)).orElseThrow();
+	public Path createPath(String path, String extension) {
+		return this.dataOutput.getModContainer()
+				.findPath("assets/%s/lang/%s.%s".formatted(dataOutput.getModId(), path, extension))
+				.orElseThrow();
 	}
 
 	public void putExistingTranslations(FabricLanguageProvider.TranslationBuilder translationBuilder) {
@@ -57,8 +62,26 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 
 	public void putExistingTranslations(FabricLanguageProvider.TranslationBuilder translationBuilder, String path) {
 		try {
-			Path existingFilePath = createPath(path);
+			Path existingFilePath = createPath(path, "json");
 			translationBuilder.add(existingFilePath);
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to add existing language file!", e);
+		}
+	}
+
+	public void putExistingYamlTranslations(FabricLanguageProvider.TranslationBuilder translationBuilder) {
+		putExistingYamlTranslations(translationBuilder, languageCode + ".existing");
+	}
+
+	public void putExistingYamlTranslations(FabricLanguageProvider.TranslationBuilder translationBuilder, String path) {
+		try {
+			Path existingFilePath = createPath(path, "yaml");
+			try (Reader reader = Files.newBufferedReader(existingFilePath)) {
+				Map<String, ?> map = Util.loadYaml(reader, Map.class);
+				for (Map.Entry<String, ?> entry : map.entrySet()) {
+					translationBuilder.add(entry.getKey(), entry.getValue().toString());
+				}
+			}
 		} catch (Exception e) {
 			throw new RuntimeException("Failed to add existing language file!", e);
 		}
@@ -80,11 +103,17 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 
 				translationEntries.put(key, value);
 			});
-			putExistingTranslations((String key, String value) -> {
+
+			FabricLanguageProvider.TranslationBuilder translationBuilder = (String key, String value) -> {
 				Objects.requireNonNull(key);
 				Objects.requireNonNull(value);
 				translationEntries.put(key, value);
-			});
+			};
+			if (Files.exists(createPath("en_us.existing", "yaml"))) {
+				putExistingYamlTranslations(translationBuilder);
+			} else if (Files.exists(createPath("en_us.existing", "json"))) {
+				putExistingTranslations(translationBuilder);
+			}
 		}
 
 		JsonObject langEntryJson = new JsonObject();
@@ -104,6 +133,9 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 			}
 			if (handler.getFileName().equals("test") || handler.getFileName().equals("kiwi-modules")) {
 				continue; // skip test entries
+			}
+			if (handler.getClazz().getDeclaredAnnotation(KiwiModule.Skip.class) != null) {
+				continue;
 			}
 			String key = handler.getTranslationKey();
 			if (Objects.equals(key, handler.getFileName())) {
