@@ -39,7 +39,7 @@ accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties
 accessible field net/minecraft/world/level/block/state/properties/IntegerProperty min I
 accessible field net/minecraft/world/level/block/state/properties/IntegerProperty max I
 
-accessible field net/minecraft/world/level/block/StairBlock baseState Lnet/minecraft/world/level/block/state/BlockState;
+# accessible field net/minecraft/world/level/block/StairBlock baseState Lnet/minecraft/world/level/block/state/BlockState;
 transitive-accessible method net/minecraft/world/level/block/StairBlock <init> (Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;)V
 
 accessible field net/minecraft/world/level/block/TrapDoorBlock type Lnet/minecraft/world/level/block/state/properties/BlockSetType;
