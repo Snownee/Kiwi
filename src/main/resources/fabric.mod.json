@@ -49,7 +49,8 @@
 	"custom": {
 		"modmenu": {
 			"links": {
-				"modmenu.discord": "https://discord.gg/rRBvGkz"
+				"modmenu.discord": "https://discord.gg/rRBvGkz",
+				"modmenu.donate": "https://ko-fi.com/snownee"
 			},
 			"badges": [
 				"library"
