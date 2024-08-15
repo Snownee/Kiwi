@@ -234,17 +234,24 @@ public final class Util {
 	public static String friendlyText(String s) {
 		StringBuilder sb = new StringBuilder();
 		MutableBoolean lastIsUpper = new MutableBoolean(true);
+		MutableBoolean nextIsUpper = new MutableBoolean(true);
 		s.codePoints().forEach(ch -> {
+			if (ch == '_' || ch == '.') {
+				sb.append(' ');
+				nextIsUpper.setTrue();
+				return;
+			}
 			if (Character.isUpperCase(ch) && lastIsUpper.isFalse()) {
 				sb.append(' ');
 			} else if (Character.isLowerCase(ch)) {
-				if (sb.isEmpty()) {
+				if (nextIsUpper.isTrue()) {
 					ch = Character.toUpperCase(ch);
 				} else if (lastIsUpper.isTrue() && sb.length() > 1 && Character.isUpperCase(sb.codePointAt(sb.length() - 2))) {
 					sb.insert(sb.length() - 1, ' ');
 				}
 			}
 			lastIsUpper.setValue(Character.isUpperCase(ch));
+			nextIsUpper.setFalse();
 			sb.appendCodePoint(ch);
 		});
 		return sb.toString();
