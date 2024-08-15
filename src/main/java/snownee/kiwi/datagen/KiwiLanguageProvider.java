@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
@@ -17,10 +18,19 @@ import com.google.gson.JsonObject;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.ConfigUI;
@@ -90,8 +100,9 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 	@Override
 	public CompletableFuture<?> run(CachedOutput writer) {
 		TreeMap<String, String> translationEntries = new TreeMap<>();
-
+		preGenerate(translationEntries);
 		if ("en_us".equals(languageCode)) {
+			generateGameObjectsEntries(translationEntries);
 			generateConfigEntries(translationEntries);
 			generateTranslations((String key, String value) -> {
 				Objects.requireNonNull(key);
@@ -115,6 +126,7 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 				putExistingTranslations(translationBuilder);
 			}
 		}
+		postGenerate(translationEntries);
 
 		JsonObject langEntryJson = new JsonObject();
 
@@ -125,7 +137,11 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 		return DataProvider.saveStable(writer, langEntryJson, getLangFilePath(this.languageCode));
 	}
 
-	private void generateConfigEntries(Map<String, String> translationEntries) {
+	protected void postGenerate(TreeMap<String, String> translationEntries) {}
+
+	protected void preGenerate(TreeMap<String, String> translationEntries) {}
+
+	protected void generateConfigEntries(Map<String, String> translationEntries) {
 		Joiner joiner = Joiner.on('.');
 		for (ConfigHandler handler : KiwiConfigManager.allConfigs) {
 			if (!Objects.equals(handler.getModId(), dataOutput.getModId())) {
@@ -164,6 +180,34 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 		return dataOutput.createPathProvider(PackOutput.Target.RESOURCE_PACK, "lang").json(new ResourceLocation(
 				dataOutput.getModId(),
 				code));
+	}
+
+	protected void generateGameObjectsEntries(Map<String, String> translationEntries) {
+		generateGameObjectEntries(translationEntries, Registries.BLOCK, Block::getDescriptionId);
+		generateGameObjectEntries(translationEntries, Registries.ITEM, Item::getDescriptionId);
+		generateGameObjectEntries(translationEntries, Registries.ENTITY_TYPE, EntityType::getDescriptionId);
+		generateGameObjectEntries(translationEntries, Registries.CREATIVE_MODE_TAB, tab -> {
+			Component component = tab.getDisplayName();
+			if (component.getContents() instanceof TranslatableContents contents) {
+				return contents.getKey();
+			} else {
+				return null;
+			}
+		});
+		generateGameObjectEntries(translationEntries, Registries.CUSTOM_STAT, stat -> net.minecraft.Util.makeDescriptionId("stat", stat));
+		generateGameObjectEntries(translationEntries, Registries.MOB_EFFECT, MobEffect::getDescriptionId);
+	}
+
+	protected <T> void generateGameObjectEntries(
+			Map<String, String> translationEntries,
+			ResourceKey<Registry<T>> registryKey,
+			Function<T, String> keyMapper) {
+		GameObjectLookup.allHolders(registryKey, dataOutput.getModId()).forEach(holder -> {
+			String key = keyMapper.apply(holder.value());
+			if (key != null) {
+				translationEntries.put(key, Util.friendlyText(holder.key().location().getPath()));
+			}
+		});
 	}
 
 }
