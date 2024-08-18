@@ -6,7 +6,8 @@ plugins {
     id "me.shedaniel.unified-publishing" version "0.1.+"
     id 'net.neoforged.gradle.userdev' version '7.0.145'
     id 'net.neoforged.gradle.mixin' version '7.0.145'
-    id "com.github.johnrengelman.shadow" version "7.1.2"
+    //id "com.github.johnrengelman.shadow" version "8.1.1"
+    id 'com.gradleup.shadow' version '8.3.0' // https://github.com/GradleUp/shadow/pull/876
 }
 
 tasks.named('wrapper', Wrapper).configure {
@@ -136,7 +137,7 @@ shadowJar {
     relocate "com.ezylang.evalex", "${project.group}.shadowed.com.ezylang.evalex"
     configurations = [project.configurations.shadowCommon]
     archiveClassifier.set('')
-    finalizedBy 'reobfShadowJar'
+    // finalizedBy 'reobfShadowJar' // Runtime MojMap, long live the reobf!
 }
 
 task APJar(type: Jar) {
@@ -164,7 +165,7 @@ jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     exclude(excludes)
     manifest { attributes(b) }
-    finalizedBy('reobfJar')
+    // finalizedBy('reobfJar')  // Runtime MojMap, long live the reobf!
 }
 
 artifacts {
@@ -200,7 +201,7 @@ dependencies {
     // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     implementation "net.neoforged:neoforge:${neo_version}"
-    annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
+    //annotationProcessor "org.spongepowered:mixin:0.8.5:processor" // Should be no longer needed, we don't need refmap in NeoForge anymore
     compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.3.2"))
 //    implementation(jarJar("io.github.llamalad7:mixinextras-forge:0.3.2")) {
 //        jarJar.ranged(it, "[0.3.2,)")
