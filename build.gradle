@@ -1,4 +1,5 @@
 plugins {
+    id 'java-library'
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
@@ -7,6 +8,15 @@ plugins {
     id 'net.neoforged.gradle.mixin' version '7.0.145'
     //id "com.github.johnrengelman.shadow" version "8.1.1"
     id 'com.gradleup.shadow' version '8.3.0' // https://github.com/GradleUp/shadow/pull/876
+}
+
+tasks.named('wrapper', Wrapper).configure {
+    // Define wrapper values here so as to not have to always do so when updating gradlew.properties.
+    // Switching this to Wrapper.DistributionType.ALL will download the full gradle sources that comes with
+    // documentation attached on cursor hover of gradle classes and methods. However, this comes with increased
+    // file size for Gradle. If you do switch this to ALL, run the Gradle wrapper task twice afterwards.
+    // (Verify by checking gradle/wrapper/gradle-wrapper.properties to see if distributionUrl now points to `-all`)
+    distributionType = Wrapper.DistributionType.BIN
 }
 
 configurations {
@@ -160,24 +170,27 @@ artifacts {
     shadowJar
 }
 
-repositories {
-    maven { url "https://api.modrinth.com/maven" }
-    maven {
-        url = "https://cursemaven.com"
-        content {
-            includeGroup "curse.maven"
+allprojects {
+    repositories {
+        mavenCentral()
+        maven { url "https://api.modrinth.com/maven" }
+        maven {
+            url = "https://cursemaven.com"
+            content {
+                includeGroup "curse.maven"
+            }
         }
-    }
-    maven { url "https://maven.shedaniel.me/" }
-    maven {
-        // location of the maven that hosts JEI files
-        name = "Progwml6 maven"
-        url = "https://dvs1.progwml6.com/files/maven/"
-    }
-    maven {
-        // location of a maven mirror for JEI files, as a fallback
-        name = "ModMaven"
-        url = "https://modmaven.dev"
+        maven { url "https://maven.shedaniel.me/" }
+        maven {
+            // location of the maven that hosts JEI files
+            name = "Progwml6 maven"
+            url = "https://dvs1.progwml6.com/files/maven/"
+        }
+        maven {
+            // location of a maven mirror for JEI files, as a fallback
+            name = "ModMaven"
+            url = "https://modmaven.dev"
+        }
     }
 }
 
@@ -228,6 +241,13 @@ publishing {
         maven {
             url "file://${project.projectDir}/mcmodsrepo"
         }
+    }
+}
+
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
     }
 }
 
