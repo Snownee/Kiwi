@@ -36,7 +36,7 @@ import snownee.kiwi.KiwiAnnotationData;
 				"snownee.kiwi.KiwiModule.LoadingCondition",
 				"snownee.kiwi.config.KiwiConfig",
 				"snownee.kiwi.network.KiwiPacket",
-				"snownee.kiwi.Mod"})
+				"net.neoforged.fml.common.Mod"})
 @SupportedOptions(
 		{
 				"kiwi.clientOnlyMod"
@@ -71,7 +71,7 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 					if (modId == null) {
 						modId = (String) o.get("value");
 					} else {
-						messager.printMessage(Kind.ERROR, "Found more than one @Mod");
+//						messager.printMessage(Kind.ERROR, "Found more than one @Mod");
 					}
 					continue;
 				}
@@ -160,7 +160,7 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 				"snownee.kiwi.network.KiwiPacket",
 				"packets",
 				Set.of(ElementKind.RECORD, ElementKind.CLASS));
-		private static final AnnotationType MOD = new AnnotationType("snownee.kiwi.Mod", "mod", Set.of());
+		private static final AnnotationType MOD = new AnnotationType("net.neoforged.fml.common.Mod", "mod", Set.of());
 		private static final Map<String, AnnotationType> MAP = Stream.of(MODULE, OPTIONAL, LOADING_CONDITION, CONFIG, PACKET, MOD).collect(
 				HashMap::new, (m, t) -> m.put(t.className, t), Map::putAll);
 

@@ -121,10 +121,11 @@ public class YogaNode implements Iterable<YogaNode> {
 		}
 	}
 
-	@Override
-	protected void finalize() throws Throwable {
-		_instanceCount.decrementAndGet();
-	}
+	//FIXME
+//	@Override
+//	protected void finalize() throws Throwable {
+//		_instanceCount.decrementAndGet();
+//	}
 
 	// Getters
 

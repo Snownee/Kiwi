@@ -1,3 +1,12 @@
 plugins {
     id 'java'
 }
+
+repositories {
+    mavenLocal()
+    gradlePluginPortal()
+}
+
+dependencies {
+    implementation("org.yaml:snakeyaml:${project.snakeyaml_version}")
+}

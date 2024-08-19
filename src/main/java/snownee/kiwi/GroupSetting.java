@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 
 import com.google.common.collect.Lists;
 
+import it.unimi.dsi.fastutil.objects.ObjectSortedSet;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -18,7 +19,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.common.util.MutableHashedLinkedMap;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import snownee.kiwi.KiwiModule.Category;
 import snownee.kiwi.item.ItemCategoryFiller;
@@ -78,19 +78,21 @@ public class GroupSetting {
 					filler.fillItemCategory(tab, event.getFlags(), event.hasPermissions(), items);
 				}
 				items = getEnabledStacks(items, event.getFlags());
-				addAfter(items, event.getEntries(), afterItems);
+				addAfter(items, event, afterItems);
 			});
 		}
 	}
 
+	//TODO test it
 	private static void addAfter(
 			List<ItemStack> toAdd,
-			MutableHashedLinkedMap<ItemStack, CreativeModeTab.TabVisibility> map,
+			BuildCreativeModeTabContentsEvent event,
 			Collection<Item> afterItems) {
+		ObjectSortedSet<ItemStack> parentEntries = event.getParentEntries();
 		ItemStack lastFound = ItemStack.EMPTY;
 		for (Item item : afterItems) {
 			ItemStack stack = new ItemStack(item);
-			if (map.contains(stack)) {
+			if (parentEntries.contains(stack)) {
 				lastFound = stack;
 			}
 		}
@@ -99,12 +101,12 @@ public class GroupSetting {
 			ItemStack item = toAdd.get(i);
 			if (i == 0) {
 				if (lastFound.isEmpty()) {
-					map.put(item, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+					event.accept(item, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
 				} else {
-					map.putAfter(lastFound, item, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+					event.insertAfter(lastFound, item, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
 				}
 			} else {
-				map.putAfter(prev, item, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+				event.insertAfter(prev, item, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
 			}
 			prev = item;
 		}
