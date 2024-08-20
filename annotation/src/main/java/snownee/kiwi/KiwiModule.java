@@ -91,6 +91,11 @@ public @interface KiwiModule {
 	@interface RenderLayer {
 		RenderLayerEnum value();
 
+		enum Layer {
+			CUTOUT_MIPPED, CUTOUT, TRANSLUCENT;
+
+			public Object value;
+		}
 	}
 
 	/**
@@ -99,7 +104,7 @@ public @interface KiwiModule {
 	 * @author Snownee
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.FIELD)
+	@Target({ElementType.TYPE, ElementType.FIELD})
 	@interface Skip {
 	}
 

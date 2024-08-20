@@ -286,11 +286,15 @@ public class Kiwi {
 //		if (Platform.isModLoaded("fabric_api")) {
 //			modEventBus.addListener(this::gatherData);
 //		}
-		modEventBus.register(KiwiModules.class);
+		//modEventBus.register(KiwiModules.class); // Cannot register without at least one event listener
 		if (Platform.isPhysicalClient()) {
 			RenderLayerEnum.CUTOUT.value = RenderType.cutout();
 			RenderLayerEnum.CUTOUT_MIPPED.value = RenderType.cutoutMipped();
 			RenderLayerEnum.TRANSLUCENT.value = RenderType.translucent();
+
+			KiwiModule.RenderLayer.Layer.CUTOUT.value = RenderType.cutout();
+			KiwiModule.RenderLayer.Layer.CUTOUT_MIPPED.value = RenderType.cutoutMipped();
+			KiwiModule.RenderLayer.Layer.TRANSLUCENT.value = RenderType.translucent();
 
 			NeoForge.EVENT_BUS.register(ClientInitializer.class);
 		}

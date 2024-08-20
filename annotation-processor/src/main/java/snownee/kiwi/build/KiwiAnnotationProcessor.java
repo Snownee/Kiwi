@@ -55,6 +55,7 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 		String modId = null;
 		for (TypeElement annotation : annotations) {
 			String className = annotation.toString();
+			System.err.println(className);
 			AnnotationType type = AnnotationType.MAP.get(className);
 			Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(annotation);
 			for (Element element : elements) {

@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.LoadingModList;
+import snownee.kiwi.customization.CustomizationServiceFinder;
 
 public class MixinPlugin implements IMixinConfigPlugin {
 	private boolean customization;
@@ -18,7 +19,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
 
 	@Override
 	public void onLoad(String mixinPackage) {
-//		customization = CustomizationServiceFinder.shouldEnable(LoadingModList.get().getMods());
+		customization = CustomizationServiceFinder.shouldEnable(LoadingModList.get().getMods());
 		persistentCreativeInventory =
 				customization || LoadingModList.get().getModFileById("persistentcreativeinventory") != null || !FMLEnvironment.production;
 		fastScrolling = LoadingModList.get().getModFileById("fastscroll") != null || !FMLEnvironment.production;

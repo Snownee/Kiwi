@@ -1,5 +1,5 @@
 {
-"loader": "forge:elements",
+"loader": "neoforge:elements",
     "textures": {
         "0_down": "block/oak_planks",
         "0_up": "block/oak_planks",

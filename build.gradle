@@ -4,8 +4,8 @@ plugins {
     id 'idea'
     id 'maven-publish'
     id "me.shedaniel.unified-publishing" version "0.1.+"
-    id 'net.neoforged.gradle.userdev' version '7.0.145'
-    id 'net.neoforged.gradle.mixin' version '7.0.145'
+    id 'net.neoforged.gradle.userdev' version '7.0.161'
+    //id 'net.neoforged.gradle.mixin' version '7.0.145'
     //id "com.github.johnrengelman.shadow" version "8.1.1"
     id 'com.gradleup.shadow' version '8.3.0' // https://github.com/GradleUp/shadow/pull/876
 }
@@ -22,6 +22,7 @@ tasks.named('wrapper', Wrapper).configure {
 configurations {
     shadowCommon
     implementation.extendsFrom shadowCommon
+    runtimeClasspath.extendsFrom shadowCommon
 }
 
 version = "${minecraft_version}-NeoForge-${mod_version}"
@@ -61,6 +62,11 @@ runs {
     client {
         // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
         systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+
+        dependencies {
+            runtime "org.yaml:snakeyaml:${project.snakeyaml_version}"
+            runtime "com.ezylang:EvalEx:${project.evalex_version}"
+        }
     }
 
     server {
@@ -129,7 +135,7 @@ sourceSets {
 //}
 
 shadowJar {
-    from(tasks.jarJar.archiveFile)
+    //from(tasks.jar.archiveFile)
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     exclude(excludes)
     manifest { attributes(b) }
@@ -150,7 +156,8 @@ task sourcesJar(type: Jar) {
     //exclude(excludes)
     manifest { attributes(b) }
     from(sourceSets.main.allJava)
-    archiveFileName = "${archivesBaseName}-${archiveVersion}-sources.${archiveExtension}"
+    //archiveFileName = "${archivesBaseName}-${archiveVersion}-source.${archiveExtension}"
+    archiveClassifier = 'sources'
 }
 
 task deobfJar(type: Jar) {
@@ -235,6 +242,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             artifact shadowJar
+            artifact sourcesJar
         }
     }
     repositories {
