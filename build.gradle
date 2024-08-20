@@ -137,7 +137,6 @@ shadowJar {
     relocate "com.ezylang.evalex", "${project.group}.shadowed.com.ezylang.evalex"
     configurations = [project.configurations.shadowCommon]
     archiveClassifier.set('')
-    // finalizedBy 'reobfShadowJar' // Runtime MojMap, long live the reobf!
 }
 
 task APJar(type: Jar) {
@@ -165,7 +164,6 @@ jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     exclude(excludes)
     manifest { attributes(b) }
-    // finalizedBy('reobfJar')  // Runtime MojMap, long live the reobf!
 }
 
 artifacts {
@@ -201,7 +199,7 @@ dependencies {
     // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     implementation "net.neoforged:neoforge:${neo_version}"
-    //annotationProcessor "org.spongepowered:mixin:0.8.5:processor" // Should be no longer needed, we don't need refmap in NeoForge anymore
+//    annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
     compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.3.2"))
 //    implementation(jarJar("io.github.llamalad7:mixinextras-forge:0.3.2")) {
 //        jarJar.ranged(it, "[0.3.2,)")
@@ -214,17 +212,17 @@ dependencies {
     shadowCommon("org.yaml:snakeyaml:${project.snakeyaml_version}")
     shadowCommon("com.ezylang:EvalEx:${project.evalex_version}")
 
-//    implementation fg.deobf("dev.architectury:architectury-forge:${project.architectury_version}")
-//    compileOnly fg.deobf("me.shedaniel:RoughlyEnoughItems-forge:${project.rei_version}")
-//    runtimeOnly fg.deobf("me.shedaniel:RoughlyEnoughItems-forge:${project.rei_version}")
+//    implementation "dev.architectury:architectury-forge:${project.architectury_version}")
+//    compileOnly "me.shedaniel:RoughlyEnoughItems-forge:${project.rei_version}")
+//    runtimeOnly "me.shedaniel:RoughlyEnoughItems-forge:${project.rei_version}")
 
     implementation "maven.modrinth:jade:15.1.3+neoforge"
 
-//    // compile against the JEI API but do not include it at runtime
-//    compileOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}"))
-//    compileOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}"))
-//    //// at runtime, use the full JEI jar for Forge
-//    implementation(fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}"))
+    // compile against the JEI API but do not include it at runtime
+    compileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
+    compileOnly("mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}")
+    // at runtime, use the full JEI jar for Forge
+    implementation("mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}")
 }
 
 processResources {

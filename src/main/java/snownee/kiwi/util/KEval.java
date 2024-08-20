@@ -75,7 +75,7 @@ public class KEval {
 		public EvaluationValue evaluate(
 				Expression expression,
 				Token functionToken,
-				EvaluationValue... parameterValues) throws EvaluationException {
+				EvaluationValue... parameterValues) {
 			String string = parameterValues[0].getStringValue();
 			return EvaluationValue.numberValue(new BigDecimal(cache.computeIfAbsent(
 					string,
@@ -87,7 +87,7 @@ public class KEval {
 		@Override
 		public EvaluationValue getData(String variable) {
 			Object o = KiwiCommonConfig.vars.get(variable);
-			return new EvaluationValue(o, config());
+			return EvaluationValue.of(o, config());
 		}
 
 		@Override
@@ -95,14 +95,14 @@ public class KEval {
 		}
 	}
 
-	@InfixOperator(precedence = OperatorIfc.OPERATOR_PRECEDENCE_OR)
+	@InfixOperator(precedence = OperatorIfc.OPERATOR_PRECEDENCE_OR, operandsLazy = true)
 	private static class NullishCoalescingOperator extends AbstractOperator {
 
 		@Override
 		public EvaluationValue evaluate(
 				Expression expression,
 				Token operatorToken,
-				EvaluationValue... operands) throws EvaluationException {
+				EvaluationValue... operands) {
 			if (operands[0].isNullValue()) {
 				return operands[1];
 			} else {
