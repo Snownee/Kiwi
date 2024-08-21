@@ -90,7 +90,6 @@ public @interface KiwiModule {
 	@Target({ElementType.TYPE, ElementType.FIELD})
 	@interface RenderLayer {
 		RenderLayerEnum value();
-
 	}
 
 	/**
@@ -99,7 +98,7 @@ public @interface KiwiModule {
 	 * @author Snownee
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.FIELD)
+	@Target({ElementType.TYPE, ElementType.FIELD})
 	@interface Skip {
 	}
 

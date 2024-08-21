@@ -8,7 +8,20 @@
 	"mixins": [
 		"GameDataMixin",
 		"RecipeManagerMixin",
-		"ReloadableServerResourcesMixin"
+		"ReloadableServerResourcesMixin",
+		"customization.AbstractContainerMenuMixin",
+		"customization.BlockBehaviourMixin",
+		"customization.BlockEntityTypeMixin",
+		"customization.BlockMixin",
+		"customization.BlockPropertiesMixin",
+		"customization.BlockStateMixin",
+		"customization.BushBlockMixin",
+		"customization.HalfTransparentBlockMixin",
+		"customization.placement.BlockItemGetPlacementStateMixin",
+		"customization.placement.BlockItemPlaceBlockMixin",
+		"customization.placement.PlayerMixin",
+		"customization.property_inject.BlockMixin",
+		"customization.property_inject.StateDefinitionBuilderMixin"
 	],
 	"client": [
 		"client.ClientTelemetryManagerMixin",
@@ -20,6 +33,7 @@
 		"client.ScreenMixin",
 		"client.TitleScreenMixin",
 		"client.WorldOpenFlowsMixin",
+		"customization.client.MultiPlayerGameModeMixin",
 		"forge.BlockColorsAccess",
 		"forge.ItemColorsAccess"
 	],

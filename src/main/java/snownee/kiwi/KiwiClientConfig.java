@@ -43,4 +43,7 @@ public final class KiwiClientConfig {
 	@ConfigUI.Hide
 	@KiwiConfig.Path("debug.debugTooltipMsg")
 	public static boolean debugTooltipMsg = true;
+
+	@KiwiModule.Skip
+	public static boolean exportBlocksMore;
 }

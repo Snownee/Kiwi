@@ -286,7 +286,7 @@ public class Kiwi {
 //		if (Platform.isModLoaded("fabric_api")) {
 //			modEventBus.addListener(this::gatherData);
 //		}
-		modEventBus.register(KiwiModules.class);
+		//modEventBus.register(KiwiModules.class); // Cannot register without at least one event listener
 		if (Platform.isPhysicalClient()) {
 			RenderLayerEnum.CUTOUT.value = RenderType.cutout();
 			RenderLayerEnum.CUTOUT_MIPPED.value = RenderType.cutoutMipped();

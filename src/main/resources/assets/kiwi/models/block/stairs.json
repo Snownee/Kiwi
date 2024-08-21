@@ -1,5 +1,5 @@
 {
-"loader": "forge:elements",
+"loader": "neoforge:elements",
    "parent": "block/block",
     "display": {
         "gui": {

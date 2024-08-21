@@ -17,3 +17,4 @@ config = "kiwi.mixins.json"
 
 [modproperties.kiwi]
 catalogueItemIcon = "minecraft:bookshelf" #Support for Catalogue mod
+kiwiCustomization=true
