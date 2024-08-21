@@ -41,6 +41,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiModule;
+import snownee.kiwi.RenderLayerEnum;
 import snownee.kiwi.customization.block.GlassType;
 import snownee.kiwi.customization.block.behavior.SitManager;
 import snownee.kiwi.customization.block.family.BlockFamilies;
@@ -141,7 +142,7 @@ public final class CustomizationClient {
 		for (var entry : blocks.entrySet()) {
 			BlockDefinitionProperties properties = entry.getValue().properties();
 			if (context.loading()) {
-				KiwiModule.RenderLayer.Layer renderType = properties.renderType().orElse(null);
+				RenderLayerEnum renderType = properties.renderType().orElse(null);
 				if (renderType == null) {
 					renderType = properties.glassType().map(GlassType::renderType).orElse(null);
 				}

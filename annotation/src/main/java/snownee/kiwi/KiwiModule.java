@@ -90,12 +90,6 @@ public @interface KiwiModule {
 	@Target({ElementType.TYPE, ElementType.FIELD})
 	@interface RenderLayer {
 		RenderLayerEnum value();
-
-		enum Layer {
-			CUTOUT_MIPPED, CUTOUT, TRANSLUCENT;
-
-			public Object value;
-		}
 	}
 
 	/**

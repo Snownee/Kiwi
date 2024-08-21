@@ -53,6 +53,7 @@ import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import snownee.kiwi.KiwiModule;
+import snownee.kiwi.RenderLayerEnum;
 import snownee.kiwi.customization.block.GlassType;
 
 public class CustomizationCodecs {
@@ -70,10 +71,10 @@ public class CustomizationCodecs {
 			"block", PushReaction.BLOCK,
 			"ignore", PushReaction.IGNORE,
 			"push_only", PushReaction.PUSH_ONLY));
-	public static final Codec<KiwiModule.RenderLayer.Layer> RENDER_TYPE = simpleByNameCodec(ImmutableBiMap.of(
-			"cutout", KiwiModule.RenderLayer.Layer.CUTOUT,
-			"cutout_mipped", KiwiModule.RenderLayer.Layer.CUTOUT_MIPPED,
-			"translucent", KiwiModule.RenderLayer.Layer.TRANSLUCENT));
+	public static final Codec<RenderLayerEnum> RENDER_TYPE = simpleByNameCodec(ImmutableBiMap.of(
+			"cutout", RenderLayerEnum.CUTOUT,
+			"cutout_mipped", RenderLayerEnum.CUTOUT_MIPPED,
+			"translucent", RenderLayerEnum.TRANSLUCENT));
 	public static final Codec<BlockBehaviour.OffsetType> OFFSET_TYPE = simpleByNameCodec(ImmutableBiMap.of(
 			"xz", BlockBehaviour.OffsetType.XZ,
 			"xyz", BlockBehaviour.OffsetType.XYZ));

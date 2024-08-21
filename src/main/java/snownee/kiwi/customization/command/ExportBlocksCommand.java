@@ -55,6 +55,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.KiwiModule;
+import snownee.kiwi.RenderLayerEnum;
 import snownee.kiwi.customization.CustomizationRegistries;
 import snownee.kiwi.customization.block.KBlockSettings;
 import snownee.kiwi.customization.block.component.KBlockComponent;
@@ -169,14 +170,14 @@ public class ExportBlocksCommand {
 						row.put("Name:" + languageCode, "");
 					}
 				}
-				KiwiModule.RenderLayer.Layer layer = null;
+				RenderLayerEnum layer = null;
 				RenderType renderType = ItemBlockRenderTypes.getChunkRenderType(block.defaultBlockState());
 				if (renderType == RenderType.cutout()) {
-					layer = KiwiModule.RenderLayer.Layer.CUTOUT;
+					layer = RenderLayerEnum.CUTOUT;
 				} else if (renderType == RenderType.cutoutMipped()) {
-					layer = KiwiModule.RenderLayer.Layer.CUTOUT_MIPPED;
+					layer = RenderLayerEnum.CUTOUT_MIPPED;
 				} else if (renderType == RenderType.translucent()) {
-					layer = KiwiModule.RenderLayer.Layer.TRANSLUCENT;
+					layer = RenderLayerEnum.TRANSLUCENT;
 				}
 				row.put("RenderType", layer == null ? "solid" : layer.name().toLowerCase(Locale.ENGLISH));
 				int lightEmission = -1;

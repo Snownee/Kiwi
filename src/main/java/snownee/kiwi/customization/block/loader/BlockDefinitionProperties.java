@@ -14,6 +14,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.PushReaction;
 import snownee.kiwi.KiwiModule;
+import snownee.kiwi.RenderLayerEnum;
 import snownee.kiwi.customization.block.GlassType;
 import snownee.kiwi.customization.block.behavior.CanSurviveHandler;
 import snownee.kiwi.customization.block.behavior.CanSurviveHandlerCodec;
@@ -24,7 +25,7 @@ public record BlockDefinitionProperties(
 		List<Either<KBlockComponent, String>> components,
 		Optional<KMaterial> material,
 		Optional<GlassType> glassType,
-		Optional<KiwiModule.RenderLayer.Layer> renderType,
+		Optional<RenderLayerEnum> renderType,
 		Optional<ResourceLocation> colorProvider,
 		Optional<ResourceLocation> shape,
 		Optional<ResourceLocation> collisionShape,
