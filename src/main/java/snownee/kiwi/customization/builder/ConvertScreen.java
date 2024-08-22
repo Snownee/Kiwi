@@ -28,8 +28,6 @@ import net.minecraft.client.gui.screens.inventory.tooltip.BelowOrAboveWidgetTool
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.Rect2i;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.metadata.gui.GuiSpriteScaling;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -60,6 +58,7 @@ public class ConvertScreen extends Screen {
 	private PanelLayout layout;
 	private final Vector2i originalMousePos;
 	private final ItemStack sourceItem;
+	private ClientTooltipPositioner forcedTooltipPositioner;
 
 	private static Vector2i getMousePos() {
 		Minecraft mc = Minecraft.getInstance();
@@ -198,21 +197,8 @@ public class ConvertScreen extends Screen {
 			GLFW.glfwSetCursorPos(window.getWindow(), (cursorOn.getX() + 15) * scale, (cursorOn.getY() + 15) * scale);
 		}
 		Rect2i bounds = layout.bounds();
-		/*StringWidget dummySpacer = new StringWidget(
-				bounds.getX() - 2,
-				bounds.getY() - 2,
-				10000,
-				10000,
-				Component.empty(),
-				getMinecraft().font);*/
-		ScreenRectangle dummySpacer = new ScreenRectangle(bounds.getX() - 2, bounds.getY() - 2, 10000, 10000);
-		ClientTooltipPositioner tooltipPositioner = new BelowOrAboveWidgetTooltipPositioner(dummySpacer);
-		this.deferredTooltipRendering = new DeferredTooltipRendering(this.deferredTooltipRendering.tooltip(), tooltipPositioner);
-		//for (AbstractWidget widget : layout.widgets()) {
-		//	if (widget instanceof ItemButton button) {
-		//		button.setTooltipPositioner(tooltipPositioner);
-		//	}
-		//}
+		ScreenRectangle rect = new ScreenRectangle(bounds.getX() - 2, bounds.getY() - 2, 10000, 10000);
+		forcedTooltipPositioner = new BelowOrAboveWidgetTooltipPositioner(rect);
 	}
 
 	@Override
@@ -245,32 +231,28 @@ public class ConvertScreen extends Screen {
 		PoseStack pose = pGuiGraphics.pose();
 		layout.update();
 		Vector2i pos = layout.getAnchoredPos();
-		float openValue = openProgress.getValue(/*minecraft.getPartialTick()*/ pPartialTick);
+		float openValue = openProgress.getValue(pPartialTick);
 		pose.pushPose();
 		pose.translate(pos.x, pos.y, 0);
 		pose.scale(openValue, openValue, openValue);
 		pose.translate(-pos.x, -pos.y, 0);
 		if (inContainer) {
 			Rect2i bounds = layout.bounds();
-			TextureAtlasSprite sprite = Minecraft.getInstance().getGuiSprites().getSprite(ResourceLocation.withDefaultNamespace(
-					"textures/gui/demo_background.png"));
-			pGuiGraphics.blitNineSlicedSprite(
-					sprite,
-					new GuiSpriteScaling.NineSlice(4, 4, new GuiSpriteScaling.NineSlice.Border(0, 0, 248, 166)),
+			pGuiGraphics.blitSprite(
+					ResourceLocation.withDefaultNamespace("recipe_book/overlay_recipe"),
 					bounds.getX() - 2,
 					bounds.getY() - 2,
 					0,
-					bounds.getWidth() + 4,
-					bounds.getHeight() + 4);
-			//4,
-			//4,
-			//248,
-			//166,
-			//0,
-			//0);
+					bounds.getWidth() + 3,
+					bounds.getHeight() + 3);
 		}
 		super.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
 		pose.popPose();
+	}
+
+	@Override
+	public void renderBackground(GuiGraphics p_283688_, int p_296369_, int p_296477_, float p_294317_) {
+		// NO-OP
 	}
 
 	@Override
@@ -278,7 +260,7 @@ public class ConvertScreen extends Screen {
 		float openValue = openProgress.getValue(Objects.requireNonNull(minecraft)./*getPartialTick()*/ getTimer()
 				.getGameTimeDeltaPartialTick(true));
 		if (openValue > 0.95f) {
-			super.setTooltipForNextRenderPass(list, tooltipPositioner, force);
+			super.setTooltipForNextRenderPass(list, forcedTooltipPositioner, force);
 		}
 	}
 
@@ -310,8 +292,8 @@ public class ConvertScreen extends Screen {
 		lingeringScreen.render(
 				pGuiGraphics,
 				Integer.MAX_VALUE,
-				Integer.MAX_VALUE, /*mc.getDeltaFrameTime()*/
-				mc.getTimer().getGameTimeDeltaTicks());
+				Integer.MAX_VALUE,
+				mc.getTimer().getGameTimeDeltaPartialTick(true));
 	}
 
 	public static void tickLingering() {
