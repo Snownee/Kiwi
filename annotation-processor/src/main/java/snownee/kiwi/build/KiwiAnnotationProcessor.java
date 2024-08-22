@@ -3,16 +3,20 @@ package snownee.kiwi.build;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
 import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedOptions;
@@ -24,6 +28,7 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
@@ -36,13 +41,30 @@ import snownee.kiwi.KiwiAnnotationData;
 				"snownee.kiwi.KiwiModule.LoadingCondition",
 				"snownee.kiwi.config.KiwiConfig",
 				"snownee.kiwi.network.KiwiPacket",
-				"net.neoforged.fml.common.Mod"})
+				KiwiAnnotationProcessor.MOD_ANNOTATION})
 @SupportedOptions(
 		{
-				"kiwi.clientOnlyMod"
-		})
+				"kiwi.clientOnlyMod",
+				"kiwi.projectModId"})
 @SuppressWarnings({"unchecked"})
 public class KiwiAnnotationProcessor extends AbstractProcessor {
+
+	public static final String MOD_ANNOTATION = "net.neoforged.fml.common.Mod";
+
+	Messager messager;
+	Filer filer;
+	Elements elementUtils;
+	TypeElement skipType;
+
+	@Override
+	public synchronized void init(ProcessingEnvironment processingEnv) {
+		super.init(processingEnv);
+		messager = processingEnv.getMessager();
+		filer = processingEnv.getFiler();
+		elementUtils = processingEnv.getElementUtils();
+		skipType = processingEnv.getElementUtils().getTypeElement("snownee.kiwi.KiwiModule.Skip");
+		Objects.requireNonNull(skipType);
+	}
 
 	@Override
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
@@ -53,8 +75,9 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 		messager.printMessage(Kind.NOTE, "KiwiAnnotationProcessor is processing");
 		KiwiMetadata metadata = new KiwiMetadata(processingEnv.getOptions().containsKey("kiwi.clientOnlyMod"));
 		String modId = null;
+		String optionModId = processingEnv.getOptions().get("kiwi.projectModId");
 		for (TypeElement annotation : annotations) {
-			String className = annotation.toString();
+			String className = annotation.getQualifiedName().toString();
 			AnnotationType type = AnnotationType.MAP.get(className);
 			Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(annotation);
 			for (Element element : elements) {
@@ -63,15 +86,22 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 					continue;
 				}
 				AnnotationMirror a = getAnnotation(element, annotation);
+				if (a == null) {
+					continue;
+				}
 				Map<String, Object> o = new TreeMap<>();
 				for (Entry<? extends ExecutableElement, ? extends AnnotationValue> e : a.getElementValues().entrySet()) {
 					o.put(e.getKey().getSimpleName().toString(), mapValue(e.getValue()));
 				}
-				if (type == AnnotationType.MOD) {
+				if (type == AnnotationType.MOD && optionModId == null) {
+					String value = (String) o.get("value");
 					if (modId == null) {
-						modId = (String) o.get("value");
-					} else {
-//						messager.printMessage(Kind.ERROR, "Found more than one @Mod");
+						modId = value;
+					} else if (!modId.equals(value)) {
+						messager.printMessage(
+								Kind.ERROR,
+								"Found @Mod annotations with different mod ids, please specify mod id with the \"kiwi.projectModId\" processor option",
+								element);
 					}
 					continue;
 				}
@@ -88,10 +118,22 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 				metadata.map().computeIfAbsent(type.yamlKey, $ -> new ArrayList<>()).add(value);
 			}
 		}
+
+		if (metadata.map().isEmpty() && !metadata.clientOnly()) {
+			return true;
+		}
+		metadata.map().values().forEach(list -> list.sort(Comparator.comparing(KiwiAnnotationData::getTarget)));
+
 		String yaml = new KiwiMetadataParser().dump(metadata);
 //		new KiwiMetadataParser().load(yaml);
 //		messager.printMessage(Kind.NOTE, yaml);
 
+		if (modId == null) {
+			modId = optionModId;
+			if (modId == null) {
+				messager.printMessage(Kind.ERROR, "No mod id found, use @Mod", null);
+			}
+		}
 		try {
 			FileObject file = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", modId + ".kiwi.yaml");
 			try (PrintWriter writer = new PrintWriter(file.openWriter())) {
@@ -109,7 +151,7 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 	}
 
 	// modified from Mixin
-	private static AnnotationMirror getAnnotation(Element elem, TypeElement annotation2) {
+	private AnnotationMirror getAnnotation(Element elem, TypeElement annotation2) {
 		if (elem == null) {
 			return null;
 		}
@@ -120,16 +162,20 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 			return null;
 		}
 
+		AnnotationMirror found = null;
 		for (AnnotationMirror annotation : annotations) {
 			Element element = annotation.getAnnotationType().asElement();
 			if (!(element instanceof TypeElement annotationElement)) {
 				continue;
 			}
+			if (annotationElement.equals(skipType)) {
+				return null;
+			}
 			if (annotationElement.equals(annotation2)) {
-				return annotation;
+				found = annotation;
 			}
 		}
-		return null;
+		return found;
 	}
 
 	private static Object mapValue(AnnotationValue av) {
@@ -160,7 +206,7 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 				"snownee.kiwi.network.KiwiPacket",
 				"packets",
 				Set.of(ElementKind.RECORD, ElementKind.CLASS));
-		private static final AnnotationType MOD = new AnnotationType("net.neoforged.fml.common.Mod", "mod", Set.of());
+		private static final AnnotationType MOD = new AnnotationType(MOD_ANNOTATION, "mod", Set.of());
 		private static final Map<String, AnnotationType> MAP = Stream.of(MODULE, OPTIONAL, LOADING_CONDITION, CONFIG, PACKET, MOD).collect(
 				HashMap::new, (m, t) -> m.put(t.className, t), Map::putAll);
 

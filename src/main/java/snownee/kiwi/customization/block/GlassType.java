@@ -6,6 +6,7 @@ import snownee.kiwi.util.codec.CustomizationCodecs;
 
 public record GlassType(String name, boolean skipRendering, float shadeBrightness, RenderLayerEnum renderType) {
 	public static final GlassType CLEAR = new GlassType("clear", true, 1F, RenderLayerEnum.CUTOUT);
+	//TODO data-driven
 	public static final GlassType CUSTOM_CLEAR = new GlassType("custom_clear", true, 1F, RenderLayerEnum.CUTOUT);
 	public static final GlassType TRANSLUCENT = new GlassType("translucent", true, 1F, RenderLayerEnum.TRANSLUCENT);
 	public static final GlassType QUARTZ = new GlassType("quartz", true, 1F, RenderLayerEnum.TRANSLUCENT);
