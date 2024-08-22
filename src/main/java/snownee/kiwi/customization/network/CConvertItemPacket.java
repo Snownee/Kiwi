@@ -79,7 +79,7 @@ public record CConvertItemPacket(
 			if (steps.isEmpty() || steps.size() > MAX_STEPS) {
 				return;
 			}
-			Item to = steps.get(steps.size() - 1).getSecond();
+			Item to = steps.getLast().getSecond();
 			if (from == to) {
 				return;
 			}
@@ -252,7 +252,7 @@ public record CConvertItemPacket(
 		}
 
 		public Item item() {
-			return steps.get(steps.size() - 1).getSecond();
+			return steps.getLast().getSecond();
 		}
 	}
 }

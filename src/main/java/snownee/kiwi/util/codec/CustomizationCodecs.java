@@ -13,7 +13,6 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 
 import net.minecraft.advancements.critereon.BlockPredicate;
-import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -58,7 +57,6 @@ public class CustomizationCodecs {
 	}, p -> {
 		return DataResult.error(() -> "Unsupported operation");
 	});
-	public static final Codec<MinMaxBounds.Ints> INT_BOUNDS = MinMaxBounds.Ints.CODEC;
 	// TODO BlockPredicate has its own Codec now.
 	//  However, to use that, you need to wrap your JsonOps into RegistryOps, which requires a HolderLookup.Provider.
 	//  Meaning, you need to get HolderLookup.Provider somewhere.

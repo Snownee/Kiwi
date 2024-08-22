@@ -11,6 +11,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
@@ -64,8 +65,8 @@ public record ItemDefinitionProperties(
 			Optional<Rarity> rarity
 	) {
 		public static final MapCodec<PartialVanillaProperties> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-				Codec.intRange(1, 64).optionalFieldOf("stacks_to").forGetter(PartialVanillaProperties::maxStackSize),
-				Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("max_damage").forGetter(PartialVanillaProperties::maxDamage),
+				Codec.intRange(1, 99).optionalFieldOf("stacks_to").forGetter(PartialVanillaProperties::maxStackSize),
+				ExtraCodecs.POSITIVE_INT.optionalFieldOf("max_damage").forGetter(PartialVanillaProperties::maxDamage),
 				ResourceKey.codec(Registries.ITEM)
 						.optionalFieldOf("crafting_remaining_item")
 						.forGetter(PartialVanillaProperties::craftingRemainingItem),

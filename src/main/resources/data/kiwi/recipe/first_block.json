@@ -22,7 +22,7 @@
 		]
 	},
 	"result": {
-		"item": "kiwi:tex_block",
+		"id": "kiwi:tex_block",
 		"count": 4
 	}
 }
