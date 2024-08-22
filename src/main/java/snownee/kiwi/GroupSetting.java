@@ -3,8 +3,6 @@ package snownee.kiwi;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.SortedSet;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 

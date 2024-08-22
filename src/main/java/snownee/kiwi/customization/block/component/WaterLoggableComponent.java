@@ -1,7 +1,5 @@
 package snownee.kiwi.customization.block.component;
 
-import snownee.kiwi.customization.block.loader.KBlockComponents;
-
 import com.google.common.base.Preconditions;
 
 import net.minecraft.core.BlockPos;
@@ -16,6 +14,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import snownee.kiwi.customization.block.KBlockSettings;
+import snownee.kiwi.customization.block.loader.KBlockComponents;
 
 public class WaterLoggableComponent implements KBlockComponent {
 	private static final WaterLoggableComponent INSTANCE = new WaterLoggableComponent();

@@ -4,17 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.neoforged.bus.api.IEventBus;
-
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent;
-import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
-import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
-
-import net.neoforged.neoforge.client.event.RenderFrameEvent;
-import net.neoforged.neoforge.client.event.RenderHighlightEvent;
-import net.neoforged.neoforge.common.NeoForge;
-
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.Lists;
@@ -39,8 +28,15 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent;
+import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.event.RenderFrameEvent;
+import net.neoforged.neoforge.client.event.RenderHighlightEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import snownee.kiwi.Kiwi;
-import snownee.kiwi.KiwiModule;
 import snownee.kiwi.RenderLayerEnum;
 import snownee.kiwi.customization.block.GlassType;
 import snownee.kiwi.customization.block.behavior.SitManager;

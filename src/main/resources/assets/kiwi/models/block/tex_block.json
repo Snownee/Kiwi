@@ -1,4 +1,4 @@
 {
-"loader": "kiwi:retexture",
-"base": "kiwi:block/blue_carpet"
+	"loader": "kiwi:retexture",
+	"base": "kiwi:block/blue_carpet"
 }

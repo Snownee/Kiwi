@@ -5,11 +5,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import net.minecraft.client.gui.navigation.ScreenRectangle;
-
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.metadata.gui.GuiSpriteScaling;
-
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
@@ -24,9 +19,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.StringWidget;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
@@ -34,6 +28,8 @@ import net.minecraft.client.gui.screens.inventory.tooltip.BelowOrAboveWidgetTool
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.Rect2i;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.metadata.gui.GuiSpriteScaling;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -256,21 +252,22 @@ public class ConvertScreen extends Screen {
 		pose.translate(-pos.x, -pos.y, 0);
 		if (inContainer) {
 			Rect2i bounds = layout.bounds();
-			TextureAtlasSprite sprite = Minecraft.getInstance().getGuiSprites().getSprite(ResourceLocation.withDefaultNamespace("textures/gui/demo_background.png"));
+			TextureAtlasSprite sprite = Minecraft.getInstance().getGuiSprites().getSprite(ResourceLocation.withDefaultNamespace(
+					"textures/gui/demo_background.png"));
 			pGuiGraphics.blitNineSlicedSprite(
 					sprite,
-					new GuiSpriteScaling.NineSlice(4, 4, new GuiSpriteScaling.NineSlice.Border(0, 0 , 248, 166)),
+					new GuiSpriteScaling.NineSlice(4, 4, new GuiSpriteScaling.NineSlice.Border(0, 0, 248, 166)),
 					bounds.getX() - 2,
 					bounds.getY() - 2,
 					0,
 					bounds.getWidth() + 4,
 					bounds.getHeight() + 4);
-					//4,
-					//4,
-					//248,
-					//166,
-					//0,
-					//0);
+			//4,
+			//4,
+			//248,
+			//166,
+			//0,
+			//0);
 		}
 		super.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
 		pose.popPose();
@@ -278,7 +275,8 @@ public class ConvertScreen extends Screen {
 
 	@Override
 	public void setTooltipForNextRenderPass(List<FormattedCharSequence> list, ClientTooltipPositioner tooltipPositioner, boolean force) {
-		float openValue = openProgress.getValue(Objects.requireNonNull(minecraft)./*getPartialTick()*/ getTimer().getGameTimeDeltaPartialTick(true));
+		float openValue = openProgress.getValue(Objects.requireNonNull(minecraft)./*getPartialTick()*/ getTimer()
+				.getGameTimeDeltaPartialTick(true));
 		if (openValue > 0.95f) {
 			super.setTooltipForNextRenderPass(list, tooltipPositioner, force);
 		}
@@ -309,7 +307,11 @@ public class ConvertScreen extends Screen {
 			lingeringScreen = null;
 			return;
 		}
-		lingeringScreen.render(pGuiGraphics, Integer.MAX_VALUE, Integer.MAX_VALUE, /*mc.getDeltaFrameTime()*/ mc.getTimer().getGameTimeDeltaTicks());
+		lingeringScreen.render(
+				pGuiGraphics,
+				Integer.MAX_VALUE,
+				Integer.MAX_VALUE, /*mc.getDeltaFrameTime()*/
+				mc.getTimer().getGameTimeDeltaTicks());
 	}
 
 	public static void tickLingering() {

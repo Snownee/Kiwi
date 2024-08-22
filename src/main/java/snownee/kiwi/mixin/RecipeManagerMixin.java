@@ -19,8 +19,14 @@ import snownee.kiwi.util.KUtil;
 @Mixin(value = RecipeManager.class, priority = 9)
 public class RecipeManagerMixin {
 
-	@Inject(at = @At("HEAD"), method = "apply(Ljava/util/Map;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/util/profiling/ProfilerFiller;)V")
-	private void kiwi$apply(Map<ResourceLocation, JsonElement> pObject, ResourceManager pResourceManager, ProfilerFiller pProfiler, CallbackInfo ci) {
+	@Inject(
+			at = @At("HEAD"),
+			method = "apply(Ljava/util/Map;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/util/profiling/ProfilerFiller;)V")
+	private void kiwi$apply(
+			Map<ResourceLocation, JsonElement> pObject,
+			ResourceManager pResourceManager,
+			ProfilerFiller pProfiler,
+			CallbackInfo ci) {
 		KUtil.setRecipeManager((RecipeManager) (Object) this);
 	}
 

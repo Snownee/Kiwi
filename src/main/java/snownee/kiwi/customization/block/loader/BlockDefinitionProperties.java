@@ -13,7 +13,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.PushReaction;
-import snownee.kiwi.KiwiModule;
 import snownee.kiwi.RenderLayerEnum;
 import snownee.kiwi.customization.block.GlassType;
 import snownee.kiwi.customization.block.behavior.CanSurviveHandler;

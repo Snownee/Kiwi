@@ -18,7 +18,6 @@ import com.mojang.serialization.MapLike;
 import com.mojang.serialization.RecordBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.minecraft.Util;
 import net.minecraft.core.Direction;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.StringRepresentable;
@@ -76,8 +75,10 @@ public record SimplePropertiesComponent(
 				String name = ops.getStringValue(map.get("name")).getOrThrow($ -> new IllegalStateException("Missing name for property"));
 
 				if (defaultValue instanceof Integer) {
-					int min = ops.getNumberValue(map.get("min")).getOrThrow($ -> new IllegalStateException("Missing min for integer property")).intValue();
-					int max = ops.getNumberValue(map.get("max")).getOrThrow($ -> new IllegalStateException("Missing max for integer property")).intValue();
+					int min = ops.getNumberValue(map.get("min")).getOrThrow($ -> new IllegalStateException(
+							"Missing min for integer property")).intValue();
+					int max = ops.getNumberValue(map.get("max")).getOrThrow($ -> new IllegalStateException(
+							"Missing max for integer property")).intValue();
 					property = IntegerProperty.create(name, min, max);
 				} else if (defaultValue instanceof Boolean) { // will the NbtOps break this?
 					property = BooleanProperty.create(name);

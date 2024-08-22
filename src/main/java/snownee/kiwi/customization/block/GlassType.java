@@ -1,10 +1,8 @@
 package snownee.kiwi.customization.block;
 
+import net.minecraft.resources.ResourceLocation;
 import snownee.kiwi.RenderLayerEnum;
 import snownee.kiwi.util.codec.CustomizationCodecs;
-
-import net.minecraft.resources.ResourceLocation;
-import snownee.kiwi.KiwiModule;
 
 public record GlassType(String name, boolean skipRendering, float shadeBrightness, RenderLayerEnum renderType) {
 	public static final GlassType CLEAR = new GlassType("clear", true, 1F, RenderLayerEnum.CUTOUT);

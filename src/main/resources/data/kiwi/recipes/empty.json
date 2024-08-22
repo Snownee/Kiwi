@@ -1,23 +1,23 @@
 {
-  "type": "kiwi:shapeless",
-  "ingredients": [
-    {
-      "type": "kiwi:alternatives",
-      "options": [
-        {
-          "type": "error"
-        },
-        {
-          "tag": "random_nonexistant_tag"
-        }
-      ]
-    },
-    {
-      "item": "lava_bucket"
-    }
-  ],
-  "result": {
-    "item": "minecraft:bucket"
-  },
-  "no_containers": true
+	"type": "kiwi:shapeless",
+	"ingredients": [
+		{
+			"type": "kiwi:alternatives",
+			"options": [
+				{
+					"type": "error"
+				},
+				{
+					"tag": "random_nonexistant_tag"
+				}
+			]
+		},
+		{
+			"item": "lava_bucket"
+		}
+	],
+	"result": {
+		"item": "minecraft:bucket"
+	},
+	"no_containers": true
 }

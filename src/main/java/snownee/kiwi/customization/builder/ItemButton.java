@@ -2,7 +2,6 @@ package snownee.kiwi.customization.builder;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import snownee.kiwi.util.NotNullByDefault;

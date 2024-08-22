@@ -1,4 +1,4 @@
 {
-"loader": "kiwi:retexture",
-"base": "kiwi:block/stairs"
+	"loader": "kiwi:retexture",
+	"base": "kiwi:block/stairs"
 }

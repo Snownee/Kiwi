@@ -5,19 +5,18 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import net.minecraft.core.Holder;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-
 import org.jetbrains.annotations.NotNull;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
 
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -237,10 +236,10 @@ public record CConvertItemPacket(
 
 		public static final StreamCodec<RegistryFriendlyByteBuf, Pair<KHolder<BlockFamily>, Item>> ENTRY_PAIR_STREAM_CODEC
 				= StreamCodec.composite(
-						ResourceLocation.STREAM_CODEC, p -> p.getFirst().key(),
-						ByteBufCodecs.registry(Registries.ITEM), Pair::getSecond,
-						(rl, item) -> Pair.of(new KHolder<>(rl, null), item)
-				);
+				ResourceLocation.STREAM_CODEC, p -> p.getFirst().key(),
+				ByteBufCodecs.registry(Registries.ITEM), Pair::getSecond,
+				(rl, item) -> Pair.of(new KHolder<>(rl, null), item)
+		);
 
 		public static final StreamCodec<RegistryFriendlyByteBuf, Entry> STREAM_CODEC = StreamCodec.composite(
 				ByteBufCodecs.FLOAT, Entry::ratio,

@@ -3,7 +3,6 @@ package snownee.kiwi.customization.block.loader;
 import java.util.Optional;
 import java.util.function.Function;
 
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 
 import snownee.kiwi.AbstractModule;

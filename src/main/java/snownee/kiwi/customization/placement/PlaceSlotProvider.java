@@ -41,10 +41,10 @@ import snownee.kiwi.Kiwi;
 import snownee.kiwi.customization.block.KBlockUtils;
 import snownee.kiwi.customization.block.loader.KBlockDefinition;
 import snownee.kiwi.customization.block.loader.KBlockTemplate;
-import snownee.kiwi.util.KHolder;
-import snownee.kiwi.util.codec.CustomizationCodecs;
 import snownee.kiwi.loader.Platform;
+import snownee.kiwi.util.KHolder;
 import snownee.kiwi.util.KUtil;
+import snownee.kiwi.util.codec.CustomizationCodecs;
 
 public record PlaceSlotProvider(
 		List<PlaceTarget> target,

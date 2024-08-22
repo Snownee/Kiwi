@@ -1,8 +1,18 @@
 {
-    "multipart": [
-        {   "apply": { "model": "block/acacia_fence_post" }},
-        {   "when": { "half": "bottom" },
-            "apply": { "model": "kiwi:block/first_block", "uvlock": true }
-        }
-    ]
+	"multipart": [
+		{
+			"apply": {
+				"model": "block/acacia_fence_post"
+			}
+		},
+		{
+			"when": {
+				"half": "bottom"
+			},
+			"apply": {
+				"model": "kiwi:block/first_block",
+				"uvlock": true
+			}
+		}
+	]
 }

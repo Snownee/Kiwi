@@ -1,10 +1,9 @@
 package snownee.kiwi.customization.block.component;
 
-import com.mojang.serialization.MapCodec;
-
 import org.jetbrains.annotations.Nullable;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.Direction;

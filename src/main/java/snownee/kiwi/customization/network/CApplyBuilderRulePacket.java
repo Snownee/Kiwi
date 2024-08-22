@@ -5,18 +5,16 @@ import java.util.List;
 import java.util.function.IntFunction;
 import java.util.stream.Stream;
 
+import org.jetbrains.annotations.NotNull;
+
 import io.netty.buffer.ByteBuf;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-
-import net.minecraft.util.ByIdMap;
-
-import org.jetbrains.annotations.NotNull;
-
-import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ByIdMap;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.Block;
@@ -24,11 +22,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import snownee.kiwi.Kiwi;
-import snownee.kiwi.network.PayloadContext;
-import snownee.kiwi.network.PlayPacketHandler;
 import snownee.kiwi.customization.builder.BuilderRule;
 import snownee.kiwi.customization.builder.BuilderRules;
 import snownee.kiwi.network.KiwiPacket;
+import snownee.kiwi.network.PayloadContext;
+import snownee.kiwi.network.PlayPacketHandler;
 import snownee.kiwi.util.KHolder;
 
 @KiwiPacket
@@ -48,10 +46,16 @@ public record CApplyBuilderRulePacket(
 	public @NotNull Type<CApplyBuilderRulePacket> type() {
 		return TYPE;
 	}
+
 	public static class Handler implements PlayPacketHandler<CApplyBuilderRulePacket> {
 
-		public static final IntFunction<InteractionHand> HAND_ID_MAPPER = ByIdMap.continuous(InteractionHand::ordinal, InteractionHand.values(), ByIdMap.OutOfBoundsStrategy.WRAP);
-		public static final StreamCodec<ByteBuf, InteractionHand> HAND_STREAM_CODEC = ByteBufCodecs.idMapper(HAND_ID_MAPPER, InteractionHand::ordinal);
+		public static final IntFunction<InteractionHand> HAND_ID_MAPPER = ByIdMap.continuous(
+				InteractionHand::ordinal,
+				InteractionHand.values(),
+				ByIdMap.OutOfBoundsStrategy.WRAP);
+		public static final StreamCodec<ByteBuf, InteractionHand> HAND_STREAM_CODEC = ByteBufCodecs.idMapper(
+				HAND_ID_MAPPER,
+				InteractionHand::ordinal);
 
 		public static final StreamCodec<RegistryFriendlyByteBuf, CApplyBuilderRulePacket> STREAM_CODEC = StreamCodec.composite(
 				HAND_STREAM_CODEC, CApplyBuilderRulePacket::hand,

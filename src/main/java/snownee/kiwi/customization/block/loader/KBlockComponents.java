@@ -5,8 +5,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 import com.google.common.collect.ImmutableMap;
-import com.mojang.serialization.Codec;
-
 import com.mojang.serialization.MapCodec;
 
 import snownee.kiwi.AbstractModule;

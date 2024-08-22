@@ -5,7 +5,6 @@ import java.util.function.Supplier;
 
 import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
-
 import com.mojang.serialization.MapCodec;
 
 import net.minecraft.resources.ResourceLocation;

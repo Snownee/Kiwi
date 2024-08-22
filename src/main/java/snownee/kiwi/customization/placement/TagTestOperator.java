@@ -5,13 +5,12 @@ import java.util.Objects;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
-import snownee.kiwi.util.codec.CustomizationCodecs;
-
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.mojang.serialization.Codec;
 
 import net.minecraft.core.Direction;
+import snownee.kiwi.util.codec.CustomizationCodecs;
 
 public record TagTestOperator(String name, BiPredicate<String, String> test) {
 	private static final Map<String, String> OPPOSITE_LOOKUP = Direction.stream().collect(Collectors.toUnmodifiableMap(

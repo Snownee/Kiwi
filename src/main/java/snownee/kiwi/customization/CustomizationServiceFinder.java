@@ -1,11 +1,11 @@
 package snownee.kiwi.customization;
 
-import net.neoforged.fml.loading.FMLPaths;
-import net.neoforged.neoforgespi.language.IModInfo;
-
 import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
+
+import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.neoforgespi.language.IModInfo;
 
 public final class CustomizationServiceFinder {
 	public static final Path PACK_DIRECTORY = FMLPaths.GAMEDIR.get().resolve("kiwipacks");

@@ -2,16 +2,14 @@ package snownee.kiwi.customization.network;
 
 import java.util.Objects;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-
+import net.minecraft.server.level.ServerPlayer;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.customization.duck.KPlayer;
-
-import net.minecraft.client.Minecraft;
-import net.minecraft.server.level.ServerPlayer;
 import snownee.kiwi.network.KPacketSender;
 import snownee.kiwi.network.KiwiPacket;
 import snownee.kiwi.network.PayloadContext;

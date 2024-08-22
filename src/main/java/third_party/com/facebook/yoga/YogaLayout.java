@@ -7,7 +7,7 @@ import com.google.common.base.Objects;
 /**
  * Copyright (c) 2014-present, Facebook, Inc.
  * Copyright (c) 2018-present, Marius Klimantavičius
- *
+ * <p>
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
@@ -16,7 +16,7 @@ public final class YogaLayout {
 	public static final int MaxCachedResultCount = 8; // 16;
 
 	public final float[] Position = new float[4]; // 4
-	public final float[] Dimensions = new float[] { Float.NaN, Float.NaN }; // 2
+	public final float[] Dimensions = new float[]{Float.NaN, Float.NaN}; // 2
 	public final float[] Margin = new float[6]; // 6
 	public final float[] Border = new float[6]; // 6
 	public final float[] Padding = new float[6]; // 6
@@ -33,7 +33,7 @@ public final class YogaLayout {
 
 	public int NextCachedMeasurementsIndex;
 	public YogaCachedMeasurement[] CachedMeasurements; // MaxCachedResultCount
-	public final float[] MeasuredDimensions = new float[] { Float.NaN, Float.NaN }; // 2
+	public final float[] MeasuredDimensions = new float[]{Float.NaN, Float.NaN}; // 2
 
 	public YogaCachedMeasurement CachedLayout;
 	public boolean DidUseLegacyFlag;
@@ -57,13 +57,20 @@ public final class YogaLayout {
 	}
 
 	public static boolean Equal(YogaLayout self, YogaLayout layout) {
-		if (self == layout)
+		if (self == layout) {
 			return true;
+		}
 
-		if (self == null || layout == null)
+		if (self == null || layout == null) {
 			return false;
+		}
 
-		boolean isEqual = Arrays.equals(self.Position, layout.Position) && Arrays.equals(self.Dimensions, layout.Dimensions) && Arrays.equals(self.Margin, layout.Margin) && Arrays.equals(self.Border, layout.Border) && Arrays.equals(self.Padding, layout.Padding) && self.Direction == layout.Direction && self.HadOverflow == layout.HadOverflow && self.LastOwnerDirection == layout.LastOwnerDirection && self.NextCachedMeasurementsIndex == layout.NextCachedMeasurementsIndex && self.CachedLayout == layout.CachedLayout;
+		boolean isEqual = Arrays.equals(self.Position, layout.Position) && Arrays.equals(self.Dimensions, layout.Dimensions) &&
+				Arrays.equals(self.Margin, layout.Margin) && Arrays.equals(self.Border, layout.Border) && Arrays.equals(
+				self.Padding,
+				layout.Padding) && self.Direction == layout.Direction && self.HadOverflow == layout.HadOverflow &&
+				self.LastOwnerDirection == layout.LastOwnerDirection &&
+				self.NextCachedMeasurementsIndex == layout.NextCachedMeasurementsIndex && self.CachedLayout == layout.CachedLayout;
 
 		for (int i = 0; i < MaxCachedResultCount && isEqual; ++i)
 			isEqual = isEqual && self.CachedMeasurements[i] == layout.CachedMeasurements[i];
@@ -117,7 +124,24 @@ public final class YogaLayout {
 
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(Position, Dimensions, Margin, Border, Padding, Direction, ComputedFlexBasisGeneration, ComputedFlexBasis, HadOverflow, GenerationCount, LastOwnerDirection, NextCachedMeasurementsIndex, CachedMeasurements, MeasuredDimensions, CachedLayout, DidUseLegacyFlag, DoesLegacyStretchFlagAffectsLayout);
+		return Objects.hashCode(
+				Position,
+				Dimensions,
+				Margin,
+				Border,
+				Padding,
+				Direction,
+				ComputedFlexBasisGeneration,
+				ComputedFlexBasis,
+				HadOverflow,
+				GenerationCount,
+				LastOwnerDirection,
+				NextCachedMeasurementsIndex,
+				CachedMeasurements,
+				MeasuredDimensions,
+				CachedLayout,
+				DidUseLegacyFlag,
+				DoesLegacyStretchFlagAffectsLayout);
 	}
 
 	@Override

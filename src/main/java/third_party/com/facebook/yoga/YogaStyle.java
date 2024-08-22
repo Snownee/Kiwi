@@ -7,16 +7,25 @@ import com.google.common.base.Objects;
 /**
  * Copyright (c) 2014-present, Facebook, Inc.
  * Copyright (c) 2018-present, Marius Klimantavičius
- *
+ * <p>
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
 
 public final class YogaStyle {
-	private static final YogaValue[] DefaultEdgeValuesUnit = new YogaValue[] { YogaValue.UNDEFINED, YogaValue.UNDEFINED, YogaValue.UNDEFINED, YogaValue.UNDEFINED, YogaValue.UNDEFINED, YogaValue.UNDEFINED, YogaValue.UNDEFINED, YogaValue.UNDEFINED, YogaValue.UNDEFINED };
+	private static final YogaValue[] DefaultEdgeValuesUnit = new YogaValue[]{
+			YogaValue.UNDEFINED,
+			YogaValue.UNDEFINED,
+			YogaValue.UNDEFINED,
+			YogaValue.UNDEFINED,
+			YogaValue.UNDEFINED,
+			YogaValue.UNDEFINED,
+			YogaValue.UNDEFINED,
+			YogaValue.UNDEFINED,
+			YogaValue.UNDEFINED};
 
-	private static final YogaValue[] DefaultDimensionValuesAutoUnit = new YogaValue[] { YogaValue.AUTO, YogaValue.AUTO };
-	private static final YogaValue[] DefaultDimensionValuesUnit = new YogaValue[] { YogaValue.UNDEFINED, YogaValue.UNDEFINED };
+	private static final YogaValue[] DefaultDimensionValuesAutoUnit = new YogaValue[]{YogaValue.AUTO, YogaValue.AUTO};
+	private static final YogaValue[] DefaultDimensionValuesUnit = new YogaValue[]{YogaValue.UNDEFINED, YogaValue.UNDEFINED};
 
 	public YogaDirection Direction = YogaDirection.Inherit;
 	public YogaFlexDirection FlexDirection = YogaFlexDirection.Column;
@@ -79,32 +88,34 @@ public final class YogaStyle {
 
 	// Yoga specific properties, not compatible with flexbox specification
 	public static boolean Equal(YogaStyle self, YogaStyle style) {
-		if (self == style)
+		if (self == style) {
 			return true;
+		}
 
-		if (self == null || style == null)
+		if (self == null || style == null) {
 			return false;
+		}
 
 		/* off */
-        boolean areNonFloatValuesEqual = self.Direction == style.Direction
-                && self.FlexDirection == style.FlexDirection
-                && self.JustifyContent == style.JustifyContent
-                && self.AlignContent == style.AlignContent
-                && self.AlignItems == style.AlignItems
-                && self.AlignSelf == style.AlignSelf
-                && self.PositionType == style.PositionType
-                && self.FlexWrap == style.FlexWrap
-                && self.Overflow == style.Overflow
-                && self.Display == style.Display
-                && java.util.Objects.equals(self.FlexBasis, style.FlexBasis)
-                && Arrays.equals(self.Margin, style.Margin)
-                && Arrays.equals(self.Position, style.Position)
-                && Arrays.equals(self.Padding, style.Padding)
-                && Arrays.equals(self.Border, style.Border)
-                && Arrays.equals(self.Dimensions, style.Dimensions)
-                && Arrays.equals(self.MinDimensions, style.MinDimensions)
-                && Arrays.equals(self.MaxDimensions, style.MaxDimensions);
-        /* on */
+		boolean areNonFloatValuesEqual = self.Direction == style.Direction
+				&& self.FlexDirection == style.FlexDirection
+				&& self.JustifyContent == style.JustifyContent
+				&& self.AlignContent == style.AlignContent
+				&& self.AlignItems == style.AlignItems
+				&& self.AlignSelf == style.AlignSelf
+				&& self.PositionType == style.PositionType
+				&& self.FlexWrap == style.FlexWrap
+				&& self.Overflow == style.Overflow
+				&& self.Display == style.Display
+				&& java.util.Objects.equals(self.FlexBasis, style.FlexBasis)
+				&& Arrays.equals(self.Margin, style.Margin)
+				&& Arrays.equals(self.Position, style.Position)
+				&& Arrays.equals(self.Padding, style.Padding)
+				&& Arrays.equals(self.Border, style.Border)
+				&& Arrays.equals(self.Dimensions, style.Dimensions)
+				&& Arrays.equals(self.MinDimensions, style.MinDimensions)
+				&& Arrays.equals(self.MaxDimensions, style.MaxDimensions);
+		/* on */
 
 		areNonFloatValuesEqual = areNonFloatValuesEqual && self.Flex == style.Flex;
 
@@ -123,6 +134,28 @@ public final class YogaStyle {
 
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(Direction, FlexDirection, JustifyContent, AlignContent, AlignItems, AlignSelf, PositionType, FlexWrap, Overflow, Display, Flex, FlexGrow, FlexShrink, FlexBasis, Margin, Position, Padding, Border, Dimensions, MinDimensions, MaxDimensions, AspectRatio);
+		return Objects.hashCode(
+				Direction,
+				FlexDirection,
+				JustifyContent,
+				AlignContent,
+				AlignItems,
+				AlignSelf,
+				PositionType,
+				FlexWrap,
+				Overflow,
+				Display,
+				Flex,
+				FlexGrow,
+				FlexShrink,
+				FlexBasis,
+				Margin,
+				Position,
+				Padding,
+				Border,
+				Dimensions,
+				MinDimensions,
+				MaxDimensions,
+				AspectRatio);
 	}
 }

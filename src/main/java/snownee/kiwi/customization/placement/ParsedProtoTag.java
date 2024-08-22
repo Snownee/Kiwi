@@ -2,14 +2,13 @@ package snownee.kiwi.customization.placement;
 
 import java.util.Locale;
 
-import snownee.kiwi.customization.block.KBlockUtils;
-
 import com.mojang.serialization.Codec;
 
 import net.minecraft.core.Direction;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
+import snownee.kiwi.customization.block.KBlockUtils;
 
 public record ParsedProtoTag(String prefix, String key, String value) {
 	public static ParsedProtoTag of(String s) {

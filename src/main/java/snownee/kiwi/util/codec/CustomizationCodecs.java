@@ -30,19 +30,16 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.ExtraCodecs;
-import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
-import net.minecraft.world.item.ArmorMaterials;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.PressurePlateBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.WeatheringCopper;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -52,7 +49,6 @@ import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
-import snownee.kiwi.KiwiModule;
 import snownee.kiwi.RenderLayerEnum;
 import snownee.kiwi.customization.block.GlassType;
 
@@ -162,7 +158,9 @@ public class CustomizationCodecs {
 			"chestplate", ArmorItem.Type.CHESTPLATE,
 			"leggings", ArmorItem.Type.LEGGINGS,
 			"boots", ArmorItem.Type.BOOTS));
-	/** @deprecated Use vanilla armor material registry */
+	/**
+	 * @deprecated Use vanilla armor material registry
+	 */
 	@Deprecated
 	public static final BiMap<ResourceLocation, ArmorMaterial> CUSTOM_ARMOR_MATERIALS = HashBiMap.create();
 	public static final Codec<Holder<ArmorMaterial>> ARMOR_MATERIAL = ArmorMaterial.CODEC;

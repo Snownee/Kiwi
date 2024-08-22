@@ -1,19 +1,19 @@
 {
-  "type": "minecraft:crafting_shapeless",
-  "ingredients": [
-    {
-      "type": "kiwi:alternatives",
-      "options": [
-        {
-          "tag": "forge:eggs"
-        },
-        {
-          "item": "gunpowder"
-        }
-      ]
-    }
-  ],
-  "result": {
-    "item": "sugar"
-  }
+	"type": "minecraft:crafting_shapeless",
+	"ingredients": [
+		{
+			"type": "kiwi:alternatives",
+			"options": [
+				{
+					"tag": "forge:eggs"
+				},
+				{
+					"item": "gunpowder"
+				}
+			]
+		}
+	],
+	"result": {
+		"item": "sugar"
+	}
 }

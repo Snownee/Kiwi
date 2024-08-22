@@ -1,52 +1,52 @@
 clientOnly: false
 conditions:
-- data:
-    method: test
-    value: [test]
-  target: snownee.kiwi.test.TestCondition
-- data:
-    method: shouldLoad
-    value: [data]
-  target: snownee.kiwi.data.DataModule
+  - data:
+      method: test
+      value: [ test ]
+    target: snownee.kiwi.test.TestCondition
+  - data:
+      method: shouldLoad
+      value: [ data ]
+    target: snownee.kiwi.data.DataModule
 configs:
-- data: {}
-  target: snownee.kiwi.KiwiCommonConfig
-- data: {type: COMMON, value: test}
-  target: snownee.kiwi.test.TestConfig
-- data: {value: ksit-common}
-  target: snownee.kiwi.customization.block.behavior.KSitCommonConfig
-- data: {type: CLIENT}
-  target: snownee.kiwi.KiwiClientConfig
+  - data: { }
+    target: snownee.kiwi.KiwiCommonConfig
+  - data: { type: COMMON, value: test }
+    target: snownee.kiwi.test.TestConfig
+  - data: { value: ksit-common }
+    target: snownee.kiwi.customization.block.behavior.KSitCommonConfig
+  - data: { type: CLIENT }
+    target: snownee.kiwi.KiwiClientConfig
 modules:
-- data: {value: test}
-  target: snownee.kiwi.test.TestModule
-- data: {dependencies: 'forge;@kiwi:test', value: test2}
-  target: snownee.kiwi.test.TestModule2
-- data: {value: item_templates}
-  target: snownee.kiwi.customization.item.loader.KItemTemplates
-- data: {value: block_components}
-  target: snownee.kiwi.customization.block.loader.KBlockComponents
-- data: {value: block_templates}
-  target: snownee.kiwi.customization.block.loader.KBlockTemplates
-- data: {value: contributors}
-  target: snownee.kiwi.contributor.Contributors
-- data: {value: data}
-  target: snownee.kiwi.data.DataModule
+  - data: { value: test }
+    target: snownee.kiwi.test.TestModule
+  - data: { dependencies: 'forge;@kiwi:test', value: test2 }
+    target: snownee.kiwi.test.TestModule2
+  - data: { value: item_templates }
+    target: snownee.kiwi.customization.item.loader.KItemTemplates
+  - data: { value: block_components }
+    target: snownee.kiwi.customization.block.loader.KBlockComponents
+  - data: { value: block_templates }
+    target: snownee.kiwi.customization.block.loader.KBlockTemplates
+  - data: { value: contributors }
+    target: snownee.kiwi.contributor.Contributors
+  - data: { value: data }
+    target: snownee.kiwi.data.DataModule
 optionals:
-- data: {defaultEnabled: false}
-  target: snownee.kiwi.test.TestModule
-- data: {defaultEnabled: false}
-  target: snownee.kiwi.test.TestModule2
+  - data: { defaultEnabled: false }
+    target: snownee.kiwi.test.TestModule
+  - data: { defaultEnabled: false }
+    target: snownee.kiwi.test.TestModule2
 packets:
-- data: {}
-  target: snownee.kiwi.test.SMyPacket
-- data: {}
-  target: snownee.kiwi.customization.network.CApplyBuilderRulePacket
-- data: {}
-  target: snownee.kiwi.customization.network.SSyncPlaceCountPacket
-- data: {}
-  target: snownee.kiwi.customization.network.CConvertItemPacket
-- data: {}
-  target: snownee.kiwi.contributor.network.SSyncCosmeticPacket
-- data: {}
-  target: snownee.kiwi.contributor.network.CSetCosmeticPacket
+  - data: { }
+    target: snownee.kiwi.test.SMyPacket
+  - data: { }
+    target: snownee.kiwi.customization.network.CApplyBuilderRulePacket
+  - data: { }
+    target: snownee.kiwi.customization.network.SSyncPlaceCountPacket
+  - data: { }
+    target: snownee.kiwi.customization.network.CConvertItemPacket
+  - data: { }
+    target: snownee.kiwi.contributor.network.SSyncCosmeticPacket
+  - data: { }
+    target: snownee.kiwi.contributor.network.CSetCosmeticPacket

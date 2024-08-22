@@ -39,12 +39,13 @@ import snownee.kiwi.config.ConfigUI.Hide;
 import snownee.kiwi.config.ConfigUI.Slider;
 import snownee.kiwi.config.ConfigUI.TextDescription;
 import snownee.kiwi.config.ConfigUI.Typed;
-import snownee.kiwi.util.LocalizableItem;
 import snownee.kiwi.util.KUtil;
+import snownee.kiwi.util.LocalizableItem;
 
 public class ClothConfigIntegration {
 
-	private static final ConfigLibAttributes ATTRIBUTES = new ConfigLibAttributes("cloth-config",
+	private static final ConfigLibAttributes ATTRIBUTES = new ConfigLibAttributes(
+			"cloth-config",
 			namespace -> create(Minecraft.getInstance().screen, namespace),
 			true,
 			false,

@@ -2,8 +2,6 @@ package snownee.kiwi.customization.shape;
 
 import java.util.stream.Stream;
 
-import snownee.kiwi.util.codec.CustomizationCodecs;
-
 import com.google.common.base.Preconditions;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -17,6 +15,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import snownee.kiwi.util.VoxelUtil;
+import snownee.kiwi.util.codec.CustomizationCodecs;
 
 public record DirectionalShape(VoxelShape[] shapes, String property) implements ShapeGenerator {
 	public static ShapeGenerator create(ShapeGenerator upGenerator, String property) {

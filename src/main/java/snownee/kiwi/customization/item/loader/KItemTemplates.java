@@ -2,8 +2,6 @@ package snownee.kiwi.customization.item.loader;
 
 import java.util.function.Supplier;
 
-import com.mojang.serialization.Codec;
-
 import com.mojang.serialization.MapCodec;
 
 import snownee.kiwi.AbstractModule;

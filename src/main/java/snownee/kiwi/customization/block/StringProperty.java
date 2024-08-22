@@ -3,12 +3,11 @@ package snownee.kiwi.customization.block;
 import java.util.Collection;
 import java.util.Optional;
 
-import snownee.kiwi.util.NotNullByDefault;
-
 import com.google.common.collect.ImmutableSortedSet;
 
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Property;
+import snownee.kiwi.util.NotNullByDefault;
 
 @NotNullByDefault
 public class StringProperty extends Property<String> {

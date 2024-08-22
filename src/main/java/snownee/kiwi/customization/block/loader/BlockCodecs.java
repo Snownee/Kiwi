@@ -4,10 +4,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 
-import net.minecraft.util.ColorRGBA;
-import net.minecraft.world.item.component.SuspiciousStewEffects;
-import net.minecraft.world.level.block.ColoredFallingBlock;
-
 import org.apache.commons.lang3.NotImplementedException;
 
 import com.google.common.collect.Maps;
@@ -20,15 +16,18 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.ColorRGBA;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.component.SuspiciousStewEffects;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BrushableBlock;
 import net.minecraft.world.level.block.ButtonBlock;
 import net.minecraft.world.level.block.ChangeOverTimeBlock;
+import net.minecraft.world.level.block.ColoredFallingBlock;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.DropExperienceBlock;
 import net.minecraft.world.level.block.FenceGateBlock;

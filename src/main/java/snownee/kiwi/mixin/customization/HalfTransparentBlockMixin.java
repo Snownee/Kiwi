@@ -4,12 +4,12 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import snownee.kiwi.customization.CustomizationHooks;
-import snownee.kiwi.customization.block.KBlockSettings;
 
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.HalfTransparentBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import snownee.kiwi.customization.CustomizationHooks;
+import snownee.kiwi.customization.block.KBlockSettings;
 
 @Mixin(HalfTransparentBlock.class)
 public abstract class HalfTransparentBlockMixin {

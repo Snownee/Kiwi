@@ -1,12 +1,11 @@
 package snownee.kiwi.util;
 
+import java.util.Optional;
+
 import org.apache.commons.lang3.NotImplementedException;
 
 import net.minecraft.advancements.critereon.BlockPredicate;
-import net.minecraft.advancements.critereon.NbtPredicate;
 import net.minecraft.world.level.block.state.BlockState;
-
-import java.util.Optional;
 
 public class BlockPredicateHelper {
 

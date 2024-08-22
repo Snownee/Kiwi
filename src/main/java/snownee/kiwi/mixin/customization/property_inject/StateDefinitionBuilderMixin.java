@@ -5,13 +5,13 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import snownee.kiwi.customization.block.KBlockSettings;
 
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.StateHolder;
 import net.minecraft.world.level.block.state.properties.Property;
+import snownee.kiwi.customization.block.KBlockSettings;
 
 @Mixin(StateDefinition.Builder.class)
 public abstract class StateDefinitionBuilderMixin<O, S extends StateHolder<O, S>> {

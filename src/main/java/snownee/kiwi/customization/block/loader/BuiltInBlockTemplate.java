@@ -3,7 +3,6 @@ package snownee.kiwi.customization.block.loader;
 import java.util.Optional;
 
 import com.google.gson.JsonObject;
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.MapCodec;

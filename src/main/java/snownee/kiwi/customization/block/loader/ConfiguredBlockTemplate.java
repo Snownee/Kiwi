@@ -10,12 +10,8 @@ import com.mojang.serialization.Encoder;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.KeyDispatchCodec;
 
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
-import snownee.kiwi.customization.item.loader.ConfiguredItemTemplate;
-import snownee.kiwi.customization.item.loader.KItemTemplate;
 import snownee.kiwi.util.codec.CustomizationCodecs;
 
 public record ConfiguredBlockTemplate(KBlockTemplate template, JsonObject json) {
@@ -32,7 +28,8 @@ public record ConfiguredBlockTemplate(KBlockTemplate template, JsonObject json) 
 
 	public static Codec<ConfiguredBlockTemplate> codec(Map<ResourceLocation, KBlockTemplate> templates) {
 		Function<ConfiguredBlockTemplate, DataResult<KBlockTemplate>> type = $ -> DataResult.success($.template());
-		Function<KBlockTemplate, DataResult<MapCodec<ConfiguredBlockTemplate>>> codec = $ -> DataResult.success(MapCodec.assumeMapUnsafe(ExtraCodecs.JSON).flatXmap(
+		Function<KBlockTemplate, DataResult<MapCodec<ConfiguredBlockTemplate>>> codec = $ -> DataResult.success(MapCodec.assumeMapUnsafe(
+				ExtraCodecs.JSON).flatXmap(
 				json -> DataResult.success(new ConfiguredBlockTemplate($, json.getAsJsonObject())),
 				template -> DataResult.error(() -> "Unsupported operation", template.json)
 		));

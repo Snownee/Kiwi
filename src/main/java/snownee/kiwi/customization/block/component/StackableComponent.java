@@ -1,12 +1,8 @@
 package snownee.kiwi.customization.block.component;
 
-import com.mojang.serialization.MapCodec;
-
 import org.jetbrains.annotations.Nullable;
-import snownee.kiwi.customization.block.loader.KBlockComponents;
-import snownee.kiwi.customization.block.KBlockUtils;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.util.ExtraCodecs;
@@ -16,6 +12,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import snownee.kiwi.customization.block.KBlockSettings;
+import snownee.kiwi.customization.block.KBlockUtils;
+import snownee.kiwi.customization.block.loader.KBlockComponents;
 
 public record StackableComponent(IntegerProperty property) implements KBlockComponent, LayeredComponent {
 	public static final MapCodec<StackableComponent> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(

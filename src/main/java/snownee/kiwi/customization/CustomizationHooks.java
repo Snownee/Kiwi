@@ -1,45 +1,11 @@
 package snownee.kiwi.customization;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
-
-import net.minecraft.server.packs.PackLocationInfo;
-import net.minecraft.server.packs.PackResources;
-import net.minecraft.server.packs.PackSelectionConfig;
-import net.minecraft.server.packs.PathPackResources;
-import net.minecraft.world.level.validation.DirectoryValidator;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.ModList;
-
-import net.neoforged.fml.ModLoadingIssue;
-import net.neoforged.fml.common.Mod;
-
-import net.neoforged.fml.loading.LoadingModList;
-import net.neoforged.neoforge.client.loading.ClientModLoader;
-import net.neoforged.neoforge.common.NeoForge;
-
-import net.neoforged.neoforge.common.Tags;
-import net.neoforged.neoforge.event.AddPackFindersEvent;
-import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
-import net.neoforged.neoforge.event.TagsUpdatedEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.event.level.BlockEvent;
-import net.neoforged.neoforge.registries.NewRegistryEvent;
-import net.neoforged.neoforge.registries.RegisterEvent;
-
-import net.neoforged.neoforge.registries.RegistryBuilder;
-
-import net.neoforged.neoforge.resource.ResourcePackLoader;
-import net.neoforged.neoforgespi.language.IModInfo;
-import net.neoforged.neoforgespi.locating.IModFile;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -48,20 +14,16 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import it.unimi.dsi.fastutil.objects.Object2ByteLinkedOpenHashMap;
-import net.minecraft.SharedConstants;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.PackSource;
-import net.minecraft.server.packs.repository.RepositorySource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -70,9 +32,27 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.validation.DirectoryValidator;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.client.loading.ClientModLoader;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.event.AddPackFindersEvent;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.event.TagsUpdatedEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.registries.NewRegistryEvent;
+import net.neoforged.neoforge.registries.RegisterEvent;
+import net.neoforged.neoforge.registries.RegistryBuilder;
+import net.neoforged.neoforge.resource.ResourcePackLoader;
+import net.neoforged.neoforgespi.locating.IModFile;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.customization.block.BlockFundamentals;
@@ -188,7 +168,8 @@ public final class CustomizationHooks {
 					CustomizationServiceFinder.PACK_DIRECTORY,
 					event.getPackType(),
 					PackSource.BUILT_IN,
-					new DirectoryValidator($ -> true) // For Snownee: this validates content path. For now, it accepts everything, but you can do something with it later.
+					new DirectoryValidator($ -> true)
+					// For Snownee: this validates content path. For now, it accepts everything, but you can do something with it later.
 			));
 		});
 		forgeEventBus.addListener((BlockEvent.BreakEvent event) -> {
@@ -289,7 +270,8 @@ public final class CustomizationHooks {
 			Map.Entry<ResourceLocation, KCreativeTab> entry = newTabs.get(i);
 			ResourceLocation key = entry.getKey();
 			KCreativeTab value = entry.getValue();
-			CreativeModeTab.Builder tab = AbstractModule.itemCategory(key,
+			CreativeModeTab.Builder tab = AbstractModule.itemCategory(
+							key,
 							() -> BuiltInRegistries.ITEM.getOptional(value.icon()).orElse(Items.BARRIER).getDefaultInstance())
 					.displayItems((params, output) -> {
 						output.acceptAll(value.contents()

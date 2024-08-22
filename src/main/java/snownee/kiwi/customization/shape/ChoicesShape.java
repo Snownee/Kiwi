@@ -5,8 +5,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import snownee.kiwi.customization.block.KBlockUtils;
-
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -17,6 +15,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import snownee.kiwi.customization.block.KBlockUtils;
 
 public record ChoicesShape(List<String> keys, Map<String, ShapeGenerator> valueMap) implements ShapeGenerator {
 	public static <T extends Comparable<T>> ShapeGenerator chooseOneProperty(Property<T> property, Map<T, ShapeGenerator> valueMap) {
