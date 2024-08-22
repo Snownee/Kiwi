@@ -48,7 +48,7 @@ public record ConfiguredItemTemplate(KItemTemplate template, JsonObject json) {
 					return DataResult.success(new ConfiguredItemTemplate(template));
 				},
 				template -> DataResult.error(() -> "Unsupported operation"));
-		return CustomizationCodecs.withAlternative(codec1, codec2);
+		return Codec.withAlternative(codec1, codec2);
 	}
 
 }

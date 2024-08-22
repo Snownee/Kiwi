@@ -33,31 +33,24 @@ public record BlockDefinitionProperties(
 		PartialVanillaProperties vanillaProperties) {
 	public static MapCodec<BlockDefinitionProperties> mapCodec(MapCodec<Optional<KMaterial>> materialCodec) {
 		return RecordCodecBuilder.mapCodec(instance -> instance.group(
-				CustomizationCodecs.strictOptionalField(
-								Codec.either(KBlockComponent.DIRECT_CODEC, Codec.STRING).listOf(),
-								"components",
-								List.of())
+				Codec.either(KBlockComponent.DIRECT_CODEC, Codec.STRING)
+						.listOf()
+						.optionalFieldOf("components", List.of())
 						.forGetter(BlockDefinitionProperties::components),
 				materialCodec.forGetter(BlockDefinitionProperties::material),
-				CustomizationCodecs.strictOptionalField(CustomizationCodecs.GLASS_TYPE_CODEC, "glass_type")
-						.forGetter(BlockDefinitionProperties::glassType),
-				CustomizationCodecs.strictOptionalField(CustomizationCodecs.RENDER_TYPE, "render_type")
-						.forGetter(BlockDefinitionProperties::renderType),
-				CustomizationCodecs.strictOptionalField(ResourceLocation.CODEC, "color_provider")
-						.forGetter(BlockDefinitionProperties::colorProvider),
-				CustomizationCodecs.strictOptionalField(ResourceLocation.CODEC, "shape").forGetter(BlockDefinitionProperties::shape),
-				CustomizationCodecs.strictOptionalField(ResourceLocation.CODEC, "collision_shape")
-						.forGetter(BlockDefinitionProperties::collisionShape),
-				CustomizationCodecs.strictOptionalField(ResourceLocation.CODEC, "interaction_shape")
-						.forGetter(BlockDefinitionProperties::interactionShape),
-				CustomizationCodecs.strictOptionalField(new CanSurviveHandlerCodec(), "can_survive_handler")
-						.forGetter(BlockDefinitionProperties::canSurviveHandler),
+				CustomizationCodecs.GLASS_TYPE_CODEC.optionalFieldOf("glass_type").forGetter(BlockDefinitionProperties::glassType),
+				CustomizationCodecs.RENDER_TYPE.optionalFieldOf("render_type").forGetter(BlockDefinitionProperties::renderType),
+				ResourceLocation.CODEC.optionalFieldOf("color_provider").forGetter(BlockDefinitionProperties::colorProvider),
+				ResourceLocation.CODEC.optionalFieldOf("shape").forGetter(BlockDefinitionProperties::shape),
+				ResourceLocation.CODEC.optionalFieldOf("collision_shape").forGetter(BlockDefinitionProperties::collisionShape),
+				ResourceLocation.CODEC.optionalFieldOf("interaction_shape").forGetter(BlockDefinitionProperties::interactionShape),
+				new CanSurviveHandlerCodec().optionalFieldOf("can_survive_handler").forGetter(BlockDefinitionProperties::canSurviveHandler),
 				PartialVanillaProperties.MAP_CODEC.forGetter(BlockDefinitionProperties::vanillaProperties)
 		).apply(instance, BlockDefinitionProperties::new));
 	}
 
 	public static MapCodec<Optional<BlockDefinitionProperties>> mapCodecField(MapCodec<Optional<KMaterial>> materialCodec) {
-		return CustomizationCodecs.strictOptionalField(mapCodec(materialCodec).codec(), BlockCodecs.BLOCK_PROPERTIES_KEY);
+		return mapCodec(materialCodec).codec().optionalFieldOf(BlockCodecs.BLOCK_PROPERTIES_KEY);
 	}
 
 	public BlockDefinitionProperties merge(BlockDefinitionProperties templateProps) {

@@ -10,7 +10,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import snownee.kiwi.util.codec.CustomizationCodecs;
 import snownee.kiwi.util.resource.OneTimeLoader;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -26,7 +25,7 @@ public final class BuiltInItemTemplate extends KItemTemplate {
 	public static MapCodec<BuiltInItemTemplate> directCodec() {
 		return RecordCodecBuilder.mapCodec(instance -> instance.group(
 				ItemDefinitionProperties.mapCodecField().forGetter(BuiltInItemTemplate::properties),
-				CustomizationCodecs.strictOptionalField(ResourceLocation.CODEC, "codec").forGetter(BuiltInItemTemplate::key)
+				ResourceLocation.CODEC.optionalFieldOf("codec").forGetter(BuiltInItemTemplate::key)
 		).apply(instance, BuiltInItemTemplate::new));
 	}
 

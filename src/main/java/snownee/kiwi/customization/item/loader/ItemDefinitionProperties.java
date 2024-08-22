@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.JavaOps;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
@@ -14,7 +15,6 @@ import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 import snownee.kiwi.util.codec.CustomizationCodecs;
-import snownee.kiwi.util.codec.JavaOps;
 
 public record ItemDefinitionProperties(
 		Optional<ResourceLocation> colorProvider,
@@ -33,8 +33,7 @@ public record ItemDefinitionProperties(
 
 	public static MapCodec<ItemDefinitionProperties> mapCodec() {
 		return RecordCodecBuilder.mapCodec(instance -> instance.group(
-				CustomizationCodecs.strictOptionalField(ResourceLocation.CODEC, "color_provider")
-						.forGetter(ItemDefinitionProperties::colorProvider),
+				ResourceLocation.CODEC.optionalFieldOf("color_provider").forGetter(ItemDefinitionProperties::colorProvider),
 				PartialVanillaProperties.MAP_CODEC.forGetter(ItemDefinitionProperties::vanillaProperties)
 		).apply(instance, ItemDefinitionProperties::new));
 	}

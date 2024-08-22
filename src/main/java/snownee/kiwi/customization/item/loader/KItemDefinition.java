@@ -10,7 +10,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import snownee.kiwi.customization.item.KItemSettings;
-import snownee.kiwi.util.codec.CustomizationCodecs;
 
 public record KItemDefinition(ConfiguredItemTemplate template, ItemDefinitionProperties properties) {
 	public KItemDefinition(ConfiguredItemTemplate template, ItemDefinitionProperties properties) {
@@ -23,10 +22,8 @@ public record KItemDefinition(ConfiguredItemTemplate template, ItemDefinitionPro
 		Preconditions.checkNotNull(defaultTemplate);
 		ConfiguredItemTemplate defaultConfiguredTemplate = new ConfiguredItemTemplate(defaultTemplate);
 		return RecordCodecBuilder.create(instance -> instance.group(
-				CustomizationCodecs.strictOptionalField(
-								ConfiguredItemTemplate.codec(templates),
-								"template",
-								defaultConfiguredTemplate)
+				ConfiguredItemTemplate.codec(templates)
+						.optionalFieldOf("template", defaultConfiguredTemplate)
 						.forGetter(KItemDefinition::template),
 				ItemDefinitionProperties.mapCodec().forGetter(KItemDefinition::properties)
 		).apply(instance, KItemDefinition::new));

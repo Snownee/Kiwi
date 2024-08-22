@@ -29,8 +29,7 @@ public record BlockFundamentals(
 		MapCodec<Optional<KMaterial>> materialCodec) {
 	public static BlockFundamentals reload(ResourceManager resourceManager, OneTimeLoader.Context context, boolean booting) {
 		var materials = OneTimeLoader.load(resourceManager, "kiwi/material", KMaterial.DIRECT_CODEC, context);
-		MapCodec<Optional<KMaterial>> materialCodec = CustomizationCodecs.strictOptionalField(CustomizationCodecs.simpleByNameCodec(
-				materials), "material");
+		MapCodec<Optional<KMaterial>> materialCodec = CustomizationCodecs.simpleByNameCodec(materials).optionalFieldOf("material");
 		var templates = OneTimeLoader.load(resourceManager, "kiwi/template/block", KBlockTemplate.codec(materialCodec), context);
 		if (booting) {
 			templates.forEach((key, value) -> value.resolve(key, context));

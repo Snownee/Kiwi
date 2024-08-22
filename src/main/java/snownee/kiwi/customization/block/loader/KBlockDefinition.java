@@ -29,7 +29,6 @@ import snownee.kiwi.customization.shape.ShapeStorage;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.VanillaActions;
 import snownee.kiwi.util.VoxelUtil;
-import snownee.kiwi.util.codec.CustomizationCodecs;
 
 public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinitionProperties properties) {
 	public KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinitionProperties properties) {
@@ -44,10 +43,8 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 		Preconditions.checkNotNull(defaultTemplate);
 		ConfiguredBlockTemplate defaultConfiguredTemplate = new ConfiguredBlockTemplate(defaultTemplate);
 		return RecordCodecBuilder.create(instance -> instance.group(
-				CustomizationCodecs.strictOptionalField(
-								ConfiguredBlockTemplate.codec(templates),
-								"template",
-								defaultConfiguredTemplate)
+				ConfiguredBlockTemplate.codec(templates)
+						.optionalFieldOf("template", defaultConfiguredTemplate)
 						.forGetter(KBlockDefinition::template),
 				BlockDefinitionProperties.mapCodec(materialCodec).forGetter(KBlockDefinition::properties)
 		).apply(instance, KBlockDefinition::new));

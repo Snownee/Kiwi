@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import com.google.common.collect.ImmutableMap;
+import com.mojang.serialization.JavaOps;
 import com.mojang.serialization.MapCodec;
 
 import snownee.kiwi.AbstractModule;
@@ -22,7 +23,6 @@ import snownee.kiwi.customization.block.component.MouldingComponent;
 import snownee.kiwi.customization.block.component.SimplePropertiesComponent;
 import snownee.kiwi.customization.block.component.StackableComponent;
 import snownee.kiwi.customization.block.component.WaterLoggableComponent;
-import snownee.kiwi.util.codec.JavaOps;
 
 @KiwiModule("block_components")
 public class KBlockComponents extends AbstractModule {

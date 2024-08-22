@@ -45,6 +45,7 @@ import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.KHolder;
 import snownee.kiwi.util.KUtil;
 import snownee.kiwi.util.codec.CustomizationCodecs;
+import snownee.kiwi.util.codec.KCodecs;
 
 public record PlaceSlotProvider(
 		List<PlaceTarget> target,
@@ -60,9 +61,9 @@ public record PlaceSlotProvider(
 		}
 	});
 	public static final Codec<PlaceSlotProvider> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-			CustomizationCodecs.compactList(PlaceTarget.CODEC).fieldOf("target").forGetter(PlaceSlotProvider::target),
-			CustomizationCodecs.strictOptionalField(Codec.STRING, "transform_with").forGetter(PlaceSlotProvider::transformWith),
-			CustomizationCodecs.strictOptionalField(TAG_CODEC.listOf(), "tag", List.of()).forGetter(PlaceSlotProvider::tag),
+			KCodecs.compactList(PlaceTarget.CODEC).fieldOf("target").forGetter(PlaceSlotProvider::target),
+			Codec.STRING.optionalFieldOf("transform_with").forGetter(PlaceSlotProvider::transformWith),
+			TAG_CODEC.listOf().optionalFieldOf("tag", List.of()).forGetter(PlaceSlotProvider::tag),
 			Slot.CODEC.listOf().fieldOf("slots").forGetter(PlaceSlotProvider::slots)
 	).apply(instance, PlaceSlotProvider::new));
 
@@ -72,13 +73,11 @@ public record PlaceSlotProvider(
 			List<String> tag,
 			Map<Direction, Side> sides) {
 		public static final Codec<Slot> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				CustomizationCodecs.strictOptionalField(
-								ExtraCodecs.nonEmptyList(CustomizationCodecs.compactList(StatePropertiesPredicate.CODEC)),
-								"when",
-								List.of())
+				ExtraCodecs.nonEmptyList(KCodecs.compactList(StatePropertiesPredicate.CODEC))
+						.optionalFieldOf("when", List.of())
 						.forGetter(Slot::when),
-				CustomizationCodecs.strictOptionalField(Codec.STRING, "transform_with").forGetter(Slot::transformWith),
-				CustomizationCodecs.strictOptionalField(TAG_CODEC.listOf(), "tag", List.of()).forGetter(Slot::tag),
+				Codec.STRING.optionalFieldOf("transform_with").forGetter(Slot::transformWith),
+				TAG_CODEC.listOf().optionalFieldOf("tag", List.of()).forGetter(Slot::tag),
 				Codec.unboundedMap(CustomizationCodecs.DIRECTION, Side.CODEC)
 						.xmap(Map::copyOf, Function.identity())
 						.fieldOf("sides")
@@ -88,7 +87,7 @@ public record PlaceSlotProvider(
 
 	public record Side(List<String> tag) {
 		public static final Codec<Side> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				CustomizationCodecs.strictOptionalField(TAG_CODEC.listOf(), "tag", List.of()).forGetter(Side::tag)
+				TAG_CODEC.listOf().optionalFieldOf("tag", List.of()).forGetter(Side::tag)
 		).apply(instance, Side::new));
 	}
 

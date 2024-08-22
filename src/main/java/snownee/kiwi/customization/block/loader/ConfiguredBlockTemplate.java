@@ -49,7 +49,7 @@ public record ConfiguredBlockTemplate(KBlockTemplate template, JsonObject json) 
 					return DataResult.success(new ConfiguredBlockTemplate(template));
 				},
 				template -> DataResult.error(() -> "Unsupported operation"));
-		return CustomizationCodecs.withAlternative(codec1, codec2);
+		return Codec.withAlternative(codec1, codec2);
 	}
 
 	@SuppressWarnings("unchecked")

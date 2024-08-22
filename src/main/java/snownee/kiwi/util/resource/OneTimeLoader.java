@@ -16,6 +16,7 @@ import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.JavaOps;
 import com.mojang.serialization.JsonOps;
 
 import net.minecraft.resources.ResourceLocation;
@@ -24,7 +25,6 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.util.KEval;
 import snownee.kiwi.util.KUtil;
-import snownee.kiwi.util.codec.JavaOps;
 
 public class OneTimeLoader {
 	private static final Gson GSON = new GsonBuilder().setLenient().create();

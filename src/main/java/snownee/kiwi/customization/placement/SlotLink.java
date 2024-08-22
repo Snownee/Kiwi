@@ -26,7 +26,6 @@ import snownee.kiwi.Kiwi;
 import snownee.kiwi.customization.block.KBlockSettings;
 import snownee.kiwi.customization.block.KBlockUtils;
 import snownee.kiwi.loader.Platform;
-import snownee.kiwi.util.codec.CustomizationCodecs;
 
 public record SlotLink(
 		String from,
@@ -47,15 +46,15 @@ public record SlotLink(
 			PRIMARY_TAG_CODEC.fieldOf("from").forGetter(SlotLink::from),
 			PRIMARY_TAG_CODEC.fieldOf("to").forGetter(SlotLink::to),
 			Codec.INT.optionalFieldOf("interest", 100).forGetter(SlotLink::interest),
-			CustomizationCodecs.strictOptionalField(TagTest.CODEC.listOf(), "test_tag", List.of()).forGetter(SlotLink::testTag),
+			TagTest.CODEC.listOf().optionalFieldOf("test_tag", List.of()).forGetter(SlotLink::testTag),
 			fromToPairCodec("on_link").forGetter($ -> Pair.of($.onLinkFrom, $.onLinkTo)),
 			fromToPairCodec("on_unlink").forGetter($ -> Pair.of($.onUnlinkFrom, $.onUnlinkTo))
 	).apply(instance, SlotLink::create));
 
 	private static MapCodec<Pair<ResultAction, ResultAction>> fromToPairCodec(String fieldName) {
 		Codec<Pair<ResultAction, ResultAction>> pairCodec = RecordCodecBuilder.create(instance -> instance.group(
-				CustomizationCodecs.strictOptionalField(ResultAction.CODEC, "from", ResultAction.EMPTY).forGetter(Pair::getFirst),
-				CustomizationCodecs.strictOptionalField(ResultAction.CODEC, "to", ResultAction.EMPTY).forGetter(Pair::getSecond)
+				ResultAction.CODEC.optionalFieldOf("from", ResultAction.EMPTY).forGetter(Pair::getFirst),
+				ResultAction.CODEC.optionalFieldOf("to", ResultAction.EMPTY).forGetter(Pair::getSecond)
 		).apply(instance, Pair::of));
 		return pairCodec.optionalFieldOf(fieldName, Pair.of(ResultAction.EMPTY, ResultAction.EMPTY));
 	}
@@ -113,7 +112,7 @@ public record SlotLink(
 	}
 
 	public record TagTest(String key, TagTestOperator operator) {
-		public static final Codec<TagTest> CODEC = CustomizationCodecs.withAlternative(RecordCodecBuilder.create(instance -> instance.group(
+		public static final Codec<TagTest> CODEC = Codec.withAlternative(RecordCodecBuilder.create(instance -> instance.group(
 				Codec.STRING.fieldOf("key").forGetter(TagTest::key),
 				TagTestOperator.CODEC.fieldOf("operator").forGetter(TagTest::operator)
 		).apply(instance, TagTest::new)), ExtraCodecs.NON_EMPTY_STRING.xmap(s -> new TagTest(s, TagTestOperator.EQUAL), TagTest::key));
@@ -121,7 +120,8 @@ public record SlotLink(
 
 	public record ResultAction(Map<String, String> setProperties, boolean reflow) {
 		public static final MapCodec<ResultAction> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-				CustomizationCodecs.strictOptionalField(Codec.unboundedMap(Codec.STRING, Codec.STRING), "set_properties", Map.of())
+				Codec.unboundedMap(Codec.STRING, Codec.STRING)
+						.optionalFieldOf("set_properties", Map.of())
 						.forGetter(ResultAction::setProperties),
 				Codec.BOOL.optionalFieldOf("reflow", false).forGetter(ResultAction::reflow)
 		).apply(instance, ResultAction::new));

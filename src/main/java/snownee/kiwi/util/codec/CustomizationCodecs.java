@@ -4,20 +4,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableBiMap;
-import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.MapLike;
-import com.mojang.serialization.RecordBuilder;
-import com.mojang.serialization.codecs.EitherCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.advancements.critereon.BlockPredicate;
@@ -114,8 +108,6 @@ public class CustomizationCodecs {
 			return DataResult.error(() -> "Not supported yet");
 		}
 	};
-	public static final Codec<BlockSetType> BLOCK_SET_TYPE = BlockSetType.CODEC;
-	public static final Codec<WoodType> WOOD_TYPE = WoodType.CODEC;
 	public static final BiMap<String, BlockSetType.PressurePlateSensitivity> SENSITIVITIES = HashBiMap.create();
 	public static final Codec<BlockSetType.PressurePlateSensitivity> SENSITIVITY_CODEC = simpleByNameCodec(SENSITIVITIES);
 	public static final Codec<WeatheringCopper.WeatherState> WEATHER_STATE = simpleByNameCodec(ImmutableBiMap.of(
@@ -420,76 +412,5 @@ public class CustomizationCodecs {
 
 	public static <T> boolean never(BlockState blockState, BlockGetter blockGetter, BlockPos pos, T t) {
 		return false;
-	}
-
-	public static <T> Codec<T> withAlternative(Codec<T> codec, Codec<? extends T> codec2) {
-		return new EitherCodec<>(codec, codec2).xmap(either -> either.map(object -> object, object -> object), Either::left);
-	}
-
-	public static <T> Codec<List<T>> compactList(Codec<T> codec) {
-		return withAlternative(codec.listOf(), codec.xmap(List::of, list -> list.get(0)));
-	}
-
-	public static <A> MapCodec<Optional<A>> strictOptionalField(Codec<A> codec, String string) {
-		return new StrictOptionalFieldCodec<>(string, codec);
-	}
-
-	public static <A> MapCodec<A> strictOptionalField(Codec<A> codec, String string, A object) {
-		return strictOptionalField(codec, string).xmap(
-				optional -> optional.orElse(object),
-				object2 -> Objects.equals(object2, object) ? Optional.empty() : Optional.of(object2));
-	}
-
-	static final class StrictOptionalFieldCodec<A>
-			extends MapCodec<Optional<A>> {
-		private final String name;
-		private final Codec<A> elementCodec;
-
-		public StrictOptionalFieldCodec(String string, Codec<A> codec) {
-			this.name = string;
-			this.elementCodec = codec;
-		}
-
-		@Override
-		public <T> DataResult<Optional<A>> decode(DynamicOps<T> dynamicOps, MapLike<T> mapLike) {
-			T object = mapLike.get(this.name);
-			if (object == null) {
-				return DataResult.success(Optional.empty());
-			}
-			return this.elementCodec.parse(dynamicOps, object).map(Optional::of);
-		}
-
-		@Override
-		public <T> RecordBuilder<T> encode(Optional<A> optional, DynamicOps<T> dynamicOps, RecordBuilder<T> recordBuilder) {
-			if (optional.isPresent()) {
-				return recordBuilder.add(this.name, this.elementCodec.encodeStart(dynamicOps, optional.get()));
-			}
-			return recordBuilder;
-		}
-
-		@Override
-		public <T> Stream<T> keys(DynamicOps<T> dynamicOps) {
-			return Stream.of(dynamicOps.createString(this.name));
-		}
-
-		public boolean equals(Object object) {
-			if (this == object) {
-				return true;
-			}
-			if (object instanceof StrictOptionalFieldCodec<?> strictOptionalFieldCodec) {
-				return Objects.equals(this.name, strictOptionalFieldCodec.name) && Objects.equals(
-						this.elementCodec,
-						strictOptionalFieldCodec.elementCodec);
-			}
-			return false;
-		}
-
-		public int hashCode() {
-			return Objects.hash(this.name, this.elementCodec);
-		}
-
-		public String toString() {
-			return "StrictOptionalFieldCodec[" + this.name + ": " + this.elementCodec + "]";
-		}
 	}
 }

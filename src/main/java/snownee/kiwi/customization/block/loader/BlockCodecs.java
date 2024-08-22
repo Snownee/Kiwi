@@ -43,6 +43,7 @@ import net.minecraft.world.level.block.WeatheringCopperStairBlock;
 import net.minecraft.world.level.block.WitherRoseBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import snownee.kiwi.customization.block.BasicBlock;
 import snownee.kiwi.customization.block.KBlockSettings;
@@ -81,17 +82,17 @@ public class BlockCodecs {
 	).apply(instance, StairBlock::new));
 
 	public static final MapCodec<DoorBlock> DOOR = RecordCodecBuilder.mapCodec(instance -> instance.group(
-			CustomizationCodecs.BLOCK_SET_TYPE.fieldOf("block_set_type").forGetter(DoorBlock::type),
+			BlockSetType.CODEC.fieldOf("block_set_type").forGetter(DoorBlock::type),
 			propertiesCodec()
 	).apply(instance, DoorBlock::new));
 
 	public static final MapCodec<TrapDoorBlock> TRAPDOOR = RecordCodecBuilder.mapCodec(instance -> instance.group(
-			CustomizationCodecs.BLOCK_SET_TYPE.fieldOf("block_set_type").forGetter(block -> block.type),
+			BlockSetType.CODEC.fieldOf("block_set_type").forGetter(block -> block.type),
 			propertiesCodec()
 	).apply(instance, TrapDoorBlock::new));
 
 	public static final MapCodec<FenceGateBlock> FENCE_GATE = RecordCodecBuilder.mapCodec(instance -> instance.group(
-			CustomizationCodecs.WOOD_TYPE.optionalFieldOf("wood_type", WoodType.OAK).forGetter($ -> WoodType.OAK),
+			WoodType.CODEC.optionalFieldOf("wood_type", WoodType.OAK).forGetter($ -> WoodType.OAK),
 			propertiesCodec()
 	).apply(instance, FenceGateBlock::new));
 
@@ -132,7 +133,7 @@ public class BlockCodecs {
 
 	public static final MapCodec<ButtonBlock> BUTTON = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			propertiesCodec(),
-			CustomizationCodecs.BLOCK_SET_TYPE.fieldOf("block_set_type").forGetter(BlockCodecs::notImplemented),
+			BlockSetType.CODEC.fieldOf("block_set_type").forGetter(BlockCodecs::notImplemented),
 			ExtraCodecs.POSITIVE_INT.optionalFieldOf("ticks_to_stay_pressed").forGetter(BlockCodecs::notImplemented),
 			Codec.BOOL.optionalFieldOf("arrows_can_press").forGetter(BlockCodecs::notImplemented)
 	).apply(instance, (
@@ -143,7 +144,7 @@ public class BlockCodecs {
 	public static final MapCodec<PressurePlateBlock> PRESSURE_PLATE = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			CustomizationCodecs.SENSITIVITY_CODEC.deprecated(1).optionalFieldOf("sensitivity").forGetter(BlockCodecs::notImplemented),
 			propertiesCodec(),
-			CustomizationCodecs.BLOCK_SET_TYPE.fieldOf("block_set_type").forGetter(BlockCodecs::notImplemented)
+			BlockSetType.CODEC.fieldOf("block_set_type").forGetter(BlockCodecs::notImplemented)
 	).apply(instance, (
 			(sensitivity, properties, blockSetType) -> new PressurePlateBlock(blockSetType, properties))));
 

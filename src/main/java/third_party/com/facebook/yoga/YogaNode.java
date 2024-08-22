@@ -3004,13 +3004,15 @@ public class YogaNode implements Iterable<YogaNode> {
 		boolean hasFractionalHeight = !YogaMath.FloatsEqual(((nodeHeight * pointScaleFactor) % 1.0F), 0) && !YogaMath.FloatsEqual((
 				(nodeHeight * pointScaleFactor) % 1.0F), 1.0F);
 
-		SetLayoutDimension(YogaMath.RoundValueToPixelGrid(absoluteNodeRight,
+		SetLayoutDimension(YogaMath.RoundValueToPixelGrid(
+				absoluteNodeRight,
 				pointScaleFactor,
 				(textRounding && hasFractionalWidth),
 				(textRounding && !hasFractionalWidth)) -
 				YogaMath.RoundValueToPixelGrid(absoluteNodeLeft, pointScaleFactor, false, textRounding), YogaDimension.Width);
 
-		SetLayoutDimension(YogaMath.RoundValueToPixelGrid(absoluteNodeBottom,
+		SetLayoutDimension(YogaMath.RoundValueToPixelGrid(
+				absoluteNodeBottom,
 				pointScaleFactor,
 				(textRounding && hasFractionalHeight),
 				(textRounding && !hasFractionalHeight)) -
