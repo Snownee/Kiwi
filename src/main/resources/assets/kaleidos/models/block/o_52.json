@@ -1,0 +1,10 @@
+{
+  "parent": "kaleidos:custom/o52",
+  "textures": {
+    "all": "kaleidos:block/o52",
+    "particle": "kaleidos:block/o52",
+    "1": "kaleidos:block/o54",
+    "2": "kaleidos:block/o52"
+  },
+  "render_type": "cutout"
+}

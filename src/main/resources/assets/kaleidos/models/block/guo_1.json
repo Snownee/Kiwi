@@ -1,0 +1,11 @@
+{
+  "parent": "kaleidos:custom/guo1",
+  "textures": {
+    "all": "kaleidos:block/tang8",
+    "particle": "kaleidos:block/tang8",
+    "3": "kaleidos:block/tang1",
+    "4": "kaleidos:block/tang8",
+    "log": "kaleidos:block/tang3"
+  },
+  "render_type": "cutout"
+}

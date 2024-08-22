@@ -1,0 +1,9 @@
+{
+  "parent": "kaleidos:custom/xinxiang1",
+  "textures": {
+    "all": "kaleidos:block/xinxiang",
+    "particle": "kaleidos:block/xinxiang",
+    "2": "kaleidos:block/xinxiang"
+  },
+  "render_type": "cutout"
+}

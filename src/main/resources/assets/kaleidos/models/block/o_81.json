@@ -1,0 +1,9 @@
+{
+  "parent": "kaleidos:custom/o81",
+  "textures": {
+    "all": "kaleidos:block/o81",
+    "particle": "kaleidos:block/o81",
+    "1": "kaleidos:block/o81"
+  },
+  "render_type": "translucent"
+}

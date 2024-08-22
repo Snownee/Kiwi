@@ -1,0 +1,11 @@
+{
+  "parent": "kaleidos:custom/xueyutong1",
+  "textures": {
+    "all": "kaleidos:block/tang1",
+    "particle": "kaleidos:block/tang1",
+    "3": "kaleidos:block/tang2",
+    "4": "kaleidos:block/tang1",
+    "5": "kaleidos:block/xueyu"
+  },
+  "render_type": "cutout"
+}

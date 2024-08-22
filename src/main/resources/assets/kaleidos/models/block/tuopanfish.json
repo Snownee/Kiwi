@@ -1,0 +1,10 @@
+{
+  "parent": "kaleidos:custom/tuopan_fish",
+  "textures": {
+    "all": "kaleidos:block/tuopan_fish",
+    "particle": "kaleidos:block/tuopan_fish",
+    "1": "kaleidos:block/tuopan_fish",
+    "4": "kaleidos:block/tuopan"
+  },
+  "render_type": "cutout"
+}

@@ -1,0 +1,10 @@
+{
+  "parent": "kaleidos:custom/tuopan_zisong",
+  "textures": {
+    "all": "kaleidos:block/tuopan_zisong",
+    "particle": "kaleidos:block/tuopan_zisong",
+    "2": "kaleidos:block/tuopan_zisong",
+    "4": "kaleidos:block/tuopan"
+  },
+  "render_type": "cutout"
+}

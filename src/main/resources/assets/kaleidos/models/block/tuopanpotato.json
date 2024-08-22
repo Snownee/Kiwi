@@ -1,0 +1,10 @@
+{
+  "parent": "kaleidos:custom/tuopan_potato2",
+  "textures": {
+    "all": "kaleidos:block/tuopan_potato",
+    "particle": "kaleidos:block/tuopan_potato",
+    "1": "kaleidos:block/tuopan",
+    "4": "kaleidos:block/tuopan_potato"
+  },
+  "render_type": "cutout"
+}

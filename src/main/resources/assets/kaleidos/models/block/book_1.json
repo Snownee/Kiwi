@@ -1,0 +1,9 @@
+{
+  "parent": "kaleidos:custom/slwx_block",
+  "textures": {
+    "all": "kaleidos:block/slwx_block",
+    "particle": "kaleidos:block/slwx_block",
+    "0": "kaleidos:block/slwx_block"
+  },
+  "render_type": "cutout"
+}

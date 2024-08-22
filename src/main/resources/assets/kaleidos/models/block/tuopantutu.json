@@ -1,0 +1,10 @@
+{
+  "parent": "kaleidos:custom/tuopan_tutu",
+  "textures": {
+    "all": "kaleidos:block/tuopan_tutu",
+    "particle": "kaleidos:block/tuopan_tutu",
+    "1": "kaleidos:block/tuopan_tutu",
+    "4": "kaleidos:block/tuopan"
+  },
+  "render_type": "cutout"
+}

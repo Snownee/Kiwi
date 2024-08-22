@@ -1,0 +1,9 @@
+{
+  "parent": "kaleidos:custom/guozi3",
+  "textures": {
+    "all": "kaleidos:block/guozic",
+    "particle": "kaleidos:block/guozic",
+    "1": "kaleidos:block/guozic"
+  },
+  "render_type": "solid"
+}

@@ -1,0 +1,10 @@
+{
+  "parent": "kaleidos:custom/tuopan_beef",
+  "textures": {
+    "all": "kaleidos:block/tuopan_beef",
+    "particle": "kaleidos:block/tuopan_beef",
+    "0": "kaleidos:block/tuopan_beef",
+    "1": "kaleidos:block/tuopan"
+  },
+  "render_type": "cutout"
+}

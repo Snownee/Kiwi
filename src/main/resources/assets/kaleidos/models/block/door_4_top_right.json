@@ -1,0 +1,23 @@
+{
+	"credit": "Made with Blockbench",
+	"ambientocclusion": false,
+	"render_type": "cutout",
+	"texture_size": [16, 32],
+	"textures": {
+		"particle": "kaleidos:block/door4a",
+		"top": "kaleidos:block/door4a"
+	},
+	"elements": [
+		{
+			"from": [0, 0, 0],
+			"to": [3, 32, 16],
+			"faces": {
+				"north": {"uv": [3, 0, 0, 16], "texture": "#top", "cullface": "north"},
+				"east": {"uv": [0, 0, 16, 16], "texture": "#top"},
+				"south": {"uv": [0, 0, 3, 16], "texture": "#top", "cullface": "south"},
+				"west": {"uv": [16, 0, 0, 16], "texture": "#top", "cullface": "west"},
+				"up": {"uv": [0, 0, 16, 1.5], "rotation": 270, "texture": "#top", "cullface": "up"}
+			}
+		}
+	]
+}

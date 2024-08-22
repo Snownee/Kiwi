@@ -1,0 +1,9 @@
+{
+  "parent": "kaleidos:custom/yutong",
+  "textures": {
+    "all": "kaleidos:block/tang1",
+    "particle": "kaleidos:block/tang1",
+    "4": "kaleidos:block/tang1"
+  },
+  "render_type": "cutout"
+}

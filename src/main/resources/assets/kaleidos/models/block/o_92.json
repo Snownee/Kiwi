@@ -1,0 +1,9 @@
+{
+  "parent": "kaleidos:custom/o92",
+  "textures": {
+    "all": "kaleidos:block/o92",
+    "particle": "kaleidos:block/o92",
+    "1": "kaleidos:block/o92"
+  },
+  "render_type": "cutout"
+}

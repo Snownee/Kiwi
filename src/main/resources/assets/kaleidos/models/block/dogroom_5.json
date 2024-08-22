@@ -1,0 +1,67 @@
+{
+	"credit": "Made by YSBB with Blockbench",
+	"texture_size": [64, 64],
+	"textures": {
+		"1": "kaleidos:block/dogroom1",
+		"particle": "kaleidos:block/dogroom1"
+	},
+	"elements": [
+		{
+			"from": [-1, 0, 2.3],
+			"to": [15, 10, 16.3],
+			"rotation": {"angle": -22.5, "axis": "y", "origin": [8.5, 6.5, 9.55]},
+			"faces": {
+				"north": {"uv": [0, 5.5, 5, 8.75], "texture": "#1"},
+				"east": {"uv": [10, 3.25, 6, 0], "rotation": 180, "texture": "#1"},
+				"south": {"uv": [5, 8.75, 0, 5.5], "rotation": 180, "texture": "#1"},
+				"west": {"uv": [11.5, 3.1875, 15.5, 0], "rotation": 180, "texture": "#1"},
+				"up": {"uv": [0.75, 0.25, 4.75, 4.25], "rotation": 180, "texture": "#1"},
+				"down": {"uv": [0, 0.25, 4.875, 4.25], "texture": "#1"}
+			}
+		}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [75, 45, 0],
+			"translation": [0, 2.5, 0],
+			"scale": [0.375, 0.375, 0.375]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [75, 45, 0],
+			"translation": [0, 2.5, 0],
+			"scale": [0.375, 0.375, 0.375]
+		},
+		"firstperson_righthand": {
+			"rotation": [0, 45, 0],
+			"scale": [0.4, 0.4, 0.4]
+		},
+		"firstperson_lefthand": {
+			"rotation": [0, 225, 0],
+			"scale": [0.4, 0.4, 0.4]
+		},
+		"ground": {
+			"translation": [0, 2, 0],
+			"scale": [0.5, 0.5, 0.5]
+		},
+		"gui": {
+			"rotation": [30, 225, 0],
+			"scale": [0.625, 0.625, 0.625]
+		},
+		"head": {
+			"rotation": [0, 112, 1],
+			"translation": [-1, 9.25, -1.75],
+			"scale": [2, 2, 2]
+		},
+		"fixed": {
+			"scale": [0.5, 0.5, 0.5]
+		}
+	},
+	"groups": [
+		{
+			"name": "bone",
+			"origin": [3.67809, 9, 7.7777],
+			"color": 0,
+			"children": [0]
+		}
+	]
+}

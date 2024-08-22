@@ -1,0 +1,9 @@
+{
+  "parent": "kaleidos:custom/gift3",
+  "textures": {
+    "all": "kaleidos:block/gift",
+    "particle": "kaleidos:block/gift",
+    "2": "kaleidos:block/gift"
+  },
+  "render_type": "cutout"
+}

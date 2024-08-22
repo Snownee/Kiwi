@@ -1,0 +1,10 @@
+{
+  "parent": "kaleidos:custom/tuopan_quqi",
+  "textures": {
+    "all": "kaleidos:block/tuopan_quqi",
+    "particle": "kaleidos:block/tuopan_quqi",
+    "2": "kaleidos:block/tuopan_quqi",
+    "3": "kaleidos:block/tuopan"
+  },
+  "render_type": "cutout"
+}

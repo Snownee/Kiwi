@@ -1,0 +1,11 @@
+{
+  "parent": "kaleidos:custom/hetuntong1",
+  "textures": {
+    "all": "kaleidos:block/tang1",
+    "particle": "kaleidos:block/tang1",
+    "2": "kaleidos:block/hetun",
+    "3": "kaleidos:block/tang2",
+    "4": "kaleidos:block/tang1"
+  },
+  "render_type": "cutout"
+}
