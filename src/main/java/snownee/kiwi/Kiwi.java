@@ -143,7 +143,6 @@ public class Kiwi {
 	private static Map<KiwiAnnotationData, String> conditions = Maps.newHashMap();
 	private static LoadingStage stage = LoadingStage.UNINITED;
 	private static final Map<String, ResourceKey<CreativeModeTab>> GROUPS = Maps.newHashMap();
-	private static boolean tagsUpdated;
 	public static boolean enableDataModule;
 
 	public static ResourceLocation id(String path) {
@@ -189,8 +188,6 @@ public class Kiwi {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-
-//		CustomizationHooks.init();
 
 		Map<String, KiwiAnnotationData> classOptionalMap = Maps.newHashMap();
 		String dist = Platform.isPhysicalClient() ? "client" : "server";
@@ -593,14 +590,6 @@ public class Kiwi {
 
 	public static boolean isLoaded(ResourceLocation module) {
 		return KiwiModules.isLoaded(module);
-	}
-
-	public static void onTagsUpdated() {
-		tagsUpdated = true;
-	}
-
-	public static boolean areTagsUpdated() {
-		return tagsUpdated;
 	}
 
 	public static void enableDataModule() {

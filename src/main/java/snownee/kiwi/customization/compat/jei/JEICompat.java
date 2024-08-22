@@ -6,8 +6,10 @@ import com.google.common.collect.Lists;
 
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
+import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.customization.CustomizationHooks;
@@ -30,7 +32,7 @@ public class JEICompat implements IModPlugin {
 	@Override
 	public void registerRecipes(IRecipeRegistration registration) {
 		if (CustomizationHooks.isEnabled()) {
-			List<StonecutterRecipe> recipes = Lists.newArrayList();
+			List<RecipeHolder<StonecutterRecipe>> recipes = Lists.newArrayList();
 			for (KHolder<BlockFamily> holder : BlockFamilies.all()) {
 				BlockFamily family = holder.value();
 				if (family.stonecutterSource().isPresent()) {
@@ -40,8 +42,7 @@ public class JEICompat implements IModPlugin {
 					recipes.addAll(StonecutterRecipeMaker.makeRecipes("exchange_in_viewer", holder));
 				}
 			}
-			// FIXME Need List<Holder<StonecutterRecipe>>
-			//registration.addRecipes(RecipeTypes.STONECUTTING, recipes);
+			registration.addRecipes(RecipeTypes.STONECUTTING, recipes);
 		}
 	}
 }

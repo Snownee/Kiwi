@@ -31,7 +31,6 @@ import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.item.ModItem;
@@ -56,7 +55,7 @@ public final class TooltipEvents {
 	}
 
 	public static void debugTooltip(ItemStack itemStack, List<Component> tooltip, TooltipFlag flag) {
-		if (!Kiwi.areTagsUpdated() || !flag.isAdvanced()) {
+		if (!flag.isAdvanced()) {
 			return;
 		}
 

@@ -15,14 +15,21 @@ public class MixinPlugin implements IMixinConfigPlugin {
 	private boolean customization;
 	private boolean persistentCreativeInventory;
 	private boolean fastScrolling;
-	private boolean ksit;
+	private boolean lavaClearView;
+	private boolean fastsuite;
+
+	public static boolean isModLoaded(String modId) {
+		return LoadingModList.get().getModFileById(modId) != null;
+	}
 
 	@Override
 	public void onLoad(String mixinPackage) {
+		boolean devEnv = !FMLEnvironment.production;
 		customization = CustomizationServiceFinder.shouldEnable(LoadingModList.get().getMods());
-		persistentCreativeInventory =
-				customization || LoadingModList.get().getModFileById("persistentcreativeinventory") != null || !FMLEnvironment.production;
-		fastScrolling = LoadingModList.get().getModFileById("fastscroll") != null || !FMLEnvironment.production;
+		persistentCreativeInventory = customization || isModLoaded("persistentcreativeinventory") || devEnv;
+		fastScrolling = isModLoaded("fastscroll") || devEnv;
+		lavaClearView = isModLoaded("lavaclearview") || devEnv;
+		fastsuite = customization && isModLoaded("fastsuite");
 	}
 
 	@Override
@@ -32,6 +39,9 @@ public class MixinPlugin implements IMixinConfigPlugin {
 
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
+		if (mixinClassName.startsWith("snownee.kiwi.mixin.customization.fastsuite.")) {
+			return fastsuite;
+		}
 		if (mixinClassName.startsWith("snownee.kiwi.mixin.customization.")) {
 			return customization;
 		}
@@ -40,6 +50,10 @@ public class MixinPlugin implements IMixinConfigPlugin {
 		}
 		if (mixinClassName.equals("snownee.kiwi.mixin.client.OptionInstanceMixin")) {
 			return fastScrolling;
+		}
+		if (mixinClassName.equals("snownee.kiwi.mixin.client.FogRendererMixin") || mixinClassName.equals(
+				"snownee.kiwi.mixin.client.ScreenEffectRendererMixin")) {
+			return lavaClearView;
 		}
 		return true;
 	}

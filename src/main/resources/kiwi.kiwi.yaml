@@ -1,4 +1,4 @@
-clientOnly: true
+clientOnly: false # Load the test recipes correctly in dev environment
 conditions:
   - data:
       method: shouldLoad
