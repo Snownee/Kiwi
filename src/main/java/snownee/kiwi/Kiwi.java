@@ -412,8 +412,13 @@ public class Kiwi {
 			// Instantiate modules
 			try {
 				Class<?> clazz = Class.forName(info.className);
-				AbstractModule instance = (AbstractModule) clazz.getDeclaredConstructor().newInstance();
-				KiwiModules.add(id, instance, context);
+				instantiateModule(id, clazz, context);
+				if (Platform.isPhysicalClient()) {
+					KiwiModule.ClientCompanion clientCompanion = clazz.getDeclaredAnnotation(KiwiModule.ClientCompanion.class);
+					if (clientCompanion != null) {
+						instantiateModule(id.withSuffix("_client"), clientCompanion.value(), context);
+					}
+				}
 			} catch (Exception e) {
 				LOGGER.error(MARKER, "Kiwi failed to initialize module class: %s".formatted(info.className), e);
 				continue;
@@ -457,6 +462,14 @@ public class Kiwi {
 		}
 
 		stage = LoadingStage.INITED;
+	}
+
+	private static void instantiateModule(
+			ResourceLocation id,
+			Class<?> clazz,
+			ModContext context) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+		AbstractModule instance = (AbstractModule) clazz.getDeclaredConstructor().newInstance();
+		KiwiModules.add(id, instance, context);
 	}
 
 	public static void registerRegistry(ResourceKey<? extends Registry<?>> registry, Class<?> baseClass) {
