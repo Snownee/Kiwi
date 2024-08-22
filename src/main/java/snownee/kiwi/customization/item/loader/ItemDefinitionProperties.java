@@ -14,7 +14,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
-import snownee.kiwi.util.codec.CustomizationCodecs;
 
 public record ItemDefinitionProperties(
 		Optional<ResourceLocation> colorProvider,
@@ -70,8 +69,8 @@ public record ItemDefinitionProperties(
 				ResourceKey.codec(Registries.ITEM)
 						.optionalFieldOf("crafting_remaining_item")
 						.forGetter(PartialVanillaProperties::craftingRemainingItem),
-				CustomizationCodecs.FOOD.optionalFieldOf("food").forGetter(PartialVanillaProperties::food),
-				CustomizationCodecs.RARITY_CODEC.optionalFieldOf("rarity").forGetter(PartialVanillaProperties::rarity)
+				FoodProperties.DIRECT_CODEC.optionalFieldOf("food").forGetter(PartialVanillaProperties::food),
+				Rarity.CODEC.optionalFieldOf("rarity").forGetter(PartialVanillaProperties::rarity)
 		).apply(instance, PartialVanillaProperties::new));
 
 		public PartialVanillaProperties merge(PartialVanillaProperties templateProps) {

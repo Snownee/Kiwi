@@ -44,7 +44,6 @@ import snownee.kiwi.customization.block.loader.KBlockTemplate;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.KHolder;
 import snownee.kiwi.util.KUtil;
-import snownee.kiwi.util.codec.CustomizationCodecs;
 import snownee.kiwi.util.codec.KCodecs;
 
 public record PlaceSlotProvider(
@@ -78,7 +77,7 @@ public record PlaceSlotProvider(
 						.forGetter(Slot::when),
 				Codec.STRING.optionalFieldOf("transform_with").forGetter(Slot::transformWith),
 				TAG_CODEC.listOf().optionalFieldOf("tag", List.of()).forGetter(Slot::tag),
-				Codec.unboundedMap(CustomizationCodecs.DIRECTION, Side.CODEC)
+				Codec.unboundedMap(Direction.CODEC, Side.CODEC)
 						.xmap(Map::copyOf, Function.identity())
 						.fieldOf("sides")
 						.forGetter(Slot::sides)

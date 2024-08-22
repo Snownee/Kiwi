@@ -1,6 +1,5 @@
 package snownee.kiwi.util.codec;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -12,35 +11,21 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.advancements.critereon.BlockPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.ExtraCodecs;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.ArmorMaterial;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.WeatheringCopper;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
-import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import snownee.kiwi.RenderLayerEnum;
@@ -73,13 +58,6 @@ public class CustomizationCodecs {
 	}, p -> {
 		return DataResult.error(() -> "Unsupported operation");
 	});
-	public static final Codec<Direction> DIRECTION = simpleByNameCodec(ImmutableBiMap.of(
-			"down", Direction.DOWN,
-			"up", Direction.UP,
-			"north", Direction.NORTH,
-			"south", Direction.SOUTH,
-			"west", Direction.WEST,
-			"east", Direction.EAST));
 	public static final Codec<MinMaxBounds.Ints> INT_BOUNDS = MinMaxBounds.Ints.CODEC;
 	// TODO BlockPredicate has its own Codec now.
 	//  However, to use that, you need to wrap your JsonOps into RegistryOps, which requires a HolderLookup.Provider.
@@ -108,54 +86,6 @@ public class CustomizationCodecs {
 			return DataResult.error(() -> "Not supported yet");
 		}
 	};
-	public static final BiMap<String, BlockSetType.PressurePlateSensitivity> SENSITIVITIES = HashBiMap.create();
-	public static final Codec<BlockSetType.PressurePlateSensitivity> SENSITIVITY_CODEC = simpleByNameCodec(SENSITIVITIES);
-	public static final Codec<WeatheringCopper.WeatherState> WEATHER_STATE = simpleByNameCodec(ImmutableBiMap.of(
-			"unaffected", WeatheringCopper.WeatherState.UNAFFECTED,
-			"exposed", WeatheringCopper.WeatherState.EXPOSED,
-			"weathered", WeatheringCopper.WeatherState.WEATHERED,
-			"oxidized", WeatheringCopper.WeatherState.OXIDIZED));
-
-	public static final Codec<MobEffectInstance> MOB_EFFECT_INSTANCE = RecordCodecBuilder.create(instance -> instance.group(
-			MobEffect.CODEC.fieldOf("id").forGetter(MobEffectInstance::getEffect),
-			ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("amplifier", 0).forGetter(MobEffectInstance::getAmplifier),
-			Codec.INT.optionalFieldOf("duration", 0).forGetter(MobEffectInstance::getDuration),
-			Codec.BOOL.optionalFieldOf("ambient", false).forGetter(MobEffectInstance::isAmbient),
-			Codec.BOOL.optionalFieldOf("show_particles", true).forGetter(MobEffectInstance::isVisible),
-			Codec.BOOL.optionalFieldOf("show_icon", true).forGetter(MobEffectInstance::showIcon)
-	).apply(instance, MobEffectInstance::new));
-
-	public static final Codec<Pair<MobEffectInstance, Float>> POSSIBLE_EFFECT = RecordCodecBuilder.create(instance -> instance.group(
-			MOB_EFFECT_INSTANCE.fieldOf("effect").forGetter(Pair::getFirst),
-			Codec.floatRange(0.0f, 1.0f).optionalFieldOf("probability", 1F).forGetter(Pair::getSecond)
-	).apply(instance, Pair::of));
-
-	public static final Codec<FoodProperties> FOOD = RecordCodecBuilder.create(instance -> instance.group(
-			ExtraCodecs.NON_NEGATIVE_INT.fieldOf("nutrition").forGetter(FoodProperties::nutrition),
-			Codec.FLOAT.fieldOf("saturation").forGetter(FoodProperties::saturation),
-			Codec.BOOL.optionalFieldOf("can_always_eat", false).forGetter(FoodProperties::canAlwaysEat),
-			Codec.FLOAT.fieldOf("eat_seconds").forGetter(FoodProperties::eatSeconds),
-			ItemStack.OPTIONAL_CODEC.optionalFieldOf("using_converts_to").forGetter(FoodProperties::usingConvertsTo),
-			FoodProperties.PossibleEffect.CODEC.listOf().optionalFieldOf("effects", List.of()).forGetter(FoodProperties::effects)
-	).apply(instance, FoodProperties::new));
-
-	public static final BiMap<String, Rarity> RARITIES = HashBiMap.create(Map.of(
-			"common", Rarity.COMMON,
-			"uncommon", Rarity.UNCOMMON,
-			"rare", Rarity.RARE,
-			"epic", Rarity.EPIC));
-	public static final Codec<Rarity> RARITY_CODEC = simpleByNameCodec(RARITIES);
-	public static final Codec<ArmorItem.Type> ARMOR_TYPE = simpleByNameCodec(ImmutableBiMap.of(
-			"helmet", ArmorItem.Type.HELMET,
-			"chestplate", ArmorItem.Type.CHESTPLATE,
-			"leggings", ArmorItem.Type.LEGGINGS,
-			"boots", ArmorItem.Type.BOOTS));
-	/**
-	 * @deprecated Use vanilla armor material registry
-	 */
-	@Deprecated
-	public static final BiMap<ResourceLocation, ArmorMaterial> CUSTOM_ARMOR_MATERIALS = HashBiMap.create();
-	public static final Codec<Holder<ArmorMaterial>> ARMOR_MATERIAL = ArmorMaterial.CODEC;
 
 	static {
 		// https://regex101.com/:
@@ -339,9 +269,6 @@ public class CustomizationCodecs {
 		}
 
 		Objects.requireNonNull(GlassType.CLEAR);
-
-		SENSITIVITIES.put("everything", BlockSetType.PressurePlateSensitivity.EVERYTHING);
-		SENSITIVITIES.put("mobs", BlockSetType.PressurePlateSensitivity.MOBS);
 	}
 
 	public static <T> Codec<T> simpleByNameCodec(Map<ResourceLocation, T> map) {

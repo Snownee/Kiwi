@@ -22,7 +22,6 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import snownee.kiwi.customization.block.KBlockUtils;
 import snownee.kiwi.customization.block.behavior.BlockBehaviorRegistry;
 import snownee.kiwi.customization.block.loader.KBlockComponents;
-import snownee.kiwi.util.codec.CustomizationCodecs;
 
 public record ConsumableComponent(
 		IntegerProperty property,
@@ -31,7 +30,7 @@ public record ConsumableComponent(
 	public static final MapCodec<ConsumableComponent> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			ExtraCodecs.intRange(0, 1).fieldOf("min").forGetter(ConsumableComponent::minValue),
 			ExtraCodecs.POSITIVE_INT.fieldOf("max").forGetter(ConsumableComponent::maxValue),
-			CustomizationCodecs.FOOD.optionalFieldOf("food").forGetter(ConsumableComponent::food),
+			FoodProperties.DIRECT_CODEC.optionalFieldOf("food").forGetter(ConsumableComponent::food),
 			ResourceKey.codec(Registries.CUSTOM_STAT).optionalFieldOf("stat").forGetter(ConsumableComponent::stat)
 	).apply(instance, ConsumableComponent::create));
 

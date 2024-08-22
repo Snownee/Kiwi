@@ -204,7 +204,7 @@ public record PlaceChoices(
 
 	public record Flow(Map<Direction, Limit> when, SlotLink.ResultAction action, boolean end) {
 		public static final Codec<Flow> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				Codec.unboundedMap(CustomizationCodecs.DIRECTION, Limit.CODEC).fieldOf("when").forGetter(Flow::when),
+				Codec.unboundedMap(Direction.CODEC, Limit.CODEC).fieldOf("when").forGetter(Flow::when),
 				SlotLink.ResultAction.MAP_CODEC.forGetter(Flow::action),
 				Codec.BOOL.optionalFieldOf("end", false).forGetter(Flow::end)
 		).apply(instance, Flow::new));
