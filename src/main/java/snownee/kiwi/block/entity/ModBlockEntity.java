@@ -12,12 +12,14 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import snownee.kiwi.util.NotNullByDefault;
 
 /**
  * Base BlockEntity skeleton used by all BlockEntity. It contains several standardized
  * implementations regarding networking.
  */
-public abstract class ModBlockEntity extends BlockEntity {
+@NotNullByDefault
+public abstract class ModBlockEntity extends BlockEntity implements BlockEntityDataListener {
 	public boolean persistData = false;
 
 	public ModBlockEntity(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state) {
@@ -29,11 +31,10 @@ public abstract class ModBlockEntity extends BlockEntity {
 		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
-	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
-		CompoundTag compoundtag = pkt.getTag();
-		if (compoundtag != null) {
-			readPacketData(compoundtag);
-		}
+	@Override
+	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider lookupProvider) {
+		super.onDataPacket(net, pkt, lookupProvider);
+		readPacketData(pkt.getTag());
 	}
 
 	// Used for syncing data at the time when the chunk is loaded
