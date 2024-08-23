@@ -24,7 +24,7 @@ public interface IBlockStateExtensionMixin {
 			Direction facing,
 			BlockState plant,
 			CallbackInfoReturnable<TriState> cir) {
-		BlockState state = (BlockState) (Object) this;
+		BlockState state = (BlockState) this;
 		if (state.isFaceSturdy(level, soilPosition, Direction.UP, SupportType.CENTER) && state.is(CustomFeatureTags.SUSTAIN_PLANT)) {
 			cir.setReturnValue(TriState.TRUE);
 		}

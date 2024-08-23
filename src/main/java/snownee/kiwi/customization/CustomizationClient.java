@@ -125,11 +125,13 @@ public final class CustomizationClient {
 				continue;
 			}
 			Item item = BuiltInRegistries.ITEM.get(entry.getKey());
-			Item providerItem = BuiltInRegistries.ITEM.get(definition.properties().colorProvider().get());
+			ResourceLocation colorProvider = definition.properties().colorProvider().get();
+			if (ResourceLocation.DEFAULT_NAMESPACE.equals(colorProvider.getNamespace()) && colorProvider.getPath().equals("grass")) {
+				colorProvider = ResourceLocation.withDefaultNamespace("short_grass");
+			}
+			Item providerItem = BuiltInRegistries.ITEM.get(colorProvider);
 			if (providerItem == Items.AIR) {
-				Kiwi.LOGGER.warn("Cannot find color provider item %s for item %s".formatted(
-						definition.properties().colorProvider().get(),
-						entry.getKey()));
+				Kiwi.LOGGER.warn("Cannot find color provider item %s for item %s".formatted(colorProvider, entry.getKey()));
 				continue;
 			}
 			itemsToAdd.add(Pair.of(item, itemColors.computeIfAbsent(providerItem, ColorProviderUtil::delegate)));
@@ -151,11 +153,14 @@ public final class CustomizationClient {
 				continue;
 			}
 			Block block = BuiltInRegistries.BLOCK.get(entry.getKey());
-			Block providerBlock = BuiltInRegistries.BLOCK.get(properties.colorProvider().get());
+			ResourceLocation colorProvider = properties.colorProvider().get();
+			// grass -> short_grass since Minecraft 1.20.3
+			if (ResourceLocation.DEFAULT_NAMESPACE.equals(colorProvider.getNamespace()) && colorProvider.getPath().equals("grass")) {
+				colorProvider = ResourceLocation.withDefaultNamespace("short_grass");
+			}
+			Block providerBlock = BuiltInRegistries.BLOCK.get(colorProvider);
 			if (providerBlock == Blocks.AIR) {
-				Kiwi.LOGGER.warn("Cannot find color provider block %s for block %s".formatted(
-						properties.colorProvider().get(),
-						entry.getKey()));
+				Kiwi.LOGGER.warn("Cannot find color provider block %s for block %s".formatted(colorProvider, entry.getKey()));
 			} else {
 				blocksToAdd.add(Pair.of(block, blockColors.computeIfAbsent(providerBlock, ColorProviderUtil::delegate)));
 			}
