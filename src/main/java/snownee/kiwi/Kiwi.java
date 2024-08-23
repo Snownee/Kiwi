@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.Validate;
@@ -124,8 +125,10 @@ import snownee.kiwi.command.KiwiCommand;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfig.ConfigType;
 import snownee.kiwi.config.KiwiConfigManager;
+import snownee.kiwi.config.NeoClothConfigIntegration;
 import snownee.kiwi.loader.ClientInitializer;
 import snownee.kiwi.loader.KiwiMetadataLoader;
+import snownee.kiwi.loader.NeoDevEnvMetadataLoader;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.loader.event.PostInitEvent;
@@ -197,7 +200,8 @@ public class Kiwi {
 			if ("neoforge".equals(mod)) {
 				continue;
 			}
-			KiwiMetadataLoader loader = new KiwiMetadataLoader(mod);
+			boolean yamlLoader = Platform.isProduction() || System.getProperties().containsKey("kiwi.disableDevEnvMetadataLoader");
+			Function<KiwiMetadataParser, KiwiMetadata> loader = yamlLoader ? new KiwiMetadataLoader(mod) : new NeoDevEnvMetadataLoader(mod);
 			KiwiMetadata metadata = loader.apply(metadataParser);
 			if (metadata == null) {
 				continue;
@@ -277,6 +281,9 @@ public class Kiwi {
 		}
 
 		KiwiConfigManager.init();
+		if (Platform.isPhysicalClient() && Platform.isModLoaded("cloth_config")) {
+			NeoClothConfigIntegration.init();
+		}
 		modEventBus.addListener(this::init);
 		modEventBus.addListener(this::postInit);
 		modEventBus.addListener(this::loadComplete);

@@ -1,7 +1,9 @@
 package snownee.kiwi.loader;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Function;
 
 import org.objectweb.asm.Type;
 
@@ -14,17 +16,15 @@ import net.neoforged.neoforgespi.language.IModFileInfo;
 import net.neoforged.neoforgespi.language.ModFileScanData;
 import snownee.kiwi.KiwiAnnotationData;
 import snownee.kiwi.KiwiModule;
+import snownee.kiwi.build.KiwiMetadata;
+import snownee.kiwi.build.KiwiMetadataParser;
 import snownee.kiwi.config.KiwiConfig;
 import snownee.kiwi.network.KiwiPacket;
 
-public class DevEnvAnnotatedTypeLoader extends AnnotatedTypeLoader {
-
-	public DevEnvAnnotatedTypeLoader(String modId) {
-		super(modId);
-	}
+public record NeoDevEnvMetadataLoader(String modId) implements Function<KiwiMetadataParser, KiwiMetadata> {
 
 	@Override
-	public KiwiConfiguration get() {
+	public KiwiMetadata apply(KiwiMetadataParser parser) {
 		IModFileInfo modFileInfo = ModList.get().getModFileById(modId);
 		if (modFileInfo == null) {
 			return null;
@@ -36,21 +36,21 @@ public class DevEnvAnnotatedTypeLoader extends AnnotatedTypeLoader {
 		final Type OPTIONAL_MODULE = Type.getType(KiwiModule.Optional.class);
 		final Type LOADING_CONDITION = Type.getType(KiwiModule.LoadingCondition.class);
 
-		KiwiConfiguration configuration = new KiwiConfiguration();
-		configuration.conditions = Lists.newArrayList();
-		configuration.optionals = Lists.newArrayList();
-		configuration.modules = Lists.newArrayList();
-		configuration.packets = Lists.newArrayList();
-		configuration.configs = Lists.newArrayList();
+		Map<String, List<KiwiAnnotationData>> map = Maps.newHashMap();
+		map.put("conditions", Lists.newArrayList());
+		map.put("optionals", Lists.newArrayList());
+		map.put("modules", Lists.newArrayList());
+		map.put("packets", Lists.newArrayList());
+		map.put("configs", Lists.newArrayList());
 
 		for (ModFileScanData.AnnotationData annotationData : modFileInfo.getFile().getScanResult().getAnnotations()) {
 			Type annotationType = annotationData.annotationType();
 			if (KIWI_MODULE.equals(annotationType)) {
-				configuration.modules.add(map(annotationData));
-			} else if (KIWI_CONFIG.equals(annotationData.annotationType())) {
-				configuration.configs.add(map(annotationData));
+				map.get("modules").add(map(annotationData));
+			} else if (KIWI_CONFIG.equals(annotationType)) {
+				map.get("configs").add(map(annotationData));
 			} else if (OPTIONAL_MODULE.equals(annotationType)) {
-				configuration.optionals.add(map(annotationData));
+				map.get("optionals").add(map(annotationData));
 			} else if (LOADING_CONDITION.equals(annotationType)) {
 				KiwiAnnotationData mapped = map(annotationData);
 				String methodName = annotationData.memberName();
@@ -60,12 +60,12 @@ public class DevEnvAnnotatedTypeLoader extends AnnotatedTypeLoader {
 				}
 				methodName = methodName.substring(0, p);
 				mapped.getData().put("method", methodName);
-				configuration.conditions.add(mapped);
+				map.get("conditions").add(mapped);
 			} else if (KIWI_PACKET.equals(annotationType)) {
-				configuration.packets.add(map(annotationData));
+				map.get("packets").add(map(annotationData));
 			}
 		}
-		return configuration;
+		return new KiwiMetadata(map, false);
 	}
 
 	private static KiwiAnnotationData map(ModFileScanData.AnnotationData data) {
