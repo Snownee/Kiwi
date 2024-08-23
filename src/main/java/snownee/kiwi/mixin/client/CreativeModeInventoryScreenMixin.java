@@ -49,7 +49,8 @@ public abstract class CreativeModeInventoryScreenMixin extends EffectRenderingIn
 	}
 
 	//fix https://bugs.mojang.com/browse/MC-179165
-	@Inject(method = "mouseClicked", at = @At("HEAD"))
+	// TODO This "fix" prevents players opening the redstone tab at this moment.
+	/*@Inject(method = "mouseClicked", at = @At("HEAD"))
 	private void kiwi$mouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
 		if (button == 0) {
 			clickedTab = null;
@@ -78,5 +79,5 @@ public abstract class CreativeModeInventoryScreenMixin extends EffectRenderingIn
 		if (clickedTab != tab) {
 			ci.setReturnValue(true);
 		}
-	}
+	}*/
 }
