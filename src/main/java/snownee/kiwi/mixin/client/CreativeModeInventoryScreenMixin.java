@@ -15,7 +15,6 @@ import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.CreativeModeTabs;
 
 @Mixin(CreativeModeInventoryScreen.class)
 public abstract class CreativeModeInventoryScreenMixin extends EffectRenderingInventoryScreen<CreativeModeInventoryScreen.ItemPickerMenu> {
@@ -55,7 +54,8 @@ public abstract class CreativeModeInventoryScreenMixin extends EffectRenderingIn
 			clickedTab = null;
 			double x = mouseX - (double) this.leftPos;
 			double y = mouseY - (double) this.topPos;
-			for (CreativeModeTab tab : CreativeModeTabs.tabs()) {
+			CreativeModeInventoryScreen self = (CreativeModeInventoryScreen) (Object) this;
+			for (CreativeModeTab tab : self.getCurrentPage().getVisibleTabs()) {
 				if (this.checkTabClicked(tab, x, y)) {
 					clickedTab = tab;
 				}

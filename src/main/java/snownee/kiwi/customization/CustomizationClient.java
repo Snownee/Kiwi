@@ -62,8 +62,6 @@ public final class CustomizationClient {
 	@Nullable
 	public static SmartKey buildersButtonKey;
 
-	private static boolean enabled;
-
 	public static void init(IEventBus modEventBus) {
 		var forgeEventBus = NeoForge.EVENT_BUS;
 		modEventBus.addListener((RegisterKeyMappingsEvent event) -> {
