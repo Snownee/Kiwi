@@ -20,17 +20,20 @@ import snownee.kiwi.util.resource.OneTimeLoader;
 
 public record BlockFundamentals(
 		Map<ResourceLocation, KMaterial> materials,
+		Map<ResourceLocation, GlassType> glassTypes,
 		Map<ResourceLocation, KBlockTemplate> templates,
 		PlaceSlotProvider.Preparation slotProviders,
 		SlotLink.Preparation slotLinks,
 		PlaceChoices.Preparation placeChoices,
 		ShapeStorage shapes,
-		Map<ResourceLocation, KBlockDefinition> blocks,
-		MapCodec<Optional<KMaterial>> materialCodec) {
+		Map<ResourceLocation, KBlockDefinition> blocks) {
 	public static BlockFundamentals reload(ResourceManager resourceManager, OneTimeLoader.Context context, boolean booting) {
 		var materials = OneTimeLoader.load(resourceManager, "kiwi/material", KMaterial.DIRECT_CODEC, context);
 		MapCodec<Optional<KMaterial>> materialCodec = CustomizationCodecs.simpleByNameCodec(materials).optionalFieldOf("material");
-		var templates = OneTimeLoader.load(resourceManager, "kiwi/template/block", KBlockTemplate.codec(materialCodec), context);
+		var glassTypes = OneTimeLoader.load(resourceManager, "kiwi/glass_type", GlassType.DIRECT_CODEC, context);
+		MapCodec<Optional<GlassType>> glassTypeCodec = CustomizationCodecs.simpleByNameCodec(glassTypes).optionalFieldOf("glass_type");
+		CodecCreationContext creationContext = new CodecCreationContext(materialCodec, glassTypeCodec);
+		var templates = OneTimeLoader.load(resourceManager, "kiwi/template/block", KBlockTemplate.codec(creationContext), context);
 		if (booting) {
 			templates.forEach((key, value) -> value.resolve(key, context));
 		}
@@ -57,8 +60,18 @@ public record BlockFundamentals(
 		var blocks = OneTimeLoader.load(
 				resourceManager,
 				"kiwi/block",
-				KBlockDefinition.codec(templates, materialCodec),
+				KBlockDefinition.codec(templates, creationContext),
 				context);
-		return new BlockFundamentals(materials, templates, slotProviders, slotLinks, placeChoices, shapes, blocks, materialCodec);
+		return new BlockFundamentals(
+				materials,
+				glassTypes,
+				templates,
+				slotProviders,
+				slotLinks,
+				placeChoices,
+				shapes,
+				blocks);
 	}
+
+	public record CodecCreationContext(MapCodec<Optional<KMaterial>> materialCodec, MapCodec<Optional<GlassType>> glassTypeCodec) {}
 }

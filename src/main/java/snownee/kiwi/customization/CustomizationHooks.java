@@ -78,6 +78,8 @@ public final class CustomizationHooks {
 	private static final Set<String> blockNamespaces = Sets.newLinkedHashSet();
 	private static boolean enabled = true;
 	public static boolean kswitch = Platform.isModLoaded("kswitch") || !Platform.isProduction();
+	@Nullable
+	private static GlassType clearGlassType;
 
 	private CustomizationHooks() {
 	}
@@ -137,7 +139,7 @@ public final class CustomizationHooks {
 			return settings.glassType;
 		}
 		if (isColorlessGlass(blockState)) {
-			return GlassType.CLEAR;
+			return clearGlassType;
 		}
 		return null;
 	}
@@ -208,6 +210,8 @@ public final class CustomizationHooks {
 		OneTimeLoader.Context context = new OneTimeLoader.Context();
 		Map<String, CustomizationMetadata> metadataMap = CustomizationMetadata.loadMap(resourceManager, context);
 		BlockFundamentals blockFundamentals = BlockFundamentals.reload(resourceManager, context, true);
+		clearGlassType = blockFundamentals.glassTypes().get(ResourceLocation.withDefaultNamespace("clear"));
+		Preconditions.checkNotNull(clearGlassType, "Missing 'clear' glass type");
 		blockNamespaces.clear();
 		blockFundamentals.blocks().keySet().stream().map(ResourceLocation::getNamespace).forEach(blockNamespaces::add);
 		List<ResourceLocation> blockIds = Lists.newArrayList();
@@ -396,4 +400,7 @@ public final class CustomizationHooks {
 		return blockState.is(Tags.Blocks.GLASS_BLOCKS_COLORLESS);
 	}
 
+	public static GlassType clearGlassType() {
+		return clearGlassType;
+	}
 }

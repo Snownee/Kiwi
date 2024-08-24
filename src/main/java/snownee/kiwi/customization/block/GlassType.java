@@ -1,23 +1,15 @@
 package snownee.kiwi.customization.block;
 
-import net.minecraft.resources.ResourceLocation;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+
 import snownee.kiwi.RenderLayerEnum;
 import snownee.kiwi.util.codec.CustomizationCodecs;
 
-public record GlassType(String name, boolean skipRendering, float shadeBrightness, RenderLayerEnum renderType) {
-	public static final GlassType CLEAR = new GlassType("clear", true, 1F, RenderLayerEnum.CUTOUT);
-	//TODO data-driven
-	public static final GlassType CUSTOM_CLEAR = new GlassType("custom_clear", true, 1F, RenderLayerEnum.CUTOUT);
-	public static final GlassType TRANSLUCENT = new GlassType("translucent", true, 1F, RenderLayerEnum.TRANSLUCENT);
-	public static final GlassType QUARTZ = new GlassType("quartz", true, 1F, RenderLayerEnum.TRANSLUCENT);
-	public static final GlassType TOUGHENED = new GlassType("toughened", true, 1F, RenderLayerEnum.TRANSLUCENT);
-	public static final GlassType HOLLOW_STEEL = new GlassType("hollow_steel", false, 0.9F, RenderLayerEnum.CUTOUT);
-
-	public GlassType(String name, boolean skipRendering, float shadeBrightness, RenderLayerEnum renderType) {
-		this.name = name;
-		this.skipRendering = skipRendering;
-		this.shadeBrightness = shadeBrightness;
-		this.renderType = renderType;
-		CustomizationCodecs.GLASS_TYPES.put(ResourceLocation.withDefaultNamespace(name), this);
-	}
+public record GlassType(boolean skipRendering, float shadeBrightness, RenderLayerEnum renderType) {
+	public static final Codec<GlassType> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
+			Codec.BOOL.optionalFieldOf("skip_rendering", true).forGetter(GlassType::skipRendering),
+			Codec.floatRange(0, 1).optionalFieldOf("shade_brightness", 1F).forGetter(GlassType::shadeBrightness),
+			CustomizationCodecs.RENDER_TYPE.fieldOf("render_type").forGetter(GlassType::renderType)
+	).apply(instance, GlassType::new));
 }

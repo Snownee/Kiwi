@@ -1,7 +1,6 @@
 package snownee.kiwi.util.codec;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 import com.google.common.collect.BiMap;
@@ -28,7 +27,6 @@ import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import snownee.kiwi.RenderLayerEnum;
-import snownee.kiwi.customization.block.GlassType;
 
 public class CustomizationCodecs {
 	public static final BiMap<ResourceLocation, SoundType> SOUND_TYPES = HashBiMap.create();
@@ -37,8 +35,6 @@ public class CustomizationCodecs {
 	public static final Codec<NoteBlockInstrument> INSTRUMENT_CODEC = simpleByNameCodec(INSTRUMENTS);
 	public static final BiMap<String, MapColor> MAP_COLORS = HashBiMap.create();
 	public static final Codec<MapColor> MAP_COLOR_CODEC = simpleByNameCodec(MAP_COLORS);
-	public static final BiMap<ResourceLocation, GlassType> GLASS_TYPES = HashBiMap.create();
-	public static final Codec<GlassType> GLASS_TYPE_CODEC = simpleByNameCodec(GLASS_TYPES);
 	public static final Codec<PushReaction> PUSH_REACTION = simpleByNameCodec(ImmutableBiMap.of(
 			"normal", PushReaction.NORMAL,
 			"destroy", PushReaction.DESTROY,
@@ -265,8 +261,6 @@ public class CustomizationCodecs {
 				INSTRUMENTS.put(instrument.getSerializedName(), instrument);
 			}
 		}
-
-		Objects.requireNonNull(GlassType.CLEAR);
 	}
 
 	public static <T> Codec<T> simpleByNameCodec(Map<ResourceLocation, T> map) {

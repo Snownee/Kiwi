@@ -6,7 +6,6 @@ import java.util.Optional;
 import com.google.common.base.Preconditions;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.Direction;
@@ -15,6 +14,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.customization.CustomizationRegistries;
+import snownee.kiwi.customization.block.BlockFundamentals;
 import snownee.kiwi.customization.block.KBlockSettings;
 import snownee.kiwi.customization.block.behavior.BlockBehaviorRegistry;
 import snownee.kiwi.customization.block.component.KBlockComponent;
@@ -38,7 +38,7 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 
 	public static Codec<KBlockDefinition> codec(
 			Map<ResourceLocation, KBlockTemplate> templates,
-			MapCodec<Optional<KMaterial>> materialCodec) {
+			BlockFundamentals.CodecCreationContext context) {
 		KBlockTemplate defaultTemplate = templates.get(ResourceLocation.withDefaultNamespace("block"));
 		Preconditions.checkNotNull(defaultTemplate);
 		ConfiguredBlockTemplate defaultConfiguredTemplate = new ConfiguredBlockTemplate(defaultTemplate);
@@ -46,7 +46,7 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 				ConfiguredBlockTemplate.codec(templates)
 						.optionalFieldOf("template", defaultConfiguredTemplate)
 						.forGetter(KBlockDefinition::template),
-				BlockDefinitionProperties.mapCodec(materialCodec).forGetter(KBlockDefinition::properties)
+				BlockDefinitionProperties.mapCodec(context).forGetter(KBlockDefinition::properties)
 		).apply(instance, KBlockDefinition::new));
 	}
 

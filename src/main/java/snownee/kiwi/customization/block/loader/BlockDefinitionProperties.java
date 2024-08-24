@@ -14,6 +14,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.PushReaction;
 import snownee.kiwi.RenderLayerEnum;
+import snownee.kiwi.customization.block.BlockFundamentals;
 import snownee.kiwi.customization.block.GlassType;
 import snownee.kiwi.customization.block.behavior.CanSurviveHandler;
 import snownee.kiwi.customization.block.behavior.CanSurviveHandlerCodec;
@@ -31,14 +32,14 @@ public record BlockDefinitionProperties(
 		Optional<ResourceLocation> interactionShape,
 		Optional<CanSurviveHandler> canSurviveHandler,
 		PartialVanillaProperties vanillaProperties) {
-	public static MapCodec<BlockDefinitionProperties> mapCodec(MapCodec<Optional<KMaterial>> materialCodec) {
+	public static MapCodec<BlockDefinitionProperties> mapCodec(BlockFundamentals.CodecCreationContext context) {
 		return RecordCodecBuilder.mapCodec(instance -> instance.group(
 				Codec.either(KBlockComponent.DIRECT_CODEC, Codec.STRING)
 						.listOf()
 						.optionalFieldOf("components", List.of())
 						.forGetter(BlockDefinitionProperties::components),
-				materialCodec.forGetter(BlockDefinitionProperties::material),
-				CustomizationCodecs.GLASS_TYPE_CODEC.optionalFieldOf("glass_type").forGetter(BlockDefinitionProperties::glassType),
+				context.materialCodec().forGetter(BlockDefinitionProperties::material),
+				context.glassTypeCodec().forGetter(BlockDefinitionProperties::glassType),
 				CustomizationCodecs.RENDER_TYPE.optionalFieldOf("render_type").forGetter(BlockDefinitionProperties::renderType),
 				ResourceLocation.CODEC.optionalFieldOf("color_provider").forGetter(BlockDefinitionProperties::colorProvider),
 				ResourceLocation.CODEC.optionalFieldOf("shape").forGetter(BlockDefinitionProperties::shape),
@@ -49,8 +50,8 @@ public record BlockDefinitionProperties(
 		).apply(instance, BlockDefinitionProperties::new));
 	}
 
-	public static MapCodec<Optional<BlockDefinitionProperties>> mapCodecField(MapCodec<Optional<KMaterial>> materialCodec) {
-		return mapCodec(materialCodec).codec().optionalFieldOf(BlockCodecs.BLOCK_PROPERTIES_KEY);
+	public static MapCodec<Optional<BlockDefinitionProperties>> mapCodecField(BlockFundamentals.CodecCreationContext context) {
+		return mapCodec(context).codec().optionalFieldOf(BlockCodecs.BLOCK_PROPERTIES_KEY);
 	}
 
 	public BlockDefinitionProperties merge(BlockDefinitionProperties templateProps) {

@@ -11,6 +11,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import snownee.kiwi.customization.block.BlockFundamentals;
 import snownee.kiwi.util.resource.OneTimeLoader;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -23,9 +24,9 @@ public final class BuiltInBlockTemplate extends KBlockTemplate {
 		this.key = key;
 	}
 
-	public static MapCodec<BuiltInBlockTemplate> directCodec(MapCodec<Optional<KMaterial>> materialCodec) {
+	public static MapCodec<BuiltInBlockTemplate> directCodec(BlockFundamentals.CodecCreationContext context) {
 		return RecordCodecBuilder.mapCodec(instance -> instance.group(
-						BlockDefinitionProperties.mapCodecField(materialCodec).forGetter(BuiltInBlockTemplate::properties),
+						BlockDefinitionProperties.mapCodecField(context).forGetter(BuiltInBlockTemplate::properties),
 						ResourceLocation.CODEC.optionalFieldOf("codec").forGetter(BuiltInBlockTemplate::key))
 				.apply(instance, BuiltInBlockTemplate::new));
 	}

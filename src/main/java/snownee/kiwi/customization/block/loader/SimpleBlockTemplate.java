@@ -11,6 +11,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import snownee.kiwi.customization.block.BlockFundamentals;
 import snownee.kiwi.util.resource.OneTimeLoader;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -23,9 +24,9 @@ public final class SimpleBlockTemplate extends KBlockTemplate {
 		this.clazz = clazz;
 	}
 
-	public static MapCodec<SimpleBlockTemplate> directCodec(MapCodec<Optional<KMaterial>> materialCodec) {
+	public static MapCodec<SimpleBlockTemplate> directCodec(BlockFundamentals.CodecCreationContext context) {
 		return RecordCodecBuilder.mapCodec(instance -> instance.group(
-				BlockDefinitionProperties.mapCodecField(materialCodec).forGetter(SimpleBlockTemplate::properties),
+				BlockDefinitionProperties.mapCodecField(context).forGetter(SimpleBlockTemplate::properties),
 				Codec.STRING.optionalFieldOf("class", "").forGetter(SimpleBlockTemplate::clazz)
 		).apply(instance, SimpleBlockTemplate::new));
 	}

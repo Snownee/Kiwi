@@ -51,12 +51,4 @@ public record ConfiguredBlockTemplate(KBlockTemplate template, JsonObject json) 
 				template -> DataResult.error(() -> "Unsupported operation"));
 		return Codec.withAlternative(codec1, codec2);
 	}
-
-	@SuppressWarnings("unchecked")
-	private static <K, V> DataResult<? extends Encoder<V>> getCodec(
-			final Function<? super V, ? extends DataResult<? extends K>> type,
-			final Function<? super K, ? extends DataResult<? extends Encoder<? extends V>>> encoder,
-			final V input) {
-		return type.apply(input).<Encoder<? extends V>>flatMap(k -> encoder.apply(k).map(Function.identity())).map(c -> ((Encoder<V>) c));
-	}
 }
