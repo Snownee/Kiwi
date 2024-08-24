@@ -8,13 +8,12 @@ import com.mojang.serialization.JavaOps;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
-import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Rarity;
 
 public record ItemDefinitionProperties(
 		Optional<ResourceLocation> colorProvider,
@@ -61,8 +60,7 @@ public record ItemDefinitionProperties(
 			Optional<Integer> maxStackSize,
 			Optional<Integer> maxDamage,
 			Optional<ResourceKey<Item>> craftingRemainingItem,
-			Optional<FoodProperties> food,
-			Optional<Rarity> rarity
+			Optional<DataComponentMap> components
 	) {
 		public static final MapCodec<PartialVanillaProperties> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 				Codec.intRange(1, 99).optionalFieldOf("stacks_to").forGetter(PartialVanillaProperties::maxStackSize),
@@ -70,8 +68,7 @@ public record ItemDefinitionProperties(
 				ResourceKey.codec(Registries.ITEM)
 						.optionalFieldOf("crafting_remaining_item")
 						.forGetter(PartialVanillaProperties::craftingRemainingItem),
-				FoodProperties.DIRECT_CODEC.optionalFieldOf("food").forGetter(PartialVanillaProperties::food),
-				Rarity.CODEC.optionalFieldOf("rarity").forGetter(PartialVanillaProperties::rarity)
+				DataComponentMap.CODEC.optionalFieldOf("components").forGetter(PartialVanillaProperties::components)
 		).apply(instance, PartialVanillaProperties::new));
 
 		public PartialVanillaProperties merge(PartialVanillaProperties templateProps) {
@@ -79,8 +76,7 @@ public record ItemDefinitionProperties(
 					or(this.maxStackSize, templateProps.maxStackSize),
 					or(this.maxDamage, templateProps.maxDamage),
 					or(this.craftingRemainingItem, templateProps.craftingRemainingItem),
-					or(this.food, templateProps.food),
-					or(this.rarity, templateProps.rarity));
+					or(this.components, templateProps.components));
 		}
 	}
 }

@@ -14,6 +14,7 @@ import snownee.kiwi.util.resource.OneTimeLoader;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public final class BuiltInItemTemplate extends KItemTemplate {
+	public static final ThreadLocal<Item.Properties> PROPERTIES_INJECTOR = new ThreadLocal<>();
 	private final Optional<ResourceLocation> key;
 	private MapCodec<Item> codec;
 
@@ -44,7 +45,7 @@ public final class BuiltInItemTemplate extends KItemTemplate {
 		if (!json.has(ItemCodecs.ITEM_PROPERTIES_KEY)) {
 			json.add(ItemCodecs.ITEM_PROPERTIES_KEY, new JsonObject());
 		}
-//		InjectedBlockPropertiesCodec.INJECTED.set(properties);
+		PROPERTIES_INJECTOR.set(properties);
 		DataResult<Item> result = codec.decode(JsonOps.INSTANCE, JsonOps.INSTANCE.getMap(json).result().orElseThrow());
 		if (result.error().isPresent()) {
 			throw new IllegalStateException(result.error().get().message());

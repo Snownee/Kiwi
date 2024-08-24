@@ -11,13 +11,16 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import snownee.kiwi.customization.block.loader.InjectedCodec;
 import snownee.kiwi.customization.item.MultipleBlockItem;
 
 public class ItemCodecs {
 	private static final Map<ResourceLocation, MapCodec<Item>> CODECS = Maps.newHashMap();
 
 	public static final String ITEM_PROPERTIES_KEY = "properties";
-	private static final Codec<Item.Properties> ITEM_PROPERTIES = Codec.unit(Item.Properties::new);
+	private static final Codec<Item.Properties> ITEM_PROPERTIES = new InjectedCodec<>(
+			Codec.unit(Item.Properties::new),
+			BuiltInItemTemplate.PROPERTIES_INJECTOR);
 
 	public static <I extends Item> RecordCodecBuilder<I, Item.Properties> propertiesCodec() {
 		return ITEM_PROPERTIES.fieldOf(ITEM_PROPERTIES_KEY).forGetter(item -> {

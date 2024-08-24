@@ -6,6 +6,7 @@ import com.google.common.base.Preconditions;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import net.minecraft.core.component.TypedDataComponent;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -29,6 +30,7 @@ public record KItemDefinition(ConfiguredItemTemplate template, ItemDefinitionPro
 		).apply(instance, KItemDefinition::new));
 	}
 
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public KItemSettings.Builder createSettings(ResourceLocation id) {
 		KItemSettings.Builder builder = KItemSettings.builder();
 		ItemDefinitionProperties.PartialVanillaProperties vanilla = properties.vanillaProperties();
@@ -36,8 +38,11 @@ public record KItemDefinition(ConfiguredItemTemplate template, ItemDefinitionPro
 			vanilla.maxStackSize().ifPresent($::stacksTo);
 			vanilla.maxDamage().ifPresent($::durability);
 			vanilla.craftingRemainingItem().map(BuiltInRegistries.ITEM::get).ifPresent($::craftRemainder);
-			vanilla.food().ifPresent($::food);
-			vanilla.rarity().ifPresent($::rarity);
+			vanilla.components().ifPresent(componentMap -> {
+				for (TypedDataComponent component : componentMap) {
+					$.component(component.type(), component.value());
+				}
+			});
 		});
 		return builder;
 	}

@@ -13,7 +13,8 @@ import com.mojang.serialization.Codec;
 
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import snownee.kiwi.customization.block.KBlockSettings;
-import snownee.kiwi.customization.block.loader.InjectedBlockPropertiesCodec;
+import snownee.kiwi.customization.block.loader.BuiltInBlockTemplate;
+import snownee.kiwi.customization.block.loader.InjectedCodec;
 import snownee.kiwi.customization.duck.KBlockProperties;
 
 @Mixin(BlockBehaviour.Properties.class)
@@ -39,6 +40,6 @@ public class BlockPropertiesMixin implements KBlockProperties {
 	private static Codec<BlockBehaviour.Properties> kiwi$injectCodec(
 			Supplier<BlockBehaviour.Properties> defaultValue,
 			Operation<Codec<BlockBehaviour.Properties>> original) {
-		return new InjectedBlockPropertiesCodec(original.call(defaultValue));
+		return new InjectedCodec<>(original.call(defaultValue), BuiltInBlockTemplate.PROPERTIES_INJECTOR);
 	}
 }
