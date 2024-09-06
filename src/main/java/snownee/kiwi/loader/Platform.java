@@ -8,7 +8,6 @@ import java.util.regex.Pattern;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
-import net.fabricmc.fabric.impl.datagen.FabricDataGenHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.resources.language.I18n;
@@ -31,6 +30,7 @@ import snownee.kiwi.Kiwi;
 public final class Platform {
 
 	private static final Pattern VERSION_PATTERN = Pattern.compile("^(\\d+)\\.(\\d+)\\.(\\d+).*?$");
+	private static final boolean DATA_GEN = System.getProperty("fabric-api.datagen") != null;
 
 	private Platform() {
 	}
@@ -52,7 +52,7 @@ public final class Platform {
 	}
 
 	public static boolean isDataGen() {
-		return FabricDataGenHelper.ENABLED;
+		return DATA_GEN;
 	}
 
 	public static int getVersionNumber(String id) {
