@@ -35,7 +35,7 @@ public class KBlockComponents extends AbstractModule {
 	@KiwiModule.Name("minecraft:front_and_top")
 	public static final KiwiGO<KBlockComponent.Type<FrontAndTopComponent>> FRONT_AND_TOP = register(MapCodec.unit(FrontAndTopComponent.getInstance()));
 	@KiwiModule.Name("minecraft:moulding")
-	public static final KiwiGO<KBlockComponent.Type<MouldingComponent>> MOULDING = register(MapCodec.unit(MouldingComponent.getInstance()));
+	public static final KiwiGO<KBlockComponent.Type<MouldingComponent>> MOULDING = register(MouldingComponent.CODEC);
 	@KiwiModule.Name("minecraft:water_loggable")
 	public static final KiwiGO<KBlockComponent.Type<WaterLoggableComponent>> WATER_LOGGABLE = register(MapCodec.unit(WaterLoggableComponent.getInstance()));
 	@KiwiModule.Name("minecraft:consumable")
