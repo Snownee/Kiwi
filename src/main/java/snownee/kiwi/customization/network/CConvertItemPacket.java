@@ -28,6 +28,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import snownee.kiwi.Kiwi;
+import snownee.kiwi.KiwiCommonConfig;
 import snownee.kiwi.customization.block.family.BlockFamilies;
 import snownee.kiwi.customization.block.family.BlockFamily;
 import snownee.kiwi.network.KiwiPacket;
@@ -71,6 +72,9 @@ public record CConvertItemPacket(
 		@Override
 		public void handle(CConvertItemPacket packet, PayloadContext context) {
 			var player = context.serverPlayer();
+			if (KiwiCommonConfig.kSwitchCreativeOnly && !player.isCreative()) {
+				return;
+			}
 			var convertOne = packet.convertOne;
 			var inContainer = packet.inContainer;
 			var slotIndex = packet.slot;

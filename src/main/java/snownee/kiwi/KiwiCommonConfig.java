@@ -13,4 +13,6 @@ public final class KiwiCommonConfig {
 		return vars.get(key) instanceof Boolean && (Boolean) vars.get(key);
 	}
 
+	@KiwiConfig.Path("kSwitch.creativeOnly")
+	public static boolean kSwitchCreativeOnly = true;
 }

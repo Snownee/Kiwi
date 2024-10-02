@@ -26,6 +26,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.phys.BlockHitResult;
+import snownee.kiwi.KiwiCommonConfig;
 import snownee.kiwi.customization.CustomizationClient;
 import snownee.kiwi.customization.block.family.BlockFamilies;
 import snownee.kiwi.customization.block.family.BlockFamily;
@@ -78,6 +79,9 @@ public class BuildersButton {
 		if (screen instanceof ConvertScreen) {
 			screen.onClose();
 			return true;
+		}
+		if (KiwiCommonConfig.kSwitchCreativeOnly && !player.isCreative()) {
+			return false;
 		}
 		if (screen instanceof AbstractContainerScreen<?> containerScreen && containerScreen.getMenu().getCarried().isEmpty()) {
 			Slot slot = ClientProxy.getSlotUnderMouse(containerScreen);
