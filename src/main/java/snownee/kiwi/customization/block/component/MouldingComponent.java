@@ -9,6 +9,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
@@ -22,19 +24,18 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.StairsShape;
 import snownee.kiwi.customization.block.KBlockSettings;
-import snownee.kiwi.customization.block.family.BlockFamily;
 import snownee.kiwi.customization.block.loader.KBlockComponents;
 
-public record MouldingComponent(Optional<BlockFamily> connectTo) implements KBlockComponent {
+public record MouldingComponent(Optional<TagKey<Block>> connectTo) implements KBlockComponent {
 	public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 	public static final EnumProperty<StairsShape> SHAPE = BlockStateProperties.STAIRS_SHAPE;
 	private static final MouldingComponent DEFAULT = new MouldingComponent(Optional.empty());
 	public static final MapCodec<MouldingComponent> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-			BlockFamily.CODEC.optionalFieldOf("connect_to").forGetter(MouldingComponent::connectTo)
-	).apply(instance, MouldingComponent::getInstance));
+			TagKey.hashedCodec(Registries.BLOCK).optionalFieldOf("connect_to").forGetter(MouldingComponent::connectTo)
+	).apply(instance, MouldingComponent::create));
 
 	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-	public static MouldingComponent getInstance(Optional<BlockFamily> connectTo) {
+	public static MouldingComponent create(Optional<TagKey<Block>> connectTo) {
 		return connectTo.isEmpty() ? DEFAULT : new MouldingComponent(connectTo);
 	}
 
@@ -92,7 +93,7 @@ public record MouldingComponent(Optional<BlockFamily> connectTo) implements KBlo
 
 	private boolean canBeConnected(BlockState ourState, BlockState theirState) {
 		//noinspection OptionalIsPresent
-		return connectTo.isEmpty() ? ourState.is(theirState.getBlock()) : connectTo.get().hasBlock(theirState.getBlock());
+		return connectTo.isEmpty() ? ourState.is(theirState.getBlock()) : theirState.is(connectTo.get());
 	}
 
 	@Override

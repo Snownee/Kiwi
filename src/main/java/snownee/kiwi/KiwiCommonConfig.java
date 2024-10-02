@@ -14,5 +14,5 @@ public final class KiwiCommonConfig {
 	}
 
 	@KiwiConfig.Path("kSwitch.creativeOnly")
-	public static boolean kSwitchCreativeOnly = true;
+	public static boolean kSwitchCreativeOnly;
 }
