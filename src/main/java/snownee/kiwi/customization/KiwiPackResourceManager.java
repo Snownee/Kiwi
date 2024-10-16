@@ -23,6 +23,7 @@ import net.minecraft.server.packs.resources.FallbackResourceManager;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceFilterSection;
 import net.minecraft.server.packs.resources.ResourceManager;
+import snownee.kiwi.Kiwi;
 
 public class KiwiPackResourceManager implements CloseableResourceManager {
 	private static final Logger LOGGER = LogUtils.getLogger();
@@ -30,10 +31,17 @@ public class KiwiPackResourceManager implements CloseableResourceManager {
 	private final List<PackResources> packs;
 
 	public KiwiPackResourceManager(List<PackResources> packs) {
-		this.packs = List.copyOf(packs);
+		this.packs = packs.stream().filter(pack -> {
+			//noinspection ConstantValue
+			if (pack.getNamespaces(PackType.CLIENT_RESOURCES) == null) {
+				Kiwi.LOGGER.error("Pack {}({}) has null namespaces", pack.packId(), pack.getClass());
+				return false;
+			}
+			return true;
+		}).toList();
 		Map<String, FallbackResourceManager> map = new HashMap<>();
-		List<String> list = packs.stream().flatMap((p_215471_) -> {
-			return p_215471_.getNamespaces(PackType.CLIENT_RESOURCES).stream();
+		List<String> list = packs.stream().flatMap(pack -> {
+			return pack.getNamespaces(PackType.CLIENT_RESOURCES).stream();
 		}).distinct().toList();
 
 		for (PackResources packresources : packs) {
