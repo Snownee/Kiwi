@@ -33,7 +33,6 @@ public abstract class ModBlockEntity extends BlockEntity implements BlockEntityD
 
 	@Override
 	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider lookupProvider) {
-		super.onDataPacket(net, pkt, lookupProvider);
 		readPacketData(pkt.getTag());
 	}
 
