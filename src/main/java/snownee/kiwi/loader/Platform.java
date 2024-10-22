@@ -27,6 +27,7 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.fml.loading.LoadingModList;
 import net.neoforged.neoforge.common.EffectCure;
 import net.neoforged.neoforge.common.EffectCures;
 import net.neoforged.neoforge.common.ItemAbilities;
@@ -41,7 +42,11 @@ public class Platform {
 	}
 
 	public static boolean isModLoaded(String id) {
-		return ModList.get().isLoaded(id);
+		ModList modList = ModList.get();
+		if (modList == null) {
+			return LoadingModList.get().getModFileById(id) != null;
+		}
+		return modList.isLoaded(id);
 	}
 
 	public static boolean isPhysicalClient() {
