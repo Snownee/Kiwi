@@ -39,6 +39,7 @@ public class KiwiPackResourceManager implements CloseableResourceManager {
 			}
 			return true;
 		}).toList();
+		packs = this.packs;
 		Map<String, FallbackResourceManager> map = new HashMap<>();
 		List<String> list = packs.stream().flatMap(pack -> {
 			return pack.getNamespaces(PackType.CLIENT_RESOURCES).stream();
