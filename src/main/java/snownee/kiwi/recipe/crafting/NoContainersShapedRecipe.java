@@ -14,7 +14,9 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapedRecipePattern;
 import snownee.kiwi.data.DataModule;
+import snownee.kiwi.util.NotNullByDefault;
 
+@NotNullByDefault
 public class NoContainersShapedRecipe extends ShapedRecipe {
 	private final boolean noContainers;
 

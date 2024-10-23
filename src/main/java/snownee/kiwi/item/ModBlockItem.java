@@ -3,6 +3,8 @@ package snownee.kiwi.item;
 import java.util.List;
 import java.util.Set;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.google.common.collect.Sets;
 
 import net.minecraft.core.BlockPos;
@@ -24,7 +26,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.block.IKiwiBlock;
 import snownee.kiwi.loader.Platform;
+import snownee.kiwi.util.NotNullByDefault;
 
+@NotNullByDefault
 public class ModBlockItem extends BlockItem implements ItemCategoryFiller {
 	public static final Set<BlockEntityType<?>> INSTANT_UPDATE_TILES = Platform.isPhysicalClient() ? Sets.newHashSet() : null;
 
@@ -33,7 +37,7 @@ public class ModBlockItem extends BlockItem implements ItemCategoryFiller {
 	}
 
 	@Override
-	protected boolean updateCustomBlockEntityTag(BlockPos pos, Level worldIn, Player player, ItemStack stack, BlockState state) {
+	protected boolean updateCustomBlockEntityTag(BlockPos pos, Level worldIn, @Nullable Player player, ItemStack stack, BlockState state) {
 		if (worldIn.isClientSide) {
 			BlockEntity tile = worldIn.getBlockEntity(pos);
 			if (tile != null && INSTANT_UPDATE_TILES.contains(tile.getType())) {

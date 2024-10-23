@@ -16,7 +16,9 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.level.Level;
 import snownee.kiwi.data.DataModule;
+import snownee.kiwi.util.NotNullByDefault;
 
+@NotNullByDefault
 public class KiwiShapelessRecipe extends ShapelessRecipe {
 
 	private final boolean noContainers;

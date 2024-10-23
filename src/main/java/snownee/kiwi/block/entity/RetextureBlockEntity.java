@@ -3,7 +3,6 @@ package snownee.kiwi.block.entity;
 import java.util.Map;
 import java.util.Objects;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.base.Predicate;
@@ -15,12 +14,15 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import snownee.kiwi.block.def.BlockDefinition;
 import snownee.kiwi.block.def.SimpleBlockDefinition;
 import snownee.kiwi.util.NBTHelper;
+import snownee.kiwi.util.NotNullByDefault;
 
+@NotNullByDefault
 public abstract class RetextureBlockEntity extends ModBlockEntity {
 	@Nullable
 	protected Map<String, BlockDefinition> textures;
@@ -43,7 +45,7 @@ public abstract class RetextureBlockEntity extends ModBlockEntity {
 		textures.put(key, path);
 	}
 
-	public void setTexture(String key, BlockDefinition modelSupplier) {
+	public void setTexture(String key, @Nullable BlockDefinition modelSupplier) {
 		if (modelSupplier == null || !isValidTexture(modelSupplier)) {
 			return;
 		}
@@ -54,7 +56,7 @@ public abstract class RetextureBlockEntity extends ModBlockEntity {
 		return true;
 	}
 
-	public static void setTexture(Map<String, BlockDefinition> textures, String key, BlockDefinition modelSupplier) {
+	public static void setTexture(@Nullable Map<String, BlockDefinition> textures, String key, BlockDefinition modelSupplier) {
 		if (textures == null || !textures.containsKey(key)) {
 			return;
 		}
@@ -63,7 +65,7 @@ public abstract class RetextureBlockEntity extends ModBlockEntity {
 
 	public static void setTexture(Map<String, BlockDefinition> textures, String key, Item item) {
 		Block block = Block.byItem(item);
-		if (block != null) {
+		if (block != Blocks.AIR) {
 			setTexture(textures, key, SimpleBlockDefinition.of(block.defaultBlockState()));
 		}
 	}
@@ -104,7 +106,10 @@ public abstract class RetextureBlockEntity extends ModBlockEntity {
 		}
 	}
 
-	public static boolean readTextures(Map<String, BlockDefinition> textures, CompoundTag data, Predicate<BlockDefinition> validator) {
+	public static boolean readTextures(
+			@Nullable Map<String, BlockDefinition> textures,
+			CompoundTag data,
+			Predicate<BlockDefinition> validator) {
 		if (textures == null) {
 			return false;
 		}
@@ -128,12 +133,12 @@ public abstract class RetextureBlockEntity extends ModBlockEntity {
 	}
 
 	@Override
-	protected @NotNull CompoundTag writePacketData(CompoundTag data, HolderLookup.Provider provider) {
+	protected CompoundTag writePacketData(CompoundTag data, HolderLookup.Provider provider) {
 		writeTextures(textures, data);
 		return data;
 	}
 
-	public static CompoundTag writeTextures(Map<String, BlockDefinition> textures, CompoundTag data) {
+	public static CompoundTag writeTextures(@Nullable Map<String, BlockDefinition> textures, CompoundTag data) {
 		if (textures != null) {
 			NBTHelper tag = NBTHelper.of(data);
 			textures.forEach((k, v) -> {

@@ -13,7 +13,9 @@ import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
+import snownee.kiwi.util.NotNullByDefault;
 
+@NotNullByDefault
 public class KiwiShapelessRecipeBuilder extends ShapelessRecipeBuilder {
 	private boolean noContainers;
 

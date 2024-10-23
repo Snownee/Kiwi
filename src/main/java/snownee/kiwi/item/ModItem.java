@@ -15,7 +15,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.loader.Platform;
+import snownee.kiwi.util.NotNullByDefault;
 
+@NotNullByDefault
 public class ModItem extends Item {
 	public ModItem(Item.Properties builder) {
 		super(builder);

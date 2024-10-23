@@ -9,6 +9,8 @@ import org.jetbrains.annotations.Nullable;
 import com.google.common.collect.Lists;
 
 import it.unimi.dsi.fastutil.chars.Char2ObjectArrayMap;
+import it.unimi.dsi.fastutil.chars.Char2ObjectMap;
+import it.unimi.dsi.fastutil.chars.Char2ObjectMaps;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -20,7 +22,9 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipePattern;
 import net.minecraft.world.level.Level;
+import snownee.kiwi.util.NotNullByDefault;
 
+@NotNullByDefault
 public abstract class DynamicShapedRecipe extends CustomRecipe {
 	protected ShapedRecipePattern pattern;
 	protected String rawPattern;
@@ -54,8 +58,7 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 		return search(input) != null;
 	}
 
-	@Nullable
-	public int[] search(CraftingInput input) {
+	public int @Nullable [] search(CraftingInput input) {
 		for (int x = 0; x <= input.width() - getWidth(); ++x) {
 			for (int y = 0; y <= input.height() - getHeight(); ++y) {
 				if (checkMatch(input, x, y) && checkEmpty(input, x, y)) {
@@ -135,7 +138,7 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 	public abstract RecipeSerializer<?> getSerializer();
 
 	protected boolean checkMatch(CraftingInput input, int startX, int startY) {
-		Char2ObjectArrayMap<ItemStack> ingredientsArrayMap = null;
+		Char2ObjectMap<ItemStack> ingredientsArrayMap = Char2ObjectMaps.emptyMap();
 		if (!differentInputs) {
 			ingredientsArrayMap = new Char2ObjectArrayMap<>();
 		}

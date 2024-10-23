@@ -5,7 +5,9 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.state.BlockState;
 import snownee.kiwi.block.entity.ModBlockEntity;
+import snownee.kiwi.util.NotNullByDefault;
 
+@NotNullByDefault
 public class MyBlockEntity extends ModBlockEntity {
 
 	public MyBlockEntity(BlockPos pos, BlockState state) {
