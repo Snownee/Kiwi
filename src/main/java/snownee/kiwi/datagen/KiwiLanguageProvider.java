@@ -1,9 +1,12 @@
 package snownee.kiwi.datagen;
 
+import java.io.Reader;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
@@ -30,6 +33,7 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import snownee.kiwi.KiwiModule;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.ConfigUI;
 import snownee.kiwi.config.KiwiConfigManager;
@@ -52,43 +56,73 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 
 	@Override
 	public void generateTranslations(HolderLookup.Provider registryLookup, TranslationBuilder translationBuilder) {
+	}
 
+	public Optional<Path> createPath(String path, String extension) {
+		return this.dataOutput.getModContainer()
+				.findPath("assets/%s/lang/%s.%s".formatted(dataOutput.getModId(), path, extension));
 	}
 
 	public void putExistingTranslations(FabricLanguageProvider.TranslationBuilder translationBuilder) {
+		putExistingTranslations(translationBuilder, languageCode + ".existing");
+	}
+
+	public void putExistingTranslations(FabricLanguageProvider.TranslationBuilder translationBuilder, String path) {
 		try {
-			Path existingFilePath = createPath(languageCode + ".existing");
+			Path existingFilePath = createPath(path, "json").orElseThrow();
 			translationBuilder.add(existingFilePath);
 		} catch (Exception e) {
 			throw new RuntimeException("Failed to add existing language file!", e);
 		}
 	}
 
-	public Path createPath(String path) {
-		return dataOutput.getModContainer().findPath("assets/%s/lang/%s.json".formatted(dataOutput.getModId(), path)).orElseThrow();
+	public void putExistingYamlTranslations(FabricLanguageProvider.TranslationBuilder translationBuilder) {
+		putExistingYamlTranslations(translationBuilder, languageCode + ".existing");
+	}
+
+	public void putExistingYamlTranslations(FabricLanguageProvider.TranslationBuilder translationBuilder, String path) {
+		try {
+			Path existingFilePath = createPath(path, "yaml").orElseThrow();
+			try (Reader reader = Files.newBufferedReader(existingFilePath)) {
+				Map<String, ?> map = KUtil.loadYaml(reader, Map.class);
+				for (Map.Entry<String, ?> entry : map.entrySet()) {
+					translationBuilder.add(entry.getKey(), entry.getValue().toString());
+				}
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to add existing language file!", e);
+		}
 	}
 
 	@Override
 	public CompletableFuture<?> run(CachedOutput writer) {
 		TreeMap<String, String> translationEntries = new TreeMap<>();
 		return this.registryLookup.thenCompose(lookup -> {
+			preGenerate(translationEntries);
 			generateModNameAndDescription(translationEntries);
 			generateConfigEntries(translationEntries);
-			generateTranslations(lookup, (String key, String value) -> {
+			generateTranslations(
+					lookup, (String key, String value) -> {
+						Objects.requireNonNull(key);
+						Objects.requireNonNull(value);
+
+						if (translationEntries.containsKey(key)) {
+							throw new RuntimeException("Existing translation key found - " + key + " - Duplicate will be ignored.");
+						}
+
+						translationEntries.put(key, value);
+					});
+			FabricLanguageProvider.TranslationBuilder translationBuilder = (String key, String value) -> {
 				Objects.requireNonNull(key);
 				Objects.requireNonNull(value);
-
-				if (translationEntries.containsKey(key)) {
-					throw new RuntimeException("Existing translation key found - " + key + " - Duplicate will be ignored.");
-				}
-
 				translationEntries.put(key, value);
-			});
-			putExistingTranslations((String key, String value) -> {
-				Objects.requireNonNull(key);
-				Objects.requireNonNull(value);
-				translationEntries.put(key, value);
-			});
+			};
+			if (createPath("en_us.existing", "yaml").map(Files::exists).orElse(false)) {
+				putExistingYamlTranslations(translationBuilder);
+			} else if (createPath("en_us.existing", "json").map(Files::exists).orElse(false)) {
+				putExistingTranslations(translationBuilder);
+			}
+			postGenerate(translationEntries);
 
 			JsonObject langEntryJson = new JsonObject();
 
@@ -100,14 +134,21 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 		});
 	}
 
+	protected void postGenerate(TreeMap<String, String> translationEntries) {}
+
+	protected void preGenerate(TreeMap<String, String> translationEntries) {}
+
 	protected void generateConfigEntries(Map<String, String> translationEntries) {
 		for (ConfigHandler handler : KiwiConfigManager.allConfigs) {
 			if (!Objects.equals(handler.getModId(), dataOutput.getModId())) {
 				continue;
 			}
 			String fileName = handler.getFileName();
-			if (fileName.equals("test")) {
+			if (fileName.equals("test") || fileName.equals("kiwi-modules")) {
 				continue; // skip test entries
+			}
+			if (handler.getClazz().getDeclaredAnnotation(KiwiModule.Skip.class) != null) {
+				continue;
 			}
 			String key = handler.getTranslationKey();
 			if (Objects.equals(key, fileName)) {
@@ -123,11 +164,11 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 					continue;
 				}
 				List<String> path = Lists.newArrayList(value.path.split("\\."));
-				String title = KUtil.friendlyText(path.remove(path.size() - 1));
+				String title = KUtil.friendlyText(path.removeLast());
 				String subCatKey = String.join(".", path);
 				if (!path.isEmpty() && !subCats.contains(subCatKey)) {
 					subCats.add(subCatKey);
-					translationEntries.put(handler.getModId() + ".config." + subCatKey, KUtil.friendlyText(path.get(path.size() - 1)));
+					translationEntries.put(handler.getModId() + ".config." + subCatKey, KUtil.friendlyText(path.getLast()));
 				}
 				translationEntries.put(value.translation, title);
 				translationEntries.put(value.translation + ".desc", "");
@@ -139,14 +180,15 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 		generateGameObjectEntries(translationEntries, Registries.BLOCK, Block::getDescriptionId);
 		generateGameObjectEntries(translationEntries, Registries.ITEM, Item::getDescriptionId);
 		generateGameObjectEntries(translationEntries, Registries.ENTITY_TYPE, EntityType::getDescriptionId);
-		generateGameObjectEntries(translationEntries, Registries.CREATIVE_MODE_TAB, tab -> {
-			Component component = tab.getDisplayName();
-			if (component.getContents() instanceof TranslatableContents contents) {
-				return contents.getKey();
-			} else {
-				return null;
-			}
-		});
+		generateGameObjectEntries(
+				translationEntries, Registries.CREATIVE_MODE_TAB, tab -> {
+					Component component = tab.getDisplayName();
+					if (component.getContents() instanceof TranslatableContents contents) {
+						return contents.getKey();
+					} else {
+						return null;
+					}
+				});
 		generateGameObjectEntries(translationEntries, Registries.CUSTOM_STAT, stat -> net.minecraft.Util.makeDescriptionId("stat", stat));
 		generateGameObjectEntries(translationEntries, Registries.MOB_EFFECT, MobEffect::getDescriptionId);
 	}
