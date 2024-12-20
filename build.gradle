@@ -125,7 +125,7 @@ tasks.withType(Jar).configureEach {
     it.exclude([
             "/assets/${project.mod_id}/blockstates",
             "/assets/${project.mod_id}/models",
-            "/assets/${project.mod_id}/lang/en_us.existing.json",
+            "/assets/${project.mod_id}/lang/en_us.existing.yaml",
             "/assets/kaleidos",
             "/snownee/${project.mod_id}/test",
             "/data",
