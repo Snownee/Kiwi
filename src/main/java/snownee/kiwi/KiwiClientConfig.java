@@ -10,6 +10,8 @@ public final class KiwiClientConfig {
 	@ConfigUI.Hide
 	public static String contributorCosmetic = "";
 
+	public static boolean cosmeticScreenKeybind = true;
+
 	public static boolean globalTooltip;
 
 	@KiwiConfig.GameRestart
