@@ -49,10 +49,10 @@ public class ContributorsClient extends AbstractModule {
 	private static int hold;
 
 	public static void onKeyInput(Minecraft mc) {
-		if (mc.screen != null || mc.player == null || !mc.isWindowActive()) {
+		if (!KiwiClientConfig.cosmeticScreenKeybind || mc.screen != null || mc.player == null || !mc.isWindowActive()) {
 			return;
 		}
-		boolean K = InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), InputConstants.KEY_K);
+		boolean K = InputConstants.isKeyDown(mc.getWindow().getWindow(), InputConstants.KEY_K);
 		if (!K || Screen.hasAltDown() || Screen.hasControlDown() || Screen.hasShiftDown()) {
 			hold = 0;
 			return;

@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
@@ -54,6 +55,15 @@ public class CosmeticScreen extends Screen {
 		if (!added) {
 			minecraft.setScreen(null);
 		}
+		addRenderableWidget(Button.builder(
+				Component.translatable(KiwiClientConfig.cosmeticScreenKeybind ? "gui.kiwi.cosmetic.enabled" : "gui.kiwi.cosmetic.disabled"),
+				b -> {
+					KiwiClientConfig.cosmeticScreenKeybind = !KiwiClientConfig.cosmeticScreenKeybind;
+					KiwiConfigManager.getHandler(KiwiClientConfig.class).save();
+					b.setMessage(Component.translatable(KiwiClientConfig.cosmeticScreenKeybind ?
+							"gui.kiwi.cosmetic.enabled" :
+							"gui.kiwi.cosmetic.disabled"));
+				}).pos(180, 30).build());
 	}
 
 	@Override
@@ -61,6 +71,7 @@ public class CosmeticScreen extends Screen {
 		renderBackground(guiGraphics, mouseX, mouseY, pTicks);
 		super.render(guiGraphics, mouseX, mouseY, pTicks);
 		list.render(guiGraphics, mouseX, mouseY, pTicks);
+		guiGraphics.drawString(minecraft.font, title, 180, 10, 0xFFFFFF);
 	}
 
 	@Override
