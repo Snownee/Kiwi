@@ -271,7 +271,7 @@ unifiedPublishing {
         gameVersions = [project.minecraft_version]
         gameLoaders = ["neoforge"]
 
-        mainPublication tasks.jarJar // Declares the publicated jar
+        mainPublication tasks.shadowJar // Declares the publicated jar
 
         if (System.getenv("CURSE_TOKEN") != null) {
             curseforge {
