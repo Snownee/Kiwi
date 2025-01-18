@@ -86,6 +86,7 @@ import snownee.kiwi.util.resource.RequiredFolderRepositorySource;
 
 public final class CustomizationHooks {
 	private static final Set<String> blockNamespaces = Sets.newLinkedHashSet();
+	private static final Set<String> lenientBETypeNamespaces = Sets.newHashSet();
 	private static boolean enabled = true;
 	public static boolean kswitch = Platform.isModLoaded("kswitch") || !Platform.isProduction();
 
@@ -245,6 +246,10 @@ public final class CustomizationHooks {
 		BlockFundamentals blockFundamentals = BlockFundamentals.reload(resourceManager, context, true);
 		blockNamespaces.clear();
 		blockFundamentals.blocks().keySet().stream().map(ResourceLocation::getNamespace).forEach(blockNamespaces::add);
+		lenientBETypeNamespaces.clear();
+		lenientBETypeNamespaces.add(ResourceLocation.DEFAULT_NAMESPACE);
+		lenientBETypeNamespaces.addAll(blockNamespaces);
+		metadataMap.values().forEach(metadata -> lenientBETypeNamespaces.addAll(metadata.lenientBETypeNamespaces()));
 		List<ResourceLocation> blockIds = Lists.newArrayList();
 		CustomizationMetadata.sortedForEach(metadataMap, "block", blockFundamentals.blocks(), (id, definition) -> {
 			try {
@@ -407,6 +412,10 @@ public final class CustomizationHooks {
 
 	public static Set<String> getBlockNamespaces() {
 		return blockNamespaces;
+	}
+
+	public static Set<String> getLenientBETypeNamespaces() {
+		return lenientBETypeNamespaces;
 	}
 
 	public static boolean isColorlessGlass(BlockState blockState) {
