@@ -23,18 +23,18 @@ public class KiwiCommand {
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
 		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal(Kiwi.ID);
 		/* off */
-        builder.then(Commands
-				.literal("debugLevelRules")
-				.requires(ctx -> ctx.hasPermission(2))
-				.executes(ctx -> cleanLevel(ctx.getSource()))
-		);
+		builder.then(Commands
+				.literal("dev_env_rules")
+				.then(Commands.literal("do_not_run_this_if_you_do_not_know_what_it_does")
+						.requires(ctx -> ctx.hasPermission(2))
+						.executes(ctx -> debugRules(ctx.getSource()))));
 
 		builder.then(Commands
 				.literal("reload")
 				.requires(ctx -> ctx.hasPermission(2))
-				.then(Commands.argument("configFile", StringArgumentType.greedyString())
+				.then(Commands.argument("fileName", StringArgumentType.greedyString())
 						.executes(ctx -> {
-							String fileName = StringArgumentType.getString(ctx, "configFile");
+							String fileName = StringArgumentType.getString(ctx, "fileName");
 							if (KiwiConfigManager.refresh(fileName)) {
 								ctx.getSource().sendSuccess(() -> Component.translatable("commands.kiwi.reload.success", fileName), true);
 								return 1;
@@ -57,7 +57,7 @@ public class KiwiCommand {
 		dispatcher.register(builder);
 	}
 
-	private static int cleanLevel(CommandSourceStack commandSourceStack) {
+	private static int debugRules(CommandSourceStack commandSourceStack) {
 		Commands commands = commandSourceStack.getServer().getCommands();
 		List<String> rules = List.of(
 				"gamerule doDaylightCycle false",
