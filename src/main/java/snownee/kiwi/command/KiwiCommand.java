@@ -24,10 +24,10 @@ public class KiwiCommand {
 		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal(Kiwi.ID);
 		/* off */
 		builder.then(Commands
-				.literal("debug_rules")
-				.requires(ctx -> ctx.hasPermission(2))
-				.executes(ctx -> debugRules(ctx.getSource()))
-		);
+				.literal("dev_env_rules")
+				.then(Commands.literal("do_not_run_this_if_you_do_not_know_what_it_does")
+						.requires(ctx -> ctx.hasPermission(2))
+						.executes(ctx -> debugRules(ctx.getSource()))));
 
 		builder.then(Commands
 				.literal("reload")
