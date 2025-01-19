@@ -76,6 +76,7 @@ import snownee.kiwi.util.resource.RequiredFolderRepositorySource;
 @Mod(Kiwi.ID)
 public final class CustomizationHooks {
 	private static final Set<String> blockNamespaces = Sets.newLinkedHashSet();
+	private static final Set<String> lenientBETypeNamespaces = Sets.newHashSet();
 	private static boolean enabled = true;
 	public static boolean kswitch = Platform.isModLoaded("kswitch") || !Platform.isProduction();
 	@Nullable
@@ -151,12 +152,13 @@ public final class CustomizationHooks {
 		}
 		Kiwi.LOGGER.info("Kiwi Customization is enabled");
 		var forgeEventBus = NeoForge.EVENT_BUS;
-		modEventBus.addListener(EventPriority.LOWEST, (RegisterEvent event) -> {
-			if (!Registries.BLOCK.equals(event.getRegistryKey())) {
-				return;
-			}
-			initLoader(modEventBus);
-		});
+		modEventBus.addListener(
+				EventPriority.LOWEST, (RegisterEvent event) -> {
+					if (!Registries.BLOCK.equals(event.getRegistryKey())) {
+						return;
+					}
+					initLoader(modEventBus);
+				});
 		modEventBus.addListener((NewRegistryEvent event) -> {
 			CustomizationRegistries.BLOCK_COMPONENT = event.create(new RegistryBuilder<>(CustomizationRegistries.BLOCK_COMPONENT_KEY));
 			Kiwi.registerRegistry(CustomizationRegistries.BLOCK_COMPONENT_KEY, KBlockComponent.Type.class);
@@ -214,21 +216,26 @@ public final class CustomizationHooks {
 		Preconditions.checkNotNull(clearGlassType, "Missing 'clear' glass type");
 		blockNamespaces.clear();
 		blockFundamentals.blocks().keySet().stream().map(ResourceLocation::getNamespace).forEach(blockNamespaces::add);
+		lenientBETypeNamespaces.clear();
+		lenientBETypeNamespaces.add(ResourceLocation.DEFAULT_NAMESPACE);
+		lenientBETypeNamespaces.addAll(blockNamespaces);
+		metadataMap.values().forEach(metadata -> lenientBETypeNamespaces.addAll(metadata.lenientBETypeNamespaces()));
 		List<ResourceLocation> blockIds = Lists.newArrayList();
-		CustomizationMetadata.sortedForEach(metadataMap, "block", blockFundamentals.blocks(), (id, definition) -> {
-			try {
-				Block block = definition.createBlock(id, blockFundamentals.shapes());
-				if (block == null) {
-					return;
-				}
-				Registry.register(BuiltInRegistries.BLOCK, id, block);
-				blockFundamentals.slotProviders().attachSlotsA(block, definition);
-				blockFundamentals.placeChoices().attachChoicesA(block, definition);
-				blockIds.add(id);
-			} catch (Exception e) {
-				Kiwi.LOGGER.error("Failed to create block %s".formatted(id), e);
-			}
-		});
+		CustomizationMetadata.sortedForEach(
+				metadataMap, "block", blockFundamentals.blocks(), (id, definition) -> {
+					try {
+						Block block = definition.createBlock(id, blockFundamentals.shapes());
+						if (block == null) {
+							return;
+						}
+						Registry.register(BuiltInRegistries.BLOCK, id, block);
+						blockFundamentals.slotProviders().attachSlotsA(block, definition);
+						blockFundamentals.placeChoices().attachChoicesA(block, definition);
+						blockIds.add(id);
+					} catch (Exception e) {
+						Kiwi.LOGGER.error("Failed to create block %s".formatted(id), e);
+					}
+				});
 		ItemFundamentals itemFundamentals = ItemFundamentals.reload(resourceManager, context, true);
 		for (ResourceLocation blockId : blockIds) {
 			if (!itemFundamentals.items().containsKey(blockId)) {
@@ -237,20 +244,21 @@ public final class CustomizationHooks {
 		}
 		KItemTemplate none = itemFundamentals.templates().get(ResourceLocation.withDefaultNamespace("none"));
 		Preconditions.checkNotNull(none, "Missing 'none' item definition");
-		CustomizationMetadata.sortedForEach(metadataMap, "item", itemFundamentals.items(), (id, definition) -> {
-			try {
-				if (definition.template().template() == none) {
-					return;
-				}
-				Item item = definition.createItem(id);
-				if (item == null) {
-					return;
-				}
-				Registry.register(BuiltInRegistries.ITEM, id, item);
-			} catch (Exception e) {
-				Kiwi.LOGGER.error("Failed to create item %s".formatted(id), e);
-			}
-		});
+		CustomizationMetadata.sortedForEach(
+				metadataMap, "item", itemFundamentals.items(), (id, definition) -> {
+					try {
+						if (definition.template().template() == none) {
+							return;
+						}
+						Item item = definition.createItem(id);
+						if (item == null) {
+							return;
+						}
+						Registry.register(BuiltInRegistries.ITEM, id, item);
+					} catch (Exception e) {
+						Kiwi.LOGGER.error("Failed to create item %s".formatted(id), e);
+					}
+				});
 		blockFundamentals.slotProviders().attachSlotsB();
 		blockFundamentals.placeChoices().attachChoicesB();
 		blockFundamentals.slotLinks().finish();
@@ -394,6 +402,10 @@ public final class CustomizationHooks {
 
 	public static Set<String> getBlockNamespaces() {
 		return blockNamespaces;
+	}
+
+	public static Set<String> getLenientBETypeNamespaces() {
+		return lenientBETypeNamespaces;
 	}
 
 	public static boolean isColorlessGlass(BlockState blockState) {
