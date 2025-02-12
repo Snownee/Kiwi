@@ -1,0 +1,6 @@
+stonecutter_from: obsidian
+stonecutter_exchange: true
+switch: {}
+blocks:
+  - obsidian
+  - crying_obsidian

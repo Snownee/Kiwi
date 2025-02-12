@@ -72,7 +72,6 @@ public final class TooltipEvents {
 			}
 			component.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, component.getString())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click"))).withInsertion(component.getString()));
 			mc.player.displayClientMessage(component, false);
-			mc.options.renderDebug = !mc.options.renderDebug;
 		}
 
 		if (KiwiClientConfig.nbtTooltip && Screen.hasShiftDown() && nbt != null) {

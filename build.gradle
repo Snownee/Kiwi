@@ -73,6 +73,9 @@ minecraft {
             // Recommended logging level for the console
             property 'forge.logging.console.level', 'debug'
 
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+
             mods {
                 kiwi {
                     source sourceSets.main
@@ -129,6 +132,7 @@ def excludes = [
         "/assets/kiwi/lang/en_us.existing.yaml",
         "/assets/kaleidos",
         "/assets/kswitch",
+        "/assets/test",
         "/snownee/kiwi/test",
         "/data",
         "/.cache",
@@ -236,6 +240,10 @@ repositories {
         name = "ModMaven"
         url = "https://modmaven.dev"
     }
+    maven {
+        name = "TerraformersMC"
+        url = "https://maven.terraformersmc.com/"
+    }
 }
 
 configurations {
@@ -287,6 +295,9 @@ dependencies {
 
     implementation fg.deobf("curse.maven:fastsuite-475117:4711435")
     implementation fg.deobf("curse.maven:placebo-283644:5414631")
+
+    compileOnly fg.deobf("dev.emi:emi-forge:${emi_version}:api")
+    runtimeOnly fg.deobf("dev.emi:emi-forge:${emi_version}")
 }
 
 processResources {
