@@ -30,6 +30,9 @@ public final class KiwiClientConfig {
 	@KiwiConfig.Path("debug.NBTTooltip")
 	public static boolean nbtTooltip = true;
 
+	@KiwiConfig.Path("debug.F3CopyInInventory")
+	public static boolean f3CopyInInventory = true;
+
 	@ConfigUI.Hide
 	@KiwiConfig.Path("debug.debugTooltipMsg")
 	public static boolean debugTooltipMsg = true;
