@@ -245,7 +245,7 @@ public final class CustomizationHooks {
 		KItemTemplate none = itemFundamentals.templates().get(ResourceLocation.withDefaultNamespace("none"));
 		Preconditions.checkNotNull(none, "Missing 'none' item definition");
 		CustomizationMetadata.sortedForEach(
-				metadataMap, "item", itemFundamentals.items(), (id, definition) -> {
+				metadataMap, List.of("item", "block"), itemFundamentals.items(), (id, definition) -> {
 					try {
 						if (definition.template().template() == none) {
 							return;
