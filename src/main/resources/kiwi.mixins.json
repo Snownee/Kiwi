@@ -31,6 +31,7 @@
 		"client.CreativeModeInventoryScreenMixin",
 		"client.FogRendererMixin",
 		"client.LoadingOverlayMixin",
+		"client.NeoForgeLoadingOverlayMixin",
 		"client.OptionInstanceMixin",
 		"client.ScreenEffectRendererMixin",
 		"client.ScreenMixin",

@@ -7,11 +7,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.LoadingOverlay;
+import net.neoforged.neoforge.client.loading.NeoForgeLoadingOverlay;
 import snownee.kiwi.KiwiClientConfig;
 
-@Mixin(LoadingOverlay.class)
-public class LoadingOverlayMixin {
+@Mixin(NeoForgeLoadingOverlay.class)
+public class NeoForgeLoadingOverlayMixin {
 	@Shadow
 	private long fadeOutStart;
 

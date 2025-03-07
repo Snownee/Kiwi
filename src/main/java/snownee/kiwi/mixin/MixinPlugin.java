@@ -45,17 +45,12 @@ public class MixinPlugin implements IMixinConfigPlugin {
 		if (mixinClassName.startsWith("snownee.kiwi.mixin.customization.")) {
 			return customization;
 		}
-		if (mixinClassName.equals("snownee.kiwi.mixin.client.CreativeModeInventoryScreenMixin")) {
-			return persistentCreativeInventory;
-		}
-		if (mixinClassName.equals("snownee.kiwi.mixin.client.OptionInstanceMixin")) {
-			return fastScrolling;
-		}
-		if (mixinClassName.equals("snownee.kiwi.mixin.client.FogRendererMixin") || mixinClassName.equals(
-				"snownee.kiwi.mixin.client.ScreenEffectRendererMixin")) {
-			return lavaClearView;
-		}
-		return true;
+		return switch (mixinClassName) {
+			case "snownee.kiwi.mixin.client.CreativeModeInventoryScreenMixin" -> persistentCreativeInventory;
+			case "snownee.kiwi.mixin.client.OptionInstanceMixin" -> fastScrolling;
+			case "snownee.kiwi.mixin.client.FogRendererMixin", "snownee.kiwi.mixin.client.ScreenEffectRendererMixin" -> lavaClearView;
+			default -> true;
+		};
 	}
 
 	@Override
