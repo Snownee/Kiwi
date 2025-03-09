@@ -1,38 +1,22 @@
-package snownee.kiwi.customization.compat.jei;
+package snownee.kiwi.customization.compat.rei;
 
 import java.util.List;
 
 import com.google.common.collect.Lists;
 
-import me.shedaniel.rei.plugincompatibilities.api.REIPluginCompatIgnore;
-import mezz.jei.api.IModPlugin;
-import mezz.jei.api.JeiPlugin;
-import mezz.jei.api.constants.RecipeTypes;
-import mezz.jei.api.registration.IRecipeRegistration;
-import net.minecraft.resources.ResourceLocation;
+import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
-import snownee.kiwi.Kiwi;
 import snownee.kiwi.customization.CustomizationHooks;
 import snownee.kiwi.customization.block.family.BlockFamilies;
 import snownee.kiwi.customization.block.family.BlockFamily;
 import snownee.kiwi.customization.block.family.StonecutterRecipeMaker;
 import snownee.kiwi.util.KHolder;
-import snownee.kiwi.util.NotNullByDefault;
 
-@JeiPlugin
-@REIPluginCompatIgnore
-@NotNullByDefault
-public class JEICompat implements IModPlugin {
-	public static final ResourceLocation ID = Kiwi.id("customization");
-
+public class REICompat implements REIClientPlugin {
 	@Override
-	public ResourceLocation getPluginUid() {
-		return ID;
-	}
-
-	@Override
-	public void registerRecipes(IRecipeRegistration registration) {
+	public void registerDisplays(DisplayRegistry registry) {
 		if (CustomizationHooks.isEnabled()) {
 			List<RecipeHolder<StonecutterRecipe>> recipes = Lists.newArrayList();
 			for (KHolder<BlockFamily> holder : BlockFamilies.all()) {
@@ -44,7 +28,9 @@ public class JEICompat implements IModPlugin {
 					recipes.addAll(StonecutterRecipeMaker.makeRecipes("exchange_in_viewer", holder));
 				}
 			}
-			registration.addRecipes(RecipeTypes.STONECUTTING, recipes);
+			for (RecipeHolder<StonecutterRecipe> recipe : recipes) {
+				registry.add(recipe);
+			}
 		}
 	}
 }
