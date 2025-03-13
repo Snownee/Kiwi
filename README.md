@@ -6,11 +6,11 @@ Kiwi is a Minecraft modding library designed to help developers focus on content
 
 ## Registration
 
-``` java
+```java
+
 @KiwiModule
 @KiwiModule.Category(Categories.BUILDING_BLOCKS)
-public class MyModule extends AbstractModule
-{
+public class MyModule extends AbstractModule {
     // Register a simple item. Kiwi will automatically register it
     public static final KiwiGO<Item> FIRST_ITEM = go(() -> new Item(itemProp().rarity(Rarity.EPIC)));
 
@@ -21,16 +21,14 @@ public class MyModule extends AbstractModule
 
 ## Conditional Loading
 
-``` java
+```java
 // This module will be loaded only when `dependency` mod is loaded
 @KiwiModule(value = "test", dependency = "modid")
 @KiwiModule.Optional
-public class MyAddon extends AbstractModule
-{
+public class MyAddon extends AbstractModule {
     // This method is called in FMLCommonSetupEvent
     @Override
-    public void init(InitEvent event)
-    {
+    public void init(InitEvent event) {
         // Do something
     }
 }
@@ -39,6 +37,7 @@ public class MyAddon extends AbstractModule
 ## Configuration
 
 ```java
+
 @KiwiConfig(type = ConfigType.COMMON)
 public class MyConfig {
     // Full Cloth Config integration. Translations are generated from data-gen

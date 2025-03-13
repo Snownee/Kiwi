@@ -32,7 +32,7 @@ public final class KiwiClientConfig {
 	@KiwiConfig.Path("debug.tagsTooltip")
 	public static boolean tagsTooltip = true;
 
-	@KiwiConfig.Path("debug.F3CopyInInventory")
+	@KiwiConfig.Path("qol.F3CopyInInventory")
 	public static boolean f3CopyInInventory = true;
 
 	@KiwiConfig.Path("debug.showTranslatedTagsByDefault")
