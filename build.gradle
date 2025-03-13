@@ -4,7 +4,7 @@ plugins {
     id 'idea'
     id 'maven-publish'
     id "me.shedaniel.unified-publishing" version "0.1.+"
-    id 'net.neoforged.gradle.userdev' version '7.0.161'
+    id 'net.neoforged.gradle.userdev' version '7.0.183'
     //id 'net.neoforged.gradle.mixin' version '7.0.145'
     //id "com.github.johnrengelman.shadow" version "8.1.1"
     id 'com.gradleup.shadow' version '8.3.0' // https://github.com/GradleUp/shadow/pull/876
@@ -57,16 +57,16 @@ runs {
         systemProperty 'forge.logging.console.level', 'debug'
 
         modSource project.sourceSets.main
-    }
-
-    client {
-        // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
-        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
 
         dependencies {
             runtime "org.yaml:snakeyaml:${project.snakeyaml_version}"
             runtime "com.ezylang:EvalEx:${project.evalex_version}"
         }
+    }
+
+    client {
+        // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
+        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
     }
 
     server {
@@ -97,6 +97,7 @@ def excludes = [
         "/assets/kaleidos",
         "/assets/kswitch",
         "/assets/test",
+        "/snownee/${project.mod_id}/datagen/KiwiDataGen.class",
         "/snownee/${project.mod_id}/test",
         "/data",
         "/.cache",
@@ -225,6 +226,7 @@ dependencies {
     shadowCommon("com.ezylang:EvalEx:${project.evalex_version}")
 
     jarJar(implementation("org.sinytra.forgified-fabric-api:fabric-api-base:0.4.42+d1308ded19"))
+    implementation "org.sinytra.forgified-fabric-api:forgified-fabric-api:0.107.0+2.0.25+1.21.1"
 
     implementation "dev.architectury:architectury-neoforge:${project.architectury_version}"
     implementation "me.shedaniel:RoughlyEnoughItems-neoforge:${project.rei_version}"

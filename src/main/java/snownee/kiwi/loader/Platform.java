@@ -2,6 +2,7 @@ package snownee.kiwi.loader;
 
 import java.nio.file.Path;
 import java.text.MessageFormat;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -46,6 +47,18 @@ public class Platform {
 			return LoadingModList.get().getModFileById(id) != null;
 		}
 		return modList.isLoaded(id);
+	}
+
+	public static String getModName(String id) {
+		return ModList.get().getModContainerById(id).orElseThrow().getModInfo().getDisplayName();
+	}
+
+	public static String getModDescription(String id) {
+		return ModList.get().getModContainerById(id).orElseThrow().getModInfo().getDescription();
+	}
+
+	public static Optional<Path> findResource(String id, String path) {
+		return Optional.of(ModList.get().getModContainerById(id).orElseThrow().getModInfo().getOwningFile().getFile().findResource(path));
 	}
 
 	public static boolean isPhysicalClient() {
