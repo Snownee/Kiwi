@@ -629,7 +629,7 @@ public class Kiwi {
 	}
 
 	private void onCommandsRegister(RegisterCommandsEvent event) {
-		KiwiCommand.register(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection());
+		KiwiCommand.register(event.getDispatcher());
 	}
 
 	private void postInit(InterModProcessEvent event) {

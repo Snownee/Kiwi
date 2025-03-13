@@ -13,6 +13,9 @@ public final class KiwiCommonConfig {
 		return vars.get(key) instanceof Boolean && (Boolean) vars.get(key);
 	}
 
+	@KiwiConfig.Path("eval.printExpression")
+	public static boolean evalPrintExpression = false;
+
 	@KiwiConfig.Path("kSwitch.creativeOnly")
 	public static boolean kSwitchCreativeOnly;
 }

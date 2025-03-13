@@ -2,7 +2,6 @@ package snownee.kiwi.loader;
 
 import java.nio.file.Path;
 import java.text.MessageFormat;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -120,16 +119,10 @@ public class Platform {
 		return Tags.getTagTranslationKey(tagKey);
 	}
 
-	public static int getVersionNumber(String id) {
+	public static int[] getVersionNumber(String id) {
 		ModContainer container = ModList.get().getModContainerById(id).orElseThrow();
 		ArtifactVersion version = container.getModInfo().getVersion();
-		List<Integer> versions = List.of(version.getMajorVersion(), version.getMinorVersion(), version.getIncrementalVersion());
-		int result = 0;
-		for (int i : versions) {
-			int group = Math.min(i, 99);
-			result = result * 100 + group;
-		}
-		return result;
+		return new int[]{version.getMajorVersion(), version.getMinorVersion(), version.getIncrementalVersion()};
 	}
 
 	public static Platform.Type getPlatform() {

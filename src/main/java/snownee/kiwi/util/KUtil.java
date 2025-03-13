@@ -33,7 +33,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -59,7 +62,6 @@ public final class KUtil {
 	private static final Yaml YAML;
 	private static RecipeManager recipeManager;
 	public static final List<Direction> DIRECTIONS = Direction.stream().toList();
-	public static final List<Direction> HORIZONTAL_DIRECTIONS = Direction.Plane.HORIZONTAL.stream().toList();
 
 	static {
 		DumperOptions dumperOptions = new DumperOptions();
@@ -68,10 +70,6 @@ public final class KUtil {
 	}
 
 	private KUtil() {
-	}
-
-	public static String color(int color) {
-		return String.format("\u00A7x%06x", color & 0x00FFFFFF);
 	}
 
 	public static String formatComma(long number) {
@@ -336,6 +334,13 @@ public final class KUtil {
 			}
 		}
 		return InteractionResult.PASS;
+	}
+
+	public static MutableComponent clickToCopy(MutableComponent component) {
+		String str = component.getString();
+		return component.withStyle(s -> s.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, str))
+				.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click")))
+				.withInsertion(str));
 	}
 
 	public static <T> T loadYaml(String yaml, Class<? super T> type) {

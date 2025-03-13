@@ -19,7 +19,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.ClickEvent.Action;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.tags.TagKey;
@@ -35,6 +34,7 @@ import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.item.ModItem;
 import snownee.kiwi.loader.Platform;
+import snownee.kiwi.util.KUtil;
 
 public final class TooltipEvents {
 	public static final String disableDebugTooltipCommand = "@kiwi disable debugTooltip";
@@ -66,11 +66,7 @@ public final class TooltipEvents {
 			latestPressF3 = millis;
 			MutableComponent component = Component.literal(BuiltInRegistries.ITEM.getKey(itemStack.getItem()).toString());
 			mc.keyboardHandler.setClipboard(component.getString());
-			component.withStyle(style -> style.withClickEvent(new ClickEvent(Action.COPY_TO_CLIPBOARD, component.getString()))
-					.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click")))
-					.withInsertion(component.getString()));
-			mc.player.displayClientMessage(component, false);
-			mc.gui.getDebugOverlay().toggleOverlay();
+			mc.player.displayClientMessage(KUtil.clickToCopy(component), false);
 		}
 
 		if (KiwiClientConfig.hideDataComponentsTooltip) {
