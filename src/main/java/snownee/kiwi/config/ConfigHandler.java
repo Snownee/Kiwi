@@ -14,9 +14,11 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.EnumUtils;
@@ -24,9 +26,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonSyntaxException;
 
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Mth;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiModule.Skip;
@@ -38,9 +45,12 @@ import snownee.kiwi.config.KiwiConfig.Range;
 import snownee.kiwi.config.KiwiConfig.Translation;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.KUtil;
+import snownee.kiwi.util.NotNullByDefault;
 
+@NotNullByDefault
 public class ConfigHandler {
 
+	public static final Component RESTART = Component.translatable("kiwi.config.requiresRestart").withStyle(ChatFormatting.RED);
 	public static final String FILE_EXTENSION = ".yaml";
 	private final String modId;
 	private final String fileName;
@@ -50,7 +60,7 @@ public class ConfigHandler {
 	private final Map<String, Value<?>> valueMap = Maps.newLinkedHashMap();
 	private boolean hasModules;
 
-	public ConfigHandler(String modId, String fileName, ConfigType type, Class<?> clazz, boolean hasModules) {
+	public ConfigHandler(String modId, String fileName, ConfigType type, @Nullable Class<?> clazz, boolean hasModules) {
 		this.hasModules = hasModules;
 		this.modId = modId;
 		this.clazz = clazz;
@@ -107,6 +117,7 @@ public class ConfigHandler {
 		return map;
 	}
 
+	@Nullable
 	private static Object convert(Field field) {
 		try {
 			Class<?> type = field.getType();
@@ -137,7 +148,7 @@ public class ConfigHandler {
 				return defaultVal;
 			}
 			return field.get(null);
-		} catch (Exception e) {
+		} catch (Exception ignored) {
 		}
 		return null;
 	}
@@ -209,11 +220,14 @@ public class ConfigHandler {
 		for (Value<?> value : valueMap.values()) {
 			List<String> path = List.of(value.path.split("\\."));
 			Object v = value.field == null ? value.value : convert(value.field);
+			if (v == null) {
+				continue;
+			}
 			value.accept(v);
 			if (v instanceof Enum) {
 				v = ((Enum<?>) v).name();
 			}
-			getEndMap(map, path).put(path.get(path.size() - 1), v);
+			getEndMap(map, path).put(path.getLast(), v);
 		}
 		try (FileWriter writer = new FileWriter(configPath.toFile(), StandardCharsets.UTF_8)) {
 			writer.append("# Use Cloth Config mod for the descriptions.");
@@ -325,6 +339,7 @@ public class ConfigHandler {
 		}
 	}
 
+	@Nullable
 	public Class<?> getClazz() {
 		return clazz;
 	}
@@ -399,6 +414,32 @@ public class ConfigHandler {
 			this.translation = translation;
 		}
 
+		public Optional<Component[]> createComment() {
+			KiwiConfig.PerformanceImpact performanceAnnotation = getAnnotation(KiwiConfig.PerformanceImpact.class);
+			Component performance = null;
+			if (performanceAnnotation != null) {
+				String name = performanceAnnotation.value().name().toLowerCase(Locale.ENGLISH);
+				performance = Component.translatable(
+						"kiwi.config.performanceImpact",
+						Component.translatable("kiwi.config." + name).withStyle(ChatFormatting.GREEN)).withColor(0xf5e1a9);
+			}
+			List<Component> tooltip = Lists.newArrayList();
+			String key = translation + ".desc";
+			if (I18n.exists(key) && !I18n.get(key).isEmpty()) {
+				MutableComponent component = Component.translatable(key);
+				if (performance != null) {
+					component.append(" ").append(performance);
+				}
+				tooltip.add(component);
+			} else if (performance != null) {
+				tooltip.add(performance);
+			}
+			if (requiresRestart) {
+				tooltip.add(RESTART);
+			}
+			return tooltip.isEmpty() ? Optional.empty() : Optional.of(tooltip.toArray(Component[]::new));
+		}
+
 		public T get() {
 			return value;
 		}
@@ -414,22 +455,22 @@ public class ConfigHandler {
 					int min = Double.isNaN(this.min) ? Integer.MIN_VALUE : (int) this.min;
 					int max = Double.isNaN(this.max) ? Integer.MAX_VALUE : (int) this.max;
 					int value = ((Number) $).intValue();
-					$ = Integer.valueOf(Mth.clamp(value, min, max));
+					$ = Mth.clamp(value, min, max);
 				} else if (type == float.class) {
 					float min = Double.isNaN(this.min) ? Float.MIN_VALUE : (float) this.min;
 					float max = Double.isNaN(this.max) ? Float.MAX_VALUE : (float) this.max;
 					float value = ((Number) $).floatValue();
-					$ = Float.valueOf(Mth.clamp(value, min, max));
+					$ = Mth.clamp(value, min, max);
 				} else if (type == double.class) {
 					double min = Double.isNaN(this.min) ? Double.MIN_VALUE : this.min;
 					double max = Double.isNaN(this.max) ? Double.MAX_VALUE : this.max;
 					double value = ((Number) $).doubleValue();
-					$ = Double.valueOf(Mth.clamp(value, min, max));
+					$ = Mth.clamp(value, min, max);
 				} else if (type == long.class) {
 					long min = Double.isNaN(this.min) ? Long.MIN_VALUE : (long) this.min;
 					long max = Double.isNaN(this.max) ? Long.MAX_VALUE : (long) this.max;
 					long value = ((Number) $).longValue();
-					$ = Long.valueOf(Math.min(Math.max(value, min), max));
+					$ = Math.min(Math.max(value, min), max);
 				}
 				if (field != null) {
 					if (type == boolean.class) {

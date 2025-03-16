@@ -28,7 +28,6 @@ import me.shedaniel.clothconfig2.impl.builders.StringListBuilder;
 import me.shedaniel.clothconfig2.impl.builders.SubCategoryBuilder;
 import me.shedaniel.clothconfig2.impl.builders.TextDescriptionBuilder;
 import me.shedaniel.clothconfig2.impl.builders.TextFieldBuilder;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
@@ -50,7 +49,6 @@ public class ClothConfigIntegration {
 			true,
 			false,
 			true);
-	private static final Component requiresRestart = Component.translatable("kiwi.config.requiresRestart").withStyle(ChatFormatting.RED);
 
 	@Nullable
 	public static Screen create(Screen parent, String namespace) {
@@ -77,21 +75,22 @@ public class ClothConfigIntegration {
 				}
 
 				List<String> path = Lists.newArrayList(value.path.split("\\."));
-				titleKey = path.remove(path.size() - 1);
+				titleKey = path.removeLast();
 				String subCatKey = String.join(".", path);
-				Consumer<AbstractConfigListEntry<?>> subCat = subCatsMap.computeIfAbsent(subCatKey, $ -> {
-					String key0 = namespace + ".config." + $;
-					Component title0;
-					if (I18n.exists(key0)) {
-						title0 = Component.translatable(key0);
-					} else {
-						title0 = Component.literal(KUtil.friendlyText(path.get(path.size() - 1)));
-					}
-					SubCategoryBuilder builder0 = entryBuilder.startSubCategory(title0);
-					builder0.setExpanded(true);
-					subCats.add(builder0);
-					return builder0::add;
-				});
+				Consumer<AbstractConfigListEntry<?>> subCat = subCatsMap.computeIfAbsent(
+						subCatKey, $ -> {
+							String key0 = namespace + ".config." + $;
+							Component title0;
+							if (I18n.exists(key0)) {
+								title0 = Component.translatable(key0);
+							} else {
+								title0 = Component.literal(KUtil.friendlyText(path.getLast()));
+							}
+							SubCategoryBuilder builder0 = entryBuilder.startSubCategory(title0);
+							builder0.setExpanded(true);
+							subCats.add(builder0);
+							return builder0::add;
+						});
 
 				TextDescription description = value.getAnnotation(TextDescription.class);
 				putDescription(subCat, entryBuilder, description, false);
@@ -105,7 +104,7 @@ public class ClothConfigIntegration {
 				Class<?> type = value.getType();
 				if (type == boolean.class) {
 					BooleanToggleBuilder toggle = entryBuilder.startBooleanToggle(title, (Boolean) value.value);
-					toggle.setTooltip(createComment(value));
+					toggle.setTooltip(value.createComment());
 					toggle.setSaveConsumer(value::accept);
 					toggle.setDefaultValue((Boolean) value.defValue);
 					entry = toggle.build();
@@ -114,7 +113,7 @@ public class ClothConfigIntegration {
 					if (color != null) {
 						ColorFieldBuilder field = entryBuilder.startAlphaColorField(title, (Integer) value.value);
 						field.setAlphaMode(color.alpha());
-						field.setTooltip(createComment(value));
+						field.setTooltip(value.createComment());
 						field.setSaveConsumer(value::accept);
 						field.setDefaultValue((Integer) value.defValue);
 						entry = field.build();
@@ -124,13 +123,13 @@ public class ClothConfigIntegration {
 								(Integer) value.value,
 								(int) value.min,
 								(int) value.max);
-						field.setTooltip(createComment(value));
+						field.setTooltip(value.createComment());
 						field.setSaveConsumer(value::accept);
 						field.setDefaultValue((Integer) value.defValue);
 						entry = field.build();
 					} else {
 						IntFieldBuilder field = entryBuilder.startIntField(title, (Integer) value.value);
-						field.setTooltip(createComment(value));
+						field.setTooltip(value.createComment());
 						if (!Double.isNaN(value.min)) {
 							field.setMin((int) value.min);
 						}
@@ -143,7 +142,7 @@ public class ClothConfigIntegration {
 					}
 				} else if (type == double.class) {
 					DoubleFieldBuilder field = entryBuilder.startDoubleField(title, (Double) value.value);
-					field.setTooltip(createComment(value));
+					field.setTooltip(value.createComment());
 					if (!Double.isNaN(value.min)) {
 						field.setMin(value.min);
 					}
@@ -155,7 +154,7 @@ public class ClothConfigIntegration {
 					entry = field.build();
 				} else if (type == float.class) {
 					FloatFieldBuilder field = entryBuilder.startFloatField(title, (Float) value.value);
-					field.setTooltip(createComment(value));
+					field.setTooltip(value.createComment());
 					if (!Double.isNaN(value.min)) {
 						field.setMin((float) value.min);
 					}
@@ -172,13 +171,13 @@ public class ClothConfigIntegration {
 								(Long) value.value,
 								(long) value.min,
 								(long) value.max);
-						field.setTooltip(createComment(value));
+						field.setTooltip(value.createComment());
 						field.setSaveConsumer(value::accept);
 						field.setDefaultValue((Long) value.defValue);
 						entry = field.build();
 					} else {
 						LongFieldBuilder field = entryBuilder.startLongField(title, (Long) value.value);
-						field.setTooltip(createComment(value));
+						field.setTooltip(value.createComment());
 						if (!Double.isNaN(value.min)) {
 							field.setMin((long) value.min);
 						}
@@ -191,7 +190,7 @@ public class ClothConfigIntegration {
 					}
 				} else if (type == String.class) {
 					TextFieldBuilder field = entryBuilder.startTextField(title, (String) value.value);
-					field.setTooltip(createComment(value));
+					field.setTooltip(value.createComment());
 					field.setSaveConsumer(value::accept);
 					field.setDefaultValue((String) value.defValue);
 					entry = field.build();
@@ -214,7 +213,7 @@ public class ClothConfigIntegration {
 						if ($ instanceof LocalizableItem item && item.getDescription() != null) {
 							tooltip.add(item.getDisplayName().copy().append(" - ").append(item.getDescription()));
 						}
-						createComment(value).map(Arrays::asList).ifPresent(tooltip::addAll);
+						value.createComment().map(Arrays::asList).ifPresent(tooltip::addAll);
 						return tooltip.isEmpty() ? Optional.empty() : Optional.of(tooltip.toArray(Component[]::new));
 					});
 					entry = field.build();
@@ -222,7 +221,7 @@ public class ClothConfigIntegration {
 					Typed typed = value.field.getAnnotation(Typed.class);
 					if (typed != null && typed.value() == String.class) {
 						StringListBuilder field = entryBuilder.startStrList(title, (List<String>) value.value);
-						field.setTooltip(createComment(value));
+						field.setTooltip(value.createComment());
 						field.setSaveConsumer(value::accept);
 						field.setDefaultValue((List<String>) value.defValue);
 						entry = field.build();
@@ -252,18 +251,6 @@ public class ClothConfigIntegration {
 		Component component = Component.translatable(description.value());
 		TextDescriptionBuilder builder = entryBuilder.startTextDescription(component);
 		subCat.accept(builder.build());
-	}
-
-	private static Optional<Component[]> createComment(Value<?> value) {
-		List<Component> tooltip = Lists.newArrayList();
-		String key = value.translation + ".desc";
-		if (I18n.exists(key) && !I18n.get(key).isEmpty()) {
-			tooltip.add(Component.translatable(key));
-		}
-		if (value.requiresRestart) {
-			tooltip.add(requiresRestart);
-		}
-		return tooltip.isEmpty() ? Optional.empty() : Optional.of(tooltip.toArray(Component[]::new));
 	}
 
 	public static ConfigLibAttributes attributes() {

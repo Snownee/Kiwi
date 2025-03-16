@@ -26,6 +26,10 @@ public @interface KiwiConfig {
 		}
 	}
 
+	enum PerformanceType {
+		NONE, LOW, MEDIUM, HIGH
+	}
+
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.FIELD)
 	@interface Translation {
@@ -48,6 +52,12 @@ public @interface KiwiConfig {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.FIELD)
 	@interface GameRestart {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.FIELD)
+	@interface PerformanceImpact {
+		PerformanceType value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
