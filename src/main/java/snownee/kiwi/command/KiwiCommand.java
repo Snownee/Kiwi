@@ -1,7 +1,9 @@
 package snownee.kiwi.command;
 
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 
 import com.ezylang.evalex.Expression;
 import com.ezylang.evalex.data.EvaluationValue;
@@ -9,21 +11,21 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
-import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import snownee.kiwi.Kiwi;
+import snownee.kiwi.KiwiCommonConfig;
 import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.KEval;
+import snownee.kiwi.util.KUtil;
 
 public class KiwiCommand {
 
-	public static void register(
-			CommandDispatcher<CommandSourceStack> dispatcher,
-			CommandBuildContext registryAccess,
-			Commands.CommandSelection environment) {
+	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal(Kiwi.ID);
 		/* off */
 		builder.then(Commands
@@ -52,8 +54,15 @@ public class KiwiCommand {
 		builder.then(Commands
 				.literal("eval")
 				.requires(ctx -> ctx.hasPermission(2))
+				.executes(ctx -> evalHelp(ctx.getSource(), CommandSourceStack::sendFailure))
 				.then(Commands.argument("expression", StringArgumentType.greedyString())
-						.executes(ctx -> eval(ctx.getSource(), StringArgumentType.getString(ctx, "expression")))
+						.executes(ctx -> eval(
+								StringArgumentType.getString(ctx, "expression"),
+								KiwiCommonConfig.evalPrintExpression,
+								ctx.getSource(),
+								(source, msg) -> source.sendSuccess(() -> msg, false),
+								CommandSourceStack::sendFailure)
+						)
 				)
 		);
 		/* on */
@@ -82,22 +91,40 @@ public class KiwiCommand {
 		return 1;
 	}
 
-	private static int eval(CommandSourceStack source, String expString) {
+	public static <T> int evalHelp(T ctx, BiConsumer<T, Component> send) {
+		String url = "https://github.com/Snownee/Kiwi/wiki/Eval-Guide";
+		send.accept(ctx,
+				Component.literal(url)
+						.withStyle(s -> s.withUnderlined(true).withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url))));
+		return 0;
+	}
+
+	public static <T> int eval(
+			String expString,
+			boolean print,
+			T source,
+			BiConsumer<T, Component> sendSuccess,
+			BiConsumer<T, Component> sendFailure) {
 		try {
+			if (print) {
+				sendSuccess.accept(source, Component.literal(">>> " + expString).withStyle(ChatFormatting.GREEN));
+			}
 			EvaluationValue value = new Expression(expString, KEval.config()).evaluate();
 			String s;
 			if (value.isNumberValue()) {
-				s = value.getNumberValue().toPlainString();
+				s = new DecimalFormat("###,###.#####").format(value.getNumberValue());
+			} else if (value.isExpressionNode() || value.isBinaryValue()) {
+				s = "[%s]".formatted(value.getDataType());
 			} else {
 				s = Objects.toString(value.getValue());
 			}
-			source.sendSuccess(() -> Component.literal(s), false);
+			sendSuccess.accept(source, KUtil.clickToCopy(Component.literal(s)));
 			return value.isNullValue() ? 0 : value.getNumberValue().intValue();
 		} catch (Throwable e) {
 			if (!Platform.isProduction()) {
 				Kiwi.LOGGER.error(expString, e);
 			}
-			source.sendFailure(Component.literal(e.getLocalizedMessage()));
+			sendFailure.accept(source, Component.literal("%s - %s".formatted(e, e.getLocalizedMessage())));
 			return 0;
 		}
 	}

@@ -19,7 +19,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.ClickEvent.Action;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.tags.TagKey;
@@ -31,11 +30,11 @@ import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.item.ModItem;
 import snownee.kiwi.loader.Platform;
+import snownee.kiwi.util.KUtil;
 
 public final class TooltipEvents {
 	public static final String disableDebugTooltipCommand = "@kiwi disable debugTooltip";
@@ -56,23 +55,18 @@ public final class TooltipEvents {
 	}
 
 	public static void debugTooltip(ItemStack itemStack, List<Component> tooltip, TooltipFlag flag) {
-		if (!Kiwi.areTagsUpdated() || !flag.isAdvanced()) {
+		if (!flag.isAdvanced()) {
 			return;
 		}
 
 		Minecraft mc = Minecraft.getInstance();
 		long millis = Util.getMillis();
-		if (mc.player != null && millis - latestPressF3 > 500 && InputConstants.isKeyDown(
-				Minecraft.getInstance().getWindow().getWindow(),
-				InputConstants.KEY_F3)) {
+		if (KiwiClientConfig.f3CopyInInventory && mc.player != null && millis - latestPressF3 > 500 &&
+				InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), InputConstants.KEY_F3)) {
 			latestPressF3 = millis;
 			MutableComponent component = Component.literal(BuiltInRegistries.ITEM.getKey(itemStack.getItem()).toString());
 			mc.keyboardHandler.setClipboard(component.getString());
-			component.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, component.getString()))
-					.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click")))
-					.withInsertion(component.getString()));
-			mc.player.displayClientMessage(component, false);
-			mc.gui.getDebugOverlay().toggleOverlay();
+			mc.player.displayClientMessage(KUtil.clickToCopy(component), false);
 		}
 
 		if (KiwiClientConfig.hideDataComponentsTooltip) {

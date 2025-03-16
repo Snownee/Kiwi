@@ -219,7 +219,7 @@ public class ClothConfigIntegration {
 					entry = field.build();
 				} else if (value.field != null && List.class.isAssignableFrom(type)) {
 					Typed typed = value.field.getAnnotation(Typed.class);
-					if (typed.value() == String.class) {
+					if (typed != null && typed.value() == String.class) {
 						StringListBuilder field = entryBuilder.startStrList(title, (List<String>) value.value);
 						field.setTooltip(createComment(value));
 						field.setSaveConsumer(value::accept);

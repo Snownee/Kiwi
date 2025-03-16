@@ -26,7 +26,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -52,7 +55,6 @@ public final class KUtil {
 	private static final Yaml YAML;
 	private static RecipeManager recipeManager;
 	public static final List<Direction> DIRECTIONS = Direction.stream().toList();
-	public static final List<Direction> HORIZONTAL_DIRECTIONS = Direction.Plane.HORIZONTAL.stream().toList();
 
 	static {
 		DumperOptions dumperOptions = new DumperOptions();
@@ -283,6 +285,13 @@ public final class KUtil {
 			}
 		}
 		return InteractionResult.PASS;
+	}
+
+	public static MutableComponent clickToCopy(MutableComponent component) {
+		String str = component.getString();
+		return component.withStyle(s -> s.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, str))
+				.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click")))
+				.withInsertion(str));
 	}
 
 	public static <T> T loadYaml(String yaml, Class<? super T> type) {

@@ -237,7 +237,7 @@ public final class VoxelUtil {
 	}
 
 	public static void setShape(VoxelShape shape, VoxelShape[] dest, boolean verticalAxis, boolean invert) {
-		List<Direction> dirs = verticalAxis ? KUtil.DIRECTIONS : KUtil.HORIZONTAL_DIRECTIONS;
+		Iterable<Direction> dirs = verticalAxis ? KUtil.DIRECTIONS : Direction.Plane.HORIZONTAL;
 		for (Direction side : dirs) {
 			dest[verticalAxis ? side.ordinal() : side.ordinal() - 2] = verticalAxis ? VoxelUtil.rotate(
 					shape,

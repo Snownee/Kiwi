@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.Locale;
 
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
@@ -26,6 +29,10 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import snownee.kiwi.Kiwi;
+import snownee.kiwi.command.ClientCommandContext;
+import snownee.kiwi.command.KalcCommand;
+import snownee.kiwi.command.KiwiClientCommand;
 
 public final class ClientPlatform {
 	private ClientPlatform() {
@@ -69,5 +76,14 @@ public final class ClientPlatform {
 
 	public static Locale getLocale() {
 		return Locale.getDefault();
+	}
+
+	public static void init() {
+		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
+			ClientCommandContext<FabricClientCommandSource> context = new ClientCommandContext<>(registryAccess);
+			dispatcher.register(KiwiClientCommand.create(context));
+			dispatcher.register(KalcCommand.create(context));
+		});
+		ClientLifecycleEvents.CLIENT_STARTED.register(Kiwi::clientInit);
 	}
 }
