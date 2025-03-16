@@ -15,6 +15,7 @@ import snownee.kiwi.config.KiwiConfig.Range;
 @KiwiConfig(value = "test", type = ConfigType.COMMON)
 public class TestConfig {
 
+	@KiwiConfig.PerformanceImpact(KiwiConfig.PerformanceType.HIGH)
 	public static int intValue = 5;
 
 	@Range(min = 0, max = 114514)
