@@ -7,7 +7,11 @@
 	"refmap": "kiwi.refmap.json",
 	"mixins": [
 		"RecipeManagerMixin",
-		"ReloadableServerResourcesMixin"
+		"ReloadableServerResourcesMixin",
+		"codec.Ingredient_ItemValueMixin",
+		"codec.Ingredient_TagValueMixin",
+		"codec.Ingredient_ValueMixin",
+		"codec.IngredientMixin"
 	],
 	"client": [
 		"client.ClientPacketListenerMixin",
