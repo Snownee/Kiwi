@@ -2,6 +2,7 @@ package snownee.kiwi.loader;
 
 import java.nio.file.Path;
 import java.text.MessageFormat;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,6 +38,18 @@ public final class Platform {
 
 	public static boolean isModLoaded(String id) {
 		return FabricLoader.getInstance().isModLoaded(id);
+	}
+
+	public static String getModName(String id) {
+		return FabricLoader.getInstance().getModContainer(id).orElseThrow().getMetadata().getName();
+	}
+
+	public static String getModDescription(String id) {
+		return FabricLoader.getInstance().getModContainer(id).orElseThrow().getMetadata().getDescription();
+	}
+
+	public static Optional<Path> findResource(String id, String path) {
+		return FabricLoader.getInstance().getModContainer(id).orElseThrow().findPath(path);
 	}
 
 	public static boolean isPhysicalClient() {

@@ -18,7 +18,6 @@ import com.google.gson.JsonObject;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
-import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
@@ -37,9 +36,12 @@ import snownee.kiwi.KiwiModule;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.ConfigUI;
 import snownee.kiwi.config.KiwiConfigManager;
+import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.GameObjectLookup;
 import snownee.kiwi.util.KUtil;
+import snownee.kiwi.util.NotNullByDefault;
 
+@NotNullByDefault
 public class KiwiLanguageProvider extends FabricLanguageProvider {
 	protected final String languageCode;
 	protected final CompletableFuture<HolderLookup.Provider> registryLookup;
@@ -59,8 +61,8 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 	}
 
 	public Optional<Path> createPath(String path, String extension) {
-		return this.dataOutput.getModContainer()
-				.findPath("assets/%s/lang/%s.%s".formatted(dataOutput.getModId(), path, extension));
+		String modId = dataOutput.getModId();
+		return Platform.findResource(modId, "assets/%s/lang/%s.%s".formatted(modId, path, extension));
 	}
 
 	public void putExistingTranslations(FabricLanguageProvider.TranslationBuilder translationBuilder) {
@@ -194,10 +196,9 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 	}
 
 	protected void generateModNameAndDescription(Map<String, String> translationEntries) {
-		ModContainer container = dataOutput.getModContainer();
 		String modId = dataOutput.getModId();
-		translationEntries.put("modmenu.nameTranslation.%s".formatted(modId), container.getMetadata().getName());
-		translationEntries.put("modmenu.descriptionTranslation.%s".formatted(modId), container.getMetadata().getDescription());
+		translationEntries.put("modmenu.nameTranslation.%s".formatted(modId), Platform.getModName(modId));
+		translationEntries.put("modmenu.descriptionTranslation.%s".formatted(modId), Platform.getModDescription(modId));
 	}
 
 	protected <T> void generateGameObjectEntries(
