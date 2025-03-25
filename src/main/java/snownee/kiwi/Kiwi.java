@@ -441,6 +441,9 @@ public class Kiwi {
 		conditions.clear();
 		conditions = null;
 
+		KiwiModules.fire(KiwiModuleContainer::addRegistries);
+		ModLoadingContext.get().setActiveContainer(null);
+
 		for (KiwiModuleContainer container : KiwiModules.get()) {
 			container.loadGameObjects(registryLookup);
 		}
