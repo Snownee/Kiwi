@@ -26,17 +26,17 @@ public class BuilderRules {
 	}
 
 	public static int reload(ResourceManager resourceManager, OneTimeLoader.Context context) {
-		Map<ResourceLocation, BuilderRule> families = OneTimeLoader.load(resourceManager, "kiwi/builder_rule", BuilderRule.CODEC, context);
+		Map<ResourceLocation, BuilderRule> families = OneTimeLoader.load(resourceManager, "kiwi/builder_rule", BuilderRule.DIRECT_CODEC, context);
 
-		if (!Platform.isProduction()) {
-			BlockSpread blockSpread = new BlockSpread(BlockSpread.Type.PLANE_Y, FacingLimitation.FrontAndBack, 16);
-			BlockFamily family = Objects.requireNonNull(BlockFamilies.get(ResourceLocation.parse("test:wool")));
-			families.put(ResourceLocation.parse("wool"), new ReplaceInHandRule(Map.of(family, family), blockSpread));
-
-			blockSpread = new BlockSpread(BlockSpread.Type.PLANE_Y, FacingLimitation.None, 16);
-			family = Objects.requireNonNull(BlockFamilies.get(ResourceLocation.parse("test:fence_gate")));
-			families.put(ResourceLocation.parse("fence_gate"), new CyclePropertyRule(Map.of(family, "open"), blockSpread));
-		}
+//		if (!Platform.isProduction()) {
+//			BlockSpread blockSpread = new BlockSpread(BlockSpread.Type.PLANE_Y, FacingLimitation.FrontAndBack, 16);
+//			BlockFamily family = Objects.requireNonNull(BlockFamilies.get(ResourceLocation.parse("test:wool")));
+//			families.put(ResourceLocation.parse("wool"), new ReplaceInHandRule(Map.of(family, family), blockSpread));
+//
+//			blockSpread = new BlockSpread(BlockSpread.Type.PLANE_Y, FacingLimitation.None, 16);
+//			family = Objects.requireNonNull(BlockFamilies.get(ResourceLocation.parse("test:fence_gate")));
+//			families.put(ResourceLocation.parse("fence_gate"), new CyclePropertyRule(Map.of(family, "open"), blockSpread));
+//		}
 
 		byId = families.entrySet()
 				.stream()

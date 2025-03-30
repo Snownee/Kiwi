@@ -12,19 +12,42 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.Nullable;
 
+import com.google.common.collect.Interner;
+import com.google.common.collect.Interners;
 import com.google.common.collect.Lists;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import it.unimi.dsi.fastutil.longs.LongAVLTreeSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import snownee.kiwi.customization.block.KBlockUtils;
+import snownee.kiwi.util.NotNullByDefault;
 
+@NotNullByDefault
 public record BlockSpread(Type type, FacingLimitation facingLimitation, int maxDistance) {
+	public static final Codec<BlockSpread> CODEC = Codec.withAlternative(
+			RecordCodecBuilder.create(instance -> instance.group(
+							Type.CODEC.fieldOf("type").forGetter(BlockSpread::type),
+							StringRepresentable.fromEnum(FacingLimitation::values)
+									.optionalFieldOf("facing_limit", FacingLimitation.None)
+									.forGetter(BlockSpread::facingLimitation),
+							ExtraCodecs.POSITIVE_INT.optionalFieldOf("max_distance", 16).forGetter(BlockSpread::maxDistance))
+					.apply(instance, BlockSpread::create)),
+			Type.CODEC.xmap(type -> BlockSpread.create(type, FacingLimitation.None, 16), BlockSpread::type));
+
+	private static final Interner<BlockSpread> INTERNER = Interners.newStrongInterner();
+
+	public static BlockSpread create(Type type, FacingLimitation facingLimitation, int maxDistance) {
+		return INTERNER.intern(new BlockSpread(type, facingLimitation, maxDistance));
+	}
 
 	public List<BlockPos> collect(
 			UseOnContext context,
@@ -89,7 +112,8 @@ public record BlockSpread(Type type, FacingLimitation facingLimitation, int maxD
 			BlockPos origin,
 			Predicate<BlockState> blockPredicate,
 			Direction direction,
-			Direction direction2, @Nullable BiConsumer<BlockPos, BlockState> blockConsumer) {
+			Direction direction2,
+			@Nullable BiConsumer<BlockPos, BlockState> blockConsumer) {
 		List<BlockPos> list = Lists.newArrayList(origin);
 		PosIterator iterator = new PlacePosIterator(origin, maxDistance, direction, direction2);
 		while (iterator.hasNext()) {
@@ -110,8 +134,15 @@ public record BlockSpread(Type type, FacingLimitation facingLimitation, int maxD
 		return list;
 	}
 
-	public enum Type {
-		PLANE_Y, PLANE_XZ, PLANE_XYZ
+	public enum Type implements StringRepresentable {
+		PLANE_Y, PLANE_XZ, PLANE_XYZ;
+
+		public static final Codec<Type> CODEC = StringRepresentable.fromEnum(Type::values);
+
+		@Override
+		public String getSerializedName() {
+			return name().toLowerCase(Locale.ENGLISH);
+		}
 	}
 
 	abstract static class PosIterator implements Iterator<BlockPos> {
@@ -135,7 +166,7 @@ public record BlockSpread(Type type, FacingLimitation facingLimitation, int maxD
 
 		@Override
 		public BlockPos next() {
-			return queue.poll();
+			return Objects.requireNonNull(queue.poll());
 		}
 
 		public void add(BlockPos cur, @Nullable BlockPos from) {

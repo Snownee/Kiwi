@@ -2,10 +2,14 @@ package snownee.kiwi.customization.builder;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+
 import net.minecraft.core.BlockPos;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -15,12 +19,21 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.customization.block.family.BlockFamily;
+import snownee.kiwi.util.codec.KCodecs;
 
 public record ReplaceInHandRule(Map<BlockFamily, Object> families, BlockSpread spread) implements BuilderRule {
+	public static final MapCodec<ReplaceInHandRule> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+					KCodecs.compactList(BlockFamily.DIRECT_CODEC).fieldOf("family").forGetter($ -> List.copyOf($.families().keySet())),
+					BlockSpread.CODEC.fieldOf("spread").forGetter(ReplaceInHandRule::spread))
+			.apply(instance, ReplaceInHandRule::new));
+
+	public ReplaceInHandRule(List<BlockFamily> families, BlockSpread spread) {
+		this(families.stream().collect(Collectors.toMap(Function.identity(), Function.identity())), spread);
+	}
+
 	@Override
 	public Stream<Block> relatedBlocks() {
 		return families.keySet().stream().flatMap(BlockFamily::blocks);
@@ -58,15 +71,7 @@ public record ReplaceInHandRule(Map<BlockFamily, Object> families, BlockSpread s
 			}
 		}
 		if (success && player != null) {
-			BlockState blockState = item.getBlock().defaultBlockState();
-			SoundType soundType = blockState.getSoundType();
-			level.playSound(
-					null,
-					player.blockPosition(),
-					soundType.getPlaceSound(),
-					SoundSource.BLOCKS,
-					(soundType.getVolume() + 1.0F) / 2.0F,
-					soundType.getPitch() * 0.8F);
+			playPlaceSound(player, item.getBlock().defaultBlockState());
 		}
 	}
 
@@ -79,5 +84,10 @@ public record ReplaceInHandRule(Map<BlockFamily, Object> families, BlockSpread s
 			Kiwi.LOGGER.error("Failed to collect positions", e);
 		}
 		return list;
+	}
+
+	@Override
+	public Type<?> type() {
+		return BuilderRuleTypes.REPLACE_IN_HAND.getOrCreate();
 	}
 }

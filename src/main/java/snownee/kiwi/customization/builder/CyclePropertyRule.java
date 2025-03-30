@@ -5,15 +5,16 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import com.google.common.collect.Maps;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 import snownee.kiwi.Kiwi;
@@ -21,6 +22,11 @@ import snownee.kiwi.customization.block.KBlockUtils;
 import snownee.kiwi.customization.block.family.BlockFamily;
 
 public class CyclePropertyRule implements BuilderRule {
+	public static final MapCodec<CyclePropertyRule> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+					Codec.unboundedMap(BlockFamily.DIRECT_CODEC, Codec.STRING).fieldOf("family").forGetter(CyclePropertyRule::families),
+					BlockSpread.CODEC.fieldOf("spread").forGetter(CyclePropertyRule::spread))
+			.apply(instance, CyclePropertyRule::new));
+
 	final Map<BlockFamily, String> families;
 	final BlockSpread spread;
 	final Map<Block, Property<?>> blocks;
@@ -39,6 +45,11 @@ public class CyclePropertyRule implements BuilderRule {
 				}
 			}
 		}
+	}
+
+	@Override
+	public Type<?> type() {
+		return BuilderRuleTypes.CYCLE_PROPERTY.getOrCreate();
 	}
 
 	@Override
@@ -81,15 +92,7 @@ public class CyclePropertyRule implements BuilderRule {
 		}
 		if (success && player != null) {
 			for (Block block : usedBlocks.keySet()) {
-				BlockState blockState = block.defaultBlockState();
-				SoundType soundType = blockState.getSoundType();
-				level.playSound(
-						null,
-						player.blockPosition(),
-						soundType.getPlaceSound(),
-						SoundSource.BLOCKS,
-						(soundType.getVolume() + 1.0F) / 2.0F,
-						soundType.getPitch() * 0.8F);
+				playPlaceSound(player, block.defaultBlockState());
 			}
 		}
 	}
@@ -113,5 +116,13 @@ public class CyclePropertyRule implements BuilderRule {
 			Kiwi.LOGGER.error("Failed to collect positions", e);
 		}
 		return list;
+	}
+
+	public Map<BlockFamily, String> families() {
+		return families;
+	}
+
+	public BlockSpread spread() {
+		return spread;
 	}
 }

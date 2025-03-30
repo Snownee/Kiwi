@@ -1,0 +1,4 @@
+type: cycle_property
+spread: plane_y
+family:
+  test:fence_gate: 'open'
