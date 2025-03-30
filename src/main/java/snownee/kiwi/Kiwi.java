@@ -445,7 +445,7 @@ public class Kiwi {
 		ModLoadingContext.get().setActiveContainer(null);
 
 		for (KiwiModuleContainer container : KiwiModules.get()) {
-			container.loadGameObjects(registryLookup);
+			container.loadGameObjects();
 		}
 
 		KiwiModules.ALL_USED_REGISTRIES.add(Registries.CREATIVE_MODE_TAB);
@@ -618,11 +618,6 @@ public class Kiwi {
 	public static void enableDataModule() {
 		enableDataModule = true;
 	}
-
-//	private void gatherData(GatherDataEvent event) {
-//		FabricDataGenerator dataGenerator = FabricDataGenerator.create(ID, event);
-//		new KiwiDataGen().onInitializeDataGenerator(dataGenerator);
-//	}
 
 	private void init(FMLCommonSetupEvent event) {
 		KiwiConfigManager.refresh();

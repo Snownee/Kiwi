@@ -6,6 +6,8 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.google.common.collect.Lists;
 
 import it.unimi.dsi.fastutil.objects.ObjectSortedSet;
@@ -22,10 +24,12 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import snownee.kiwi.KiwiModule.Category;
 import snownee.kiwi.item.ItemCategoryFiller;
+import snownee.kiwi.util.NotNullByDefault;
 
+@NotNullByDefault
 public class GroupSetting {
 
-	public static GroupSetting of(Category category, GroupSetting preset) {
+	public static GroupSetting of(Category category, @Nullable GroupSetting preset) {
 		if (preset != null) {
 			if (category.value().length == 0 && category.after().length == 0) {
 				return preset;
@@ -38,12 +42,13 @@ public class GroupSetting {
 	}
 
 	private final String[] groups;
+	@Nullable
 	private final String[] after;
 	private final List<ItemCategoryFiller> fillers = Lists.newArrayList();
 
-	public GroupSetting(String[] groups, String[] after) {
+	public GroupSetting(String[] groups, @Nullable String[] after) {
 		this.groups = groups;
-		this.after = after;
+		this.after = after == null || after.length == 0 ? null : after;
 	}
 
 	public void apply(ItemCategoryFiller filler) {
@@ -66,7 +71,7 @@ public class GroupSetting {
 				if (!event.getTabKey().equals(tabKey)) {
 					return;
 				}
-				List<Item> afterItems = Stream.of(after)
+				List<Item> afterItems = after == null ? List.of() : Stream.of(after)
 						.map(ResourceLocation::tryParse)
 						.filter(Objects::nonNull)
 						.map(BuiltInRegistries.ITEM::get)
