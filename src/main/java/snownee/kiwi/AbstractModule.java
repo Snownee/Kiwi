@@ -47,6 +47,10 @@ public abstract class AbstractModule {
 		return new KiwiGO.RegistrySpecified<>((Supplier<T>) factory, registryKey);
 	}
 
+	protected static <T> KiwiGO<T> ref(ResourceKey<? extends Registry<?>> registryKey) {
+		return new KiwiGO.Ref<>(registryKey);
+	}
+
 	/// helper methods:
 	protected static Item.Properties itemProp() {
 		return new Item.Properties();

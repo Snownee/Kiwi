@@ -5,7 +5,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import org.jetbrains.annotations.NotNull;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.core.Holder;
@@ -117,7 +117,7 @@ public class KiwiGO<T> implements Supplier<T> {
 
 	void register() {
 		//noinspection unchecked
-		Registry<T> registry = (Registry<T>) Objects.requireNonNull(BuiltInRegistries.REGISTRY.get(key.registry()));
+		Registry<T> registry = (Registry<T>) Objects.requireNonNull(BuiltInRegistries.REGISTRY.get(resourceKey().registry()));
 		Registry.register(registry, key(), get());
 	}
 
@@ -138,8 +138,17 @@ public class KiwiGO<T> implements Supplier<T> {
 		return registry.getHolder(key);
 	}
 
-	public static class RegistrySpecified<T> extends KiwiGO<T> {
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+				.append("key", key)
+				.append("value", value)
+				.append("field", field)
+				.append("groupSetting", groupSetting)
+				.toString();
+	}
 
+	public static class RegistrySpecified<T> extends KiwiGO<T> {
 		final ResourceKey<? extends Registry<?>> registryKey;
 
 		public RegistrySpecified(Supplier<T> factory, ResourceKey<? extends Registry<?>> registryKey) {
@@ -154,9 +163,38 @@ public class KiwiGO<T> implements Supplier<T> {
 	}
 
 	public static class Direct<T> extends KiwiGO<T> {
-		public Direct(@NotNull T value) {
+		public Direct(T value) {
 			super(null);
 			this.value = value;
+		}
+	}
+
+	public static class Ref<T> extends KiwiGO<T> {
+		final ResourceKey<? extends Registry<?>> registryKey;
+
+		public Ref(ResourceKey<? extends Registry<?>> registryKey) {
+			super(null);
+			this.registryKey = registryKey;
+		}
+
+		@Override
+		public ResourceKey<? extends Registry<?>> findRegistry() {
+			return registryKey;
+		}
+
+		@Override
+		public T get() {
+			if (value == null) {
+				//noinspection unchecked
+				Registry<T> registry = (Registry<T>) Objects.requireNonNull(BuiltInRegistries.REGISTRY.get(resourceKey().registry()));
+				value = registry.getOrThrow(resourceKey());
+			}
+			return value;
+		}
+
+		@Override
+		public T getOrCreate() {
+			return get();
 		}
 	}
 

@@ -1,11 +1,13 @@
 package snownee.kiwi;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.Lists;
@@ -49,6 +51,14 @@ public class GroupSetting {
 	public GroupSetting(String[] groups, @Nullable String[] after) {
 		this.groups = groups;
 		this.after = after == null || after.length == 0 ? null : after;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+				.append("groups", Arrays.toString(groups))
+				.append("after", Arrays.toString(after))
+				.toString();
 	}
 
 	public void apply(ItemCategoryFiller filler) {

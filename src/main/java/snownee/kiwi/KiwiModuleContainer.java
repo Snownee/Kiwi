@@ -12,7 +12,6 @@ import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -66,13 +65,12 @@ public final class KiwiModuleContainer {
 		module.uid = id;
 	}
 
-	public <T> void register(KiwiGO<T> object, @Nullable Field field) {
-		registries.put(object);
-		if (field != null) {
-			object.field = field;
-			KiwiModule.Category group = field.getAnnotation(KiwiModule.Category.class);
+	public <T> void register(KiwiGO<T> go) {
+		registries.put(go);
+		if (go.field != null) {
+			KiwiModule.Category group = go.field.getAnnotation(KiwiModule.Category.class);
 			if (group != null) {
-				object.groupSetting = GroupSetting.of(group, groupSetting);
+				go.groupSetting = GroupSetting.of(group, groupSetting);
 			}
 		}
 	}
@@ -139,45 +137,56 @@ public final class KiwiModuleContainer {
 				continue;
 			}
 
-			if (!(o instanceof KiwiGO<?> kiwiGO)) {
+			if (!(o instanceof KiwiGO<?> go)) {
 				continue;
 			}
-			o = kiwiGO.getOrCreate();
-			ResourceKey<? extends Registry<?>> registryKey = kiwiGO.findRegistry();
-			//noinspection unchecked,rawtypes
-			ResourceKey resourceKey = ResourceKey.create((ResourceKey) registryKey, id);
-			//noinspection unchecked
-			kiwiGO.setKey(resourceKey);
-
-			if (o instanceof Block) {
-				if (field.getAnnotation(KiwiModule.NoItem.class) != null) {
-					noItems.add((Block) o);
+			try {
+				go.field = field;
+				boolean isRef = go instanceof KiwiGO.Ref;
+				if (!isRef) {
+					o = go.getOrCreate();
 				}
-				checkNoGroup(field, o);
-				if (tmpBuilder != null) {
-					blockItemBuilders.put((Block) o, tmpBuilder);
-					try {
-						tmpBuilderField.set(module, null);
-					} catch (Exception e) {
-						Kiwi.LOGGER.error("Kiwi failed to clean used item builder: %s".formatted(tmpBuilderField), e);
+				ResourceKey<? extends Registry<?>> registryKey = go.findRegistry();
+				//noinspection unchecked,rawtypes
+				ResourceKey resourceKey = ResourceKey.create((ResourceKey) registryKey, id);
+				//noinspection unchecked
+				go.setKey(resourceKey);
+				if (isRef) {
+					continue;
+				}
+
+				if (o instanceof Block) {
+					if (field.getAnnotation(KiwiModule.NoItem.class) != null) {
+						noItems.add((Block) o);
 					}
+					checkNoGroup(field, o);
+					if (tmpBuilder != null) {
+						blockItemBuilders.put((Block) o, tmpBuilder);
+						try {
+							tmpBuilderField.set(module, null);
+						} catch (Exception e) {
+							Kiwi.LOGGER.error("Mod %s failed to clean used item builder: %s".formatted(modId, go), e);
+						}
+					}
+				} else if (o instanceof Item) {
+					checkNoGroup(field, o);
+				} else if (o instanceof CreativeModeTab && useOwnGroup && groupSetting == null) {
+					groupSetting = new GroupSetting(new String[]{id.toString()}, null);
 				}
-			} else if (o instanceof Item) {
-				checkNoGroup(field, o);
-			} else if (o instanceof CreativeModeTab && useOwnGroup && groupSetting == null) {
-				groupSetting = new GroupSetting(new String[]{id.toString()}, null);
-			}
-			register(kiwiGO, field);
-			if (Registries.MOB_EFFECT == registryKey) {
-				BiConsumer<KiwiModuleContainer, KiwiGO<?>> decorator = module.decorators.getOrDefault(
-						registryKey, (a, b) -> {
-						});
-				decorator.accept(this, kiwiGO);
-				kiwiGO.register();
-			}
+				register(go);
+				if (Registries.MOB_EFFECT == registryKey) {
+					BiConsumer<KiwiModuleContainer, KiwiGO<?>> decorator = module.decorators.getOrDefault(
+							registryKey, (a, b) -> {
+							});
+					decorator.accept(this, go);
+					go.register();
+				}
 
-			tmpBuilder = null;
-			tmpBuilderField = null;
+				tmpBuilder = null;
+				tmpBuilderField = null;
+			} catch (Throwable e) {
+				throw new IllegalStateException("Mod %s failed to register game object: %s".formatted(modId, go), e);
+			}
 		}
 	}
 

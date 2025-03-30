@@ -3,7 +3,7 @@
 	"minVersion": "0.8",
 	"package": "snownee.kiwi.mixin",
 	"plugin": "snownee.kiwi.mixin.MixinPlugin",
-	"compatibilityLevel": "JAVA_17",
+	"compatibilityLevel": "JAVA_21",
 	"refmap": "kiwi.refmap.json",
 	"mixins": [
 		"GameDataMixin",
