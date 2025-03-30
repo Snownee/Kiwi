@@ -59,10 +59,12 @@ public class BlockFamilies {
 				.stream()
 				.map(e -> new KHolder<>(e.getKey(), e.getValue()))
 				.collect(ImmutableList.toImmutableList());
+		// we need the byItem cache for automatically generating families
+		// we also need the byId cache because it is referenced by BuilderRules
+		reloadComplete(List.of());
 	}
 
 	public static int reloadTags() {
-		reloadComplete(List.of()); // we need the byItem cache for automatically generating families
 		if (CustomizationHooks.kswitch) {
 			reloadComplete(new BlockFamilyInferrer().generate());
 		}

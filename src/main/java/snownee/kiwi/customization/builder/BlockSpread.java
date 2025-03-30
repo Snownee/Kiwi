@@ -4,8 +4,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Queue;
+import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -21,72 +21,88 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import snownee.kiwi.customization.block.KBlockUtils;
-import snownee.kiwi.customization.placement.StatePropertiesPredicate;
 
-public record BlockSpread(
-		Type type,
-		Optional<StatePropertiesPredicate> statePropertiesPredicate,
-		FacingLimitation facingLimitation,
-		int maxDistance) {
+public record BlockSpread(Type type, FacingLimitation facingLimitation, int maxDistance) {
 
-
-	public List<BlockPos> collect(UseOnContext context, Predicate<Block> blockPredicate) {
-		return collect(context.getLevel(), context.getClickedPos(), Objects.requireNonNull(context.getPlayer()), blockPredicate);
+	public List<BlockPos> collect(
+			UseOnContext context,
+			Predicate<BlockState> blockPredicate,
+			@Nullable BiConsumer<BlockPos, BlockState> blockConsumer) {
+		return collect(
+				context.getLevel(),
+				context.getClickedPos(),
+				Objects.requireNonNull(context.getPlayer()),
+				blockPredicate,
+				blockConsumer);
 	}
 
 	public List<BlockPos> collect(
 			BlockGetter level,
 			BlockPos origin,
 			Player player,
-			Predicate<Block> blockPredicate
-	) {
+			Predicate<BlockState> blockPredicate,
+			@Nullable BiConsumer<BlockPos, BlockState> blockConsumer) {
 		BlockState originalBlock = level.getBlockState(origin);
+		if (!blockPredicate.test(originalBlock)) {
+			return List.of();
+		}
 		Direction direction = player.getDirection();
-		Direction originalDirection = Direction.NORTH;
+		Direction originalDirection = null;
 		try {
 			String s = KBlockUtils.getValueString(originalBlock, "facing");
 			originalDirection = Direction.valueOf(s.toUpperCase(Locale.ENGLISH));
 		} catch (Exception ignored) {
 		}
 		return switch (type) {
+			case PLANE_Y -> {
+				if (originalDirection == null || facingLimitation.test(originalDirection, direction)) {
+					yield collectPlane(level, origin, blockPredicate, direction, direction.getClockWise(), blockConsumer);
+				}
+				yield List.of();
+			}
 			case PLANE_XZ -> {
 				List<BlockPos> list = List.of();
-				if (facingLimitation.test(originalDirection, direction)) {
-					list = collectPlaneXZ(level, origin, originalBlock, direction);
-					if (list.size() > 1) {
-						yield list;
-					}
+				if (originalDirection == null || facingLimitation.test(originalDirection, direction)) {
+					list = collectPlane(level, origin, blockPredicate, direction, Direction.UP, blockConsumer);
 				}
-				if (facingLimitation.test(originalDirection, direction.getClockWise())) {
-					List<BlockPos> list2 = collectPlaneXZ(level, origin, originalBlock, direction.getClockWise());
-					if (list2.size() > list.size()) {
-						yield list2;
-					}
+				List<BlockPos> list2 = List.of();
+				if (originalDirection == null || facingLimitation.test(originalDirection, direction.getClockWise())) {
+					list2 = collectPlane(level, origin, blockPredicate, direction.getClockWise(), Direction.UP, blockConsumer);
+				}
+				if (list.size() != list2.size()) {
+					yield list.size() > list2.size() ? list : list2;
 				}
 				yield list;
 			}
-			case PLANE_XYZ -> collectPlaneXYZ(level, origin, originalBlock, player);
+			case PLANE_XYZ -> collectPlaneXYZ(level, origin, blockPredicate, player);
 		};
 	}
 
-	private List<BlockPos> collectPlaneXYZ(BlockGetter level, BlockPos origin, BlockState originalBlock, Player player) {
+	private List<BlockPos> collectPlaneXYZ(BlockGetter level, BlockPos origin, Predicate<BlockState> blockPredicate, Player player) {
 		throw new NotImplementedException();
 	}
 
-	private List<BlockPos> collectPlaneXZ(BlockGetter level, BlockPos origin, BlockState originalBlock, Direction direction) {
+	private List<BlockPos> collectPlane(
+			BlockGetter level,
+			BlockPos origin,
+			Predicate<BlockState> blockPredicate,
+			Direction direction,
+			Direction direction2, @Nullable BiConsumer<BlockPos, BlockState> blockConsumer) {
 		List<BlockPos> list = Lists.newArrayList(origin);
-		PosIterator iterator = new PlacePosIterator(origin, maxDistance, direction);
+		PosIterator iterator = new PlacePosIterator(origin, maxDistance, direction, direction2);
 		while (iterator.hasNext()) {
 			BlockPos next = iterator.next();
 			BlockState blockState = level.getBlockState(next);
-			if (!blockState.is(originalBlock.getBlock())) {
+			if (!blockPredicate.test(blockState)) {
 				continue;
 			}
-			if (statePropertiesPredicate.isPresent() && !statePropertiesPredicate.get().smartTest(originalBlock, blockState)) {
-				continue;
+//			if (statePropertiesPredicate.isPresent() && !statePropertiesPredicate.get().smartTest(originalBlock, blockState)) {
+//				continue;
+//			}
+			if (blockConsumer != null) {
+				blockConsumer.accept(next, blockState);
 			}
 			list.add(next);
 			iterator.add(next, null);
@@ -95,7 +111,7 @@ public record BlockSpread(
 	}
 
 	public enum Type {
-		PLANE_XZ, PLANE_XYZ
+		PLANE_Y, PLANE_XZ, PLANE_XYZ
 	}
 
 	abstract static class PosIterator implements Iterator<BlockPos> {
@@ -142,10 +158,12 @@ public record BlockSpread(
 
 	static class PlacePosIterator extends PosIterator {
 		final Direction direction;
+		final Direction direction2;
 
-		PlacePosIterator(BlockPos origin, int maxDistance, Direction direction) {
+		PlacePosIterator(BlockPos origin, int maxDistance, Direction direction, Direction direction2) {
 			super(origin, maxDistance);
 			this.direction = direction;
+			this.direction2 = direction2;
 		}
 
 		@Override
@@ -156,7 +174,7 @@ public record BlockSpread(
 					if (i == 0 && j == 0) {
 						continue;
 					}
-					BlockPos next = cur.relative(direction, i).relative(Direction.UP, j);
+					BlockPos next = cur.relative(direction, i).relative(direction2, j);
 					if (!next.equals(from)) {
 						builder.accept(next);
 					}

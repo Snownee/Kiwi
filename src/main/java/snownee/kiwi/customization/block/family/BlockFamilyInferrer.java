@@ -16,6 +16,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.StairBlock;
 import snownee.kiwi.AbstractModule;
@@ -85,6 +87,11 @@ public class BlockFamilyInferrer {
 			if (capturedBlocks.contains(block)) {
 				continue;
 			}
+			Item item = block.asItem();
+			if (item != Items.AIR && !BlockFamilies.findQuickSwitch(item, false).isEmpty()) {
+				capturedBlocks.add(block);
+				continue;
+			}
 //			Kiwi.LOGGER.info(holder.unwrapKey().orElseThrow().location().toString());
 			ResourceLocation key = holder.unwrapKey().orElseThrow().location();
 			String path = key.getPath();
@@ -112,7 +119,7 @@ public class BlockFamilyInferrer {
 				continue;
 			}
 			if (path.endsWith("_stairs")) {
-				if (!(block instanceof StairBlock stairBlock)) {
+				if (!(block instanceof StairBlock)) {
 					continue;
 				}
 				ResourceLocation id = key.withPath(path.substring(0, path.length() - 7));
@@ -124,7 +131,7 @@ public class BlockFamilyInferrer {
 							id1));
 					if (holder1.isPresent()) {
 						id = id1;
-						blocks.add(0, holder1.get());
+						blocks.addFirst(holder1.get());
 					}
 				}
 				blocks.addAll(collectBlocks(id, variants));

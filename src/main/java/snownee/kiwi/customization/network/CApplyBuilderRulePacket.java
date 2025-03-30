@@ -2,7 +2,6 @@ package snownee.kiwi.customization.network;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.IntFunction;
 import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
@@ -49,12 +48,11 @@ public record CApplyBuilderRulePacket(
 
 	public static class Handler implements PlayPacketHandler<CApplyBuilderRulePacket> {
 
-		public static final IntFunction<InteractionHand> HAND_ID_MAPPER = ByIdMap.continuous(
-				InteractionHand::ordinal,
-				InteractionHand.values(),
-				ByIdMap.OutOfBoundsStrategy.WRAP);
 		public static final StreamCodec<ByteBuf, InteractionHand> HAND_STREAM_CODEC = ByteBufCodecs.idMapper(
-				HAND_ID_MAPPER,
+				ByIdMap.continuous(
+						InteractionHand::ordinal,
+						InteractionHand.values(),
+						ByIdMap.OutOfBoundsStrategy.WRAP),
 				InteractionHand::ordinal);
 
 		public static final StreamCodec<RegistryFriendlyByteBuf, CApplyBuilderRulePacket> STREAM_CODEC = StreamCodec.composite(

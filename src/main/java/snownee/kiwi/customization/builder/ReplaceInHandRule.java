@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import com.google.common.base.Predicates;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
@@ -22,7 +20,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.customization.block.family.BlockFamily;
 
-public record ReplaceBuilderRule(Map<BlockFamily, Object> families, BlockSpread spread) implements BuilderRule {
+public record ReplaceInHandRule(Map<BlockFamily, Object> families, BlockSpread spread) implements BuilderRule {
 	@Override
 	public Stream<Block> relatedBlocks() {
 		return families.keySet().stream().flatMap(BlockFamily::blocks);
@@ -39,7 +37,7 @@ public record ReplaceBuilderRule(Map<BlockFamily, Object> families, BlockSpread 
 	@Override
 	public void apply(UseOnContext context, List<BlockPos> positions) {
 		ItemStack itemStack = context.getItemInHand().copy();
-		if (!(itemStack.getItem().asItem() instanceof BlockItem item)) {
+		if (!(itemStack.getItem() instanceof BlockItem item)) {
 			return;
 		}
 		BlockPlaceContext placeContext = new BlockPlaceContext(context);
@@ -51,7 +49,7 @@ public record ReplaceBuilderRule(Map<BlockFamily, Object> families, BlockSpread 
 			level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_INVISIBLE); //FIXME water
 			placeContext = BlockPlaceContext.at(placeContext, pos, context.getClickedFace());
 			if (item.place(placeContext) == InteractionResult.FAIL) {
-				level.setBlock(pos, oldBlock, Block.UPDATE_INVISIBLE);
+				level.setBlock(pos, oldBlock, Block.UPDATE_CLIENTS);
 			} else {
 				success = true;
 			}
@@ -73,10 +71,10 @@ public record ReplaceBuilderRule(Map<BlockFamily, Object> families, BlockSpread 
 	}
 
 	@Override
-	public List<BlockPos> searchPositions(UseOnContext context) {
+	public List<BlockPos> searchPositions(BlockState blockState, UseOnContext context) {
 		List<BlockPos> list = List.of();
 		try {
-			list = spread.collect(context, Predicates.alwaysTrue());
+			list = spread.collect(context, $ -> $.is(blockState.getBlock()), null);
 		} catch (Exception e) {
 			Kiwi.LOGGER.error("Failed to collect positions", e);
 		}

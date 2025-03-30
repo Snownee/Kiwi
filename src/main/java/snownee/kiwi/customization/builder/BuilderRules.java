@@ -2,6 +2,7 @@ package snownee.kiwi.customization.builder;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 import com.google.common.collect.ImmutableListMultimap;
@@ -10,6 +11,9 @@ import com.google.common.collect.ImmutableMap;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.level.block.Block;
+import snownee.kiwi.customization.block.family.BlockFamilies;
+import snownee.kiwi.customization.block.family.BlockFamily;
+import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.KHolder;
 import snownee.kiwi.util.resource.OneTimeLoader;
 
@@ -24,9 +28,15 @@ public class BuilderRules {
 	public static int reload(ResourceManager resourceManager, OneTimeLoader.Context context) {
 		Map<ResourceLocation, BuilderRule> families = OneTimeLoader.load(resourceManager, "kiwi/builder_rule", BuilderRule.CODEC, context);
 
-//		BlockSpread blockSpread = new BlockSpread(BlockSpread.Type.PLANE_XZ, Optional.empty(), FacingLimitation.FrontAndBack, 16);
-//		BlockFamily family = Objects.requireNonNull(BlockFamilies.get(new ResourceLocation("xkdeco:black_roof_end")));
-//		families.put(new ResourceLocation("test"), new ReplaceBuilderRule(Map.of(family, family), blockSpread));
+		if (!Platform.isProduction()) {
+			BlockSpread blockSpread = new BlockSpread(BlockSpread.Type.PLANE_Y, FacingLimitation.FrontAndBack, 16);
+			BlockFamily family = Objects.requireNonNull(BlockFamilies.get(ResourceLocation.parse("test:wool")));
+			families.put(ResourceLocation.parse("wool"), new ReplaceInHandRule(Map.of(family, family), blockSpread));
+
+			blockSpread = new BlockSpread(BlockSpread.Type.PLANE_Y, FacingLimitation.None, 16);
+			family = Objects.requireNonNull(BlockFamilies.get(ResourceLocation.parse("test:fence_gate")));
+			families.put(ResourceLocation.parse("fence_gate"), new CyclePropertyRule(Map.of(family, "open"), blockSpread));
+		}
 
 		byId = families.entrySet()
 				.stream()

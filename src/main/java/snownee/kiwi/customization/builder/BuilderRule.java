@@ -21,5 +21,5 @@ public interface BuilderRule {
 
 	void apply(UseOnContext context, List<BlockPos> positions);
 
-	List<BlockPos> searchPositions(UseOnContext context);
+	List<BlockPos> searchPositions(BlockState blockState, UseOnContext context);
 }
