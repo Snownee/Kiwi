@@ -2,7 +2,6 @@ package snownee.kiwi.recipe;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -14,16 +13,19 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.neoforged.neoforge.common.crafting.ICustomIngredient;
-import net.neoforged.neoforge.common.crafting.IngredientType;
+import snownee.kiwi.Kiwi;
+import snownee.kiwi.util.NotNullByDefault;
 
-public class AlternativesIngredient implements ICustomIngredient {
-	public static final IngredientType<AlternativesIngredient> SERIALIZER = new IngredientType<>(Serializer.CODEC, Serializer.STREAM_CODEC);
+@NotNullByDefault
+public class AlternativesIngredient implements CustomIngredient {
+	public static final ResourceLocation ID = Kiwi.id("alternatives");
+	public static final Serializer SERIALIZER = new Serializer();
 	@Nullable
-	private List<JsonElement> options;
+	private final List<JsonElement> options;
 	private Ingredient cached;
 
 	public AlternativesIngredient(@Nullable List<JsonElement> options) {
@@ -36,17 +38,17 @@ public class AlternativesIngredient implements ICustomIngredient {
 	}
 
 	@Override
-	public Stream<ItemStack> getItems() {
-		return Stream.of(internal().getItems());
+	public List<ItemStack> getMatchingStacks() {
+		return List.of(internal().getItems());
 	}
 
 	@Override
-	public boolean isSimple() {
-		return false;
+	public boolean requiresTesting() {
+		return true;
 	}
 
 	@Override
-	public IngredientType<?> getType() {
+	public CustomIngredientSerializer<?> getSerializer() {
 		return SERIALIZER;
 	}
 
@@ -71,7 +73,7 @@ public class AlternativesIngredient implements ICustomIngredient {
 		return cached;
 	}
 
-	public static final class Serializer {
+	public static final class Serializer implements CustomIngredientSerializer<AlternativesIngredient> {
 		public static final MapCodec<AlternativesIngredient> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
 				Codec.list(ExtraCodecs.JSON).fieldOf("options").forGetter(o -> o.options)
 		).apply(i, AlternativesIngredient::new));
@@ -89,6 +91,21 @@ public class AlternativesIngredient implements ICustomIngredient {
 
 		public static void write(RegistryFriendlyByteBuf buf, AlternativesIngredient ingredient) {
 			Ingredient.CONTENTS_STREAM_CODEC.encode(buf, ingredient.internal());
+		}
+
+		@Override
+		public ResourceLocation getIdentifier() {
+			return ID;
+		}
+
+		@Override
+		public MapCodec<AlternativesIngredient> getCodec(boolean allowEmpty) {
+			return CODEC;
+		}
+
+		@Override
+		public StreamCodec<RegistryFriendlyByteBuf, AlternativesIngredient> getPacketCodec() {
+			return STREAM_CODEC;
 		}
 	}
 }

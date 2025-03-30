@@ -8,7 +8,9 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.neoforged.neoforge.common.conditions.ICondition;
 import snownee.kiwi.util.KEval;
+import snownee.kiwi.util.NotNullByDefault;
 
+@NotNullByDefault
 public record EvalCondition(String expression) implements ICondition {
 	public static final MapCodec<EvalCondition> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			Codec.STRING.fieldOf("ex").forGetter(EvalCondition::expression)

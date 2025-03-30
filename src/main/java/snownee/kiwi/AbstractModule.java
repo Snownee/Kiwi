@@ -33,14 +33,16 @@ import snownee.kiwi.util.KiwiTabBuilder;
  * @author Snownee
  */
 public abstract class AbstractModule {
-	protected final Map<ResourceKey<? extends Registry<?>>, BiConsumer<KiwiModuleContainer, KiwiGOHolder<?>>> decorators = Maps.newHashMap();
+	protected final Map<ResourceKey<? extends Registry<?>>, BiConsumer<KiwiModuleContainer, KiwiGOHolder<?>>> decorators = Maps.newIdentityHashMap();
 	public ResourceLocation uid;
 
 	protected static <T> KiwiGO<T> go(Supplier<? extends T> factory) {
+		//noinspection unchecked
 		return new KiwiGO<>((Supplier<T>) factory);
 	}
 
 	protected static <T> KiwiGO<T> go(Supplier<? extends T> factory, ResourceKey<? extends Registry<?>> registryKey) {
+		//noinspection unchecked
 		return new KiwiGO.RegistrySpecified<>((Supplier<T>) factory, registryKey);
 	}
 
