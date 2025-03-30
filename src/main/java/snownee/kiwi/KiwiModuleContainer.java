@@ -60,10 +60,10 @@ public final class KiwiModuleContainer {
 	Set<Object> noCategories = Sets.newHashSet();
 	Set<Block> noItems = Sets.newHashSet();
 
-	public KiwiModuleContainer(ResourceLocation rl, AbstractModule module, ModContext context) {
+	public KiwiModuleContainer(ResourceLocation id, AbstractModule module, ModContext context) {
 		this.module = module;
 		this.context = context;
-		module.uid = rl;
+		module.uid = id;
 	}
 
 	public <T> KiwiGOHolder<T> register(T object, ResourceKey<T> key, @Nullable Field field) {

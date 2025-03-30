@@ -15,6 +15,11 @@ public @interface KiwiModule {
 	String value() default "core";
 
 	/**
+	 * Let it determine your namespace during the <clinit> phase.
+	 */
+	String modId() default "";
+
+	/**
 	 * Module will be registered only if dependent mods or modules are loaded.
 	 * You can use ";" to separate multiple mod ids.
 	 * You can use "@mod:module" to announce a dependent module

@@ -16,14 +16,14 @@ import snownee.kiwi.KiwiModule.Name;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.util.VanillaActions;
 
-@KiwiModule(value = "test2", dependencies = "forge;@kiwi:test")
+@KiwiModule(modId = Kiwi.ID, value = "test2", dependencies = "minecraft;@kiwi:test")
 @KiwiModule.Optional(defaultEnabled = false)
 public class TestModule2 extends AbstractModule {
 	public static final KiwiGO<CreativeModeTab> TAB = go(() -> itemCategory(
 			ResourceLocation.fromNamespaceAndPath("my_mod", "items"),
 			() -> new ItemStack(Items.DANDELION)).build());
 
-	public static final TagKey<EntityType<?>> BAT = entityTag(Kiwi.ID, "bat");
+	public static final TagKey<EntityType<?>> BAT = entityTag("bat");
 
 	@Name("kiwi:test_item")
 	public static final KiwiGO<TestItem> FIRST_ITEM = go(() -> new TestItem(itemProp().rarity(Rarity.EPIC)) {

@@ -33,6 +33,7 @@ import snownee.kiwi.util.KiwiTabBuilder;
  * @author Snownee
  */
 public abstract class AbstractModule {
+	private static final StackWalker STACK_WALKER = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
 	protected final Map<ResourceKey<? extends Registry<?>>, BiConsumer<KiwiModuleContainer, KiwiGOHolder<?>>> decorators = Maps.newIdentityHashMap();
 	public ResourceLocation uid;
 
@@ -97,6 +98,44 @@ public abstract class AbstractModule {
 
 	public static <T> TagKey<T> tag(ResourceKey<? extends Registry<T>> registryKey, String namespace, String path) {
 		return TagKey.create(registryKey, ResourceLocation.fromNamespaceAndPath(namespace, path));
+	}
+
+	public static TagKey<Item> itemTag(String id) {
+		return tag(Registries.ITEM, id);
+	}
+
+	public static TagKey<EntityType<?>> entityTag(String id) {
+		return tag(Registries.ENTITY_TYPE, id);
+	}
+
+	public static TagKey<Block> blockTag(String id) {
+		return tag(Registries.BLOCK, id);
+	}
+
+	public static TagKey<Fluid> fluidTag(String id) {
+		return tag(Registries.FLUID, id);
+	}
+
+	public static <T> TagKey<T> tag(ResourceKey<? extends Registry<T>> registryKey, String id) {
+		ResourceLocation location;
+		if (id.contains(":")) {
+			location = ResourceLocation.parse(id);
+		} else {
+			Class<?> callerClass = STACK_WALKER.walk(stream -> stream
+					.map(StackWalker.StackFrame::getDeclaringClass)
+					.filter(cls -> cls != AbstractModule.class)
+					.findFirst()
+			).orElse(null);
+			if (callerClass == null) {
+				throw new IllegalStateException("No caller class found");
+			}
+			KiwiModule annotation = callerClass.getDeclaredAnnotation(KiwiModule.class);
+			if (annotation == null || annotation.modId().isEmpty()) {
+				throw new IllegalStateException("No KiwiModule modId found on " + callerClass.getName());
+			}
+			location = ResourceLocation.fromNamespaceAndPath(annotation.modId(), id);
+		}
+		return TagKey.create(registryKey, location);
 	}
 
 	public void addRegistries() {
