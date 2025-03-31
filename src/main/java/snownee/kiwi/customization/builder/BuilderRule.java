@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import snownee.kiwi.customization.CustomizationRegistries;
 
 public interface BuilderRule {
-	Codec<BuilderRule> DIRECT_CODEC = Codec.lazyInitialized(() -> CustomizationRegistries.BUILDER_RULE.byNameCodec()
+	Codec<BuilderRule> CODEC = Codec.lazyInitialized(() -> CustomizationRegistries.BUILDER_RULE.byNameCodec()
 			.dispatch(BuilderRule::type, BuilderRule.Type::codec));
 
 	Type<?> type();

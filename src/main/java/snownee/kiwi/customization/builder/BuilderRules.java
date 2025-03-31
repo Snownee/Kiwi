@@ -2,7 +2,6 @@ package snownee.kiwi.customization.builder;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 
 import com.google.common.collect.ImmutableListMultimap;
@@ -11,9 +10,6 @@ import com.google.common.collect.ImmutableMap;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.level.block.Block;
-import snownee.kiwi.customization.block.family.BlockFamilies;
-import snownee.kiwi.customization.block.family.BlockFamily;
-import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.KHolder;
 import snownee.kiwi.util.resource.OneTimeLoader;
 
@@ -26,7 +22,7 @@ public class BuilderRules {
 	}
 
 	public static int reload(ResourceManager resourceManager, OneTimeLoader.Context context) {
-		Map<ResourceLocation, BuilderRule> families = OneTimeLoader.load(resourceManager, "kiwi/builder_rule", BuilderRule.DIRECT_CODEC, context);
+		Map<ResourceLocation, BuilderRule> families = OneTimeLoader.load(resourceManager, "kiwi/builder_rule", BuilderRule.CODEC, context);
 
 //		if (!Platform.isProduction()) {
 //			BlockSpread blockSpread = new BlockSpread(BlockSpread.Type.PLANE_Y, FacingLimitation.FrontAndBack, 16);

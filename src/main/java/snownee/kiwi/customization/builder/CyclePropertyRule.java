@@ -23,7 +23,7 @@ import snownee.kiwi.customization.block.family.BlockFamily;
 
 public class CyclePropertyRule implements BuilderRule {
 	public static final MapCodec<CyclePropertyRule> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-					Codec.unboundedMap(BlockFamily.DIRECT_CODEC, Codec.STRING).fieldOf("family").forGetter(CyclePropertyRule::families),
+					Codec.unboundedMap(BlockFamily.CODEC, Codec.STRING).fieldOf("family").forGetter(CyclePropertyRule::families),
 					BlockSpread.CODEC.fieldOf("spread").forGetter(CyclePropertyRule::spread))
 			.apply(instance, CyclePropertyRule::new));
 

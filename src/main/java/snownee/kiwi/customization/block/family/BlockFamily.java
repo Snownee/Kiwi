@@ -28,7 +28,7 @@ import snownee.kiwi.util.codec.KCodecs;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class BlockFamily {
-	public static final Codec<BlockFamily> DIRECT_CODEC = ResourceLocation.CODEC.flatXmap(
+	public static final Codec<BlockFamily> CODEC = ResourceLocation.CODEC.flatXmap(
 			$ -> {
 				BlockFamily family = BlockFamilies.get($);
 				if (family == null) {
@@ -45,7 +45,7 @@ public class BlockFamily {
 			}
 	);
 
-	public static final Codec<BlockFamily> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+	public static final Codec<BlockFamily> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			Codec.BOOL.optionalFieldOf("strict", false).forGetter($ -> true),
 			ResourceKey.codec(Registries.BLOCK).listOf()
 					.optionalFieldOf("blocks", List.of())

@@ -19,7 +19,7 @@ import snownee.kiwi.customization.block.KBlockSettings;
 import snownee.kiwi.customization.block.behavior.BlockBehaviorRegistry;
 
 public interface KBlockComponent {
-	Codec<KBlockComponent> DIRECT_CODEC = Codec.lazyInitialized(() -> CustomizationRegistries.BLOCK_COMPONENT.byNameCodec()
+	Codec<KBlockComponent> CODEC = Codec.lazyInitialized(() -> CustomizationRegistries.BLOCK_COMPONENT.byNameCodec()
 			.dispatch(KBlockComponent::type, KBlockComponent.Type::codec));
 
 	Type<?> type();
