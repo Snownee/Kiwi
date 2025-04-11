@@ -3,6 +3,7 @@ package snownee.kiwi.command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
+import net.minecraft.client.Minecraft;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiCommonConfig;
 
@@ -18,7 +19,18 @@ public class KiwiClientCommand {
 						ctx.getSource(),
 						context::sendSuccess,
 						context::sendFailure))));
+		builder.then(context.literal("quiet")
+				.executes(ctx -> quiet()));
 		return builder;
+	}
+
+	private static int quiet() {
+		Minecraft mc = Minecraft.getInstance();
+		mc.gui.getChat().trimmedMessages.clear();
+		mc.gui.clear();
+		mc.getToasts().clear();
+		mc.getSoundManager().stop();
+		return 0;
 	}
 
 }
