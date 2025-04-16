@@ -2,8 +2,16 @@ package snownee.kiwi.customization.builder;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Interner;
+import com.google.common.collect.Interners;
 import com.google.common.collect.Maps;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -21,30 +29,54 @@ import snownee.kiwi.Kiwi;
 import snownee.kiwi.customization.block.KBlockUtils;
 import snownee.kiwi.customization.block.family.BlockFamily;
 
-public class CyclePropertyRule implements BuilderRule {
+public record CyclePropertyRule(
+		Map<BlockFamily, Map<String, String>> families,
+		BlockSpread spread,
+		Map<Block, Map<Property<?>, Set<Object>>> blocks) implements BuilderRule {
 	public static final MapCodec<CyclePropertyRule> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-					Codec.unboundedMap(BlockFamily.CODEC, Codec.STRING).fieldOf("family").forGetter(CyclePropertyRule::families),
-					BlockSpread.CODEC.fieldOf("spread").forGetter(CyclePropertyRule::spread))
-			.apply(instance, CyclePropertyRule::new));
+					Codec.unboundedMap(BlockFamily.CODEC, Codec.unboundedMap(Codec.STRING, Codec.STRING))
+							.fieldOf("family")
+							.forGetter(CyclePropertyRule::families), BlockSpread.CODEC.fieldOf("spread").forGetter(CyclePropertyRule::spread))
+			.apply(instance, CyclePropertyRule::of));
 
-	final Map<BlockFamily, String> families;
-	final BlockSpread spread;
-	final Map<Block, Property<?>> blocks;
-
-	public CyclePropertyRule(Map<BlockFamily, String> families, BlockSpread spread) {
-		this.families = families;
-		this.spread = spread;
-		blocks = Maps.newLinkedHashMap();
-		for (Map.Entry<BlockFamily, String> entry : families.entrySet()) {
-			String propertyName = entry.getValue();
+	public static CyclePropertyRule of(Map<BlockFamily, Map<String, String>> families, BlockSpread spread) {
+		ImmutableMap.Builder<Block, Map<Property<?>, Set<Object>>> blocks = ImmutableMap.builder();
+		Interner<Map<Property<?>, Set<Object>>> interner = Interners.newStrongInterner();
+		Interner<Set<Object>> valuesInterner = Interners.newStrongInterner();
+		for (Map.Entry<BlockFamily, Map<String, String>> entry : families.entrySet()) {
 			for (Block block : entry.getKey().blocks().toList()) {
-				try {
-					Property<?> property = KBlockUtils.getProperty(block.defaultBlockState(), propertyName);
-					blocks.put(block, property);
-				} catch (Exception ignored) {
+				ImmutableMap.Builder<Property<?>, Set<Object>> properties = ImmutableMap.builder();
+				for (Map.Entry<String, String> propEntry : entry.getValue().entrySet()) {
+					try {
+						Property<?> property = KBlockUtils.getProperty(block.defaultBlockState(), propEntry.getKey());
+						if (propEntry.getValue().equals("*")) {
+							properties.put(property, Set.of());
+							continue;
+						}
+						String[] values = StringUtils.split(propEntry.getValue(), '|');
+						ImmutableSet.Builder<Object> setBuilder = ImmutableSet.builder();
+						for (String value : values) {
+							Optional<?> opt = property.getValue(value);
+							if (opt.isPresent()) {
+								setBuilder.add(opt.get());
+							} else {
+								Kiwi.LOGGER.warn("Invalid value {} for property {} on block {}", value, property, block);
+							}
+						}
+						ImmutableSet<Object> set = setBuilder.build();
+						if (!set.isEmpty()) {
+							properties.put(property, valuesInterner.intern(set));
+						}
+					} catch (Exception ignored) {
+					}
+				}
+				ImmutableMap<Property<?>, Set<Object>> map = properties.build();
+				if (!map.isEmpty()) {
+					blocks.put(block, interner.intern(map));
 				}
 			}
 		}
+		return new CyclePropertyRule(families, spread, blocks.build());
 	}
 
 	@Override
@@ -67,32 +99,49 @@ public class CyclePropertyRule implements BuilderRule {
 		Player player = context.getPlayer();
 		Level level = context.getLevel();
 		boolean success = false;
-		Map<Block, Object> usedBlocks = Maps.newHashMap();
+		Map<Block, BlockState> usedBlocks = Maps.newHashMap();
 		for (BlockPos pos : positions) {
 			BlockState oldBlock = level.getBlockState(pos);
+			BlockState newBlock = oldBlock;
 			Block block = oldBlock.getBlock();
-			Property<?> property = blocks.get(block);
-			if (property == null) {
-				continue;
+			BlockState usedBlock = usedBlocks.get(block);
+			props:
+			for (Map.Entry<Property<?>, Set<Object>> propEntry : blocks.get(block).entrySet()) {
+				Property<?> property = propEntry.getKey();
+				Set<Object> values = propEntry.getValue();
+				Object curValue = oldBlock.getValue(property);
+				if (!values.isEmpty() && !values.contains(curValue)) {
+					continue;
+				}
+				Object value = usedBlock == null ? null : usedBlock.getValue(property);
+				if (!values.isEmpty() && !values.contains(value)) {
+					value = null;
+				}
+				if (value == null) {
+					do {
+						//noinspection rawtypes,unchecked
+						newBlock = newBlock.cycle((Property) property);
+						value = newBlock.getValue(property);
+						if (value.equals(curValue)) {
+							continue props;
+						}
+					} while (!values.isEmpty() && !values.contains(value));
+				} else {
+					//noinspection rawtypes,unchecked
+					newBlock = newBlock.setValue((Property) property, (Comparable) value);
+				}
 			}
-			Object value = usedBlocks.get(block);
-			if (value == null) {
-				value = oldBlock.cycle(property).getValue(property);
-				usedBlocks.put(block, value);
-			} else if (value == oldBlock.getValue(property)) {
-				continue;
-			}
-			//noinspection rawtypes,unchecked
-			BlockState newBlock = oldBlock.setValue((Property) property, (Comparable) value);
 			if (!newBlock.canSurvive(level, pos)) {
 				continue;
 			}
-			level.setBlock(pos, newBlock, Block.UPDATE_CLIENTS);
-			success = true;
+			if (usedBlock == null) {
+				usedBlocks.put(block, newBlock);
+			}
+			success |= level.setBlock(pos, newBlock, Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
 		}
 		if (success && player != null) {
-			for (Block block : usedBlocks.keySet()) {
-				playPlaceSound(player, block.defaultBlockState());
+			for (BlockState block : usedBlocks.values()) {
+				playPlaceSound(player, block);
 			}
 		}
 	}
@@ -100,29 +149,49 @@ public class CyclePropertyRule implements BuilderRule {
 	@Override
 	public List<BlockPos> searchPositions(BlockState blockState, UseOnContext context) {
 		List<BlockPos> list = List.of();
-		Map<Block, Object> usedBlocks = Maps.newHashMap();
+		Map<Block, BlockState> usedBlocks = Maps.newHashMap();
 		try {
 			list = spread.collect(
 					context, $ -> {
 						Block block = $.getBlock();
-						if (!blocks.containsKey(block)) {
+						Map<Property<?>, Set<Object>> map = blocks.get(block);
+						if (map == null) {
 							return false;
 						}
-						Property<?> property = blocks.get(block);
-						Object value = usedBlocks.get(block);
-						return value == null || value.equals($.getValue(property));
-					}, (pos, $) -> usedBlocks.computeIfAbsent($.getBlock(), block -> $.getValue(blocks.get(block))));
+						BlockState usedBlock = usedBlocks.get(block);
+						for (Map.Entry<Property<?>, Set<Object>> entry : map.entrySet()) {
+							Property<?> property = entry.getKey();
+							Set<Object> values = entry.getValue();
+							Object curValue = $.getValue(property);
+							if (usedBlock != null) {
+								if (!values.isEmpty() && !values.contains(curValue)) {
+									continue;
+								}
+								if (!curValue.equals(usedBlock.getValue(property))) {
+									return false;
+								}
+							}
+						}
+						if (usedBlock != $) {
+							if (usedBlock != null) {
+								for (Map.Entry<Property<?>, Set<Object>> entry : map.entrySet()) {
+									Property<?> property = entry.getKey();
+									Set<Object> values = entry.getValue();
+									Object value = $.getValue(property);
+									if (!values.isEmpty() && !values.contains(value)) {
+										continue;
+									}
+									//noinspection rawtypes,unchecked
+									usedBlock = usedBlock.setValue((Property) property, (Comparable) value);
+								}
+							}
+							usedBlocks.put(block, usedBlock);
+						}
+						return true;
+					}, null);
 		} catch (Exception e) {
 			Kiwi.LOGGER.error("Failed to collect positions", e);
 		}
 		return list;
-	}
-
-	public Map<BlockFamily, String> families() {
-		return families;
-	}
-
-	public BlockSpread spread() {
-		return spread;
 	}
 }
