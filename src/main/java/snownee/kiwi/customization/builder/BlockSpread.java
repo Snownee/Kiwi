@@ -86,12 +86,14 @@ public record BlockSpread(Type type, FacingLimitation facingLimitation, int maxD
 				yield List.of();
 			}
 			case PLANE_XZ -> {
+				float yRot = player.getYRot() / 90F % 1F;
+				boolean forcedDirection = yRot < 0.15F || yRot > 0.85F;
 				List<BlockPos> list = List.of();
 				if (originalDirection == null || facingLimitation.test(originalDirection, direction)) {
 					list = collectPlane(level, origin, blockPredicate, direction, Direction.UP, blockConsumer);
 				}
 				List<BlockPos> list2 = List.of();
-				if (originalDirection == null || facingLimitation.test(originalDirection, direction.getClockWise())) {
+				if (!forcedDirection && (originalDirection == null || facingLimitation.test(originalDirection, direction.getClockWise()))) {
 					list2 = collectPlane(level, origin, blockPredicate, direction.getClockWise(), Direction.UP, blockConsumer);
 				}
 				if (list.size() != list2.size()) {
