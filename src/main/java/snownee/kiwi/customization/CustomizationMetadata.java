@@ -22,7 +22,7 @@ import snownee.kiwi.util.Util;
 import snownee.kiwi.util.resource.AlternativesFileToIdConverter;
 import snownee.kiwi.util.resource.OneTimeLoader;
 
-public record CustomizationMetadata(ImmutableListMultimap<String, String> registryOrder) {
+public record CustomizationMetadata(ImmutableListMultimap<String, String> registryOrder, List<String> lenientBETypeNamespaces) {
 	public static final Codec<CustomizationMetadata> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
 			Codec.unboundedMap(Codec.STRING, Codec.STRING.listOf())
 					.fieldOf("registry_order")
@@ -32,17 +32,20 @@ public record CustomizationMetadata(ImmutableListMultimap<String, String> regist
 							map.put(entry.getKey(), List.copyOf(entry.getValue()));
 						}
 						return map;
-					})
+					}),
+			Codec.STRING.listOf()
+					.optionalFieldOf("lenient_be_type_namespaces", List.of())
+					.forGetter(CustomizationMetadata::lenientBETypeNamespaces)
 	).apply(instance, CustomizationMetadata::create));
 
-	public static CustomizationMetadata create(Map<String, List<String>> map) {
+	public static CustomizationMetadata create(Map<String, List<String>> map, List<String> lenientBETypeNamespaces) {
 		ImmutableListMultimap.Builder<String, String> builder = ImmutableListMultimap.builder();
 		map.forEach(builder::putAll);
-		return new CustomizationMetadata(builder.build());
+		return new CustomizationMetadata(builder.build(), lenientBETypeNamespaces);
 	}
 
 	public static Map<String, CustomizationMetadata> loadMap(ResourceManager resourceManager, OneTimeLoader.Context context) {
-		CustomizationMetadata emptyMetadata = new CustomizationMetadata(ImmutableListMultimap.of());
+		CustomizationMetadata emptyMetadata = new CustomizationMetadata(ImmutableListMultimap.of(), List.of());
 		var fileToIdConverter = AlternativesFileToIdConverter.yamlOrJson(Kiwi.ID);
 		Map<String, CustomizationMetadata> metadataMap = Maps.newHashMap();
 		for (String namespace : resourceManager.getNamespaces()) {

@@ -12,6 +12,8 @@ import com.google.common.collect.Sets;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import snownee.kiwi.customization.CustomizationHooks;
@@ -21,6 +23,9 @@ public class BlockEntityTypeMixin {
 	@Shadow
 	@Final
 	private Set<Block> validBlocks;
+
+	@Unique
+	private Boolean lenient;
 	@Unique
 	private volatile Set<Block> lenientValidBlocks;
 
@@ -38,6 +43,17 @@ public class BlockEntityTypeMixin {
 		}
 		if (original.call(instance, object)) {
 			return true;
+		}
+		if (lenient == null) {
+			//noinspection deprecation
+			ResourceLocation key = BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey((BlockEntityType<?>) (Object) this);
+			if (key == null) {
+				return false;
+			}
+			lenient = CustomizationHooks.getLenientBETypeNamespaces().contains(key.getNamespace());
+		}
+		if (lenient == Boolean.FALSE) {
+			return false;
 		}
 		for (Block validBlock : validBlocks) {
 			if (validBlock.getClass() == object.getClass()) {

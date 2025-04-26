@@ -62,6 +62,7 @@ import snownee.kiwi.util.resource.RequiredFolderRepositorySource;
 
 public final class CustomizationHooks {
 	private static final Set<String> blockNamespaces = Sets.newLinkedHashSet();
+	private static final Set<String> lenientBETypeNamespaces = Sets.newHashSet();
 	private static boolean enabled = true;
 	public static boolean kswitch = Platform.isModLoaded("kswitch") || !Platform.isProduction();
 
@@ -173,21 +174,26 @@ public final class CustomizationHooks {
 		BlockFundamentals blockFundamentals = BlockFundamentals.reload(resourceManager, context, true);
 		blockNamespaces.clear();
 		blockFundamentals.blocks().keySet().stream().map(ResourceLocation::getNamespace).forEach(blockNamespaces::add);
+		lenientBETypeNamespaces.clear();
+		lenientBETypeNamespaces.add(ResourceLocation.DEFAULT_NAMESPACE);
+		lenientBETypeNamespaces.addAll(blockNamespaces);
+		metadataMap.values().forEach(metadata -> lenientBETypeNamespaces.addAll(metadata.lenientBETypeNamespaces()));
 		List<ResourceLocation> blockIds = Lists.newArrayList();
-		CustomizationMetadata.sortedForEach(metadataMap, "block", blockFundamentals.blocks(), (id, definition) -> {
-			try {
-				Block block = definition.createBlock(id, blockFundamentals.shapes());
-				if (block == null) {
-					return;
-				}
-				Registry.register(BuiltInRegistries.BLOCK, id, block);
-				blockFundamentals.slotProviders().attachSlotsA(block, definition);
-				blockFundamentals.placeChoices().attachChoicesA(block, definition);
-				blockIds.add(id);
-			} catch (Exception e) {
-				Kiwi.LOGGER.error("Failed to create block %s".formatted(id), e);
-			}
-		});
+		CustomizationMetadata.sortedForEach(
+				metadataMap, "block", blockFundamentals.blocks(), (id, definition) -> {
+					try {
+						Block block = definition.createBlock(id, blockFundamentals.shapes());
+						if (block == null) {
+							return;
+						}
+						Registry.register(BuiltInRegistries.BLOCK, id, block);
+						blockFundamentals.slotProviders().attachSlotsA(block, definition);
+						blockFundamentals.placeChoices().attachChoicesA(block, definition);
+						blockIds.add(id);
+					} catch (Exception e) {
+						Kiwi.LOGGER.error("Failed to create block %s".formatted(id), e);
+					}
+				});
 		ItemFundamentals itemFundamentals = ItemFundamentals.reload(resourceManager, context, true);
 		for (ResourceLocation blockId : blockIds) {
 			if (!itemFundamentals.items().containsKey(blockId)) {
@@ -196,20 +202,21 @@ public final class CustomizationHooks {
 		}
 		KItemTemplate none = itemFundamentals.templates().get(new ResourceLocation("none"));
 		Preconditions.checkNotNull(none, "Missing 'none' item definition");
-		CustomizationMetadata.sortedForEach(metadataMap, "item", itemFundamentals.items(), (id, definition) -> {
-			try {
-				if (definition.template().template() == none) {
-					return;
-				}
-				Item item = definition.createItem(id);
-				if (item == null) {
-					return;
-				}
-				Registry.register(BuiltInRegistries.ITEM, id, item);
-			} catch (Exception e) {
-				Kiwi.LOGGER.error("Failed to create item %s".formatted(id), e);
-			}
-		});
+		CustomizationMetadata.sortedForEach(
+				metadataMap, "item", itemFundamentals.items(), (id, definition) -> {
+					try {
+						if (definition.template().template() == none) {
+							return;
+						}
+						Item item = definition.createItem(id);
+						if (item == null) {
+							return;
+						}
+						Registry.register(BuiltInRegistries.ITEM, id, item);
+					} catch (Exception e) {
+						Kiwi.LOGGER.error("Failed to create item %s".formatted(id), e);
+					}
+				});
 		blockFundamentals.slotProviders().attachSlotsB();
 		blockFundamentals.placeChoices().attachChoicesB();
 		blockFundamentals.slotLinks().finish();
