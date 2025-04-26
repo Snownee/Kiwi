@@ -5,7 +5,13 @@ import yaml
 import tempfile
 
 def main():
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
     if len(sys.argv) < 2:
+        # Delete all jar files in the current directory
+        for file in os.listdir('.'):
+            if file.endswith('.jar'):
+                os.remove(file)
+
         pack('kswitch')
         pack('ksit')
         pack('kiwicustomization')
@@ -46,6 +52,7 @@ def pack(dir):
     os.system('jar -c -f %s .' % path)
     os.chdir(curPath)
     shutil.rmtree(tempdir)
+    print('Packaged %s' % path)
 
 if __name__ == '__main__':
     main()

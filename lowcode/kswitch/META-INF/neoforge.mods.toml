@@ -1,5 +1,5 @@
 modLoader = "lowcodefml"
-loaderVersion = "[46,)"
+loaderVersion = "[1,)"
 license = "ARR"
 issueTrackerURL = "https://github.com/Snownee/Kiwi/issues"
 

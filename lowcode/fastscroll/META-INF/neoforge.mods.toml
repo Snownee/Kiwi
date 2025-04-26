@@ -1,5 +1,5 @@
 modLoader = "lowcodefml"
-loaderVersion = "[46,)"
+loaderVersion = "[1,)"
 license = "Apache-2.0"
 issueTrackerURL = "https://github.com/Snownee/Kiwi/issues"
 
@@ -14,4 +14,3 @@ description = "Let you scroll faster when holding CTRL."
 [[dependencies.fastscroll]]
 modId = "kiwi"
 versionRange = "[15,)"
-ordering = "CLIENT"
