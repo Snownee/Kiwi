@@ -54,6 +54,7 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoader;
 import net.minecraftforge.fml.ModLoadingStage;
 import net.minecraftforge.fml.ModLoadingWarning;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.forgespi.locating.IModFile;
@@ -161,12 +162,13 @@ public final class CustomizationHooks {
 		Kiwi.LOGGER.info("Kiwi Customization is enabled");
 		var modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 		var forgeEventBus = MinecraftForge.EVENT_BUS;
-		modEventBus.addListener(EventPriority.LOWEST, (RegisterEvent event) -> {
-			if (!Registries.BLOCK.equals(event.getRegistryKey())) {
-				return;
-			}
-			initLoader(modEventBus);
-		});
+		modEventBus.addListener(
+				EventPriority.LOWEST, (RegisterEvent event) -> {
+					if (!Registries.BLOCK.equals(event.getRegistryKey())) {
+						return;
+					}
+					initLoader(modEventBus);
+				});
 		modEventBus.addListener((NewRegistryEvent event) -> {
 			event.create(
 					new RegistryBuilder<>().setName(CustomizationRegistries.BLOCK_COMPONENT_KEY.location())
@@ -251,20 +253,21 @@ public final class CustomizationHooks {
 		lenientBETypeNamespaces.addAll(blockNamespaces);
 		metadataMap.values().forEach(metadata -> lenientBETypeNamespaces.addAll(metadata.lenientBETypeNamespaces()));
 		List<ResourceLocation> blockIds = Lists.newArrayList();
-		CustomizationMetadata.sortedForEach(metadataMap, "block", blockFundamentals.blocks(), (id, definition) -> {
-			try {
-				Block block = definition.createBlock(id, blockFundamentals.shapes());
-				if (block == null) {
-					return;
-				}
-				ForgeRegistries.BLOCKS.register(id, block);
-				blockFundamentals.slotProviders().attachSlotsA(block, definition);
-				blockFundamentals.placeChoices().attachChoicesA(block, definition);
-				blockIds.add(id);
-			} catch (Exception e) {
-				Kiwi.LOGGER.error("Failed to create block %s".formatted(id), e);
-			}
-		});
+		CustomizationMetadata.sortedForEach(
+				metadataMap, "block", blockFundamentals.blocks(), (id, definition) -> {
+					try {
+						Block block = definition.createBlock(id, blockFundamentals.shapes());
+						if (block == null) {
+							return;
+						}
+						ForgeRegistries.BLOCKS.register(id, block);
+						blockFundamentals.slotProviders().attachSlotsA(block, definition);
+						blockFundamentals.placeChoices().attachChoicesA(block, definition);
+						blockIds.add(id);
+					} catch (Exception e) {
+						Kiwi.LOGGER.error("Failed to create block %s".formatted(id), e);
+					}
+				});
 		ItemFundamentals itemFundamentals = ItemFundamentals.reload(resourceManager, context, true);
 		for (ResourceLocation blockId : blockIds) {
 			if (!itemFundamentals.items().containsKey(blockId)) {
@@ -273,20 +276,21 @@ public final class CustomizationHooks {
 		}
 		KItemTemplate none = itemFundamentals.templates().get(new ResourceLocation("none"));
 		Preconditions.checkNotNull(none, "Missing 'none' item definition");
-		CustomizationMetadata.sortedForEach(metadataMap, "item", itemFundamentals.items(), (id, definition) -> {
-			try {
-				if (definition.template().template() == none) {
-					return;
-				}
-				Item item = definition.createItem(id);
-				if (item == null) {
-					return;
-				}
-				ForgeRegistries.ITEMS.register(id, item);
-			} catch (Exception e) {
-				Kiwi.LOGGER.error("Failed to create item %s".formatted(id), e);
-			}
-		});
+		CustomizationMetadata.sortedForEach(
+				metadataMap, "item", itemFundamentals.items(), (id, definition) -> {
+					try {
+						if (definition.template().template() == none) {
+							return;
+						}
+						Item item = definition.createItem(id);
+						if (item == null) {
+							return;
+						}
+						ForgeRegistries.ITEMS.register(id, item);
+					} catch (Exception e) {
+						Kiwi.LOGGER.error("Failed to create item %s".formatted(id), e);
+					}
+				});
 		blockFundamentals.slotProviders().attachSlotsB();
 		blockFundamentals.placeChoices().attachChoicesB();
 		blockFundamentals.slotLinks().finish();
@@ -330,9 +334,13 @@ public final class CustomizationHooks {
 			}
 			Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, key, tab.build());
 		}
-		BlockFamilies.reloadResources(resourceManager, context); // might be useful for data-gen
-		if (!Platform.isDataGen()) {
-			BuilderRules.reload(resourceManager, context);
+		if (Platform.isDataGen()) {
+			BlockFamilies.reloadResources(resourceManager, context); // might be useful for data-gen
+		} else {
+			modEventBus.addListener((FMLCommonSetupEvent event) -> {
+				BlockFamilies.reloadResources(resourceManager, context);
+				BuilderRules.reload(resourceManager, context);
+			});
 		}
 	}
 
@@ -402,8 +410,10 @@ public final class CustomizationHooks {
 		}
 
 		// Create a resource pack merging all mod resources that should be hidden
-		final Pack modResourcesPack = Pack.readMetaAndCreate("mod_resources", Component.literal("Mod Resources"), true,
-				id -> new DelegatingPackResources(id, false, new PackMetadataSection(
+		final Pack modResourcesPack = Pack.readMetaAndCreate(
+				"mod_resources", Component.literal("Mod Resources"), true,
+				id -> new DelegatingPackResources(
+						id, false, new PackMetadataSection(
 						Component.translatable("fml.resources.modresources", hiddenPacks.size()),
 						SharedConstants.getCurrentVersion().getPackVersion(PackType.CLIENT_RESOURCES)), hiddenPacks),
 				PackType.CLIENT_RESOURCES, Pack.Position.BOTTOM, PackSource.DEFAULT);
