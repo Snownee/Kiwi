@@ -433,9 +433,7 @@ public class Kiwi implements ModInitializer {
 		CommandRegistrationCallback.EVENT.register(KiwiCommand::register);
 		ServerLifecycleEvents.SERVER_STARTING.register(this::serverInit);
 		ServerLifecycleEvents.SERVER_STOPPED.register($ -> currentServer = null);
-		AttackEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
-			return Util.onAttackEntity(player, world, hand, entity, hitResult);
-		});
+		AttackEntityCallback.EVENT.register(Util::onAttackEntity);
 		if (Platform.isPhysicalClient()) {
 			Layer.CUTOUT.value = RenderType.cutout();
 			Layer.CUTOUT_MIPPED.value = RenderType.cutoutMipped();

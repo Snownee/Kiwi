@@ -255,9 +255,8 @@ public final class CustomizationHooks {
 //			}
 			Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, key, tab.build());
 		}
-		BlockFamilies.reloadResources(resourceManager, context); // might be useful for data-gen
-		if (!Platform.isDataGen()) {
-			BuilderRules.reload(resourceManager, context);
+		if (Platform.isDataGen()) {
+			BlockFamilies.reloadResources(resourceManager, context); // might be useful for data-gen
 		}
 		if (Platform.isPhysicalClient()) {
 			CustomizationClient.afterRegister(
@@ -342,8 +341,18 @@ public final class CustomizationHooks {
 		return blockNamespaces;
 	}
 
+	public static Set<String> getLenientBETypeNamespaces() {
+		return lenientBETypeNamespaces;
+	}
+
 	public static boolean isColorlessGlass(BlockState blockState) {
 		return blockState.is(ConventionalBlockTags.GLASS_BLOCKS) && !(blockState.getBlock() instanceof StainedGlassBlock);
 	}
 
+	public static void frozen() {
+		ResourceManager resourceManager = collectKiwiPacks();
+		OneTimeLoader.Context context = new OneTimeLoader.Context();
+		BlockFamilies.reloadResources(resourceManager, context);
+		BuilderRules.reload(resourceManager, context);
+	}
 }

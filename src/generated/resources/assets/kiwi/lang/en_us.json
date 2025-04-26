@@ -18,6 +18,8 @@
   "kiwi.config.cosmeticScreenKeybind": "Cosmetic Screen Keybind",
   "kiwi.config.cosmeticScreenKeybind.desc": "Opens the Kiwi Cosmetic Screen by holding K, if you have available cosmetics",
   "kiwi.config.debug": "Debug",
+  "kiwi.config.debug.F3CopyInInventory": "F3 Copy In Inventory",
+  "kiwi.config.debug.F3CopyInInventory.desc": "",
   "kiwi.config.debug.NBTTooltip": "NBT Tooltip",
   "kiwi.config.debug.NBTTooltip.desc": "Shows item NBT in advanced tooltips (F3+H) while holding shift",
   "kiwi.config.debug.tagsPerPage": "Tags Per Page",
