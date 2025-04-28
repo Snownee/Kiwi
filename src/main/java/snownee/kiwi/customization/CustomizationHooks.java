@@ -28,6 +28,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
@@ -293,7 +294,9 @@ public final class CustomizationHooks {
 								.toList());
 					});
 			if (i > 0) {
-				tab.withTabsBefore(newTabs.get(i - 1).getKey());
+				tab.withTabsBefore(CreativeModeTabs.SPAWN_EGGS.location(), newTabs.get(i - 1).getKey());
+			} else {
+				tab.withTabsBefore(CreativeModeTabs.SPAWN_EGGS.location());
 			}
 			if (i < newTabs.size() - 1) {
 				tab.withTabsAfter(newTabs.get(i + 1).getKey());
