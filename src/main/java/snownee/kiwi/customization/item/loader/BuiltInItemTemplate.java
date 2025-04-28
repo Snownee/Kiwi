@@ -1,6 +1,9 @@
 package snownee.kiwi.customization.item.loader;
 
+import java.util.Objects;
 import java.util.Optional;
+
+import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.JsonObject;
 import com.mojang.serialization.DataResult;
@@ -16,7 +19,7 @@ import snownee.kiwi.util.resource.OneTimeLoader;
 public final class BuiltInItemTemplate extends KItemTemplate {
 	public static final ThreadLocal<Item.Properties> PROPERTIES_INJECTOR = new ThreadLocal<>();
 	private final Optional<ResourceLocation> key;
-	private MapCodec<Item> codec;
+	private @Nullable MapCodec<Item> codec;
 
 	public BuiltInItemTemplate(Optional<ItemDefinitionProperties> properties, Optional<ResourceLocation> key) {
 		super(properties);
@@ -46,7 +49,9 @@ public final class BuiltInItemTemplate extends KItemTemplate {
 			json.add(ItemCodecs.ITEM_PROPERTIES_KEY, new JsonObject());
 		}
 		PROPERTIES_INJECTOR.set(properties);
-		DataResult<Item> result = codec.decode(JsonOps.INSTANCE, JsonOps.INSTANCE.getMap(json).result().orElseThrow());
+		DataResult<Item> result = Objects.requireNonNull(codec).decode(
+				JsonOps.INSTANCE,
+				JsonOps.INSTANCE.getMap(json).result().orElseThrow());
 		if (result.error().isPresent()) {
 			throw new IllegalStateException(result.error().get().message());
 		}

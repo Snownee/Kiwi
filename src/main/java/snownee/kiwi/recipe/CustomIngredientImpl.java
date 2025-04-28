@@ -20,9 +20,7 @@ import net.neoforged.neoforge.common.crafting.ICustomIngredient;
 import net.neoforged.neoforge.common.crafting.IngredientType;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.neoforged.neoforge.registries.RegisterEvent;
-import snownee.kiwi.util.NotNullByDefault;
 
-@NotNullByDefault
 @EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD)
 public record CustomIngredientImpl<T extends CustomIngredient>(T ingredient) implements ICustomIngredient {
 	static final Map<ResourceLocation, CustomIngredientSerializer<?>> REGISTERED_SERIALIZERS = new ConcurrentHashMap<>();

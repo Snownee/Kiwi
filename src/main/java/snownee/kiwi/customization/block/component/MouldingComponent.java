@@ -97,7 +97,7 @@ public record MouldingComponent(Optional<TagKey<Block>> connectTo) implements KB
 	}
 
 	@Override
-	public BlockState getStateForPlacement(KBlockSettings settings, BlockState state, BlockPlaceContext context) {
+	public @Nullable BlockState getStateForPlacement(KBlockSettings settings, BlockState state, BlockPlaceContext context) {
 		if (settings.customPlacement) {
 			return state;
 		}

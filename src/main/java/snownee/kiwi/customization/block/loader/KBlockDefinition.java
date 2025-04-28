@@ -1,6 +1,7 @@
 package snownee.kiwi.customization.block.loader;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import com.google.common.base.Preconditions;
@@ -131,7 +132,7 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 		properties.material().ifPresent(mat -> {
 			VanillaActions.setFireInfo(block, mat.igniteOdds(), mat.burnOdds());
 		});
-		KBlockSettings settings = KBlockSettings.of(block);
+		KBlockSettings settings = Objects.requireNonNull(KBlockSettings.of(block));
 		BlockBehaviorRegistry behaviorRegistry = BlockBehaviorRegistry.getInstance();
 		for (KBlockComponent component : settings.components.values()) {
 			behaviorRegistry.setContext(block);
@@ -181,13 +182,14 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 		} else if (builder.hasComponent(KBlockComponents.FRONT_AND_TOP.getOrCreate())) {
 			shape = shapes.transform(shape, KBlockComponents.FRONT_AND_TOP.getOrCreate(), $ -> DirectionalShape.create($, "orientation"));
 		} else if (builder.hasComponent(KBlockComponents.HORIZONTAL_AXIS.getOrCreate())) {
-			shape = shapes.transform(shape, KBlockComponents.HORIZONTAL_AXIS.getOrCreate(), $ -> ChoicesShape.chooseOneProperty(
-					BlockStateProperties.HORIZONTAL_AXIS,
-					Map.of(
-							Direction.Axis.X,
-							$,
-							Direction.Axis.Z,
-							ShapeGenerator.unit(VoxelUtil.rotateHorizontal(ShapeGenerator.Unit.unboxOrThrow($), Direction.EAST)))));
+			shape = shapes.transform(
+					shape, KBlockComponents.HORIZONTAL_AXIS.getOrCreate(), $ -> ChoicesShape.chooseOneProperty(
+							BlockStateProperties.HORIZONTAL_AXIS,
+							Map.of(
+									Direction.Axis.X,
+									$,
+									Direction.Axis.Z,
+									ShapeGenerator.unit(VoxelUtil.rotateHorizontal(ShapeGenerator.Unit.unboxOrThrow($), Direction.EAST)))));
 		}
 		builder.shape(type, shape);
 	}

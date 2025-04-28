@@ -4,6 +4,8 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Set;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.google.common.collect.Sets;
 
 import net.minecraft.client.model.PlayerModel;
@@ -57,7 +59,7 @@ public class KiwiTierProvider extends JsonTierProvider {
 
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public CosmeticLayer createRenderer(
+	public @Nullable CosmeticLayer createRenderer(
 			RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer,
 			String tier) {
 		return switch (tier) {

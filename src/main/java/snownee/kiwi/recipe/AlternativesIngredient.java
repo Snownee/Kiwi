@@ -18,9 +18,7 @@ import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import snownee.kiwi.Kiwi;
-import snownee.kiwi.util.NotNullByDefault;
 
-@NotNullByDefault
 public class AlternativesIngredient implements CustomIngredient {
 	public static final ResourceLocation ID = Kiwi.id("alternatives");
 	public static final Serializer SERIALIZER = new Serializer();

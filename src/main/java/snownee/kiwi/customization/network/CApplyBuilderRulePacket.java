@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.jetbrains.annotations.NotNull;
-
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -42,7 +40,7 @@ public record CApplyBuilderRulePacket(
 	public static final Type<CApplyBuilderRulePacket> TYPE = new Type<>(Kiwi.id("apply_builder_rule"));
 
 	@Override
-	public @NotNull Type<CApplyBuilderRulePacket> type() {
+	public Type<CApplyBuilderRulePacket> type() {
 		return TYPE;
 	}
 

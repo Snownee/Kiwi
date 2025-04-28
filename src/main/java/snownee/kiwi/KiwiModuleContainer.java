@@ -12,6 +12,7 @@ import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.mutable.MutableObject;
+import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -53,7 +54,7 @@ public final class KiwiModuleContainer {
 
 	public final AbstractModule module;
 	public final ModContext context;
-	public GroupSetting groupSetting;
+	public @Nullable GroupSetting groupSetting;
 	final RegistryEntryStore registries = new RegistryEntryStore();
 	Map<Block, Item.Properties> blockItemBuilders = Maps.newHashMap();
 	Set<Object> noCategories = Sets.newHashSet();
@@ -91,7 +92,7 @@ public final class KiwiModuleContainer {
 			useOwnGroup = false;
 		}
 
-		String modId = module.uid.getNamespace();
+		String modId = Objects.requireNonNull(module.uid).getNamespace();
 		Item.Properties tmpBuilder = null;
 		Field tmpBuilderField = null;
 		for (Field field : module.getClass().getFields()) {

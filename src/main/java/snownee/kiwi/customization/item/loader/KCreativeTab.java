@@ -21,7 +21,7 @@ public record KCreativeTab(
 			Codec.INT.optionalFieldOf("order", 0).forGetter(KCreativeTab::order),
 			ResourceKey.codec(Registries.ITEM)
 					.optionalFieldOf("icon")
-					.forGetter($ -> Optional.ofNullable($.icon())),
+					.forGetter($ -> Optional.of($.icon())),
 			ResourceKey.codec(Registries.CREATIVE_MODE_TAB)
 					.optionalFieldOf("insert")
 					.forGetter(KCreativeTab::insert),
@@ -30,6 +30,7 @@ public record KCreativeTab(
 					.forGetter(KCreativeTab::contents)
 	).apply(instance, KCreativeTab::create));
 
+	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 	public static KCreativeTab create(
 			int order,
 			Optional<ResourceKey<Item>> icon,
@@ -38,6 +39,6 @@ public record KCreativeTab(
 		if (icon.isPresent() && insert.isPresent()) {
 			throw new IllegalArgumentException("Both icon and insert are present");
 		}
-		return new KCreativeTab(order, icon.orElse(contents.get(0)), insert, contents);
+		return new KCreativeTab(order, icon.orElse(contents.getFirst()), insert, contents);
 	}
 }

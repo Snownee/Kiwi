@@ -3,9 +3,7 @@ package snownee.kiwi.customization.block;
 import com.mojang.serialization.MapCodec;
 
 import net.minecraft.world.level.block.Block;
-import snownee.kiwi.util.NotNullByDefault;
 
-@NotNullByDefault
 public class BasicBlock extends Block implements CheckedWaterloggedBlock, KBlockUtils {
 	public static final MapCodec<Block> CODEC = simpleCodec(BasicBlock::new);
 

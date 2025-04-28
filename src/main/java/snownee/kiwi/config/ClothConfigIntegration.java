@@ -51,7 +51,7 @@ public class ClothConfigIntegration {
 			true);
 
 	@Nullable
-	public static Screen create(Screen parent, String namespace) {
+	public static Screen create(@Nullable Screen parent, String namespace) {
 		ConfigBuilder builder = ConfigBuilder.create();
 		ConfigEntryBuilder entryBuilder = builder.entryBuilder();
 		builder.setParentScreen(parent);
@@ -243,7 +243,7 @@ public class ClothConfigIntegration {
 	private static void putDescription(
 			Consumer<AbstractConfigListEntry<?>> subCat,
 			ConfigEntryBuilder entryBuilder,
-			TextDescription description,
+			@Nullable TextDescription description,
 			boolean after) {
 		if (description == null || description.after() != after) {
 			return;

@@ -39,7 +39,7 @@ public class PlacementSystem {
 			100,
 			TimeUnit.MILLISECONDS).build();
 
-	public static boolean isDebugEnabled(Player player) {
+	public static boolean isDebugEnabled(@Nullable Player player) {
 		return player != null && player.isCreative() && player.getOffhandItem().is(Items.CHAINMAIL_HELMET);
 	}
 
@@ -129,7 +129,7 @@ public class PlacementSystem {
 		}
 		results.sort(null);
 		int resultIndex = 0;
-		int maxInterest = results.get(0).interest();
+		int maxInterest = results.getFirst().interest();
 		if (maxInterest > 0 && results.size() > 1 && context.getPlayer() instanceof KPlayer player) {
 			for (int i = 1; i < results.size(); i++) {
 				if (results.get(i).interest() < maxInterest) {

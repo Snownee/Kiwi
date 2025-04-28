@@ -39,9 +39,7 @@ import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.GameObjectLookup;
 import snownee.kiwi.util.KUtil;
-import snownee.kiwi.util.NotNullByDefault;
 
-@NotNullByDefault
 public class KiwiLanguageProvider extends FabricLanguageProvider {
 	protected final String languageCode;
 	protected final CompletableFuture<HolderLookup.Provider> registryLookup;
@@ -149,7 +147,7 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 			if (fileName.equals("test") || fileName.equals("kiwi-modules")) {
 				continue; // skip test entries
 			}
-			if (handler.getClazz().getDeclaredAnnotation(KiwiModule.Skip.class) != null) {
+			if (handler.getClazz() != null && handler.getClazz().getDeclaredAnnotation(KiwiModule.Skip.class) != null) {
 				continue;
 			}
 			String key = handler.getTranslationKey();

@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
 
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Type;
 
 import com.google.common.collect.Lists;
@@ -21,10 +22,10 @@ import snownee.kiwi.build.KiwiMetadataParser;
 import snownee.kiwi.config.KiwiConfig;
 import snownee.kiwi.network.KiwiPacket;
 
-public record NeoDevEnvMetadataLoader(String modId) implements Function<KiwiMetadataParser, KiwiMetadata> {
+public record NeoDevEnvMetadataLoader(String modId) implements Function<KiwiMetadataParser, @Nullable KiwiMetadata> {
 
 	@Override
-	public KiwiMetadata apply(KiwiMetadataParser parser) {
+	public @Nullable KiwiMetadata apply(KiwiMetadataParser parser) {
 		IModFileInfo modFileInfo = ModList.get().getModFileById(modId);
 		if (modFileInfo == null) {
 			return null;

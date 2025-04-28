@@ -117,6 +117,9 @@ public final class KUtil {
 
 	@Nullable
 	public static ResourceLocation RL(@Nullable String string) {
+		if (string == null) {
+			return null;
+		}
 		try {
 			return ResourceLocation.tryParse(string);
 		} catch (Exception e) {
@@ -191,9 +194,7 @@ public final class KUtil {
 				}
 			} else if (aNumber && bNumber) {
 				asNumeric = true;
-				if (lastNumericCompare == 0) {
-					lastNumericCompare = aChar - bChar;
-				}
+				lastNumericCompare = aChar - bChar;
 			} else if (aChar != bChar) {
 				return aChar - bChar;
 			}
@@ -294,8 +295,8 @@ public final class KUtil {
 		}
 	}
 
-	@Nullable
-	public static String[] readNBTStrings(CompoundTag tag, String key, @Nullable String[] strings) {
+
+	public static String @Nullable [] readNBTStrings(CompoundTag tag, String key, String @Nullable [] strings) {
 		if (!tag.contains(key, Tag.TAG_LIST)) {
 			return null;
 		}
@@ -313,7 +314,7 @@ public final class KUtil {
 		return strings;
 	}
 
-	public static void writeNBTStrings(CompoundTag tag, String key, @Nullable String[] strings) {
+	public static void writeNBTStrings(CompoundTag tag, String key, String @Nullable [] strings) {
 		if (strings == null || strings.length == 0) {
 			return;
 		}
@@ -364,6 +365,7 @@ public final class KUtil {
 		}
 
 		private class ConstructSafeMapping extends ConstructMapping {
+			@Override
 			public Object construct(Node node) {
 				MappingNode mnode = (MappingNode) node;
 				if (node.isTwoStepsConstruction()) {
@@ -373,6 +375,7 @@ public final class KUtil {
 				}
 			}
 
+			@Override
 			@SuppressWarnings("unchecked")
 			public void construct2ndStep(Node node, Object object) {
 				constructMapping2ndStep((MappingNode) node, (Map<Object, Object>) object);

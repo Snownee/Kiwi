@@ -4,9 +4,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
-import snownee.kiwi.util.NotNullByDefault;
 
-@NotNullByDefault
 public class ItemButton extends Button {
 	private final ItemStack itemStack;
 	private final boolean inContainer;

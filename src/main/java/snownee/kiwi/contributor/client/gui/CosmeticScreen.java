@@ -37,7 +37,7 @@ public class CosmeticScreen extends Screen {
 	@Override
 	protected void init() {
 		currentCosmetic = Contributors.PLAYER_COSMETICS.get(getPlayerName());
-		list = new List(minecraft, 150, height, 0, 20);
+		list = new List(getMinecraft(), 150, height, 0, 20);
 		list.setX(20);
 		list.addEntry(selectedEntry = new Entry(this, null));
 		String playerName = getPlayerName();
@@ -53,7 +53,7 @@ public class CosmeticScreen extends Screen {
 			}
 		}
 		if (!added) {
-			minecraft.setScreen(null);
+			getMinecraft().setScreen(null);
 		}
 		addRenderableWidget(Button.builder(
 				Component.translatable(KiwiClientConfig.cosmeticScreenKeybind ? "gui.kiwi.cosmetic.enabled" : "gui.kiwi.cosmetic.disabled"),
@@ -71,7 +71,7 @@ public class CosmeticScreen extends Screen {
 		renderBackground(guiGraphics, mouseX, mouseY, pTicks);
 		super.render(guiGraphics, mouseX, mouseY, pTicks);
 		list.render(guiGraphics, mouseX, mouseY, pTicks);
-		guiGraphics.drawString(minecraft.font, title, 180, 10, 0xFFFFFF);
+		guiGraphics.drawString(getMinecraft().font, title, 180, 10, 0xFFFFFF);
 	}
 
 	@Override
@@ -145,7 +145,7 @@ public class CosmeticScreen extends Screen {
 		private final ResourceLocation id;
 		private final String name;
 
-		public Entry(CosmeticScreen parent, ResourceLocation id) {
+		public Entry(CosmeticScreen parent, @Nullable ResourceLocation id) {
 			this.parent = parent;
 			this.id = id;
 			name = id == null ? "-" : I18n.get(Util.makeDescriptionId("cosmetic", id));

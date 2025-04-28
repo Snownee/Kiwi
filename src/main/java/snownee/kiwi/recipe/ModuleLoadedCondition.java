@@ -6,9 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.common.conditions.ICondition;
 import snownee.kiwi.Kiwi;
-import snownee.kiwi.util.NotNullByDefault;
 
-@NotNullByDefault
 public record ModuleLoadedCondition(ResourceLocation module) implements ICondition {
 	public static final MapCodec<ModuleLoadedCondition> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			ResourceLocation.CODEC.fieldOf("module").forGetter(ModuleLoadedCondition::module)

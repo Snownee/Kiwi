@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
+import org.jetbrains.annotations.Nullable;
+
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
@@ -26,6 +28,7 @@ public interface ITierProvider {
 	}
 
 	@OnlyIn(Dist.CLIENT)
+	@Nullable
 	CosmeticLayer createRenderer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer, String tier);
 
 	default boolean isContributor(String playerName) {
@@ -61,7 +64,7 @@ public interface ITierProvider {
 
 		@OnlyIn(Dist.CLIENT)
 		@Override
-		public CosmeticLayer createRenderer(
+		public @Nullable CosmeticLayer createRenderer(
 				RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer,
 				String tier) {
 			return null;

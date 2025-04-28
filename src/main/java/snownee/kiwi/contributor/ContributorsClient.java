@@ -1,6 +1,5 @@
 package snownee.kiwi.contributor;
 
-import java.util.Map;
 import java.util.Objects;
 
 import com.mojang.blaze3d.platform.InputConstants;
@@ -24,6 +23,7 @@ import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.contributor.client.CosmeticLayer;
 import snownee.kiwi.contributor.client.gui.CosmeticScreen;
 import snownee.kiwi.contributor.network.CSetCosmeticPacket;
+import snownee.kiwi.contributor.network.SSyncCosmeticPacket;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.network.KPacketSender;
 import snownee.kiwi.util.KUtil;
@@ -46,10 +46,7 @@ public class ContributorsClient extends AbstractModule {
 			NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingIn e) -> {
 				ContributorsClient.changeCosmetic();
 			});
-			NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingOut e) -> {
-				Contributors.PLAYER_COSMETICS.clear();
-				CosmeticLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidateAll());
-			});
+			NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingOut e) -> clear());
 			NeoForge.EVENT_BUS.addListener((InputEvent.Key e) -> onKeyInput(Minecraft.getInstance()));
 		});
 	}
@@ -95,15 +92,24 @@ public class ContributorsClient extends AbstractModule {
 		});
 	}
 
-	public static void changeCosmetic(Map<String, ResourceLocation> changes) {
-		changes.forEach((k, v) -> {
-			if (v == null) {
-				Contributors.PLAYER_COSMETICS.remove(k);
-			} else {
-				Contributors.PLAYER_COSMETICS.put(k, v);
-			}
+	public static void changeCosmetic(SSyncCosmeticPacket changes) {
+		if (changes.add().isEmpty() && changes.remove().isEmpty()) {
+			clear();
+			return;
+		}
+		Contributors.PLAYER_COSMETICS.putAll(changes.add());
+		for (String s : changes.remove()) {
+			Contributors.PLAYER_COSMETICS.remove(s);
+		}
+		CosmeticLayer.ALL_LAYERS.forEach(l -> {
+			l.getCache().invalidateAll(changes.add().keySet());
+			l.getCache().invalidateAll(changes.remove());
 		});
-		CosmeticLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidateAll(changes.keySet()));
+	}
+
+	public static void clear() {
+		Contributors.PLAYER_COSMETICS.clear();
+		CosmeticLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidateAll());
 	}
 
 	private static String getPlayerName() {

@@ -18,11 +18,9 @@ import snownee.kiwi.customization.block.family.BlockFamilies;
 import snownee.kiwi.customization.block.family.BlockFamily;
 import snownee.kiwi.customization.block.family.StonecutterRecipeMaker;
 import snownee.kiwi.util.KHolder;
-import snownee.kiwi.util.NotNullByDefault;
 
 @JeiPlugin
 @REIPluginCompatIgnore
-@NotNullByDefault
 public class JEICompat implements IModPlugin {
 	public static final ResourceLocation ID = Kiwi.id("customization");
 

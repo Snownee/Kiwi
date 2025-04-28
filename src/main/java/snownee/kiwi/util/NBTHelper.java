@@ -1,16 +1,16 @@
 package snownee.kiwi.util;
 
-import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.base.Preconditions;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponentType;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -29,13 +29,16 @@ import net.minecraft.world.level.block.state.BlockState;
 public class NBTHelper {
 
 	@Nullable
-	private ItemStack stack;
-	@Nullable
 	private CompoundTag tag;
+	@Nullable
+	private final ItemStack stack;
+	@Nullable
+	private final DataComponentType<CustomData> componentType;
 
-	private NBTHelper(@Nullable CompoundTag tag, @Nullable ItemStack stack) {
-		this.stack = stack;
+	private NBTHelper(@Nullable CompoundTag tag, @Nullable ItemStack stack, @Nullable DataComponentType<CustomData> componentType) {
 		this.tag = tag;
+		this.stack = stack;
+		this.componentType = componentType;
 	}
 
 	@Nullable
@@ -43,10 +46,14 @@ public class NBTHelper {
 		return getTag(key, false);
 	}
 
+	@Nullable
+	@Contract("_, true -> !null")
 	public CompoundTag getTag(String key, boolean createIfNull) {
 		return getTagInternal(key, createIfNull, false);
 	}
 
+	@Nullable
+	@Contract("_, true, _ -> !null")
 	private CompoundTag getTagInternal(String key, boolean createIfNull, boolean ignoreLastNode) {
 		if (tag == null) {
 			if (createIfNull) {
@@ -73,7 +80,7 @@ public class NBTHelper {
 					return null;
 				}
 			}
-			subTag = (CompoundTag) subTag.get(parts[i]);
+			subTag = (CompoundTag) Objects.requireNonNull(subTag.get(parts[i]));
 		}
 		return subTag;
 	}
@@ -290,7 +297,9 @@ public class NBTHelper {
 		return getString(key, null);
 	}
 
-	public String getString(String key, String defaultValue) {
+	@Nullable
+	@Contract("_, !null -> !null")
+	public String getString(String key, @Nullable String defaultValue) {
 		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
 			String actualKey = getLastNode(key);
@@ -350,6 +359,7 @@ public class NBTHelper {
 		return null;
 	}
 
+	@Nullable
 	public ListTag getTagList(String key, int type) {
 		CompoundTag subTag = getTagInternal(key, false, true);
 		if (subTag != null) {
@@ -374,7 +384,7 @@ public class NBTHelper {
 	}
 
 	public Set<String> keySet(String key) {
-		return hasTag(key, Tag.TAG_COMPOUND) ? getTag(key).getAllKeys() : Collections.EMPTY_SET;
+		return hasTag(key, Tag.TAG_COMPOUND) ? Objects.requireNonNull(getTag(key)).getAllKeys() : Set.of();
 	}
 
 	// TODO: remove parent if empty?
@@ -397,11 +407,8 @@ public class NBTHelper {
 	}
 
 	public NBTHelper updateItemData() {
-		return updateItemData(DataComponents.CUSTOM_DATA);
-	}
-
-	public NBTHelper updateItemData(DataComponentType<CustomData> componentType) {
 		Preconditions.checkNotNull(stack);
+		Preconditions.checkNotNull(componentType);
 		if (tag == null) {
 			stack.remove(componentType);
 		} else {
@@ -410,13 +417,13 @@ public class NBTHelper {
 		return this;
 	}
 
-	public static NBTHelper of(ItemStack stack) {
+	public static NBTHelper of(ItemStack stack, DataComponentType<CustomData> componentType) {
 		Preconditions.checkState(!stack.isEmpty());
-		return new NBTHelper(stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag(), stack);
+		return new NBTHelper(stack.getOrDefault(componentType, CustomData.EMPTY).copyTag(), stack, componentType);
 	}
 
 	public static NBTHelper of(CompoundTag tag) {
-		return new NBTHelper(tag, null);
+		return new NBTHelper(tag, null, null);
 	}
 
 	public static NBTHelper create() {

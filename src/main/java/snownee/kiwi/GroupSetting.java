@@ -26,9 +26,8 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import snownee.kiwi.KiwiModule.Category;
 import snownee.kiwi.item.ItemCategoryFiller;
-import snownee.kiwi.util.NotNullByDefault;
+import snownee.kiwi.util.KUtil;
 
-@NotNullByDefault
 public class GroupSetting {
 
 	public static GroupSetting of(Category category, @Nullable GroupSetting preset) {
@@ -44,11 +43,10 @@ public class GroupSetting {
 	}
 
 	private final String[] groups;
-	@Nullable
-	private final String[] after;
+	private final String @Nullable [] after;
 	private final List<ItemCategoryFiller> fillers = Lists.newArrayList();
 
-	public GroupSetting(String[] groups, @Nullable String[] after) {
+	public GroupSetting(String[] groups, String @Nullable [] after) {
 		this.groups = groups;
 		this.after = after == null || after.length == 0 ? null : after;
 	}
@@ -82,7 +80,7 @@ public class GroupSetting {
 					return;
 				}
 				List<Item> afterItems = after == null ? List.of() : Stream.of(after)
-						.map(ResourceLocation::tryParse)
+						.map(KUtil::RL)
 						.filter(Objects::nonNull)
 						.map(BuiltInRegistries.ITEM::get)
 						.filter(Predicate.not(Items.AIR::equals))
@@ -90,7 +88,9 @@ public class GroupSetting {
 				List<ItemStack> items = Lists.newArrayList();
 				for (ItemCategoryFiller filler : fillers) {
 					CreativeModeTab tab = BuiltInRegistries.CREATIVE_MODE_TAB.get(tabKey);
-					filler.fillItemCategory(tab, event.getFlags(), event.hasPermissions(), items);
+					if (tab != null) {
+						filler.fillItemCategory(tab, event.getFlags(), event.hasPermissions(), items);
+					}
 				}
 				items = getEnabledStacks(items, event.getFlags());
 				addAfter(items, event, afterItems);

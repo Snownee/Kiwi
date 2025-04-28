@@ -1,14 +1,10 @@
 package snownee.kiwi.customization.network;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import org.jetbrains.annotations.NotNull;
-
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.core.Holder;
@@ -34,7 +30,6 @@ import snownee.kiwi.customization.block.family.BlockFamily;
 import snownee.kiwi.network.KiwiPacket;
 import snownee.kiwi.network.PayloadContext;
 import snownee.kiwi.network.PlayPacketHandler;
-import snownee.kiwi.util.KHolder;
 
 @KiwiPacket
 public record CConvertItemPacket(
@@ -50,7 +45,7 @@ public record CConvertItemPacket(
 	public static final int MAX_STEPS = 4;
 
 	@Override
-	public @NotNull Type<CConvertItemPacket> type() {
+	public Type<CConvertItemPacket> type() {
 		return TYPE;
 	}
 
@@ -91,8 +86,8 @@ public record CConvertItemPacket(
 				Item item = from;
 				int index = 0;
 				float ratio = 1;
-				for (Pair<KHolder<BlockFamily>, Item> step : steps) {
-					BlockFamily family = BlockFamilies.get(step.getFirst().key());
+				for (Pair<ResourceLocation, Item> step : steps) {
+					BlockFamily family = BlockFamilies.get(step.getFirst());
 					if (family == null || !family.switchAttrs().enabled() || !family.contains(item) || !family.contains(step.getSecond())) {
 						return;
 					}
@@ -230,20 +225,18 @@ public record CConvertItemPacket(
 		}
 	}
 
-	public record Group(LinkedHashSet<CConvertItemPacket.Entry> entries) {
+	public record Group(List<CConvertItemPacket.Entry> entries) {
 		public Group() {
-			this(Sets.newLinkedHashSet());
+			this(Lists.newArrayList());
 		}
 	}
 
-	public record Entry(float ratio, List<Pair<KHolder<BlockFamily>, Item>> steps) {
+	public record Entry(float ratio, List<Pair<ResourceLocation, Item>> steps) {
 
-		public static final StreamCodec<RegistryFriendlyByteBuf, Pair<KHolder<BlockFamily>, Item>> ENTRY_PAIR_STREAM_CODEC
-				= StreamCodec.composite(
-				ResourceLocation.STREAM_CODEC, p -> p.getFirst().key(),
+		public static final StreamCodec<RegistryFriendlyByteBuf, Pair<ResourceLocation, Item>> ENTRY_PAIR_STREAM_CODEC = StreamCodec.composite(
+				ResourceLocation.STREAM_CODEC, Pair::getFirst,
 				ByteBufCodecs.registry(Registries.ITEM), Pair::getSecond,
-				(rl, item) -> Pair.of(new KHolder<>(rl, null), item)
-		);
+				Pair::of);
 
 		public static final StreamCodec<RegistryFriendlyByteBuf, Entry> STREAM_CODEC = StreamCodec.composite(
 				ByteBufCodecs.FLOAT, Entry::ratio,

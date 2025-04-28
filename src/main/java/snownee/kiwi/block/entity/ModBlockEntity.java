@@ -1,7 +1,5 @@
 package snownee.kiwi.block.entity;
 
-import org.jetbrains.annotations.NotNull;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -12,13 +10,11 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import snownee.kiwi.util.NotNullByDefault;
 
 /**
  * Base BlockEntity skeleton used by all BlockEntity. It contains several standardized
  * implementations regarding networking.
  */
-@NotNullByDefault
 public abstract class ModBlockEntity extends BlockEntity implements BlockEntityDataListener {
 	public boolean persistData = false;
 
@@ -37,7 +33,6 @@ public abstract class ModBlockEntity extends BlockEntity implements BlockEntityD
 	}
 
 	// Used for syncing data at the time when the chunk is loaded
-	@NotNull
 	@Override
 	public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
 		return writePacketData(new CompoundTag(), provider);
@@ -56,11 +51,10 @@ public abstract class ModBlockEntity extends BlockEntity implements BlockEntityD
 	 * @param data the data sink
 	 * @return the parameter, or delegate to super method
 	 */
-	@NotNull
 	protected abstract CompoundTag writePacketData(CompoundTag data, HolderLookup.Provider provider);
 
 	public void refresh() {
-		if (hasLevel() && !level.isClientSide) {
+		if (level != null && !level.isClientSide) {
 			BlockState state = getBlockState();
 			level.sendBlockUpdated(worldPosition, state, state, 11);
 			setChanged();

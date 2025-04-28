@@ -34,9 +34,7 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import snownee.kiwi.util.KHolder;
-import snownee.kiwi.util.NotNullByDefault;
 
-@NotNullByDefault
 public class BuilderModePreview implements DebugRenderer.SimpleDebugRenderer {
 	public KHolder<BuilderRule> rule;
 	public BlockPos pos;

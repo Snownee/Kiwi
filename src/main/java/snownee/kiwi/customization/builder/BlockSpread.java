@@ -29,9 +29,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import snownee.kiwi.customization.block.KBlockUtils;
-import snownee.kiwi.util.NotNullByDefault;
 
-@NotNullByDefault
 public record BlockSpread(Type type, FacingLimitation facingLimitation, int maxDistance) {
 	public static final Codec<BlockSpread> CODEC = Codec.withAlternative(
 			RecordCodecBuilder.create(instance -> instance.group(

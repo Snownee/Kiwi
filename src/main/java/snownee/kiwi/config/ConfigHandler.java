@@ -22,7 +22,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.EnumUtils;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.base.Joiner;
@@ -45,9 +44,7 @@ import snownee.kiwi.config.KiwiConfig.Range;
 import snownee.kiwi.config.KiwiConfig.Translation;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.KUtil;
-import snownee.kiwi.util.NotNullByDefault;
 
-@NotNullByDefault
 public class ConfigHandler {
 
 	public static final Component RESTART = Component.translatable("kiwi.config.requiresRestart").withStyle(ChatFormatting.RED);
@@ -97,6 +94,7 @@ public class ConfigHandler {
 	 *
 	 * @return the annotated path, or {@code null} if there is none.
 	 */
+	@Nullable
 	static List<String> getPath(AnnotatedElement annotatedElement) {
 		var path = annotatedElement.getDeclaredAnnotation(KiwiConfig.Path.class);
 		if (path != null) {
@@ -344,6 +342,8 @@ public class ConfigHandler {
 		return clazz;
 	}
 
+	@SuppressWarnings("unchecked")
+	@Nullable
 	public <T> Value<T> get(String path) {
 		return (Value<T>) valueMap.get(path);
 	}
@@ -394,11 +394,9 @@ public class ConfigHandler {
 	}
 
 	public static class Value<T> {
-		@NotNull
 		public final T defValue;
 		@Nullable
 		public Field field;
-		@NotNull
 		public T value;
 		public boolean requiresRestart;
 		public String translation;
@@ -448,6 +446,7 @@ public class ConfigHandler {
 			return field != null ? field.getType() : toPrimitiveClass(value.getClass());
 		}
 
+		@SuppressWarnings("unchecked")
 		public void accept(Object $) {
 			try {
 				Class<?> type = getType();

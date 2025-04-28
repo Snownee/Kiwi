@@ -16,10 +16,8 @@ import snownee.kiwi.KiwiGO;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModule.Name;
 import snownee.kiwi.loader.event.InitEvent;
-import snownee.kiwi.util.NotNullByDefault;
 import snownee.kiwi.util.VanillaActions;
 
-@NotNullByDefault
 @KiwiModule(modId = Kiwi.ID, value = "test2", dependencies = "minecraft;@kiwi:test")
 @KiwiModule.Optional(defaultEnabled = false)
 public class TestModule2 extends AbstractModule {

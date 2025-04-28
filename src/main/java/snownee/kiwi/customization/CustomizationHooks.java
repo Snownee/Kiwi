@@ -40,6 +40,7 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.client.loading.ClientModLoader;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.Tags;
@@ -82,8 +83,7 @@ public final class CustomizationHooks {
 	private static final Set<String> lenientBETypeNamespaces = Sets.newHashSet();
 	private static boolean enabled = true;
 	public static boolean kswitch = Platform.isModLoaded("kswitch") || !Platform.isProduction();
-	@Nullable
-	private static GlassType clearGlassType;
+	private static @Nullable GlassType clearGlassType;
 
 	private CustomizationHooks() {
 	}
@@ -230,9 +230,6 @@ public final class CustomizationHooks {
 				metadataMap, "block", blockFundamentals.blocks(), (id, definition) -> {
 					try {
 						Block block = definition.createBlock(id, blockFundamentals.shapes());
-						if (block == null) {
-							return;
-						}
 						Registry.register(BuiltInRegistries.BLOCK, id, block);
 						blockFundamentals.slotProviders().attachSlotsA(block, definition);
 						blockFundamentals.placeChoices().attachChoicesA(block, definition);
@@ -256,9 +253,6 @@ public final class CustomizationHooks {
 							return;
 						}
 						Item item = definition.createItem(id);
-						if (item == null) {
-							return;
-						}
 						Registry.register(BuiltInRegistries.ITEM, id, item);
 					} catch (Exception e) {
 						Kiwi.LOGGER.error("Failed to create item %s".formatted(id), e);
@@ -308,6 +302,8 @@ public final class CustomizationHooks {
 		}
 		if (Platform.isDataGen()) {
 			BlockFamilies.reloadResources(resourceManager, context); // might be useful for data-gen
+		} else {
+			modEventBus.addListener(FMLCommonSetupEvent.class, $ -> frozen());
 		}
 	}
 
@@ -417,7 +413,7 @@ public final class CustomizationHooks {
 	}
 
 	public static GlassType clearGlassType() {
-		return clearGlassType;
+		return Objects.requireNonNull(clearGlassType);
 	}
 
 	@KiwiModule.LoadingCondition({"block_components", "block_templates", "item_templates", "builder_rules"})

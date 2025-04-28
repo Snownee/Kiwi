@@ -31,7 +31,7 @@ public class TestConfig {
 
 	@Typed(String.class)
 	@TextDescription(value = "1\n2\n3", after = true)
-	public static List<String> listValue = Arrays.asList("test");
+	public static List<String> listValue = List.of("test");
 
 	@TextDescription("Test2")
 	public static String emptyStr;

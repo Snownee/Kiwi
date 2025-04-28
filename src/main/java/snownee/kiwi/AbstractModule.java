@@ -1,9 +1,12 @@
 package snownee.kiwi;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
+import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.types.Type;
@@ -35,7 +38,7 @@ import snownee.kiwi.util.KiwiTabBuilder;
 public abstract class AbstractModule {
 	private static final StackWalker STACK_WALKER = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
 	protected final Map<ResourceKey<? extends Registry<?>>, BiConsumer<KiwiModuleContainer, KiwiGO<?>>> decorators = Maps.newIdentityHashMap();
-	public ResourceLocation uid;
+	public @Nullable ResourceLocation uid;
 
 	protected static <T> KiwiGO<T> go(Supplier<? extends T> factory) {
 		//noinspection unchecked
@@ -158,10 +161,10 @@ public abstract class AbstractModule {
 	}
 
 	public ResourceLocation id(String path) {
-		return ResourceLocation.fromNamespaceAndPath(uid.getNamespace(), path);
+		return ResourceLocation.fromNamespaceAndPath(Objects.requireNonNull(uid).getNamespace(), path);
 	}
 
 	public KiwiModuleContainer container() {
-		return KiwiModules.get(uid);
+		return KiwiModules.get(Objects.requireNonNull(uid));
 	}
 }

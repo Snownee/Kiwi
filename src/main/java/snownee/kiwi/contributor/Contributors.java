@@ -2,6 +2,7 @@ package snownee.kiwi.contributor;
 
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -9,7 +10,8 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.ImmutableMap;
+import org.jetbrains.annotations.Nullable;
+
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -79,16 +81,19 @@ public class Contributors extends AbstractModule {
 		}
 	}
 
-	public static void changeCosmetic(ServerPlayer player, ResourceLocation cosmetic) {
+	public static void changeCosmetic(ServerPlayer player, @Nullable ResourceLocation cosmetic) {
 		String playerName = player.getGameProfile().getName();
 		canPlayerUseCosmetic(playerName, cosmetic).thenAccept(bl -> {
 			if (bl) {
+				SSyncCosmeticPacket packet;
 				if (cosmetic == null) {
 					PLAYER_COSMETICS.remove(playerName);
+					packet = new SSyncCosmeticPacket(Map.of(), List.of(playerName));
 				} else {
 					PLAYER_COSMETICS.put(playerName, cosmetic);
+					packet = new SSyncCosmeticPacket(Map.of(playerName, cosmetic), List.of());
 				}
-				KPacketSender.sendToAll(new SSyncCosmeticPacket(ImmutableMap.of(playerName, cosmetic)), player.server);
+				KPacketSender.sendToAll(packet, player.server);
 			}
 		});
 	}
@@ -117,7 +122,7 @@ public class Contributors extends AbstractModule {
 		}
 	}
 
-	public static CompletableFuture<Boolean> canPlayerUseCosmetic(String playerName, ResourceLocation cosmetic) {
+	public static CompletableFuture<Boolean> canPlayerUseCosmetic(String playerName, @Nullable ResourceLocation cosmetic) {
 		if (cosmetic == null || cosmetic.getPath().isEmpty()) { // Set to empty
 			return CompletableFuture.completedFuture(Boolean.TRUE);
 		}
@@ -143,7 +148,7 @@ public class Contributors extends AbstractModule {
 		NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedInEvent e) -> {
 			Player player = e.getEntity();
 			if (player.getServer() != null && !player.getServer().isSingleplayerOwner(player.getGameProfile())) {
-				KPacketSender.send(new SSyncCosmeticPacket(ImmutableMap.copyOf(PLAYER_COSMETICS)), player);
+				KPacketSender.send(new SSyncCosmeticPacket(Map.copyOf(PLAYER_COSMETICS), List.of()), player);
 			}
 		});
 		if (!Platform.isPhysicalClient()) {

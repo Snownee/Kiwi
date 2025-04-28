@@ -17,9 +17,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import snownee.kiwi.util.NotNullByDefault;
 
-@NotNullByDefault
 public class KiwiGO<T> implements Supplier<T> {
 
 	@Nullable

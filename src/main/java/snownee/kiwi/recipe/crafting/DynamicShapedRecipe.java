@@ -54,8 +54,7 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 		return search(input) != null;
 	}
 
-	@Nullable
-	public int[] search(CraftingInput input) {
+	public int @Nullable [] search(CraftingInput input) {
 		for (int x = 0; x <= input.width() - getWidth(); ++x) {
 			for (int y = 0; y <= input.height() - getHeight(); ++y) {
 				if (checkMatch(input, x, y) && checkEmpty(input, x, y)) {

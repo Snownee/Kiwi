@@ -98,6 +98,7 @@ public class BlockFamilies {
 		StonecutterRecipeMaker.invalidateCache();
 	}
 
+	@Nullable
 	public static BlockFamily get(ResourceLocation id) {
 		KHolder<BlockFamily> holder = byId.get(id);
 		return holder == null ? null : holder.value();

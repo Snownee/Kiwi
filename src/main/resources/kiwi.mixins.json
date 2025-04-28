@@ -14,7 +14,6 @@
 		"customization.BlockMixin",
 		"customization.BlockPropertiesMixin",
 		"customization.BlockStateMixin",
-		"customization.BuiltInRegistriesMixin",
 		"customization.BushBlockMixin",
 		"customization.HalfTransparentBlockMixin",
 		"customization.family.RecipeManagerMixin",

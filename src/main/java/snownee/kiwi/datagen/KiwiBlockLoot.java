@@ -20,9 +20,7 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.LootTable.Builder;
 import snownee.kiwi.KiwiModuleContainer;
 import snownee.kiwi.KiwiModules;
-import snownee.kiwi.util.NotNullByDefault;
 
-@NotNullByDefault
 public abstract class KiwiBlockLoot extends FabricBlockLootTableProvider {
 	protected final ResourceLocation moduleId;
 	private final List<Block> knownBlocks;
@@ -77,6 +75,7 @@ public abstract class KiwiBlockLoot extends FabricBlockLootTableProvider {
 		added.add(block);
 	}
 
+	@Override
 	public List<Block> getKnownBlocks() {
 		return knownBlocks;
 	}

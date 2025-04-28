@@ -455,7 +455,7 @@ public class Kiwi {
 
 		List<String> entries = Lists.newArrayList();
 		for (KiwiModuleContainer container : KiwiModules.get()) {
-			ResourceLocation uid = container.module.uid;
+			ResourceLocation uid = Objects.requireNonNull(container.module.uid);
 			if (ID.equals(uid.getNamespace()) && uid.getPath().startsWith("contributors")) {
 				continue;
 			}

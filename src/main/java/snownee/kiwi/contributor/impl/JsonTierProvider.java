@@ -9,6 +9,8 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.gson.Gson;
@@ -105,8 +107,9 @@ public class JsonTierProvider implements ITierProvider {
 
 	@OnlyIn(Dist.CLIENT)
 	@Override
-	public CosmeticLayer createRenderer(
-			RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer, String tier) {
+	public @Nullable CosmeticLayer createRenderer(
+			RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer,
+			String tier) {
 		return null;
 	}
 

@@ -15,9 +15,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import snownee.kiwi.customization.item.loader.ItemCodecs;
-import snownee.kiwi.util.NotNullByDefault;
 
-@NotNullByDefault
 public class MultipleBlockItem extends BlockItem {
 	public static final MapCodec<MultipleBlockItem> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			Codec.compoundList(Codec.STRING, BuiltInRegistries.BLOCK.byNameCodec()).fieldOf("blocks").forGetter($ -> {

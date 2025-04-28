@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.meta.TypeQualifierDefault;
 
+@SuppressWarnings("NullableProblems")
 @NotNull
 @TypeQualifierDefault({ElementType.METHOD, ElementType.PARAMETER})
 @Target({ElementType.TYPE, ElementType.PACKAGE})

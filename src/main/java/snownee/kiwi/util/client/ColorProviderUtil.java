@@ -1,5 +1,6 @@
 package snownee.kiwi.util.client;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
@@ -65,7 +66,7 @@ public class ColorProviderUtil {
 
 		@Override
 		public int getColor(BlockState blockState, @Nullable BlockAndTintGetter blockAndTintGetter, @Nullable BlockPos blockPos, int i) {
-			return this.get().getColor(blockState, blockAndTintGetter, blockPos, i);
+			return Objects.requireNonNull(this.get()).getColor(blockState, blockAndTintGetter, blockPos, i);
 		}
 	}
 
@@ -76,7 +77,7 @@ public class ColorProviderUtil {
 
 		@Override
 		public int getColor(ItemStack itemStack, int i) {
-			return this.get().getColor(itemStack, i);
+			return Objects.requireNonNull(this.get()).getColor(itemStack, i);
 		}
 	}
 }

@@ -11,9 +11,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
-import snownee.kiwi.util.NotNullByDefault;
 
-@NotNullByDefault
 public interface CheckedWaterloggedBlock extends SimpleWaterloggedBlock {
 	@Override
 	default boolean canPlaceLiquid(@Nullable Player player, BlockGetter pLevel, BlockPos pPos, BlockState pState, Fluid pFluid) {

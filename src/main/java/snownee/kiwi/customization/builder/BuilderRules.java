@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
 
@@ -48,6 +50,7 @@ public class BuilderRules {
 		return byId.size();
 	}
 
+	@Nullable
 	public static BuilderRule get(ResourceLocation id) {
 		KHolder<BuilderRule> holder = byId.get(id);
 		return holder == null ? null : holder.value();
