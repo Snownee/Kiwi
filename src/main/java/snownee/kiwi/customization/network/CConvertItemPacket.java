@@ -2,11 +2,16 @@ package snownee.kiwi.customization.network;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.function.IntFunction;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
 
+import io.netty.buffer.ByteBuf;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -17,6 +22,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.ByIdMap;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -30,11 +36,12 @@ import snownee.kiwi.customization.block.family.BlockFamily;
 import snownee.kiwi.network.KiwiPacket;
 import snownee.kiwi.network.PayloadContext;
 import snownee.kiwi.network.PlayPacketHandler;
+import snownee.kiwi.util.KHolder;
 
 @KiwiPacket
 public record CConvertItemPacket(
 		boolean inContainer,
-		boolean convertOne,
+		Action action,
 		int slot,
 		Holder<Item> from,
 		Entry entry
@@ -49,15 +56,16 @@ public record CConvertItemPacket(
 		return TYPE;
 	}
 
-	public CConvertItemPacket(boolean inContainer, int slot, Entry entry, Item from, boolean convertOne) {
-		this(inContainer, convertOne, slot, from.builtInRegistryHolder(), entry);
+	public CConvertItemPacket(boolean inContainer, int slot, Entry entry, Item from, Action action) {
+		//noinspection deprecation
+		this(inContainer, action, slot, from.builtInRegistryHolder(), entry);
 	}
 
 	public static class Handler implements PlayPacketHandler<CConvertItemPacket> {
 
 		public static final StreamCodec<RegistryFriendlyByteBuf, CConvertItemPacket> STREAM_CODEC = StreamCodec.composite(
 				ByteBufCodecs.BOOL, CConvertItemPacket::inContainer,
-				ByteBufCodecs.BOOL, CConvertItemPacket::convertOne,
+				Action.STREAM_CODEC, CConvertItemPacket::action,
 				ByteBufCodecs.VAR_INT, CConvertItemPacket::slot,
 				ByteBufCodecs.holderRegistry(Registries.ITEM), CConvertItemPacket::from,
 				Entry.STREAM_CODEC, CConvertItemPacket::entry,
@@ -70,7 +78,7 @@ public record CConvertItemPacket(
 			if (KiwiCommonConfig.kSwitchCreativeOnly && !player.isCreative()) {
 				return;
 			}
-			var convertOne = packet.convertOne;
+			var action = packet.action;
 			var inContainer = packet.inContainer;
 			var slotIndex = packet.slot;
 			var from = packet.from.value();
@@ -78,10 +86,10 @@ public record CConvertItemPacket(
 			if (steps.isEmpty() || steps.size() > MAX_STEPS) {
 				return;
 			}
-			Item to = steps.getLast().getSecond();
-			if (from == to) {
+			if (action == Action.CONVERT_FAMILY && inContainer) {
 				return;
 			}
+			Item to = steps.getLast().getSecond();
 			context.execute(() -> {
 				Item item = from;
 				int index = 0;
@@ -125,12 +133,16 @@ public record CConvertItemPacket(
 				if (!sourceItem.is(from)) {
 					return;
 				}
+				if (action == Action.CONVERT_FAMILY) {
+					convertFamily(player, to, slotIndex, ratio);
+					return;
+				}
 				boolean skipSettingSlot = false;
 				ItemStack newItem;
 				int inventorySwap = Integer.MIN_VALUE;
 				if (ratio >= 1) {
 					newItem = to.getDefaultInstance();
-				} else if (convertOne) {
+				} else if (action == Action.CONVERT_ONE) {
 					return;
 				} else {
 					for (int i = 0; i < playerInventory.getContainerSize(); i++) {
@@ -145,9 +157,8 @@ public record CConvertItemPacket(
 					}
 					newItem = playerInventory.getItem(inventorySwap);
 				}
-				newItem.setPopTime(5);
 				int ratioInt = Mth.floor(ratio);
-				if (convertOne) {
+				if (action == Action.CONVERT_ONE) {
 					if (!player.isCreative()) {
 						sourceItem.shrink(1);
 						newItem.setCount(ratioInt);
@@ -172,6 +183,7 @@ public record CConvertItemPacket(
 							}
 							slot.setByPlayer(newItem);
 						} else {
+							newItem.setPopTime(Inventory.POP_TIME_DURATION);
 							playerInventory.setItem(slotIndex, newItem);
 						}
 					} catch (Exception e) {
@@ -183,9 +195,55 @@ public record CConvertItemPacket(
 				} else if (!skipSettingSlot && !player.isCreative()) {
 					addToPlayer(player, sourceItem.copy(), !inContainer);
 				}
+				broadcastChanges(player);
+			});
+		}
+
+		private static void broadcastChanges(ServerPlayer player) {
+			Inventory inventory = player.getInventory();
+			boolean success = false;
+			for (int i = 0; i < inventory.getContainerSize(); i++) {
+				success |= SItemPopTimePacket.send(player, i);
+			}
+			if (success) {
 				playPickupSound(player);
 				player.containerMenu.broadcastChanges();
-			});
+			}
+		}
+
+		public static void convertFamily(ServerPlayer player, Item to, int slotIndex, float ratio) {
+			Set<Item> set = BlockFamilies.findQuickSwitch(to, player.isCreative()).stream()
+					.map(KHolder::value)
+					.flatMap(BlockFamily::items)
+					.filter(Predicate.not(to::equals))
+					.collect(Collectors.toSet());
+			Inventory inventory = player.getInventory();
+			boolean success = false;
+			for (int i = 0; i < inventory.getContainerSize(); i++) {
+				ItemStack stack = inventory.getItem(i);
+				if (!set.contains(stack.getItem())) {
+					continue;
+				}
+				success = true;
+				inventory.setItem(i, ItemStack.EMPTY);
+				ItemStack newItem = to.getDefaultInstance();
+				newItem.setPopTime(Inventory.POP_TIME_DURATION);
+				int newCount = Mth.floor(stack.getCount() * ratio);
+				while (newCount > 0) {
+					int count = Math.min(newCount, newItem.getMaxStackSize());
+					newItem.setCount(count);
+					newCount -= count;
+					if (!inventory.add(slotIndex, newItem) && !inventory.add(newItem)) {
+						player.drop(newItem, true);
+					}
+					if (newCount > 0) {
+						newItem = newItem.copy();
+					}
+				}
+			}
+			if (success) {
+				broadcastChanges(player);
+			}
 		}
 
 		@Override
@@ -193,11 +251,11 @@ public record CConvertItemPacket(
 			return STREAM_CODEC;
 		}
 
-		private void addToPlayer(ServerPlayer player, ItemStack itemStack, boolean nextToSelected) {
+		private static void addToPlayer(ServerPlayer player, ItemStack itemStack, boolean nextToSelected) {
 			Inventory inventory = player.getInventory();
 			IntStream intStream = IntStream.range(0, 9);
 			if (nextToSelected) {
-				IntStream leftAndRight = IntStream.of(inventory.selected + 1, inventory.selected - 1);
+				IntStream leftAndRight = IntStream.of(inventory.selected, inventory.selected + 1, inventory.selected - 1);
 				intStream = IntStream.concat(leftAndRight, intStream);
 			}
 			int slot = intStream.filter(Inventory::isHotbarSlot).filter(i -> {
@@ -207,7 +265,7 @@ public record CConvertItemPacket(
 				}
 				return stack.getCount() < stack.getMaxStackSize() && ItemStack.isSameItemSameComponents(stack, itemStack);
 			}).findFirst().orElse(-1);
-			if (!inventory.add(slot, itemStack) && !player.isCreative()) {
+			if (!inventory.add(slot, itemStack) && !inventory.add(itemStack) && !player.isCreative()) {
 				player.drop(itemStack, true);
 			}
 		}
@@ -232,7 +290,6 @@ public record CConvertItemPacket(
 	}
 
 	public record Entry(float ratio, List<Pair<ResourceLocation, Item>> steps) {
-
 		public static final StreamCodec<RegistryFriendlyByteBuf, Pair<ResourceLocation, Item>> ENTRY_PAIR_STREAM_CODEC = StreamCodec.composite(
 				ResourceLocation.STREAM_CODEC, Pair::getFirst,
 				ByteBufCodecs.registry(Registries.ITEM), Pair::getSecond,
@@ -251,5 +308,14 @@ public record CConvertItemPacket(
 		public Item item() {
 			return steps.getLast().getSecond();
 		}
+	}
+
+	public enum Action {
+		CONVERT_ALL,
+		CONVERT_ONE,
+		CONVERT_FAMILY;
+
+		private static final IntFunction<Action> BY_ID = ByIdMap.continuous(Enum::ordinal, values(), ByIdMap.OutOfBoundsStrategy.ZERO);
+		public static final StreamCodec<ByteBuf, Action> STREAM_CODEC = ByteBufCodecs.idMapper(BY_ID, Enum::ordinal);
 	}
 }

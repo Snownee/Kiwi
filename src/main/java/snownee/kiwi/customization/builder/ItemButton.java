@@ -1,5 +1,9 @@
 package snownee.kiwi.customization.builder;
 
+import java.util.function.Consumer;
+
+import org.jetbrains.annotations.Nullable;
+
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.util.Mth;
@@ -8,8 +12,10 @@ import net.minecraft.world.item.ItemStack;
 public class ItemButton extends Button {
 	private final ItemStack itemStack;
 	private final boolean inContainer;
-	//private ClientTooltipPositioner tooltipPositioner;
 	private float hoverProgress;
+	private float pressTime = -1;
+	public @Nullable Consumer<ItemButton> onPress;
+	public @Nullable Consumer<ItemButton> onRelease;
 
 	protected ItemButton(Builder builder) {
 		super(builder);
@@ -21,12 +27,27 @@ public class ItemButton extends Button {
 		return new Builder(itemStack, inContainer, pOnPress);
 	}
 
-	public ItemStack getItem() {
+	public ItemStack item() {
 		return itemStack;
+	}
+
+	public int pressTime() {
+		return (int) pressTime;
+	}
+
+	public void unpress() {
+		pressTime = -1;
 	}
 
 	@Override
 	protected void renderWidget(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
+		if (pressTime >= 0) {
+			int i = (int) pressTime;
+			pressTime += pPartialTick;
+			if (onPress != null && i != (int) pressTime) {
+				onPress.accept(this);
+			}
+		}
 		int x = getX();
 		int y = getY();
 		int width = getWidth() - 1;
@@ -46,14 +67,19 @@ public class ItemButton extends Button {
 		pGuiGraphics.renderItem(itemStack, x + 2, y + 2);
 	}
 
-	//public void setTooltipPositioner(ClientTooltipPositioner tooltipPositioner) {
-	//	this.tooltipPositioner = tooltipPositioner;
-	//}
+	@Override
+	public void onClick(double mouseX, double mouseY) {
+		super.onClick(mouseX, mouseY);
+		pressTime = 0;
+	}
 
-	//@Override
-	//protected ClientTooltipPositioner createTooltipPositioner() {
-	//	return tooltipPositioner != null ? tooltipPositioner : super.createTooltipPositioner();
-	//}
+	@Override
+	public void onRelease(double mouseX, double mouseY) {
+		if (onRelease != null && pressTime >= 0) {
+			onRelease.accept(this);
+		}
+		pressTime = -1;
+	}
 
 	public static class Builder extends Button.Builder {
 		private final ItemStack itemStack;
