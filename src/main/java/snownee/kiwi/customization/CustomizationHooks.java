@@ -205,6 +205,9 @@ public final class CustomizationHooks {
 			}
 		});
 		forgeEventBus.addListener((TagsUpdatedEvent event) -> {
+			if (event.getUpdateCause() == TagsUpdatedEvent.UpdateCause.SERVER_DATA_LOAD && Platform.isPhysicalClient()) {
+				return;
+			}
 			BlockFamilies.reloadTags();
 		});
 

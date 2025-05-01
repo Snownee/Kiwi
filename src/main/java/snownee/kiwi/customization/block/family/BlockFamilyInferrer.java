@@ -56,7 +56,24 @@ public class BlockFamilyInferrer {
 			"%s_pillar");
 
 	public BlockFamilyInferrer() {
-		for (DyeColor color : DyeColor.values()) {
+		DyeColor[] colors = new DyeColor[]{
+				DyeColor.WHITE,
+				DyeColor.LIGHT_GRAY,
+				DyeColor.GRAY,
+				DyeColor.BLACK,
+				DyeColor.BROWN,
+				DyeColor.RED,
+				DyeColor.ORANGE,
+				DyeColor.YELLOW,
+				DyeColor.LIME,
+				DyeColor.GREEN,
+				DyeColor.CYAN,
+				DyeColor.LIGHT_BLUE,
+				DyeColor.BLUE,
+				DyeColor.PURPLE,
+				DyeColor.MAGENTA,
+				DyeColor.PINK};
+		for (DyeColor color : colors) {
 			colorPrefixed.add(color.getName() + "_%s");
 			colorSuffixed.add("%s_" + color.getName());
 		}
@@ -88,7 +105,7 @@ public class BlockFamilyInferrer {
 				continue;
 			}
 			Item item = block.asItem();
-			if (item != Items.AIR && !BlockFamilies.findQuickSwitch(item, false).isEmpty()) {
+			if (item == Items.AIR || !BlockFamilies.findQuickSwitch(item, false).isEmpty()) {
 				capturedBlocks.add(block);
 				continue;
 			}
@@ -193,16 +210,15 @@ public class BlockFamilyInferrer {
 	private void family(ResourceLocation id, String desc, List<Holder.Reference<Block>> blocks, boolean cascading) {
 		List<ResourceKey<Block>> blockKeys = blocks.stream().filter($ -> !$.is(IGNORE)).map(Holder.Reference::key).toList();
 		KHolder<BlockFamily> family = new KHolder<>(
-				id.withPrefix("auto/%s/".formatted(desc)),
-				new BlockFamily(
-						false,
-						blockKeys,
-						List.of(),
-						List.of(),
-						false,
-						Optional.empty(),
-						1,
-						BlockFamily.SwitchAttrs.create(true, cascading, false)));
+				id.withPrefix("auto/%s/".formatted(desc)), new BlockFamily(
+				false,
+				blockKeys,
+				List.of(),
+				List.of(),
+				false,
+				Optional.empty(),
+				1,
+				BlockFamily.SwitchAttrs.create(true, cascading, false)));
 		families.add(family);
 		family.value().blocks().forEach(capturedBlocks::add);
 	}
