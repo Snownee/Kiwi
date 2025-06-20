@@ -4,7 +4,7 @@ plugins {
     id 'idea'
     id 'maven-publish'
     id "me.shedaniel.unified-publishing" version "0.1.+"
-    id 'net.neoforged.gradle.userdev' version '7.0.183'
+    id 'net.neoforged.moddev' version '2.0.95'
     //id 'net.neoforged.gradle.mixin' version '7.0.145'
     //id "com.github.johnrengelman.shadow" version "8.1.1"
     id 'com.gradleup.shadow' version '8.3.0' // https://github.com/GradleUp/shadow/pull/876
@@ -37,56 +37,52 @@ if (System.getenv().BUILD_NUMBER != null) {
     version += ".${System.getenv().BUILD_NUMBER}"
 }
 
-minecraft.accessTransformers.file rootProject.file('src/main/resources/META-INF/accesstransformer.cfg')
 
-// Default run configurations.
-// These can be tweaked, removed, or duplicated as needed.
-runs {
-    // applies to all the run configs below
-    configureEach {
-        // Recommended logging data for a userdev environment
-        // The markers can be added/remove as needed separated by commas.
-        // "SCAN": For mods scan.
-        // "REGISTRIES": For firing of registry events.
-        // "REGISTRYDUMP": For getting the contents of all registries.
-        systemProperty 'forge.logging.markers', 'REGISTRIES'
+neoForge {
+    // We currently only support NeoForge versions later than 21.0.x
+    // See https://projects.neoforged.net/neoforged/neoforge for the latest updates
+    version = "21.6.8-beta"
 
-        // Recommended logging level for the console
-        // You can set various levels here.
-        // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
-        systemProperty 'forge.logging.console.level', 'debug'
+    // Validate AT files and raise errors when they have invalid targets
+    // This option is false by default, but turning it on is recommended
+    validateAccessTransformers = true
 
-        modSource project.sourceSets.main
+    accessTransformers = ["src/main/resources/META-INF/accesstransformer.cfg"]
 
-        dependencies {
-            runtime "org.yaml:snakeyaml:${project.snakeyaml_version}"
-            runtime "com.ezylang:EvalEx:${project.evalex_version}"
+    runs {
+        // applies to all the run configs below
+        configureEach {
+            // Recommended logging data for a userdev environment
+            // The markers can be added/remove as needed separated by commas.
+            // "SCAN": For mods scan.
+            // "REGISTRIES": For firing of registry events.
+            // "REGISTRYDUMP": For getting the contents of all registries.
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+
+            // Recommended logging level for the console
+            // You can set various levels here.
+            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
+            systemProperty 'forge.logging.console.level', 'debug'
         }
-    }
 
-    client {
-        // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
-        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
-    }
+        client {
+            client()
+            systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+        }
+        data {
+            clientData()
+        }
+        server {
+            server()
+            systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+            programArgument '--nogui'
+        }
 
-    server {
-        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
-        programArgument '--nogui'
-    }
-
-    // This run config launches GameTestServer and runs all registered gametests, then exits.
-    // By default, the server will crash when no gametests are provided.
-    // The gametest system is also enabled by default for other run configs under the /test command.
-    gameTestServer {
-        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
-    }
-
-    clientData {
-        // example of overriding the workingDirectory set in configureEach above, uncomment if you want to use it
-        // workingDirectory project.file('run-data')
-
-        // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
-        arguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+        gameTestServer {
+            type = "gameTestServer"
+            gameDirectory = project.file('runs/client')
+            systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+        }
     }
 }
 
@@ -140,7 +136,6 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 shadowJar {
-    from(tasks.jarJar.archiveFile)
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     exclude(excludes)
     manifest { attributes(b) }
@@ -223,7 +218,9 @@ dependencies {
 
     implementation "me.shedaniel.cloth:cloth-config-neoforge:${project.cloth_config_version}"
     shadowCommon("org.yaml:snakeyaml:${project.snakeyaml_version}")
+    additionalRuntimeClasspath("org.yaml:snakeyaml:${project.snakeyaml_version}")
     shadowCommon("com.ezylang:EvalEx:${project.evalex_version}")
+    additionalRuntimeClasspath("com.ezylang:EvalEx:${project.evalex_version}")
 
     jarJar(implementation("org.sinytra.forgified-fabric-api:fabric-api-base:0.4.42+d1308ded19"))
     implementation "org.sinytra.forgified-fabric-api:forgified-fabric-api:0.107.0+2.0.25+1.21.1"
