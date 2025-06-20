@@ -37,7 +37,7 @@ public record KItemDefinition(ConfiguredItemTemplate template, ItemDefinitionPro
 		builder.configure($ -> {
 			vanilla.maxStackSize().ifPresent($::stacksTo);
 			vanilla.maxDamage().ifPresent($::durability);
-			vanilla.craftingRemainingItem().map(BuiltInRegistries.ITEM::get).ifPresent($::craftRemainder);
+			vanilla.craftingRemainingItem().map(BuiltInRegistries.ITEM::getValue).ifPresent($::craftRemainder);
 			vanilla.components().ifPresent(componentMap -> {
 				for (TypedDataComponent component : componentMap) {
 					$.component(component.type(), component.value());

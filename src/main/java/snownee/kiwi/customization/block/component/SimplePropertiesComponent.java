@@ -26,7 +26,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -85,11 +84,12 @@ public record SimplePropertiesComponent(
 				} else if (values != null && defaultValue instanceof String s) {
 					if (DIRECTION_STRINGS.containsKey(s) && DIRECTION_STRINGS.keySet().containsAll(values)) {
 						if (values.size() == DIRECTION_STRINGS.size()) {
-							property = DirectionProperty.create(name);
+							property = EnumProperty.create(name, Direction.class);
 						} else {
-							property = DirectionProperty.create(
+							property = EnumProperty.create(
 									name,
-									values.stream().map(DIRECTION_STRINGS::get).toArray(Direction[]::new));
+									Direction.class,
+									values.stream().map(DIRECTION_STRINGS::get).toList());
 						}
 					} else {
 						property = new StringProperty(name, values);

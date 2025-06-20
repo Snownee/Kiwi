@@ -1,3 +1,4 @@
+/*
 package snownee.kiwi.datagen;
 
 import java.io.Reader;
@@ -216,4 +217,4 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 				.createPathProvider(PackOutput.Target.RESOURCE_PACK, "lang")
 				.json(ResourceLocation.fromNamespaceAndPath(dataOutput.getModId(), code));
 	}
-}
+}*/

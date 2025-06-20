@@ -10,9 +10,11 @@ import org.jetbrains.annotations.Nullable;
 import com.google.common.collect.Maps;
 import com.mojang.serialization.MapCodec;
 
+import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -21,7 +23,7 @@ import net.neoforged.neoforge.common.crafting.IngredientType;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.neoforged.neoforge.registries.RegisterEvent;
 
-@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber
 public record CustomIngredientImpl<T extends CustomIngredient>(T ingredient) implements ICustomIngredient {
 	static final Map<ResourceLocation, CustomIngredientSerializer<?>> REGISTERED_SERIALIZERS = new ConcurrentHashMap<>();
 	private static final Map<CustomIngredientSerializer<?>, IngredientType<?>> INGREDIENT_TYPES = Maps.newIdentityHashMap();
@@ -68,8 +70,8 @@ public record CustomIngredientImpl<T extends CustomIngredient>(T ingredient) imp
 	}
 
 	@Override
-	public Stream<ItemStack> getItems() {
-		return this.ingredient.getMatchingStacks().stream();
+	public Stream<Holder<Item>> items() {
+		return ingredient.getMatchingItems();
 	}
 
 	@Override

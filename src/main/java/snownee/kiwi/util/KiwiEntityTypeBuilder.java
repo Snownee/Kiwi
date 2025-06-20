@@ -1,3 +1,4 @@
+/*
 package snownee.kiwi.util;
 
 import java.util.Objects;
@@ -229,3 +230,4 @@ public class KiwiEntityTypeBuilder<T extends Entity> {
 				requiredFeatures);
 	}
 }
+*/

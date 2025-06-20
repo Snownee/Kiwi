@@ -2,13 +2,11 @@ package snownee.kiwi.customization;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.datafixers.util.Pair;
@@ -16,16 +14,13 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColor;
-import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.bus.api.IEventBus;
@@ -113,28 +108,7 @@ public final class CustomizationClient {
 			Map<ResourceLocation, KBlockDefinition> blocks,
 			ClientProxy.Context context) {
 		Map<Block, BlockColor> blockColors = Maps.newHashMap();
-		Map<Item, ItemColor> itemColors = Maps.newHashMap();
 		List<Pair<Block, BlockColor>> blocksToAdd = Lists.newArrayList();
-		List<Pair<Item, ItemColor>> itemsToAdd = Lists.newArrayList();
-		Set<Item> addedItems = Sets.newHashSet();
-		for (var entry : items.entrySet()) {
-			KItemDefinition definition = entry.getValue();
-			if (definition.properties().colorProvider().isEmpty()) {
-				continue;
-			}
-			Item item = BuiltInRegistries.ITEM.get(entry.getKey());
-			ResourceLocation colorProvider = definition.properties().colorProvider().get();
-			if (ResourceLocation.DEFAULT_NAMESPACE.equals(colorProvider.getNamespace()) && colorProvider.getPath().equals("grass")) {
-				colorProvider = ResourceLocation.withDefaultNamespace("short_grass");
-			}
-			Item providerItem = BuiltInRegistries.ITEM.get(colorProvider);
-			if (providerItem == Items.AIR) {
-				Kiwi.LOGGER.warn("Cannot find color provider item %s for item %s".formatted(colorProvider, entry.getKey()));
-				continue;
-			}
-			itemsToAdd.add(Pair.of(item, itemColors.computeIfAbsent(providerItem, ColorProviderUtil::delegate)));
-			addedItems.add(item);
-		}
 		for (var entry : blocks.entrySet()) {
 			BlockDefinitionProperties properties = entry.getValue().properties();
 			if (context.loading()) {
@@ -143,46 +117,26 @@ public final class CustomizationClient {
 					renderType = properties.glassType().map(GlassType::renderType).orElse(null);
 				}
 				if (renderType != null) {
-					Block block = BuiltInRegistries.BLOCK.get(entry.getKey());
-					ItemBlockRenderTypes.setRenderLayer(block, (RenderType) renderType.value);
+					Block block = BuiltInRegistries.BLOCK.getValue(entry.getKey());
+					ItemBlockRenderTypes.setRenderLayer(block, (ChunkSectionLayer) renderType.value);
 				}
 			}
 			if (properties.colorProvider().isEmpty()) {
 				continue;
 			}
-			Block block = BuiltInRegistries.BLOCK.get(entry.getKey());
+			Block block = BuiltInRegistries.BLOCK.getValue(entry.getKey());
 			ResourceLocation colorProvider = properties.colorProvider().get();
 			// grass -> short_grass since Minecraft 1.20.3
 			if (ResourceLocation.DEFAULT_NAMESPACE.equals(colorProvider.getNamespace()) && colorProvider.getPath().equals("grass")) {
 				colorProvider = ResourceLocation.withDefaultNamespace("short_grass");
 			}
-			Block providerBlock = BuiltInRegistries.BLOCK.get(colorProvider);
+			Block providerBlock = BuiltInRegistries.BLOCK.getValue(colorProvider);
 			if (providerBlock == Blocks.AIR) {
 				Kiwi.LOGGER.warn("Cannot find color provider block %s for block %s".formatted(colorProvider, entry.getKey()));
 			} else {
 				blocksToAdd.add(Pair.of(block, blockColors.computeIfAbsent(providerBlock, ColorProviderUtil::delegate)));
 			}
-			Item item = block.asItem();
-			if (item == Items.AIR) {
-				continue;
-			}
-			if (addedItems.contains(item)) {
-				continue;
-			}
-			addedItems.add(item); //sometimes multiple blocks share the same item
-			Item providerItem = providerBlock.asItem();
-			if (providerItem != Items.AIR) {
-				itemsToAdd.add(Pair.of(
-						item,
-						itemColors.computeIfAbsent(providerItem, ColorProviderUtil::delegate)));
-			} else if (providerBlock == Blocks.WATER) {
-				itemsToAdd.add(Pair.of(item, (stack, i) -> 0x3f76e4));
-			} else {
-				itemsToAdd.add(Pair.of(
-						item,
-						itemColors.computeIfAbsent(providerItem, $ -> ColorProviderUtil.delegateItemFallback(providerBlock))));
-			}
 		}
-		ClientProxy.registerColors(context, blocksToAdd, itemsToAdd);
+		ClientProxy.registerColors(context, blocksToAdd);
 	}
 }

@@ -2,6 +2,7 @@ package snownee.kiwi.recipe;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -11,10 +12,12 @@ import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import snownee.kiwi.Kiwi;
@@ -36,8 +39,8 @@ public class AlternativesIngredient implements CustomIngredient {
 	}
 
 	@Override
-	public List<ItemStack> getMatchingStacks() {
-		return List.of(internal().getItems());
+	public Stream<Holder<Item>> getMatchingItems() {
+		return internal().getValues().stream();
 	}
 
 	@Override
@@ -53,7 +56,7 @@ public class AlternativesIngredient implements CustomIngredient {
 	public Ingredient internal() {
 		if (cached == null) {
 			Objects.requireNonNull(options);
-			cached = Ingredient.EMPTY;
+			cached = RecipeUtil.emptyIngredient();
 			for (JsonElement option : options) {
 				Ingredient ingredient;
 				try {
@@ -61,7 +64,7 @@ public class AlternativesIngredient implements CustomIngredient {
 				} catch (Exception e) {
 					continue;
 				}
-				if (ingredient.getItems().length == 0) {
+				if (ingredient.isEmpty()) {
 					continue;
 				}
 				cached = ingredient;

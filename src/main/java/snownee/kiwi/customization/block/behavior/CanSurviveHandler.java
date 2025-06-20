@@ -11,7 +11,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SupportType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 
 public interface CanSurviveHandler {
 	boolean isSensitiveSide(BlockState state, Direction side);
@@ -26,20 +26,21 @@ public interface CanSurviveHandler {
 		return Impls.CHECK_CEILING;
 	}
 
-	static CanSurviveHandler checkFace(DirectionProperty property) {
-		return Impls.CHECK_FACE.computeIfAbsent(property, key -> new CanSurviveHandler() {
-			@Override
-			public boolean isSensitiveSide(BlockState state, Direction side) {
-				return side == state.getValue(key).getOpposite();
-			}
+	static CanSurviveHandler checkFace(EnumProperty<Direction> property) {
+		return Impls.CHECK_FACE.computeIfAbsent(
+				property, key -> new CanSurviveHandler() {
+					@Override
+					public boolean isSensitiveSide(BlockState state, Direction side) {
+						return side == state.getValue(key).getOpposite();
+					}
 
-			@Override
-			public boolean canSurvive(BlockState state, LevelReader world, BlockPos pos) {
-				Direction direction = state.getValue(key);
-				BlockPos neighbor = pos.relative(direction);
-				return world.getBlockState(neighbor).isFaceSturdy(world, neighbor, direction.getOpposite(), SupportType.RIGID);
-			}
-		});
+					@Override
+					public boolean canSurvive(BlockState state, LevelReader world, BlockPos pos) {
+						Direction direction = state.getValue(key);
+						BlockPos neighbor = pos.relative(direction);
+						return world.getBlockState(neighbor).isFaceSturdy(world, neighbor, direction.getOpposite(), SupportType.RIGID);
+					}
+				});
 	}
 
 	static Compound any(List<CanSurviveHandler> handlers) {
@@ -79,7 +80,7 @@ public interface CanSurviveHandler {
 			}
 		};
 
-		private static final Map<DirectionProperty, CanSurviveHandler> CHECK_FACE = Maps.newHashMap();
+		private static final Map<EnumProperty<Direction>, CanSurviveHandler> CHECK_FACE = Maps.newHashMap();
 	}
 
 	record Compound(boolean any, List<CanSurviveHandler> handlers) implements CanSurviveHandler {

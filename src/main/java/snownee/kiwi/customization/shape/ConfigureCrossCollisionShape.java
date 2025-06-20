@@ -1,10 +1,13 @@
 package snownee.kiwi.customization.shape;
 
+import java.util.function.Function;
+
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.CrossCollisionBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public record ConfigureCrossCollisionShape(
@@ -28,15 +31,15 @@ public record ConfigureCrossCollisionShape(
 		if (!(block instanceof CrossCollisionBlock crossCollisionBlock)) {
 			throw new IllegalArgumentException("Block %s is not a CrossCollisionBlock".formatted(block));
 		}
-		VoxelShape[] shapes = crossCollisionBlock.makeShapes(
+		Function<BlockState, VoxelShape> shapes = crossCollisionBlock.makeShapes(
 				nodeWidth / 2,
 				extensionWidth / 2,
 				nodeHeight,
 				extensionBottom,
 				extensionHeight);
 		switch (type) {
-			case MAIN -> crossCollisionBlock.shapeByIndex = shapes;
-			case COLLISION -> crossCollisionBlock.collisionShapeByIndex = shapes;
+			case MAIN -> crossCollisionBlock.shapes = shapes;
+			case COLLISION -> crossCollisionBlock.collisionShapes = shapes;
 			case INTERACTION -> throw new UnsupportedOperationException();
 		}
 	}

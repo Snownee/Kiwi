@@ -1,5 +1,6 @@
 package snownee.kiwi.command;
 
+import java.net.URI;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Objects;
@@ -93,9 +94,10 @@ public class KiwiCommand {
 
 	public static <T> int evalHelp(T ctx, BiConsumer<T, Component> send) {
 		String url = "https://github.com/Snownee/Kiwi/wiki/Eval-Guide";
-		send.accept(ctx,
+		send.accept(
+				ctx,
 				Component.literal(url)
-						.withStyle(s -> s.withUnderlined(true).withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url))));
+						.withStyle(s -> s.withUnderlined(true).withClickEvent(new ClickEvent.OpenUrl(URI.create(url)))));
 		return 0;
 	}
 

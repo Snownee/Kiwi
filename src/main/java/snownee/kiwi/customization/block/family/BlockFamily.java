@@ -6,6 +6,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.jetbrains.annotations.Nullable;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Interner;
@@ -84,7 +85,7 @@ public class BlockFamily {
 			int stonecutterFromMultiplier,
 			SwitchAttrs switchAttrs) {
 		this.blocks = blocks.stream().map($ -> {
-			Optional<Holder.Reference<Block>> holder = BuiltInRegistries.BLOCK.getHolder($);
+			Optional<Holder.Reference<Block>> holder = BuiltInRegistries.BLOCK.get($);
 			if (strict) {
 				Preconditions.checkArgument(holder.isPresent(), "Block %s not found", $);
 			}
@@ -97,16 +98,16 @@ public class BlockFamily {
 						.filter(Predicate.not(Items.AIR::equals))
 						.mapToInt(BuiltInRegistries.ITEM::getId)
 						.distinct()
-						.mapToObj(BuiltInRegistries.ITEM::getHolder)
+						.mapToObj(BuiltInRegistries.ITEM::get)
 						.map(Optional::orElseThrow), items.stream().map($ -> {
-					Optional<Holder.Reference<Item>> holder = BuiltInRegistries.ITEM.getHolder($);
+					Optional<Holder.Reference<Item>> holder = BuiltInRegistries.ITEM.get($);
 					if (strict) {
 						Preconditions.checkArgument(holder.isPresent(), "Item %s not found", $);
 					}
 					return holder;
 				}).filter(Optional::isPresent).map(Optional::get)).toList();
 		this.exchangeInputsInViewer = exchangeInputsInViewer.stream().map($ -> {
-			Optional<Holder.Reference<Item>> holder = BuiltInRegistries.ITEM.getHolder($);
+			Optional<Holder.Reference<Item>> holder = BuiltInRegistries.ITEM.get($);
 			if (strict) {
 				Preconditions.checkArgument(holder.isPresent(), "Item %s not found", $);
 			}
@@ -114,7 +115,7 @@ public class BlockFamily {
 		}).filter(Optional::isPresent).map(Optional::get).toList();
 		this.stonecutterExchange = stonecutterExchange;
 		this.stonecutterFrom = stonecutterFrom.map($ -> {
-			Optional<Holder.Reference<Item>> holder = BuiltInRegistries.ITEM.getHolder($);
+			Optional<Holder.Reference<Item>> holder = BuiltInRegistries.ITEM.get($);
 			if (strict) {
 				Preconditions.checkArgument(holder.isPresent(), "Item %s not found", $);
 			}
@@ -175,8 +176,9 @@ public class BlockFamily {
 		return stonecutterFromMultiplier;
 	}
 
+	@Nullable
 	public Ingredient stonecutterSourceIngredient() {
-		return stonecutterFrom.map(holder -> Ingredient.of(holder.value())).orElse(Ingredient.EMPTY);
+		return stonecutterFrom.map(holder -> Ingredient.of(holder.value())).orElse(null);
 	}
 
 	public SwitchAttrs switchAttrs() {

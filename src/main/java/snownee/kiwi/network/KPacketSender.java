@@ -46,11 +46,6 @@ public final class KPacketSender {
 		PacketDistributor.sendToAllPlayers(payload);
 	}
 
-	@Deprecated
-	public static void sendToAllExcept(CustomPacketPayload payload, ServerPlayer player) {
-		sendToAll(payload, player.server);
-	}
-
 	public static void sendToAround(
 			CustomPacketPayload payload,
 			ServerLevel world,

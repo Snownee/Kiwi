@@ -1,3 +1,4 @@
+/*
 package snownee.kiwi.datagen;
 
 import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
@@ -8,7 +9,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import snownee.kiwi.Kiwi;
 
-@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber
 public class KiwiDataGen implements DataGeneratorEntrypoint {
 	@Override
 	public void onInitializeDataGenerator(FabricDataGenerator fabricDataGenerator) {
@@ -21,4 +22,4 @@ public class KiwiDataGen implements DataGeneratorEntrypoint {
 		//noinspection UnstableApiUsage
 		FabricDataGenHelper.runDatagenForMod(Kiwi.ID, Kiwi.ID, new KiwiDataGen(), event);
 	}
-}
+}*/

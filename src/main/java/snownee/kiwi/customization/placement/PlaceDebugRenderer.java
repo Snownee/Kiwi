@@ -7,9 +7,9 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.client.renderer.debug.DebugRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -51,21 +51,14 @@ public class PlaceDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 
 		VertexConsumer vertexconsumer = pBuffer.getBuffer(RenderType.lines());
 		for (SlotRenderInstance instance : slots) {
-			float r = ((instance.color >> 16) & 0xFF) / 255.0F;
-			float g = ((instance.color >> 8) & 0xFF) / 255.0F;
-			float b = (instance.color & 0xFF) / 255.0F;
-			LevelRenderer.renderVoxelShape(
+			ShapeRenderer.renderShape(
 					pPoseStack,
 					vertexconsumer,
 					instance.shape,
 					instance.pos.getX() - pCamX,
 					instance.pos.getY() - pCamY,
 					instance.pos.getZ() - pCamZ,
-					r,
-					g,
-					b,
-					1.0F,
-					true);
+					instance.color);
 		}
 	}
 
@@ -77,13 +70,13 @@ public class PlaceDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 
 		private static SlotRenderInstance create(PlaceSlot slot, BlockPos pos, Direction side) {
 			String tag = slot.primaryTag();
-			int color = 0xFFFFFF;
+			int color = 0xFFFFFFFF;
 			if (tag.endsWith("side")) {
-				color = 0xFFAAAA;
+				color = 0xFFFFAAAA;
 			} else if (tag.endsWith("front") || tag.endsWith("top")) {
-				color = 0xAAFFAA;
+				color = 0xFFAAFFAA;
 			} else if (tag.endsWith("back") || tag.endsWith("bottom")) {
-				color = 0xAAAAFF;
+				color = 0xFFAAAAFF;
 			}
 			return new SlotRenderInstance(slot, pos, side, SHAPES[side.ordinal()], color);
 		}

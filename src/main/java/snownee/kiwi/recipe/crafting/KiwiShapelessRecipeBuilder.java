@@ -1,3 +1,4 @@
+/*
 package snownee.kiwi.recipe.crafting;
 
 import java.util.Objects;
@@ -56,3 +57,4 @@ public class KiwiShapelessRecipeBuilder extends ShapelessRecipeBuilder {
 	}
 }
 
+*/

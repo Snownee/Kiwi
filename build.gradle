@@ -43,6 +43,11 @@ neoForge {
     // See https://projects.neoforged.net/neoforged/neoforge for the latest updates
     version = "21.6.8-beta"
 
+    parchment {
+        mappingsVersion = project.parchment_mappings_version
+        minecraftVersion = project.parchment_minecraft_version
+    }
+
     // Validate AT files and raise errors when they have invalid targets
     // This option is false by default, but turning it on is recommended
     validateAccessTransformers = true
@@ -67,13 +72,16 @@ neoForge {
 
         client {
             client()
+            ideName = "Run ${project.mod_id} - Client"
             systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
         }
         data {
             clientData()
+            ideName = "Run ${project.mod_id} - Data"
         }
         server {
             server()
+            ideName = "Run ${project.mod_id} - Server"
             systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
             programArgument '--nogui'
         }
@@ -223,22 +231,22 @@ dependencies {
     additionalRuntimeClasspath("com.ezylang:EvalEx:${project.evalex_version}")
 
     jarJar(implementation("org.sinytra.forgified-fabric-api:fabric-api-base:0.4.42+d1308ded19"))
-    implementation "org.sinytra.forgified-fabric-api:forgified-fabric-api:0.107.0+2.0.25+1.21.1"
+//    implementation "org.sinytra.forgified-fabric-api:forgified-fabric-api:0.107.0+2.0.25+1.21.1"
 
-    implementation "dev.architectury:architectury-neoforge:${project.architectury_version}"
-    implementation "me.shedaniel:RoughlyEnoughItems-neoforge:${project.rei_version}"
-    compileOnly "me.shedaniel:REIPluginCompatibilities-forge-annotations:12.+"
+//    implementation "dev.architectury:architectury-neoforge:${project.architectury_version}"
+//    implementation "me.shedaniel:RoughlyEnoughItems-neoforge:${project.rei_version}"
+//    compileOnly "me.shedaniel:REIPluginCompatibilities-forge-annotations:12.+"
 
-    implementation "maven.modrinth:jade:19.0.2+neoforge"
+    implementation "maven.modrinth:jade:19.0.3+neoforge"
 
-    // compile against the JEI API but do not include it at runtime
-    compileOnly("mezz.jei:jei-1.21.1-common-api:${jei_version}")
-    compileOnly("mezz.jei:jei-1.21.1-neoforge-api:${jei_version}")
-    // at runtime, use the full JEI jar for Forge
-    implementation("mezz.jei:jei-1.21.1-neoforge:${jei_version}")
+//    // compile against the JEI API but do not include it at runtime
+//    compileOnly("mezz.jei:jei-1.21.1-common-api:${jei_version}")
+//    compileOnly("mezz.jei:jei-1.21.1-neoforge-api:${jei_version}")
+//    // at runtime, use the full JEI jar for Forge
+//    implementation("mezz.jei:jei-1.21.1-neoforge:${jei_version}")
 
-    compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
-    runtimeOnly "dev.emi:emi-neoforge:${emi_version}"
+//    compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
+//    runtimeOnly "dev.emi:emi-neoforge:${emi_version}"
 }
 
 processResources {

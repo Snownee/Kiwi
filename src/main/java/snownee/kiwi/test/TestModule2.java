@@ -15,8 +15,8 @@ import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiGO;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModule.Name;
+import snownee.kiwi.loader.Platform;
 import snownee.kiwi.loader.event.InitEvent;
-import snownee.kiwi.util.VanillaActions;
 
 @KiwiModule(modId = Kiwi.ID, value = "test2", dependencies = "minecraft;@kiwi:test")
 @KiwiModule.Optional(defaultEnabled = false)
@@ -41,7 +41,7 @@ public class TestModule2 extends AbstractModule {
 	@Override
 	protected void init(InitEvent event) {
 		event.enqueueWork(() -> {
-			VanillaActions.registerAxeConversion(Blocks.DIAMOND_BLOCK, Blocks.REDSTONE_BLOCK);
+			Platform.registerAxeConversion(Blocks.DIAMOND_BLOCK, Blocks.REDSTONE_BLOCK);
 			Kiwi.LOGGER.info("{}", DANDELION.get());
 		});
 	}

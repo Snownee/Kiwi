@@ -1,5 +1,7 @@
 package snownee.kiwi.util;
 
+import org.jetbrains.annotations.Nullable;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Blocks;
@@ -22,6 +24,7 @@ public class SimulationBlockGetter extends WrappedBlockGetter {
 	}
 
 	@Override
+	@Nullable
 	public BlockEntity getBlockEntity(BlockPos pos) {
 		if (simulatedBlockEntity != null && pos.equals(simulatedPos)) {
 			return simulatedBlockEntity;

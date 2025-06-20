@@ -1,4 +1,4 @@
-package snownee.kiwi.test;
+/*package snownee.kiwi.test;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -98,3 +98,4 @@ public class TestRecipe extends DynamicShapedRecipe {
 		}
 	}
 }
+*/

@@ -1,3 +1,4 @@
+/*
 package snownee.kiwi.customization.compat.jei;
 
 import java.util.List;
@@ -46,3 +47,4 @@ public class JEICompat implements IModPlugin {
 		}
 	}
 }
+*/

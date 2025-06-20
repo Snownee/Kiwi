@@ -2,10 +2,12 @@ package snownee.kiwi.contributor.network;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -18,7 +20,7 @@ import snownee.kiwi.network.PayloadContext;
 import snownee.kiwi.network.PlayPacketHandler;
 
 @KiwiPacket
-public record SSyncCosmeticPacket(Map<String, ResourceLocation> add, List<String> remove) implements CustomPacketPayload {
+public record SSyncCosmeticPacket(Map<UUID, ResourceLocation> add, List<UUID> remove) implements CustomPacketPayload {
 	public static final Type<SSyncCosmeticPacket> TYPE = new Type<>(Kiwi.id("sync_cosmetic"));
 
 	@Override
@@ -30,11 +32,11 @@ public record SSyncCosmeticPacket(Map<String, ResourceLocation> add, List<String
 		public static final StreamCodec<RegistryFriendlyByteBuf, SSyncCosmeticPacket> STREAM_CODEC = StreamCodec.composite(
 				ByteBufCodecs.map(
 								Maps::newHashMapWithExpectedSize,
-								ByteBufCodecs.STRING_UTF8,
+								UUIDUtil.STREAM_CODEC,
 								ResourceLocation.STREAM_CODEC)
 						.map(ImmutableMap::copyOf, Maps::newHashMap),
 				SSyncCosmeticPacket::add,
-				ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()),
+				UUIDUtil.STREAM_CODEC.apply(ByteBufCodecs.list()),
 				SSyncCosmeticPacket::remove,
 				SSyncCosmeticPacket::new
 		);

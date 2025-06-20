@@ -1,3 +1,4 @@
+/*
 package snownee.kiwi.datagen;
 
 import java.util.List;
@@ -84,4 +85,4 @@ public abstract class KiwiBlockLoot extends FabricBlockLootTableProvider {
 	public String getName() {
 		return super.getName() + " - " + moduleId;
 	}
-}
+}*/

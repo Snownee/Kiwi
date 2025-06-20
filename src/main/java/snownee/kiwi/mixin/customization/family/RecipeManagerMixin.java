@@ -21,16 +21,16 @@ import snownee.kiwi.customization.block.family.StonecutterRecipeMaker;
 @Mixin(RecipeManager.class)
 public class RecipeManagerMixin {
 
-	@ModifyReturnValue(method = "getRecipesFor", at = @At(value = "RETURN"))
-	private <C extends RecipeInput, T extends Recipe<C>> List<RecipeHolder<T>> kiwi$addFakeStonecutterRecipes(
-			List<RecipeHolder<T>> recipes,
-			RecipeType<T> pRecipeType,
-			C pInventory) {
-		if (pRecipeType == RecipeType.STONECUTTING) {
-			return StonecutterRecipeMaker.appendRecipesFor(recipes, pInventory);
-		}
-		return recipes;
-	}
+//	@ModifyReturnValue(method = "getRecipesFor", at = @At(value = "RETURN"))
+//	private <C extends RecipeInput, T extends Recipe<C>> List<RecipeHolder<T>> kiwi$addFakeStonecutterRecipes(
+//			List<RecipeHolder<T>> recipes,
+//			RecipeType<T> pRecipeType,
+//			C pInventory) {
+//		if (pRecipeType == RecipeType.STONECUTTING) {
+//			return StonecutterRecipeMaker.appendRecipesFor(recipes, pInventory);
+//		}
+//		return recipes;
+//	}
 
 	@ModifyReturnValue(
 			method = "getRecipeFor(Lnet/minecraft/world/item/crafting/RecipeType;Lnet/minecraft/world/item/crafting/RecipeInput;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/crafting/RecipeHolder;)Ljava/util/Optional;",

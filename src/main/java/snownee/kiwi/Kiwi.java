@@ -33,8 +33,7 @@ import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.MutableGraph;
 import com.mojang.logging.LogUtils;
 
-import net.minecraft.advancements.critereon.ItemSubPredicate;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
@@ -54,15 +53,12 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
-import net.minecraft.world.entity.animal.CatVariant;
-import net.minecraft.world.entity.animal.FrogVariant;
 import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerType;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.entity.schedule.Schedule;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Instrument;
@@ -292,9 +288,9 @@ public class Kiwi {
 //		}
 		//modEventBus.register(KiwiModules.class); // Cannot register without at least one event listener
 		if (Platform.isPhysicalClient()) {
-			RenderLayerEnum.CUTOUT.value = RenderType.cutout();
-			RenderLayerEnum.CUTOUT_MIPPED.value = RenderType.cutoutMipped();
-			RenderLayerEnum.TRANSLUCENT.value = RenderType.translucent();
+			RenderLayerEnum.CUTOUT.value = ChunkSectionLayer.CUTOUT;
+			RenderLayerEnum.CUTOUT_MIPPED.value = ChunkSectionLayer.CUTOUT_MIPPED;
+			RenderLayerEnum.TRANSLUCENT.value = ChunkSectionLayer.TRANSLUCENT;
 
 			NeoForge.EVENT_BUS.register(ClientInitializer.class);
 		}
@@ -573,13 +569,9 @@ public class Kiwi {
 		registerRegistry(Registries.FEATURE_SIZE_TYPE, FeatureSizeType.class);
 		registerRegistry(Registries.STRUCTURE_PROCESSOR, StructureProcessorType.class);
 		registerRegistry(Registries.STRUCTURE_POOL_ELEMENT, StructurePoolElementType.class);
-		registerRegistry(Registries.CAT_VARIANT, CatVariant.class);
-		registerRegistry(Registries.FROG_VARIANT, FrogVariant.class);
 		registerRegistry(Registries.INSTRUMENT, Instrument.class);
 		registerRegistry(Registries.CREATIVE_MODE_TAB, CreativeModeTab.class);
-		registerRegistry(Registries.ARMOR_MATERIAL, ArmorMaterial.class);
 		registerRegistry(Registries.DATA_COMPONENT_TYPE, DataComponentType.class);
-		registerRegistry(Registries.ITEM_SUB_PREDICATE_TYPE, ItemSubPredicate.Type.class);
 
 		registerRegistry(NeoForgeRegistries.Keys.ENTITY_DATA_SERIALIZERS, EntityDataSerializer.class);
 		registerRegistry(NeoForgeRegistries.Keys.INGREDIENT_TYPES, IngredientType.class);

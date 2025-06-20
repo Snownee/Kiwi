@@ -1,32 +1,35 @@
 package snownee.kiwi.mixin.client;
 
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.ScreenEffectRenderer;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.world.effect.MobEffects;
 
 @Mixin(ScreenEffectRenderer.class)
 public class ScreenEffectRendererMixin {
 
-	@Inject(at = @At("HEAD"), method = "renderFire", cancellable = true)
-	private static void kiwi$renderFire(Minecraft minecraft, PoseStack poseStack, CallbackInfo ci) {
+	@WrapMethod(method = "renderFire")
+	private static void kiwi$renderFire(PoseStack poseStack, MultiBufferSource bufferSource, Operation<Void> original) {
 		LocalPlayer player = Minecraft.getInstance().player;
 		if (player == null) {
+			original.call(poseStack, bufferSource);
 			return;
 		}
 		if (player.isCreative()) {
-			ci.cancel();
+			return;
 		}
-		if (player.isEyeInFluid(FluidTags.LAVA) && (player.fireImmune() || player.hasEffect(MobEffects.FIRE_RESISTANCE))) {
+		if (player.fireImmune() || player.hasEffect(MobEffects.FIRE_RESISTANCE)) {
+			poseStack.pushPose();
 			poseStack.translate(0, -0.25, 0);
+			original.call(poseStack, bufferSource);
+			poseStack.popPose();
 		}
 	}
 

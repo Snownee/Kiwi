@@ -83,7 +83,7 @@ public final class BlockItemTemplate extends KItemTemplate {
 
 	@Override
 	public Item createItem(ResourceLocation id, Item.Properties properties, JsonObject json) {
-		Block block = BuiltInRegistries.BLOCK.get(this.block.orElse(id));
+		Block block = BuiltInRegistries.BLOCK.getValue(this.block.orElse(id));
 		Preconditions.checkState(block != Blocks.AIR, "Block %s not found", this.block);
 		return constructor.apply(block, properties);
 	}

@@ -4,12 +4,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.Maps;
-import com.mojang.datafixers.types.Type;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
@@ -70,17 +70,29 @@ public abstract class AbstractModule {
 	@SafeVarargs
 	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(
 			BlockEntityType.BlockEntitySupplier<? extends T> factory,
-			Type<?> datafixer,
 			Supplier<? extends Block>... blocks) {
-		return go(() -> BlockEntityType.Builder.<T>of(factory, Stream.of(blocks).map(Supplier::get).toArray(Block[]::new))
-				.build(datafixer));
+		return blockEntity(factory, false, blocks);
+	}
+
+	@SafeVarargs
+	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(
+			BlockEntityType.BlockEntitySupplier<? extends T> factory,
+			boolean onlyOpCanSetNbt,
+			Supplier<? extends Block>... blocks) {
+		return go(() -> new BlockEntityType<>(factory, Stream.of(blocks).map(Supplier::get).collect(Collectors.toSet()), onlyOpCanSetNbt));
 	}
 
 	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(
 			BlockEntityType.BlockEntitySupplier<? extends T> factory,
-			Type<?> datafixer,
 			Class<? extends Block> blockClass) {
-		return go(() -> new InheritanceBlockEntityType<>(factory, blockClass, datafixer));
+		return blockEntity(factory, false, blockClass);
+	}
+
+	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(
+			BlockEntityType.BlockEntitySupplier<? extends T> factory,
+			boolean onlyOpCanSetNbt,
+			Class<? extends Block> blockClass) {
+		return go(() -> new InheritanceBlockEntityType<>(factory, blockClass, onlyOpCanSetNbt));
 	}
 
 	public static CreativeModeTab.Builder itemCategory(ResourceLocation id, Supplier<ItemStack> icon) {

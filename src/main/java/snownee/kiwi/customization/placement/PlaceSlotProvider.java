@@ -35,7 +35,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.customization.block.KBlockUtils;
@@ -146,7 +146,7 @@ public record PlaceSlotProvider(
 
 		public void attachSlotsB() {
 			byBlock.asMap().forEach((blockId, holders) -> {
-				Block block = BuiltInRegistries.BLOCK.get(blockId);
+				Block block = BuiltInRegistries.BLOCK.getValue(blockId);
 				if (block == Blocks.AIR) {
 					Kiwi.LOGGER.error("Block %s not found for slot providers %s".formatted(blockId, holders));
 					return;
@@ -201,16 +201,17 @@ public record PlaceSlotProvider(
 				String transformWith = (slot.transformWith.isPresent() ? slot.transformWith : this.transformWith).orElse("none");
 				if (!"none".equals(transformWith)) {
 					Property<?> property = KBlockUtils.getProperty(blockState, transformWith);
-					if (!(property instanceof DirectionProperty directionProperty)) {
+					if (!(property instanceof EnumProperty<?> directionProperty) || directionProperty.getValueClass() != Direction.class) {
 						throw new IllegalArgumentException("Invalid transform_with property: " + transformWith);
 					}
-					attachSlotWithTransformation(preparation, slot, blockState, directionProperty);
+					//noinspection unchecked
+					attachSlotWithTransformation(preparation, slot, blockState, (EnumProperty<Direction>) directionProperty);
 				}
 			}
 		}
 	}
 
-	private void attachSlotWithTransformation(Preparation preparation, Slot slot, BlockState blockState, DirectionProperty property) {
+	private void attachSlotWithTransformation(Preparation preparation, Slot slot, BlockState blockState, EnumProperty<Direction> property) {
 		Direction baseDirection = blockState.getValue(property);
 		BlockState rotatedState = blockState;
 		while ((rotatedState = rotatedState.cycle(property)) != blockState) {

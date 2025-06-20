@@ -17,12 +17,12 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import snownee.kiwi.customization.block.KBlockSettings;
 import snownee.kiwi.customization.block.loader.KBlockComponents;
 
 public record HorizontalComponent(boolean oppose) implements KBlockComponent {
-	public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+	public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
 	private static final HorizontalComponent NORMAL = new HorizontalComponent(false);
 	private static final HorizontalComponent OPPOSE = new HorizontalComponent(true);
 	public static final MapCodec<HorizontalComponent> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(

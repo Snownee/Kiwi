@@ -1,4 +1,4 @@
-package snownee.kiwi.mixin.client;
+package snownee.kiwi.mixin.forge;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

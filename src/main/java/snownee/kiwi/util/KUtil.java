@@ -25,14 +25,8 @@ import org.yaml.snakeyaml.representer.Representer;
 
 import com.google.gson.JsonElement;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
@@ -46,15 +40,10 @@ import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.item.crafting.RecipeManager;
-import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.EntityHitResult;
-import snownee.kiwi.loader.Platform;
 
 public final class KUtil {
 	public static final MessageFormat MESSAGE_FORMAT = new MessageFormat("{0,number,#.#}");
@@ -136,30 +125,6 @@ public final class KUtil {
 			string = defaultNamespace + ":" + string;
 		}
 		return RL(string);
-	}
-
-	@Nullable
-	public static RecipeManager getRecipeManager() {
-		if (recipeManager == null && Platform.isPhysicalClient()) {
-			ClientPacketListener connection = Minecraft.getInstance().getConnection();
-			if (connection != null) {
-				return connection.getRecipeManager();
-			}
-		}
-		return recipeManager;
-	}
-
-	public static void setRecipeManager(RecipeManager recipeManager) {
-		KUtil.recipeManager = recipeManager;
-	}
-
-	public static <I extends RecipeInput, T extends Recipe<I>> List<RecipeHolder<T>> getRecipes(RecipeType<T> recipeTypeIn) {
-		RecipeManager manager = getRecipeManager();
-		if (manager == null) {
-			return List.of();
-		} else {
-			return getRecipeManager().getAllRecipesFor(recipeTypeIn);
-		}
 	}
 
 	public static int friendlyCompare(String a, String b) {
@@ -282,7 +247,7 @@ public final class KUtil {
 		if (client != player.level().isClientSide) {
 			return;
 		}
-		player.sendSystemMessage(Component.translatable(key, args));
+		player.displayClientMessage(Component.translatable(key, args), false);
 	}
 
 	public static void jsonList(JsonElement json, Consumer<JsonElement> collector) {
@@ -293,36 +258,6 @@ public final class KUtil {
 		} else {
 			collector.accept(json);
 		}
-	}
-
-
-	public static String @Nullable [] readNBTStrings(CompoundTag tag, String key, String @Nullable [] strings) {
-		if (!tag.contains(key, Tag.TAG_LIST)) {
-			return null;
-		}
-		ListTag list = tag.getList(key, Tag.TAG_STRING);
-		if (list.isEmpty()) {
-			return null;
-		}
-		if (strings == null || strings.length != list.size()) {
-			strings = new String[list.size()];
-		}
-		for (int i = 0; i < strings.length; i++) {
-			String s = list.getString(i);
-			strings[i] = s;
-		}
-		return strings;
-	}
-
-	public static void writeNBTStrings(CompoundTag tag, String key, String @Nullable [] strings) {
-		if (strings == null || strings.length == 0) {
-			return;
-		}
-		ListTag list = new ListTag();
-		for (String s : strings) {
-			list.add(StringTag.valueOf(s));
-		}
-		tag.put(key, list);
 	}
 
 	public static InteractionResult onAttackEntity(
@@ -339,8 +274,8 @@ public final class KUtil {
 
 	public static MutableComponent clickToCopy(MutableComponent component) {
 		String str = component.getString();
-		return component.withStyle(s -> s.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, str))
-				.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click")))
+		return component.withStyle(s -> s.withClickEvent(new ClickEvent.CopyToClipboard(str))
+				.withHoverEvent(new HoverEvent.ShowText(Component.translatable("chat.copy.click")))
 				.withInsertion(str));
 	}
 

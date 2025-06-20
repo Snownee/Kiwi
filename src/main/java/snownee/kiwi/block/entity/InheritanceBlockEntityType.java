@@ -2,8 +2,6 @@ package snownee.kiwi.block.entity;
 
 import java.util.Set;
 
-import com.mojang.datafixers.types.Type;
-
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -16,8 +14,8 @@ public class InheritanceBlockEntityType<T extends BlockEntity> extends BlockEnti
 	public InheritanceBlockEntityType(
 			BlockEntityType.BlockEntitySupplier<? extends T> factory,
 			Class<? extends Block> clazz,
-			Type<?> datafixer) {
-		super(factory::create, Set.of(), datafixer);
+			boolean onlyOpCanSetNbt) {
+		super(factory, Set.of(), onlyOpCanSetNbt);
 		this.clazz = clazz;
 	}
 

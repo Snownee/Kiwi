@@ -1,3 +1,4 @@
+/*
 package snownee.kiwi.recipe.crafting;
 
 import com.mojang.serialization.Codec;
@@ -119,3 +120,4 @@ public class KiwiShapelessRecipe extends ShapelessRecipe {
 		}
 	}
 }
+*/

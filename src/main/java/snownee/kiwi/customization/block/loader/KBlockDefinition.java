@@ -28,7 +28,6 @@ import snownee.kiwi.customization.shape.MouldingShape;
 import snownee.kiwi.customization.shape.ShapeGenerator;
 import snownee.kiwi.customization.shape.ShapeStorage;
 import snownee.kiwi.loader.Platform;
-import snownee.kiwi.util.VanillaActions;
 import snownee.kiwi.util.VoxelUtil;
 
 public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinitionProperties properties) {
@@ -108,7 +107,7 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 				if (remove) {
 					s = s.substring(1);
 				}
-				KBlockComponent.Type<?> type = CustomizationRegistries.BLOCK_COMPONENT.get(ResourceLocation.parse(s));
+				KBlockComponent.Type<?> type = CustomizationRegistries.BLOCK_COMPONENT.getValue(ResourceLocation.parse(s));
 				Preconditions.checkNotNull(type, "Unknown component type %s", s);
 				if (remove) {
 					builder.removeComponent(type);
@@ -130,7 +129,7 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 		Block block = template.template().createBlock(id, builder.get(), template.json());
 		setConfiguringShape(block);
 		properties.material().ifPresent(mat -> {
-			VanillaActions.setFireInfo(block, mat.igniteOdds(), mat.burnOdds());
+			Platform.setFireInfo(block, mat.igniteOdds(), mat.burnOdds());
 		});
 		KBlockSettings settings = Objects.requireNonNull(KBlockSettings.of(block));
 		BlockBehaviorRegistry behaviorRegistry = BlockBehaviorRegistry.getInstance();

@@ -115,7 +115,7 @@ public class KiwiGO<T> implements Supplier<T> {
 
 	void register() {
 		//noinspection unchecked
-		Registry<T> registry = (Registry<T>) Objects.requireNonNull(BuiltInRegistries.REGISTRY.get(resourceKey().registry()));
+		Registry<T> registry = (Registry<T>) Objects.requireNonNull(BuiltInRegistries.REGISTRY.getValue(resourceKey().registry()));
 		Registry.register(registry, key(), get());
 	}
 
@@ -129,11 +129,11 @@ public class KiwiGO<T> implements Supplier<T> {
 			return Optional.empty();
 		}
 		//noinspection unchecked
-		Registry<T> registry = (Registry<T>) BuiltInRegistries.REGISTRY.get(key.registry());
+		Registry<T> registry = (Registry<T>) BuiltInRegistries.REGISTRY.getValue(key.registry());
 		if (registry == null) {
 			return Optional.empty();
 		}
-		return registry.getHolder(key);
+		return registry.get(key);
 	}
 
 	@Override
@@ -184,8 +184,8 @@ public class KiwiGO<T> implements Supplier<T> {
 		public T get() {
 			if (value == null) {
 				//noinspection unchecked
-				Registry<T> registry = (Registry<T>) Objects.requireNonNull(BuiltInRegistries.REGISTRY.get(resourceKey().registry()));
-				value = registry.getOrThrow(resourceKey());
+				Registry<T> registry = (Registry<T>) Objects.requireNonNull(BuiltInRegistries.REGISTRY.getValue(resourceKey().registry()));
+				value = registry.getValueOrThrow(resourceKey());
 			}
 			return value;
 		}

@@ -1,38 +1,24 @@
 package snownee.kiwi.loader;
 
-import java.util.List;
 import java.util.Locale;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.color.block.BlockColor;
-import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.particle.ParticleProvider;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
 public final class ClientPlatform {
 	private ClientPlatform() {
-	}
-
-	public static BakedModel getModel(ModelResourceLocation id) {
-		return Minecraft.getInstance().getModelManager().getModel(id);
-	}
-
-	public static void addExtraModels(List<? extends ModelResourceLocation> ids) {
-//		ModelEvent.RegisterAdditional
-//		ModelLoadingPlugin.register(ctx -> ctx.addModels(ids));
 	}
 
 	public static <E extends Entity> void registerEntityRenderer(
@@ -51,16 +37,8 @@ public final class ClientPlatform {
 //		ParticleFactoryRegistry.getInstance().register(type, factory);
 	}
 
-	public static void registerItemColor(ItemColor itemColor, ItemLike... items) {
-//		ColorProviderRegistry.ITEM.register(itemColor, items);
-	}
-
-	public static void registerBlockColor(BlockColor blockColor, Block... blocks) {
-//		ColorProviderRegistry.BLOCK.register(blockColor, blocks);
-	}
-
-	public static void setRenderType(Block block, RenderType renderType) {
-//		BlockRenderLayerMap.INSTANCE.putBlock(block, renderType);
+	public static void setRenderType(Block block, ChunkSectionLayer layer) {
+		ItemBlockRenderTypes.setRenderLayer(block, layer);
 	}
 
 	public static Locale getLocale() {

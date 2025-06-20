@@ -1,18 +1,8 @@
 package snownee.kiwi.contributor;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-
-import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.client.model.PlayerModel;
-import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.entity.RenderLayerParent;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import snownee.kiwi.contributor.client.CosmeticLayer;
 
 public interface ITierProvider {
 	String getAuthor();
@@ -27,10 +17,6 @@ public interface ITierProvider {
 		return CompletableFuture.completedFuture(null);
 	}
 
-	@OnlyIn(Dist.CLIENT)
-	@Nullable
-	CosmeticLayer createRenderer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer, String tier);
-
 	default boolean isContributor(String playerName) {
 		return !getPlayerTiers(playerName).isEmpty();
 	}
@@ -39,7 +25,7 @@ public interface ITierProvider {
 		return getPlayerTiers(playerName).contains(tier);
 	}
 
-	public enum Empty implements ITierProvider {
+	enum Empty implements ITierProvider {
 		INSTANCE;
 
 		@Override
@@ -49,26 +35,17 @@ public interface ITierProvider {
 
 		@Override
 		public Set<String> getTiers() {
-			return Collections.EMPTY_SET;
+			return Set.of();
 		}
 
 		@Override
 		public Set<String> getPlayerTiers(String playerName) {
-			return Collections.EMPTY_SET;
+			return Set.of();
 		}
 
 		@Override
 		public List<String> getRenderableTiers() {
-			return Collections.EMPTY_LIST;
+			return List.of();
 		}
-
-		@OnlyIn(Dist.CLIENT)
-		@Override
-		public @Nullable CosmeticLayer createRenderer(
-				RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer,
-				String tier) {
-			return null;
-		}
-
 	}
 }

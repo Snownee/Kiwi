@@ -9,27 +9,20 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
-import org.jetbrains.annotations.Nullable;
-
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.google.gson.Strictness;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 
-import net.minecraft.client.model.PlayerModel;
-import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.entity.RenderLayerParent;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.contributor.ITierProvider;
-import snownee.kiwi.contributor.client.CosmeticLayer;
 
 public class JsonTierProvider implements ITierProvider {
-	public static final Gson GSON = new GsonBuilder().setLenient().create();
+	public static final Gson GSON = new GsonBuilder().setStrictness(Strictness.LENIENT).create();
 	public static final Codec<Map<String, List<String>>> CODEC = Codec.unboundedMap(Codec.STRING, Codec.STRING.listOf());
 
 	private final String author;
@@ -104,13 +97,4 @@ public class JsonTierProvider implements ITierProvider {
 	public List<String> getRenderableTiers() {
 		return List.of();
 	}
-
-	@OnlyIn(Dist.CLIENT)
-	@Override
-	public @Nullable CosmeticLayer createRenderer(
-			RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer,
-			String tier) {
-		return null;
-	}
-
 }

@@ -14,6 +14,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import it.unimi.dsi.fastutil.objects.Object2ByteLinkedOpenHashMap;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -31,6 +32,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.validation.DirectoryValidator;
@@ -89,10 +91,10 @@ public final class CustomizationHooks {
 	private CustomizationHooks() {
 	}
 
-	// a custom implementation of the Block.shouldRenderFace
+	/// a custom implementation of the {@link Block#shouldRenderFace(BlockGetter, BlockPos, BlockState, BlockState, Direction)}
 	private static final int CACHE_SIZE = 512;
-	private static final ThreadLocal<Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey>> OCCLUSION_CACHE = ThreadLocal.withInitial(() -> {
-		Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey> object2bytelinkedopenhashmap = new Object2ByteLinkedOpenHashMap<>(
+	private static final ThreadLocal<Object2ByteLinkedOpenHashMap<BlockStatePairKey>> OCCLUSION_CACHE = ThreadLocal.withInitial(() -> {
+		Object2ByteLinkedOpenHashMap<BlockStatePairKey> object2bytelinkedopenhashmap = new Object2ByteLinkedOpenHashMap<>(
 				CACHE_SIZE,
 				0.25F) {
 			@Override
@@ -118,8 +120,8 @@ public final class CustomizationHooks {
 		if (!pState.is(pAdjacentBlockState.getBlock()) && glassType != getGlassType(pAdjacentBlockState)) {
 			return false;
 		}
-		Block.BlockStatePairKey key = new Block.BlockStatePairKey(pState, pAdjacentBlockState, pDirection);
-		Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey> map = OCCLUSION_CACHE.get();
+		BlockStatePairKey key = new BlockStatePairKey(pState, pAdjacentBlockState, pDirection);
+		Object2ByteLinkedOpenHashMap<BlockStatePairKey> map = OCCLUSION_CACHE.get();
 		byte b0 = map.getAndMoveToFirst(key);
 		if (b0 != 127) {
 			return b0 == 0;
@@ -200,7 +202,7 @@ public final class CustomizationHooks {
 		});
 		forgeEventBus.addListener((PlayerInteractEvent.RightClickBlock event) -> {
 			if (event.getHand() == InteractionHand.MAIN_HAND && SitManager.sit(event.getEntity(), event.getHitVec())) {
-				event.setCancellationResult(InteractionResult.sidedSuccess(event.getLevel().isClientSide));
+				event.setCancellationResult(InteractionResult.SUCCESS_SERVER);
 				event.setCanceled(true);
 			}
 		});
@@ -291,7 +293,7 @@ public final class CustomizationHooks {
 					.displayItems((params, output) -> {
 						output.acceptAll(value.contents()
 								.stream()
-								.map(BuiltInRegistries.ITEM::get)
+								.map(BuiltInRegistries.ITEM::getValue)
 								.filter(Objects::nonNull)
 								.map(Item::getDefaultInstance)
 								.toList());
@@ -322,7 +324,7 @@ public final class CustomizationHooks {
 				return;
 			}
 			for (ResourceKey<Item> content : kCreativeTab.contents()) {
-				Item item = BuiltInRegistries.ITEM.get(content);
+				Item item = BuiltInRegistries.ITEM.getValue(content);
 				if (item == null) {
 					return;
 				}
@@ -433,4 +435,6 @@ public final class CustomizationHooks {
 		BlockFamilies.reloadResources(resourceManager, context);
 		BuilderRules.reload(resourceManager, context);
 	}
+
+	private record BlockStatePairKey(BlockState pState, BlockState pAdjacentBlockState, Direction pDirection) {}
 }

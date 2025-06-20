@@ -15,6 +15,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import snownee.kiwi.Kiwi;
 
+@Deprecated
 // https://github.com/mekanism/Mekanism/blob/1.20.4/src/main/java/mekanism/common/util/VoxelUtil.java
 public final class VoxelUtil {
 

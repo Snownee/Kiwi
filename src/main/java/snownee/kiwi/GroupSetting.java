@@ -82,12 +82,12 @@ public class GroupSetting {
 				List<Item> afterItems = after == null ? List.of() : Stream.of(after)
 						.map(KUtil::RL)
 						.filter(Objects::nonNull)
-						.map(BuiltInRegistries.ITEM::get)
+						.map(BuiltInRegistries.ITEM::getValue)
 						.filter(Predicate.not(Items.AIR::equals))
 						.toList();
 				List<ItemStack> items = Lists.newArrayList();
 				for (ItemCategoryFiller filler : fillers) {
-					CreativeModeTab tab = BuiltInRegistries.CREATIVE_MODE_TAB.get(tabKey);
+					CreativeModeTab tab = BuiltInRegistries.CREATIVE_MODE_TAB.getValue(tabKey);
 					if (tab != null) {
 						filler.fillItemCategory(tab, event.getFlags(), event.hasPermissions(), items);
 					}

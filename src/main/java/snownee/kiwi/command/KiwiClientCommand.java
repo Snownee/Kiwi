@@ -27,8 +27,8 @@ public class KiwiClientCommand {
 	private static int quiet() {
 		Minecraft mc = Minecraft.getInstance();
 		mc.gui.getChat().trimmedMessages.clear();
-		mc.gui.clear();
-		mc.getToasts().clear();
+		mc.gui.clearTitles();
+		mc.getToastManager().clear();
 		mc.getSoundManager().stop();
 		return 0;
 	}

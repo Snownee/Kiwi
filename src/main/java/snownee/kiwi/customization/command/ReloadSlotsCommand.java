@@ -34,19 +34,21 @@ public class ReloadSlotsCommand {
 		int choicesCount = reload(fundamentals);
 		long attachTime = stopwatch.elapsed().toMillis();
 		Kiwi.LOGGER.info("Parse time %dms + Attach time %dms = %dms".formatted(parseTime, attachTime, parseTime + attachTime));
-		source.sendSuccess(() -> Component.literal("Slots in %d blocks, %d block states have been reloaded, using %d providers".formatted(
-				PlaceSlot.blockCount(),
-				fundamentals.slotProviders().slots().size(),
-				fundamentals.slotProviders().providers().size())), false);
-		source.sendSuccess(() -> Component.literal("Place choices in %d blocks have been reloaded, using %d providers".formatted(
-				choicesCount,
-				fundamentals.placeChoices().choices().size())), false);
+		source.sendSuccess(
+				() -> Component.literal("Slots in %d blocks, %d block states have been reloaded, using %d providers".formatted(
+						PlaceSlot.blockCount(),
+						fundamentals.slotProviders().slots().size(),
+						fundamentals.slotProviders().providers().size())), false);
+		source.sendSuccess(
+				() -> Component.literal("Place choices in %d blocks have been reloaded, using %d providers".formatted(
+						choicesCount,
+						fundamentals.placeChoices().choices().size())), false);
 		return 1;
 	}
 
 	public static int reload(BlockFundamentals fundamentals) {
 		AtomicInteger choicesCounter = new AtomicInteger();
-		BuiltInRegistries.BLOCK.holders().forEach(holder -> {
+		BuiltInRegistries.BLOCK.listElements().forEach(holder -> {
 			PlaceChoices.setTo(holder.value(), null);
 			KBlockDefinition definition = fundamentals.blocks().get(holder.key().location());
 			if (definition == null) {

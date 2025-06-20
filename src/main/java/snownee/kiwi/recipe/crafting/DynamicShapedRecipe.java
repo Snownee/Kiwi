@@ -1,3 +1,4 @@
+/*
 package snownee.kiwi.recipe.crafting;
 
 import java.util.List;
@@ -211,3 +212,4 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 		}
 	}
 }
+*/

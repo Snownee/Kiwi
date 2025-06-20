@@ -1,7 +1,7 @@
+/*
 package snownee.kiwi.customization.compat.emi;
 
 import java.util.List;
-import java.util.Objects;
 
 import dev.emi.emi.api.recipe.EmiRecipe;
 import dev.emi.emi.api.recipe.EmiRecipeCategory;
@@ -10,7 +10,6 @@ import dev.emi.emi.api.render.EmiTexture;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.widget.WidgetHolder;
-import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
@@ -21,9 +20,9 @@ public class KEmiStonecutterRecipe implements EmiRecipe {
 	private final EmiStack output;
 
 	public KEmiStonecutterRecipe(RecipeHolder<StonecutterRecipe> recipeHolder) {
-		id = recipeHolder.id();
-		input = EmiIngredient.of(recipeHolder.value().getIngredients().getFirst());
-		output = EmiStack.of(recipeHolder.value().getResultItem(Objects.requireNonNull(Minecraft.getInstance().level).registryAccess()));
+		id = recipeHolder.id().location();
+		input = EmiIngredient.of(recipeHolder.value().input());
+		output = EmiStack.of(recipeHolder.value().result());
 	}
 
 	@Override
@@ -63,3 +62,4 @@ public class KEmiStonecutterRecipe implements EmiRecipe {
 		widgets.addSlot(output, 58, 0).recipeContext(this);
 	}
 }
+*/

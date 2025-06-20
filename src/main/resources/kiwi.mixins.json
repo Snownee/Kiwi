@@ -7,14 +7,13 @@
 	"refmap": "kiwi.refmap.json",
 	"mixins": [
 		"GameDataMixin",
-		"RecipeManagerMixin",
 		"customization.AbstractContainerMenuMixin",
 		"customization.BlockBehaviourMixin",
 		"customization.BlockEntityTypeMixin",
 		"customization.BlockMixin",
 		"customization.BlockPropertiesMixin",
 		"customization.BlockStateMixin",
-		"customization.BushBlockMixin",
+		"customization.VegetationBlockMixin",
 		"customization.HalfTransparentBlockMixin",
 		"customization.family.RecipeManagerMixin",
 		"customization.forge.IBlockStateExtensionMixin",
@@ -29,10 +28,10 @@
 	"client": [
 		"client.ClientTelemetryManagerMixin",
 		"client.CreativeModeInventoryScreenMixin",
-		"client.FogRendererMixin",
+		"client.LavaFogEnvironmentMixin",
 		"client.LoadingOverlayMixin",
-		"client.NeoForgeLoadingOverlayMixin",
 		"client.OptionInstanceMixin",
+		"client.RenderLayerAccess",
 		"client.ScreenEffectRendererMixin",
 		"client.ScreenMixin",
 		"client.TitleScreenMixin",
@@ -43,7 +42,7 @@
 		"customization.sit.ClientPacketListenerMixin",
 		"customization.sit.LocalPlayerMixin",
 		"forge.BlockColorsAccess",
-		"forge.ItemColorsAccess"
+		"forge.NeoForgeLoadingOverlayMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

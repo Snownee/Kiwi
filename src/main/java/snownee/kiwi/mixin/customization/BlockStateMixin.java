@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -13,11 +14,12 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -47,33 +49,44 @@ public abstract class BlockStateMixin {
 
 	@Inject(method = "updateShape", at = @At("HEAD"), cancellable = true)
 	private void kiwi$checkCanSurvive(
-			Direction pDirection,
-			BlockState pNeighborState,
-			LevelAccessor pLevel,
-			BlockPos pPos,
-			BlockPos pNeighborPos,
+			LevelReader level,
+			ScheduledTickAccess scheduledTickAccess,
+			BlockPos pos,
+			Direction direction,
+			BlockPos neighborPos,
+			BlockState neighborState,
+			RandomSource random,
 			CallbackInfoReturnable<BlockState> cir) {
 		KBlockSettings settings = KBlockSettings.of(getBlock());
-		if (settings != null && settings.canSurviveHandler != null && settings.canSurviveHandler.isSensitiveSide(asState(), pDirection) &&
-				!settings.canSurviveHandler.canSurvive(asState(), pLevel, pPos)) {
+		if (settings != null && settings.canSurviveHandler != null && settings.canSurviveHandler.isSensitiveSide(asState(), direction) &&
+				!settings.canSurviveHandler.canSurvive(asState(), level, pos)) {
 			cir.setReturnValue(Blocks.AIR.defaultBlockState());
 		}
 	}
 
 	@Inject(method = "updateShape", at = @At("RETURN"), cancellable = true)
 	private void kiwi$updateShape(
-			Direction pDirection,
-			BlockState pNeighborState,
-			LevelAccessor pLevel,
-			BlockPos pPos,
-			BlockPos pNeighborPos,
+			LevelReader level,
+			ScheduledTickAccess scheduledTickAccess,
+			BlockPos pos,
+			Direction direction,
+			BlockPos neighborPos,
+			BlockState neighborState,
+			RandomSource random,
 			CallbackInfoReturnable<BlockState> cir) {
 		if (!cir.getReturnValue().is(getBlock())) {
 			return;
 		}
 		KBlockSettings settings = KBlockSettings.of(getBlock());
 		if (settings != null) {
-			cir.setReturnValue(settings.updateShape(cir.getReturnValue(), pDirection, pNeighborState, pLevel, pPos, pNeighborPos));
+			cir.setReturnValue(settings.updateShape(
+					cir.getReturnValue(),
+					direction,
+					neighborState,
+					level,
+					scheduledTickAccess,
+					pos,
+					neighborPos));
 		}
 	}
 
@@ -89,24 +102,12 @@ public abstract class BlockStateMixin {
 		}
 	}
 
-	@WrapOperation(
-			method = "onRemove",
-			at = @At(
-					value = "INVOKE",
-					target = "Lnet/minecraft/world/level/block/Block;onRemove(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Z)V"))
-	private void kiwi$onRemove(
-			Block block,
-			BlockState oldState,
-			Level level,
-			BlockPos pos,
-			BlockState newState,
-			boolean pMovedByPiston,
-			Operation<Void> original) {
-		original.call(block, oldState, level, pos, newState, pMovedByPiston);
+	@Inject(method = "affectNeighborsAfterRemoval", at = @At("RETURN"))
+	private void kiwi$onRemove(ServerLevel level, BlockPos pos, boolean movedByPiston, CallbackInfo ci) {
 		try {
-			PlacementSystem.onBlockRemoved(level, pos, oldState, newState);
+			PlacementSystem.onBlockRemoved(level, pos, asState());
 		} catch (Throwable t) {
-			Kiwi.LOGGER.error("Failed to handle placement for %s".formatted(oldState), t);
+			Kiwi.LOGGER.error("Failed to handle placement for %s".formatted(asState()), t);
 		}
 	}
 

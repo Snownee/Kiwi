@@ -1,11 +1,13 @@
 package snownee.kiwi.customization.builder;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 
@@ -16,6 +18,7 @@ public class ItemButton extends Button {
 	private float pressTime = -1;
 	public @Nullable Consumer<ItemButton> onPress;
 	public @Nullable Consumer<ItemButton> onRelease;
+	public List<Component> tooltip = List.of();
 
 	protected ItemButton(Builder builder) {
 		super(builder);
