@@ -10,6 +10,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -50,8 +51,8 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 		).apply(instance, KBlockDefinition::new));
 	}
 
-	public KBlockSettings.Builder createSettings(ResourceLocation id, ShapeStorage shapes) {
-		KBlockSettings.Builder builder = KBlockSettings.builder();
+	public KBlockSettings.Builder createSettings(ResourceKey<Block> key, ShapeStorage shapes) {
+		KBlockSettings.Builder builder = KBlockSettings.builder(key);
 		properties.glassType().ifPresent(builder::glassType);
 		BlockDefinitionProperties.PartialVanillaProperties vanilla = properties.vanillaProperties();
 		builder.configure($ -> {
@@ -124,9 +125,9 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 		return builder;
 	}
 
-	public Block createBlock(ResourceLocation id, ShapeStorage shapes) {
-		KBlockSettings.Builder builder = createSettings(id, shapes);
-		Block block = template.template().createBlock(id, builder.get(), template.json());
+	public Block createBlock(ResourceKey<Block> key, ShapeStorage shapes) {
+		KBlockSettings.Builder builder = createSettings(key, shapes);
+		Block block = template.template().createBlock(key, builder.get(), template.json());
 		setConfiguringShape(block);
 		properties.material().ifPresent(mat -> {
 			Platform.setFireInfo(block, mat.igniteOdds(), mat.burnOdds());

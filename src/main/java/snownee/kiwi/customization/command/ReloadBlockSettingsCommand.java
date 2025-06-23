@@ -39,7 +39,7 @@ public class ReloadBlockSettingsCommand {
 			if (definition == null || !set.add(holder.value())) {
 				return;
 			}
-			KBlockSettings.Builder builder = definition.createSettings(holder.key().location(), fundamentals.shapes());
+			KBlockSettings.Builder builder = definition.createSettings(holder.key(), fundamentals.shapes());
 			holder.value().properties = builder.get();
 			KBlockDefinition.setConfiguringShape(holder.value());
 		});

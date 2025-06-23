@@ -195,7 +195,7 @@ public class ExportBlocksCommand {
 				}
 				KBlockSettings settings = KBlockSettings.of(block);
 				if (settings == null) {
-					settings = KBlockSettings.empty();
+					settings = KBlockSettings.defaulted(block);
 				}
 				if (settings.glassType == null) {
 					row.put("GlassType", "");

@@ -235,8 +235,9 @@ public final class CustomizationHooks {
 		CustomizationMetadata.sortedForEach(
 				metadataMap, "block", blockFundamentals.blocks(), (id, definition) -> {
 					try {
-						Block block = definition.createBlock(id, blockFundamentals.shapes());
-						Registry.register(BuiltInRegistries.BLOCK, id, block);
+						ResourceKey<Block> key = ResourceKey.create(Registries.BLOCK, id);
+						Block block = definition.createBlock(key, blockFundamentals.shapes());
+						Registry.register(BuiltInRegistries.BLOCK, key, block);
 						blockFundamentals.slotProviders().attachSlotsA(block, definition);
 						blockFundamentals.placeChoices().attachChoicesA(block, definition);
 						blockIds.add(id);
@@ -258,8 +259,9 @@ public final class CustomizationHooks {
 						if (definition.template().template() == none) {
 							return;
 						}
-						Item item = definition.createItem(id);
-						Registry.register(BuiltInRegistries.ITEM, id, item);
+						ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, id);
+						Item item = definition.createItem(key);
+						Registry.register(BuiltInRegistries.ITEM, key, item);
 					} catch (Exception e) {
 						Kiwi.LOGGER.error("Failed to create item %s".formatted(id), e);
 					}

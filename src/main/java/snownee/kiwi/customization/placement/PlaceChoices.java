@@ -139,7 +139,7 @@ public record PlaceChoices(
 	public static void setTo(Block block, @Nullable KHolder<PlaceChoices> holder) {
 		KBlockSettings settings = KBlockSettings.of(block);
 		if (settings == null && holder != null) {
-			((KBlockProperties) block.properties()).kiwi$setSettings(settings = KBlockSettings.empty());
+			((KBlockProperties) block.properties()).kiwi$setSettings(settings = KBlockSettings.defaulted(block));
 		}
 		if (settings != null) {
 			settings.placeChoices = holder == null ? null : holder.value();

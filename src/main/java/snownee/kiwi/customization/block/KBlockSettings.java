@@ -12,6 +12,8 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.EmptyBlockGetter;
@@ -68,20 +70,20 @@ public class KBlockSettings {
 //		}
 	}
 
-	public static KBlockSettings empty() {
-		return new KBlockSettings(builder());
+	public static KBlockSettings defaulted(Block block) {
+		return new KBlockSettings(builder(BuiltInRegistries.BLOCK.getResourceKey(block).orElseThrow()));
 	}
 
-	public static KBlockSettings.Builder builder() {
-		return new Builder(BlockBehaviour.Properties.of());
+	public static KBlockSettings.Builder builder(ResourceKey<Block> key) {
+		return new Builder(BlockBehaviour.Properties.of().setId(key));
 	}
 
-	public static KBlockSettings.Builder copyProperties(Block block) {
-		return new Builder(BlockBehaviour.Properties.ofFullCopy(block));
+	public static KBlockSettings.Builder copyProperties(ResourceKey<Block> key, Block block) {
+		return new Builder(BlockBehaviour.Properties.ofFullCopy(block).setId(key));
 	}
 
-	public static KBlockSettings.Builder copyProperties(Block block, MapColor mapColor) {
-		return new Builder(BlockBehaviour.Properties.ofFullCopy(block).mapColor(mapColor));
+	public static KBlockSettings.Builder copyProperties(ResourceKey<Block> key, Block block, MapColor mapColor) {
+		return new Builder(BlockBehaviour.Properties.ofFullCopy(block).setId(key).mapColor(mapColor));
 	}
 
 	@Nullable
