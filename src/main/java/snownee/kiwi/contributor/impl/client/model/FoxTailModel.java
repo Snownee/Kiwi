@@ -4,6 +4,7 @@ import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
@@ -22,14 +23,21 @@ public class FoxTailModel<T extends HumanoidRenderState> extends HumanoidModel<T
 	public FoxTailModel(PlayerModel playerModel, ModelPart root) {
 		super(root);
 		this.playerModel = playerModel;
-		this.ear1 = root.getChild("right_ear");
-		this.ear2 = root.getChild("left_ear");
+		this.ear1 = root.getChild("head").getChild("right_ear");
+		this.ear2 = root.getChild("head").getChild("left_ear");
 		this.tail = root.getChild("tail");
 	}
 
 	public static LayerDefinition create() {
-		MeshDefinition meshdefinition = new MeshDefinition();
+		MeshDefinition meshdefinition = HumanoidModel.createMesh(CubeDeformation.NONE, 0.0F);
 		PartDefinition root = meshdefinition.getRoot();
+		PartDefinition head = root.clearChild("head");
+		head.clearChild("hat");
+		root.clearChild("body");
+		root.clearChild("left_arm");
+		root.clearChild("right_arm");
+		root.clearChild("left_leg");
+		root.clearChild("right_leg");
 
 		//		this.ear1 = new ModelPart(this, 8, 1);
 		//		this.ear1.addBox(-4.0F, -10.0F, -4.0F, 2.0F, 2.0F, 1.0F);
@@ -39,11 +47,11 @@ public class FoxTailModel<T extends HumanoidRenderState> extends HumanoidModel<T
 		//		this.tail.addBox(0F, 0F, 0F, 4.0F, 9.0F, 5.0F);
 
 		//PartDefinition partdefinition1 = root.addOrReplaceChild("head", CubeListBuilder.create().texOffs(1, 5).addBox(-3.0F, -2.0F, -5.0F, 8.0F, 6.0F, 6.0F), PartPose.offset(-1.0F, 16.5F, -3.0F));
-		root.addOrReplaceChild(
+		head.addOrReplaceChild(
 				"right_ear",
 				CubeListBuilder.create().texOffs(8, 1).addBox(-4.0F, -10.0F, -4.0F, 2.0F, 2.0F, 1.0F),
 				PartPose.ZERO);
-		root.addOrReplaceChild(
+		head.addOrReplaceChild(
 				"left_ear",
 				CubeListBuilder.create().texOffs(15, 1).addBox(2.0F, -10.0F, -4.0F, 2.0F, 2.0F, 1.0F),
 				PartPose.ZERO);

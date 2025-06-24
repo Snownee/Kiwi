@@ -9,6 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
@@ -30,17 +31,13 @@ public class CosmeticScreen extends Screen {
 		super(Component.translatable("gui.kiwi.cosmetic"));
 	}
 
-	private static String getPlayerName() {
-		return Minecraft.getInstance().getUser().getName();
-	}
-
 	@Override
 	protected void init() {
-		currentCosmetic = Contributors.PLAYER_COSMETICS.get(getPlayerName());
+		currentCosmetic = Contributors.PLAYER_COSMETICS.get(ContributorsClient.getSelfUUID());
 		list = new List(getMinecraft(), 150, height, 0, 20);
 		list.setX(20);
 		list.addEntry(selectedEntry = new Entry(this, null));
-		String playerName = getPlayerName();
+		String playerName = ContributorsClient.getSelfName();
 		boolean added = false;
 		for (ResourceLocation tier : Contributors.getRenderableTiers()) {
 			if (Contributors.isContributor(tier.getNamespace(), playerName, tier.getPath())) {
@@ -55,6 +52,10 @@ public class CosmeticScreen extends Screen {
 		if (!added) {
 			getMinecraft().setScreen(null);
 		}
+		StringWidget stringWidget = new StringWidget(title, getMinecraft().font);
+		stringWidget.setPosition(180, 10);
+		addRenderableWidget(stringWidget);
+		addRenderableWidget(list);
 		addRenderableWidget(Button.builder(
 				Component.translatable(KiwiClientConfig.cosmeticScreenKeybind ? "gui.kiwi.cosmetic.enabled" : "gui.kiwi.cosmetic.disabled"),
 				b -> {
@@ -64,14 +65,6 @@ public class CosmeticScreen extends Screen {
 							"gui.kiwi.cosmetic.enabled" :
 							"gui.kiwi.cosmetic.disabled"));
 				}).pos(180, 30).build());
-	}
-
-	@Override
-	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float pTicks) {
-		renderBackground(guiGraphics, mouseX, mouseY, pTicks);
-		super.render(guiGraphics, mouseX, mouseY, pTicks);
-		list.render(guiGraphics, mouseX, mouseY, pTicks);
-		guiGraphics.drawString(getMinecraft().font, title, 180, 10, 0xFFFFFF);
 	}
 
 	@Override
@@ -163,9 +156,9 @@ public class CosmeticScreen extends Screen {
 				int mouseY,
 				boolean hover,
 				float partialTicks) {
-			int color = hover ? 0xFFFFAA : 0xFFFFFF;
+			int color = hover ? 0xFFFFFFAA : 0xFFFFFFFF;
 			if (this == parent.selectedEntry) {
-				color = 0xFFFF77;
+				color = 0xFFFFFF77;
 			}
 			guiGraphics.drawString(parent.font, name, left + 43, top + 2, color);
 		}

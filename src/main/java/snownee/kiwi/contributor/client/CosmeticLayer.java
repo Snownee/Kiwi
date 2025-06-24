@@ -54,8 +54,8 @@ public class CosmeticLayer extends RenderLayer<PlayerRenderState, PlayerModel> {
 				id, key -> {
 					Function<RenderLayerParent<PlayerRenderState, PlayerModel>, CosmeticLayer> creator = LAYER_CREATORS.get(key);
 					if (creator != null) {
-						//noinspection unchecked
-						RenderLayerParent<PlayerRenderState, PlayerModel> layerParent = ((RenderLayerAccess<PlayerRenderState, PlayerModel>) parent).getRenderer();
+						//noinspection unchecked,rawtypes
+						RenderLayerParent<PlayerRenderState, PlayerModel> layerParent = ((RenderLayerAccess) parent).getRenderer();
 						return creator.apply(layerParent);
 					}
 					return null;
