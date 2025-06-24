@@ -11,6 +11,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.block.Blocks;
 import snownee.kiwi.AbstractModule;
+import snownee.kiwi.ItemObject;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiGO;
 import snownee.kiwi.KiwiModule;
@@ -28,7 +29,7 @@ public class TestModule2 extends AbstractModule {
 	public static final TagKey<EntityType<?>> BAT = entityTag("bat");
 
 	@Name("kiwi:test_item")
-	public static final KiwiGO<TestItem> FIRST_ITEM = go(() -> new TestItem(itemProp().rarity(Rarity.EPIC)) {
+	public static final ItemObject<TestItem> FIRST_ITEM = item(p -> new TestItem(p.rarity(Rarity.EPIC)) {
 		@Override
 		public boolean isFoil(ItemStack stack) {
 			return true;

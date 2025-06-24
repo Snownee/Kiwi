@@ -3,6 +3,7 @@ package snownee.kiwi;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -48,6 +49,20 @@ public abstract class AbstractModule {
 	protected static <T> KiwiGO<T> go(Supplier<? extends T> factory, ResourceKey<? extends Registry<?>> registryKey) {
 		//noinspection unchecked
 		return new KiwiGO.RegistrySpecified<>((Supplier<T>) factory, registryKey);
+	}
+
+	protected static <T extends Item> ItemObject<T> item(Function<Item.Properties, T> factory) {
+		return new ItemObject<>(factory);
+	}
+
+	protected static <T extends Block> BlockObject<T> block(Function<BlockBehaviour.Properties, T> factory) {
+		return block(factory, null);
+	}
+
+	protected static <T extends Block> BlockObject<T> block(
+			Function<BlockBehaviour.Properties, T> factory,
+			@Nullable Supplier<Block> copyFrom) {
+		return new BlockObject<>(factory, copyFrom);
 	}
 
 	protected static <T> KiwiGO<T> ref(ResourceKey<? extends Registry<?>> registryKey) {

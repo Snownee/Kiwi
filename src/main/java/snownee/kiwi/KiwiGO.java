@@ -26,10 +26,8 @@ public class KiwiGO<T> implements Supplier<T> {
 	protected ResourceKey<T> key;
 	@Nullable
 	protected T value;
-	@Nullable
-	Field field;
-	@Nullable
-	GroupSetting groupSetting;
+	@Nullable Field field;
+	@Nullable GroupSetting groupSetting;
 
 	public KiwiGO(@Nullable Supplier<T> factory) {
 		this.factory = factory;
@@ -47,6 +45,17 @@ public class KiwiGO<T> implements Supplier<T> {
 			value = Objects.requireNonNull(factory.get());
 			factory = null;
 		}
+		return get();
+	}
+
+	@Nullable
+	public T preRegister(ResourceLocation id) {
+		getOrCreate();
+		ResourceKey<? extends Registry<?>> registryKey = findRegistry();
+		//noinspection unchecked,rawtypes
+		ResourceKey resourceKey = ResourceKey.create((ResourceKey) registryKey, id);
+		//noinspection unchecked
+		setKey(resourceKey);
 		return get();
 	}
 
@@ -138,12 +147,9 @@ public class KiwiGO<T> implements Supplier<T> {
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this)
-				.append("key", key)
-				.append("value", value)
-				.append("field", field)
-				.append("groupSetting", groupSetting)
-				.toString();
+		return new ToStringBuilder(this).append("key", key).append("value", value).append("field", field).append(
+				"groupSetting",
+				groupSetting).toString();
 	}
 
 	public static class RegistrySpecified<T> extends KiwiGO<T> {
@@ -163,7 +169,7 @@ public class KiwiGO<T> implements Supplier<T> {
 	public static class Direct<T> extends KiwiGO<T> {
 		public Direct(T value) {
 			super(null);
-			this.value = value;
+			this.value = Objects.requireNonNull(value);
 		}
 	}
 
@@ -173,6 +179,14 @@ public class KiwiGO<T> implements Supplier<T> {
 		public Ref(ResourceKey<? extends Registry<?>> registryKey) {
 			super(null);
 			this.registryKey = registryKey;
+		}
+
+		@Override
+		@Nullable
+		public T preRegister(ResourceLocation id) {
+			//noinspection unchecked
+			setKey(ResourceKey.create((ResourceKey<? extends Registry<T>>) registryKey, id));
+			return null;
 		}
 
 		@Override

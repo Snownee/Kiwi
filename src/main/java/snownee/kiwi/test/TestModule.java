@@ -10,6 +10,7 @@ import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.crafting.RecipeType;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.Categories;
+import snownee.kiwi.ItemObject;
 import snownee.kiwi.KiwiGO;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModule.Category;
@@ -23,11 +24,11 @@ public class TestModule extends AbstractModule {
 
 	// Register a simple item
 	@Category(value = Categories.FOOD_AND_DRINKS, after = "apple")
-	public static final KiwiGO<TestItem> FIRST_ITEM = go(() -> new TestItem(itemProp().rarity(Rarity.EPIC)));
-	public static final KiwiGO<TestItem> ITEM2 = go(() -> new TestItem(itemProp()));
+	public static final ItemObject<TestItem> FIRST_ITEM = item(p -> new TestItem(p.rarity(Rarity.EPIC)));
+	public static final ItemObject<TestItem> ITEM2 = item(TestItem::new);
 	@Category(value = Categories.FOOD_AND_DRINKS, after = "kiwi:item2")
-	public static final KiwiGO<TestItem> ITEM3 = go(() -> new TestItem(itemProp()));
-	public static final KiwiGO<TestItem> ITEM4 = go(() -> new TestItem(itemProp()));
+	public static final ItemObject<TestItem> ITEM3 = item(TestItem::new);
+	public static final ItemObject<TestItem> ITEM4 = item(TestItem::new);
 
 	// The next block will use this builder to build its BlockItem. After that this field will be null
 	public static Item.Properties FIRST_BLOCK_ITEM_BUILDER = itemProp().rarity(Rarity.RARE);
