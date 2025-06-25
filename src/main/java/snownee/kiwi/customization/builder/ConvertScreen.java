@@ -280,7 +280,6 @@ public class ConvertScreen extends Screen {
 					ResourceLocation.withDefaultNamespace("recipe_book/overlay_recipe"),
 					bounds.getX() - 2,
 					bounds.getY() - 2,
-					0,
 					bounds.getWidth() + 3,
 					bounds.getHeight() + 3);
 		}

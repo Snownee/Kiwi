@@ -170,7 +170,6 @@ public final class KiwiModuleContainer {
 					}
 				}
 				register(go);
-				//TODO
 				if (go.resourceKey().isFor(Registries.MOB_EFFECT)) {
 					BiConsumer<KiwiModuleContainer, KiwiGO<?>> decorator = module.decorators.get(go.resourceKey().registryKey());
 					if (decorator != null) {

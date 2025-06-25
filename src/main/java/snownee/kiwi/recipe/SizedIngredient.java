@@ -26,11 +26,18 @@ import snownee.kiwi.data.DataModule;
 public final class SizedIngredient {
 	public static final SizedIngredient EMPTY = new SizedIngredient(RecipeUtil.emptyIngredient(), 1);
 
-	//TODO flatten
-	public static final Codec<SizedIngredient> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-			Ingredient.CODEC.fieldOf("ingredient").forGetter(SizedIngredient::ingredient),
-			ExtraCodecs.POSITIVE_INT.optionalFieldOf("count", 1).forGetter(SizedIngredient::count)
+	private static final Codec<SizedIngredient> FLAT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
+			Ingredient.NON_AIR_HOLDER_SET_CODEC.xmap(Ingredient::of, Ingredient::getValues)
+					.fieldOf("ingredient")
+					.forGetter(SizedIngredient::ingredient),
+			ExtraCodecs.POSITIVE_INT.fieldOf("count").forGetter(SizedIngredient::count)
 	).apply(instance, SizedIngredient::new));
+
+	public static final Codec<SizedIngredient> CODEC = Codec.withAlternative(
+			RecordCodecBuilder.create(instance -> instance.group(
+					Ingredient.CODEC.fieldOf("ingredient").forGetter(SizedIngredient::ingredient),
+					ExtraCodecs.POSITIVE_INT.optionalFieldOf("count", 1).forGetter(SizedIngredient::count)
+			).apply(instance, SizedIngredient::new)), FLAT_CODEC);
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, SizedIngredient> STREAM_CODEC = StreamCodec.composite(
 			Ingredient.CONTENTS_STREAM_CODEC,

@@ -330,8 +330,9 @@ public record PlaceChoices(
 				if (!faces.test(context, direction)) {
 					continue;
 				}
-				BlockState neighbor = context.getLevel().getBlockState(mutable.setWithOffset(pos, direction));
-				if (!BlockPredicateHelper.fastMatch(block, neighbor)) {
+				BlockPos.MutableBlockPos offset = mutable.setWithOffset(pos, direction);
+				BlockState neighbor = context.getLevel().getBlockState(offset);
+				if (!BlockPredicateHelper.fastMatch(block, neighbor, () -> context.getLevel().getBlockEntity(offset))) {
 					continue;
 				}
 				for (ParsedProtoTag tag : tags) {

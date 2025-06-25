@@ -13,8 +13,4 @@ public class MyModule extends AbstractModule {
 		event.enqueueWork(() -> Platform.registerAxeConversion(Blocks.DIAMOND_BLOCK, Blocks.REDSTONE_BLOCK));
 	}
 
-	@Override
-	protected void postInit(PostInitEvent event) {
-	}
-
 }
