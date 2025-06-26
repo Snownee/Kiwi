@@ -214,7 +214,7 @@ public class BlockFamilyInferrer {
 				false,
 				blockKeys,
 				List.of(),
-				List.of(),
+				Optional.empty(),
 				false,
 				Optional.empty(),
 				1,

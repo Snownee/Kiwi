@@ -1,3 +1,4 @@
+stonecutter_exchange: true
 switch: {}
 blocks:
   - red_wool

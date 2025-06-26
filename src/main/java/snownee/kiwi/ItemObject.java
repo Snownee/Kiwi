@@ -3,6 +3,7 @@ package snownee.kiwi;
 import java.util.Objects;
 import java.util.function.Function;
 
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -38,5 +39,10 @@ public class ItemObject<T extends Item> extends KiwiGO<T> implements ItemLike {
 	@Override
 	public Item asItem() {
 		return get();
+	}
+
+	@Override
+	public ResourceKey<? extends Registry<?>> findRegistry() {
+		return Registries.ITEM;
 	}
 }

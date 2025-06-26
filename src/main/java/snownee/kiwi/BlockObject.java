@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
 
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -53,5 +54,10 @@ public class BlockObject<T extends Block> extends KiwiGO<T> implements ItemLike 
 	@Override
 	public Item asItem() {
 		return get().asItem();
+	}
+
+	@Override
+	public ResourceKey<? extends Registry<?>> findRegistry() {
+		return Registries.BLOCK;
 	}
 }
