@@ -51,7 +51,8 @@ public class UnbakedShapeCodec implements Codec<UnbakedShape> {
 				Map.entry("six_way", SixWayShape.Unbaked.codec(this)),
 				Map.entry("front_and_top", FrontAndTopShape.Unbaked.codec(this)),
 				Map.entry("configure_wall", ConfigureWallShape.codec()),
-				Map.entry("configure_cross_collision", ConfigureCrossCollisionShape.codec())
+				Map.entry("configure_cross_collision", ConfigureCrossCollisionShape.codec()),
+				Map.entry("merge_configured", MergeConfiguredShape.codec(this))
 		);
 	}
 

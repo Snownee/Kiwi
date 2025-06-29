@@ -1,5 +1,8 @@
 package snownee.kiwi.customization.shape;
 
+import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
+
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
@@ -24,7 +27,7 @@ public record ConfigureCrossCollisionShape(
 	}
 
 	@Override
-	public void configure(Block block, BlockShapeType type) {
+	public void configure(Block block, BlockShapeType type, ShapeStorage storage) {
 		if (!(block instanceof CrossCollisionBlock crossCollisionBlock)) {
 			throw new IllegalArgumentException("Block %s is not a CrossCollisionBlock".formatted(block));
 		}
@@ -37,6 +40,21 @@ public record ConfigureCrossCollisionShape(
 		switch (type) {
 			case MAIN -> crossCollisionBlock.shapeByIndex = shapes;
 			case COLLISION -> crossCollisionBlock.collisionShapeByIndex = shapes;
+			case INTERACTION -> throw new UnsupportedOperationException();
+		}
+	}
+
+	@Override
+	public void replaceAll(Block block, BlockShapeType type, UnaryOperator<VoxelShape> operator) {
+		if (!(block instanceof CrossCollisionBlock crossCollisionBlock)) {
+			throw new IllegalArgumentException("Block %s is not a CrossCollisionBlock".formatted(block));
+		}
+		switch (type) {
+			case MAIN ->
+					crossCollisionBlock.shapeByIndex = Stream.of(crossCollisionBlock.shapeByIndex).map(operator).toArray(VoxelShape[]::new);
+			case COLLISION ->
+					crossCollisionBlock.collisionShapeByIndex = Stream.of(crossCollisionBlock.collisionShapeByIndex).map(operator).toArray(
+							VoxelShape[]::new);
 			case INTERACTION -> throw new UnsupportedOperationException();
 		}
 	}
