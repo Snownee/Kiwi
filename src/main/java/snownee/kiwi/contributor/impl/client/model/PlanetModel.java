@@ -25,8 +25,8 @@ public class PlanetModel<T extends HumanoidRenderState> extends HumanoidModel<T>
 		MeshDefinition meshdefinition = HumanoidModel.createMesh(CubeDeformation.NONE, 0.0F);
 		PartDefinition root = meshdefinition.getRoot();
 		root.clearChild("body");
-		root.clearChild("head");
-		root.getChild("head").clearChild("hat");
+		PartDefinition head = root.clearChild("head");
+		head.clearChild("hat");
 		root.clearChild("left_arm");
 		root.clearChild("right_arm");
 		root.clearChild("left_leg");

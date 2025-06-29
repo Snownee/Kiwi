@@ -23,10 +23,12 @@ public class SantaHatLayer extends CosmeticLayer {
 	private static final ResourceLocation TEXTURE = Kiwi.id("textures/reward/santa.png");
 	private static final Supplier<LayerDefinition> definition = Suppliers.memoize(SantaHatModel::create);
 	private final SantaHatModel<PlayerRenderState> modelSantaHat;
+	private final SantaHatModel<PlayerRenderState> modelBabySantaHat;
 
 	public SantaHatLayer(RenderLayerParent<PlayerRenderState, PlayerModel> entityRendererIn) {
 		super(entityRendererIn);
-		modelSantaHat = new SantaHatModel<>(entityRendererIn.getModel(), definition.get().apply(HumanoidModel.BABY_TRANSFORMER).bakeRoot());
+		modelSantaHat = new SantaHatModel<>(entityRendererIn.getModel(), definition.get().bakeRoot());
+		modelBabySantaHat = new SantaHatModel<>(entityRendererIn.getModel(), definition.get().apply(HumanoidModel.BABY_TRANSFORMER).bakeRoot());
 	}
 
 	@Override
@@ -41,10 +43,10 @@ public class SantaHatLayer extends CosmeticLayer {
 			return;
 		}
 		matrixStackIn.pushPose();
-//		modelSantaHat.young = renderState.isBaby;
-		modelSantaHat.setupAnim(renderState);
+		SantaHatModel<PlayerRenderState> model = renderState.isBaby ? modelBabySantaHat : modelSantaHat;
+		model.setupAnim(renderState);
 		VertexConsumer ivertexbuilder = ItemRenderer.getFoilBuffer(bufferIn, RenderType.entitySolid(TEXTURE), false, false);
-		modelSantaHat.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY);
+		model.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY);
 		matrixStackIn.popPose();
 	}
 

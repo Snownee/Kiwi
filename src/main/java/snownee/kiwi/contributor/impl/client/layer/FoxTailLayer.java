@@ -26,10 +26,12 @@ public class FoxTailLayer extends CosmeticLayer {
 	private static final ResourceLocation SNOW_FOX = ResourceLocation.withDefaultNamespace("textures/entity/fox/snow_fox.png");
 	private static final Supplier<LayerDefinition> definition = Suppliers.memoize(FoxTailModel::create);
 	private final FoxTailModel<PlayerRenderState> modelFoxTail;
+	private final FoxTailModel<PlayerRenderState> modelBabyFoxTail;
 
 	public FoxTailLayer(RenderLayerParent<PlayerRenderState, PlayerModel> entityRendererIn) {
 		super(entityRendererIn);
-		modelFoxTail = new FoxTailModel<>(entityRendererIn.getModel(), definition.get().apply(HumanoidModel.BABY_TRANSFORMER).bakeRoot());
+		modelFoxTail = new FoxTailModel<>(entityRendererIn.getModel(), definition.get().bakeRoot());
+		modelBabyFoxTail = new FoxTailModel<>(entityRendererIn.getModel(), definition.get().apply(HumanoidModel.BABY_TRANSFORMER).bakeRoot());
 	}
 
 	@Override
@@ -46,10 +48,10 @@ public class FoxTailLayer extends CosmeticLayer {
 		String name = renderState.name.toLowerCase(Locale.ENGLISH);
 		ResourceLocation texture = name.contains("snow") || name.contains("xue") || name.contains("yuki") ? SNOW_FOX : FOX;
 		matrixStackIn.pushPose();
-//		modelFoxTail.young = renderState.isBaby;
-		modelFoxTail.setupAnim(renderState);
-		VertexConsumer ivertexbuilder = ItemRenderer.getFoilBuffer(bufferIn, RenderType.entitySolid(texture), false, false);
-		modelFoxTail.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY);
+		FoxTailModel<PlayerRenderState> model = renderState.isBaby ? modelBabyFoxTail : modelFoxTail;
+		model.setupAnim(renderState);
+		VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(bufferIn, RenderType.entitySolid(texture), false, false);
+		model.renderToBuffer(matrixStackIn, vertexConsumer, packedLightIn, OverlayTexture.NO_OVERLAY);
 		matrixStackIn.popPose();
 	}
 
