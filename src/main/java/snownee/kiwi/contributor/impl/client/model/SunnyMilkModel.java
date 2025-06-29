@@ -14,8 +14,8 @@ import net.minecraft.util.Mth;
 public class SunnyMilkModel<T extends HumanoidRenderState> extends HumanoidModel<T> {
 
 	private float ticks;
-	private ModelPart wingRight;
-	private ModelPart wingLeft;
+	private final ModelPart wingRight;
+	private final ModelPart wingLeft;
 
 	public SunnyMilkModel(ModelPart root) {
 		super(root);
@@ -26,6 +26,13 @@ public class SunnyMilkModel<T extends HumanoidRenderState> extends HumanoidModel
 	public static LayerDefinition create() {
 		MeshDefinition meshdefinition = HumanoidModel.createMesh(CubeDeformation.NONE, 0.0F);
 		PartDefinition root = meshdefinition.getRoot();
+		root.clearChild("body");
+		PartDefinition head = root.clearChild("head");
+		head.clearChild("hat");
+		root.clearChild("left_arm");
+		root.clearChild("right_arm");
+		root.clearChild("left_leg");
+		root.clearChild("right_leg");
 
 		CubeListBuilder wingLeft = CubeListBuilder.create();
 		wingLeft.texOffs(0, 12).addBox(0.5F, -5.5F, 0.0F, 0.0F, 12.0F, 20.0F);

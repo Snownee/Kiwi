@@ -54,6 +54,15 @@ neoForge {
 
     accessTransformers = ["src/main/resources/META-INF/accesstransformer.cfg"]
 
+    mods {
+        // define mod <-> source bindings
+        // these are used to tell the game which sources are for which mod
+        // multi mod projects should define one per mod
+        "${mod_id}" {
+            sourceSet(sourceSets.main)
+        }
+    }
+
     runs {
         // applies to all the run configs below
         configureEach {
@@ -74,6 +83,7 @@ neoForge {
             client()
             ideName = "Run ${project.mod_id} - Client"
             systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+            programArguments = ['--username', 'Dev']
         }
         data {
             clientData()

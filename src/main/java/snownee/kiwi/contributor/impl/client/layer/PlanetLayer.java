@@ -38,9 +38,9 @@ public class PlanetLayer extends CosmeticLayer {
 			float yRot,
 			float xRot) {
 		matrixStackIn.pushPose();
-		matrixStackIn.translate(0, -0.6, 0);
 		matrixStackIn.mulPose(Axis.YP.rotationDegrees(-renderState.ageInTicks));
-		matrixStackIn.scale(1.2f, 1.2f, 1.2f);
+		float scale = 0.7f;
+		matrixStackIn.scale(scale, scale, scale);
 		modelPlanet.setupAnim(renderState);
 		VertexConsumer ivertexbuilder = ItemRenderer.getFoilBuffer(bufferIn, RenderType.entityTranslucent(TEXTURE), false, false);
 		modelPlanet.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY);

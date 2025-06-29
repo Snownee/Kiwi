@@ -5,7 +5,6 @@ import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
-import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -26,7 +25,7 @@ public class SantaHatLayer extends CosmeticLayer {
 
 	public SantaHatLayer(RenderLayerParent<PlayerRenderState, PlayerModel> entityRendererIn) {
 		super(entityRendererIn);
-		modelSantaHat = new SantaHatModel<>(entityRendererIn.getModel(), definition.get().apply(HumanoidModel.BABY_TRANSFORMER).bakeRoot());
+		modelSantaHat = new SantaHatModel<>(entityRendererIn.getModel(), definition.get().bakeRoot());
 	}
 
 	@Override
@@ -41,7 +40,6 @@ public class SantaHatLayer extends CosmeticLayer {
 			return;
 		}
 		matrixStackIn.pushPose();
-//		modelSantaHat.young = renderState.isBaby;
 		modelSantaHat.setupAnim(renderState);
 		VertexConsumer ivertexbuilder = ItemRenderer.getFoilBuffer(bufferIn, RenderType.entitySolid(TEXTURE), false, false);
 		modelSantaHat.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY);

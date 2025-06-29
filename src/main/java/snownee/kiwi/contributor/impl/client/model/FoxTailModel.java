@@ -65,8 +65,6 @@ public class FoxTailModel<T extends HumanoidRenderState> extends HumanoidModel<T
 	@Override
 	public void setupAnim(T renderState) {
 		super.setupAnim(renderState);
-		ear1.copyFrom(playerModel.head);
-		ear2.copyFrom(playerModel.head);
 		if (renderState.ageInTicks % 60 < 2) {
 			ear1.yRot += 0.05f;
 			ear2.yRot -= 0.05f;
