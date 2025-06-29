@@ -39,10 +39,12 @@ public class Contributors extends AbstractModule {
 	private static int DAY = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
 
 	public static boolean isContributor(String author, String playerName) {
+		if (!Platform.isProduction()) return true;
 		return REWARD_PROVIDERS.getOrDefault(author.toLowerCase(Locale.ENGLISH), ITierProvider.Empty.INSTANCE).isContributor(playerName);
 	}
 
 	public static boolean isContributor(String author, String playerName, String tier) {
+		if (!Platform.isProduction()) return true;
 		return REWARD_PROVIDERS.getOrDefault(author.toLowerCase(Locale.ENGLISH), ITierProvider.Empty.INSTANCE).isContributor(
 				playerName,
 				tier);
@@ -145,6 +147,9 @@ public class Contributors extends AbstractModule {
 
 	@Override
 	protected void init(InitEvent event) {
+		if (!Platform.isProduction()) {
+
+		}
 		registerTierProvider(new KiwiTierProvider());
 		NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedInEvent e) -> {
 			Player player = e.getEntity();
