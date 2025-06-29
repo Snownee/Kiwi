@@ -147,9 +147,6 @@ public class Contributors extends AbstractModule {
 
 	@Override
 	protected void init(InitEvent event) {
-		if (!Platform.isProduction()) {
-
-		}
 		registerTierProvider(new KiwiTierProvider());
 		NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedInEvent e) -> {
 			Player player = e.getEntity();
