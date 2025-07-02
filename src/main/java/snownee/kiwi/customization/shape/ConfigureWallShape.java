@@ -2,6 +2,7 @@ package snownee.kiwi.customization.shape;
 
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -34,7 +35,7 @@ public record ConfigureWallShape(
 	}
 
 	@Override
-	public void configure(Block block, BlockShapeType type) {
+	public void configure(Block block, BlockShapeType type, ShapeStorage storage) {
 		if (!(block instanceof WallBlock wallBlock)) {
 			throw new IllegalArgumentException("Block %s is not a WallBlock".formatted(block));
 		}
@@ -79,5 +80,26 @@ public record ConfigureWallShape(
 
 					return voxelshape1;
 				}, WallBlock.WATERLOGGED);
+	}
+
+	@Override
+	public void replaceAll(Block block, BlockShapeType type, UnaryOperator<VoxelShape> operator) {
+		if (!(block instanceof WallBlock wallBlock)) {
+			throw new IllegalArgumentException("Block %s is not a WallBlock".formatted(block));
+		}
+		if (type == BlockShapeType.INTERACTION) {
+			throw new UnsupportedOperationException("Interaction shapes cannot be replaced for WallBlock");
+		}
+		Function<BlockState, VoxelShape> shapes = switch (type) {
+			case MAIN -> wallBlock.shapes;
+			case COLLISION -> wallBlock.collisionShapes;
+			default -> throw new IllegalStateException();
+		};
+		Function<BlockState, VoxelShape> newShapes = MergeConfiguredShape.transform(block, operator, shapes);
+		switch (type) {
+			case MAIN -> wallBlock.shapes = newShapes;
+			case COLLISION -> wallBlock.collisionShapes = newShapes;
+			default -> throw new IllegalStateException();
+		}
 	}
 }

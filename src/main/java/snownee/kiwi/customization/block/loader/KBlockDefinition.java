@@ -128,7 +128,7 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 	public Block createBlock(ResourceKey<Block> key, ShapeStorage shapes) {
 		KBlockSettings.Builder builder = createSettings(key, shapes);
 		Block block = template.template().createBlock(key, builder.get(), template.json());
-		setConfiguringShape(block);
+		setConfiguringShape(block, shapes);
 		properties.material().ifPresent(mat -> {
 			Platform.setFireInfo(block, mat.igniteOdds(), mat.burnOdds());
 		});
@@ -142,7 +142,7 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 		return block;
 	}
 
-	public static void setConfiguringShape(Block block) {
+	public static void setConfiguringShape(Block block, ShapeStorage shapes) {
 		KBlockSettings settings = KBlockSettings.of(block);
 		if (settings == null) {
 			return;
@@ -150,7 +150,7 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 		for (BlockShapeType shapeType : BlockShapeType.VALUES) {
 			ConfiguringShape shape = settings.removeIfPossible(shapeType);
 			if (shape != null) {
-				shape.configure(block, shapeType);
+				shape.configure(block, shapeType, shapes);
 			}
 		}
 	}

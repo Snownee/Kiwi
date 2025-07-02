@@ -1,6 +1,7 @@
 package snownee.kiwi.customization.shape;
 
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -27,7 +28,7 @@ public record ConfigureCrossCollisionShape(
 	}
 
 	@Override
-	public void configure(Block block, BlockShapeType type) {
+	public void configure(Block block, BlockShapeType type, ShapeStorage storage) {
 		if (!(block instanceof CrossCollisionBlock crossCollisionBlock)) {
 			throw new IllegalArgumentException("Block %s is not a CrossCollisionBlock".formatted(block));
 		}
@@ -41,6 +42,24 @@ public record ConfigureCrossCollisionShape(
 			case MAIN -> crossCollisionBlock.shapes = shapes;
 			case COLLISION -> crossCollisionBlock.collisionShapes = shapes;
 			case INTERACTION -> throw new UnsupportedOperationException();
+		}
+	}
+
+	@Override
+	public void replaceAll(Block block, BlockShapeType type, UnaryOperator<VoxelShape> operator) {
+		if (!(block instanceof CrossCollisionBlock crossCollisionBlock)) {
+			throw new IllegalArgumentException("Block %s is not a CrossCollisionBlock".formatted(block));
+		}
+		Function<BlockState, VoxelShape> shapes = switch (type) {
+			case MAIN -> crossCollisionBlock.shapes;
+			case COLLISION -> crossCollisionBlock.collisionShapes;
+			default -> throw new IllegalStateException();
+		};
+		Function<BlockState, VoxelShape> newShapes = MergeConfiguredShape.transform(block, operator, shapes);
+		switch (type) {
+			case MAIN -> crossCollisionBlock.shapes = newShapes;
+			case COLLISION -> crossCollisionBlock.collisionShapes = newShapes;
+			default -> throw new IllegalStateException();
 		}
 	}
 }
