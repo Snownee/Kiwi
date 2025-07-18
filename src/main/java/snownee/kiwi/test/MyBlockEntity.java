@@ -1,9 +1,9 @@
 package snownee.kiwi.test;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import snownee.kiwi.block.entity.ModBlockEntity;
 import snownee.kiwi.util.NotNullByDefault;
 
@@ -16,23 +16,21 @@ public class MyBlockEntity extends ModBlockEntity {
 	}
 
 	@Override
-	protected void readPacketData(CompoundTag data) {
+	protected void readPacketData(ValueInput valueInput) {}
+
+	@Override
+	protected void writePacketData(ValueOutput valueOutput) {}
+
+
+	@Override
+	protected void loadAdditional(ValueInput valueInput) {
+		readPacketData(valueInput);
+		super.loadAdditional(valueInput);
 	}
 
 	@Override
-	protected CompoundTag writePacketData(CompoundTag data, HolderLookup.Provider provider) {
-		return data;
-	}
-
-	@Override
-	protected void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
-		readPacketData(compoundTag);
-		super.loadAdditional(compoundTag, provider);
-	}
-
-	@Override
-	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
-		writePacketData(compoundTag, provider);
-		super.saveAdditional(compoundTag, provider);
+	protected void saveAdditional(ValueOutput valueOutput) {
+		writePacketData(valueOutput);
+		super.saveAdditional(valueOutput);
 	}
 }

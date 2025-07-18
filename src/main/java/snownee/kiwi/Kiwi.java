@@ -108,8 +108,6 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 import net.minecraft.world.level.storage.loot.providers.nbt.LootNbtProviderType;
 import net.minecraft.world.level.storage.loot.providers.number.LootNumberProviderType;
 import net.minecraft.world.level.storage.loot.providers.score.LootScoreProviderType;
-import snownee.kiwi.block.def.BlockDefinition;
-import snownee.kiwi.block.def.SimpleBlockDefinition;
 import snownee.kiwi.build.KiwiMetadata;
 import snownee.kiwi.build.KiwiMetadataParser;
 import snownee.kiwi.command.KiwiClientCommand;
@@ -618,7 +616,6 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 		KiwiConfigManager.refresh();
 		InitEvent e = new InitEvent();
 		KiwiModules.fire(m -> m.init(e));
-		BlockDefinition.registerFactory(SimpleBlockDefinition.Factory.INSTANCE);
 	}
 
 	private static void clientInit(Minecraft mc) {
