@@ -17,15 +17,12 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.state.PlayerRenderState;
 import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.context.ContextKey;
-import snownee.kiwi.Kiwi;
 import snownee.kiwi.contributor.Contributors;
 import snownee.kiwi.contributor.CosmeticRenderState;
 import snownee.kiwi.mixin.client.RenderLayerAccess;
 
 public class CosmeticLayer extends RenderLayer<PlayerRenderState, PlayerModel> {
 
-	public static final ContextKey<CosmeticLayer> COSMETIC_KEY = new ContextKey<>(Kiwi.id("cosmetic"));
 	public static Map<PlayerSkin.Model, CosmeticLayer> ALL_LAYERS = Maps.newHashMap();
 	private static final Map<UUID, CosmeticLayer> PLAYER_CACHE = Maps.newHashMap();
 	private static final Map<ResourceLocation, Function<RenderLayerParent<PlayerRenderState, PlayerModel>, CosmeticLayer>> LAYER_CREATORS = Maps.newHashMap();

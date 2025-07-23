@@ -1,33 +1,39 @@
 package snownee.kiwi.contributor.impl.client.model;
 
-import com.google.common.collect.ImmutableList;
-
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.AgeableListModel;
+import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.LivingEntity;
 
-public class SunnyMilkModel<T extends LivingEntity> extends AgeableListModel<T> {
+public class SunnyMilkModel<T extends HumanoidRenderState> extends HumanoidModel<T> {
 
 	private float ticks;
-	private ModelPart wingRight;
-	private ModelPart wingLeft;
+	private final ModelPart wingRight;
+	private final ModelPart wingLeft;
 
-	public SunnyMilkModel(LayerDefinition definition) {
-		ModelPart root = definition.bakeRoot();
+	public SunnyMilkModel(ModelPart root) {
+		super(root);
 		wingLeft = root.getChild("wingLeft");
 		wingRight = root.getChild("wingRight");
 	}
 
 	public static LayerDefinition create() {
-		MeshDefinition meshdefinition = new MeshDefinition();
+		MeshDefinition meshdefinition = HumanoidModel.createMesh(CubeDeformation.NONE, 0.0F);
 		PartDefinition root = meshdefinition.getRoot();
+		root.clearChild("body");
+		PartDefinition head = root.clearChild("head");
+		head.clearChild("hat");
+		root.clearChild("left_arm");
+		root.clearChild("right_arm");
+		root.clearChild("left_leg");
+		root.clearChild("right_leg");
 
 		CubeListBuilder wingLeft = CubeListBuilder.create();
 		wingLeft.texOffs(0, 12).addBox(0.5F, -5.5F, 0.0F, 0.0F, 12.0F, 20.0F);
@@ -44,19 +50,12 @@ public class SunnyMilkModel<T extends LivingEntity> extends AgeableListModel<T> 
 	}
 
 	@Override
-	protected Iterable<ModelPart> headParts() {
-		return ImmutableList.of();
-	}
+	public void setupAnim(T renderState) {
+		super.setupAnim(renderState);
 
-	@Override
-	protected Iterable<ModelPart> bodyParts() {
-		return ImmutableList.of(wingLeft, wingRight);
-	}
-
-	@Override
-	public void setupAnim(T entityIn, float limbSwing, float limbSwingAmount, float partialTicks, float netHeadYaw, float headPitch) {
-		float f = ((float) entityIn.getDeltaMovement().length()) * 10;
-		ticks += Minecraft.getInstance().getTimer().getGameTimeDeltaTicks() * (1 + Math.min(9, f * f * f)) * 0.1f;
+		float f = renderState.speedValue * 10;
+		ticks += Minecraft.getInstance().getDeltaTracker()
+				.getGameTimeDeltaPartialTick(!renderState.isFullyFrozen) * (1 + Math.min(9, f * f * f)) * 0.1f;
 		wingLeft.yRot = -1.0472F + Mth.sin(ticks) * 0.25f;
 		wingRight.yRot = -wingLeft.yRot;
 	}

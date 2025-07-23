@@ -120,6 +120,7 @@ import snownee.kiwi.loader.Platform;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.loader.event.PostInitEvent;
 import snownee.kiwi.network.KNetworking;
+import snownee.kiwi.util.ClientProxy;
 import snownee.kiwi.util.KUtil;
 
 @Mod(Kiwi.ID)
@@ -314,6 +315,7 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 	@Override
 	public void onInitializeClient() {
 		onInitialize();
+		ClientProxy.init();
 	}
 
 	@Override

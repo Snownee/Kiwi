@@ -1,6 +1,5 @@
 package snownee.kiwi.contributor.network;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -17,10 +16,10 @@ import snownee.kiwi.util.KUtil;
 
 @KiwiPacket
 public record CSetCosmeticPacket(@Nullable ResourceLocation id) implements CustomPacketPayload {
-	public static final Type<CSetCosmeticPacket> TYPE = new CustomPacketPayload.Type<>(Kiwi.id("set_cosmetic"));
+	public static final Type<CSetCosmeticPacket> TYPE = new Type<>(Kiwi.id("set_cosmetic"));
 
 	@Override
-	public @NotNull Type<CSetCosmeticPacket> type() {
+	public Type<CSetCosmeticPacket> type() {
 		return TYPE;
 	}
 

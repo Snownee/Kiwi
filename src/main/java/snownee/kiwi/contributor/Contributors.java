@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -39,10 +38,12 @@ public class Contributors extends AbstractModule {
 	private static int DAY = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
 
 	public static boolean isContributor(String author, String playerName) {
+		if (!Platform.isProduction()) return true;
 		return REWARD_PROVIDERS.getOrDefault(author.toLowerCase(Locale.ENGLISH), ITierProvider.Empty.INSTANCE).isContributor(playerName);
 	}
 
 	public static boolean isContributor(String author, String playerName, String tier) {
+		if (!Platform.isProduction()) return true;
 		return REWARD_PROVIDERS.getOrDefault(author.toLowerCase(Locale.ENGLISH), ITierProvider.Empty.INSTANCE).isContributor(
 				playerName,
 				tier);
@@ -148,12 +149,12 @@ public class Contributors extends AbstractModule {
 		registerTierProvider(new KiwiTierProvider());
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
 			if (!(server.isSingleplayerOwner(handler.player.getGameProfile()))) {
-				KPacketSender.send(new SSyncCosmeticPacket(ImmutableMap.copyOf(PLAYER_COSMETICS)), handler.player);
+				KPacketSender.send(new SSyncCosmeticPacket(Map.copyOf(PLAYER_COSMETICS), List.of()), handler.player);
 			}
 		});
 		if (!Platform.isPhysicalClient()) {
 			ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
-				PLAYER_COSMETICS.remove(handler.player.getGameProfile().getName());
+				PLAYER_COSMETICS.remove(handler.player.getUUID());
 			});
 		}
 	}

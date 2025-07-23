@@ -1,24 +1,16 @@
 package snownee.kiwi.contributor;
 
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
+import java.util.function.Function;
 
 import com.mojang.blaze3d.platform.InputConstants;
 
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.fabricmc.fabric.mixin.client.rendering.LivingEntityRendererAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.model.PlayerModel;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.state.PlayerRenderState;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.resources.ResourceManager;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiClientConfig;
@@ -33,7 +25,6 @@ import snownee.kiwi.contributor.impl.client.layer.SunnyMilkLayer;
 import snownee.kiwi.contributor.network.CSetCosmeticPacket;
 import snownee.kiwi.contributor.network.SSyncCosmeticPacket;
 import snownee.kiwi.loader.event.InitEvent;
-import snownee.kiwi.mixin.client.EntityRenderDispatcherAccess;
 import snownee.kiwi.network.KPacketSender;
 import snownee.kiwi.util.KUtil;
 
@@ -41,42 +32,14 @@ public class ContributorsClient extends AbstractModule {
 
 	@Override
 	protected void init(InitEvent event) {
-		event.enqueueWork(() -> {
-			CosmeticLayer.registerRenderer(Kiwi.id("2020q3"), PlanetLayer::new);
-			CosmeticLayer.registerRenderer(Kiwi.id("2020q4"), FoxTailLayer::new);
-			CosmeticLayer.registerRenderer(Kiwi.id("xmas"), SantaHatLayer::new);
-			CosmeticLayer.registerRenderer(Kiwi.id("sunny_milk"), SunnyMilkLayer::new);
+		registerRenderer("2020q3", PlanetLayer::new);
+		registerRenderer("2020q4", FoxTailLayer::new);
+		registerRenderer("xmas", SantaHatLayer::new);
+		registerRenderer("sunny_milk", SunnyMilkLayer::new);
+	}
 
-			ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new IdentifiableResourceReloadListener() {
-				private static final ResourceLocation ID = Kiwi.id("contributors");
-
-				@Override
-				public ResourceLocation getFabricId() {
-					return ID;
-				}
-
-				@Override
-				public CompletableFuture<Void> reload(
-						PreparationBarrier barrier,
-						ResourceManager manager,
-						Executor backgroundExecutor,
-						Executor gameExecutor) {
-					return CompletableFuture.runAsync(() -> {
-						((EntityRenderDispatcherAccess) Minecraft.getInstance().getEntityRenderDispatcher())
-								.getPlayerRenderers()
-								.forEach((skin, renderer) -> {
-									CosmeticLayer layer = new CosmeticLayer((PlayerRenderer) renderer);
-									CosmeticLayer.ALL_LAYERS.put(skin, layer);
-									((LivingEntityRendererAccessor<PlayerRenderState, PlayerModel>) renderer).callAddFeature(layer);
-								});
-					});
-				}
-			});
-
-			ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> ContributorsClient.changeCosmetic());
-			ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> clear());
-			ClientTickEvents.END_CLIENT_TICK.register(ContributorsClient::onKeyInput);
-		});
+	private static void registerRenderer(String id, Function<RenderLayerParent<PlayerRenderState, PlayerModel>, CosmeticLayer> creator) {
+		CosmeticLayer.registerRenderer(ResourceLocation.fromNamespaceAndPath("snownee", id), creator);
 	}
 
 	private static int hold;
@@ -135,15 +98,14 @@ public class ContributorsClient extends AbstractModule {
 
 	public static void clear() {
 		Contributors.PLAYER_COSMETICS.clear();
-		CosmeticLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidateAll());
 		CosmeticLayer.getCache().clear();
 	}
 
-	private static UUID getSelfUUID() {
+	public static UUID getSelfUUID() {
 		return Minecraft.getInstance().getUser().getProfileId();
 	}
 
-	private static String getSelfName() {
+	public static String getSelfName() {
 		return Minecraft.getInstance().getUser().getName();
 	}
 
