@@ -2,12 +2,16 @@ package snownee.kiwi.contributor;
 
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+
+import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -30,8 +34,8 @@ import snownee.kiwi.network.KPacketSender;
 public class Contributors extends AbstractModule {
 
 	public static final Map<String, ITierProvider> REWARD_PROVIDERS = Maps.newConcurrentMap();
-	public static final Map<String, ResourceLocation> PLAYER_COSMETICS = Maps.newConcurrentMap();
-	private static final Set<ResourceLocation> RENDERABLES = Sets.newLinkedHashSet();
+	public static final Map<UUID, ResourceLocation> PLAYER_COSMETICS = Maps.newConcurrentMap();
+	private static final Set<ResourceLocation> COSMETIC_IDS = Sets.newLinkedHashSet();
 	private static int DAY = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
 
 	public static boolean isContributor(String author, String playerName) {
@@ -74,49 +78,52 @@ public class Contributors extends AbstractModule {
 		String namespace = rewardProvider.getAuthor().toLowerCase(Locale.ENGLISH);
 		REWARD_PROVIDERS.put(namespace, rewardProvider);
 		for (String tier : rewardProvider.getRenderableTiers()) {
-			RENDERABLES.add(ResourceLocation.fromNamespaceAndPath(namespace, tier));
+			COSMETIC_IDS.add(ResourceLocation.fromNamespaceAndPath(namespace, tier));
 		}
 	}
 
-	public static void changeCosmetic(ServerPlayer player, ResourceLocation cosmetic) {
-		String playerName = player.getGameProfile().getName();
-		canPlayerUseCosmetic(playerName, cosmetic).thenAccept(bl -> {
+	public static void changeCosmetic(ServerPlayer player, @Nullable ResourceLocation cosmetic) {
+		canPlayerUseCosmetic(player.getGameProfile().getName(), cosmetic).thenAccept(bl -> {
 			if (bl) {
+				UUID uuid = player.getUUID();
+				SSyncCosmeticPacket packet;
 				if (cosmetic == null) {
-					PLAYER_COSMETICS.remove(playerName);
+					PLAYER_COSMETICS.remove(uuid);
+					packet = new SSyncCosmeticPacket(Map.of(), List.of(uuid));
 				} else {
-					PLAYER_COSMETICS.put(playerName, cosmetic);
+					PLAYER_COSMETICS.put(uuid, cosmetic);
+					packet = new SSyncCosmeticPacket(Map.of(uuid, cosmetic), List.of());
 				}
-				KPacketSender.sendToAll(new SSyncCosmeticPacket(ImmutableMap.of(playerName, cosmetic)), player.server);
+				KPacketSender.sendToAll(packet, player.level().getServer());
 			}
 		});
 	}
 
 	public static boolean isRenderable(ResourceLocation id) {
 		refreshRenderables();
-		return RENDERABLES.contains(id);
+		return COSMETIC_IDS.contains(id);
 	}
 
 	public static Set<ResourceLocation> getRenderableTiers() {
 		refreshRenderables();
-		return Collections.unmodifiableSet(RENDERABLES);
+		return Collections.unmodifiableSet(COSMETIC_IDS);
 	}
 
 	private static void refreshRenderables() {
 		int current = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
 		if (current != DAY) {
 			DAY = current;
-			RENDERABLES.clear();
+			COSMETIC_IDS.clear();
 			for (Entry<String, ITierProvider> entry : REWARD_PROVIDERS.entrySet()) {
 				String namespace = entry.getKey();
 				for (String tier : entry.getValue().getRenderableTiers()) {
-					RENDERABLES.add(ResourceLocation.fromNamespaceAndPath(namespace, tier));
+					COSMETIC_IDS.add(ResourceLocation.fromNamespaceAndPath(namespace, tier));
 				}
 			}
 		}
 	}
 
-	public static CompletableFuture<Boolean> canPlayerUseCosmetic(String playerName, ResourceLocation cosmetic) {
+	public static CompletableFuture<Boolean> canPlayerUseCosmetic(String playerName, @Nullable ResourceLocation cosmetic) {
 		if (cosmetic == null || cosmetic.getPath().isEmpty()) { // Set to empty
 			return CompletableFuture.completedFuture(Boolean.TRUE);
 		}
@@ -150,5 +157,4 @@ public class Contributors extends AbstractModule {
 			});
 		}
 	}
-
 }
