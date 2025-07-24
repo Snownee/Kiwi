@@ -8,9 +8,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.Categories;
+import snownee.kiwi.ItemObject;
 import snownee.kiwi.KiwiGO;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModule.Category;
@@ -24,37 +24,36 @@ public class TestModule extends AbstractModule {
 
 	// Register a simple item
 	@Category(value = Categories.FOOD_AND_DRINKS, after = "apple")
-	public static final KiwiGO<TestItem> FIRST_ITEM = go(() -> new TestItem(itemProp().rarity(Rarity.EPIC)));
-	public static final KiwiGO<TestItem> ITEM2 = go(() -> new TestItem(itemProp()));
+	public static final ItemObject<TestItem> FIRST_ITEM = item(p -> new TestItem(p.rarity(Rarity.EPIC)));
+	public static final ItemObject<TestItem> ITEM2 = item(TestItem::new);
 	@Category(value = Categories.FOOD_AND_DRINKS, after = "kiwi:item2")
-	public static final KiwiGO<TestItem> ITEM3 = go(() -> new TestItem(itemProp()));
-	public static final KiwiGO<TestItem> ITEM4 = go(() -> new TestItem(itemProp()));
+	public static final ItemObject<TestItem> ITEM3 = item(TestItem::new);
+	public static final ItemObject<TestItem> ITEM4 = item(TestItem::new);
 
 	// The next block will use this builder to build its BlockItem. After that this field will be null
 	public static Item.Properties FIRST_BLOCK_ITEM_BUILDER = itemProp().rarity(Rarity.RARE);
 	// Register a simple block and its BlockItem
 	//@RenderLayer(Layer.CUTOUT)
-	@Category
-	public static final KiwiGO<TestBlock> FIRST_BLOCK = go(() -> new TestBlock2(blockProp()));
+//	@Category
+//	public static final KiwiGO<TestBlock> FIRST_BLOCK = go(() -> new TestBlock2(blockProp()));
 
 	// Register a simple effect
 	public static final KiwiGO<MobEffect> FIRST_EFFECT = go(() -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0xFF0000));
 
 	// And its potion
-	public static final KiwiGO<Potion> FIRST_POTION = go(() -> new Potion(new MobEffectInstance(
-			FIRST_EFFECT.holder().orElseThrow(),
-			1800)));
+	public static final KiwiGO<Potion> FIRST_POTION = go(() -> new Potion(
+			"kiwi:first_potion",
+			new MobEffectInstance(FIRST_EFFECT.holder().orElseThrow(), 1800)));
 
-	public static final KiwiGO<BlockEntityType<TestBlockEntity>> FIRST_TILE = blockEntity(TestBlockEntity::new, null, FIRST_BLOCK);
+//	public static final KiwiGO<BlockEntityType<TestBlockEntity>> FIRST_TILE = blockEntity(TestBlockEntity::new, null, FIRST_BLOCK);
 
-	public static final KiwiGO<TestBlock> TEX_BLOCK = go(() -> new TestBlock(blockProp()));
-	public static final KiwiGO<BlockEntityType<TexBlockEntity>> TEX_TILE = blockEntity(TexBlockEntity::new, null, TEX_BLOCK);
+//	public static final KiwiGO<TestBlock> TEX_BLOCK = go(() -> new TestBlock(blockProp()));
+//	public static final KiwiGO<BlockEntityType<TexBlockEntity>> TEX_TILE = blockEntity(TexBlockEntity::new, null, TEX_BLOCK);
 
 	public static TestModule INSTANCE;
 
 	public static final KiwiGO<RecipeType<?>> RECIPE_TYPE = go(() -> {
-		return new RecipeType<>() {
-		};
+		return new RecipeType<>() {};
 	});
 
 	//	@Override

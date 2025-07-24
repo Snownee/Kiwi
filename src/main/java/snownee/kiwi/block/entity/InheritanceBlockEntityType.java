@@ -2,23 +2,21 @@ package snownee.kiwi.block.entity;
 
 import java.util.Set;
 
-import com.mojang.datafixers.types.Type;
-
-import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
+import net.fabricmc.fabric.impl.object.builder.ExtendedBlockEntityType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class InheritanceBlockEntityType<T extends BlockEntity> extends BlockEntityType<T> {
+public class InheritanceBlockEntityType<T extends BlockEntity> extends ExtendedBlockEntityType<T> {
 
 	private final Class<? extends Block> clazz;
 
 	public InheritanceBlockEntityType(
-			FabricBlockEntityTypeBuilder.Factory<? extends T> factory,
+			BlockEntityType.BlockEntitySupplier<? extends T> factory,
 			Class<? extends Block> clazz,
-			Type<?> datafixer) {
-		super(factory::create, Set.of(), datafixer);
+			boolean onlyOpCanSetNbt) {
+		super(factory, Set.of(), onlyOpCanSetNbt);
 		this.clazz = clazz;
 	}
 
