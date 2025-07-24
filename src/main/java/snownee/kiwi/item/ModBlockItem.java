@@ -10,53 +10,53 @@ import com.google.common.collect.Sets;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import snownee.kiwi.KiwiClientConfig;
+import net.minecraft.world.level.storage.TagValueInput;
+import snownee.kiwi.Kiwi;
 import snownee.kiwi.block.IKiwiBlock;
 import snownee.kiwi.loader.Platform;
-import snownee.kiwi.util.NotNullByDefault;
 
-@NotNullByDefault
 public class ModBlockItem extends BlockItem implements ItemCategoryFiller {
 	public static final Set<BlockEntityType<?>> INSTANT_UPDATE_TILES = Platform.isPhysicalClient() ? Sets.newHashSet() : null;
 
-	public ModBlockItem(Block block, Item.Properties builder) {
+	public ModBlockItem(Block block, Properties builder) {
 		super(block, builder);
 	}
 
 	@Override
-	protected boolean updateCustomBlockEntityTag(BlockPos pos, Level worldIn, @Nullable Player player, ItemStack stack, BlockState state) {
+	protected boolean updateCustomBlockEntityTag(
+			BlockPos pos,
+			Level worldIn,
+			@Nullable Player player,
+			ItemStack itemStack,
+			BlockState state) {
 		if (worldIn.isClientSide) {
-			BlockEntity tile = worldIn.getBlockEntity(pos);
-			if (tile != null && INSTANT_UPDATE_TILES.contains(tile.getType())) {
-				CustomData data = stack.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY);
+			BlockEntity be = worldIn.getBlockEntity(pos);
+			if (be != null && INSTANT_UPDATE_TILES.contains(be.getType())) {
+				CustomData data = itemStack.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY);
 				if (!data.isEmpty()) {
-					tile.loadWithComponents(data.copyTag(), worldIn.registryAccess());
-					tile.setChanged();
+					try (
+							ProblemReporter.ScopedCollector scopedCollector = new ProblemReporter.ScopedCollector(
+									be.problemPath(),
+									Kiwi.LOGGER)) {
+						be.loadWithComponents(TagValueInput.create(scopedCollector, worldIn.registryAccess(), data.copyTag()));
+						be.setChanged();
+					}
 				}
 			}
 		}
-		return super.updateCustomBlockEntityTag(pos, worldIn, player, stack, state);
-	}
-
-	@Override
-	public void appendHoverText(ItemStack itemStack, TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag tooltipFlag) {
-		super.appendHoverText(itemStack, tooltipContext, tooltip, tooltipFlag);
-		if (Platform.isPhysicalClient() && !KiwiClientConfig.globalTooltip) {
-			ModItem.addTip(itemStack, tooltip, tooltipFlag);
-		}
+		return super.updateCustomBlockEntityTag(pos, worldIn, player, itemStack, state);
 	}
 
 	@Override

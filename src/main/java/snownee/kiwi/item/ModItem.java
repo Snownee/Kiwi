@@ -13,22 +13,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import snownee.kiwi.KiwiClientConfig;
-import snownee.kiwi.loader.Platform;
-import snownee.kiwi.util.NotNullByDefault;
 
-@NotNullByDefault
 public class ModItem extends Item {
-	public ModItem(Item.Properties builder) {
+	public ModItem(Properties builder) {
 		super(builder);
-	}
-
-	@Override
-	public void appendHoverText(ItemStack itemStack, TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag tooltipFlag) {
-		super.appendHoverText(itemStack, tooltipContext, tooltip, tooltipFlag);
-		if (Platform.isPhysicalClient() && !KiwiClientConfig.globalTooltip) {
-			ModItem.addTip(itemStack, tooltip, tooltipFlag);
-		}
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -39,12 +27,13 @@ public class ModItem extends Item {
 		String key;
 		boolean shift = Screen.hasShiftDown();
 		boolean ctrl = Screen.hasControlDown();
+		String descriptionId = stack.getItem().getDescriptionId();
 		if (shift == ctrl) {
-			key = stack.getDescriptionId() + ".tip";
+			key = descriptionId + ".tip";
 		} else if (shift) {
-			key = stack.getDescriptionId() + ".tip.shift";
+			key = descriptionId + ".tip.shift";
 		} else { // ctrl
-			key = stack.getDescriptionId() + ".tip.ctrl";
+			key = descriptionId + ".tip.ctrl";
 		}
 		boolean hasKey = I18n.exists(key);
 		if (!hasKey && (shift != ctrl)) {
