@@ -6,10 +6,10 @@ import java.util.Objects;
 import com.google.common.collect.Maps;
 
 public class ModContext {
-	public static final Map<String, ModContext> ALL = Maps.newHashMap();
+	public static final Map<String, ModContext> ALL_CONTEXTS = Maps.newHashMap();
 
 	public static ModContext get(String modid) {
-		return ALL.computeIfAbsent(modid, ModContext::new);
+		return ALL_CONTEXTS.computeIfAbsent(modid, ModContext::new);
 	}
 
 	private ModContext(String modid) {

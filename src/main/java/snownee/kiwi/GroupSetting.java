@@ -65,12 +65,12 @@ public class GroupSetting {
 				Set<Item> afterItems = Stream.of(after)
 						.map(ResourceLocation::tryParse)
 						.filter(Objects::nonNull)
-						.map(BuiltInRegistries.ITEM::get)
+						.map(BuiltInRegistries.ITEM::getValue)
 						.filter(Predicate.not(Items.AIR::equals))
 						.collect(Collectors.toSet());
 				List<ItemStack> items = Lists.newArrayList();
 				for (ItemCategoryFiller filler : fillers) {
-					CreativeModeTab tab = BuiltInRegistries.CREATIVE_MODE_TAB.get(tabKey);
+					CreativeModeTab tab = BuiltInRegistries.CREATIVE_MODE_TAB.getValue(tabKey);
 					filler.fillItemCategory(tab, entries.getEnabledFeatures(), entries.shouldShowOpRestrictedItems(), items);
 				}
 				items = getEnabledStacks(items, entries.getEnabledFeatures());
