@@ -1,32 +1,33 @@
 {
-	"required": true,
-	"minVersion": "0.8",
-	"package": "snownee.kiwi.mixin",
-	"plugin": "snownee.kiwi.mixin.MixinPlugin",
-	"compatibilityLevel": "JAVA_16",
-	"refmap": "kiwi.refmap.json",
-	"mixins": [
-		"RecipeManagerMixin",
-		"ReloadableServerResourcesMixin"
-	],
-	"client": [
-		"client.ClientPacketListenerMixin",
-		"client.ClientTelemetryManagerMixin",
-		"client.CreativeModeInventoryScreenMixin",
-		"client.EntityRenderDispatcherAccess",
-		"client.EntityRenderDispatcherMixin",
-		"client.EntityRendererMixin",
-		"client.FogRendererMixin",
-		"client.LoadingOverlayMixin",
-		"client.OptionInstanceMixin",
-		"client.PlayerRenderStateMixin",
-		"client.RenderLayerAccess",
-		"client.ScreenEffectRendererMixin",
-		"client.ScreenMixin",
-		"client.TitleScreenMixin",
-		"client.WorldOpenFlowsMixin"
-	],
-	"injectors": {
-		"defaultRequire": 1
+  "required": true,
+  "minVersion": "0.8",
+  "package": "snownee.kiwi.mixin",
+  "plugin": "snownee.kiwi.mixin.MixinPlugin",
+  "compatibilityLevel": "JAVA_16",
+  "refmap": "kiwi.refmap.json",
+  "mixins": [
+    "IngredientAccess",
+    "RecipeManagerMixin",
+    "ReloadableServerResourcesMixin"
+  ],
+  "client": [
+    "client.ClientPacketListenerMixin",
+    "client.ClientTelemetryManagerMixin",
+    "client.CreativeModeInventoryScreenMixin",
+    "client.EntityRenderDispatcherAccess",
+    "client.EntityRenderDispatcherMixin",
+    "client.EntityRendererMixin",
+    "client.FogRendererMixin",
+    "client.LoadingOverlayMixin",
+    "client.OptionInstanceMixin",
+    "client.PlayerRenderStateMixin",
+    "client.RenderLayerAccess",
+    "client.ScreenEffectRendererMixin",
+    "client.ScreenMixin",
+    "client.TitleScreenMixin",
+    "client.WorldOpenFlowsMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
 	}
 }

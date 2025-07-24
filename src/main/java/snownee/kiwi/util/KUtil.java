@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.jetbrains.annotations.Nullable;
@@ -22,11 +23,14 @@ import org.yaml.snakeyaml.nodes.NodeId;
 import org.yaml.snakeyaml.nodes.SequenceNode;
 import org.yaml.snakeyaml.representer.Representer;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientPacketListener;
+import com.google.gson.JsonElement;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -36,23 +40,17 @@ import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.item.crafting.RecipeManager;
-import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.EntityHitResult;
-import snownee.kiwi.loader.Platform;
 
 public final class KUtil {
-	public static final MessageFormat MESSAGE_FORMAT = new MessageFormat("{0,number,0.#}");
+	public static final MessageFormat MESSAGE_FORMAT = new MessageFormat("{0,number,#.#}");
 	private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("###,###");
 	private static final Yaml YAML;
 	private static RecipeManager recipeManager;
 	public static final List<Direction> DIRECTIONS = Direction.stream().toList();
-	public static final List<Direction> HORIZONTAL_DIRECTIONS = Direction.Plane.HORIZONTAL.stream().toList();
 
 	static {
 		DumperOptions dumperOptions = new DumperOptions();
@@ -108,6 +106,9 @@ public final class KUtil {
 
 	@Nullable
 	public static ResourceLocation RL(@Nullable String string) {
+		if (string == null) {
+			return null;
+		}
 		try {
 			return ResourceLocation.tryParse(string);
 		} catch (Exception e) {
@@ -124,30 +125,6 @@ public final class KUtil {
 			string = defaultNamespace + ":" + string;
 		}
 		return RL(string);
-	}
-
-	@Nullable
-	public static RecipeManager getRecipeManager() {
-		if (recipeManager == null && Platform.isPhysicalClient()) {
-			ClientPacketListener connection = Minecraft.getInstance().getConnection();
-			if (connection != null) {
-				return connection.getRecipeManager();
-			}
-		}
-		return recipeManager;
-	}
-
-	public static void setRecipeManager(RecipeManager recipeManager) {
-		KUtil.recipeManager = recipeManager;
-	}
-
-	public static <I extends RecipeInput, T extends Recipe<I>> List<RecipeHolder<T>> getRecipes(RecipeType<T> recipeTypeIn) {
-		RecipeManager manager = getRecipeManager();
-		if (manager == null) {
-			return List.of();
-		} else {
-			return getRecipeManager().getAllRecipesFor(recipeTypeIn);
-		}
 	}
 
 	public static int friendlyCompare(String a, String b) {
@@ -182,9 +159,7 @@ public final class KUtil {
 				}
 			} else if (aNumber && bNumber) {
 				asNumeric = true;
-				if (lastNumericCompare == 0) {
-					lastNumericCompare = aChar - bChar;
-				}
+				lastNumericCompare = aChar - bChar;
 			} else if (aChar != bChar) {
 				return aChar - bChar;
 			}
@@ -240,7 +215,7 @@ public final class KUtil {
 			return false;
 		}
 		//		BreakEvent event = new BreakEvent(player.level, pos, state, player);
-		//		if (MinecraftForge.EVENT_BUS.post(event)) {
+		//		if (NeoForge.EVENT_BUS.post(event)) {
 		//			return false;
 		//		}
 		return true;
@@ -259,6 +234,12 @@ public final class KUtil {
 		return (color & 0xFFFFFF) | alphaChannel << 24;
 	}
 
+	// GameRenderer.pick
+	public static float getPickRange(Player player) {
+		float attrib = 5;
+		return player.isCreative() ? attrib : attrib - 0.5F;
+	}
+
 	public static void displayClientMessage(@Nullable Player player, boolean client, String key, Object... args) {
 		if (player == null) {
 			return;
@@ -266,15 +247,21 @@ public final class KUtil {
 		if (client != player.level().isClientSide) {
 			return;
 		}
-		player.sendSystemMessage(Component.translatable(key, args));
+		player.displayClientMessage(Component.translatable(key, args), false);
+	}
+
+	public static void jsonList(JsonElement json, Consumer<JsonElement> collector) {
+		if (json.isJsonArray()) {
+			for (JsonElement e : json.getAsJsonArray()) {
+				collector.accept(e);
+			}
+		} else {
+			collector.accept(json);
+		}
 	}
 
 	public static InteractionResult onAttackEntity(
-			Player player,
-			Level world,
-			InteractionHand hand,
-			Entity entity,
-			@Nullable EntityHitResult hitResult) {
+			Player player, Level world, InteractionHand hand, Entity entity, @Nullable EntityHitResult hitResult) {
 		if (entity instanceof ItemFrame frame && !frame.getItem().isEmpty() && !frame.isNoGravity() && !frame.isInvulnerable()) {
 			ItemStack stack = player.getItemInHand(hand);
 			if (stack.is(Items.END_PORTAL_FRAME)) {
@@ -283,6 +270,13 @@ public final class KUtil {
 			}
 		}
 		return InteractionResult.PASS;
+	}
+
+	public static MutableComponent clickToCopy(MutableComponent component) {
+		String str = component.getString();
+		return component.withStyle(s -> s.withClickEvent(new ClickEvent.CopyToClipboard(str))
+				.withHoverEvent(new HoverEvent.ShowText(Component.translatable("chat.copy.click")))
+				.withInsertion(str));
 	}
 
 	public static <T> T loadYaml(String yaml, Class<? super T> type) {
@@ -306,6 +300,7 @@ public final class KUtil {
 		}
 
 		private class ConstructSafeMapping extends ConstructMapping {
+			@Override
 			public Object construct(Node node) {
 				MappingNode mnode = (MappingNode) node;
 				if (node.isTwoStepsConstruction()) {
@@ -315,6 +310,7 @@ public final class KUtil {
 				}
 			}
 
+			@Override
 			@SuppressWarnings("unchecked")
 			public void construct2ndStep(Node node, Object object) {
 				constructMapping2ndStep((MappingNode) node, (Map<Object, Object>) object);
