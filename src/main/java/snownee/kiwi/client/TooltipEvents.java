@@ -2,6 +2,7 @@ package snownee.kiwi.client;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.IntConsumer;
 import java.util.stream.Stream;
 
@@ -12,16 +13,16 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.ClickEvent.Action;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.BucketItem;
@@ -36,9 +37,10 @@ import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.item.ModItem;
 import snownee.kiwi.loader.Platform;
+import snownee.kiwi.util.KUtil;
 
 public final class TooltipEvents {
-	public static final String disableDebugTooltipCommand = "@kiwi disable debugTooltip";
+	public static final ResourceLocation DISABLE_DEBUG_TOOLTIP = Kiwi.id("disable_debug_tooltip");
 	private static final DebugTooltipCache cache = new DebugTooltipCache();
 	private static boolean firstSeenDebugTooltip = true;
 	private static long latestPressF3;
@@ -56,23 +58,18 @@ public final class TooltipEvents {
 	}
 
 	public static void debugTooltip(ItemStack itemStack, List<Component> tooltip, TooltipFlag flag) {
-		if (!Kiwi.areTagsUpdated() || !flag.isAdvanced()) {
+		if (!flag.isAdvanced()) {
 			return;
 		}
 
 		Minecraft mc = Minecraft.getInstance();
 		long millis = Util.getMillis();
-		if (mc.player != null && millis - latestPressF3 > 500 && InputConstants.isKeyDown(
-				Minecraft.getInstance().getWindow().getWindow(),
-				InputConstants.KEY_F3)) {
+		if (KiwiClientConfig.f3CopyInInventory && mc.player != null && millis - latestPressF3 > 500 &&
+				InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), InputConstants.KEY_F3)) {
 			latestPressF3 = millis;
 			MutableComponent component = Component.literal(BuiltInRegistries.ITEM.getKey(itemStack.getItem()).toString());
 			mc.keyboardHandler.setClipboard(component.getString());
-			component.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, component.getString()))
-					.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click")))
-					.withInsertion(component.getString()));
-			mc.player.displayClientMessage(component, false);
-			mc.gui.getDebugOverlay().toggleOverlay();
+			mc.player.displayClientMessage(KUtil.clickToCopy(component), false);
 		}
 
 		if (KiwiClientConfig.hideDataComponentsTooltip) {
@@ -108,10 +105,11 @@ public final class TooltipEvents {
 		if (firstSeenDebugTooltip && mc.player != null) {
 			firstSeenDebugTooltip = false;
 			if (KiwiClientConfig.debugTooltipMsg) {
-				MutableComponent clickHere = Component.translatable("tip.kiwi.click_here").withStyle($ -> $.withClickEvent(new ClickEvent(
-						Action.COPY_TO_CLIPBOARD,
-						disableDebugTooltipCommand)));
-				mc.player.sendSystemMessage(Component.translatable("tip.kiwi.debug_tooltip", clickHere.withStyle(ChatFormatting.AQUA)));
+				MutableComponent clickHere = Component.translatable("tip.kiwi.click_here")
+						.withStyle($ -> $.withClickEvent(new ClickEvent.Custom(DISABLE_DEBUG_TOOLTIP, Optional.empty())));
+				mc.player.displayClientMessage(
+						Component.translatable("tip.kiwi.debug_tooltip", clickHere.withStyle(ChatFormatting.AQUA)),
+						false);
 				KiwiClientConfig.debugTooltipMsg = false;
 				KiwiConfigManager.getHandler(KiwiClientConfig.class).save();
 			}
@@ -144,8 +142,9 @@ public final class TooltipEvents {
 			if (block != Blocks.AIR) {
 				addPages("block", getTags(BuiltInRegistries.BLOCK, block));
 			}
-			if (item instanceof SpawnEggItem spawnEggItem) {
-				EntityType<?> type = spawnEggItem.getType(itemStack);
+			ClientLevel level = Minecraft.getInstance().level;
+			if (level != null && item instanceof SpawnEggItem spawnEggItem) {
+				EntityType<?> type = spawnEggItem.getType(level.registryAccess(), itemStack);
 				addPages("entity_type", getTags(BuiltInRegistries.ENTITY_TYPE, type));
 			} else if (item instanceof BucketItem bucketItem) {
 				addPages("fluid", getTags(BuiltInRegistries.FLUID, Platform.getFluidFromBucket(bucketItem)));
@@ -159,10 +158,7 @@ public final class TooltipEvents {
 		}
 
 		private static <T> Stream<TagKey<T>> getTags(Registry<T> registry, T object) {
-			return registry.getResourceKey(object)
-					.flatMap(registry::getHolder)
-					.stream()
-					.flatMap(Holder::tags);
+			return registry.getResourceKey(object).flatMap(registry::get).stream().flatMap(Holder::tags);
 		}
 
 		public void addPages(String type, Stream<? extends TagKey<?>> stream) {
@@ -222,10 +218,11 @@ public final class TooltipEvents {
 			for (String tag : page) {
 				sub.add(Component.literal(tag).withStyle(ChatFormatting.DARK_GRAY));
 			}
-			int index = findIdLine(tooltip, i -> {
-				String type = pageTypes.get(pageNow);
-				tooltip.set(i, tooltip.get(i).copy().append(" (%s/%s...%s)".formatted(pageNow + 1, pages.size(), type)));
-			});
+			int index = findIdLine(
+					tooltip, i -> {
+						String type = pageTypes.get(pageNow);
+						tooltip.set(i, tooltip.get(i).copy().append(" (%s/%s...%s)".formatted(pageNow + 1, pages.size(), type)));
+					});
 			index = index == -1 ? tooltip.size() : index + 1;
 			tooltip.addAll(index, sub);
 		}
