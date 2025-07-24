@@ -2,6 +2,7 @@ package snownee.kiwi.recipe;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -11,10 +12,12 @@ import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import snownee.kiwi.Kiwi;
@@ -35,8 +38,8 @@ public class AlternativesIngredient implements CustomIngredient {
 	}
 
 	@Override
-	public List<ItemStack> getMatchingStacks() {
-		return List.of(internal().getItems());
+	public Stream<Holder<Item>> getMatchingItems() {
+		return internal().items();
 	}
 
 	@Override
@@ -47,7 +50,7 @@ public class AlternativesIngredient implements CustomIngredient {
 	public Ingredient internal() {
 		if (cached == null) {
 			Objects.requireNonNull(options);
-			cached = Ingredient.EMPTY;
+			cached = RecipeUtil.emptyIngredient();
 			for (JsonElement option : options) {
 				Ingredient ingredient;
 				try {
@@ -55,7 +58,7 @@ public class AlternativesIngredient implements CustomIngredient {
 				} catch (Exception e) {
 					continue;
 				}
-				if (ingredient.getItems().length == 0) {
+				if (ingredient.isEmpty()) {
 					continue;
 				}
 				cached = ingredient;
@@ -86,6 +89,11 @@ public class AlternativesIngredient implements CustomIngredient {
 			return ID;
 		}
 
+		@Override
+		public MapCodec<AlternativesIngredient> getCodec() {
+			return CODEC;
+		}
+
 		public static AlternativesIngredient read(RegistryFriendlyByteBuf buf) {
 			Ingredient internal = Ingredient.CONTENTS_STREAM_CODEC.decode(buf);
 			AlternativesIngredient ingredient = new AlternativesIngredient(null);
@@ -95,11 +103,6 @@ public class AlternativesIngredient implements CustomIngredient {
 
 		public static void write(RegistryFriendlyByteBuf buf, AlternativesIngredient ingredient) {
 			Ingredient.CONTENTS_STREAM_CODEC.encode(buf, ingredient.internal());
-		}
-
-		@Override
-		public MapCodec<AlternativesIngredient> getCodec(boolean allowEmpty) {
-			return CODEC;
 		}
 
 		@Override

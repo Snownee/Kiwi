@@ -10,7 +10,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceCondition;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditionType;
-import net.minecraft.core.HolderLookup;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.util.KEval;
@@ -30,7 +30,7 @@ public record EvalCondition(String expression) implements ResourceCondition {
 	}
 
 	@Override
-	public boolean test(@Nullable HolderLookup.Provider registryLookup) {
+	public boolean test(RegistryOps.@Nullable RegistryInfoLookup registryInfo) {
 		try {
 			return new Expression(expression, KEval.config()).evaluate().getBooleanValue();
 		} catch (EvaluationException | ParseException e) {
