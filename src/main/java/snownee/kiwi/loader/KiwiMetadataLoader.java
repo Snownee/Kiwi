@@ -2,8 +2,10 @@ package snownee.kiwi.loader;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.function.Function;
 
+import net.fabricmc.loader.api.FabricLoader;
 import snownee.kiwi.build.KiwiMetadata;
 import snownee.kiwi.build.KiwiMetadataParser;
 
@@ -12,13 +14,12 @@ public record KiwiMetadataLoader(String modId) implements Function<KiwiMetadataP
 	@Override
 	public KiwiMetadata apply(KiwiMetadataParser parser) {
 		String name = "/%s.kiwi.yaml".formatted(modId);
-		try (InputStream is = getClass().getResourceAsStream(name)) {
-			if (is == null) {
+		return FabricLoader.getInstance().getModContainer(modId).flatMap(mod -> mod.findPath(name)).map(path -> {
+			try (InputStream is = Files.newInputStream(path)) {
+				return parser.load(is);
+			} catch (IOException e) {
 				return null;
 			}
-			return parser.load(is);
-		} catch (IOException e) {
-			return null;
-		}
+		}).orElse(null);
 	}
 }
