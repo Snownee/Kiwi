@@ -35,3 +35,6 @@ accessible method net/minecraft/server/packs/repository/FolderRepositorySource c
 accessible method net/minecraft/world/level/block/entity/BlockEntityType <init> (Lnet/minecraft/world/level/block/entity/BlockEntityType$BlockEntitySupplier;Ljava/util/Set;)V
 
 accessible field net/minecraft/client/renderer/ItemBlockRenderTypes TYPE_BY_BLOCK Ljava/util/Map;
+
+accessible method net/minecraft/advancements/critereon/BlockPredicate matchesBlockEntity (Lnet/minecraft/world/level/LevelReader;Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/advancements/critereon/NbtPredicate;)Z
+accessible method net/minecraft/advancements/critereon/BlockPredicate matchesComponents (Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/advancements/critereon/DataComponentMatchers;)Z
