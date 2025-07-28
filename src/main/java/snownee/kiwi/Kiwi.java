@@ -76,7 +76,6 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 	public static MinecraftServer currentServer;
 	private static Multimap<String, KiwiAnnotationData> moduleData = ArrayListMultimap.create();
 	private static Map<KiwiAnnotationData, String> conditions = Maps.newHashMap();
-	private static boolean tagsUpdated;
 	public static boolean enableDataModule;
 	private static boolean initialized;
 
@@ -257,14 +256,6 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 
 	public static boolean isLoaded(ResourceLocation module) {
 		return KiwiModules.isLoaded(module);
-	}
-
-	public static void onTagsUpdated() {
-		tagsUpdated = true;
-	}
-
-	public static boolean areTagsUpdated() {
-		return tagsUpdated;
 	}
 
 	public static void enableDataModule() {
