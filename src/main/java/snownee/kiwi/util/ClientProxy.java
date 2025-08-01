@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.entity.state.PlayerRenderState;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.Unit;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.contributor.ContributorsClient;
 import snownee.kiwi.contributor.client.CosmeticLayer;
@@ -38,15 +39,14 @@ public final class ClientProxy {
 					ResourceManager manager,
 					Executor backgroundExecutor,
 					Executor gameExecutor) {
-				return CompletableFuture.runAsync(() -> {
-					((EntityRenderDispatcherAccess) Minecraft.getInstance().getEntityRenderDispatcher())
-							.getPlayerRenderers()
-							.forEach((skin, renderer) -> {
-								CosmeticLayer layer = new CosmeticLayer((PlayerRenderer) renderer);
-								CosmeticLayer.ALL_LAYERS.put(skin, layer);
-								((LivingEntityRendererAccessor<PlayerRenderState, PlayerModel>) renderer).callAddFeature(layer);
-							});
-				});
+				return barrier.wait(Unit.INSTANCE).thenRunAsync(
+						() -> ((EntityRenderDispatcherAccess) Minecraft.getInstance().getEntityRenderDispatcher())
+								.getPlayerRenderers()
+								.forEach((skin, renderer) -> {
+									CosmeticLayer layer = new CosmeticLayer((PlayerRenderer) renderer);
+									CosmeticLayer.ALL_LAYERS.put(skin, layer);
+									((LivingEntityRendererAccessor<PlayerRenderState, PlayerModel>) renderer).callAddFeature(layer);
+								}), backgroundExecutor);
 			}
 		});
 
