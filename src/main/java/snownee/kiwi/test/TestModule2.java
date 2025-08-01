@@ -42,7 +42,7 @@ public class TestModule2 extends AbstractModule {
 	@Override
 	protected void init(InitEvent event) {
 		event.enqueueWork(() -> {
-			Platform.registerAxeConversion(Blocks.DIAMOND_BLOCK, Blocks.REDSTONE_BLOCK);
+			Platform.registerAxeConversion(Blocks.QUARTZ_PILLAR, Blocks.PURPUR_PILLAR);
 			Kiwi.LOGGER.info("{}", DANDELION.get());
 		});
 	}

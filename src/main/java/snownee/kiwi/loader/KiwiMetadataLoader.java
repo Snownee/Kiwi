@@ -13,7 +13,7 @@ public record KiwiMetadataLoader(String modId) implements Function<KiwiMetadataP
 
 	@Override
 	public KiwiMetadata apply(KiwiMetadataParser parser) {
-		String name = "/%s.kiwi.yaml".formatted(modId);
+		String name = "%s.kiwi.yaml".formatted(modId);
 		return FabricLoader.getInstance().getModContainer(modId).flatMap(mod -> mod.findPath(name)).map(path -> {
 			try (InputStream is = Files.newInputStream(path)) {
 				return parser.load(is);
