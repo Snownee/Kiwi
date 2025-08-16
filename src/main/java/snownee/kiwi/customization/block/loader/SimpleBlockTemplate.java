@@ -5,12 +5,12 @@ import java.util.function.Function;
 
 import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import snownee.kiwi.customization.block.BlockFundamentals;
 import snownee.kiwi.util.resource.OneTimeLoader;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -23,7 +23,7 @@ public final class SimpleBlockTemplate extends KBlockTemplate {
 		this.clazz = clazz;
 	}
 
-	public static Codec<SimpleBlockTemplate> directCodec(MapCodec<Optional<KMaterial>> materialCodec) {
+	public static Codec<SimpleBlockTemplate> directCodec(BlockFundamentals.CodecCreationContext materialCodec) {
 		return RecordCodecBuilder.create(instance -> instance.group(
 				BlockDefinitionProperties.mapCodecField(materialCodec).forGetter(SimpleBlockTemplate::properties),
 				Codec.STRING.optionalFieldOf("class", "").forGetter(SimpleBlockTemplate::clazz)

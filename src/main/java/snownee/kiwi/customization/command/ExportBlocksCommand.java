@@ -54,6 +54,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.KiwiModule;
+import snownee.kiwi.customization.CustomizationHooks;
 import snownee.kiwi.customization.CustomizationRegistries;
 import snownee.kiwi.customization.block.KBlockSettings;
 import snownee.kiwi.customization.block.component.KBlockComponent;
@@ -153,10 +154,11 @@ public class ExportBlocksCommand {
 				}
 				if ("door".equals(template) || "trapdoor".equals(template)) {
 					Codec<Block> codec = BlockCodecs.get(new ResourceLocation(template)).codec();
-					template += toYaml(codec, block, json -> {
-						json.getAsJsonObject().remove(BlockCodecs.BLOCK_PROPERTIES_KEY);
-						return json;
-					});
+					template += toYaml(
+							codec, block, json -> {
+								json.getAsJsonObject().remove(BlockCodecs.BLOCK_PROPERTIES_KEY);
+								return json;
+							});
 				}
 				row.put("Template", template);
 				row.put("ID", BuiltInRegistries.BLOCK.getKey(block).getPath());
@@ -197,8 +199,10 @@ public class ExportBlocksCommand {
 				}
 				if (settings.glassType == null) {
 					row.put("GlassType", "");
+				} else if (settings.glassType == CustomizationHooks.clearGlassType()) {
+					row.put("GlassType", "clear");
 				} else {
-					row.put("GlassType", settings.glassType.name());
+					row.put("GlassType", "unknown");
 				}
 				row.put("WaterLoggable", Boolean.toString(settings.hasComponent(KBlockComponents.WATER_LOGGABLE.get())));
 				KBlockComponent.Type<?> baseComponent = settings.components.keySet()

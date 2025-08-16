@@ -41,7 +41,7 @@ public class ReloadBlockSettingsCommand {
 			}
 			KBlockSettings.Builder builder = definition.createSettings(holder.key().location(), fundamentals.shapes());
 			holder.value().properties = builder.get();
-			KBlockDefinition.setConfiguringShape(holder.value());
+			KBlockDefinition.setConfiguringShape(holder.value(), fundamentals.shapes());
 		});
 		Blocks.rebuildCache();
 		ReloadSlotsCommand.reload(fundamentals);

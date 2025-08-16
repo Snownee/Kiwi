@@ -20,7 +20,7 @@ public class KEmiStonecutterRecipe implements EmiRecipe {
 	private final EmiStack output;
 
 	public KEmiStonecutterRecipe(StonecutterRecipe recipe) {
-		id = recipe.getId().withPrefix("/");
+		id = recipe.getId();
 		input = EmiIngredient.of(recipe.getIngredients().stream().map(EmiIngredient::of).toList());
 		output = EmiStack.of(recipe.getResultItem(Objects.requireNonNull(Minecraft.getInstance().level).registryAccess()));
 	}

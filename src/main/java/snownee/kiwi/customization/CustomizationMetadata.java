@@ -76,12 +76,22 @@ public record CustomizationMetadata(ImmutableListMultimap<String, String> regist
 			String key,
 			Map<ResourceLocation, T> values,
 			BiConsumer<ResourceLocation, T> action) {
+		sortedForEach(metadataMap, List.of(key), values, action);
+	}
+
+	public static <T> void sortedForEach(
+			Map<String, CustomizationMetadata> metadataMap,
+			List<String> keys,
+			Map<ResourceLocation, T> values,
+			BiConsumer<ResourceLocation, T> action) {
 		Set<ResourceLocation> order = Sets.newLinkedHashSet();
-		metadataMap.forEach((namespace, metadata) -> {
-			for (String s : metadata.registryOrder().get(key)) {
-				order.add(Util.RL(s, namespace));
-			}
-		});
+		for (String key : keys) {
+			metadataMap.forEach((namespace, metadata) -> {
+				for (String s : metadata.registryOrder().get(key)) {
+					order.add(Util.RL(s, namespace));
+				}
+			});
+		}
 		for (ResourceLocation id : order) {
 			T value = values.get(id);
 			if (value != null) {
