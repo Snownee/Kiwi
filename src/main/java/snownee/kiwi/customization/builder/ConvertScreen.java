@@ -35,6 +35,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -57,6 +58,7 @@ public class ConvertScreen extends Screen {
 	private PanelLayout layout;
 	private final Vector2i originalMousePos;
 	private final ItemStack sourceItem;
+	private final Set<Item> chosenItems = Sets.newIdentityHashSet();
 
 	private static Vector2i getMousePos() {
 		Minecraft mc = Minecraft.getInstance();
@@ -70,11 +72,12 @@ public class ConvertScreen extends Screen {
 		this.slotIndex = slotIndex;
 		this.groups = groups;
 		inContainer = parent instanceof AbstractContainerScreen;
-		inCreativeContainer = parent instanceof CreativeModeInventoryScreen;
+		inCreativeContainer = inContainer && parent instanceof CreativeModeInventoryScreen;
 		originalMousePos = getMousePos();
 		openProgress.setValue(0.2f);
 		openProgress.chase(1, 0.8, LerpedFloat.Chaser.EXP);
 		sourceItem = getSourceItem();
+		chosenItems.add(sourceItem.getItem());
 	}
 
 	private ItemStack getSourceItem() {
@@ -106,46 +109,22 @@ public class ConvertScreen extends Screen {
 					continue;
 				}
 				ItemStack itemStack = new ItemStack(entry.item());
-				Button button = ItemButton.builder(
-						itemStack, inContainer, btn -> {
-							Item from = sourceItem.getItem();
-							Item to = ((ItemButton) btn).getItem().getItem();
-							if (from == to) {
-								onClose();
-								return;
-							}
-							boolean convertOne = hasControlDown();
-							LocalPlayer player0 = Objects.requireNonNull(getMinecraft().player);
-							if (inCreativeContainer && convertOne) {
-								// magic number time
-								CConvertItemPacket.send(false, -500, entry, from, true);
-							} else if (inCreativeContainer) {
-								Objects.requireNonNull(slot);
-								ItemStack newItem = to.getDefaultInstance();
-								newItem.setCount(slot.getItem().getCount());
-								newItem.setPopTime(5);
-								slot.setByPlayer(newItem);
-								NonNullList<Slot> slots = player0.inventoryMenu.slots;
-								for (int i = 0; i < slots.size(); i++) {
-									if (slots.get(i).getItem() == newItem) {
-										Objects.requireNonNull(getMinecraft().gameMode).handleCreativeModeItemAdd(newItem, i);
-										CConvertItemPacket.playPickupSound(player0);
-										break;
-									}
-								}
-							} else {
-								CConvertItemPacket.send(inContainer, slotIndex, entry, from, convertOne);
-							}
-							if (convertOne) {
-								if (player0.isCreative() || sourceItem.getCount() > 1) {
-									return;
-								}
-							}
-							if (inContainer) {
-								GLFW.glfwSetCursorPos(getMinecraft().getWindow().getWindow(), originalMousePos.x, originalMousePos.y);
-							}
-							onClose();
-						}).bounds(curX, curY, 21, 21).build();
+				ItemButton button = (ItemButton) ItemButton
+						.builder(itemStack, inContainer, btn -> shortPress((ItemButton) btn, entry))
+						.bounds(curX, curY, 21, 21)
+						.build();
+
+				button.onPress = btn -> {
+					if (btn.pressTime() >= 10) {
+						longPress(btn, entry);
+					}
+				};
+				button.onRelease = btn -> {
+					if (!hasControlDown()) {
+						onClose();
+					}
+				};
+
 				button.setAlpha(inContainer ? 0.2f : 0.8f);
 				List<Component> tooltip;
 				if (Platform.isProduction()) {
@@ -211,10 +190,70 @@ public class ConvertScreen extends Screen {
 		}
 	}
 
+	private void longPress(ItemButton button, CConvertItemPacket.Entry entry) {
+		boolean convertOne = hasControlDown();
+		if (convertOne) {
+			shortPress(button, entry);
+		} else if ((!inContainer || Objects.requireNonNull(getMinecraft().player).containerMenu instanceof InventoryMenu) &&
+				button.pressTime() >= 15) {
+			Item from = getSourceItem().getItem();
+			CConvertItemPacket.send(
+					false,
+					slotIndex,
+					entry,
+					from,
+					CConvertItemPacket.Action.CONVERT_FAMILY);
+			onClose();
+		}
+	}
+
+	private void shortPress(ItemButton button, CConvertItemPacket.Entry entry) {
+		LocalPlayer player = Objects.requireNonNull(getMinecraft().player);
+		boolean creative = player.isCreative();
+		ItemStack sourceItem = getSourceItem();
+		boolean convertOne = hasControlDown();
+		if (convertOne) {
+			if (!creative && sourceItem.getCount() <= 1) {
+				onClose();
+			}
+		}
+		Item from = sourceItem.getItem();
+		Item to = button.item().getItem();
+		if (!(creative && convertOne) && from == to) {
+			return;
+		}
+		chosenItems.add(to);
+		if (inCreativeContainer && convertOne) {
+			// magic number time
+			CConvertItemPacket.send(false, -500, entry, from, CConvertItemPacket.Action.CONVERT_ONE);
+		} else if (inCreativeContainer) {
+			Objects.requireNonNull(slot);
+			ItemStack newItem = to.getDefaultInstance();
+			newItem.setCount(slot.getItem().getCount());
+			newItem.setPopTime(Inventory.POP_TIME_DURATION);
+			slot.setByPlayer(newItem);
+			NonNullList<Slot> slots = player.inventoryMenu.slots;
+			for (int i = 0; i < slots.size(); i++) {
+				if (slots.get(i).getItem() == newItem) {
+					Objects.requireNonNull(getMinecraft().gameMode).handleCreativeModeItemAdd(newItem, i);
+					CConvertItemPacket.playPickupSound(player);
+					break;
+				}
+			}
+		} else {
+			CConvertItemPacket.send(
+					inContainer,
+					slotIndex,
+					entry,
+					from,
+					convertOne ? CConvertItemPacket.Action.CONVERT_ONE : CConvertItemPacket.Action.CONVERT_ALL);
+		}
+	}
+
 	@Override
 	public void tick() {
 		openProgress.tickChaser();
-		if (!isClosing() && !ItemStack.isSameItemSameTags(sourceItem, getSourceItem())) {
+		if (!isClosing() && !chosenItems.contains(getSourceItem().getItem())) {
 			onClose();
 		}
 	}
@@ -278,6 +317,9 @@ public class ConvertScreen extends Screen {
 		openProgress.chase(0, 0.8, LerpedFloat.Chaser.EXP);
 		lingeringScreen = this;
 		super.onClose();
+		if (inContainer) {
+			GLFW.glfwSetCursorPos(getMinecraft().getWindow().getWindow(), originalMousePos.x, originalMousePos.y);
+		}
 	}
 
 	public boolean isClosing() {
