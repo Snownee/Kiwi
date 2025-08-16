@@ -40,7 +40,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import snownee.kiwi.customization.network.CConvertItemPacket;
 import snownee.kiwi.loader.Platform;
-import snownee.kiwi.util.KHolder;
 import snownee.kiwi.util.LerpedFloat;
 import snownee.kiwi.util.MultilineTooltip;
 import snownee.kiwi.util.NotNullByDefault;
@@ -95,7 +94,7 @@ public class ConvertScreen extends Screen {
 		int curX = xStart;
 		int curY = yStart;
 		Set<CConvertItemPacket.Entry> accepted = Sets.newHashSet();
-		LocalPlayer player = Objects.requireNonNull(mc().player);
+		LocalPlayer player = Objects.requireNonNull(getMinecraft().player);
 		for (CConvertItemPacket.Group group : groups) {
 			accepted.addAll(group.entries());
 		}
@@ -107,45 +106,46 @@ public class ConvertScreen extends Screen {
 					continue;
 				}
 				ItemStack itemStack = new ItemStack(entry.item());
-				Button button = ItemButton.builder(itemStack, inContainer, btn -> {
-					Item from = sourceItem.getItem();
-					Item to = ((ItemButton) btn).getItem().getItem();
-					if (from == to) {
-						onClose();
-						return;
-					}
-					boolean convertOne = hasControlDown();
-					LocalPlayer player0 = Objects.requireNonNull(mc().player);
-					if (inCreativeContainer && convertOne) {
-						// magic number time
-						CConvertItemPacket.send(false, -500, entry, from, true);
-					} else if (inCreativeContainer) {
-						Objects.requireNonNull(slot);
-						ItemStack newItem = to.getDefaultInstance();
-						newItem.setCount(slot.getItem().getCount());
-						newItem.setPopTime(5);
-						slot.setByPlayer(newItem);
-						NonNullList<Slot> slots = player0.inventoryMenu.slots;
-						for (int i = 0; i < slots.size(); i++) {
-							if (slots.get(i).getItem() == newItem) {
-								Objects.requireNonNull(mc().gameMode).handleCreativeModeItemAdd(newItem, i);
-								CConvertItemPacket.playPickupSound(player0);
-								break;
+				Button button = ItemButton.builder(
+						itemStack, inContainer, btn -> {
+							Item from = sourceItem.getItem();
+							Item to = ((ItemButton) btn).getItem().getItem();
+							if (from == to) {
+								onClose();
+								return;
 							}
-						}
-					} else {
-						CConvertItemPacket.send(inContainer, slotIndex, entry, from, convertOne);
-					}
-					if (convertOne) {
-						if (player0.isCreative() || sourceItem.getCount() > 1) {
-							return;
-						}
-					}
-					if (inContainer) {
-						GLFW.glfwSetCursorPos(mc().getWindow().getWindow(), originalMousePos.x, originalMousePos.y);
-					}
-					onClose();
-				}).bounds(curX, curY, 21, 21).build();
+							boolean convertOne = hasControlDown();
+							LocalPlayer player0 = Objects.requireNonNull(getMinecraft().player);
+							if (inCreativeContainer && convertOne) {
+								// magic number time
+								CConvertItemPacket.send(false, -500, entry, from, true);
+							} else if (inCreativeContainer) {
+								Objects.requireNonNull(slot);
+								ItemStack newItem = to.getDefaultInstance();
+								newItem.setCount(slot.getItem().getCount());
+								newItem.setPopTime(5);
+								slot.setByPlayer(newItem);
+								NonNullList<Slot> slots = player0.inventoryMenu.slots;
+								for (int i = 0; i < slots.size(); i++) {
+									if (slots.get(i).getItem() == newItem) {
+										Objects.requireNonNull(getMinecraft().gameMode).handleCreativeModeItemAdd(newItem, i);
+										CConvertItemPacket.playPickupSound(player0);
+										break;
+									}
+								}
+							} else {
+								CConvertItemPacket.send(inContainer, slotIndex, entry, from, convertOne);
+							}
+							if (convertOne) {
+								if (player0.isCreative() || sourceItem.getCount() > 1) {
+									return;
+								}
+							}
+							if (inContainer) {
+								GLFW.glfwSetCursorPos(getMinecraft().getWindow().getWindow(), originalMousePos.x, originalMousePos.y);
+							}
+							onClose();
+						}).bounds(curX, curY, 21, 21).build();
 				button.setAlpha(inContainer ? 0.2f : 0.8f);
 				List<Component> tooltip;
 				if (Platform.isProduction()) {
@@ -153,7 +153,7 @@ public class ConvertScreen extends Screen {
 				} else {
 					String steps = String.join(
 							" -> ",
-							entry.steps().stream().map(Pair::getFirst).map(KHolder::key).map(Objects::toString).toList());
+							entry.steps().stream().map(Pair::getFirst).map(Objects::toString).toList());
 					tooltip = List.of(itemStack.getHoverName(), Component.literal(steps).withStyle(ChatFormatting.GRAY));
 				}
 				button.setTooltip(MultilineTooltip.create(tooltip));
@@ -191,7 +191,7 @@ public class ConvertScreen extends Screen {
 		}
 		layout.bind(this, new Vector2i(x, y), anchor);
 		if (cursorOn != null) {
-			Window window = mc().getWindow();
+			Window window = getMinecraft().getWindow();
 			double scale = window.getGuiScale();
 			GLFW.glfwSetCursorPos(window.getWindow(), (cursorOn.getX() + 15) * scale, (cursorOn.getY() + 15) * scale);
 		}
@@ -202,7 +202,7 @@ public class ConvertScreen extends Screen {
 				10000,
 				10000,
 				Component.empty(),
-				mc().font);
+				getMinecraft().font);
 		ClientTooltipPositioner tooltipPositioner = new BelowOrAboveWidgetTooltipPositioner(dummySpacer);
 		for (AbstractWidget widget : layout.widgets()) {
 			if (widget instanceof ItemButton button) {
@@ -237,10 +237,11 @@ public class ConvertScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
+		Objects.requireNonNull(minecraft);
 		PoseStack pose = pGuiGraphics.pose();
 		layout.update();
 		Vector2i pos = layout.getAnchoredPos();
-		float openValue = openProgress.getValue(mc().getFrameTime());
+		float openValue = openProgress.getValue(minecraft.getFrameTime());
 		pose.pushPose();
 		pose.translate(pos.x, pos.y, 0);
 		pose.scale(openValue, openValue, openValue);
@@ -266,7 +267,7 @@ public class ConvertScreen extends Screen {
 
 	@Override
 	public void setTooltipForNextRenderPass(List<FormattedCharSequence> list, ClientTooltipPositioner tooltipPositioner, boolean force) {
-		float openValue = openProgress.getValue(mc().getFrameTime());
+		float openValue = openProgress.getValue(Objects.requireNonNull(minecraft).getFrameTime());
 		if (openValue > 0.95f) {
 			super.setTooltipForNextRenderPass(list, tooltipPositioner, force);
 		}
@@ -306,7 +307,7 @@ public class ConvertScreen extends Screen {
 		}
 	}
 
-	private Minecraft mc() {
+	private Minecraft getMinecraft() {
 		return Objects.requireNonNull(minecraft);
 	}
 

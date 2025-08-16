@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
@@ -94,6 +96,7 @@ public class BlockFamilies {
 		StonecutterRecipeMaker.invalidateCache();
 	}
 
+	@Nullable
 	public static BlockFamily get(ResourceLocation id) {
 		KHolder<BlockFamily> holder = byId.get(id);
 		return holder == null ? null : holder.value();

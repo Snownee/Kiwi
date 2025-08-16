@@ -21,7 +21,7 @@ public record KCreativeTab(
 			Codec.INT.optionalFieldOf("order", 0).forGetter(KCreativeTab::order),
 			ResourceKey.codec(Registries.ITEM)
 					.optionalFieldOf("icon")
-					.forGetter($ -> Optional.ofNullable($.icon())),
+					.forGetter($ -> Optional.of($.icon())),
 			ResourceKey.codec(Registries.CREATIVE_MODE_TAB)
 					.optionalFieldOf("insert")
 					.forGetter(KCreativeTab::insert),

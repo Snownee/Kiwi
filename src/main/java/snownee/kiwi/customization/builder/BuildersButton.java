@@ -1,8 +1,11 @@
 package snownee.kiwi.customization.builder;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
+
+import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -10,24 +13,30 @@ import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.phys.BlockHitResult;
+import snownee.kiwi.KiwiCommonConfig;
 import snownee.kiwi.customization.CustomizationClient;
 import snownee.kiwi.customization.block.family.BlockFamilies;
 import snownee.kiwi.customization.block.family.BlockFamily;
 import snownee.kiwi.customization.network.CApplyBuilderRulePacket;
 import snownee.kiwi.customization.network.CConvertItemPacket;
+import snownee.kiwi.util.ClientProxy;
 import snownee.kiwi.util.KHolder;
 
 public class BuildersButton {
@@ -73,6 +82,9 @@ public class BuildersButton {
 		if (screen instanceof ConvertScreen) {
 			screen.onClose();
 			return true;
+		}
+		if (KiwiCommonConfig.kSwitchCreativeOnly && !player.isCreative()) {
+			return false;
 		}
 //		if (screen instanceof AbstractContainerScreen<?> containerScreen && containerScreen.getMenu().getCarried().isEmpty()) {
 //			Slot slot = ClientProxy.getSlotUnderMouse(containerScreen);
@@ -122,7 +134,7 @@ public class BuildersButton {
 			for (Item item : family.value().items().toList()) {
 				float convertRatio = BlockFamilies.getConvertRatio(item);
 				CConvertItemPacket.Entry entry = new CConvertItemPacket.Entry(ratio / convertRatio);
-				Pair<KHolder<BlockFamily>, Item> pair = Pair.of(family, item);
+				Pair<ResourceLocation, Item> pair = Pair.of(family.key(), item);
 				entry.steps().add(pair);
 				if (cascading) {
 					unresolved.add(entry);
@@ -135,7 +147,7 @@ public class BuildersButton {
 			}
 			while (!unresolved.isEmpty()) {
 				CConvertItemPacket.Entry parentEntry = unresolved.remove(0);
-				Pair<KHolder<BlockFamily>, Item> lastStep = parentEntry.steps().get(parentEntry.steps().size() - 1);
+				Pair<ResourceLocation, Item> lastStep = parentEntry.steps().get(parentEntry.steps().size() - 1);
 				Item lastItem = lastStep.getSecond();
 				ratio = BlockFamilies.getConvertRatio(lastItem);
 				for (KHolder<BlockFamily> nextFamily : BlockFamilies.findQuickSwitch(lastItem, player.isCreative())) {
@@ -149,7 +161,7 @@ public class BuildersButton {
 						float convertRatio = BlockFamilies.getConvertRatio(nextItem);
 						CConvertItemPacket.Entry entry = new CConvertItemPacket.Entry(parentEntry.ratio() * ratio / convertRatio);
 						entry.steps().addAll(parentEntry.steps());
-						entry.steps().add(Pair.of(nextFamily, nextItem));
+						entry.steps().add(Pair.of(nextFamily.key(), nextItem));
 						if (!addedItems.contains(nextItem)) {
 							group.entries().add(entry);
 							addedItems.add(nextItem);
@@ -213,6 +225,7 @@ public class BuildersButton {
 		return true;
 	}
 
+	@Nullable
 	private static LocalPlayer ensureBuilderMode() {
 		if (!isBuilderModeOn()) {
 			return null;
@@ -221,10 +234,11 @@ public class BuildersButton {
 	}
 
 	public static void renderDebugText(List<String> left, List<String> right) {
-		if (!isBuilderModeOn() || Minecraft.getInstance().options.renderDebug) {
+		if (!isBuilderModeOn() /*|| Minecraft.getInstance().options.renderDebug*/) {
 			return;
 		}
-		left.add("Builder Mode is on, long press %s to toggle".formatted(CustomizationClient.buildersButtonKey.getTranslatedKeyMessage()
+		left.add("Builder Mode is on, long press %s to toggle".formatted(Objects.requireNonNull(CustomizationClient.buildersButtonKey)
+				.getTranslatedKeyMessage()
 				.getString()));
 	}
 

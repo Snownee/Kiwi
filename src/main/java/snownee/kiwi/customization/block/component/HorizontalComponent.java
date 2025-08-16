@@ -2,6 +2,8 @@ package snownee.kiwi.customization.block.component;
 
 import java.util.List;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.google.common.collect.Iterables;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -46,7 +48,7 @@ public record HorizontalComponent(boolean oppose) implements KBlockComponent {
 	}
 
 	@Override
-	public BlockState getStateForPlacement(KBlockSettings settings, BlockState state, BlockPlaceContext context) {
+	public @Nullable BlockState getStateForPlacement(KBlockSettings settings, BlockState state, BlockPlaceContext context) {
 		if (settings.customPlacement) {
 			return state;
 		}
