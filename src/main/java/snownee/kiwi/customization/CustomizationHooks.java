@@ -33,6 +33,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
@@ -90,6 +91,7 @@ public final class CustomizationHooks {
 	private static final Set<String> lenientBETypeNamespaces = Sets.newHashSet();
 	private static boolean enabled = true;
 	public static boolean kswitch = Platform.isModLoaded("kswitch") || !Platform.isProduction();
+	private static @Nullable GlassType clearGlassType;
 
 	private CustomizationHooks() {
 	}
@@ -149,7 +151,7 @@ public final class CustomizationHooks {
 			return settings.glassType;
 		}
 		if (isColorlessGlass(blockState)) {
-			return GlassType.CLEAR;
+			return clearGlassType;
 		}
 		return null;
 	}
@@ -246,6 +248,8 @@ public final class CustomizationHooks {
 		OneTimeLoader.Context context = new OneTimeLoader.Context();
 		Map<String, CustomizationMetadata> metadataMap = CustomizationMetadata.loadMap(resourceManager, context);
 		BlockFundamentals blockFundamentals = BlockFundamentals.reload(resourceManager, context, true);
+		clearGlassType = blockFundamentals.glassTypes().get(new ResourceLocation("clear"));
+		Preconditions.checkNotNull(clearGlassType, "Missing 'clear' glass type");
 		blockNamespaces.clear();
 		blockFundamentals.blocks().keySet().stream().map(ResourceLocation::getNamespace).forEach(blockNamespaces::add);
 		lenientBETypeNamespaces.clear();
@@ -274,7 +278,7 @@ public final class CustomizationHooks {
 		KItemTemplate none = itemFundamentals.templates().get(new ResourceLocation("none"));
 		Preconditions.checkNotNull(none, "Missing 'none' item definition");
 		CustomizationMetadata.sortedForEach(
-				metadataMap, "item", itemFundamentals.items(), (id, definition) -> {
+				metadataMap, List.of("item", "block"), itemFundamentals.items(), (id, definition) -> {
 					try {
 						if (definition.template().template() == none) {
 							return;
@@ -321,7 +325,9 @@ public final class CustomizationHooks {
 								.toList());
 					});
 			if (i > 0) {
-				tab.withTabsBefore(newTabs.get(i - 1).getKey());
+				tab.withTabsBefore(CreativeModeTabs.SPAWN_EGGS.location(), newTabs.get(i - 1).getKey());
+			} else {
+				tab.withTabsBefore(CreativeModeTabs.SPAWN_EGGS.location());
 			}
 			if (i < newTabs.size() - 1) {
 				tab.withTabsAfter(newTabs.get(i + 1).getKey());
@@ -426,4 +432,7 @@ public final class CustomizationHooks {
 		return blockState.is(Tags.Blocks.GLASS_COLORLESS);
 	}
 
+	public static GlassType clearGlassType() {
+		return clearGlassType;
+	}
 }

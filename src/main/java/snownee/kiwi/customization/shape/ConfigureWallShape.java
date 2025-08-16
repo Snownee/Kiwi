@@ -1,7 +1,9 @@
 package snownee.kiwi.customization.shape;
 
 import java.util.Map;
+import java.util.function.UnaryOperator;
 
+import com.google.common.collect.Maps;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
@@ -29,7 +31,7 @@ public record ConfigureWallShape(
 	}
 
 	@Override
-	public void configure(Block block, BlockShapeType type) {
+	public void configure(Block block, BlockShapeType type, ShapeStorage storage) {
 		if (!(block instanceof WallBlock wallBlock)) {
 			throw new IllegalArgumentException("Block %s is not a WallBlock".formatted(block));
 		}
@@ -44,6 +46,30 @@ public record ConfigureWallShape(
 			case MAIN -> wallBlock.shapeByIndex = shapes;
 			case COLLISION -> wallBlock.collisionShapeByIndex = shapes;
 			case INTERACTION -> throw new UnsupportedOperationException();
+		}
+	}
+
+	@Override
+	public void replaceAll(Block block, BlockShapeType type, UnaryOperator<VoxelShape> operator) {
+		if (!(block instanceof WallBlock wallBlock)) {
+			throw new IllegalArgumentException("Block %s is not a WallBlock".formatted(block));
+		}
+		if (type == BlockShapeType.INTERACTION) {
+			throw new UnsupportedOperationException("Interaction shapes cannot be replaced for WallBlock");
+		}
+		Map<BlockState, VoxelShape> shapes = switch (type) {
+			case MAIN -> wallBlock.shapeByIndex;
+			case COLLISION -> wallBlock.collisionShapeByIndex;
+			default -> throw new IllegalStateException();
+		};
+		Map<BlockState, VoxelShape> newShapes = Maps.newIdentityHashMap();
+		for (Map.Entry<BlockState, VoxelShape> entry : shapes.entrySet()) {
+			newShapes.put(entry.getKey(), operator.apply(entry.getValue()));
+		}
+		switch (type) {
+			case MAIN -> wallBlock.shapeByIndex = newShapes;
+			case COLLISION -> wallBlock.collisionShapeByIndex = newShapes;
+			default -> throw new IllegalStateException();
 		}
 	}
 }

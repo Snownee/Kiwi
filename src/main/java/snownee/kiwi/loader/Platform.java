@@ -11,6 +11,7 @@ import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.fml.loading.LoadingModList;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import snownee.kiwi.util.resource.MappingResolver;
 
@@ -20,7 +21,11 @@ public class Platform {
 	}
 
 	public static boolean isModLoaded(String id) {
-		return ModList.get().isLoaded(id);
+		ModList modList = ModList.get();
+		if (modList == null) {
+			return LoadingModList.get().getModFileById(id) != null;
+		}
+		return modList.isLoaded(id);
 	}
 
 	public static boolean isPhysicalClient() {

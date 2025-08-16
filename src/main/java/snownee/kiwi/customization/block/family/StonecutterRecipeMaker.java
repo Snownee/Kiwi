@@ -45,19 +45,20 @@ public class StonecutterRecipeMaker {
 			if (families.isEmpty()) {
 				break get_recipes;
 			}
-			exchangeRecipes = EXCHANGE_CACHE.get(item, () -> {
-				List<StonecutterRecipe> list = null;
-				for (KHolder<BlockFamily> family : families) {
-					if (!family.value().stonecutterExchange()) {
-						continue;
-					}
-					if (list == null) {
-						list = Lists.newArrayList();
-					}
-					list.addAll(makeRecipes("exchange", family));
-				}
-				return list == null ? List.of() : list;
-			});
+			exchangeRecipes = EXCHANGE_CACHE.get(
+					item, () -> {
+						List<StonecutterRecipe> list = null;
+						for (KHolder<BlockFamily> family : families) {
+							if (!family.value().stonecutterExchange()) {
+								continue;
+							}
+							if (list == null) {
+								list = Lists.newArrayList();
+							}
+							list.addAll(makeRecipes("exchange", family));
+						}
+						return list == null ? List.of() : list;
+					});
 		} catch (ExecutionException ignored) {
 		}
 		List<StonecutterRecipe> sourceRecipes = List.of();
@@ -67,13 +68,14 @@ public class StonecutterRecipeMaker {
 			if (families.isEmpty()) {
 				break get_recipes;
 			}
-			sourceRecipes = SOURCE_CACHE.get(item, () -> {
-				List<StonecutterRecipe> list = Lists.newArrayList();
-				for (KHolder<BlockFamily> family : families) {
-					list.addAll(makeRecipes("to", family));
-				}
-				return list;
-			});
+			sourceRecipes = SOURCE_CACHE.get(
+					item, () -> {
+						List<StonecutterRecipe> list = Lists.newArrayList();
+						for (KHolder<BlockFamily> family : families) {
+							list.addAll(makeRecipes("to", family));
+						}
+						return list;
+					});
 		} catch (ExecutionException ignored) {
 		}
 		if (exchangeRecipes.isEmpty() && sourceRecipes.isEmpty()) {
@@ -90,9 +92,10 @@ public class StonecutterRecipeMaker {
 			case "to" -> family.value().stonecutterSourceIngredient();
 			default -> throw new IllegalArgumentException();
 		};
+		boolean exchangeInViewer = "exchange_in_viewer".equals(type);
 		ResourceLocation prefix = family.key().withPath("fake/stonecutter/%s/%s".formatted(
 				family.key().getPath(),
-				"exchange_in_viewer".equals(type) ? "exchange" : type));
+				exchangeInViewer ? "exchange" : type));
 		return family.value().items().map(item -> {
 			int count;
 			if ("to".equals(type)) {
@@ -103,12 +106,18 @@ public class StonecutterRecipeMaker {
 					return null;
 				}
 			}
+			ItemStack itemStack = new ItemStack(item, count);
+			// avoid self-exchange
+			if (exchangeInViewer && !family.value().exchangeInputsInViewer().isEmpty() &&
+					family.value().ingredientInViewer().test(itemStack)) {
+				return null;
+			}
 			ResourceLocation itemKey = BuiltInRegistries.ITEM.getKey(item);
 			return new StonecutterRecipe(
 					prefix.withSuffix("/%s/%s".formatted(itemKey.getNamespace(), itemKey.getPath())),
 					prefix.toString(),
 					input,
-					new ItemStack(item, count));
+					itemStack);
 		}).filter(Objects::nonNull).toList();
 	}
 

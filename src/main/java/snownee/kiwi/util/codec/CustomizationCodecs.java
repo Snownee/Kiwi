@@ -49,7 +49,6 @@ import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import snownee.kiwi.KiwiModule;
-import snownee.kiwi.customization.block.GlassType;
 
 public class CustomizationCodecs {
 	public static final BiMap<ResourceLocation, SoundType> SOUND_TYPES = HashBiMap.create();
@@ -58,8 +57,6 @@ public class CustomizationCodecs {
 	public static final Codec<NoteBlockInstrument> INSTRUMENT_CODEC = simpleByNameCodec(INSTRUMENTS);
 	public static final BiMap<String, MapColor> MAP_COLORS = HashBiMap.create();
 	public static final Codec<MapColor> MAP_COLOR_CODEC = simpleByNameCodec(MAP_COLORS);
-	public static final BiMap<ResourceLocation, GlassType> GLASS_TYPES = HashBiMap.create();
-	public static final Codec<GlassType> GLASS_TYPE_CODEC = simpleByNameCodec(GLASS_TYPES);
 	public static final Codec<PushReaction> PUSH_REACTION = simpleByNameCodec(ImmutableBiMap.of(
 			"normal", PushReaction.NORMAL,
 			"destroy", PushReaction.DESTROY,
@@ -73,11 +70,12 @@ public class CustomizationCodecs {
 	public static final Codec<BlockBehaviour.OffsetType> OFFSET_TYPE = simpleByNameCodec(ImmutableBiMap.of(
 			"xz", BlockBehaviour.OffsetType.XZ,
 			"xyz", BlockBehaviour.OffsetType.XYZ));
-	public static final Codec<BlockBehaviour.StatePredicate> STATE_PREDICATE = Codec.BOOL.flatComapMap(bl -> {
-		return bl ? Blocks::always : Blocks::never;
-	}, p -> {
-		return DataResult.error(() -> "Unsupported operation");
-	});
+	public static final Codec<BlockBehaviour.StatePredicate> STATE_PREDICATE = Codec.BOOL.flatComapMap(
+			bl -> {
+				return bl ? Blocks::always : Blocks::never;
+			}, p -> {
+				return DataResult.error(() -> "Unsupported operation");
+			});
 	public static final Codec<Direction> DIRECTION = simpleByNameCodec(ImmutableBiMap.of(
 			"down", Direction.DOWN,
 			"up", Direction.UP,
@@ -94,13 +92,15 @@ public class CustomizationCodecs {
 			String stringValue = ops.getStringValue(input).result().orElse(null);
 			if (stringValue != null) {
 				if (stringValue.startsWith("#")) {
-					return DataResult.success(Pair.of(BlockPredicate.Builder.block()
-							.of(TagKey.create(Registries.BLOCK, new ResourceLocation(stringValue.substring(1))))
-							.build(), ops.empty()));
+					return DataResult.success(Pair.of(
+							BlockPredicate.Builder.block()
+									.of(TagKey.create(Registries.BLOCK, new ResourceLocation(stringValue.substring(1))))
+									.build(), ops.empty()));
 				}
-				return DataResult.success(Pair.of(BlockPredicate.Builder.block()
-						.of(BuiltInRegistries.BLOCK.get(new ResourceLocation(stringValue)))
-						.build(), ops.empty()));
+				return DataResult.success(Pair.of(
+						BlockPredicate.Builder.block()
+								.of(BuiltInRegistries.BLOCK.get(new ResourceLocation(stringValue)))
+								.build(), ops.empty()));
 			}
 			return ExtraCodecs.JSON.decode(ops, input).map($ -> $.mapFirst(BlockPredicate::fromJson));
 		}
@@ -345,22 +345,21 @@ public class CustomizationCodecs {
 			}
 		}
 
-		Objects.requireNonNull(GlassType.CLEAR);
-
 		SENSITIVITIES.put("everything", PressurePlateBlock.Sensitivity.EVERYTHING);
 		SENSITIVITIES.put("mobs", PressurePlateBlock.Sensitivity.MOBS);
 	}
 
 	public static <T> Codec<T> simpleByNameCodec(Map<ResourceLocation, T> map) {
-		return ResourceLocation.CODEC.flatXmap(key -> {
-			T value = map.get(key);
-			if (value == null) {
-				return DataResult.error(() -> "Unknown key: " + key);
-			}
-			return DataResult.success(value);
-		}, value -> {
-			return DataResult.error(() -> "Unsupported operation");
-		});
+		return ResourceLocation.CODEC.flatXmap(
+				key -> {
+					T value = map.get(key);
+					if (value == null) {
+						return DataResult.error(() -> "Unknown key: " + key);
+					}
+					return DataResult.success(value);
+				}, value -> {
+					return DataResult.error(() -> "Unsupported operation");
+				});
 	}
 
 	public static <T> Codec<T> simpleByNameCodec(BiMap<String, T> map) {
@@ -368,19 +367,20 @@ public class CustomizationCodecs {
 	}
 
 	public static <K, V> Codec<V> simpleByNameCodec(BiMap<K, V> map, Codec<K> keyCodec) {
-		return keyCodec.flatXmap(key -> {
-			V value = map.get(key);
-			if (value == null) {
-				return DataResult.error(() -> "Unknown key: " + key);
-			}
-			return DataResult.success(value);
-		}, value -> {
-			K key = map.inverse().get(value);
-			if (key == null) {
-				return DataResult.error(() -> "Unknown value: " + value);
-			}
-			return DataResult.success(key);
-		});
+		return keyCodec.flatXmap(
+				key -> {
+					V value = map.get(key);
+					if (value == null) {
+						return DataResult.error(() -> "Unknown key: " + key);
+					}
+					return DataResult.success(value);
+				}, value -> {
+					K key = map.inverse().get(value);
+					if (key == null) {
+						return DataResult.error(() -> "Unknown value: " + value);
+					}
+					return DataResult.success(key);
+				});
 	}
 
 	public static <T> Codec<BlockBehaviour.StateArgumentPredicate<T>> stateArgumentPredicate() {
@@ -403,9 +403,10 @@ public class CustomizationCodecs {
 				if (stringValue.isPresent()) {
 					String s = stringValue.get();
 					if ("ocelot_or_parrot".equals(s)) {
-						return DataResult.success(Pair.of((state, world, pos, entity) -> {
-							return entity == EntityType.OCELOT || entity == EntityType.PARROT;
-						}, ops.empty()));
+						return DataResult.success(Pair.of(
+								(state, world, pos, entity) -> {
+									return entity == EntityType.OCELOT || entity == EntityType.PARROT;
+								}, ops.empty()));
 					}
 				}
 				return DataResult.error(() -> "Failed to decode state argument predicate: " + input);

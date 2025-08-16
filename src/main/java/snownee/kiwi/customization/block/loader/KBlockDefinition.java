@@ -7,7 +7,6 @@ import java.util.Optional;
 import com.google.common.base.Preconditions;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.Direction;
@@ -16,6 +15,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.customization.CustomizationRegistries;
+import snownee.kiwi.customization.block.BlockFundamentals;
 import snownee.kiwi.customization.block.KBlockSettings;
 import snownee.kiwi.customization.block.behavior.BlockBehaviorRegistry;
 import snownee.kiwi.customization.block.component.KBlockComponent;
@@ -40,7 +40,7 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 
 	public static Codec<KBlockDefinition> codec(
 			Map<ResourceLocation, KBlockTemplate> templates,
-			MapCodec<Optional<KMaterial>> materialCodec) {
+			BlockFundamentals.CodecCreationContext context) {
 		KBlockTemplate defaultTemplate = templates.get(new ResourceLocation("block"));
 		Preconditions.checkNotNull(defaultTemplate);
 		ConfiguredBlockTemplate defaultConfiguredTemplate = new ConfiguredBlockTemplate(defaultTemplate);
@@ -50,7 +50,7 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 								"template",
 								defaultConfiguredTemplate)
 						.forGetter(KBlockDefinition::template),
-				BlockDefinitionProperties.mapCodec(materialCodec).forGetter(KBlockDefinition::properties)
+				BlockDefinitionProperties.mapCodec(context).forGetter(KBlockDefinition::properties)
 		).apply(instance, KBlockDefinition::new));
 	}
 
@@ -131,7 +131,7 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 	public Block createBlock(ResourceLocation id, ShapeStorage shapes) {
 		KBlockSettings.Builder builder = createSettings(id, shapes);
 		Block block = template.template().createBlock(id, builder.get(), template.json());
-		setConfiguringShape(block);
+		setConfiguringShape(block, shapes);
 		properties.material().ifPresent(mat -> {
 			VanillaActions.setFireInfo(block, mat.igniteOdds(), mat.burnOdds());
 		});
@@ -145,7 +145,7 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 		return block;
 	}
 
-	public static void setConfiguringShape(Block block) {
+	public static void setConfiguringShape(Block block, ShapeStorage shapes) {
 		KBlockSettings settings = KBlockSettings.of(block);
 		if (settings == null) {
 			return;
@@ -153,7 +153,7 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 		for (BlockShapeType shapeType : BlockShapeType.VALUES) {
 			ConfiguringShape shape = settings.removeIfPossible(shapeType);
 			if (shape != null) {
-				shape.configure(block, shapeType);
+				shape.configure(block, shapeType, shapes);
 			}
 		}
 	}
