@@ -3,8 +3,12 @@ package snownee.kiwi.customization.network;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
+import java.util.function.IntFunction;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.jetbrains.annotations.Nullable;
@@ -19,6 +23,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.ByIdMap;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -29,16 +34,17 @@ import snownee.kiwi.customization.block.family.BlockFamilies;
 import snownee.kiwi.customization.block.family.BlockFamily;
 import snownee.kiwi.network.KiwiPacket;
 import snownee.kiwi.network.PacketHandler;
+import snownee.kiwi.util.KHolder;
 
 @KiwiPacket(value = "convert_item", dir = KiwiPacket.Direction.PLAY_TO_SERVER)
 public class CConvertItemPacket extends PacketHandler {
 	public static final int MAX_STEPS = 4;
 	public static CConvertItemPacket I;
 
-	public static void send(boolean inContainer, int slot, Entry entry, Item from, boolean convertOne) {
+	public static void send(boolean inContainer, int slot, Entry entry, Item from, Action action) {
 		I.sendToServer(buf -> {
 			buf.writeBoolean(inContainer);
-			buf.writeBoolean(convertOne);
+			buf.writeEnum(action);
 			buf.writeVarInt(slot);
 			buf.writeId(BuiltInRegistries.ITEM, from);
 			buf.writeVarInt(entry.steps().size());
@@ -51,11 +57,11 @@ public class CConvertItemPacket extends PacketHandler {
 
 	@Override
 	public CompletableFuture<FriendlyByteBuf> receive(
-			Function<Runnable, CompletableFuture<FriendlyByteBuf>> function,
+			Function<Runnable, CompletableFuture<FriendlyByteBuf>> executor,
 			FriendlyByteBuf buf,
 			@Nullable ServerPlayer player) {
 		boolean inContainer = buf.readBoolean();
-		boolean convertOne = buf.readBoolean();
+		Action action = buf.readEnum(Action.class);
 		int slotIndex = buf.readVarInt();
 		Item from = buf.readById(BuiltInRegistries.ITEM);
 		if (from == null) {
@@ -75,10 +81,10 @@ public class CConvertItemPacket extends PacketHandler {
 			return null;
 		}
 		Item to = steps.get(steps.size() - 1).getSecond();
-		if (from == to) {
+		if (action == Action.CONVERT_FAMILY && inContainer) {
 			return null;
 		}
-		return function.apply(() -> {
+		return executor.apply(() -> {
 			Objects.requireNonNull(player);
 			Item item = from;
 			int index = 0;
@@ -122,12 +128,16 @@ public class CConvertItemPacket extends PacketHandler {
 			if (!sourceItem.is(from)) {
 				return;
 			}
+			if (action == Action.CONVERT_FAMILY) {
+				convertFamily(player, to, slotIndex, ratio);
+				return;
+			}
 			boolean skipSettingSlot = false;
 			ItemStack newItem;
 			int inventorySwap = Integer.MIN_VALUE;
 			if (ratio >= 1) {
 				newItem = to.getDefaultInstance();
-			} else if (convertOne) {
+			} else if (action == Action.CONVERT_ONE) {
 				return;
 			} else {
 				for (int i = 0; i < playerInventory.getContainerSize(); i++) {
@@ -142,9 +152,8 @@ public class CConvertItemPacket extends PacketHandler {
 				}
 				newItem = playerInventory.getItem(inventorySwap);
 			}
-			newItem.setPopTime(5);
 			int ratioInt = Mth.floor(ratio);
-			if (convertOne) {
+			if (action == Action.CONVERT_ONE) {
 				if (!player.isCreative()) {
 					sourceItem.shrink(1);
 					newItem.setCount(ratioInt);
@@ -169,6 +178,7 @@ public class CConvertItemPacket extends PacketHandler {
 						}
 						slot.setByPlayer(newItem);
 					} else {
+						newItem.setPopTime(Inventory.POP_TIME_DURATION);
 						playerInventory.setItem(slotIndex, newItem);
 					}
 				} catch (Exception e) {
@@ -180,16 +190,64 @@ public class CConvertItemPacket extends PacketHandler {
 			} else if (!skipSettingSlot && !player.isCreative()) {
 				addToPlayer(player, sourceItem.copy(), !inContainer);
 			}
+			broadcastChanges(player);
 			playPickupSound(player);
 			player.containerMenu.broadcastChanges();
 		});
 	}
 
-	private void addToPlayer(ServerPlayer player, ItemStack itemStack, boolean nextToSelected) {
+	private static void broadcastChanges(ServerPlayer player) {
+		Inventory inventory = player.getInventory();
+		boolean success = false;
+		for (int i = 0; i < inventory.getContainerSize(); i++) {
+			success |= SItemPopTimePacket.send(player, i);
+		}
+		if (success) {
+			playPickupSound(player);
+			player.containerMenu.broadcastChanges();
+		}
+	}
+
+	public static void convertFamily(ServerPlayer player, Item to, int slotIndex, float ratio) {
+		Set<Item> set = BlockFamilies.findQuickSwitch(to, player.isCreative()).stream()
+				.map(KHolder::value)
+				.flatMap(BlockFamily::items)
+				.filter(Predicate.not(to::equals))
+				.collect(Collectors.toSet());
+		Inventory inventory = player.getInventory();
+		boolean success = false;
+		for (int i = 0; i < inventory.getContainerSize(); i++) {
+			ItemStack stack = inventory.getItem(i);
+			if (!set.contains(stack.getItem())) {
+				continue;
+			}
+			success = true;
+			inventory.setItem(i, ItemStack.EMPTY);
+			ItemStack newItem = to.getDefaultInstance();
+			newItem.setPopTime(Inventory.POP_TIME_DURATION);
+			int newCount = Mth.floor(stack.getCount() * ratio);
+			while (newCount > 0) {
+				int count = Math.min(newCount, newItem.getMaxStackSize());
+				newItem.setCount(count);
+				newCount -= count;
+				if (!inventory.add(slotIndex, newItem) && !inventory.add(newItem)) {
+					player.drop(newItem, true);
+				}
+				if (newCount > 0) {
+					newItem = newItem.copy();
+				}
+			}
+		}
+		if (success) {
+			broadcastChanges(player);
+		}
+	}
+
+	private static void addToPlayer(ServerPlayer player, ItemStack itemStack, boolean nextToSelected) {
 		Inventory inventory = player.getInventory();
 		IntStream intStream = IntStream.range(0, 9);
 		if (nextToSelected) {
-			IntStream leftAndRight = IntStream.of(inventory.selected + 1, inventory.selected - 1);
+			IntStream leftAndRight = IntStream.of(inventory.selected, inventory.selected + 1, inventory.selected - 1);
 			intStream = IntStream.concat(leftAndRight, intStream);
 		}
 		int slot = intStream.filter(Inventory::isHotbarSlot).filter(i -> {
@@ -199,7 +257,7 @@ public class CConvertItemPacket extends PacketHandler {
 			}
 			return stack.getCount() < stack.getMaxStackSize() && ItemStack.isSameItemSameTags(stack, itemStack);
 		}).findFirst().orElse(-1);
-		if (!inventory.add(slot, itemStack) && !player.isCreative()) {
+		if (!inventory.add(slot, itemStack) && !inventory.add(itemStack) && !player.isCreative()) {
 			player.drop(itemStack, true);
 		}
 	}
@@ -230,5 +288,13 @@ public class CConvertItemPacket extends PacketHandler {
 		public Item item() {
 			return steps.get(steps.size() - 1).getSecond();
 		}
+	}
+
+	public enum Action {
+		CONVERT_ALL,
+		CONVERT_ONE,
+		CONVERT_FAMILY;
+
+		private static final IntFunction<Action> BY_ID = ByIdMap.continuous(Enum::ordinal, values(), ByIdMap.OutOfBoundsStrategy.ZERO);
 	}
 }

@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.jetbrains.annotations.Nullable;
@@ -61,17 +62,23 @@ public class BlockFamilies {
 				.stream()
 				.map(e -> new KHolder<>(e.getKey(), e.getValue()))
 				.collect(ImmutableList.toImmutableList());
+		// we need the byItem cache for automatically generating families
+		// we also need the byId cache because it is referenced by BuilderRules
+		reloadComplete(List::of);
 	}
 
 	public static int reloadTags() {
-		reloadComplete(List.of()); // we need the byItem cache for automatically generating families
 		if (CustomizationHooks.kswitch) {
-			reloadComplete(new BlockFamilyInferrer().generate());
+			reloadComplete(new BlockFamilyInferrer()::generate);
 		}
 		return byId.size();
 	}
 
-	private static void reloadComplete(Collection<KHolder<BlockFamily>> additional) {
+	private static void reloadComplete(Supplier<Collection<KHolder<BlockFamily>>> additionalSupplier) {
+		byId = ImmutableMap.of();
+		byItem = ImmutableListMultimap.of();
+		byStonecutterSource = ImmutableListMultimap.of();
+		Collection<KHolder<BlockFamily>> additional = additionalSupplier.get();
 		Map<ResourceLocation, KHolder<BlockFamily>> byIdBuilder = Maps.newHashMapWithExpectedSize(fromResources.size() + additional.size());
 		ImmutableListMultimap.Builder<Item, KHolder<BlockFamily>> byItemBuilder = ImmutableListMultimap.builder();
 		ImmutableListMultimap.Builder<Item, KHolder<BlockFamily>> byStonecutterBuilder = ImmutableListMultimap.builder();
