@@ -1,6 +1,6 @@
 package snownee.kiwi.customization.block.component;
 
-import snownee.kiwi.customization.block.loader.KBlockComponents;
+import org.jetbrains.annotations.Nullable;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -14,6 +14,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import snownee.kiwi.customization.block.KBlockSettings;
+import snownee.kiwi.customization.block.loader.KBlockComponents;
 
 public record HorizontalAxisComponent(boolean oppose) implements KBlockComponent {
 	public static final EnumProperty<Direction.Axis> AXIS = BlockStateProperties.HORIZONTAL_AXIS;
@@ -43,7 +44,7 @@ public record HorizontalAxisComponent(boolean oppose) implements KBlockComponent
 	}
 
 	@Override
-	public BlockState getStateForPlacement(KBlockSettings settings, BlockState state, BlockPlaceContext context) {
+	public @Nullable BlockState getStateForPlacement(KBlockSettings settings, BlockState state, BlockPlaceContext context) {
 		if (settings.customPlacement) {
 			return state;
 		}
@@ -59,20 +60,15 @@ public record HorizontalAxisComponent(boolean oppose) implements KBlockComponent
 		return null;
 	}
 
+	@Override
 	public BlockState rotate(BlockState pState, Rotation pRot) {
-		switch (pRot) {
-			case COUNTERCLOCKWISE_90:
-			case CLOCKWISE_90:
-				switch (pState.getValue(AXIS)) {
-					case Z:
-						return pState.setValue(AXIS, Direction.Axis.X);
-					case X:
-						return pState.setValue(AXIS, Direction.Axis.Z);
-					default:
-						return pState;
-				}
-			default:
-				return pState;
-		}
+		return switch (pRot) {
+			case COUNTERCLOCKWISE_90, CLOCKWISE_90 -> switch (pState.getValue(AXIS)) {
+				case Z -> pState.setValue(AXIS, Direction.Axis.X);
+				case X -> pState.setValue(AXIS, Direction.Axis.Z);
+				default -> pState;
+			};
+			default -> pState;
+		};
 	}
 }

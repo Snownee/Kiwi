@@ -257,9 +257,6 @@ public final class CustomizationHooks {
 				metadataMap, "block", blockFundamentals.blocks(), (id, definition) -> {
 					try {
 						Block block = definition.createBlock(id, blockFundamentals.shapes());
-						if (block == null) {
-							return;
-						}
 						ForgeRegistries.BLOCKS.register(id, block);
 						blockFundamentals.slotProviders().attachSlotsA(block, definition);
 						blockFundamentals.placeChoices().attachChoicesA(block, definition);
@@ -283,9 +280,6 @@ public final class CustomizationHooks {
 							return;
 						}
 						Item item = definition.createItem(id);
-						if (item == null) {
-							return;
-						}
 						ForgeRegistries.ITEMS.register(id, item);
 					} catch (Exception e) {
 						Kiwi.LOGGER.error("Failed to create item %s".formatted(id), e);

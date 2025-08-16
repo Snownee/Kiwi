@@ -84,20 +84,24 @@ public class KiwiPackResourceManager implements CloseableResourceManager {
 		}
 	}
 
+	@Override
 	public Set<String> getNamespaces() {
 		return this.namespacedManagers.keySet();
 	}
 
+	@Override
 	public Optional<Resource> getResource(ResourceLocation p_215482_) {
 		ResourceManager resourcemanager = this.namespacedManagers.get(p_215482_.getNamespace());
 		return resourcemanager != null ? resourcemanager.getResource(p_215482_) : Optional.empty();
 	}
 
+	@Override
 	public List<Resource> getResourceStack(ResourceLocation p_215466_) {
 		ResourceManager resourcemanager = this.namespacedManagers.get(p_215466_.getNamespace());
 		return resourcemanager != null ? resourcemanager.getResourceStack(p_215466_) : List.of();
 	}
 
+	@Override
 	public Map<ResourceLocation, Resource> listResources(String p_215476_, Predicate<ResourceLocation> p_215477_) {
 		checkTrailingDirectoryPath(p_215476_);
 		Map<ResourceLocation, Resource> map = new TreeMap<>();
@@ -109,6 +113,7 @@ public class KiwiPackResourceManager implements CloseableResourceManager {
 		return map;
 	}
 
+	@Override
 	public Map<ResourceLocation, List<Resource>> listResourceStacks(String p_215479_, Predicate<ResourceLocation> p_215480_) {
 		checkTrailingDirectoryPath(p_215479_);
 		Map<ResourceLocation, List<Resource>> map = new TreeMap<>();
@@ -126,10 +131,12 @@ public class KiwiPackResourceManager implements CloseableResourceManager {
 		}
 	}
 
+	@Override
 	public Stream<PackResources> listPacks() {
 		return this.packs.stream();
 	}
 
+	@Override
 	public void close() {
 		this.packs.forEach(PackResources::close);
 	}

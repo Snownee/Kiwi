@@ -29,7 +29,6 @@ import snownee.kiwi.customization.block.family.BlockFamilies;
 import snownee.kiwi.customization.block.family.BlockFamily;
 import snownee.kiwi.network.KiwiPacket;
 import snownee.kiwi.network.PacketHandler;
-import snownee.kiwi.util.KHolder;
 
 @KiwiPacket(value = "convert_item", dir = KiwiPacket.Direction.PLAY_TO_SERVER)
 public class CConvertItemPacket extends PacketHandler {
@@ -43,8 +42,8 @@ public class CConvertItemPacket extends PacketHandler {
 			buf.writeVarInt(slot);
 			buf.writeId(BuiltInRegistries.ITEM, from);
 			buf.writeVarInt(entry.steps().size());
-			for (Pair<KHolder<BlockFamily>, Item> step : entry.steps()) {
-				buf.writeResourceLocation(step.getFirst().key());
+			for (Pair<ResourceLocation, Item> step : entry.steps()) {
+				buf.writeResourceLocation(step.getFirst());
 				buf.writeId(BuiltInRegistries.ITEM, step.getSecond());
 			}
 		});
@@ -223,7 +222,7 @@ public class CConvertItemPacket extends PacketHandler {
 		}
 	}
 
-	public record Entry(float ratio, List<Pair<KHolder<BlockFamily>, Item>> steps) {
+	public record Entry(float ratio, List<Pair<ResourceLocation, Item>> steps) {
 		public Entry(float ratio) {
 			this(ratio, Lists.newArrayList());
 		}

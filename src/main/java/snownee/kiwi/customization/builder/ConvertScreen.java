@@ -40,7 +40,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import snownee.kiwi.customization.network.CConvertItemPacket;
 import snownee.kiwi.loader.Platform;
-import snownee.kiwi.util.KHolder;
 import snownee.kiwi.util.LerpedFloat;
 import snownee.kiwi.util.MultilineTooltip;
 import snownee.kiwi.util.NotNullByDefault;
@@ -107,45 +106,46 @@ public class ConvertScreen extends Screen {
 					continue;
 				}
 				ItemStack itemStack = new ItemStack(entry.item());
-				Button button = ItemButton.builder(itemStack, inContainer, btn -> {
-					Item from = sourceItem.getItem();
-					Item to = ((ItemButton) btn).getItem().getItem();
-					if (from == to) {
-						onClose();
-						return;
-					}
-					boolean convertOne = hasControlDown();
-					LocalPlayer player0 = Objects.requireNonNull(getMinecraft().player);
-					if (inCreativeContainer && convertOne) {
-						// magic number time
-						CConvertItemPacket.send(false, -500, entry, from, true);
-					} else if (inCreativeContainer) {
-						Objects.requireNonNull(slot);
-						ItemStack newItem = to.getDefaultInstance();
-						newItem.setCount(slot.getItem().getCount());
-						newItem.setPopTime(5);
-						slot.setByPlayer(newItem);
-						NonNullList<Slot> slots = player0.inventoryMenu.slots;
-						for (int i = 0; i < slots.size(); i++) {
-							if (slots.get(i).getItem() == newItem) {
-								Objects.requireNonNull(getMinecraft().gameMode).handleCreativeModeItemAdd(newItem, i);
-								CConvertItemPacket.playPickupSound(player0);
-								break;
+				Button button = ItemButton.builder(
+						itemStack, inContainer, btn -> {
+							Item from = sourceItem.getItem();
+							Item to = ((ItemButton) btn).getItem().getItem();
+							if (from == to) {
+								onClose();
+								return;
 							}
-						}
-					} else {
-						CConvertItemPacket.send(inContainer, slotIndex, entry, from, convertOne);
-					}
-					if (convertOne) {
-						if (player0.isCreative() || sourceItem.getCount() > 1) {
-							return;
-						}
-					}
-					if (inContainer) {
-						GLFW.glfwSetCursorPos(getMinecraft().getWindow().getWindow(), originalMousePos.x, originalMousePos.y);
-					}
-					onClose();
-				}).bounds(curX, curY, 21, 21).build();
+							boolean convertOne = hasControlDown();
+							LocalPlayer player0 = Objects.requireNonNull(getMinecraft().player);
+							if (inCreativeContainer && convertOne) {
+								// magic number time
+								CConvertItemPacket.send(false, -500, entry, from, true);
+							} else if (inCreativeContainer) {
+								Objects.requireNonNull(slot);
+								ItemStack newItem = to.getDefaultInstance();
+								newItem.setCount(slot.getItem().getCount());
+								newItem.setPopTime(5);
+								slot.setByPlayer(newItem);
+								NonNullList<Slot> slots = player0.inventoryMenu.slots;
+								for (int i = 0; i < slots.size(); i++) {
+									if (slots.get(i).getItem() == newItem) {
+										Objects.requireNonNull(getMinecraft().gameMode).handleCreativeModeItemAdd(newItem, i);
+										CConvertItemPacket.playPickupSound(player0);
+										break;
+									}
+								}
+							} else {
+								CConvertItemPacket.send(inContainer, slotIndex, entry, from, convertOne);
+							}
+							if (convertOne) {
+								if (player0.isCreative() || sourceItem.getCount() > 1) {
+									return;
+								}
+							}
+							if (inContainer) {
+								GLFW.glfwSetCursorPos(getMinecraft().getWindow().getWindow(), originalMousePos.x, originalMousePos.y);
+							}
+							onClose();
+						}).bounds(curX, curY, 21, 21).build();
 				button.setAlpha(inContainer ? 0.2f : 0.8f);
 				List<Component> tooltip;
 				if (Platform.isProduction()) {
@@ -153,7 +153,7 @@ public class ConvertScreen extends Screen {
 				} else {
 					String steps = String.join(
 							" -> ",
-							entry.steps().stream().map(Pair::getFirst).map(KHolder::key).map(Objects::toString).toList());
+							entry.steps().stream().map(Pair::getFirst).map(Objects::toString).toList());
 					tooltip = List.of(itemStack.getHoverName(), Component.literal(steps).withStyle(ChatFormatting.GRAY));
 				}
 				button.setTooltip(MultilineTooltip.create(tooltip));

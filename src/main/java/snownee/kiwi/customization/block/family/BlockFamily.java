@@ -127,8 +127,18 @@ public class BlockFamily {
 		return blocks.stream().map(Holder::value);
 	}
 
+	public boolean hasBlock(Block block) {
+		//noinspection deprecation
+		return blocks.contains(block.builtInRegistryHolder());
+	}
+
 	public Stream<Item> items() {
 		return items.stream().map(Holder::value);
+	}
+
+	public boolean hasItem(Item item) {
+		//noinspection deprecation
+		return items.contains(item.builtInRegistryHolder());
 	}
 
 	public boolean stonecutterExchange() {
