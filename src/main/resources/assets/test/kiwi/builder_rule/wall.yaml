@@ -1,0 +1,8 @@
+type: cycle_property
+spread: plane_y
+family:
+  test:wall:
+    north: 'low|tall'
+    south: 'low|tall'
+    east: 'low|tall'
+    west: 'low|tall'

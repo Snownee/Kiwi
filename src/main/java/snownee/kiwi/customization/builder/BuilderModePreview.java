@@ -91,32 +91,33 @@ public class BuilderModePreview implements DebugRenderer.SimpleDebugRenderer {
 		this.pos = null;
 		positions = List.of();
 		for (KHolder<BuilderRule> holder : BuilderRules.find(blockState.getBlock())) {
-			if (holder.value().matches(player, itemStack, blockState)) {
-				positions = holder.value().searchPositions(new UseOnContext(player, hand, hitResult));
-				if (positions.isEmpty()) {
-					continue;
-				}
-				this.rule = holder;
-				this.pos = hitResult.getBlockPos();
-				faces.clear();
-				VoxelShape fullShape = positions.stream().map(BuilderModePreview::getShape).reduce(
-						Shapes.empty(),
-						(a, b) -> Shapes.joinUnoptimized(a, b, BooleanOp.OR));
-				fullShape = fullShape.optimize();
-				List<AABB> aabbs = fullShape.toAabbs();
-				for (Direction direction : snownee.kiwi.util.Util.DIRECTIONS) {
-					for (AABB aabb : aabbs) {
-						VoxelShape faceShape = getFaceShape(aabb, direction);
-						faceShape = Shapes.join(faceShape, fullShape, BooleanOp.ONLY_FIRST);
-						if (!faceShape.isEmpty()) {
-							for (AABB faceShapeAabb : faceShape.toAabbs()) {
-								faces.put(direction, faceShapeAabb);
-							}
+			if (!holder.value().matches(player, itemStack, blockState)) {
+				continue;
+			}
+			positions = holder.value().searchPositions(blockState, new UseOnContext(player, hand, hitResult));
+			if (positions.isEmpty()) {
+				continue;
+			}
+			this.rule = holder;
+			this.pos = hitResult.getBlockPos();
+			faces.clear();
+			VoxelShape fullShape = positions.stream().map(BuilderModePreview::getShape).reduce(
+					Shapes.empty(),
+					(a, b) -> Shapes.joinUnoptimized(a, b, BooleanOp.OR));
+			fullShape = fullShape.optimize();
+			List<AABB> aabbs = fullShape.toAabbs();
+			for (Direction direction : snownee.kiwi.util.Util.DIRECTIONS) {
+				for (AABB aabb : aabbs) {
+					VoxelShape faceShape = getFaceShape(aabb, direction);
+					faceShape = Shapes.join(faceShape, fullShape, BooleanOp.ONLY_FIRST);
+					if (!faceShape.isEmpty()) {
+						for (AABB faceShapeAabb : faceShape.toAabbs()) {
+							faces.put(direction, faceShapeAabb);
 						}
 					}
 				}
-				break;
 			}
+			break;
 		}
 	}
 

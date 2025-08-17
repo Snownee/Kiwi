@@ -13,6 +13,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.MapLike;
 import com.mojang.serialization.RecordBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -157,7 +158,7 @@ public record SimplePropertiesComponent(
 			return mapBuilder.build(prefix);
 		}
 	};
-	public static final Codec<SimplePropertiesComponent> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+	public static final MapCodec<SimplePropertiesComponent> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			Codec.BOOL.optionalFieldOf("shape_for_light_occlusion", false)
 					.forGetter(SimplePropertiesComponent::useShapeForLightOcclusion),
 			ExtraCodecs.nonEmptyList(CustomizationCodecs.compactList(SINGLE_CODEC))

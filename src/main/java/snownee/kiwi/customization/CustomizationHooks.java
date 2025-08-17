@@ -42,6 +42,8 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.Kiwi;
+import snownee.kiwi.KiwiModule;
+import snownee.kiwi.LoadingContext;
 import snownee.kiwi.customization.block.BlockFundamentals;
 import snownee.kiwi.customization.block.GlassType;
 import snownee.kiwi.customization.block.KBlockSettings;
@@ -50,6 +52,7 @@ import snownee.kiwi.customization.block.behavior.SitManager;
 import snownee.kiwi.customization.block.component.KBlockComponent;
 import snownee.kiwi.customization.block.family.BlockFamilies;
 import snownee.kiwi.customization.block.loader.KBlockTemplate;
+import snownee.kiwi.customization.builder.BuilderRule;
 import snownee.kiwi.customization.builder.BuilderRules;
 import snownee.kiwi.customization.item.ItemFundamentals;
 import snownee.kiwi.customization.item.loader.KCreativeTab;
@@ -146,6 +149,9 @@ public final class CustomizationHooks {
 		CustomizationRegistries.ITEM_TEMPLATE = FabricRegistryBuilder.createSimple(CustomizationRegistries.ITEM_TEMPLATE_KEY)
 				.buildAndRegister();
 		Kiwi.registerRegistry(CustomizationRegistries.ITEM_TEMPLATE, KItemTemplate.Type.class);
+		CustomizationRegistries.BUILDER_RULE = FabricRegistryBuilder.createSimple(CustomizationRegistries.BUILDER_RULE_KEY)
+				.buildAndRegister();
+		Kiwi.registerRegistry(CustomizationRegistries.BUILDER_RULE, BuilderRule.Type.class);
 		PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, entity) -> {
 			if (PlacementSystem.isDebugEnabled(player)) {
 				PlacementSystem.removeDebugBlocks(world, pos);
@@ -357,5 +363,16 @@ public final class CustomizationHooks {
 
 	public static GlassType clearGlassType() {
 		return clearGlassType;
+	}
+
+	@KiwiModule.LoadingCondition(
+			{
+					"block_components",
+					"block_templates",
+					"item_templates",
+					"builder_rules",
+			})
+	public static boolean shouldLoad(LoadingContext ctx) {
+		return isEnabled();
 	}
 }

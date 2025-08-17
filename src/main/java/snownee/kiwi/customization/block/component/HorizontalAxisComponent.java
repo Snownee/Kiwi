@@ -3,6 +3,7 @@ package snownee.kiwi.customization.block.component;
 import org.jetbrains.annotations.Nullable;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.Direction;
@@ -20,7 +21,7 @@ public record HorizontalAxisComponent(boolean oppose) implements KBlockComponent
 	public static final EnumProperty<Direction.Axis> AXIS = BlockStateProperties.HORIZONTAL_AXIS;
 	private static final HorizontalAxisComponent NORMAL = new HorizontalAxisComponent(false);
 	private static final HorizontalAxisComponent OPPOSE = new HorizontalAxisComponent(true);
-	public static final Codec<HorizontalAxisComponent> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+	public static final MapCodec<HorizontalAxisComponent> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			Codec.BOOL.optionalFieldOf("oppose", false).forGetter(HorizontalAxisComponent::oppose)
 	).apply(instance, HorizontalAxisComponent::getInstance));
 

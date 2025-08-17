@@ -35,7 +35,7 @@ public record BlockDefinitionProperties(
 	public static MapCodec<BlockDefinitionProperties> mapCodec(BlockFundamentals.CodecCreationContext context) {
 		return RecordCodecBuilder.mapCodec(instance -> instance.group(
 				CustomizationCodecs.strictOptionalField(
-								Codec.either(KBlockComponent.DIRECT_CODEC, Codec.STRING).listOf(),
+								Codec.either(KBlockComponent.CODEC, Codec.STRING).listOf(),
 								"components",
 								List.of())
 						.forGetter(BlockDefinitionProperties::components),

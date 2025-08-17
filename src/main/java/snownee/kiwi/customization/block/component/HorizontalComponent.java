@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.Iterables;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.Direction;
@@ -24,7 +25,7 @@ public record HorizontalComponent(boolean oppose) implements KBlockComponent {
 	public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 	private static final HorizontalComponent NORMAL = new HorizontalComponent(false);
 	private static final HorizontalComponent OPPOSE = new HorizontalComponent(true);
-	public static final Codec<HorizontalComponent> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+	public static final MapCodec<HorizontalComponent> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			Codec.BOOL.optionalFieldOf("oppose", false).forGetter(HorizontalComponent::oppose)
 	).apply(instance, HorizontalComponent::getInstance));
 
