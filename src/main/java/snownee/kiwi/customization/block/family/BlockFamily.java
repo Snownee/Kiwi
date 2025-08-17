@@ -9,12 +9,14 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Interner;
 import com.google.common.collect.Interners;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -24,7 +26,24 @@ import snownee.kiwi.util.codec.CustomizationCodecs;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class BlockFamily {
-	public static final Codec<BlockFamily> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+	public static final Codec<BlockFamily> CODEC = ResourceLocation.CODEC.flatXmap(
+			$ -> {
+				BlockFamily family = BlockFamilies.get($);
+				if (family == null) {
+					return DataResult.error(() -> "Block family " + $ + " not found");
+				}
+				return DataResult.success(family);
+			},
+			family -> {
+				ResourceLocation id = BlockFamilies.getKey(family);
+				if (id == null) {
+					return DataResult.error(() -> "Block family " + family + " not registered");
+				}
+				return DataResult.success(id);
+			}
+	);
+
+	public static final Codec<BlockFamily> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			Codec.BOOL.optionalFieldOf("strict", false).forGetter($ -> true),
 			ResourceKey.codec(Registries.BLOCK).listOf()
 					.optionalFieldOf("blocks", List.of())
@@ -40,7 +59,7 @@ public class BlockFamily {
 					.optionalFieldOf("stonecutter_from")
 					.forGetter($ -> $.stonecutterSource().map(Holder.Reference::key)),
 			Codec.intRange(1, 64).optionalFieldOf("stonecutter_from_multiplier", 1).forGetter(BlockFamily::stonecutterSourceMultiplier),
-			SwitchAttrs.CODEC.optionalFieldOf("switch", SwitchAttrs.DISABLED).forGetter(BlockFamily::switchAttrs)
+			SwitchAttrs.DIRECT_CODEC.optionalFieldOf("switch", SwitchAttrs.DISABLED).forGetter(BlockFamily::switchAttrs)
 	).apply(instance, BlockFamily::new));
 
 	private final List<Holder.Reference<Block>> blocks;
@@ -69,20 +88,21 @@ public class BlockFamily {
 			}
 			return holder;
 		}).filter(Optional::isPresent).map(Optional::get).toList();
-		this.items = Stream.concat(this.blocks.stream()
-				.map(Holder::value)
-				.map(ItemLike::asItem)
-				.filter(Predicate.not(Items.AIR::equals))
-				.mapToInt(BuiltInRegistries.ITEM::getId)
-				.distinct()
-				.mapToObj(BuiltInRegistries.ITEM::getHolder)
-				.map(Optional::orElseThrow), items.stream().map($ -> {
-			Optional<Holder.Reference<Item>> holder = BuiltInRegistries.ITEM.getHolder($);
-			if (strict) {
-				Preconditions.checkArgument(holder.isPresent(), "Item %s not found", $);
-			}
-			return holder;
-		}).filter(Optional::isPresent).map(Optional::get)).toList();
+		this.items = Stream.concat(
+				this.blocks.stream()
+						.map(Holder::value)
+						.map(ItemLike::asItem)
+						.filter(Predicate.not(Items.AIR::equals))
+						.mapToInt(BuiltInRegistries.ITEM::getId)
+						.distinct()
+						.mapToObj(BuiltInRegistries.ITEM::getHolder)
+						.map(Optional::orElseThrow), items.stream().map($ -> {
+					Optional<Holder.Reference<Item>> holder = BuiltInRegistries.ITEM.getHolder($);
+					if (strict) {
+						Preconditions.checkArgument(holder.isPresent(), "Item %s not found", $);
+					}
+					return holder;
+				}).filter(Optional::isPresent).map(Optional::get)).toList();
 		this.exchangeInputsInViewer = exchangeInputsInViewer.stream().map($ -> {
 			Optional<Holder.Reference<Item>> holder = BuiltInRegistries.ITEM.getHolder($);
 			if (strict) {
@@ -199,7 +219,7 @@ public class BlockFamily {
 	}
 
 	public record SwitchAttrs(boolean enabled, boolean cascading, boolean creativeOnly) {
-		public static final Codec<SwitchAttrs> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+		public static final Codec<SwitchAttrs> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.BOOL.optionalFieldOf("enabled", true).forGetter(SwitchAttrs::enabled),
 				Codec.BOOL.optionalFieldOf("cascading", false).forGetter(SwitchAttrs::cascading),
 				Codec.BOOL.optionalFieldOf("creative_only", false).forGetter(SwitchAttrs::creativeOnly)

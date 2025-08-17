@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiGO;
@@ -33,11 +34,11 @@ public class KBlockComponents extends AbstractModule {
 	@KiwiModule.Name("minecraft:horizontal_axis")
 	public static final KiwiGO<KBlockComponent.Type<HorizontalAxisComponent>> HORIZONTAL_AXIS = register(HorizontalAxisComponent.CODEC);
 	@KiwiModule.Name("minecraft:front_and_top")
-	public static final KiwiGO<KBlockComponent.Type<FrontAndTopComponent>> FRONT_AND_TOP = register(Codec.unit(FrontAndTopComponent.getInstance()));
+	public static final KiwiGO<KBlockComponent.Type<FrontAndTopComponent>> FRONT_AND_TOP = register(MapCodec.unit(FrontAndTopComponent.getInstance()));
 	@KiwiModule.Name("minecraft:moulding")
 	public static final KiwiGO<KBlockComponent.Type<MouldingComponent>> MOULDING = register(MouldingComponent.CODEC);
 	@KiwiModule.Name("minecraft:water_loggable")
-	public static final KiwiGO<KBlockComponent.Type<WaterLoggableComponent>> WATER_LOGGABLE = register(Codec.unit(WaterLoggableComponent.getInstance()));
+	public static final KiwiGO<KBlockComponent.Type<WaterLoggableComponent>> WATER_LOGGABLE = register(MapCodec.unit(WaterLoggableComponent.getInstance()));
 	@KiwiModule.Name("minecraft:consumable")
 	public static final KiwiGO<KBlockComponent.Type<ConsumableComponent>> CONSUMABLE = register(ConsumableComponent.CODEC);
 	@KiwiModule.Name("minecraft:stackable")
@@ -48,8 +49,8 @@ public class KBlockComponents extends AbstractModule {
 	public static final KiwiGO<KBlockComponent.Type<SimplePropertiesComponent>> SIMPLE_PROPERTIES = register(SimplePropertiesComponent.CODEC);
 	private static Map<KBlockComponent.Type<?>, KBlockComponent> SIMPLE_INSTANCES;
 
-	private static <T extends KBlockComponent> KiwiGO<KBlockComponent.Type<T>> register(Codec<T> codec) {
-		return go(() -> new KBlockComponent.Type<>(codec));
+	private static <T extends KBlockComponent> KiwiGO<KBlockComponent.Type<T>> register(MapCodec<T> codec) {
+		return go(() -> new KBlockComponent.Type<>(codec.codec()));
 	}
 
 	public static KBlockComponent getSimpleInstance(KBlockComponent.Type<?> type) {

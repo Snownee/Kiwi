@@ -68,6 +68,8 @@ import net.minecraftforge.resource.PathPackResources;
 import net.minecraftforge.resource.ResourcePackLoader;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.Kiwi;
+import snownee.kiwi.KiwiModule;
+import snownee.kiwi.LoadingContext;
 import snownee.kiwi.customization.block.BlockFundamentals;
 import snownee.kiwi.customization.block.GlassType;
 import snownee.kiwi.customization.block.KBlockSettings;
@@ -76,6 +78,7 @@ import snownee.kiwi.customization.block.behavior.SitManager;
 import snownee.kiwi.customization.block.component.KBlockComponent;
 import snownee.kiwi.customization.block.family.BlockFamilies;
 import snownee.kiwi.customization.block.loader.KBlockTemplate;
+import snownee.kiwi.customization.builder.BuilderRule;
 import snownee.kiwi.customization.builder.BuilderRules;
 import snownee.kiwi.customization.item.ItemFundamentals;
 import snownee.kiwi.customization.item.loader.KCreativeTab;
@@ -204,6 +207,17 @@ public final class CustomizationHooks {
 						CustomizationRegistries.ITEM_TEMPLATE = (Registry<KItemTemplate.Type<?>>) BuiltInRegistries.REGISTRY.get(
 								CustomizationRegistries.ITEM_TEMPLATE_KEY.location());
 						Kiwi.registerRegistry($, KItemTemplate.Type.class);
+					});
+			event.create(
+					new RegistryBuilder<>().setName(CustomizationRegistries.BUILDER_RULE_KEY.location())
+							.disableOverrides()
+							.disableSaving()
+							.hasTags(),
+					$ -> {
+						//noinspection unchecked
+						CustomizationRegistries.BUILDER_RULE = (Registry<BuilderRule.Type<?>>) BuiltInRegistries.REGISTRY.get(
+								CustomizationRegistries.BUILDER_RULE_KEY.location());
+						Kiwi.registerRegistry($, BuilderRule.Type.class);
 					});
 		});
 		modEventBus.addListener((AddPackFindersEvent event) -> {
@@ -437,5 +451,16 @@ public final class CustomizationHooks {
 
 	public static GlassType clearGlassType() {
 		return clearGlassType;
+	}
+
+	@KiwiModule.LoadingCondition(
+			{
+					"block_components",
+					"block_templates",
+					"item_templates",
+					"builder_rules",
+			})
+	public static boolean shouldLoad(LoadingContext ctx) {
+		return isEnabled();
 	}
 }

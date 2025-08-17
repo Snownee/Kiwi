@@ -2,7 +2,7 @@ package snownee.kiwi.customization.block.component;
 
 import java.util.Optional;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.BlockPos;
@@ -29,7 +29,7 @@ public record ConsumableComponent(
 		IntegerProperty property,
 		Optional<FoodProperties> food,
 		Optional<ResourceKey<ResourceLocation>> stat) implements KBlockComponent, LayeredComponent {
-	public static final Codec<ConsumableComponent> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+	public static final MapCodec<ConsumableComponent> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			ExtraCodecs.intRange(0, 1).fieldOf("min").forGetter(ConsumableComponent::minValue),
 			ExtraCodecs.POSITIVE_INT.fieldOf("max").forGetter(ConsumableComponent::maxValue),
 			CustomizationCodecs.FOOD.optionalFieldOf("food").forGetter(ConsumableComponent::food),

@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.BlockPos;
@@ -30,7 +30,7 @@ public record MouldingComponent(Optional<TagKey<Block>> connectTo) implements KB
 	public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 	public static final EnumProperty<StairsShape> SHAPE = BlockStateProperties.STAIRS_SHAPE;
 	private static final MouldingComponent DEFAULT = new MouldingComponent(Optional.empty());
-	public static final Codec<MouldingComponent> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+	public static final MapCodec<MouldingComponent> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			TagKey.hashedCodec(Registries.BLOCK).optionalFieldOf("connect_to").forGetter(MouldingComponent::connectTo)
 	).apply(instance, MouldingComponent::create));
 

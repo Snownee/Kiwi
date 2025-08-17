@@ -57,7 +57,7 @@ public class BlockFamilies {
 	}
 
 	public static void reloadResources(ResourceManager resourceManager, OneTimeLoader.Context context) {
-		Map<ResourceLocation, BlockFamily> families = OneTimeLoader.load(resourceManager, "kiwi/family", BlockFamily.CODEC, context);
+		Map<ResourceLocation, BlockFamily> families = OneTimeLoader.load(resourceManager, "kiwi/family", BlockFamily.DIRECT_CODEC, context);
 		fromResources = families.entrySet()
 				.stream()
 				.map(e -> new KHolder<>(e.getKey(), e.getValue()))
@@ -135,5 +135,15 @@ public class BlockFamilies {
 			return 2;
 		}
 		return 1;
+	}
+
+	@Nullable
+	public static ResourceLocation getKey(BlockFamily family) {
+		for (KHolder<BlockFamily> holder : all()) {
+			if (holder.value() == family) {
+				return holder.key();
+			}
+		}
+		return null;
 	}
 }

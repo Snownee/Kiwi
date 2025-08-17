@@ -1,10 +1,7 @@
 package snownee.kiwi.customization.block.component;
 
-import snownee.kiwi.customization.block.behavior.BlockBehaviorRegistry;
-import snownee.kiwi.customization.block.loader.KBlockComponents;
-import snownee.kiwi.customization.block.KBlockUtils;
-
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.util.ExtraCodecs;
@@ -13,9 +10,12 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import snownee.kiwi.customization.block.KBlockUtils;
+import snownee.kiwi.customization.block.behavior.BlockBehaviorRegistry;
+import snownee.kiwi.customization.block.loader.KBlockComponents;
 
 public record CycleVariantsComponent(IntegerProperty property, boolean rightClickToCycle) implements KBlockComponent, LayeredComponent {
-	public static final Codec<CycleVariantsComponent> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+	public static final MapCodec<CycleVariantsComponent> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(CycleVariantsComponent::maxValue),
 			Codec.BOOL.optionalFieldOf("right_click_to_cycle", true).forGetter(CycleVariantsComponent::rightClickToCycle)
 	).apply(instance, CycleVariantsComponent::create));
