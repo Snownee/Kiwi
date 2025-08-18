@@ -370,11 +370,7 @@ public class Kiwi {
 
 			ResourceLocation rl = new ResourceLocation(modid, name);
 			if (disabledModules.contains(rl)) {
-				if (KiwiConfigManager.modules.containsKey(rl)) { // module is optional
-					continue;
-				} else {
-					throw new RuntimeException("Cannot load mandatory module: " + rl);
-				}
+				continue;
 			}
 			if (KiwiConfigManager.modules.containsKey(rl) && !KiwiConfigManager.modules.get(rl).get()) {
 				continue;
@@ -387,7 +383,7 @@ public class Kiwi {
 			List<String> rules = StringUtils.split(Strings.nullToEmpty(dependencies), ';')
 					.stream()
 					.filter(s -> !Strings.isNullOrEmpty(s))
-					.collect(Collectors.toList());
+					.toList();
 			/* on */
 
 			for (String rule : rules) {
