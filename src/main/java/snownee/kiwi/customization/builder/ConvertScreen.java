@@ -19,7 +19,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -58,6 +59,7 @@ public class ConvertScreen extends Screen {
 	private final ItemStack sourceItem;
 	private ClientTooltipPositioner forcedTooltipPositioner;
 	private final Set<Item> chosenItems = Sets.newIdentityHashSet();
+	private @Nullable AbstractWidget lastFocused;
 
 	private static Vector2i getMousePos() {
 		Minecraft mc = Minecraft.getInstance();
@@ -89,6 +91,7 @@ public class ConvertScreen extends Screen {
 
 	@Override
 	protected void init() {
+		lastFocused = null;
 		layout = new PanelLayout(2);
 		int step = inContainer ? 19 : 21;
 		int xStart = 0;
@@ -101,7 +104,6 @@ public class ConvertScreen extends Screen {
 			accepted.addAll(group.entries());
 		}
 		int itemsPerLine = accepted.size() > 30 ? 11 : 4;
-		Button cursorOn = null;
 		for (CConvertItemPacket.Group group : groups) {
 			for (CConvertItemPacket.Entry entry : group.entries()) {
 				if (!accepted.contains(entry)) {
@@ -135,8 +137,8 @@ public class ConvertScreen extends Screen {
 					tooltip = List.of(itemStack.getHoverName(), Component.literal(steps).withStyle(ChatFormatting.GRAY));
 				}
 				button.setTooltip(MultilineTooltip.create(tooltip));
-				if (cursorOn == null && itemStack.is(sourceItem.getItem())) {
-					cursorOn = button;
+				if (lastFocused == null && itemStack.is(sourceItem.getItem())) {
+					lastFocused = button;
 				}
 				layout.addWidget(button);
 				curX += step;
@@ -168,14 +170,19 @@ public class ConvertScreen extends Screen {
 			anchor = new Vector2f(0.5f, 1f);
 		}
 		layout.bind(this, new Vector2i(x, y), anchor);
-		if (cursorOn != null) {
-			Window window = getMinecraft().getWindow();
-			double scale = window.getGuiScale();
-			GLFW.glfwSetCursorPos(window.getWindow(), (cursorOn.getX() + 15) * scale, (cursorOn.getY() + 15) * scale);
+		if (lastFocused != null) {
+			moveMouseOn(lastFocused);
 		}
 		Rect2i bounds = layout.bounds();
 		ScreenRectangle rect = new ScreenRectangle(bounds.getX() - 2, bounds.getY() - 2, 10000, 10000);
 		forcedTooltipPositioner = new BelowOrAboveWidgetTooltipPositioner(rect);
+	}
+
+	private void moveMouseOn(AbstractWidget button) {
+		setFocused(button);
+		Window window = Objects.requireNonNull(getMinecraft().getWindow());
+		double scale = window.getGuiScale();
+		GLFW.glfwSetCursorPos(window.getWindow(), (button.getX() + 15) * scale, (button.getY() + 15) * scale);
 	}
 
 	private void longPress(ItemButton button, CConvertItemPacket.Entry entry) {
@@ -247,6 +254,14 @@ public class ConvertScreen extends Screen {
 	}
 
 	@Override
+	public void setFocused(@Nullable GuiEventListener listener) {
+		if (listener instanceof ItemButton button) {
+			lastFocused = button;
+		}
+		super.setFocused(listener);
+	}
+
+	@Override
 	public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
 		if (super.mouseClicked(pMouseX, pMouseY, pButton)) {
 			return true;
@@ -260,6 +275,33 @@ public class ConvertScreen extends Screen {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+		if (scrollY == 0) {
+			return false;
+		}
+		int index = -1;
+		List<AbstractWidget> widgets = layout.widgets();
+		if (widgets.isEmpty()) {
+			return false;
+		}
+		if (lastFocused != null) {
+			index = widgets.indexOf(lastFocused);
+		}
+		if (index == -1 && scrollY > 0) {
+			index = widgets.size();
+		}
+		index += scrollY > 0 ? -1 : 1;
+		if (index < 0) {
+			index = widgets.size() - 1;
+		} else if (index >= widgets.size()) {
+			index = 0;
+		}
+		lastFocused = widgets.get(index);
+		moveMouseOn(lastFocused);
+		return true;
 	}
 
 	@Override

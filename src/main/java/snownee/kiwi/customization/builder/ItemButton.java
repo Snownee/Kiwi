@@ -4,8 +4,13 @@ import java.util.function.Consumer;
 
 import org.jetbrains.annotations.Nullable;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.navigation.CommonInputs;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 
@@ -16,6 +21,7 @@ public class ItemButton extends Button {
 	private float pressTime = -1;
 	public @Nullable Consumer<ItemButton> onPress;
 	public @Nullable Consumer<ItemButton> onRelease;
+	public @Nullable Tooltip rawTooltip; // we dont want the delay
 
 	protected ItemButton(Builder builder) {
 		super(builder);
@@ -25,6 +31,16 @@ public class ItemButton extends Button {
 
 	public static Builder builder(ItemStack itemStack, boolean inContainer, Button.OnPress pOnPress) {
 		return new Builder(itemStack, inContainer, pOnPress);
+	}
+
+	@Override
+	public void setTooltip(@Nullable Tooltip tooltip) {
+		rawTooltip = tooltip;
+	}
+
+	@Override
+	public @Nullable Tooltip getTooltip() {
+		return rawTooltip;
 	}
 
 	public ItemStack item() {
@@ -41,6 +57,12 @@ public class ItemButton extends Button {
 
 	@Override
 	protected void renderWidget(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
+		if (rawTooltip != null && isHovered() || isFocused() && Minecraft.getInstance().getLastInputType().isKeyboard()) {
+			Screen screen = Minecraft.getInstance().screen;
+			if (screen != null) {
+				screen.setTooltipForNextRenderPass(rawTooltip, DefaultTooltipPositioner.INSTANCE, true);
+			}
+		}
 		if (pressTime >= 0) {
 			int i = (int) pressTime;
 			pressTime += pPartialTick;
@@ -68,13 +90,29 @@ public class ItemButton extends Button {
 	}
 
 	@Override
-	public void onClick(double mouseX, double mouseY) {
-		super.onClick(mouseX, mouseY);
+	public void onPress() {
+		super.onPress();
 		pressTime = 0;
 	}
 
 	@Override
 	public void onRelease(double mouseX, double mouseY) {
+		onRelease();
+	}
+
+	@Override
+	public boolean keyReleased(int button, int p_94751_, int p_94752_) {
+		if (!this.active || !this.visible) {
+			return false;
+		}
+		if (CommonInputs.selected(button)) {
+			onRelease();
+			return true;
+		}
+		return false;
+	}
+
+	public void onRelease() {
 		if (onRelease != null && pressTime >= 0) {
 			onRelease.accept(this);
 		}
