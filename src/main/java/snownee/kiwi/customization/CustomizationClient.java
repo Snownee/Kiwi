@@ -40,10 +40,8 @@ import snownee.kiwi.Kiwi;
 import snownee.kiwi.RenderLayerEnum;
 import snownee.kiwi.customization.block.GlassType;
 import snownee.kiwi.customization.block.behavior.SitManager;
-import snownee.kiwi.customization.block.family.BlockFamilies;
 import snownee.kiwi.customization.block.loader.BlockDefinitionProperties;
 import snownee.kiwi.customization.block.loader.KBlockDefinition;
-import snownee.kiwi.customization.builder.BuilderRules;
 import snownee.kiwi.customization.builder.BuildersButton;
 import snownee.kiwi.customization.builder.ConvertScreen;
 import snownee.kiwi.customization.command.ExportBlocksCommand;
@@ -65,9 +63,6 @@ public final class CustomizationClient {
 	public static void init(IEventBus modEventBus) {
 		var forgeEventBus = NeoForge.EVENT_BUS;
 		modEventBus.addListener((RegisterKeyMappingsEvent event) -> {
-			if (!CustomizationHooks.kswitch && BlockFamilies.all().isEmpty() && BuilderRules.all().isEmpty()) {
-				return;
-			}
 			buildersButtonKey = new SmartKey.Builder("key.kiwi.builders_button", KeyMapping.CATEGORY_GAMEPLAY)
 					.key(InputConstants.getKey("key.mouse.4"))
 					.onLongPress(BuildersButton::onLongPress)
