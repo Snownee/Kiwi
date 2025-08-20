@@ -36,10 +36,8 @@ import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.customization.block.GlassType;
 import snownee.kiwi.customization.block.behavior.SitManager;
-import snownee.kiwi.customization.block.family.BlockFamilies;
 import snownee.kiwi.customization.block.loader.BlockDefinitionProperties;
 import snownee.kiwi.customization.block.loader.KBlockDefinition;
-import snownee.kiwi.customization.builder.BuilderRules;
 import snownee.kiwi.customization.builder.BuildersButton;
 import snownee.kiwi.customization.builder.ConvertScreen;
 import snownee.kiwi.customization.command.ExportBlocksCommand;
@@ -100,15 +98,13 @@ public final class CustomizationClient {
 			Map<ResourceLocation, KItemDefinition> items,
 			Map<ResourceLocation, KBlockDefinition> blocks,
 			ClientProxy.Context context) {
-		if (CustomizationHooks.kswitch || !BlockFamilies.isEmpty() || !BuilderRules.all().isEmpty()) {
-			buildersButtonKey = new SmartKey.Builder("key.kiwi.builders_button", KeyMapping.CATEGORY_GAMEPLAY)
-					.key(InputConstants.getKey("key.mouse.4"))
-					.onLongPress(BuildersButton::onLongPress)
-					.onShortPress(BuildersButton::onShortPress)
-					.build();
-			KeyBindingHelper.registerKeyBinding(buildersButtonKey);
-			ClientProxy.afterRegisterSmartKey(buildersButtonKey);
-		}
+		buildersButtonKey = new SmartKey.Builder("key.kiwi.builders_button", KeyMapping.CATEGORY_GAMEPLAY)
+				.key(InputConstants.getKey("key.mouse.4"))
+				.onLongPress(BuildersButton::onLongPress)
+				.onShortPress(BuildersButton::onShortPress)
+				.build();
+		KeyBindingHelper.registerKeyBinding(buildersButtonKey);
+		ClientProxy.afterRegisterSmartKey(buildersButtonKey);
 		Map<Block, BlockColor> blockColors = Maps.newHashMap();
 		Map<Item, ItemColor> itemColors = Maps.newHashMap();
 		List<Pair<Block, BlockColor>> blocksToAdd = Lists.newArrayList();
