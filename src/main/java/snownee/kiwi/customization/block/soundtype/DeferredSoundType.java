@@ -18,11 +18,11 @@ public class DeferredSoundType extends SoundType {
 	public static final MapCodec<DeferredSoundType> DIRECT_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			Codec.FLOAT.optionalFieldOf("volume", 1.0f).forGetter(SoundType::getVolume),
 			Codec.FLOAT.optionalFieldOf("pitch", 1.0f).forGetter(SoundType::getPitch),
-			DeferredHolder.codec(Registries.SOUND_EVENT).optionalFieldOf("break_sound", EMPTY_SOUND_EVENT).forGetter(it -> it.breakSound),
-			DeferredHolder.codec(Registries.SOUND_EVENT).optionalFieldOf("step_sound", EMPTY_SOUND_EVENT).forGetter(it -> it.stepSound),
-			DeferredHolder.codec(Registries.SOUND_EVENT).optionalFieldOf("place_sound", EMPTY_SOUND_EVENT).forGetter(it -> it.placeSound),
-			DeferredHolder.codec(Registries.SOUND_EVENT).optionalFieldOf("hit_sound", EMPTY_SOUND_EVENT).forGetter(it -> it.hitSound),
-			DeferredHolder.codec(Registries.SOUND_EVENT).optionalFieldOf("fall_sound", EMPTY_SOUND_EVENT).forGetter(it -> it.fallSound)
+			DeferredHolder.codec(Registries.SOUND_EVENT).optionalFieldOf("break", EMPTY_SOUND_EVENT).forGetter(it -> it.breakSound),
+			DeferredHolder.codec(Registries.SOUND_EVENT).optionalFieldOf("step", EMPTY_SOUND_EVENT).forGetter(it -> it.stepSound),
+			DeferredHolder.codec(Registries.SOUND_EVENT).optionalFieldOf("place", EMPTY_SOUND_EVENT).forGetter(it -> it.placeSound),
+			DeferredHolder.codec(Registries.SOUND_EVENT).optionalFieldOf("hit", EMPTY_SOUND_EVENT).forGetter(it -> it.hitSound),
+			DeferredHolder.codec(Registries.SOUND_EVENT).optionalFieldOf("fall", EMPTY_SOUND_EVENT).forGetter(it -> it.fallSound)
 	).apply(instance, DeferredSoundType::new));
 
 	private final DeferredHolder<SoundEvent, SoundEvent> breakSound;
