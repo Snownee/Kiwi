@@ -67,6 +67,10 @@ import snownee.kiwi.customization.block.behavior.SitManager;
 import snownee.kiwi.customization.block.component.KBlockComponent;
 import snownee.kiwi.customization.block.family.BlockFamilies;
 import snownee.kiwi.customization.block.loader.KBlockTemplate;
+import snownee.kiwi.customization.block.soundtype.DeferredSoundType;
+import snownee.kiwi.customization.block.soundtype.SoundTypes;
+import snownee.kiwi.customization.block.tier.KiwiTiers;
+import snownee.kiwi.customization.block.tier.SimpleTier;
 import snownee.kiwi.customization.builder.BuilderRule;
 import snownee.kiwi.customization.builder.BuilderRules;
 import snownee.kiwi.customization.item.ItemFundamentals;
@@ -220,6 +224,13 @@ public final class CustomizationHooks {
 		ResourceManager resourceManager = collectKiwiPacks();
 		OneTimeLoader.Context context = new OneTimeLoader.Context();
 		Map<String, CustomizationMetadata> metadataMap = CustomizationMetadata.loadMap(resourceManager, context);
+
+		SoundTypes.refreshWithValues(OneTimeLoader.load(
+				resourceManager,
+				"kiwi/sound_type",
+				DeferredSoundType.DIRECT_CODEC.codec(),
+				context));
+
 		BlockFundamentals blockFundamentals = BlockFundamentals.reload(resourceManager, context, true);
 		clearGlassType = blockFundamentals.glassTypes().get(ResourceLocation.withDefaultNamespace("clear"));
 		Preconditions.checkNotNull(clearGlassType, "Missing 'clear' glass type");
@@ -242,6 +253,14 @@ public final class CustomizationHooks {
 						Kiwi.LOGGER.error("Failed to create block %s".formatted(id), e);
 					}
 				});
+
+
+		KiwiTiers.refreshWithValues(OneTimeLoader.load(
+				resourceManager,
+				"kiwi/tier",
+				SimpleTier.DIRECT_CODEC.codec(),
+				context));
+
 		ItemFundamentals itemFundamentals = ItemFundamentals.reload(resourceManager, context, true);
 		for (ResourceLocation blockId : blockIds) {
 			if (!itemFundamentals.items().containsKey(blockId)) {
