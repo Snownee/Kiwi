@@ -52,20 +52,14 @@ public class ItemCodecs {
 
 	public static final MapCodec<Item> ITEM = simpleCodec(SIMPLE_ITEM_FACTORY);
 
-	public static final MapCodec<AxeItem> AXE_ITEM = tieredItemCodec(AxeItem::new);
-	public static final MapCodec<HoeItem> HOE_ITEM = tieredItemCodec(HoeItem::new);
-	public static final MapCodec<PickaxeItem> PICKAXE_ITEM = tieredItemCodec(PickaxeItem::new);
-	public static final MapCodec<ShovelItem> SHOVEL_ITEM = tieredItemCodec(ShovelItem::new);
-	public static final MapCodec<SwordItem> SWORD_ITEM = tieredItemCodec(SwordItem::new);
-
 	static {
 		register(ResourceLocation.withDefaultNamespace("item"), ITEM);
 		register(ResourceLocation.withDefaultNamespace("blocks"), MultipleBlockItem.CODEC);
-		register(ResourceLocation.withDefaultNamespace("axe"), AXE_ITEM);
-		register(ResourceLocation.withDefaultNamespace("hoe"), HOE_ITEM);
-		register(ResourceLocation.withDefaultNamespace("pickaxe"), PICKAXE_ITEM);
-		register(ResourceLocation.withDefaultNamespace("shovel"), SHOVEL_ITEM);
-		register(ResourceLocation.withDefaultNamespace("sword"), SWORD_ITEM);
+		register(ResourceLocation.withDefaultNamespace("axe"), tieredItemCodec(AxeItem::new));
+		register(ResourceLocation.withDefaultNamespace("hoe"), tieredItemCodec(HoeItem::new));
+		register(ResourceLocation.withDefaultNamespace("pickaxe"), tieredItemCodec(PickaxeItem::new));
+		register(ResourceLocation.withDefaultNamespace("shovel"), tieredItemCodec(ShovelItem::new));
+		register(ResourceLocation.withDefaultNamespace("sword"), tieredItemCodec(SwordItem::new));
 	}
 
 	public static void register(ResourceLocation key, MapCodec<? extends Item> codec) {
