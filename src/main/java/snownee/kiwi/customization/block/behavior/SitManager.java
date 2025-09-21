@@ -36,7 +36,6 @@ import snownee.kiwi.customization.block.component.KBlockComponent;
 
 public class SitManager {
 	public static final Component ENTITY_NAME = Component.literal("Seat from Kiwi");
-	public static final double VERTICAL_OFFSET = 0.23;
 
 	public static void tick(Display.BlockDisplay display) {
 		if (display.tickCount < 7) {
@@ -45,7 +44,7 @@ public class SitManager {
 		if (!display.isVehicle()) {
 			display.discard();
 		}
-		BlockPos pos = BlockPos.containing(display.getX(), display.getY() + VERTICAL_OFFSET, display.getZ());
+		BlockPos pos = BlockPos.containing(display.getX(), display.getY(), display.getZ());
 		BlockState blockState = display.level().getBlockState(pos);
 		if (!blockState.is(display.getBlockState().getBlock())) {
 			display.discard();
@@ -111,7 +110,9 @@ public class SitManager {
 					seatPos = hit.getLocation();
 				}
 			}
-			if (facing != null) {
+			if (facing == null) {
+				display.setYRot(player.getYRot());
+			} else {
 				float yRot = facing.toYRot();
 				display.setYRot(yRot);
 				display.setNoGravity(true); //hacky way to tell the client that this block has facing
@@ -120,7 +121,7 @@ public class SitManager {
 				seatPos = Vec3.atCenterOf(pos);
 			}
 			double clampedY = Mth.clamp(seatPos.y, pos.getY(), pos.getY() + 0.999);
-			display.setPos(seatPos.x, clampedY - VERTICAL_OFFSET, seatPos.z);
+			display.setPos(seatPos.x, clampedY, seatPos.z);
 			if (level.addFreshEntity(display)) {
 				player.startRiding(display, true);
 			}
@@ -197,7 +198,7 @@ public class SitManager {
 		} else {
 			direction = passenger.getDirection();
 		}
-		BlockPos pos = BlockPos.containing(display.getX(), display.getY() + VERTICAL_OFFSET, display.getZ());
+		BlockPos pos = BlockPos.containing(display.getX(), display.getY(), display.getZ());
 		Optional<Vec3> vec3 = BedBlock.findStandUpPosition(
 				passenger.getType(),
 				passenger.level(),
