@@ -288,10 +288,13 @@ public final class KUtil {
 	}
 
 	public static MutableComponent clickToCopy(MutableComponent component) {
-		String str = component.getString();
-		return component.withStyle(s -> s.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, str))
-				.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click")))
-				.withInsertion(str));
+		return clickToCopy(component, Component.translatable("chat.copy.click"), component.getString());
+	}
+
+	public static MutableComponent clickToCopy(MutableComponent component, Component hoverText, String toCopy) {
+		return component.withStyle(s -> s.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, toCopy))
+				.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText))
+				.withInsertion(toCopy));
 	}
 
 	public static <T> T loadYaml(String yaml, Class<? super T> type) {
