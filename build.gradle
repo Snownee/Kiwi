@@ -242,9 +242,6 @@ dependencies {
 
     compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
     runtimeOnly "dev.emi:emi-neoforge:${emi_version}"
-
-    implementation "curse.maven:placebo-283644:6446766"
-    implementation "curse.maven:fastsuite-475117:6454401"
 }
 
 processResources {

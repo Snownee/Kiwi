@@ -15,6 +15,7 @@ import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BedBlock;
@@ -52,6 +53,9 @@ public class SitManager {
 	}
 
 	public static boolean sit(Player player, BlockHitResult hitResult) {
+		if (KSitCommonConfig.requireEmptyHand && (!player.getMainHandItem().isEmpty() || !player.getOffhandItem().isEmpty())) {
+			return false;
+		}
 		if (hitResult.getDirection() == Direction.DOWN || player.isSecondaryUseActive()) {
 			return false;
 		}
@@ -70,7 +74,8 @@ public class SitManager {
 			if (player instanceof ServerPlayer serverPlayer && serverPlayer.bedInRange(pos, direction)) {
 				return false;
 			}
-		} else if (player.getEyePosition().distanceToSqr(hitResult.getLocation()) > 12) {
+		} else if (player.getEyePosition().distanceToSqr(hitResult.getLocation()) >
+				Mth.square(player.getAttributeValue(Attributes.BLOCK_INTERACTION_RANGE) * KSitCommonConfig.sitActionReachDistanceRatio)) {
 			return false;
 		}
 		if (!player.getMainHandItem().isEmpty() && player.getMainHandItem().is(block.asItem())) {
