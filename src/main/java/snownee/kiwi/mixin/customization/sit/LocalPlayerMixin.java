@@ -26,4 +26,12 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer {
 			SitManager.clampRotation(this, vehicle);
 		}
 	}
+
+	@Inject(method = "moveTowardsClosestSpace", at = @At("HEAD"), cancellable = true)
+	private void kiwi$moveTowardsClosestSpace(double p_108705_, double p_108706_, CallbackInfo ci) {
+		Entity vehicle = getVehicle();
+		if (SitManager.isSeatEntity(vehicle)) {
+			ci.cancel();
+		}
+	}
 }
