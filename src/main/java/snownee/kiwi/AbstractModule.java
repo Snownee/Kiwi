@@ -1,9 +1,12 @@
 package snownee.kiwi;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
+import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.types.Type;
@@ -35,15 +38,22 @@ import snownee.kiwi.loader.event.PostInitEvent;
  * @author Snownee
  */
 public abstract class AbstractModule {
-	protected final Map<ResourceKey<? extends Registry<?>>, BiConsumer<KiwiModuleContainer, KiwiGOHolder<?>>> decorators = Maps.newHashMap();
-	public ResourceLocation uid;
+	private static final StackWalker STACK_WALKER = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
+	protected final Map<ResourceKey<? extends Registry<?>>, BiConsumer<KiwiModuleContainer, KiwiGO<?>>> decorators = Maps.newIdentityHashMap();
+	public @Nullable ResourceLocation uid;
 
 	protected static <T> KiwiGO<T> go(Supplier<? extends T> factory) {
+		//noinspection unchecked
 		return new KiwiGO<>((Supplier<T>) factory);
 	}
 
 	protected static <T> KiwiGO<T> go(Supplier<? extends T> factory, ResourceKey<? extends Registry<?>> registryKey) {
+		//noinspection unchecked
 		return new KiwiGO.RegistrySpecified<>((Supplier<T>) factory, registryKey);
+	}
+
+	protected static <T> KiwiGO<T> ref(ResourceKey<? extends Registry<?>> registryKey) {
+		return new KiwiGO.Ref<>(registryKey);
 	}
 
 	/// helper methods:
@@ -99,6 +109,44 @@ public abstract class AbstractModule {
 		return TagKey.create(registryKey, ResourceLocation.fromNamespaceAndPath(namespace, path));
 	}
 
+	public static TagKey<Item> itemTag(String id) {
+		return tag(Registries.ITEM, id);
+	}
+
+	public static TagKey<EntityType<?>> entityTag(String id) {
+		return tag(Registries.ENTITY_TYPE, id);
+	}
+
+	public static TagKey<Block> blockTag(String id) {
+		return tag(Registries.BLOCK, id);
+	}
+
+	public static TagKey<Fluid> fluidTag(String id) {
+		return tag(Registries.FLUID, id);
+	}
+
+	public static <T> TagKey<T> tag(ResourceKey<? extends Registry<T>> registryKey, String id) {
+		ResourceLocation location;
+		if (id.contains(":")) {
+			location = ResourceLocation.parse(id);
+		} else {
+			Class<?> callerClass = STACK_WALKER.walk(stream -> stream
+					.map(StackWalker.StackFrame::getDeclaringClass)
+					.filter(cls -> cls != AbstractModule.class)
+					.findFirst()
+			).orElse(null);
+			if (callerClass == null) {
+				throw new IllegalStateException("No caller class found");
+			}
+			KiwiModule annotation = callerClass.getDeclaredAnnotation(KiwiModule.class);
+			if (annotation == null || annotation.modId().isEmpty()) {
+				throw new IllegalStateException("No KiwiModule modId found on " + callerClass.getName());
+			}
+			location = ResourceLocation.fromNamespaceAndPath(annotation.modId(), id);
+		}
+		return TagKey.create(registryKey, location);
+	}
+
 	public void addRegistries() {
 	}
 
@@ -115,10 +163,10 @@ public abstract class AbstractModule {
 	}
 
 	public ResourceLocation id(String path) {
-		return ResourceLocation.fromNamespaceAndPath(uid.getNamespace(), path);
+		return ResourceLocation.fromNamespaceAndPath(Objects.requireNonNull(uid).getNamespace(), path);
 	}
 
 	public KiwiModuleContainer container() {
-		return KiwiModules.get(uid);
+		return KiwiModules.get(Objects.requireNonNull(uid));
 	}
 }

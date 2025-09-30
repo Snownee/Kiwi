@@ -1,0 +1,12 @@
+registry_order:
+  block:
+  - hologram_planet
+  - hologram_dna
+  - hologram_pictures
+  - hologram_message
+  - hologram_xekr_logo
+  item:
+  - black_roof_small_ridge_end
+  - black_roof_small_flat_end
+  - black_roof_ridge_end
+  - black_roof_deco_oblique

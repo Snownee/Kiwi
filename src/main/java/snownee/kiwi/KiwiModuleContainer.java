@@ -40,59 +40,59 @@ import snownee.kiwi.util.KUtil;
 
 public final class KiwiModuleContainer {
 	public static final class RegistryEntryStore {
-		final Multimap<ResourceLocation, KiwiGOHolder<?>> registries = ListMultimapBuilder.linkedHashKeys().linkedListValues().build();
+		final Multimap<ResourceLocation, KiwiGO<?>> registries = ListMultimapBuilder.linkedHashKeys().linkedListValues().build();
 
-		<T> void put(KiwiGOHolder<T> entry) {
-			registries.put(entry.key.registry(), entry);
+		<T> void put(KiwiGO<T> entry) {
+			registries.put(entry.resourceKey().registry(), entry);
 		}
 
 		@SuppressWarnings("unchecked")
-		<T> Collection<KiwiGOHolder<T>> get(ResourceKey<Registry<T>> registry) {
-			return (Collection<KiwiGOHolder<T>>) (Object) registries.get(registry.location());
+		<T> Collection<KiwiGO<T>> get(ResourceKey<Registry<T>> registry) {
+			return (Collection<KiwiGO<T>>) (Object) registries.get(registry.location());
 		}
 	}
 
 	public final AbstractModule module;
 	public final ModContext context;
-	public GroupSetting groupSetting;
+	public @Nullable GroupSetting groupSetting;
 	final RegistryEntryStore registries = new RegistryEntryStore();
 	Map<Block, Item.Properties> blockItemBuilders = Maps.newHashMap();
 	Set<Object> noCategories = Sets.newHashSet();
 	Set<Block> noItems = Sets.newHashSet();
 
-	public KiwiModuleContainer(ResourceLocation rl, AbstractModule module, ModContext context) {
+	public KiwiModuleContainer(ResourceLocation id, AbstractModule module, ModContext context) {
 		this.module = module;
 		this.context = context;
-		module.uid = rl;
+		module.uid = id;
 	}
 
-	public <T> KiwiGOHolder<T> register(T object, ResourceKey<T> key, @Nullable Field field) {
-		KiwiGOHolder<T> entry = new KiwiGOHolder<>(object, key, field);
-		registries.put(entry);
-		if (field != null) {
-			KiwiModule.Category group = field.getAnnotation(KiwiModule.Category.class);
+	public <T> void register(KiwiGO<T> go) {
+		registries.put(go);
+		if (go.field != null) {
+			KiwiModule.Category group = go.field.getAnnotation(KiwiModule.Category.class);
 			if (group != null) {
-				entry.groupSetting = GroupSetting.of(group, groupSetting);
+				go.groupSetting = GroupSetting.of(group, groupSetting);
 			}
 		}
-		return entry;
 	}
 
-	public void loadGameObjects(RegistryLookup registryLookup) {
+	public void loadGameObjects() {
 		context.setActiveContainer();
 
-		boolean useOwnGroup = groupSetting == null;
-		if (useOwnGroup) {
+		final boolean useOwnGroup;
+		if (groupSetting == null) {
 			KiwiModule.Category group = module.getClass().getDeclaredAnnotation(KiwiModule.Category.class);
-			if (group != null) {
-				if (group.value().length > 0) {
-					useOwnGroup = false;
-					groupSetting = GroupSetting.of(group, null);
-				}
+			if (group != null && group.value().length > 0) {
+				useOwnGroup = false;
+				groupSetting = GroupSetting.of(group, null);
+			} else {
+				useOwnGroup = true;
 			}
+		} else {
+			useOwnGroup = false;
 		}
 
-		String modid = module.uid.getNamespace();
+		String modId = Objects.requireNonNull(module.uid).getNamespace();
 		Item.Properties tmpBuilder = null;
 		Field tmpBuilderField = null;
 		for (Field field : module.getClass().getFields()) {
@@ -108,13 +108,13 @@ public final class KiwiModuleContainer {
 			ResourceLocation id;
 			KiwiModule.Name nameAnnotation = field.getAnnotation(KiwiModule.Name.class);
 			if (nameAnnotation != null) {
-				id = KUtil.RL(nameAnnotation.value(), modid);
+				id = KUtil.RL(nameAnnotation.value(), modId);
 			} else {
-				id = KUtil.RL(field.getName().toLowerCase(Locale.ENGLISH), modid);
+				id = KUtil.RL(field.getName().toLowerCase(Locale.ENGLISH), modId);
 			}
 			Objects.requireNonNull(id);
 
-			if (field.getType() == module.getClass() && "instance".equals(id.getPath()) && id.getNamespace().equals(modid)) {
+			if (field.getType() == module.getClass() && "instance".equals(id.getPath()) && id.getNamespace().equals(modId)) {
 				try {
 					field.set(null, module);
 				} catch (IllegalArgumentException | IllegalAccessException e) {
@@ -138,56 +138,56 @@ public final class KiwiModuleContainer {
 				continue;
 			}
 
-			ResourceKey<? extends Registry<?>> registryKey;
-			//noinspection rawtypes
-			ResourceKey resourceKey;
-			if (o instanceof KiwiGO<?> kiwiGO) {
-				o = kiwiGO.getOrCreate();
-				registryKey = kiwiGO.findRegistry();
+			if (!(o instanceof KiwiGO<?> go)) {
+				continue;
+			}
+			try {
+				go.field = field;
+				boolean isRef = go instanceof KiwiGO.Ref;
+				if (!isRef) {
+					o = go.getOrCreate();
+				}
+				ResourceKey<? extends Registry<?>> registryKey = go.findRegistry();
 				//noinspection unchecked,rawtypes
-				resourceKey = ResourceKey.create((ResourceKey) registryKey, id);
+				ResourceKey resourceKey = ResourceKey.create((ResourceKey) registryKey, id);
 				//noinspection unchecked
-				kiwiGO.setKey(resourceKey);
-			} else {
-				registryKey = registryLookup.findRegistry(o);
-				if (registryKey == null) {
-					tmpBuilder = null;
-					tmpBuilderField = null;
+				go.setKey(resourceKey);
+				if (isRef) {
 					continue;
 				}
-				//noinspection unchecked,rawtypes
-				resourceKey = ResourceKey.create((ResourceKey) registryKey, id);
-			}
 
-			if (o instanceof Block) {
-				if (field.getAnnotation(KiwiModule.NoItem.class) != null) {
-					noItems.add((Block) o);
-				}
-				checkNoGroup(field, o);
-				if (tmpBuilder != null) {
-					blockItemBuilders.put((Block) o, tmpBuilder);
-					try {
-						tmpBuilderField.set(module, null);
-					} catch (Exception e) {
-						Kiwi.LOGGER.error("Kiwi failed to clean used item builder: %s".formatted(tmpBuilderField), e);
+				if (o instanceof Block) {
+					if (field.getAnnotation(KiwiModule.NoItem.class) != null) {
+						noItems.add((Block) o);
 					}
+					checkNoGroup(field, o);
+					if (tmpBuilder != null) {
+						blockItemBuilders.put((Block) o, tmpBuilder);
+						try {
+							tmpBuilderField.set(module, null);
+						} catch (Exception e) {
+							Kiwi.LOGGER.error("Mod %s failed to clean used item builder: %s".formatted(modId, go), e);
+						}
+					}
+				} else if (o instanceof Item) {
+					checkNoGroup(field, o);
+				} else if (o instanceof CreativeModeTab && useOwnGroup && groupSetting == null) {
+					groupSetting = new GroupSetting(new String[]{id.toString()}, null);
 				}
-			} else if (o instanceof Item) {
-				checkNoGroup(field, o);
-			} else if (useOwnGroup && groupSetting == null && o instanceof CreativeModeTab) {
-				groupSetting = new GroupSetting(new String[]{id.toString()}, new String[0]);
-			}
-			//noinspection unchecked
-			KiwiGOHolder<?> entry = register(o, resourceKey, field);
-			if (Registries.MOB_EFFECT == registryKey) {
-				BiConsumer<KiwiModuleContainer, KiwiGOHolder<?>> decorator = module.decorators.getOrDefault(registryKey, (a, b) -> {
-				});
-				decorator.accept(this, entry);
-				entry.register();
-			}
+				register(go);
+				if (Registries.MOB_EFFECT == registryKey) {
+					BiConsumer<KiwiModuleContainer, KiwiGO<?>> decorator = module.decorators.getOrDefault(
+							registryKey, (a, b) -> {
+							});
+					decorator.accept(this, go);
+					go.register();
+				}
 
-			tmpBuilder = null;
-			tmpBuilderField = null;
+				tmpBuilder = null;
+				tmpBuilderField = null;
+			} catch (Throwable e) {
+				throw new IllegalStateException("Mod %s failed to register game object: %s".formatted(modId, go), e);
+			}
 		}
 	}
 
@@ -203,28 +203,30 @@ public final class KiwiModuleContainer {
 			return;
 		}
 		context.setActiveContainer();
-		Collection<KiwiGOHolder<?>> entries = registries.registries.get(registryKey.location());
-		BiConsumer<KiwiModuleContainer, KiwiGOHolder<?>> decorator = module.decorators.getOrDefault(registryKey, (a, b) -> {
-		});
+		Collection<KiwiGO<?>> entries = registries.registries.get(registryKey.location());
+		BiConsumer<KiwiModuleContainer, KiwiGO<?>> decorator = module.decorators.getOrDefault(
+				registryKey, (a, b) -> {
+				});
 		if (Registries.ITEM == registryKey) {
 			registries.get(Registries.BLOCK).forEach(e -> {
-				if (noItems.contains(e.value)) {
+				if (noItems.contains(e.get())) {
 					return;
 				}
-				Item.Properties builder = blockItemBuilders.get(e.value);
+				Item.Properties builder = blockItemBuilders.get(e.get());
 				if (builder == null) {
 					builder = new Item.Properties();
 				}
 				BlockItem item;
-				if (e.value instanceof IKiwiBlock kiwiBlock) {
+				if (e.get() instanceof IKiwiBlock kiwiBlock) {
 					item = kiwiBlock.createItem(builder);
 				} else {
-					item = new ModBlockItem(e.value, builder);
+					item = new ModBlockItem(e.get(), builder);
 				}
-				if (noCategories.contains(e.value)) {
+				if (noCategories.contains(e.get())) {
 					noCategories.add(item);
 				}
-				KiwiGOHolder<Item> itemEntry = new KiwiGOHolder<>(item, ResourceKey.create(Registries.ITEM, e.key.location()), null);
+				KiwiGO<Item> itemEntry = new KiwiGO.Direct<>(item);
+				itemEntry.setKey(ResourceKey.create(Registries.ITEM, e.key()));
 				itemEntry.groupSetting = e.groupSetting;
 				entries.add(itemEntry);
 			});
@@ -235,7 +237,7 @@ public final class KiwiModuleContainer {
 				groupSettings.add(groupSetting);
 			}
 			entries.forEach(e -> {
-				Item item = (Item) e.value;
+				Item item = (Item) e.get();
 				if (noCategories.contains(item)) {
 					prevSetting.setValue(groupSetting);
 					return;
@@ -268,7 +270,7 @@ public final class KiwiModuleContainer {
 			final RenderType solid = RenderType.solid();
 			Map<Class<?>, RenderType> cache = Maps.newHashMap();
 			entries.forEach(e -> {
-				Block block = (Block) e.value;
+				Block block = (Block) e.get();
 				if (e.field != null) {
 					KiwiModule.RenderLayer layer = e.field.getAnnotation(KiwiModule.RenderLayer.class);
 					if (layer != null) {
@@ -280,17 +282,18 @@ public final class KiwiModuleContainer {
 					}
 				}
 				Class<?> klass = block.getClass();
-				RenderType type = cache.computeIfAbsent(klass, k -> {
-					KiwiModule.RenderLayer layer;
-					while (k != Block.class) {
-						layer = k.getDeclaredAnnotation(KiwiModule.RenderLayer.class);
-						if (layer != null) {
-							return (RenderType) layer.value().value;
-						}
-						k = k.getSuperclass();
-					}
-					return solid;
-				});
+				RenderType type = cache.computeIfAbsent(
+						klass, k -> {
+							KiwiModule.RenderLayer layer;
+							while (k != Block.class) {
+								layer = k.getDeclaredAnnotation(KiwiModule.RenderLayer.class);
+								if (layer != null) {
+									return (RenderType) layer.value().value;
+								}
+								k = k.getSuperclass();
+							}
+							return solid;
+						});
 				if (type != solid && type != null) {
 					ClientPlatform.setRenderType(block, type);
 				}
@@ -323,10 +326,10 @@ public final class KiwiModuleContainer {
 	}
 
 	public <T> List<T> getRegistries(ResourceKey<Registry<T>> registry) {
-		return getRegistryEntries(registry).map($ -> $.value).toList();
+		return getRegistryEntries(registry).map(KiwiGO::get).toList();
 	}
 
-	public <T> Stream<KiwiGOHolder<T>> getRegistryEntries(ResourceKey<Registry<T>> registry) {
+	public <T> Stream<KiwiGO<T>> getRegistryEntries(ResourceKey<Registry<T>> registry) {
 		return registries.get(registry).stream();
 	}
 

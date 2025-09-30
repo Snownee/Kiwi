@@ -335,6 +335,8 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 			throw new RuntimeException(e);
 		}
 
+		CustomizationHooks.init();
+
 		if (!Platform.isProduction()) {
 			enableDataModule();
 		}
@@ -580,7 +582,7 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 
 		KiwiModules.fire(KiwiModuleContainer::addRegistries);
 		for (KiwiModuleContainer container : KiwiModules.get()) {
-			container.loadGameObjects(registryLookup);
+			container.loadGameObjects();
 		}
 
 		KiwiModules.ALL_USED_REGISTRIES.add(Registries.CREATIVE_MODE_TAB);
