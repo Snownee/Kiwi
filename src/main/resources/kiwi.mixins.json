@@ -11,7 +11,25 @@
 		"codec.Ingredient_ItemValueMixin",
 		"codec.Ingredient_TagValueMixin",
 		"codec.Ingredient_ValueMixin",
-		"codec.IngredientMixin"
+		"codec.IngredientMixin",
+		"customization.AbstractContainerMenuMixin",
+		"customization.BlockBehaviourMixin",
+		"customization.BlockEntityTypeMixin",
+		"customization.BlockMixin",
+		"customization.BlockPropertiesMixin",
+		"customization.BlockStateMixin",
+		"customization.BuiltInRegistriesMixin",
+		"customization.BushBlockMixin",
+		"customization.HalfTransparentBlockMixin",
+		"customization.fabric.PackRepositoryMixin",
+		"customization.family.RecipeManagerMixin",
+		"customization.placement.BlockItemGetPlacementStateMixin",
+		"customization.placement.BlockItemPlaceBlockMixin",
+		"customization.placement.PlayerMixin",
+		"customization.property_inject.BlockMixin",
+		"customization.property_inject.StateDefinitionBuilderMixin",
+		"customization.sit.DisplayMixin",
+		"customization.sit.EntityMixin"
 	],
 	"client": [
 		"client.ClientPacketListenerMixin",
@@ -23,7 +41,12 @@
 		"client.ScreenEffectRendererMixin",
 		"client.ScreenMixin",
 		"client.TitleScreenMixin",
-		"client.WorldOpenFlowsMixin"
+		"client.WorldOpenFlowsMixin",
+		"customization.client.DebugRendererMixin",
+		"customization.client.GameRendererMixin",
+		"customization.client.MultiPlayerGameModeMixin",
+		"customization.sit.ClientPacketListenerMixin",
+		"customization.sit.LocalPlayerMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
