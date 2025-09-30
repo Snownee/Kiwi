@@ -5,6 +5,7 @@ import java.util.function.Function;
 
 import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.resources.ResourceLocation;
@@ -21,8 +22,8 @@ public final class SimpleItemTemplate extends KItemTemplate {
 		this.clazz = clazz;
 	}
 
-	public static Codec<SimpleItemTemplate> directCodec() {
-		return RecordCodecBuilder.create(instance -> instance.group(
+	public static MapCodec<SimpleItemTemplate> directCodec() {
+		return RecordCodecBuilder.mapCodec(instance -> instance.group(
 				ItemDefinitionProperties.mapCodecField().forGetter(SimpleItemTemplate::properties),
 				Codec.STRING.optionalFieldOf("class", "").forGetter(SimpleItemTemplate::clazz)
 		).apply(instance, SimpleItemTemplate::new));
@@ -40,7 +41,7 @@ public final class SimpleItemTemplate extends KItemTemplate {
 			return;
 		}
 		try {
-			Class<?> clazz = Class.forName(context.mappingResolver().unmapClass(this.clazz));
+			Class<?> clazz = Class.forName(this.clazz);
 			this.constructor = $ -> {
 				try {
 					return (Item) clazz.getConstructor(Item.Properties.class).newInstance($);

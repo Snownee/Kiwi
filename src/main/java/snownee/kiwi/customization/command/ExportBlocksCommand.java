@@ -38,13 +38,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.CsvOutput;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.ColoredFallingBlock;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.FenceGateBlock;
 import net.minecraft.world.level.block.IronBarsBlock;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
-import net.minecraft.world.level.block.SandBlock;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.TrapDoorBlock;
@@ -53,13 +53,14 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiClientConfig;
-import snownee.kiwi.KiwiModule;
+import snownee.kiwi.RenderLayerEnum;
+import snownee.kiwi.customization.CustomizationHooks;
 import snownee.kiwi.customization.CustomizationRegistries;
 import snownee.kiwi.customization.block.KBlockSettings;
 import snownee.kiwi.customization.block.component.KBlockComponent;
 import snownee.kiwi.customization.block.loader.BlockCodecs;
 import snownee.kiwi.customization.block.loader.KBlockComponents;
-import snownee.kiwi.datagen.GameObjectLookup;
+import snownee.kiwi.util.GameObjectLookup;
 
 public class ExportBlocksCommand {
 	public static final Supplier<Map<Class<? extends Block>, String>> TEMPLATE_MAPPING = Suppliers.memoize(() -> {
@@ -74,7 +75,7 @@ public class ExportBlocksCommand {
 		map.put(IronBarsBlock.class, "iron_bars");
 		map.put(RotatedPillarBlock.class, "rotated_pillar");
 		map.put(LeavesBlock.class, "leaves");
-		map.put(SandBlock.class, "colored_falling");
+		map.put(ColoredFallingBlock.class, "colored_falling");
 		return map;
 	});
 
@@ -152,7 +153,7 @@ public class ExportBlocksCommand {
 					continue;
 				}
 				if ("door".equals(template) || "trapdoor".equals(template)) {
-					Codec<Block> codec = BlockCodecs.get(new ResourceLocation(template)).codec();
+					Codec<Block> codec = BlockCodecs.get(ResourceLocation.parse(template)).codec();
 					template += toYaml(codec, block, json -> {
 						json.getAsJsonObject().remove(BlockCodecs.BLOCK_PROPERTIES_KEY);
 						return json;
@@ -168,14 +169,14 @@ public class ExportBlocksCommand {
 						row.put("Name:" + languageCode, "");
 					}
 				}
-				KiwiModule.RenderLayer.Layer layer = null;
+				RenderLayerEnum layer = null;
 				RenderType renderType = ItemBlockRenderTypes.getChunkRenderType(block.defaultBlockState());
 				if (renderType == RenderType.cutout()) {
-					layer = KiwiModule.RenderLayer.Layer.CUTOUT;
+					layer = RenderLayerEnum.CUTOUT;
 				} else if (renderType == RenderType.cutoutMipped()) {
-					layer = KiwiModule.RenderLayer.Layer.CUTOUT_MIPPED;
+					layer = RenderLayerEnum.CUTOUT_MIPPED;
 				} else if (renderType == RenderType.translucent()) {
-					layer = KiwiModule.RenderLayer.Layer.TRANSLUCENT;
+					layer = RenderLayerEnum.TRANSLUCENT;
 				}
 				row.put("RenderType", layer == null ? "solid" : layer.name().toLowerCase(Locale.ENGLISH));
 				int lightEmission = -1;
@@ -197,8 +198,10 @@ public class ExportBlocksCommand {
 				}
 				if (settings.glassType == null) {
 					row.put("GlassType", "");
+				} else if (settings.glassType == CustomizationHooks.clearGlassType()) {
+					row.put("GlassType", "clear");
 				} else {
-					row.put("GlassType", settings.glassType.name());
+					row.put("GlassType", "unknown");
 				}
 				row.put("WaterLoggable", Boolean.toString(settings.hasComponent(KBlockComponents.WATER_LOGGABLE.get())));
 				KBlockComponent.Type<?> baseComponent = settings.components.keySet()
@@ -223,7 +226,7 @@ public class ExportBlocksCommand {
 					row.put("CollisionShape", Optional.ofNullable(moreInfo.collisionShape()).map(Object::toString).orElse(""));
 					row.put("InteractionShape", Optional.ofNullable(moreInfo.interactionShape()).map(Object::toString).orElse(""));
 				}
-				BlockBehaviour.Properties properties = block.properties;
+				BlockBehaviour.Properties properties = block.properties();
 				row.put("NoCollision", Boolean.toString(!properties.hasCollision));
 				row.put("NoOcclusion", Boolean.toString(!properties.canOcclude));
 				csvOutput.writeRow(row.values().toArray(Object[]::new));

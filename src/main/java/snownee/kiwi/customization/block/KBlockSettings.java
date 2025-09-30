@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -38,6 +39,7 @@ import snownee.kiwi.customization.shape.ShapeGenerator;
 
 public class KBlockSettings {
 	public final boolean customPlacement;
+	@Nullable
 	public final GlassType glassType;
 	@Nullable
 	public final CanSurviveHandler canSurviveHandler;
@@ -46,6 +48,7 @@ public class KBlockSettings {
 	public final Map<KBlockComponent.Type<?>, KBlockComponent> components;
 	@Nullable
 	private ShapeGenerator[] shapes;
+	@Nullable
 	public PlaceChoices placeChoices;
 
 	private KBlockSettings(Builder builder) {
@@ -73,15 +76,16 @@ public class KBlockSettings {
 	}
 
 	public static Builder copyProperties(Block block) {
-		return new Builder(BlockBehaviour.Properties.copy(block));
+		return new Builder(BlockBehaviour.Properties.ofFullCopy(block));
 	}
 
 	public static Builder copyProperties(Block block, MapColor mapColor) {
-		return new Builder(BlockBehaviour.Properties.copy(block).mapColor(mapColor));
+		return new Builder(BlockBehaviour.Properties.ofFullCopy(block).mapColor(mapColor));
 	}
 
+	@Nullable
 	public static KBlockSettings of(Object block) {
-		return ((KBlockProperties) ((BlockBehaviour) block).properties).kiwi$getSettings();
+		return ((KBlockProperties) ((BlockBehaviour) block).properties()).kiwi$getSettings();
 	}
 
 	public static VoxelShape getGlassFaceShape(BlockState blockState, Direction direction) {
@@ -122,6 +126,7 @@ public class KBlockSettings {
 		return state;
 	}
 
+	@Nullable
 	public BlockState getStateForPlacement(BlockState blockState, BlockPlaceContext context) {
 		for (KBlockComponent component : components.values()) {
 			blockState = component.getStateForPlacement(this, blockState, context);
@@ -182,6 +187,7 @@ public class KBlockSettings {
 		return null;
 	}
 
+	@Nullable
 	public ConfiguringShape removeIfPossible(BlockShapeType shapeType) {
 		if (getShape(shapeType) instanceof ConfiguringShape shape) {
 			setShape(shapeType, null);
@@ -190,6 +196,7 @@ public class KBlockSettings {
 		return null;
 	}
 
+	@Nullable
 	public ShapeGenerator getShape(BlockShapeType shapeType) {
 		return shapes != null ? shapes[shapeType.ordinal()] : null;
 	}
@@ -227,6 +234,7 @@ public class KBlockSettings {
 			return properties;
 		}
 
+		@CanIgnoreReturnValue
 		public Builder configure(Consumer<BlockBehaviour.Properties> configurator) {
 			configurator.accept(properties);
 			return this;
@@ -247,6 +255,7 @@ public class KBlockSettings {
 			return this;
 		}
 
+		@CanIgnoreReturnValue
 		public Builder glassType(GlassType glassType) {
 			this.glassType = glassType;
 			return this;
@@ -262,6 +271,7 @@ public class KBlockSettings {
 			return shapes[type.ordinal()];
 		}
 
+		@CanIgnoreReturnValue
 		public Builder canSurviveHandler(CanSurviveHandler canSurviveHandler) {
 			this.canSurviveHandler = canSurviveHandler;
 			return this;
@@ -289,6 +299,7 @@ public class KBlockSettings {
 			return components.containsKey(type);
 		}
 
+		@CanIgnoreReturnValue
 		public Builder removeComponent(KBlockComponent.Type<?> type) {
 			components.remove(type);
 			return this;

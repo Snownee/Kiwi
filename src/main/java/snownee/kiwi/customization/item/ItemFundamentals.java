@@ -27,7 +27,7 @@ public record ItemFundamentals(
 				"kiwi/item",
 				KItemDefinition.codec(templates),
 				context);
-		var blockItemTemplate = templates.get(new ResourceLocation("block"));
+		var blockItemTemplate = templates.get(ResourceLocation.withDefaultNamespace("block"));
 		Preconditions.checkNotNull(blockItemTemplate, "Default block item template not found");
 		return new ItemFundamentals(
 				templates,

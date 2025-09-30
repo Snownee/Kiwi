@@ -12,14 +12,15 @@ import com.google.common.collect.Sets;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 
-import net.minecraft.core.registries.BuiltInRegistries;
+import javax.annotation.Nullable;
+import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import snownee.kiwi.customization.CustomizationHooks;
 
 @Mixin(BlockEntityType.class)
-public class BlockEntityTypeMixin {
+public abstract class BlockEntityTypeMixin {
 	@Shadow
 	@Final
 	private Set<Block> validBlocks;
@@ -28,6 +29,10 @@ public class BlockEntityTypeMixin {
 	private Boolean lenient;
 	@Unique
 	private volatile Set<Block> lenientValidBlocks;
+
+	@Shadow
+	@Nullable
+	public abstract Holder.Reference<BlockEntityType<?>> builtInRegistryHolder();
 
 	@SuppressWarnings("SuspiciousMethodCalls")
 	@WrapOperation(method = "isValid", at = @At(value = "INVOKE", target = "Ljava/util/Set;contains(Ljava/lang/Object;)Z"))
@@ -45,11 +50,11 @@ public class BlockEntityTypeMixin {
 			return true;
 		}
 		if (lenient == null) {
-			//noinspection deprecation
-			ResourceLocation key = BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey((BlockEntityType<?>) (Object) this);
-			if (key == null) {
+			Holder.Reference<BlockEntityType<?>> reference = builtInRegistryHolder();
+			if (reference == null) {
 				return false;
 			}
+			ResourceLocation key = reference.key().location();
 			lenient = CustomizationHooks.getLenientBETypeNamespaces().contains(key.getNamespace());
 		}
 		if (lenient == Boolean.FALSE) {

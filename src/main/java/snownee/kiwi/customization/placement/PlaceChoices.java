@@ -44,8 +44,9 @@ import snownee.kiwi.customization.item.MultipleBlockItem;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.BlockPredicateHelper;
 import snownee.kiwi.util.KHolder;
-import snownee.kiwi.util.Util;
+import snownee.kiwi.util.KUtil;
 import snownee.kiwi.util.codec.CustomizationCodecs;
+import snownee.kiwi.util.codec.KCodecs;
 
 public record PlaceChoices(
 		List<PlaceTarget> target,
@@ -62,22 +63,18 @@ public record PlaceChoices(
 		BLOCK_FACE_TYPES.put("horizontal", BlockFaceType.HORIZONTAL);
 		BLOCK_FACE_TYPES.put("vertical", BlockFaceType.VERTICAL);
 		BLOCK_FACE_TYPES.put("clicked_face", (context, direction) -> context.getClickedFace() == direction.getOpposite());
-		for (Direction direction : Util.DIRECTIONS) {
+		for (Direction direction : KUtil.DIRECTIONS) {
 			BLOCK_FACE_TYPES.put(direction.getSerializedName(), (context, dir) -> dir == direction);
 		}
 	}
 
 	public static final Codec<PlaceChoices> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-			CustomizationCodecs.compactList(PlaceTarget.CODEC).fieldOf("target").forGetter(PlaceChoices::target),
-			CustomizationCodecs.strictOptionalField(Codec.STRING, "transform_with").forGetter(PlaceChoices::transformWith),
-			CustomizationCodecs.strictOptionalField(CustomizationCodecs.compactList(Flow.CODEC), "flow", List.of())
-					.forGetter(PlaceChoices::flow),
-			CustomizationCodecs.strictOptionalField(CustomizationCodecs.compactList(Alter.CODEC), "alter", List.of())
-					.forGetter(PlaceChoices::alter),
-			CustomizationCodecs.strictOptionalField(CustomizationCodecs.compactList(Limit.CODEC), "limit", List.of())
-					.forGetter(PlaceChoices::limit),
-			CustomizationCodecs.strictOptionalField(CustomizationCodecs.compactList(Interests.CODEC), "interests", List.of())
-					.forGetter(PlaceChoices::interests),
+			KCodecs.compactList(PlaceTarget.CODEC).fieldOf("target").forGetter(PlaceChoices::target),
+			Codec.STRING.optionalFieldOf("transform_with").forGetter(PlaceChoices::transformWith),
+			KCodecs.compactList(Flow.CODEC).optionalFieldOf("flow", List.of()).forGetter(PlaceChoices::flow),
+			KCodecs.compactList(Alter.CODEC).optionalFieldOf("alter", List.of()).forGetter(PlaceChoices::alter),
+			KCodecs.compactList(Limit.CODEC).optionalFieldOf("limit", List.of()).forGetter(PlaceChoices::limit),
+			KCodecs.compactList(Interests.CODEC).optionalFieldOf("interests", List.of()).forGetter(PlaceChoices::interests),
 			Codec.BOOL.optionalFieldOf("skippable", true).forGetter(PlaceChoices::skippable)
 	).apply(instance, PlaceChoices::new));
 
@@ -142,7 +139,7 @@ public record PlaceChoices(
 	public static void setTo(Block block, @Nullable KHolder<PlaceChoices> holder) {
 		KBlockSettings settings = KBlockSettings.of(block);
 		if (settings == null && holder != null) {
-			((KBlockProperties) block.properties).kiwi$setSettings(settings = KBlockSettings.empty());
+			((KBlockProperties) block.properties()).kiwi$setSettings(settings = KBlockSettings.empty());
 		}
 		if (settings != null) {
 			settings.placeChoices = holder == null ? null : holder.value();
@@ -207,7 +204,7 @@ public record PlaceChoices(
 
 	public record Flow(Map<Direction, Limit> when, SlotLink.ResultAction action, boolean end) {
 		public static final Codec<Flow> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				Codec.unboundedMap(CustomizationCodecs.DIRECTION, Limit.CODEC).fieldOf("when").forGetter(Flow::when),
+				Codec.unboundedMap(Direction.CODEC, Limit.CODEC).fieldOf("when").forGetter(Flow::when),
 				SlotLink.ResultAction.MAP_CODEC.forGetter(Flow::action),
 				Codec.BOOL.optionalFieldOf("end", false).forGetter(Flow::end)
 		).apply(instance, Flow::new));
@@ -216,7 +213,7 @@ public record PlaceChoices(
 	public record Limit(String type, List<ParsedProtoTag> tags) {
 		public static final Codec<Limit> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.STRING.fieldOf("type").forGetter(Limit::type),
-				CustomizationCodecs.compactList(ParsedProtoTag.CODEC).fieldOf("tags").forGetter(Limit::tags)
+				KCodecs.compactList(ParsedProtoTag.CODEC).fieldOf("tags").forGetter(Limit::tags)
 		).apply(instance, Limit::new));
 
 		public boolean test(BlockState baseState, BlockState targetState) {
@@ -225,7 +222,7 @@ public record PlaceChoices(
 				//noinspection SwitchStatementWithTooFewBranches
 				boolean pass = switch (this.type) {
 					case "has_tags" -> {
-						for (Direction direction : Util.DIRECTIONS) {
+						for (Direction direction : KUtil.DIRECTIONS) {
 							Collection<PlaceSlot> slots = PlaceSlot.find(targetState, direction);
 							for (PlaceSlot slot : slots) {
 								if (slot.hasTag(resolvedTag)) {
@@ -278,7 +275,7 @@ public record PlaceChoices(
 	//TODO check if `use` exists when attaching choices
 	public record Alter(List<AlterCondition> when, String use) {
 		public static final Codec<Alter> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				ExtraCodecs.nonEmptyList(CustomizationCodecs.compactList(AlterCondition.CODEC)).fieldOf("when").forGetter(Alter::when),
+				ExtraCodecs.nonEmptyList(KCodecs.compactList(AlterCondition.CODEC)).fieldOf("when").forGetter(Alter::when),
 				Codec.STRING.fieldOf("use").forGetter(Alter::use)
 		).apply(instance, Alter::new));
 
@@ -310,20 +307,20 @@ public record PlaceChoices(
 	}
 
 	public record AlterCondition(String target, BlockFaceType faces, BlockPredicate block, List<ParsedProtoTag> tags) {
+
 		public static final Codec<AlterCondition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				CustomizationCodecs.strictOptionalField(Codec.STRING, "target", "neighbor").forGetter(AlterCondition::target),
-				CustomizationCodecs.strictOptionalField(CustomizationCodecs.simpleByNameCodec(BLOCK_FACE_TYPES), "faces", BlockFaceType.ANY)
+				Codec.STRING.optionalFieldOf("target", "neighbor").forGetter(AlterCondition::target),
+				CustomizationCodecs.simpleByNameCodec(BLOCK_FACE_TYPES)
+						.optionalFieldOf("faces", BlockFaceType.ANY)
 						.forGetter(AlterCondition::faces),
-				CustomizationCodecs.strictOptionalField(CustomizationCodecs.BLOCK_PREDICATE, "block", BlockPredicate.ANY)
-						.forGetter(AlterCondition::block),
-				CustomizationCodecs.strictOptionalField(CustomizationCodecs.compactList(ParsedProtoTag.CODEC), "tags", List.of())
-						.forGetter(AlterCondition::tags)
+				CustomizationCodecs.BLOCK_PREDICATE.optionalFieldOf("block", BlockPredicateHelper.ANY).forGetter(AlterCondition::block),
+				KCodecs.compactList(ParsedProtoTag.CODEC).optionalFieldOf("tags", List.of()).forGetter(AlterCondition::tags)
 		).apply(instance, AlterCondition::new));
 
 		public boolean test(BlockPlaceContext context) {
 			List<Direction> directions = switch (target) {
 				case "clicked_face" -> List.of(context.getClickedFace().getOpposite());
-				case "neighbor" -> Util.DIRECTIONS;
+				case "neighbor" -> KUtil.DIRECTIONS;
 				default -> throw new IllegalStateException("Unexpected value: " + target);
 			};
 			BlockPos pos = context.getClickedPos();

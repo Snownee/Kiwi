@@ -7,9 +7,7 @@ import com.google.common.collect.ImmutableSortedSet;
 
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Property;
-import snownee.kiwi.util.NotNullByDefault;
 
-@NotNullByDefault
 public class StringProperty extends Property<String> {
 	private final ImmutableSortedSet<String> values;
 

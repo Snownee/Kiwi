@@ -43,10 +43,12 @@ public record ChoicesShape(List<String> keys, Map<String, ShapeGenerator> valueM
 
 	public record Unbaked(List<String> keys, Map<String, UnbakedShape> choices) implements UnbakedShape {
 		public static Codec<Unbaked> codec(UnbakedShapeCodec parentCodec) {
-			return ExtraCodecs.validate(RecordCodecBuilder.create(instance -> instance.group(
+			Codec<Unbaked> codec = RecordCodecBuilder.create(instance -> instance.group(
 					ExtraCodecs.NON_EMPTY_STRING.listOf().fieldOf("keys").forGetter(Unbaked::keys),
 					Codec.unboundedMap(ExtraCodecs.NON_EMPTY_STRING, parentCodec).fieldOf("choices").forGetter(Unbaked::choices)
-			).apply(instance, Unbaked::new)), $ -> {
+			).apply(instance, Unbaked::new));
+			// javac type inference broke without this separate variable declaration.
+			return codec.validate($ -> {
 				if ($.keys().isEmpty()) {
 					return DataResult.error(() -> "Keys must not be empty");
 				}

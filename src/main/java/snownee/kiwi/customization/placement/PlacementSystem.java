@@ -32,14 +32,14 @@ import snownee.kiwi.customization.CustomizationHooks;
 import snownee.kiwi.customization.block.KBlockSettings;
 import snownee.kiwi.customization.duck.KPlayer;
 import snownee.kiwi.customization.network.SSyncPlaceCountPacket;
-import snownee.kiwi.util.Util;
+import snownee.kiwi.util.KUtil;
 
 public class PlacementSystem {
 	private static final Cache<BlockPlaceContext, PlaceMatchResult> RESULT_CONTEXT = CacheBuilder.newBuilder().weakKeys().expireAfterWrite(
 			100,
 			TimeUnit.MILLISECONDS).build();
 
-	public static boolean isDebugEnabled(Player player) {
+	public static boolean isDebugEnabled(@Nullable Player player) {
 		return player != null && player.isCreative() && player.getOffhandItem().is(Items.CHAINMAIL_HELMET);
 	}
 
@@ -129,7 +129,7 @@ public class PlacementSystem {
 		}
 		results.sort(null);
 		int resultIndex = 0;
-		int maxInterest = results.get(0).interest();
+		int maxInterest = results.getFirst().interest();
 		if (maxInterest > 0 && results.size() > 1 && context.getPlayer() instanceof KPlayer player) {
 			for (int i = 1; i < results.size(); i++) {
 				if (results.get(i).interest() < maxInterest) {
@@ -173,7 +173,7 @@ public class PlacementSystem {
 		int interest = 0;
 		List<SlotLink.MatchResult> results = List.of();
 		List<Vec3i> offsets = List.of();
-		for (Direction side : Util.DIRECTIONS) {
+		for (Direction side : KUtil.DIRECTIONS) {
 			Collection<PlaceSlot> theirSlots = theirSlotsMap.get(side);
 			if (theirSlots == null) {
 				continue;
@@ -225,7 +225,7 @@ public class PlacementSystem {
 			return;
 		}
 		BlockPos.MutableBlockPos mutable = pos.mutable();
-		for (Direction direction : Util.DIRECTIONS) {
+		for (Direction direction : KUtil.DIRECTIONS) {
 			BlockState neighborState = level.getBlockState(mutable.setWithOffset(pos, direction));
 			if (PlaceSlot.hasNoSlots(neighborState.getBlock())) {
 				continue;

@@ -15,6 +15,7 @@ import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BedBlock;
@@ -36,7 +37,6 @@ import snownee.kiwi.customization.block.component.KBlockComponent;
 
 public class SitManager {
 	public static final Component ENTITY_NAME = Component.literal("Seat from Kiwi");
-	public static final double VERTICAL_OFFSET = 0.23;
 
 	public static void tick(Display.BlockDisplay display) {
 		if (display.tickCount < 7) {
@@ -45,7 +45,7 @@ public class SitManager {
 		if (!display.isVehicle()) {
 			display.discard();
 		}
-		BlockPos pos = BlockPos.containing(display.getX(), display.getY() + VERTICAL_OFFSET, display.getZ());
+		BlockPos pos = BlockPos.containing(display.getX(), display.getY(), display.getZ());
 		BlockState blockState = display.level().getBlockState(pos);
 		if (!blockState.is(display.getBlockState().getBlock())) {
 			display.discard();
@@ -53,6 +53,9 @@ public class SitManager {
 	}
 
 	public static boolean sit(Player player, BlockHitResult hitResult) {
+		if (KSitCommonConfig.requireEmptyHand && (!player.getMainHandItem().isEmpty() || !player.getOffhandItem().isEmpty())) {
+			return false;
+		}
 		if (hitResult.getDirection() == Direction.DOWN || player.isSecondaryUseActive()) {
 			return false;
 		}
@@ -71,7 +74,8 @@ public class SitManager {
 			if (player instanceof ServerPlayer serverPlayer && serverPlayer.bedInRange(pos, direction)) {
 				return false;
 			}
-		} else if (player.getEyePosition().distanceToSqr(hitResult.getLocation()) > 12) {
+		} else if (player.getEyePosition().distanceToSqr(hitResult.getLocation()) >
+				Mth.square(player.getAttributeValue(Attributes.BLOCK_INTERACTION_RANGE) * KSitCommonConfig.sitActionReachDistanceRatio)) {
 			return false;
 		}
 		if (!player.getMainHandItem().isEmpty() && player.getMainHandItem().is(block.asItem())) {
@@ -111,7 +115,9 @@ public class SitManager {
 					seatPos = hit.getLocation();
 				}
 			}
-			if (facing != null) {
+			if (facing == null) {
+				display.setYRot(player.getYRot());
+			} else {
 				float yRot = facing.toYRot();
 				display.setYRot(yRot);
 				display.setNoGravity(true); //hacky way to tell the client that this block has facing
@@ -120,7 +126,7 @@ public class SitManager {
 				seatPos = Vec3.atCenterOf(pos);
 			}
 			double clampedY = Mth.clamp(seatPos.y, pos.getY(), pos.getY() + 0.999);
-			display.setPos(seatPos.x, clampedY - VERTICAL_OFFSET, seatPos.z);
+			display.setPos(seatPos.x, clampedY, seatPos.z);
 			if (level.addFreshEntity(display)) {
 				player.startRiding(display, true);
 			}
@@ -197,7 +203,7 @@ public class SitManager {
 		} else {
 			direction = passenger.getDirection();
 		}
-		BlockPos pos = BlockPos.containing(display.getX(), display.getY() + VERTICAL_OFFSET, display.getZ());
+		BlockPos pos = BlockPos.containing(display.getX(), display.getY(), display.getZ());
 		Optional<Vec3> vec3 = BedBlock.findStandUpPosition(
 				passenger.getType(),
 				passenger.level(),

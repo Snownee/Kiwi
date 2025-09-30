@@ -1,6 +1,9 @@
 package snownee.kiwi.customization.block.component;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.Direction;
@@ -18,7 +21,7 @@ public record HorizontalAxisComponent(boolean oppose) implements KBlockComponent
 	public static final EnumProperty<Direction.Axis> AXIS = BlockStateProperties.HORIZONTAL_AXIS;
 	private static final HorizontalAxisComponent NORMAL = new HorizontalAxisComponent(false);
 	private static final HorizontalAxisComponent OPPOSE = new HorizontalAxisComponent(true);
-	public static final Codec<HorizontalAxisComponent> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+	public static final MapCodec<HorizontalAxisComponent> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			Codec.BOOL.optionalFieldOf("oppose", false).forGetter(HorizontalAxisComponent::oppose)
 	).apply(instance, HorizontalAxisComponent::getInstance));
 
@@ -42,7 +45,7 @@ public record HorizontalAxisComponent(boolean oppose) implements KBlockComponent
 	}
 
 	@Override
-	public BlockState getStateForPlacement(KBlockSettings settings, BlockState state, BlockPlaceContext context) {
+	public @Nullable BlockState getStateForPlacement(KBlockSettings settings, BlockState state, BlockPlaceContext context) {
 		if (settings.customPlacement) {
 			return state;
 		}
@@ -58,20 +61,15 @@ public record HorizontalAxisComponent(boolean oppose) implements KBlockComponent
 		return null;
 	}
 
+	@Override
 	public BlockState rotate(BlockState pState, Rotation pRot) {
-		switch (pRot) {
-			case COUNTERCLOCKWISE_90:
-			case CLOCKWISE_90:
-				switch (pState.getValue(AXIS)) {
-					case Z:
-						return pState.setValue(AXIS, Direction.Axis.X);
-					case X:
-						return pState.setValue(AXIS, Direction.Axis.Z);
-					default:
-						return pState;
-				}
-			default:
-				return pState;
-		}
+		return switch (pRot) {
+			case COUNTERCLOCKWISE_90, CLOCKWISE_90 -> switch (pState.getValue(AXIS)) {
+				case Z -> pState.setValue(AXIS, Direction.Axis.X);
+				case X -> pState.setValue(AXIS, Direction.Axis.Z);
+				default -> pState;
+			};
+			default -> pState;
+		};
 	}
 }

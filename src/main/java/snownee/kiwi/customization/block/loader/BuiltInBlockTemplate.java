@@ -3,7 +3,6 @@ package snownee.kiwi.customization.block.loader;
 import java.util.Optional;
 
 import com.google.gson.JsonObject;
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.MapCodec;
@@ -12,10 +11,12 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import snownee.kiwi.customization.block.BlockFundamentals;
 import snownee.kiwi.util.resource.OneTimeLoader;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public final class BuiltInBlockTemplate extends KBlockTemplate {
+	public static final ThreadLocal<Block.Properties> PROPERTIES_INJECTOR = new ThreadLocal<>();
 	private final Optional<ResourceLocation> key;
 	private MapCodec<Block> codec;
 
@@ -24,9 +25,9 @@ public final class BuiltInBlockTemplate extends KBlockTemplate {
 		this.key = key;
 	}
 
-	public static Codec<BuiltInBlockTemplate> directCodec(MapCodec<Optional<KMaterial>> materialCodec) {
-		return RecordCodecBuilder.create(instance -> instance.group(
-						BlockDefinitionProperties.mapCodecField(materialCodec).forGetter(BuiltInBlockTemplate::properties),
+	public static MapCodec<BuiltInBlockTemplate> directCodec(BlockFundamentals.CodecCreationContext context) {
+		return RecordCodecBuilder.mapCodec(instance -> instance.group(
+						BlockDefinitionProperties.mapCodecField(context).forGetter(BuiltInBlockTemplate::properties),
 						ResourceLocation.CODEC.optionalFieldOf("codec").forGetter(BuiltInBlockTemplate::key))
 				.apply(instance, BuiltInBlockTemplate::new));
 	}
@@ -46,7 +47,7 @@ public final class BuiltInBlockTemplate extends KBlockTemplate {
 		if (!json.has(BlockCodecs.BLOCK_PROPERTIES_KEY)) {
 			json.add(BlockCodecs.BLOCK_PROPERTIES_KEY, new JsonObject());
 		}
-		InjectedBlockPropertiesCodec.INJECTED.set(properties);
+		PROPERTIES_INJECTOR.set(properties);
 		DataResult<Block> result = codec.decode(JsonOps.INSTANCE, JsonOps.INSTANCE.getMap(json).result().orElseThrow());
 		if (result.error().isPresent()) {
 			throw new IllegalStateException(result.error().get().message());

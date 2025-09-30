@@ -18,7 +18,8 @@ public interface AbstractHorizontalShape extends ShapeGenerator {
 			synchronized (shapes) {
 				shape = shapes[index];
 				if (shape == null) {
-					shapes[index] = shape = VoxelUtil.rotateHorizontal(shapes[Direction.NORTH.get2DDataValue()], direction);
+					shape = VoxelUtil.rotateHorizontal(shapes[Direction.NORTH.get2DDataValue()], direction);
+					shapes[index] = shape;
 				}
 			}
 		}

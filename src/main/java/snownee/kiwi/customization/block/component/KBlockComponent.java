@@ -3,10 +3,10 @@ package snownee.kiwi.customization.block.component;
 import org.jetbrains.annotations.Nullable;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
@@ -19,8 +19,8 @@ import snownee.kiwi.customization.block.KBlockSettings;
 import snownee.kiwi.customization.block.behavior.BlockBehaviorRegistry;
 
 public interface KBlockComponent {
-	Codec<KBlockComponent> DIRECT_CODEC = ExtraCodecs.lazyInitializedCodec(() -> CustomizationRegistries.BLOCK_COMPONENT.byNameCodec()
-			.dispatch(KBlockComponent::type, Type::codec));
+	Codec<KBlockComponent> CODEC = Codec.lazyInitialized(() -> CustomizationRegistries.BLOCK_COMPONENT.byNameCodec()
+			.dispatch(KBlockComponent::type, KBlockComponent.Type::codec));
 
 	Type<?> type();
 
@@ -75,7 +75,7 @@ public interface KBlockComponent {
 		return null;
 	}
 
-	record Type<T extends KBlockComponent>(Codec<T> codec) {
+	record Type<T extends KBlockComponent>(MapCodec<T> codec) {
 		@Override
 		public String toString() {
 			return "KBlockComponent.Type[" + CustomizationRegistries.BLOCK_COMPONENT.getKey(this) + "]";

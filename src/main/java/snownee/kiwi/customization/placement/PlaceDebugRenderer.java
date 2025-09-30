@@ -18,10 +18,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import snownee.kiwi.util.NotNullByDefault;
 import snownee.kiwi.util.VoxelUtil;
 
-@NotNullByDefault
 public class PlaceDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 	private static final PlaceDebugRenderer INSTANCE = new PlaceDebugRenderer();
 	private List<SlotRenderInstance> slots = List.of();

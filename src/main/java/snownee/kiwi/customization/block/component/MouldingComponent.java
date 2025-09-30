@@ -1,9 +1,16 @@
 package snownee.kiwi.customization.block.component;
 
+import java.util.Optional;
+
 import org.jetbrains.annotations.Nullable;
+
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
@@ -19,13 +26,17 @@ import net.minecraft.world.level.block.state.properties.StairsShape;
 import snownee.kiwi.customization.block.KBlockSettings;
 import snownee.kiwi.customization.block.loader.KBlockComponents;
 
-public record MouldingComponent() implements KBlockComponent {
+public record MouldingComponent(Optional<TagKey<Block>> connectTo) implements KBlockComponent {
 	public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 	public static final EnumProperty<StairsShape> SHAPE = BlockStateProperties.STAIRS_SHAPE;
-	private static final MouldingComponent INSTANCE = new MouldingComponent();
+	private static final MouldingComponent DEFAULT = new MouldingComponent(Optional.empty());
+	public static final MapCodec<MouldingComponent> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+			TagKey.hashedCodec(Registries.BLOCK).optionalFieldOf("connect_to").forGetter(MouldingComponent::connectTo)
+	).apply(instance, MouldingComponent::create));
 
-	public static MouldingComponent getInstance() {
-		return INSTANCE;
+	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+	public static MouldingComponent create(Optional<TagKey<Block>> connectTo) {
+		return connectTo.isEmpty() ? DEFAULT : new MouldingComponent(connectTo);
 	}
 
 	@Override
@@ -81,12 +92,12 @@ public record MouldingComponent() implements KBlockComponent {
 	}
 
 	private boolean canBeConnected(BlockState ourState, BlockState theirState) {
-		//TODO add a new field Optional<BlockPredicate> to check?
-		return ourState.is(theirState.getBlock());
+		//noinspection OptionalIsPresent
+		return connectTo.isEmpty() ? ourState.is(theirState.getBlock()) : theirState.is(connectTo.get());
 	}
 
 	@Override
-	public BlockState getStateForPlacement(KBlockSettings settings, BlockState state, BlockPlaceContext context) {
+	public @Nullable BlockState getStateForPlacement(KBlockSettings settings, BlockState state, BlockPlaceContext context) {
 		if (settings.customPlacement) {
 			return state;
 		}

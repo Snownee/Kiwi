@@ -15,7 +15,6 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import snownee.kiwi.util.VoxelUtil;
-import snownee.kiwi.util.codec.CustomizationCodecs;
 
 public record DirectionalShape(VoxelShape[] shapes, String property) implements ShapeGenerator {
 	public static ShapeGenerator create(ShapeGenerator upGenerator, String property) {
@@ -42,7 +41,8 @@ public record DirectionalShape(VoxelShape[] shapes, String property) implements 
 			synchronized (shapes) {
 				shape = shapes[index];
 				if (shape == null) {
-					shapes[index] = shape = VoxelUtil.rotate(shapes[Direction.DOWN.get3DDataValue()], direction);
+					shape = VoxelUtil.rotate(shapes[Direction.DOWN.get3DDataValue()], direction);
+					shapes[index] = shape;
 				}
 			}
 		}
@@ -53,7 +53,7 @@ public record DirectionalShape(VoxelShape[] shapes, String property) implements 
 		public static Codec<Unbaked> codec(UnbakedShapeCodec parentCodec) {
 			return RecordCodecBuilder.create(instance -> instance.group(
 					parentCodec.fieldOf("up").forGetter(Unbaked::wrapped),
-					CustomizationCodecs.strictOptionalField(ExtraCodecs.NON_EMPTY_STRING, "property", "facing").forGetter(Unbaked::property)
+					ExtraCodecs.NON_EMPTY_STRING.optionalFieldOf("property", "facing").forGetter(Unbaked::property)
 			).apply(instance, Unbaked::new));
 		}
 

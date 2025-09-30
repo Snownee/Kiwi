@@ -42,8 +42,8 @@ public class ShapeStorage {
 
 	public static ShapeStorage reload(Supplier<Map<ResourceLocation, UnbakedShape>> shapesSupplier) {
 		Map<ResourceLocation, UnbakedShape> shapes = Platform.isDataGen() ? Maps.newHashMap() : shapesSupplier.get();
-		shapes.put(new ResourceLocation("empty"), new UnbakedShape.Inlined(Shapes.empty()));
-		shapes.put(new ResourceLocation("block"), new UnbakedShape.Inlined(Shapes.block()));
+		shapes.put(ResourceLocation.withDefaultNamespace("empty"), new UnbakedShape.Inlined(Shapes.empty()));
+		shapes.put(ResourceLocation.withDefaultNamespace("block"), new UnbakedShape.Inlined(Shapes.block()));
 		BakingContext.Impl context = new BakingContext.Impl(shapes);
 		LinkedHashSet<ShapeRef> refs = Sets.newLinkedHashSet();
 		List<UnresolvedEntry> unresolved = shapes.entrySet().stream().map(entry -> {

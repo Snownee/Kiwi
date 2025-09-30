@@ -51,7 +51,8 @@ public class UnbakedShapeCodec implements Codec<UnbakedShape> {
 				Map.entry("six_way", SixWayShape.Unbaked.codec(this)),
 				Map.entry("front_and_top", FrontAndTopShape.Unbaked.codec(this)),
 				Map.entry("configure_wall", ConfigureWallShape.codec()),
-				Map.entry("configure_cross_collision", ConfigureCrossCollisionShape.codec())
+				Map.entry("configure_cross_collision", ConfigureCrossCollisionShape.codec()),
+				Map.entry("merge_configured", MergeConfiguredShape.codec(this))
 		);
 	}
 
@@ -100,8 +101,8 @@ public class UnbakedShapeCodec implements Codec<UnbakedShape> {
 			throw new IllegalArgumentException("Empty shape string");
 		}
 		// blame mods that modify the vanilla rules (OptiFine, AAA Particles)
-		if (ResourceLocation.isValidResourceLocation(s) && s.indexOf('(') == -1 && s.indexOf(',') == -1) {
-			return refInterner.computeIfAbsent(new ResourceLocation(s), ShapeRef::new);
+		if (ResourceLocation.tryParse(s) != null && s.indexOf('(') == -1 && s.indexOf(',') == -1) {
+			return refInterner.computeIfAbsent(ResourceLocation.parse(s), ShapeRef::new);
 		}
 		return new UnbakedShape.Inlined(recursiveDecodeVoxelShape(s));
 	}

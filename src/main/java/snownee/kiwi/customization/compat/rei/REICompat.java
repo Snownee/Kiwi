@@ -6,9 +6,8 @@ import com.google.common.collect.Lists;
 
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
-import snownee.kiwi.Kiwi;
 import snownee.kiwi.customization.CustomizationHooks;
 import snownee.kiwi.customization.block.family.BlockFamilies;
 import snownee.kiwi.customization.block.family.BlockFamily;
@@ -16,12 +15,10 @@ import snownee.kiwi.customization.block.family.StonecutterRecipeMaker;
 import snownee.kiwi.util.KHolder;
 
 public class REICompat implements REIClientPlugin {
-	public static final ResourceLocation ID = Kiwi.id("customization");
-
 	@Override
 	public void registerDisplays(DisplayRegistry registry) {
 		if (CustomizationHooks.isEnabled()) {
-			List<StonecutterRecipe> recipes = Lists.newArrayList();
+			List<RecipeHolder<StonecutterRecipe>> recipes = Lists.newArrayList();
 			for (KHolder<BlockFamily> holder : BlockFamilies.all()) {
 				BlockFamily family = holder.value();
 				if (family.stonecutterSource().isPresent()) {
@@ -31,7 +28,7 @@ public class REICompat implements REIClientPlugin {
 					recipes.addAll(StonecutterRecipeMaker.makeRecipes("exchange_in_viewer", holder));
 				}
 			}
-			for (StonecutterRecipe recipe : recipes) {
+			for (RecipeHolder<StonecutterRecipe> recipe : recipes) {
 				registry.add(recipe);
 			}
 		}

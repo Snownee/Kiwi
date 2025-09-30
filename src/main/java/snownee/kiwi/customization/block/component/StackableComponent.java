@@ -2,7 +2,7 @@ package snownee.kiwi.customization.block.component;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.util.ExtraCodecs;
@@ -16,7 +16,7 @@ import snownee.kiwi.customization.block.KBlockUtils;
 import snownee.kiwi.customization.block.loader.KBlockComponents;
 
 public record StackableComponent(IntegerProperty property) implements KBlockComponent, LayeredComponent {
-	public static final Codec<StackableComponent> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+	public static final MapCodec<StackableComponent> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			ExtraCodecs.intRange(0, 1).optionalFieldOf("min", 1).forGetter(StackableComponent::minValue),
 			ExtraCodecs.POSITIVE_INT.fieldOf("max").forGetter(StackableComponent::maxValue)
 	).apply(instance, StackableComponent::create));

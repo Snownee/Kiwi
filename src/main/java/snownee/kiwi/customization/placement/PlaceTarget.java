@@ -10,7 +10,7 @@ public record PlaceTarget(Type type, ResourceLocation id) {
 
 	public static PlaceTarget of(String s) {
 		Type type = s.startsWith("@") ? Type.TEMPLATE : Type.BLOCK;
-		ResourceLocation id = new ResourceLocation(s.substring(type.prefix.length()));
+		ResourceLocation id = ResourceLocation.parse(s.substring(type.prefix.length()));
 		return new PlaceTarget(type, id);
 	}
 

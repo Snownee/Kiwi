@@ -1,5 +1,7 @@
 package snownee.kiwi.mixin.customization;
 
+import java.util.Objects;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -123,7 +125,7 @@ public abstract class BlockStateMixin {
 		KBlockSettings settings = KBlockSettings.of(getBlock());
 		if (settings != null && settings.getShape(BlockShapeType.MAIN) != null) {
 			try {
-				return settings.getShape(BlockShapeType.MAIN).getShape(blockState, context);
+				return Objects.requireNonNull(settings.getShape(BlockShapeType.MAIN)).getShape(blockState, context);
 			} catch (Exception ignored) {
 			}
 		}
@@ -145,7 +147,7 @@ public abstract class BlockStateMixin {
 		KBlockSettings settings = KBlockSettings.of(getBlock());
 		if (settings != null && settings.getShape(BlockShapeType.COLLISION) != null) {
 			try {
-				return settings.getShape(BlockShapeType.COLLISION).getShape(blockState, context);
+				return Objects.requireNonNull(settings.getShape(BlockShapeType.COLLISION)).getShape(blockState, context);
 			} catch (Exception ignored) {
 			}
 		}
@@ -165,7 +167,7 @@ public abstract class BlockStateMixin {
 		KBlockSettings settings = KBlockSettings.of(getBlock());
 		if (settings != null && settings.getShape(BlockShapeType.INTERACTION) != null) {
 			try {
-				return settings.getShape(BlockShapeType.INTERACTION).getShape(blockState, CollisionContext.empty());
+				return Objects.requireNonNull(settings.getShape(BlockShapeType.INTERACTION)).getShape(blockState, CollisionContext.empty());
 			} catch (Exception ignored) {
 			}
 		}

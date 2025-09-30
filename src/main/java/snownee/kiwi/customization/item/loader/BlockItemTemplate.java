@@ -6,6 +6,7 @@ import java.util.function.BiFunction;
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -38,8 +39,8 @@ public final class BlockItemTemplate extends KItemTemplate {
 		this.clazz = clazz;
 	}
 
-	public static Codec<BlockItemTemplate> directCodec() {
-		return RecordCodecBuilder.create(instance -> instance.group(
+	public static MapCodec<BlockItemTemplate> directCodec() {
+		return RecordCodecBuilder.mapCodec(instance -> instance.group(
 				ItemDefinitionProperties.mapCodecField().forGetter(BlockItemTemplate::properties),
 				ResourceLocation.CODEC.optionalFieldOf("block").forGetter(BlockItemTemplate::block),
 				Codec.STRING.optionalFieldOf("class", "").forGetter(BlockItemTemplate::clazz)
