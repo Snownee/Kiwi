@@ -56,7 +56,10 @@ public class SitManager {
 		if (KSitCommonConfig.requireEmptyHand && (!player.getMainHandItem().isEmpty() || !player.getOffhandItem().isEmpty())) {
 			return false;
 		}
-		if (hitResult.getDirection() == Direction.DOWN || player.isSecondaryUseActive()) {
+		if (!KSitCommonConfig.allowClickBlockBottomToSit && hitResult.getDirection() == Direction.DOWN) {
+			return false;
+		}
+		if (player.isSecondaryUseActive()) {
 			return false;
 		}
 		Level level = player.level();
