@@ -1,7 +1,9 @@
 package snownee.kiwi.customization.block.behavior;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -15,6 +17,7 @@ import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BedBlock;
@@ -34,6 +37,7 @@ import snownee.kiwi.customization.CustomFeatureTags;
 import snownee.kiwi.customization.block.KBlockSettings;
 import snownee.kiwi.customization.block.KBlockUtils;
 import snownee.kiwi.customization.block.component.KBlockComponent;
+import snownee.kiwi.mixin.customization.sit.EntityAccess;
 
 public class SitManager {
 	public static final Component ENTITY_NAME = Component.literal("Seat from Kiwi");
@@ -130,8 +134,30 @@ public class SitManager {
 			}
 			double clampedY = Mth.clamp(seatPos.y, pos.getY(), pos.getY() + 0.999);
 			display.setPos(seatPos.x, clampedY, seatPos.z);
+			Entity rider = player;
+			if (KSitCommonConfig.makeLeashedMobSit) {
+				List<Mob> list = leashableInArea(
+						level,
+						player.blockPosition(),
+						player,
+						leashable -> leashable.getLeashHolder() == player);
+				double dist = Double.MAX_VALUE;
+				for (Mob leashable : list) {
+					if (leashable.isNoAi() || !((EntityAccess) leashable).callCanRide(display)) {
+						continue;
+					}
+					double d = leashable.distanceToSqr(player);
+					if (rider == player || d < dist) {
+						rider = leashable;
+						dist = d;
+					}
+				}
+			}
 			if (level.addFreshEntity(display)) {
-				player.startRiding(display, true);
+				rider.startRiding(display, true);
+				if (rider != player) {
+					((Mob) rider).dropLeash(true, true);
+				}
 			}
 		}
 		return true;
@@ -214,5 +240,18 @@ public class SitManager {
 				direction,
 				passenger.getYRot());
 		return vec3.orElseGet(() -> Vec3.atBottomCenterOf(pos.above()));
+	}
+
+	public static List<Mob> leashableInArea(Level level, BlockPos blockPos, Player player, Predicate<Mob> mobPredicate) {
+		double radius = 7.0;
+		int x = blockPos.getX();
+		int y = blockPos.getY();
+		int z = blockPos.getZ();
+		AABB searchArea = new AABB(x - radius, y - radius, z - radius, x + radius, y + radius, z + radius);
+		return level.getEntitiesOfClass(
+						Mob.class, searchArea,
+						mob -> (mob.isLeashed() || mob.canBeLeashed(player)) && mobPredicate.test(mob))
+				.stream()
+				.toList();
 	}
 }
