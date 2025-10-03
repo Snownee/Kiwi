@@ -14,4 +14,5 @@ public class KSitCommonConfig {
 	public static float sitActionReachDistanceRatio = 0.75f;
 	public static boolean requireEmptyHand = false;
 	public static boolean allowClickBlockBottomToSit = false;
+	public static boolean makeLeashedMobSit = true;
 }
