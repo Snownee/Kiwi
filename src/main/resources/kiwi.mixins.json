@@ -25,6 +25,7 @@
 		"customization.BlockStateMixin",
 		"customization.BushBlockMixin",
 		"customization.HalfTransparentBlockMixin",
+		"customization.WoodTypeMixin",
 		"customization.family.RecipeManagerMixin",
 		"customization.fastsuite.AuxRecipeManagerMixin",
 		"customization.forge.BlockMixin",
