@@ -1,6 +1,7 @@
 package snownee.kiwi.customization.block.loader;
 
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.apache.commons.lang3.NotImplementedException;
@@ -16,9 +17,14 @@ import net.minecraft.util.ColorRGBA;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ButtonBlock;
+import net.minecraft.world.level.block.CeilingHangingSignBlock;
 import net.minecraft.world.level.block.ColoredFallingBlock;
 import net.minecraft.world.level.block.FenceGateBlock;
+import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.StandingSignBlock;
+import net.minecraft.world.level.block.WallHangingSignBlock;
+import net.minecraft.world.level.block.WallSignBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockSetType;
@@ -26,6 +32,7 @@ import net.minecraft.world.level.block.state.properties.WoodType;
 import snownee.kiwi.customization.block.BasicBlock;
 import snownee.kiwi.customization.block.KBlockSettings;
 import snownee.kiwi.customization.duck.KBlockProperties;
+import snownee.kiwi.util.codec.CustomizationCodecs;
 
 public class BlockCodecs {
 	private static final Map<ResourceLocation, MapCodec<Block>> CODECS = Maps.newHashMap();
@@ -49,10 +56,7 @@ public class BlockCodecs {
 			Block.propertiesCodec()
 	).apply(instance, StairBlock::new));
 
-	public static final MapCodec<FenceGateBlock> FENCE_GATE = RecordCodecBuilder.mapCodec(instance -> instance.group(
-			WoodType.CODEC.optionalFieldOf("wood_type", WoodType.OAK).forGetter($ -> WoodType.OAK),
-			Block.propertiesCodec()
-	).apply(instance, FenceGateBlock::new));
+	public static final MapCodec<FenceGateBlock> FENCE_GATE = woodTyped(FenceGateBlock::new);
 
 	public static final MapCodec<ColoredFallingBlock> COLORED_FALLING = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			ColorRGBA.CODEC.optionalFieldOf("falling_dust_color", new ColorRGBA(14406560)).forGetter($ -> new ColorRGBA(14406560)),
@@ -69,12 +73,31 @@ public class BlockCodecs {
 				return new ButtonBlock(blockSetType, ticksToStayPressed.orElse(blockSetType.canOpenByHand() ? 30 : 20), properties);
 			}));
 
+	public static final MapCodec<WallSignBlock> WALL_SIGN = woodTyped(WallSignBlock::new);
+	public static final MapCodec<StandingSignBlock> STANDING_SIGN = woodTyped(StandingSignBlock::new);
+	public static final MapCodec<WallHangingSignBlock> WALL_HANGING_SIGN = woodTyped(WallHangingSignBlock::new);
+	public static final MapCodec<CeilingHangingSignBlock> CEILING_HANGING_SIGN = woodTyped(CeilingHangingSignBlock::new);
+
+	public static final MapCodec<SaplingBlock> SAPLING = RecordCodecBuilder.mapCodec(instance -> instance.group(
+			CustomizationCodecs.TREE_GROWER.fieldOf("tree").forGetter(BlockCodecs::notImplemented),
+			Block.propertiesCodec()
+	).apply(instance, SaplingBlock::new));
+
 	static {
-		register(ResourceLocation.withDefaultNamespace("block"), BLOCK);
-		register(ResourceLocation.withDefaultNamespace("stair"), STAIR);
-		register(ResourceLocation.withDefaultNamespace("fence_gate"), FENCE_GATE);
-		register(ResourceLocation.withDefaultNamespace("colored_falling"), COLORED_FALLING);
-		register(ResourceLocation.withDefaultNamespace("button"), BUTTON);
+		register("block", BLOCK);
+		register("stair", STAIR);
+		register("fence_gate", FENCE_GATE);
+		register("colored_falling", COLORED_FALLING);
+		register("button", BUTTON);
+		register("wall_sign", WALL_SIGN);
+		register("standing_sign", STANDING_SIGN);
+		register("wall_hanging_sign", WALL_HANGING_SIGN);
+		register("ceiling_hanging_sign", CEILING_HANGING_SIGN);
+		register("sapling", SAPLING);
+	}
+
+	public static void register(String key, MapCodec<? extends Block> codec) {
+		register(ResourceLocation.withDefaultNamespace(key), codec);
 	}
 
 	public static void register(ResourceLocation key, MapCodec<? extends Block> codec) {
@@ -93,5 +116,12 @@ public class BlockCodecs {
 
 	public static <O, A> A notImplemented(O block) {
 		throw new NotImplementedException();
+	}
+
+	public static <T extends Block> MapCodec<T> woodTyped(BiFunction<WoodType, Block.Properties, T> factory) {
+		return RecordCodecBuilder.mapCodec(instance -> instance.group(
+				WoodType.CODEC.optionalFieldOf("wood_type", WoodType.OAK).forGetter($ -> WoodType.OAK),
+				Block.propertiesCodec()
+		).apply(instance, factory));
 	}
 }

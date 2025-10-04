@@ -10,22 +10,26 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.advancements.critereon.BlockPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.grower.TreeGrower;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import snownee.kiwi.RenderLayerEnum;
+import snownee.kiwi.customization.block.loader.BlockCodecs;
 
 public class CustomizationCodecs {
 	public static final BiMap<String, NoteBlockInstrument> INSTRUMENTS = HashBiMap.create();
@@ -45,11 +49,30 @@ public class CustomizationCodecs {
 	public static final Codec<BlockBehaviour.OffsetType> OFFSET_TYPE = simpleByNameCodec(ImmutableBiMap.of(
 			"xz", BlockBehaviour.OffsetType.XZ,
 			"xyz", BlockBehaviour.OffsetType.XYZ));
-	public static final Codec<BlockBehaviour.StatePredicate> STATE_PREDICATE = Codec.BOOL.flatComapMap(bl -> {
-		return bl ? Blocks::always : Blocks::never;
-	}, p -> {
-		return DataResult.error(() -> "Unsupported operation");
-	});
+	public static final Codec<BlockBehaviour.StatePredicate> STATE_PREDICATE = Codec.BOOL.flatComapMap(
+			bl -> {
+				return bl ? Blocks::always : Blocks::never;
+			}, p -> {
+				return DataResult.error(() -> "Unsupported operation");
+			});
+	public static final Codec<TreeGrower> TREE_GROWER = Codec.withAlternative(
+			TreeGrower.CODEC,
+			RecordCodecBuilder.create(instance -> instance.group(
+					Codec.STRING.fieldOf("name").forGetter(BlockCodecs::notImplemented),
+					Codec.FLOAT.optionalFieldOf("secondary_chance", 0F).forGetter(BlockCodecs::notImplemented),
+					ResourceKey.codec(Registries.CONFIGURED_FEATURE).optionalFieldOf("mega_tree").forGetter(BlockCodecs::notImplemented),
+					ResourceKey.codec(Registries.CONFIGURED_FEATURE)
+							.optionalFieldOf("secondary_mega_tree")
+							.forGetter(BlockCodecs::notImplemented),
+					ResourceKey.codec(Registries.CONFIGURED_FEATURE).optionalFieldOf("tree").forGetter(BlockCodecs::notImplemented),
+					ResourceKey.codec(Registries.CONFIGURED_FEATURE)
+							.optionalFieldOf("secondary_tree")
+							.forGetter(BlockCodecs::notImplemented),
+					ResourceKey.codec(Registries.CONFIGURED_FEATURE).optionalFieldOf("flowers").forGetter(BlockCodecs::notImplemented),
+					ResourceKey.codec(Registries.CONFIGURED_FEATURE)
+							.optionalFieldOf("secondary_flowers")
+							.forGetter(BlockCodecs::notImplemented)
+			).apply(instance, TreeGrower::new)));
 	// TODO BlockPredicate has its own Codec now.
 	//  However, to use that, you need to wrap your JsonOps into RegistryOps, which requires a HolderLookup.Provider.
 	//  Meaning, you need to get HolderLookup.Provider somewhere.
@@ -59,13 +82,15 @@ public class CustomizationCodecs {
 			String stringValue = ops.getStringValue(input).result().orElse(null);
 			if (stringValue != null) {
 				if (stringValue.startsWith("#")) {
-					return DataResult.success(Pair.of(BlockPredicate.Builder.block()
-							.of(TagKey.create(Registries.BLOCK, ResourceLocation.parse(stringValue.substring(1))))
-							.build(), ops.empty()));
+					return DataResult.success(Pair.of(
+							BlockPredicate.Builder.block()
+									.of(TagKey.create(Registries.BLOCK, ResourceLocation.parse(stringValue.substring(1))))
+									.build(), ops.empty()));
 				}
-				return DataResult.success(Pair.of(BlockPredicate.Builder.block()
-						.of(BuiltInRegistries.BLOCK.get(ResourceLocation.parse(stringValue)))
-						.build(), ops.empty()));
+				return DataResult.success(Pair.of(
+						BlockPredicate.Builder.block()
+								.of(BuiltInRegistries.BLOCK.get(ResourceLocation.parse(stringValue)))
+								.build(), ops.empty()));
 			}
 			//return ExtraCodecs.JSON.decode(ops, input).map($ -> $.mapFirst(BlockPredicate::fromJson));
 			return DataResult.error(() -> "Raw JSON input is not supported");
@@ -153,15 +178,16 @@ public class CustomizationCodecs {
 	}
 
 	public static <T> Codec<T> simpleByNameCodec(Map<ResourceLocation, T> map) {
-		return ResourceLocation.CODEC.flatXmap(key -> {
-			T value = map.get(key);
-			if (value == null) {
-				return DataResult.error(() -> "Unknown key: " + key);
-			}
-			return DataResult.success(value);
-		}, value -> {
-			return DataResult.error(() -> "Unsupported operation");
-		});
+		return ResourceLocation.CODEC.flatXmap(
+				key -> {
+					T value = map.get(key);
+					if (value == null) {
+						return DataResult.error(() -> "Unknown key: " + key);
+					}
+					return DataResult.success(value);
+				}, value -> {
+					return DataResult.error(() -> "Unsupported operation");
+				});
 	}
 
 	public static <T> Codec<T> simpleByNameCodec(BiMap<String, T> map) {
@@ -169,19 +195,20 @@ public class CustomizationCodecs {
 	}
 
 	public static <K, V> Codec<V> simpleByNameCodec(BiMap<K, V> map, Codec<K> keyCodec) {
-		return keyCodec.flatXmap(key -> {
-			V value = map.get(key);
-			if (value == null) {
-				return DataResult.error(() -> "Unknown key: " + key);
-			}
-			return DataResult.success(value);
-		}, value -> {
-			K key = map.inverse().get(value);
-			if (key == null) {
-				return DataResult.error(() -> "Unknown value: " + value);
-			}
-			return DataResult.success(key);
-		});
+		return keyCodec.flatXmap(
+				key -> {
+					V value = map.get(key);
+					if (value == null) {
+						return DataResult.error(() -> "Unknown key: " + key);
+					}
+					return DataResult.success(value);
+				}, value -> {
+					K key = map.inverse().get(value);
+					if (key == null) {
+						return DataResult.error(() -> "Unknown value: " + value);
+					}
+					return DataResult.success(key);
+				});
 	}
 
 	public static <T> Codec<BlockBehaviour.StateArgumentPredicate<T>> stateArgumentPredicate() {
@@ -204,9 +231,10 @@ public class CustomizationCodecs {
 				if (stringValue.isPresent()) {
 					String s = stringValue.get();
 					if ("ocelot_or_parrot".equals(s)) {
-						return DataResult.success(Pair.of((state, world, pos, entity) -> {
-							return entity == EntityType.OCELOT || entity == EntityType.PARROT;
-						}, ops.empty()));
+						return DataResult.success(Pair.of(
+								(state, world, pos, entity) -> {
+									return entity == EntityType.OCELOT || entity == EntityType.PARROT;
+								}, ops.empty()));
 					}
 				}
 				return DataResult.error(() -> "Failed to decode state argument predicate: " + input);

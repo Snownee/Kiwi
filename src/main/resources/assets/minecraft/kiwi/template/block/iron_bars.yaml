@@ -2,3 +2,4 @@ type: simple
 class: net.minecraft.world.level.block.IronBarsBlock
 properties:
   render_type: cutout_mipped
+  copy: iron_bars
