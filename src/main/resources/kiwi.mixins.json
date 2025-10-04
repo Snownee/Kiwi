@@ -17,6 +17,7 @@
 		"customization.BuiltInRegistriesMixin",
 		"customization.BushBlockMixin",
 		"customization.HalfTransparentBlockMixin",
+		"customization.WoodTypeMixin",
 		"customization.fabric.PackRepositoryMixin",
 		"customization.family.RecipeManagerMixin",
 		"customization.placement.BlockItemGetPlacementStateMixin",
