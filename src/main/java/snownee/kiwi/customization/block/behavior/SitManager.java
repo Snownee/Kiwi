@@ -154,6 +154,7 @@ public class SitManager {
 				}
 			}
 			if (level.addFreshEntity(display)) {
+				rider.setYRot(display.getYRot());
 				rider.startRiding(display, true);
 				if (rider != player) {
 					((Leashable) rider).dropLeash(true, true);
