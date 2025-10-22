@@ -1,15 +1,6 @@
 package snownee.kiwi;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import com.google.common.collect.Lists;
-
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -22,6 +13,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import snownee.kiwi.KiwiModule.Category;
 import snownee.kiwi.item.ItemCategoryFiller;
+import snownee.kiwi.util.KUtil;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public class GroupSetting {
 
@@ -62,12 +60,14 @@ public class GroupSetting {
 				.toList();
 		for (ResourceKey<CreativeModeTab> tabKey : tabKeys) {
 			ItemGroupEvents.modifyEntriesEvent(tabKey).register(entries -> {
-				Set<Item> afterItems = Stream.of(after)
-						.map(ResourceLocation::tryParse)
-						.filter(Objects::nonNull)
-						.map(BuiltInRegistries.ITEM::get)
-						.filter(Predicate.not(Items.AIR::equals))
-						.collect(Collectors.toSet());
+				List<Item> afterItems = after == null ?
+										List.of() :
+										Stream.of(after)
+											  .map(KUtil::RL)
+											  .filter(Objects::nonNull)
+											  .map(BuiltInRegistries.ITEM::get)
+											  .filter(Predicate.not(Items.AIR::equals))
+											  .toList();
 				List<ItemStack> items = Lists.newArrayList();
 				for (ItemCategoryFiller filler : fillers) {
 					CreativeModeTab tab = BuiltInRegistries.CREATIVE_MODE_TAB.get(tabKey);
