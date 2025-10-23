@@ -1,1 +1,1 @@
-break_sound: minecraft:block.chest.locked
+break: minecraft:block.chest.locked

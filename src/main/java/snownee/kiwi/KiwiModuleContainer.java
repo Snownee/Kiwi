@@ -148,6 +148,9 @@ public final class KiwiModuleContainer {
 					o = go.getOrCreate();
 				}
 				ResourceKey<? extends Registry<?>> registryKey = go.findRegistry();
+				if (registryKey == null) {
+					throw new IllegalArgumentException("Kiwi failed to find registry for %s".formatted(go.value.getClass()));
+				}
 				//noinspection unchecked,rawtypes
 				ResourceKey resourceKey = ResourceKey.create((ResourceKey) registryKey, id);
 				//noinspection unchecked
