@@ -9,7 +9,6 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.jetbrains.annotations.Nullable;
@@ -24,7 +23,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
-import net.neoforged.neoforge.registries.datamaps.DataMapType;
 
 /**
  * A Deferred Holder is a {@link Holder} that is constructed with only a ResourceKey.
@@ -33,8 +31,8 @@ import net.neoforged.neoforge.registries.datamaps.DataMapType;
  *
  * @param <T> The type of object being held by this DeferredHolder.
  */
-public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
-	public static <R, T extends R> Codec<DeferredHolder<R, T>> codec(ResourceKey<? extends Registry<R>> registryKey) {
+public class DeferredHolder<T> implements Holder<T> {
+	public static <T> Codec<DeferredHolder<T>> codec(ResourceKey<? extends Registry<T>> registryKey) {
 		return ResourceKey.codec(registryKey).xmap(DeferredHolder::new, DeferredHolder::getKey);
 	}
 
@@ -42,11 +40,11 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 	 * Creates a new DeferredHolder targeting the value with the specified name in the specified registry.
 	 *
 	 * @param <T>         The type of the target value.
-	 * @param <R>         The registry type.
+	 * @param <T>         The registry type.
 	 * @param registryKey The name of the registry the target value is a member of.
 	 * @param valueName   The name of the target value.
 	 */
-	public static <R, T extends R> DeferredHolder<R, T> create(ResourceKey<? extends Registry<R>> registryKey, ResourceLocation valueName) {
+	public static <T> DeferredHolder<T> create(ResourceKey<? extends Registry<T>> registryKey, ResourceLocation valueName) {
 		return create(ResourceKey.create(registryKey, valueName));
 	}
 
@@ -57,7 +55,7 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 	 * @param registryName The name of the registry the target value is a member of.
 	 * @param valueName    The name of the target value.
 	 */
-	public static <R, T extends R> DeferredHolder<R, T> create(ResourceLocation registryName, ResourceLocation valueName) {
+	public static <T> DeferredHolder<T> create(ResourceLocation registryName, ResourceLocation valueName) {
 		return create(ResourceKey.createRegistryKey(registryName), valueName);
 	}
 
@@ -67,20 +65,20 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 	 * @param <T> The type of the target value.
 	 * @param key The resource key of the target value.
 	 */
-	public static <R, T extends R> DeferredHolder<R, T> create(ResourceKey<R> key) {
+	public static <T> DeferredHolder<T> create(ResourceKey<T> key) {
 		return new DeferredHolder<>(key);
 	}
 
 	/**
 	 * The resource key of the target object.
 	 */
-	protected final ResourceKey<R> key;
+	protected final ResourceKey<T> key;
 
 	/**
 	 * The currently cached value.
 	 */
 	@Nullable
-	private Holder<R> holder = null;
+	private Holder<T> holder = null;
 
 	/**
 	 * Creates a new DeferredHolder with a ResourceKey.
@@ -92,7 +90,7 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 	 * @see #create(ResourceLocation, ResourceLocation)
 	 * @see #create(ResourceKey)
 	 */
-	protected DeferredHolder(ResourceKey<R> key) {
+	protected DeferredHolder(ResourceKey<T> key) {
 		this.key = Objects.requireNonNull(key);
 		this.bind(false);
 	}
@@ -141,8 +139,8 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 	 */
 	@Nullable
 	@SuppressWarnings("unchecked")
-	protected Registry<R> getRegistry() {
-		return (Registry<R>) BuiltInRegistries.REGISTRY.get(this.key.registry());
+	protected Registry<T> getRegistry() {
+		return (Registry<T>) BuiltInRegistries.REGISTRY.get(this.key.registry());
 	}
 
 	/**
@@ -158,7 +156,7 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 			return;
 		}
 
-		Registry<R> registry = getRegistry();
+		Registry<T> registry = getRegistry();
 		if (registry != null) {
 			this.holder = registry.getHolder(this.key).orElse(null);
 		} else if (throwOnMissingRegistry) {
@@ -176,8 +174,7 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 	/**
 	 * @return The ResourceKey of the object pointed to by this DeferredHolder.
 	 */
-	@Override
-	public ResourceKey<R> getKey() {
+	public ResourceKey<T> getKey() {
 		return this.key;
 	}
 
@@ -186,7 +183,7 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 		if (this == obj) {
 			return true;
 		}
-		return obj instanceof Holder<?> h && h.kind() == Kind.REFERENCE && h.getKey() == this.key;
+		return obj instanceof Holder<?> h && h.kind() == Kind.REFERENCE && h.unwrapKey().get() == this.key;
 	}
 
 	@Override
@@ -223,7 +220,7 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 	 * {@return true if the passed ResourceKey is the same as this holder's resource key}
 	 */
 	@Override
-	public boolean is(ResourceKey<R> key) {
+	public boolean is(ResourceKey<T> key) {
 		return key == this.key;
 	}
 
@@ -233,7 +230,7 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 	 * @return {@code true} if the filter matches {@linkplain #getKey() this DH's resource key}
 	 */
 	@Override
-	public boolean is(Predicate<ResourceKey<R>> filter) {
+	public boolean is(Predicate<ResourceKey<T>> filter) {
 		return filter.test(this.key);
 	}
 
@@ -241,29 +238,11 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 	 * {@return true if this holder is a member of the passed tag}
 	 */
 	@Override
-	public boolean is(TagKey<R> tag) {
+	public boolean is(TagKey<T> tag) {
 		bind(false);
 		return this.holder != null && this.holder.is(tag);
 	}
 
-	/**
-	 * {@return {@code true} if the {@code holder} is the same as this holder}
-	 */
-	@Override
-	@Deprecated
-	public boolean is(Holder<R> holder) {
-		bind(false);
-		return this.holder != null && this.holder.is(holder);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public <Z> @Nullable Z getData(DataMapType<R, Z> type) {
-		bind(false);
-		return holder == null ? null : holder.getData(type);
-	}
 
 	/**
 	 * {@return all tags present on the underlying object}
@@ -271,7 +250,7 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 	 * <p>If the underlying object is not {@linkplain #isBound() bound} yet, and empty stream is returned.
 	 */
 	@Override
-	public Stream<TagKey<R>> tags() {
+	public Stream<TagKey<T>> tags() {
 		bind(false);
 		return this.holder != null ? this.holder.tags() : Stream.empty();
 	}
@@ -282,7 +261,7 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 	 * @apiNote This method is implemented for {@link Holder} compatibility, but {@link #getKey()} should be preferred.
 	 */
 	@Override
-	public Either<ResourceKey<R>, R> unwrap() {
+	public Either<ResourceKey<T>, T> unwrap() {
 		// Holder.Reference always returns the key, do the same here.
 		return Either.left(this.key);
 	}
@@ -294,7 +273,7 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 	 * @apiNote This method is implemented for {@link Holder} compatibility, but {@link #getKey()} should be preferred.
 	 */
 	@Override
-	public Optional<ResourceKey<R>> unwrapKey() {
+	public Optional<ResourceKey<T>> unwrapKey() {
 		return Optional.of(this.key);
 	}
 
@@ -304,14 +283,8 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 	}
 
 	@Override
-	public boolean canSerializeIn(HolderOwner<R> owner) {
+	public boolean canSerializeIn(HolderOwner<T> owner) {
 		bind(false);
 		return this.holder != null && this.holder.canSerializeIn(owner);
-	}
-
-	@Override
-	public Holder<R> getDelegate() {
-		bind(false);
-		return this.holder != null ? this.holder.getDelegate() : this;
 	}
 }
