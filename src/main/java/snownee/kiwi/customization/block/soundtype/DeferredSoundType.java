@@ -11,7 +11,7 @@ import net.minecraft.world.level.block.SoundType;
 import snownee.kiwi.util.DeferredHolder;
 
 public class DeferredSoundType extends SoundType {
-	private static final DeferredHolder<SoundEvent, SoundEvent> EMPTY_SOUND_EVENT = DeferredHolder.create(
+	private static final DeferredHolder<SoundEvent> EMPTY_SOUND_EVENT = DeferredHolder.create(
 			Registries.SOUND_EVENT,
 			SoundEvents.EMPTY.getLocation());
 
@@ -25,20 +25,20 @@ public class DeferredSoundType extends SoundType {
 			DeferredHolder.codec(Registries.SOUND_EVENT).optionalFieldOf("fall", EMPTY_SOUND_EVENT).forGetter(it -> it.fallSound)
 	).apply(instance, DeferredSoundType::new));
 
-	private final DeferredHolder<SoundEvent, SoundEvent> breakSound;
-	private final DeferredHolder<SoundEvent, SoundEvent> stepSound;
-	private final DeferredHolder<SoundEvent, SoundEvent> placeSound;
-	private final DeferredHolder<SoundEvent, SoundEvent> hitSound;
-	private final DeferredHolder<SoundEvent, SoundEvent> fallSound;
+	private final DeferredHolder<SoundEvent> breakSound;
+	private final DeferredHolder<SoundEvent> stepSound;
+	private final DeferredHolder<SoundEvent> placeSound;
+	private final DeferredHolder<SoundEvent> hitSound;
+	private final DeferredHolder<SoundEvent> fallSound;
 
 	public DeferredSoundType(
 			float volumeIn,
 			float pitchIn,
-			DeferredHolder<SoundEvent, SoundEvent> breakSoundIn,
-			DeferredHolder<SoundEvent, SoundEvent> stepSoundIn,
-			DeferredHolder<SoundEvent, SoundEvent> placeSoundIn,
-			DeferredHolder<SoundEvent, SoundEvent> hitSoundIn,
-			DeferredHolder<SoundEvent, SoundEvent> fallSoundIn) {
+			DeferredHolder<SoundEvent> breakSoundIn,
+			DeferredHolder<SoundEvent> stepSoundIn,
+			DeferredHolder<SoundEvent> placeSoundIn,
+			DeferredHolder<SoundEvent> hitSoundIn,
+			DeferredHolder<SoundEvent> fallSoundIn) {
 		super(volumeIn, pitchIn, null, null, null, null, null);
 		this.breakSound = breakSoundIn;
 		this.stepSound = stepSoundIn;
