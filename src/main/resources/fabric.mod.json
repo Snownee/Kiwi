@@ -22,11 +22,23 @@
 			"snownee.kiwi.Kiwi",
 			"snownee.kiwi.loader.ClientInitializer"
 		],
+		"fabric-datagen": [
+			"snownee.kiwi.datagen.KiwiDataGen"
+		],
 		"modmenu": [
 			"snownee.kiwi.config.ModMenuIntegration"
 		],
-		"fabric-datagen": [
-			"snownee.kiwi.datagen.KiwiDataGen"
+		"jade": [
+			"snownee.kiwi.customization.compat.jade.JadeCompat"
+		],
+		"jei_mod_plugin": [
+			"snownee.kiwi.customization.compat.jei.JEICompat"
+		],
+		"rei_client": [
+			"snownee.kiwi.customization.compat.rei.REICompat"
+		],
+		"emi": [
+			"snownee.kiwi.customization.compat.emi.EMICompat"
 		]
 	},
 	"mixins": [

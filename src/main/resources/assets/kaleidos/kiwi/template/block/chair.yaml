@@ -1,0 +1,17 @@
+type: simple
+properties:
+  components:
+    - horizontal
+    - water_loggable
+    - type: simple
+      properties:
+        - name: type
+          values:
+            - single
+            - pushed
+            - both
+            - left
+            - right
+  shape: kaleidos:chair
+  interaction_shape: kaleidos:chair
+  no_occlusion: true

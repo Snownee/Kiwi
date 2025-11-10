@@ -28,6 +28,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import com.google.common.graph.GraphBuilder;
+import com.google.common.graph.MutableGraph;
 import com.mojang.logging.LogUtils;
 
 import net.fabricmc.api.ClientModInitializer;
@@ -39,6 +41,8 @@ import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
+import net.fabricmc.loader.impl.gui.FabricGuiEntry;
+import net.fabricmc.loader.impl.gui.FabricStatusTree;
 import net.minecraft.advancements.critereon.ItemSubPredicate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
@@ -114,6 +118,7 @@ import snownee.kiwi.command.KiwiCommand;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfig.ConfigType;
 import snownee.kiwi.config.KiwiConfigManager;
+import snownee.kiwi.customization.CustomizationHooks;
 import snownee.kiwi.loader.ClientPlatform;
 import snownee.kiwi.loader.KiwiMetadataLoader;
 import snownee.kiwi.loader.Platform;
@@ -121,540 +126,565 @@ import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.loader.event.PostInitEvent;
 import snownee.kiwi.network.KNetworking;
 import snownee.kiwi.util.KUtil;
+import snownee.kiwi.util.toposort.TopologicalSort;
 
 @Mod(Kiwi.ID)
 public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer {
-	public static final String ID = "kiwi";
-	public static final RegistryLookup registryLookup = new RegistryLookup();
-	static final Marker MARKER = MarkerFactory.getMarker("INIT");
-	private static final Map<String, ResourceKey<CreativeModeTab>> GROUPS = Maps.newHashMap();
-	public static final Logger LOGGER = LogUtils.getLogger();
-	public static Map<ResourceLocation, Boolean> defaultOptions = Maps.newHashMap();
-	public static MinecraftServer currentServer;
-	private static Multimap<String, KiwiAnnotationData> moduleData = ArrayListMultimap.create();
-	private static Map<KiwiAnnotationData, String> conditions = Maps.newHashMap();
-	private static boolean tagsUpdated;
-	public static boolean enableDataModule;
-	private static boolean initialized;
+    public static final String ID = "kiwi";
+    public static final RegistryLookup registryLookup = new RegistryLookup();
+    static final Marker MARKER = MarkerFactory.getMarker("INIT");
+    private static final Map<String, ResourceKey<CreativeModeTab>> GROUPS = Maps.newHashMap();
+    public static final Logger LOGGER = LogUtils.getLogger();
+    public static Map<ResourceLocation, Boolean> defaultOptions = Maps.newHashMap();
+    public static MinecraftServer currentServer;
+    private static Multimap<String, KiwiAnnotationData> moduleData = ArrayListMultimap.create();
+    private static Map<KiwiAnnotationData, String> conditions = Maps.newHashMap();
+    private static boolean tagsUpdated;
+    public static boolean enableDataModule;
+    private static boolean initialized;
 
-	public static ResourceLocation id(String path) {
-		return ResourceLocation.fromNamespaceAndPath(ID, path);
-	}
+    public static ResourceLocation id(String path) {
+        return ResourceLocation.fromNamespaceAndPath(ID, path);
+    }
 
-	private static boolean shouldLoad(KiwiAnnotationData annotationData, String dist) {
-		try {
-			String target = annotationData.getTarget();
-			if (Platform.isProduction() && target.startsWith("snownee.kiwi.test.")) {
-				return false;
-			}
-			ClassNode clazz = new ClassNode(Opcodes.ASM7);
-			InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(
-					target.replace('.', '/') + ".class");
-			final ClassReader classReader = new ClassReader(is);
-			classReader.accept(clazz, 0);
-			if (clazz.visibleAnnotations != null) {
-				final String ONLYIN = Type.getDescriptor(Environment.class);
-				for (AnnotationNode node : clazz.visibleAnnotations) {
-					if (node.values != null && ONLYIN.equals(node.desc)) {
-						int i = node.values.indexOf("value");
-						if (i != -1 && !node.values.get(i + 1).equals(dist)) {
-							return false;
-						}
-					}
-				}
-			}
-			return true;
-		} catch (Throwable e) {
-			return false;
-		}
-	}
+    private static boolean shouldLoad(KiwiAnnotationData annotationData, String dist) {
+        try {
+            String target = annotationData.getTarget();
+            if (Platform.isProduction() && target.startsWith("snownee.kiwi.test.")) {
+                return false;
+            }
+            ClassNode clazz = new ClassNode(Opcodes.ASM7);
+            InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(
+                target.replace('.', '/') + ".class");
+            final ClassReader classReader = new ClassReader(is);
+            classReader.accept(clazz, 0);
+            if (clazz.visibleAnnotations != null) {
+                final String ONLYIN = Type.getDescriptor(Environment.class);
+                for (AnnotationNode node : clazz.visibleAnnotations) {
+                    if (node.values != null && ONLYIN.equals(node.desc)) {
+                        int i = node.values.indexOf("value");
+                        if (i != -1 && !node.values.get(i + 1).equals(dist)) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        } catch (Throwable e) {
+            return false;
+        }
+    }
 
-	public static void registerRegistry(ResourceKey<? extends Registry<?>> registry, Class<?> baseClass) {
-		Objects.requireNonNull(registryLookup);
-		registryLookup.registries.put(baseClass, registry);
-	}
+    public static void registerRegistry(ResourceKey<? extends Registry<?>> registry, Class<?> baseClass) {
+        Objects.requireNonNull(registryLookup);
+        registryLookup.registries.put(baseClass, registry);
+    }
 
-	//	@SuppressWarnings("rawtypes")
-	private static void registerRegistries() throws Exception {
-		//		Map<String, Field> allFields = Maps.newHashMap();
-		//		for (Field field : BuiltInRegistries.class.getFields()) {
-		//			if (!Modifier.isStatic(field.getModifiers()) || !Modifier.isPublic(field.getModifiers())) {
-		//				continue;
-		//			}
-		//			if (BuiltInRegistries.class.isAssignableFrom(field.getType())) {
-		//				allFields.put(field.getName(), field);
-		//			}
-		//		}
-		//
-		//		StringBuilder sb = new StringBuilder();
-		//		ClassNode clazz = new ClassNode(Opcodes.ASM7);
-		//		InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(BuiltInRegistries.class.getName().replace('.', '/') + ".class");
-		//		final ClassReader classReader = new ClassReader(is);
-		//		classReader.accept(clazz, 0);
-		//
-		//		Pattern pattern = Pattern.compile("<L([^<;]+?)[<;]");
-		//		for (FieldNode field : clazz.fields) {
-		//			if (allFields.containsKey(field.name)) {
-		//				Matcher matcher = pattern.matcher(field.signature);
-		//				if (!matcher.find()) {
-		//					continue;
-		//				}
-		//				String className = matcher.group(1).replace('/', '.');
-		//				Class<?> baseClass = Class.forName(className);
-		//				sb.append("registerRegistry(Registries.%s, %s.class);\n".formatted(field.name, baseClass.getSimpleName()));
-		//				registerRegistry((BuiltInRegistries) allFields.get(field.name).get(null), baseClass);
-		//			}
-		//		}
-		//		System.out.println(sb);
+    //	@SuppressWarnings("rawtypes")
+    private static void registerRegistries() throws Exception {
+        //		Map<String, Field> allFields = Maps.newHashMap();
+        //		for (Field field : BuiltInRegistries.class.getFields()) {
+        //			if (!Modifier.isStatic(field.getModifiers()) || !Modifier.isPublic(field.getModifiers())) {
+        //				continue;
+        //			}
+        //			if (BuiltInRegistries.class.isAssignableFrom(field.getType())) {
+        //				allFields.put(field.getName(), field);
+        //			}
+        //		}
+        //
+        //		StringBuilder sb = new StringBuilder();
+        //		ClassNode clazz = new ClassNode(Opcodes.ASM7);
+        //		InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(BuiltInRegistries.class.getName().replace('.', '/') + ".class");
+        //		final ClassReader classReader = new ClassReader(is);
+        //		classReader.accept(clazz, 0);
+        //
+        //		Pattern pattern = Pattern.compile("<L([^<;]+?)[<;]");
+        //		for (FieldNode field : clazz.fields) {
+        //			if (allFields.containsKey(field.name)) {
+        //				Matcher matcher = pattern.matcher(field.signature);
+        //				if (!matcher.find()) {
+        //					continue;
+        //				}
+        //				String className = matcher.group(1).replace('/', '.');
+        //				Class<?> baseClass = Class.forName(className);
+        //				sb.append("registerRegistry(Registries.%s, %s.class);\n".formatted(field.name, baseClass.getSimpleName()));
+        //				registerRegistry((BuiltInRegistries) allFields.get(field.name).get(null), baseClass);
+        //			}
+        //		}
+        //		System.out.println(sb);
 
-		registerRegistry(Registries.GAME_EVENT, GameEvent.class);
-		registerRegistry(Registries.SOUND_EVENT, SoundEvent.class);
-		registerRegistry(Registries.FLUID, Fluid.class);
-		registerRegistry(Registries.MOB_EFFECT, MobEffect.class);
-		registerRegistry(Registries.BLOCK, Block.class);
-		registerRegistry(Registries.ENTITY_TYPE, EntityType.class);
-		registerRegistry(Registries.ITEM, Item.class);
-		registerRegistry(Registries.POTION, Potion.class);
-		registerRegistry(Registries.PARTICLE_TYPE, ParticleType.class);
-		registerRegistry(Registries.BLOCK_ENTITY_TYPE, BlockEntityType.class);
-		registerRegistry(Registries.PAINTING_VARIANT, PaintingVariant.class);
-		//registerRegistry(Registries.CUSTOM_STAT, ResourceLocation.class);
-		registerRegistry(Registries.CHUNK_STATUS, ChunkStatus.class);
-		registerRegistry(Registries.RULE_TEST, RuleTestType.class);
-		registerRegistry(Registries.POS_RULE_TEST, PosRuleTestType.class);
-		registerRegistry(Registries.MENU, MenuType.class);
-		registerRegistry(Registries.RECIPE_TYPE, RecipeType.class);
-		registerRegistry(Registries.RECIPE_SERIALIZER, RecipeSerializer.class);
-		registerRegistry(Registries.ATTRIBUTE, Attribute.class);
-		registerRegistry(Registries.POSITION_SOURCE_TYPE, PositionSourceType.class);
-		registerRegistry(Registries.COMMAND_ARGUMENT_TYPE, ArgumentTypeInfo.class);
-		registerRegistry(Registries.STAT_TYPE, StatType.class);
-		registerRegistry(Registries.VILLAGER_TYPE, VillagerType.class);
-		registerRegistry(Registries.VILLAGER_PROFESSION, VillagerProfession.class);
-		registerRegistry(Registries.POINT_OF_INTEREST_TYPE, PoiType.class);
-		registerRegistry(Registries.MEMORY_MODULE_TYPE, MemoryModuleType.class);
-		registerRegistry(Registries.SENSOR_TYPE, SensorType.class);
-		registerRegistry(Registries.SCHEDULE, Schedule.class);
-		registerRegistry(Registries.ACTIVITY, Activity.class);
-		registerRegistry(Registries.LOOT_POOL_ENTRY_TYPE, LootPoolEntryType.class);
-		registerRegistry(Registries.LOOT_FUNCTION_TYPE, LootItemFunctionType.class);
-		registerRegistry(Registries.LOOT_CONDITION_TYPE, LootItemConditionType.class);
-		registerRegistry(Registries.LOOT_NUMBER_PROVIDER_TYPE, LootNumberProviderType.class);
-		registerRegistry(Registries.LOOT_NBT_PROVIDER_TYPE, LootNbtProviderType.class);
-		registerRegistry(Registries.LOOT_SCORE_PROVIDER_TYPE, LootScoreProviderType.class);
-		registerRegistry(Registries.FLOAT_PROVIDER_TYPE, FloatProviderType.class);
-		registerRegistry(Registries.INT_PROVIDER_TYPE, IntProviderType.class);
-		registerRegistry(Registries.HEIGHT_PROVIDER_TYPE, HeightProviderType.class);
-		registerRegistry(Registries.BLOCK_PREDICATE_TYPE, BlockPredicateType.class);
-		registerRegistry(Registries.CARVER, WorldCarver.class);
-		registerRegistry(Registries.FEATURE, Feature.class);
-		registerRegistry(Registries.STRUCTURE_PLACEMENT, StructurePlacementType.class);
-		registerRegistry(Registries.STRUCTURE_PIECE, StructurePieceType.class);
-		registerRegistry(Registries.STRUCTURE_TYPE, StructureType.class);
-		registerRegistry(Registries.PLACEMENT_MODIFIER_TYPE, PlacementModifierType.class);
-		registerRegistry(Registries.BLOCK_STATE_PROVIDER_TYPE, BlockStateProviderType.class);
-		registerRegistry(Registries.FOLIAGE_PLACER_TYPE, FoliagePlacerType.class);
-		registerRegistry(Registries.TRUNK_PLACER_TYPE, TrunkPlacerType.class);
-		registerRegistry(Registries.ROOT_PLACER_TYPE, RootPlacerType.class);
-		registerRegistry(Registries.TREE_DECORATOR_TYPE, TreeDecoratorType.class);
-		registerRegistry(Registries.FEATURE_SIZE_TYPE, FeatureSizeType.class);
-		registerRegistry(Registries.STRUCTURE_PROCESSOR, StructureProcessorType.class);
-		registerRegistry(Registries.STRUCTURE_POOL_ELEMENT, StructurePoolElementType.class);
-		registerRegistry(Registries.CAT_VARIANT, CatVariant.class);
-		registerRegistry(Registries.FROG_VARIANT, FrogVariant.class);
-		registerRegistry(Registries.INSTRUMENT, Instrument.class);
-		registerRegistry(Registries.CREATIVE_MODE_TAB, CreativeModeTab.class);
-		registerRegistry(Registries.ARMOR_MATERIAL, ArmorMaterial.class);
-		registerRegistry(Registries.DATA_COMPONENT_TYPE, DataComponentType.class);
-		registerRegistry(Registries.ITEM_SUB_PREDICATE_TYPE, ItemSubPredicate.Type.class);
-	}
+        registerRegistry(Registries.GAME_EVENT, GameEvent.class);
+        registerRegistry(Registries.SOUND_EVENT, SoundEvent.class);
+        registerRegistry(Registries.FLUID, Fluid.class);
+        registerRegistry(Registries.MOB_EFFECT, MobEffect.class);
+        registerRegistry(Registries.BLOCK, Block.class);
+        registerRegistry(Registries.ENTITY_TYPE, EntityType.class);
+        registerRegistry(Registries.ITEM, Item.class);
+        registerRegistry(Registries.POTION, Potion.class);
+        registerRegistry(Registries.PARTICLE_TYPE, ParticleType.class);
+        registerRegistry(Registries.BLOCK_ENTITY_TYPE, BlockEntityType.class);
+        registerRegistry(Registries.PAINTING_VARIANT, PaintingVariant.class);
+        //registerRegistry(Registries.CUSTOM_STAT, ResourceLocation.class);
+        registerRegistry(Registries.CHUNK_STATUS, ChunkStatus.class);
+        registerRegistry(Registries.RULE_TEST, RuleTestType.class);
+        registerRegistry(Registries.POS_RULE_TEST, PosRuleTestType.class);
+        registerRegistry(Registries.MENU, MenuType.class);
+        registerRegistry(Registries.RECIPE_TYPE, RecipeType.class);
+        registerRegistry(Registries.RECIPE_SERIALIZER, RecipeSerializer.class);
+        registerRegistry(Registries.ATTRIBUTE, Attribute.class);
+        registerRegistry(Registries.POSITION_SOURCE_TYPE, PositionSourceType.class);
+        registerRegistry(Registries.COMMAND_ARGUMENT_TYPE, ArgumentTypeInfo.class);
+        registerRegistry(Registries.STAT_TYPE, StatType.class);
+        registerRegistry(Registries.VILLAGER_TYPE, VillagerType.class);
+        registerRegistry(Registries.VILLAGER_PROFESSION, VillagerProfession.class);
+        registerRegistry(Registries.POINT_OF_INTEREST_TYPE, PoiType.class);
+        registerRegistry(Registries.MEMORY_MODULE_TYPE, MemoryModuleType.class);
+        registerRegistry(Registries.SENSOR_TYPE, SensorType.class);
+        registerRegistry(Registries.SCHEDULE, Schedule.class);
+        registerRegistry(Registries.ACTIVITY, Activity.class);
+        registerRegistry(Registries.LOOT_POOL_ENTRY_TYPE, LootPoolEntryType.class);
+        registerRegistry(Registries.LOOT_FUNCTION_TYPE, LootItemFunctionType.class);
+        registerRegistry(Registries.LOOT_CONDITION_TYPE, LootItemConditionType.class);
+        registerRegistry(Registries.LOOT_NUMBER_PROVIDER_TYPE, LootNumberProviderType.class);
+        registerRegistry(Registries.LOOT_NBT_PROVIDER_TYPE, LootNbtProviderType.class);
+        registerRegistry(Registries.LOOT_SCORE_PROVIDER_TYPE, LootScoreProviderType.class);
+        registerRegistry(Registries.FLOAT_PROVIDER_TYPE, FloatProviderType.class);
+        registerRegistry(Registries.INT_PROVIDER_TYPE, IntProviderType.class);
+        registerRegistry(Registries.HEIGHT_PROVIDER_TYPE, HeightProviderType.class);
+        registerRegistry(Registries.BLOCK_PREDICATE_TYPE, BlockPredicateType.class);
+        registerRegistry(Registries.CARVER, WorldCarver.class);
+        registerRegistry(Registries.FEATURE, Feature.class);
+        registerRegistry(Registries.STRUCTURE_PLACEMENT, StructurePlacementType.class);
+        registerRegistry(Registries.STRUCTURE_PIECE, StructurePieceType.class);
+        registerRegistry(Registries.STRUCTURE_TYPE, StructureType.class);
+        registerRegistry(Registries.PLACEMENT_MODIFIER_TYPE, PlacementModifierType.class);
+        registerRegistry(Registries.BLOCK_STATE_PROVIDER_TYPE, BlockStateProviderType.class);
+        registerRegistry(Registries.FOLIAGE_PLACER_TYPE, FoliagePlacerType.class);
+        registerRegistry(Registries.TRUNK_PLACER_TYPE, TrunkPlacerType.class);
+        registerRegistry(Registries.ROOT_PLACER_TYPE, RootPlacerType.class);
+        registerRegistry(Registries.TREE_DECORATOR_TYPE, TreeDecoratorType.class);
+        registerRegistry(Registries.FEATURE_SIZE_TYPE, FeatureSizeType.class);
+        registerRegistry(Registries.STRUCTURE_PROCESSOR, StructureProcessorType.class);
+        registerRegistry(Registries.STRUCTURE_POOL_ELEMENT, StructurePoolElementType.class);
+        registerRegistry(Registries.CAT_VARIANT, CatVariant.class);
+        registerRegistry(Registries.FROG_VARIANT, FrogVariant.class);
+        registerRegistry(Registries.INSTRUMENT, Instrument.class);
+        registerRegistry(Registries.CREATIVE_MODE_TAB, CreativeModeTab.class);
+        registerRegistry(Registries.ARMOR_MATERIAL, ArmorMaterial.class);
+        registerRegistry(Registries.DATA_COMPONENT_TYPE, DataComponentType.class);
+        registerRegistry(Registries.ITEM_SUB_PREDICATE_TYPE, ItemSubPredicate.Type.class);
+    }
 
-	public static void registerTab(String id, ResourceKey<CreativeModeTab> tab) {
-		Validate.isTrue(!GROUPS.containsKey(id), "Already exists: %s", id);
-		GROUPS.put(id, tab);
-	}
+    public static void registerTab(String id, ResourceKey<CreativeModeTab> tab) {
+        Validate.isTrue(!GROUPS.containsKey(id), "Already exists: %s", id);
+        GROUPS.put(id, tab);
+    }
 
-	private static void registerTabs() {
-		registerTab(Categories.BUILDING_BLOCKS, CreativeModeTabs.BUILDING_BLOCKS);
-		registerTab(Categories.COLORED_BLOCKS, CreativeModeTabs.COLORED_BLOCKS);
-		registerTab(Categories.COMBAT, CreativeModeTabs.COMBAT);
-		registerTab(Categories.FOOD_AND_DRINKS, CreativeModeTabs.FOOD_AND_DRINKS);
-		registerTab(Categories.FUNCTIONAL_BLOCKS, CreativeModeTabs.FUNCTIONAL_BLOCKS);
-		registerTab(Categories.INGREDIENTS, CreativeModeTabs.INGREDIENTS);
-		registerTab(Categories.NATURAL_BLOCKS, CreativeModeTabs.NATURAL_BLOCKS);
-		registerTab(Categories.OP_BLOCKS, CreativeModeTabs.OP_BLOCKS);
-		registerTab(Categories.REDSTONE_BLOCKS, CreativeModeTabs.REDSTONE_BLOCKS);
-		registerTab(Categories.SPAWN_EGGS, CreativeModeTabs.SPAWN_EGGS);
-		registerTab(Categories.TOOLS_AND_UTILITIES, CreativeModeTabs.TOOLS_AND_UTILITIES);
-	}
+    private static void registerTabs() {
+        registerTab(Categories.BUILDING_BLOCKS, CreativeModeTabs.BUILDING_BLOCKS);
+        registerTab(Categories.COLORED_BLOCKS, CreativeModeTabs.COLORED_BLOCKS);
+        registerTab(Categories.COMBAT, CreativeModeTabs.COMBAT);
+        registerTab(Categories.FOOD_AND_DRINKS, CreativeModeTabs.FOOD_AND_DRINKS);
+        registerTab(Categories.FUNCTIONAL_BLOCKS, CreativeModeTabs.FUNCTIONAL_BLOCKS);
+        registerTab(Categories.INGREDIENTS, CreativeModeTabs.INGREDIENTS);
+        registerTab(Categories.NATURAL_BLOCKS, CreativeModeTabs.NATURAL_BLOCKS);
+        registerTab(Categories.OP_BLOCKS, CreativeModeTabs.OP_BLOCKS);
+        registerTab(Categories.REDSTONE_BLOCKS, CreativeModeTabs.REDSTONE_BLOCKS);
+        registerTab(Categories.SPAWN_EGGS, CreativeModeTabs.SPAWN_EGGS);
+        registerTab(Categories.TOOLS_AND_UTILITIES, CreativeModeTabs.TOOLS_AND_UTILITIES);
+    }
 
-	@Nullable
-	static ResourceKey<CreativeModeTab> getGroup(String path) {
-		return GROUPS.get(path);
-	}
+    @Nullable
+    static ResourceKey<CreativeModeTab> getGroup(String path) {
+        return GROUPS.get(path);
+    }
 
-	public static boolean isLoaded(ResourceLocation module) {
-		return KiwiModules.isLoaded(module);
-	}
+    public static boolean isLoaded(ResourceLocation module) {
+        return KiwiModules.isLoaded(module);
+    }
 
-	public static void onTagsUpdated() {
-		tagsUpdated = true;
-	}
+    public static void onTagsUpdated() {
+        tagsUpdated = true;
+    }
 
-	public static boolean areTagsUpdated() {
-		return tagsUpdated;
-	}
+    public static boolean areTagsUpdated() {
+        return tagsUpdated;
+    }
 
-	public static void enableDataModule() {
-		enableDataModule = true;
-	}
+    public static void enableDataModule() {
+        enableDataModule = true;
+    }
 
-	// a hack to make sure our mod is loaded after all other mods,
-	// so that other mods can call `enableDataModule` in their `onInitialize` method
-	@Override
-	public void onInitializeClient() {
-		onInitialize();
-	}
+    // a hack to make sure our mod is loaded after all other mods,
+    // so that other mods can call `enableDataModule` in their `onInitialize` method
+    @Override
+    public void onInitializeClient() {
+        onInitialize();
+    }
 
-	@Override
-	public void onInitializeServer() {
-		onInitialize();
-	}
+    @Override
+    public void onInitializeServer() {
+        onInitialize();
+    }
 
-	public static void onInitialize() {
-		if (initialized) {
-			return;
-		}
-		initialized = true;
+    public static void onInitialize() {
+        if (initialized) {
+            return;
+        }
+        initialized = true;
 
-		try {
-			registerRegistries();
-			registerTabs();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+        try {
+            registerRegistries();
+            registerTabs();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
-		if (!Platform.isProduction()) {
-			enableDataModule();
-		}
+        CustomizationHooks.init();
 
-		Map<String, KiwiAnnotationData> classOptionalMap = Maps.newHashMap();
-		String dist = Platform.isPhysicalClient() ? "client" : "server";
-		List<String> mods = FabricLoader.getInstance()
-				.getAllMods()
-				.stream()
-				.map(ModContainer::getMetadata)
-				.filter($ -> !"builtin".equals($.getType()))
-				.map(ModMetadata::getId)
-				.toList();
-		KiwiMetadataParser metadataParser = new KiwiMetadataParser();
-		for (String mod : mods) {
-			if (mod.startsWith("fabric")) {
-				continue;
-			}
-			KiwiMetadataLoader loader = new KiwiMetadataLoader(mod);
-			KiwiMetadata metadata = loader.apply(metadataParser);
-			if (metadata == null) {
-				continue;
-			}
+        if (!Platform.isProduction()) {
+            enableDataModule();
+        }
 
-			if (!metadata.clientOnly()) {
-				enableDataModule();
-			}
-			for (KiwiAnnotationData module : metadata.get("modules")) {
-				if (shouldLoad(module, dist)) {
-					moduleData.put(mod, module);
-				}
-			}
-			for (KiwiAnnotationData optional : metadata.get("optionals")) {
-				if (shouldLoad(optional, dist)) {
-					classOptionalMap.put(optional.getTarget(), optional);
-				}
-			}
-			for (KiwiAnnotationData condition : metadata.get("conditions")) {
-				if (shouldLoad(condition, dist)) {
-					conditions.put(condition, mod);
-				}
-			}
-			for (KiwiAnnotationData config : metadata.get("configs")) {
-				if (!shouldLoad(config, dist)) {
-					continue;
-				}
-				ConfigType type = null;
-				try {
-					type = ConfigType.valueOf((String) config.getData().get("type"));
-				} catch (Throwable ignored) {
-				}
-				type = type == null ? ConfigType.COMMON : type;
-				if ((type != ConfigType.CLIENT || Platform.isPhysicalClient() || Platform.isDataGen())) {
-					try {
-						Class<?> clazz = Class.forName(config.getTarget());
-						String fileName = (String) config.getData().get("value");
-						boolean hasModules = type == ConfigType.COMMON && Strings.isNullOrEmpty(fileName);
-						if (Strings.isNullOrEmpty(fileName)) {
-							fileName = String.format("%s-%s", mod, type.extension());
-						}
-						new ConfigHandler(mod, fileName, type, clazz, hasModules);
-					} catch (ClassNotFoundException e) {
-						LOGGER.error(MARKER, "Failed to load config class {}", config.getTarget());
-					}
-				}
-			}
-			for (KiwiAnnotationData packet : metadata.get("packets")) {
-				if (shouldLoad(packet, dist)) {
-					KNetworking.processClass(packet);
-				}
-			}
-		}
+        Map<String, KiwiAnnotationData> classOptionalMap = Maps.newHashMap();
+        String dist = Platform.isPhysicalClient() ? "client" : "server";
+        List<String> mods = FabricLoader.getInstance()
+                                        .getAllMods()
+                                        .stream()
+                                        .map(ModContainer::getMetadata)
+                                        .filter($ -> !"builtin".equals($.getType()))
+                                        .map(ModMetadata::getId)
+                                        .toList();
+        KiwiMetadataParser metadataParser = new KiwiMetadataParser();
+        for (String mod : mods) {
+            if (mod.startsWith("fabric")) {
+                continue;
+            }
+            KiwiMetadataLoader loader = new KiwiMetadataLoader(mod);
+            KiwiMetadata metadata = loader.apply(metadataParser);
+            if (metadata == null) {
+                continue;
+            }
 
-		LOGGER.info(MARKER, "Processing " + moduleData.size() + " KiwiModule annotations");
+            if (!metadata.clientOnly()) {
+                enableDataModule();
+            }
+            for (KiwiAnnotationData module : metadata.get("modules")) {
+                if (shouldLoad(module, dist)) {
+                    moduleData.put(mod, module);
+                }
+            }
+            for (KiwiAnnotationData optional : metadata.get("optionals")) {
+                if (shouldLoad(optional, dist)) {
+                    classOptionalMap.put(optional.getTarget(), optional);
+                }
+            }
+            for (KiwiAnnotationData condition : metadata.get("conditions")) {
+                if (shouldLoad(condition, dist)) {
+                    conditions.put(condition, mod);
+                }
+            }
+            for (KiwiAnnotationData config : metadata.get("configs")) {
+                if (!shouldLoad(config, dist)) {
+                    continue;
+                }
+                ConfigType type = null;
+                try {
+                    type = ConfigType.valueOf((String) config.getData().get("type"));
+                } catch (Throwable ignored) {
+                }
+                type = type == null ? ConfigType.COMMON : type;
+                if ((type != ConfigType.CLIENT || Platform.isPhysicalClient() || Platform.isDataGen())) {
+                    try {
+                        Class<?> clazz = Class.forName(config.getTarget());
+                        String fileName = (String) config.getData().get("value");
+                        boolean hasModules = type == ConfigType.COMMON && Strings.isNullOrEmpty(fileName);
+                        if (Strings.isNullOrEmpty(fileName)) {
+                            fileName = String.format("%s-%s", mod, type.extension());
+                        }
+                        new ConfigHandler(mod, fileName, type, clazz, hasModules);
+                    } catch (ClassNotFoundException e) {
+                        LOGGER.error(MARKER, "Failed to load config class {}", config.getTarget());
+                    }
+                }
+            }
+            for (KiwiAnnotationData packet : metadata.get("packets")) {
+                if (shouldLoad(packet, dist)) {
+                    KNetworking.processClass(packet);
+                }
+            }
+        }
 
-		for (Entry<String, KiwiAnnotationData> entry : moduleData.entries()) {
-			KiwiAnnotationData optional = classOptionalMap.get(entry.getValue().getTarget());
-			if (optional != null) {
-				String modid = entry.getKey();
-				if (!Platform.isModLoaded(modid)) {
-					continue;
-				}
+        LOGGER.info(MARKER, "Processing " + moduleData.size() + " KiwiModule annotations");
 
-				String name = (String) entry.getValue().getData().get("value");
-				if (Strings.isNullOrEmpty(name)) {
-					name = "core";
-				}
+        for (Entry<String, KiwiAnnotationData> entry : moduleData.entries()) {
+            KiwiAnnotationData optional = classOptionalMap.get(entry.getValue().getTarget());
+            if (optional != null) {
+                String modid = entry.getKey();
+                if (!Platform.isModLoaded(modid)) {
+                    continue;
+                }
 
-				Boolean defaultEnabled = (Boolean) optional.getData().get("defaultEnabled");
-				if (defaultEnabled == null) {
-					defaultEnabled = Boolean.TRUE;
-				}
-				defaultOptions.put(ResourceLocation.fromNamespaceAndPath(modid, name), defaultEnabled);
-			}
-		}
+                String name = (String) entry.getValue().getData().get("value");
+                if (Strings.isNullOrEmpty(name)) {
+                    name = "core";
+                }
 
-		KiwiConfigManager.init();
-		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-			KiwiCommand.register(dispatcher);
-		});
-		ServerLifecycleEvents.SERVER_STARTING.register(Kiwi::serverInit);
-		ServerLifecycleEvents.SERVER_STOPPED.register($ -> currentServer = null);
-		AttackEntityCallback.EVENT.register(KUtil::onAttackEntity);
-		if (Platform.isPhysicalClient()) {
-			RenderLayerEnum.CUTOUT.value = RenderType.cutout();
-			RenderLayerEnum.CUTOUT_MIPPED.value = RenderType.cutoutMipped();
-			RenderLayerEnum.TRANSLUCENT.value = RenderType.translucent();
+                Boolean defaultEnabled = (Boolean) optional.getData().get("defaultEnabled");
+                if (defaultEnabled == null) {
+                    defaultEnabled = Boolean.TRUE;
+                }
+                defaultOptions.put(ResourceLocation.fromNamespaceAndPath(modid, name), defaultEnabled);
+            }
+        }
 
-			ClientPlatform.init();
-		}
-		preInit();
-	}
+        KiwiConfigManager.init();
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+            KiwiCommand.register(dispatcher);
+        });
+        ServerLifecycleEvents.SERVER_STARTING.register(Kiwi::serverInit);
+        ServerLifecycleEvents.SERVER_STOPPED.register($ -> currentServer = null);
+        AttackEntityCallback.EVENT.register(KUtil::onAttackEntity);
+        if (Platform.isPhysicalClient()) {
+            RenderLayerEnum.CUTOUT.value = RenderType.cutout();
+            RenderLayerEnum.CUTOUT_MIPPED.value = RenderType.cutoutMipped();
+            RenderLayerEnum.TRANSLUCENT.value = RenderType.translucent();
 
-	private static void preInit() {
-		Set<ResourceLocation> disabledModules = Sets.newHashSet();
-		conditions.forEach((k, v) -> {
-			try {
-				Class<?> clazz = Class.forName(k.getTarget());
-				String methodName = (String) k.getData().get("method");
-				List<String> values = (List<String>) k.getData().get("value");
-				if (values == null) {
-					values = List.of(v);
-				}
-				List<ResourceLocation> ids = values.stream().map(s -> KUtil.RL(s, v)).toList();
-				for (ResourceLocation id : ids) {
-					LoadingContext context = new LoadingContext(id);
-					try {
-						Boolean bl = (Boolean) MethodUtils.invokeExactStaticMethod(clazz, methodName, context);
-						if (!bl) {
-							disabledModules.add(id);
-						}
-					} catch (Exception e) {
-						disabledModules.add(id);
-						throw e;
-					}
-				}
-			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException |
-					 ClassNotFoundException e) {
-				LOGGER.error(MARKER, "Failed to access to LoadingCondition: %s".formatted(k), e);
-			}
-		});
+            ClientPlatform.init();
+        }
+        preInit();
+    }
 
-		final Map<ResourceLocation, Info> infos = Maps.newHashMap();
-		boolean checkDep = false;
+    private static void preInit() {
+        Set<ResourceLocation> disabledModules = Sets.newHashSet();
+        conditions.forEach((k, v) -> {
+            try {
+                Class<?> clazz = Class.forName(k.getTarget());
+                String methodName = (String) k.getData().get("method");
+                List<String> values = (List<String>) k.getData().get("value");
+                if (values == null) {
+                    values = List.of(v);
+                }
+                List<ResourceLocation> ids = values.stream().map(s -> KUtil.RL(s, v)).toList();
+                for (ResourceLocation id : ids) {
+                    LoadingContext context = new LoadingContext(id);
+                    try {
+                        Boolean bl = (Boolean) MethodUtils.invokeExactStaticMethod(clazz, methodName, context);
+                        if (!bl) {
+                            disabledModules.add(id);
+                        }
+                    } catch (Exception e) {
+                        disabledModules.add(id);
+                        throw e;
+                    }
+                }
+            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException |
+                     ClassNotFoundException e) {
+                LOGGER.error(MARKER, "Failed to access to LoadingCondition: %s".formatted(k), e);
+            }
+        });
 
-		load:
-		for (Entry<String, KiwiAnnotationData> entry : moduleData.entries()) {
-			KiwiAnnotationData module = entry.getValue();
-			String modid = entry.getKey();
-			if (!Platform.isModLoaded(modid)) {
-				continue;
-			}
+        final Map<ResourceLocation, Info> infos = Maps.newHashMap();
+        boolean checkDep = false;
 
-			String name = (String) module.getData().get("value");
-			if (Strings.isNullOrEmpty(name)) {
-				name = "core";
-			}
+        load:
+        for (Entry<String, KiwiAnnotationData> entry : moduleData.entries()) {
+            KiwiAnnotationData module = entry.getValue();
+            String modid = entry.getKey();
+            if (!Platform.isModLoaded(modid)) {
+                continue;
+            }
 
-			ResourceLocation rl = ResourceLocation.fromNamespaceAndPath(modid, name);
-			if (disabledModules.contains(rl)) {
-				continue;
-			}
-			if (KiwiConfigManager.modules.containsKey(rl) && !KiwiConfigManager.modules.get(rl).get()) {
-				continue;
-			}
+            String name = (String) module.getData().get("value");
+            if (Strings.isNullOrEmpty(name)) {
+                name = "core";
+            }
 
-			Info info = new Info(rl, module.getTarget());
+            ResourceLocation rl = ResourceLocation.fromNamespaceAndPath(modid, name);
+            if (disabledModules.contains(rl)) {
+                continue;
+            }
+            if (KiwiConfigManager.modules.containsKey(rl) && !KiwiConfigManager.modules.get(rl).get()) {
+                continue;
+            }
 
-			String dependencies = (String) module.getData().get("dependencies");
-			/* off */
-			List<String> rules = Stream.of(Strings.nullToEmpty(dependencies).split(";"))
-					.filter(s -> !Strings.isNullOrEmpty(s))
-					.toList();
-			/* on */
+            Info info = new Info(rl, module.getTarget());
 
-			for (String rule : rules) {
-				if (rule.startsWith("@")) {
-					info.moduleRules.add(KUtil.RL(rule.substring(1), modid));
-					checkDep = true;
-				} else if (!Platform.isModLoaded(rule)) {
-					continue load;
-				}
-			}
-			infos.put(rl, info);
-		}
+            String dependencies = (String) module.getData().get("dependencies");
+            /* off */
+            List<String> rules = Stream.of(Strings.nullToEmpty(dependencies).split(";"))
+                                       .filter(s -> !Strings.isNullOrEmpty(s))
+                                       .toList();
+            /* on */
 
-		List<ResourceLocation> moduleLoadingQueue = null;
-		if (checkDep) {
-			//			List<Info> errorList = Lists.newLinkedList();
-			//			for (Info i : infos.values()) {
-			//				for (ResourceLocation id : i.moduleRules) {
-			//					if (!infos.containsKey(id)) {
-			//						errorList.add(i);
-			//						break;
-			//					}
-			//				}
-			//			}
-			//			for (Info i : errorList) {
-			//				IModInfo modInfo = ModList.get().getModContainerById(i.id.getNamespace()).get().getModInfo();
-			//				String dependencies = org.apache.commons.lang3.StringUtils.join(i.moduleRules, ", ");
-			//				ModLoader.get().addWarning(new ModLoadingWarning(modInfo, ModLoadingStage.ERROR, "msg.kiwi.no_dependencies", i.id, dependencies));
-			//			}
-			//			if (!errorList.isEmpty()) {
-			//				return;
-			//			}
-			//			MutableGraph<ResourceLocation> graph = GraphBuilder.directed().allowsSelfLoops(false).expectedNodeCount(infos.size()).build();
-			//			infos.keySet().forEach(graph::addNode);
-			//			infos.values().forEach($ -> {
-			//				$.moduleRules.forEach(r -> graph.putEdge(r, $.id));
-			//			});
-			//			list = TopologicalSort.topologicalSort(graph, null);
-			moduleLoadingQueue = ImmutableList.copyOf(infos.keySet());
-		} else {
-			moduleLoadingQueue = ImmutableList.copyOf(infos.keySet());
-		}
+            for (String rule : rules) {
+                if (rule.startsWith("@")) {
+                    info.moduleRules.add(KUtil.RL(rule.substring(1), modid));
+                    checkDep = true;
+                } else if (!Platform.isModLoaded(rule)) {
+                    continue load;
+                }
+            }
+            infos.put(rl, info);
+        }
 
-		for (ResourceLocation id : moduleLoadingQueue) {
-			Info info = infos.get(id);
-			ModContext context = ModContext.get(id.getNamespace());
-			context.setActiveContainer();
+        List<ResourceLocation> moduleLoadingQueue;
+        if (checkDep) {
+            List<Info> errorList = Lists.newLinkedList();
+            for (Info i : infos.values()) {
+                for (ResourceLocation id : i.moduleRules) {
+                    if (!infos.containsKey(id)) {
+                        errorList.add(i);
+                        break;
+                    }
+                }
+            }
+            FabricStatusTree tree = new FabricStatusTree(
+                "Kiwi error when loading modules",
+                "The following modules failed to load because of missing dependencies:"
+            );
+            FabricStatusTree.FabricStatusTab tab = tree.addTab("Errors");
+            for (Info i : errorList) {
+                var modContainer = FabricLoader.getInstance().getModContainer(i.id.getNamespace()).orElseThrow();
+                String dependencies = org.apache.commons.lang3.StringUtils.join(i.moduleRules, ", ");
+                String message = String.format(
+                    "%s: Module %s requires the following modules to be enabled: %s",
+                    modContainer.getMetadata().getId(),
+                    i.id,
+                    dependencies
+                );
+                tab.node.addMessage(message, FabricStatusTree.FabricTreeWarningLevel.WARN);
+            }
+            if (!errorList.isEmpty()) {
+                try {
+                    FabricGuiEntry.open(tree);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                return;
+            }
+            MutableGraph<ResourceLocation> graph =
+                GraphBuilder.directed().allowsSelfLoops(false).expectedNodeCount(infos.size()).build();
+            infos.keySet().forEach(graph::addNode);
+            infos.values().forEach($ -> {
+                $.moduleRules.forEach(r -> graph.putEdge(r, $.id));
+            });
+            moduleLoadingQueue = TopologicalSort.topologicalSort(graph, null);
+        } else {
+            moduleLoadingQueue = ImmutableList.copyOf(infos.keySet());
+        }
 
-			// Instantiate modules
-			try {
-				Class<?> clazz = Class.forName(info.className);
-				instantiateModule(id, clazz, context);
-				if (Platform.isPhysicalClient()) {
-					KiwiModule.ClientCompanion clientCompanion = clazz.getDeclaredAnnotation(KiwiModule.ClientCompanion.class);
-					if (clientCompanion != null) {
-						instantiateModule(id.withSuffix("_client"), clientCompanion.value(), context);
-					}
-				}
-			} catch (Exception e) {
-				LOGGER.error(MARKER, "Kiwi failed to initialize module class: %s".formatted(info.className), e);
-			}
-		}
+        for (ResourceLocation id : moduleLoadingQueue) {
+            Info info = infos.get(id);
+            ModContext context = ModContext.get(id.getNamespace());
+            context.setActiveContainer();
 
-		moduleData.clear();
-		moduleData = null;
-		defaultOptions.clear();
-		defaultOptions = null;
-		conditions.clear();
-		conditions = null;
+            // Instantiate modules
+            try {
+                Class<?> clazz = Class.forName(info.className);
+                instantiateModule(id, clazz, context);
+                if (Platform.isPhysicalClient()) {
+                    KiwiModule.ClientCompanion clientCompanion =
+                        clazz.getDeclaredAnnotation(KiwiModule.ClientCompanion.class);
+                    if (clientCompanion != null) {
+                        instantiateModule(id.withSuffix("_client"), clientCompanion.value(), context);
+                    }
+                }
+            } catch (Exception e) {
+                LOGGER.error(MARKER, "Kiwi failed to initialize module class: %s".formatted(info.className), e);
+            }
+        }
 
-		KiwiModules.fire(KiwiModuleContainer::addRegistries);
-		for (KiwiModuleContainer container : KiwiModules.get()) {
-			container.loadGameObjects(registryLookup);
-		}
+        moduleData.clear();
+        moduleData = null;
+        defaultOptions.clear();
+        defaultOptions = null;
+        conditions.clear();
+        conditions = null;
 
-		KiwiModules.ALL_USED_REGISTRIES.add(Registries.CREATIVE_MODE_TAB);
-		KiwiModules.ALL_USED_REGISTRIES.add(Registries.ITEM);
-		KiwiModules.fire(KiwiModuleContainer::addEntries);
+        KiwiModules.fire(KiwiModuleContainer::addRegistries);
+        for (KiwiModuleContainer container : KiwiModules.get()) {
+            container.loadGameObjects();
+        }
 
-		List<String> entries = Lists.newArrayList();
-		for (KiwiModuleContainer container : KiwiModules.get()) {
-			ResourceLocation uid = container.module.uid;
-			if (ID.equals(uid.getNamespace()) && uid.getPath().startsWith("contributors")) {
-				continue;
-			}
-			LOGGER.info(MARKER, "Module [{}] initialized", uid);
-			container.registries.registries.asMap().forEach((key, values) -> {
-				if (!values.isEmpty()) {
-					entries.add("%s: %s".formatted(KUtil.trimRL(key), values.size()));
-				}
-			});
-			if (!entries.isEmpty()) {
-				LOGGER.info(MARKER, "\t\t" + String.join(", ", entries));
-				entries.clear();
-			}
-		}
-	}
+        KiwiModules.ALL_USED_REGISTRIES.add(Registries.CREATIVE_MODE_TAB);
+        KiwiModules.ALL_USED_REGISTRIES.add(Registries.ITEM);
+        KiwiModules.fire(KiwiModuleContainer::addEntries);
 
-	private static void instantiateModule(
-			ResourceLocation id,
-			Class<?> clazz,
-			ModContext context) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-		AbstractModule instance = (AbstractModule) clazz.getDeclaredConstructor().newInstance();
-		KiwiModules.add(id, instance, context);
-	}
+        if (CustomizationHooks.isEnabled()) {
+            CustomizationHooks.initLoader();
+        }
 
-	private static void init() {
-		KiwiConfigManager.refresh();
-		InitEvent e = new InitEvent();
-		KiwiModules.fire(m -> m.init(e));
-		BlockDefinition.registerFactory(SimpleBlockDefinition.Factory.INSTANCE);
-	}
+        List<String> entries = Lists.newArrayList();
+        for (KiwiModuleContainer container : KiwiModules.get()) {
+            ResourceLocation uid = container.module.uid;
+            if (ID.equals(uid.getNamespace()) && uid.getPath().startsWith("contributors")) {
+                continue;
+            }
+            LOGGER.info(MARKER, "Module [{}] initialized", uid);
+            container.registries.registries.asMap().forEach((key, values) -> {
+                if (!values.isEmpty()) {
+                    entries.add("%s: %s".formatted(KUtil.trimRL(key), values.size()));
+                }
+            });
+            if (!entries.isEmpty()) {
+                LOGGER.info(MARKER, "\t\t" + String.join(", ", entries));
+                entries.clear();
+            }
+        }
+    }
 
-	public static void clientInit(Minecraft mc) {
-		init();
-		postInit();
-		loadComplete();
-	}
+    private static void instantiateModule(
+        ResourceLocation id,
+        Class<?> clazz,
+        ModContext context
+    ) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        AbstractModule instance = (AbstractModule) clazz.getDeclaredConstructor().newInstance();
+        KiwiModules.add(id, instance, context);
+    }
 
-	private static void serverInit(MinecraftServer server) {
-		currentServer = server;
-		if (server.isDedicatedServer()) {
-			init();
-			postInit();
-			loadComplete();
-		}
-		//server.getLevel(Level.OVERWORLD).getDataStorage().computeIfAbsent(Scheduler::load, () -> Scheduler.INSTANCE, Scheduler.ID);
-	}
+    private static void init() {
+        KiwiConfigManager.refresh();
+        InitEvent e = new InitEvent();
+        KiwiModules.fire(m -> m.init(e));
+        BlockDefinition.registerFactory(SimpleBlockDefinition.Factory.INSTANCE);
+    }
 
-	private static void postInit() {
-		PostInitEvent e = new PostInitEvent();
-		KiwiModules.fire(m -> m.postInit(e));
-		KiwiModules.clear();
-	}
+    public static void clientInit(Minecraft mc) {
+        init();
+        postInit();
+        loadComplete();
+    }
 
-	private static void loadComplete() {
-		registryLookup.cache.invalidateAll();
-	}
+    private static void serverInit(MinecraftServer server) {
+        currentServer = server;
+        if (server.isDedicatedServer()) {
+            init();
+            postInit();
+            loadComplete();
+        }
+        //server.getLevel(Level.OVERWORLD).getDataStorage().computeIfAbsent(Scheduler::load, () -> Scheduler.INSTANCE, Scheduler.ID);
+    }
 
-	private record Info(ResourceLocation id, String className, List<ResourceLocation> moduleRules) {
-		Info(ResourceLocation id, String className) {
-			this(id, className, Lists.newArrayList());
-		}
-	}
+    private static void postInit() {
+        PostInitEvent e = new PostInitEvent();
+        KiwiModules.fire(m -> m.postInit(e));
+        KiwiModules.clear();
+    }
 
-	//	@Environment(EnvType.CLIENT)
-	//	private void registerModelLoader(ModelRegistryEvent event) {
-	//		ModelLoaderRegistry.registerLoader(Util.RL("kiwi:retexture"), RetextureModel.Loader.INSTANCE);
-	//	}
+    private static void loadComplete() {
+        registryLookup.cache.invalidateAll();
+    }
+
+    private record Info(ResourceLocation id, String className, List<ResourceLocation> moduleRules) {
+        Info(ResourceLocation id, String className) {
+            this(id, className, Lists.newArrayList());
+        }
+    }
+
+    //	@Environment(EnvType.CLIENT)
+    //	private void registerModelLoader(ModelRegistryEvent event) {
+    //		ModelLoaderRegistry.registerLoader(Util.RL("kiwi:retexture"), RetextureModel.Loader.INSTANCE);
+    //	}
 
 }

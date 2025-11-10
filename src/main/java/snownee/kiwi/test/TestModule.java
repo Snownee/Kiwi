@@ -8,7 +8,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.Categories;
 import snownee.kiwi.KiwiGO;
@@ -17,7 +16,7 @@ import snownee.kiwi.KiwiModule.Category;
 
 @KiwiModule("test")
 @KiwiModule.Optional(defaultEnabled = false)
-@KiwiModule.Category(value = Categories.BUILDING_BLOCKS, after = "redstone_block")
+@Category(value = Categories.BUILDING_BLOCKS, after = "redstone_block")
 //@KiwiModule.Subscriber(Bus.MOD)
 public class TestModule extends AbstractModule {
 	// Keep your fields `public static`
@@ -34,8 +33,8 @@ public class TestModule extends AbstractModule {
 	public static Item.Properties FIRST_BLOCK_ITEM_BUILDER = itemProp().rarity(Rarity.RARE);
 	// Register a simple block and its BlockItem
 	//@RenderLayer(Layer.CUTOUT)
-	@Category
-	public static final KiwiGO<TestBlock> FIRST_BLOCK = go(() -> new TestBlock2(blockProp()));
+//	@Category
+//	public static final KiwiGO<TestBlock> FIRST_BLOCK = go(() -> new TestBlock2(blockProp()));
 
 	// Register a simple effect
 	public static final KiwiGO<MobEffect> FIRST_EFFECT = go(() -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0xFF0000));
@@ -45,10 +44,10 @@ public class TestModule extends AbstractModule {
 			FIRST_EFFECT.holder().orElseThrow(),
 			1800)));
 
-	public static final KiwiGO<BlockEntityType<TestBlockEntity>> FIRST_TILE = blockEntity(TestBlockEntity::new, null, FIRST_BLOCK);
+//	public static final KiwiGO<BlockEntityType<TestBlockEntity>> FIRST_TILE = blockEntity(TestBlockEntity::new, null, FIRST_BLOCK);
 
-	public static final KiwiGO<TestBlock> TEX_BLOCK = go(() -> new TestBlock(blockProp()));
-	public static final KiwiGO<BlockEntityType<TexBlockEntity>> TEX_TILE = blockEntity(TexBlockEntity::new, null, TEX_BLOCK);
+//	public static final KiwiGO<TestBlock> TEX_BLOCK = go(() -> new TestBlock(blockProp()));
+//	public static final KiwiGO<BlockEntityType<TexBlockEntity>> TEX_TILE = blockEntity(TexBlockEntity::new, null, TEX_BLOCK);
 
 	public static TestModule INSTANCE;
 

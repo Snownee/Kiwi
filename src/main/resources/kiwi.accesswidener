@@ -38,3 +38,37 @@ accessible class net/minecraft/world/item/crafting/Ingredient$ItemValue
 accessible class net/minecraft/world/item/crafting/Ingredient$TagValue
 accessible field net/minecraft/world/item/crafting/Ingredient values [Lnet/minecraft/world/item/crafting/Ingredient$Value;
 accessible method net/minecraft/world/item/crafting/Ingredient fromValues (Ljava/util/stream/Stream;)Lnet/minecraft/world/item/crafting/Ingredient;
+
+accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen hoveredSlot Lnet/minecraft/world/inventory/Slot;
+
+accessible method net/minecraft/server/level/ServerPlayer bedInRange (Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Direction;)Z
+accessible method net/minecraft/world/entity/Display$BlockDisplay getBlockState ()Lnet/minecraft/world/level/block/state/BlockState;
+accessible method net/minecraft/world/entity/Display$BlockDisplay setBlockState (Lnet/minecraft/world/level/block/state/BlockState;)V
+
+accessible field net/minecraft/world/level/block/state/properties/IntegerProperty min I
+accessible field net/minecraft/world/level/block/state/properties/IntegerProperty max I
+
+accessible method net/minecraft/world/level/block/state/BlockBehaviour propertiesCodec ()Lcom/mojang/serialization/codecs/RecordCodecBuilder;
+accessible field net/minecraft/world/level/block/state/BlockBehaviour properties Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;
+mutable field net/minecraft/world/level/block/state/BlockBehaviour properties Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;
+accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties hasCollision Z
+accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties canOcclude Z
+
+accessible field net/minecraft/client/gui/components/Button onPress Lnet/minecraft/client/gui/components/Button$OnPress;
+accessible field net/minecraft/client/gui/components/Button createNarration Lnet/minecraft/client/gui/components/Button$CreateNarration;
+
+accessible field net/minecraft/client/gui/screens/Screen renderables Ljava/util/List;
+accessible field net/minecraft/client/gui/screens/Screen children Ljava/util/List;
+accessible field net/minecraft/client/gui/screens/Screen narratables Ljava/util/List;
+
+accessible field net/minecraft/world/level/block/CrossCollisionBlock shapeByIndex [Lnet/minecraft/world/phys/shapes/VoxelShape;
+accessible field net/minecraft/world/level/block/CrossCollisionBlock collisionShapeByIndex [Lnet/minecraft/world/phys/shapes/VoxelShape;
+mutable field net/minecraft/world/level/block/CrossCollisionBlock shapeByIndex [Lnet/minecraft/world/phys/shapes/VoxelShape;
+mutable field net/minecraft/world/level/block/CrossCollisionBlock collisionShapeByIndex [Lnet/minecraft/world/phys/shapes/VoxelShape;
+accessible method net/minecraft/world/level/block/CrossCollisionBlock makeShapes (FFFFF)[Lnet/minecraft/world/phys/shapes/VoxelShape;
+
+accessible field net/minecraft/world/level/block/WallBlock shapeByIndex Ljava/util/Map;
+accessible field net/minecraft/world/level/block/WallBlock collisionShapeByIndex Ljava/util/Map;
+mutable field net/minecraft/world/level/block/WallBlock shapeByIndex Ljava/util/Map;
+mutable field net/minecraft/world/level/block/WallBlock collisionShapeByIndex Ljava/util/Map;
+accessible method net/minecraft/world/level/block/WallBlock makeShapes (FFFFFF)Ljava/util/Map;

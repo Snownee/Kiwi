@@ -15,6 +15,11 @@ public @interface KiwiModule {
 	String value() default "core";
 
 	/**
+	 * Let it determine your namespace during the <clinit> phase.
+	 */
+	String modId() default "";
+
+	/**
 	 * Module will be registered only if dependent mods or modules are loaded.
 	 * You can use ";" to separate multiple mod ids.
 	 * You can use "@mod:module" to announce a dependent module
@@ -69,7 +74,7 @@ public @interface KiwiModule {
 	 * Set group of this item/block to null
 	 *
 	 * @author Snownee
-	 * @see KiwiModule.Category
+	 * @see Category
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.FIELD)
@@ -90,7 +95,6 @@ public @interface KiwiModule {
 	@Target({ElementType.TYPE, ElementType.FIELD})
 	@interface RenderLayer {
 		RenderLayerEnum value();
-
 	}
 
 	/**
@@ -99,7 +103,7 @@ public @interface KiwiModule {
 	 * @author Snownee
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.FIELD)
+	@Target({ElementType.TYPE, ElementType.FIELD})
 	@interface Skip {
 	}
 

@@ -1,0 +1,7 @@
+incorrect_blocks_for_drops: incorrect_for_wooden_tool
+uses: 64
+speed: 6
+attack_damage_bonus: 1
+enchantment_value: 12
+repair_ingredient:
+  tag: minecraft:wool

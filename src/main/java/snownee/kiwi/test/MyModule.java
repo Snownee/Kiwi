@@ -9,10 +9,6 @@ import snownee.kiwi.util.VanillaActions;
 public class MyModule extends AbstractModule {
 
 	@Override
-	protected void addEntries() {
-	}
-
-	@Override
 	protected void init(InitEvent event) {
 		event.enqueueWork(() -> VanillaActions.registerAxeConversion(Blocks.DIAMOND_BLOCK, Blocks.REDSTONE_BLOCK));
 	}

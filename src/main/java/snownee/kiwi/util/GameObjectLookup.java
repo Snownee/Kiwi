@@ -8,7 +8,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import snownee.kiwi.KiwiGOHolder;
+import snownee.kiwi.KiwiGO;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModules;
 
@@ -37,7 +37,7 @@ public interface GameObjectLookup {
 				});
 	}
 
-	record OptionalEntry<T>(KiwiGOHolder<T> holder, boolean optional) {
+	record OptionalEntry<T>(KiwiGO<T> holder, boolean optional) {
 	}
 
 }

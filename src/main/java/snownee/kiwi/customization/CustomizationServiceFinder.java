@@ -6,8 +6,9 @@ import java.util.Collection;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
+import net.fabricmc.loader.api.metadata.CustomValue;
 
-public class CustomizationServiceFinder {
+public final class CustomizationServiceFinder {
 	public static final Path PACK_DIRECTORY = FabricLoader.getInstance().getGameDir().resolve("kiwipacks");
 
 	public static boolean shouldEnable(Collection<ModContainer> mods) {
@@ -15,8 +16,12 @@ public class CustomizationServiceFinder {
 		if (files != null && files.length > 0) {
 			return true;
 		}
-		for (var mod : mods) {
-			if (mod.getMetadata().containsCustomValue("kiwiCustomization")) {
+		for (ModContainer mod : mods) {
+			var kiwi = mod.getMetadata().getCustomValue("kiwi");
+			if (kiwi == null || kiwi.getType() != CustomValue.CvType.OBJECT) continue;
+			var customization = kiwi.getAsObject().get("customization");
+			if (customization == null || customization.getType() != CustomValue.CvType.BOOLEAN) continue;
+			if (customization.getAsBoolean()) {
 				return true;
 			}
 		}

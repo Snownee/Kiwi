@@ -82,6 +82,7 @@ public class TestRecipe extends DynamicShapedRecipe {
 			return CODEC;
 		}
 
+		@Override
 		public StreamCodec<RegistryFriendlyByteBuf, TestRecipe> streamCodec() {
 			return STREAM_CODEC;
 		}

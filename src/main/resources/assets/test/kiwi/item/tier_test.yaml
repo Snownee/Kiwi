@@ -1,0 +1,3 @@
+template:
+  kiwi:type: test:tier_test
+  tier: test:tier_test

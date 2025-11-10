@@ -1,0 +1,11 @@
+type: choices
+keys:
+  - type
+choices:
+  single: (1, 0, 1, 15, 9, 15)
+  pushed:
+    type: horizontal
+    north: (1, 0, -5, 15, 9, 9)
+  both: (0, 0, 0, 16, 9, 16)
+  left: (0, 0, 0, 16, 9, 16)
+  right: (0, 0, 0, 16, 9, 16)

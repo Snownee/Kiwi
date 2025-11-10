@@ -19,7 +19,6 @@ out
 
 # other
 eclipse
-run
 *.log
 
 # Files from Forge MDK
@@ -29,4 +28,6 @@ forge*changelog.txt
 /src/main/resources/assets/kaleidos/models
 /src/main/resources/assets/kaleidos/textures
 /lowcode/*.jar
-/runs/
+/runs/*
+/run/*
+!/run/kiwipacks

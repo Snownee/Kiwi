@@ -1,0 +1,15 @@
+from: '*kaleidos.chair:side'
+to: '*kaleidos.chair:side'
+interest: 0
+test_tag:
+  - facing
+on_link:
+  to:
+    set_properties:
+      type: single
+    reflow: true
+on_unlink:
+  to:
+    set_properties:
+      type: single
+    reflow: true
