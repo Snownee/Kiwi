@@ -1,7 +1,9 @@
 package snownee.kiwi.customization.block.behavior;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -15,6 +17,7 @@ import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BedBlock;
@@ -29,14 +32,15 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.common.ForgeMod;
 import snownee.kiwi.customization.CustomFeatureTags;
 import snownee.kiwi.customization.block.KBlockSettings;
 import snownee.kiwi.customization.block.KBlockUtils;
 import snownee.kiwi.customization.block.component.KBlockComponent;
+import snownee.kiwi.mixin.customization.sit.EntityAccess;
 
 public class SitManager {
 	public static final Component ENTITY_NAME = Component.literal("Seat from Kiwi");
-	public static final double VERTICAL_OFFSET = 0.23;
 
 	public static void tick(Display.BlockDisplay display) {
 		if (display.tickCount < 7) {
@@ -45,7 +49,7 @@ public class SitManager {
 		if (!display.isVehicle()) {
 			display.discard();
 		}
-		BlockPos pos = BlockPos.containing(display.getX(), display.getY() + VERTICAL_OFFSET, display.getZ());
+		BlockPos pos = BlockPos.containing(display.getX(), display.getY(), display.getZ());
 		BlockState blockState = display.level().getBlockState(pos);
 		if (!blockState.is(display.getBlockState().getBlock())) {
 			display.discard();
@@ -53,7 +57,13 @@ public class SitManager {
 	}
 
 	public static boolean sit(Player player, BlockHitResult hitResult) {
-		if (hitResult.getDirection() == Direction.DOWN || player.isSecondaryUseActive()) {
+		if (KSitCommonConfig.requireEmptyHand && (!player.getMainHandItem().isEmpty() || !player.getOffhandItem().isEmpty())) {
+			return false;
+		}
+		if (!KSitCommonConfig.allowClickBlockBottomToSit && hitResult.getDirection() == Direction.DOWN) {
+			return false;
+		}
+		if (player.isSecondaryUseActive()) {
 			return false;
 		}
 		Level level = player.level();
@@ -71,7 +81,8 @@ public class SitManager {
 			if (player instanceof ServerPlayer serverPlayer && serverPlayer.bedInRange(pos, direction)) {
 				return false;
 			}
-		} else if (player.getEyePosition().distanceToSqr(hitResult.getLocation()) > 12) {
+		} else if (player.getEyePosition().distanceToSqr(hitResult.getLocation()) >
+				Mth.square(player.getAttributeValue(ForgeMod.BLOCK_REACH.get()) * KSitCommonConfig.sitActionReachDistanceRatio)) {
 			return false;
 		}
 		if (!player.getMainHandItem().isEmpty() && player.getMainHandItem().is(block.asItem())) {
@@ -111,7 +122,9 @@ public class SitManager {
 					seatPos = hit.getLocation();
 				}
 			}
-			if (facing != null) {
+			if (facing == null) {
+				display.setYRot(player.getYRot());
+			} else {
 				float yRot = facing.toYRot();
 				display.setYRot(yRot);
 				display.setNoGravity(true); //hacky way to tell the client that this block has facing
@@ -120,9 +133,32 @@ public class SitManager {
 				seatPos = Vec3.atCenterOf(pos);
 			}
 			double clampedY = Mth.clamp(seatPos.y, pos.getY(), pos.getY() + 0.999);
-			display.setPos(seatPos.x, clampedY - VERTICAL_OFFSET, seatPos.z);
+			display.setPos(seatPos.x, clampedY, seatPos.z);
+			Entity rider = player;
+			if (KSitCommonConfig.makeLeashedMobSit) {
+				List<Mob> list = leashableInArea(
+						level,
+						player.blockPosition(),
+						player,
+						leashable -> leashable.getLeashHolder() == player);
+				double dist = Double.MAX_VALUE;
+				for (Mob leashable : list) {
+					if (leashable.isNoAi() || !((EntityAccess) leashable).callCanRide(display)) {
+						continue;
+					}
+					double d = leashable.distanceToSqr(player);
+					if (rider == player || d < dist) {
+						rider = leashable;
+						dist = d;
+					}
+				}
+			}
 			if (level.addFreshEntity(display)) {
-				player.startRiding(display, true);
+				rider.setYRot(display.getYRot());
+				rider.startRiding(display, true);
+				if (rider != player) {
+					((Mob) rider).dropLeash(true, true);
+				}
 			}
 		}
 		return true;
@@ -197,7 +233,7 @@ public class SitManager {
 		} else {
 			direction = passenger.getDirection();
 		}
-		BlockPos pos = BlockPos.containing(display.getX(), display.getY() + VERTICAL_OFFSET, display.getZ());
+		BlockPos pos = BlockPos.containing(display.getX(), display.getY(), display.getZ());
 		Optional<Vec3> vec3 = BedBlock.findStandUpPosition(
 				passenger.getType(),
 				passenger.level(),
@@ -205,5 +241,18 @@ public class SitManager {
 				direction,
 				passenger.getYRot());
 		return vec3.orElseGet(() -> Vec3.atBottomCenterOf(pos.above()));
+	}
+
+	public static List<Mob> leashableInArea(Level level, BlockPos blockPos, Player player, Predicate<Mob> mobPredicate) {
+		double radius = 7.0;
+		int x = blockPos.getX();
+		int y = blockPos.getY();
+		int z = blockPos.getZ();
+		AABB searchArea = new AABB(x - radius, y - radius, z - radius, x + radius, y + radius, z + radius);
+		return level.getEntitiesOfClass(
+						Mob.class, searchArea,
+						mob -> (mob.isLeashed() || mob.canBeLeashed(player)) && mobPredicate.test(mob))
+				.stream()
+				.toList();
 	}
 }

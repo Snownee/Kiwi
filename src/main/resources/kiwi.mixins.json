@@ -25,6 +25,7 @@
 		"customization.BlockStateMixin",
 		"customization.BushBlockMixin",
 		"customization.HalfTransparentBlockMixin",
+		"customization.WoodTypeMixin",
 		"customization.family.RecipeManagerMixin",
 		"customization.fastsuite.AuxRecipeManagerMixin",
 		"customization.forge.BlockMixin",
@@ -35,6 +36,7 @@
 		"customization.property_inject.BlockMixin",
 		"customization.property_inject.StateDefinitionBuilderMixin",
 		"customization.sit.DisplayMixin",
+		"customization.sit.EntityAccess",
 		"customization.sit.EntityMixin"
 	],
 	"client": [

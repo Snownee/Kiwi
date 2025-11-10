@@ -20,8 +20,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.StringWidget;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
@@ -58,7 +58,9 @@ public class ConvertScreen extends Screen {
 	private PanelLayout layout;
 	private final Vector2i originalMousePos;
 	private final ItemStack sourceItem;
+	private ClientTooltipPositioner forcedTooltipPositioner;
 	private final Set<Item> chosenItems = Sets.newIdentityHashSet();
+	private @Nullable AbstractWidget lastFocused;
 
 	private static Vector2i getMousePos() {
 		Minecraft mc = Minecraft.getInstance();
@@ -90,6 +92,7 @@ public class ConvertScreen extends Screen {
 
 	@Override
 	protected void init() {
+		lastFocused = null;
 		layout = new PanelLayout(2);
 		int step = inContainer ? 19 : 21;
 		int xStart = 0;
@@ -97,12 +100,11 @@ public class ConvertScreen extends Screen {
 		int curX = xStart;
 		int curY = yStart;
 		Set<CConvertItemPacket.Entry> accepted = Sets.newHashSet();
-		LocalPlayer player = Objects.requireNonNull(getMinecraft().player);
+		LocalPlayer player = Objects.requireNonNull(minecraft.player);
 		for (CConvertItemPacket.Group group : groups) {
 			accepted.addAll(group.entries());
 		}
 		int itemsPerLine = accepted.size() > 30 ? 11 : 4;
-		Button cursorOn = null;
 		for (CConvertItemPacket.Group group : groups) {
 			for (CConvertItemPacket.Entry entry : group.entries()) {
 				if (!accepted.contains(entry)) {
@@ -136,8 +138,8 @@ public class ConvertScreen extends Screen {
 					tooltip = List.of(itemStack.getHoverName(), Component.literal(steps).withStyle(ChatFormatting.GRAY));
 				}
 				button.setTooltip(MultilineTooltip.create(tooltip));
-				if (cursorOn == null && itemStack.is(sourceItem.getItem())) {
-					cursorOn = button;
+				if (lastFocused == null && itemStack.is(sourceItem.getItem())) {
+					lastFocused = button;
 				}
 				layout.addWidget(button);
 				curX += step;
@@ -169,10 +171,8 @@ public class ConvertScreen extends Screen {
 			anchor = new Vector2f(0.5f, 1f);
 		}
 		layout.bind(this, new Vector2i(x, y), anchor);
-		if (cursorOn != null) {
-			Window window = getMinecraft().getWindow();
-			double scale = window.getGuiScale();
-			GLFW.glfwSetCursorPos(window.getWindow(), (cursorOn.getX() + 15) * scale, (cursorOn.getY() + 15) * scale);
+		if (lastFocused != null) {
+			moveMouseOn(lastFocused);
 		}
 		Rect2i bounds = layout.bounds();
 		StringWidget dummySpacer = new StringWidget(
@@ -182,19 +182,21 @@ public class ConvertScreen extends Screen {
 				10000,
 				Component.empty(),
 				getMinecraft().font);
-		ClientTooltipPositioner tooltipPositioner = new BelowOrAboveWidgetTooltipPositioner(dummySpacer);
-		for (AbstractWidget widget : layout.widgets()) {
-			if (widget instanceof ItemButton button) {
-				button.setTooltipPositioner(tooltipPositioner);
-			}
-		}
+		forcedTooltipPositioner = new BelowOrAboveWidgetTooltipPositioner(dummySpacer);
+	}
+
+	private void moveMouseOn(AbstractWidget button) {
+		setFocused(button);
+		Window window = Objects.requireNonNull(minecraft.getWindow());
+		double scale = window.getGuiScale();
+		GLFW.glfwSetCursorPos(window.getWindow(), (button.getX() + 15) * scale, (button.getY() + 15) * scale);
 	}
 
 	private void longPress(ItemButton button, CConvertItemPacket.Entry entry) {
 		boolean convertOne = hasControlDown();
 		if (convertOne) {
 			shortPress(button, entry);
-		} else if ((!inContainer || Objects.requireNonNull(getMinecraft().player).containerMenu instanceof InventoryMenu) &&
+		} else if ((!inContainer || Objects.requireNonNull(minecraft.player).containerMenu instanceof InventoryMenu) &&
 				button.pressTime() >= 15) {
 			Item from = getSourceItem().getItem();
 			CConvertItemPacket.send(
@@ -208,7 +210,7 @@ public class ConvertScreen extends Screen {
 	}
 
 	private void shortPress(ItemButton button, CConvertItemPacket.Entry entry) {
-		LocalPlayer player = Objects.requireNonNull(getMinecraft().player);
+		LocalPlayer player = Objects.requireNonNull(minecraft.player);
 		boolean creative = player.isCreative();
 		ItemStack sourceItem = getSourceItem();
 		boolean convertOne = hasControlDown();
@@ -235,7 +237,7 @@ public class ConvertScreen extends Screen {
 			NonNullList<Slot> slots = player.inventoryMenu.slots;
 			for (int i = 0; i < slots.size(); i++) {
 				if (slots.get(i).getItem() == newItem) {
-					Objects.requireNonNull(getMinecraft().gameMode).handleCreativeModeItemAdd(newItem, i);
+					Objects.requireNonNull(minecraft.gameMode).handleCreativeModeItemAdd(newItem, i);
 					CConvertItemPacket.playPickupSound(player);
 					break;
 				}
@@ -259,6 +261,14 @@ public class ConvertScreen extends Screen {
 	}
 
 	@Override
+	public void setFocused(@Nullable GuiEventListener listener) {
+		if (listener instanceof ItemButton button) {
+			lastFocused = button;
+		}
+		super.setFocused(listener);
+	}
+
+	@Override
 	public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
 		if (super.mouseClicked(pMouseX, pMouseY, pButton)) {
 			return true;
@@ -275,12 +285,39 @@ public class ConvertScreen extends Screen {
 	}
 
 	@Override
+	public boolean mouseScrolled(double mouseX, double mouseY, double scrollY) {
+		if (scrollY == 0) {
+			return false;
+		}
+		int index = -1;
+		List<AbstractWidget> widgets = layout.widgets();
+		if (widgets.isEmpty()) {
+			return false;
+		}
+		if (lastFocused != null) {
+			index = widgets.indexOf(lastFocused);
+		}
+		if (index == -1 && scrollY > 0) {
+			index = widgets.size();
+		}
+		index += scrollY > 0 ? -1 : 1;
+		if (index < 0) {
+			index = widgets.size() - 1;
+		} else if (index >= widgets.size()) {
+			index = 0;
+		}
+		lastFocused = widgets.get(index);
+		moveMouseOn(lastFocused);
+		return true;
+	}
+
+	@Override
 	public void render(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
 		Objects.requireNonNull(minecraft);
 		PoseStack pose = pGuiGraphics.pose();
 		layout.update();
 		Vector2i pos = layout.getAnchoredPos();
-		float openValue = openProgress.getValue(minecraft.getPartialTick());
+		float openValue = openProgress.getValue(pPartialTick);
 		pose.pushPose();
 		pose.translate(pos.x, pos.y, 0);
 		pose.scale(openValue, openValue, openValue);
@@ -308,7 +345,7 @@ public class ConvertScreen extends Screen {
 	public void setTooltipForNextRenderPass(List<FormattedCharSequence> list, ClientTooltipPositioner tooltipPositioner, boolean force) {
 		float openValue = openProgress.getValue(Objects.requireNonNull(minecraft).getPartialTick());
 		if (openValue > 0.95f) {
-			super.setTooltipForNextRenderPass(list, tooltipPositioner, force);
+			super.setTooltipForNextRenderPass(list, forcedTooltipPositioner, force);
 		}
 	}
 
@@ -318,7 +355,7 @@ public class ConvertScreen extends Screen {
 		lingeringScreen = this;
 		super.onClose();
 		if (inContainer) {
-			GLFW.glfwSetCursorPos(getMinecraft().getWindow().getWindow(), originalMousePos.x, originalMousePos.y);
+			GLFW.glfwSetCursorPos(minecraft.getWindow().getWindow(), originalMousePos.x, originalMousePos.y);
 		}
 	}
 
@@ -340,7 +377,11 @@ public class ConvertScreen extends Screen {
 			lingeringScreen = null;
 			return;
 		}
-		lingeringScreen.render(pGuiGraphics, Integer.MAX_VALUE, Integer.MAX_VALUE, mc.getDeltaFrameTime());
+		lingeringScreen.render(
+				pGuiGraphics,
+				Integer.MAX_VALUE,
+				Integer.MAX_VALUE,
+				Objects.requireNonNull(mc).getPartialTick());
 	}
 
 	public static void tickLingering() {

@@ -78,6 +78,8 @@ import snownee.kiwi.customization.block.behavior.SitManager;
 import snownee.kiwi.customization.block.component.KBlockComponent;
 import snownee.kiwi.customization.block.family.BlockFamilies;
 import snownee.kiwi.customization.block.loader.KBlockTemplate;
+import snownee.kiwi.customization.block.soundtype.DeferredSoundType;
+import snownee.kiwi.customization.block.soundtype.SoundTypes;
 import snownee.kiwi.customization.builder.BuilderRule;
 import snownee.kiwi.customization.builder.BuilderRules;
 import snownee.kiwi.customization.item.ItemFundamentals;
@@ -264,6 +266,13 @@ public final class CustomizationHooks {
 		ResourceManager resourceManager = collectKiwiPacks();
 		OneTimeLoader.Context context = new OneTimeLoader.Context();
 		Map<String, CustomizationMetadata> metadataMap = CustomizationMetadata.loadMap(resourceManager, context);
+
+		SoundTypes.refreshWithValues(OneTimeLoader.load(
+				resourceManager,
+				"kiwi/sound_type",
+				DeferredSoundType.DIRECT_CODEC.codec(),
+				context));
+
 		BlockFundamentals blockFundamentals = BlockFundamentals.reload(resourceManager, context, true);
 		clearGlassType = blockFundamentals.glassTypes().get(new ResourceLocation("clear"));
 		Preconditions.checkNotNull(clearGlassType, "Missing 'clear' glass type");
