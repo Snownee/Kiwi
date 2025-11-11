@@ -362,7 +362,7 @@ public final class CustomizationHooks {
 		Map<IModFile, Pack.ResourcesSupplier> kiwiPacks = new HashMap<>();
 		for (var modFileInfo : ModList.get().getModFiles()) {
 			for (var modInfo : modFileInfo.getMods()) {
-				if (modInfo.getModProperties().containsKey("kiwiCustomization")) {
+				if (Kiwi.ID.equals(modInfo.getModId()) || modInfo.getModProperties().containsKey("kiwiCustomization")) {
 					var modResourcePack = ResourcePackLoader.createPackForMod(modFileInfo);
 					kiwiPacks.put(modFileInfo.getFile(), modResourcePack);
 					break;
