@@ -65,5 +65,7 @@ cosmetic.snownee.2020q4: Fox
 cosmetic.snownee.2021q1: Electronicat
 cosmetic.snownee.xmas: Santa Hat
 cosmetic.snownee.sunny_milk: Sunny Milk
-key.kiwi.builders_button: Builder's Button
+key.kiwi.builders_button2: Builder's Button
+kiwi.builder_mode.on: "Builder Mode: §aON"
+kiwi.builder_mode.off: "Builder Mode: §cOFF"
 gui.kiwi.builder.convert: Convert items

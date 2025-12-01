@@ -63,8 +63,7 @@ public final class CustomizationClient {
 		var modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 		var forgeEventBus = MinecraftForge.EVENT_BUS;
 		modEventBus.addListener((RegisterKeyMappingsEvent event) -> {
-			buildersButtonKey = new SmartKey.Builder("key.kiwi.builders_button", KeyMapping.CATEGORY_GAMEPLAY)
-					.key(InputConstants.getKey("key.mouse.4"))
+			buildersButtonKey = new SmartKey.Builder("key.kiwi.builders_button2", KeyMapping.CATEGORY_GAMEPLAY)
 					.onLongPress(BuildersButton::onLongPress)
 					.onShortPress(BuildersButton::onShortPress)
 					.build();

@@ -19,6 +19,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
@@ -65,6 +66,10 @@ public class BuildersButton {
 		Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(
 				SoundEvents.EXPERIENCE_ORB_PICKUP,
 				(random.nextFloat() - random.nextFloat()) * 0.35F + 0.9F));
+		Minecraft.getInstance().getChatListener().handleSystemMessage(
+				Component.translatable("kiwi.builder_mode.%s".formatted(builderMode ?
+						"on" :
+						"off")), false);
 		return true;
 	}
 
