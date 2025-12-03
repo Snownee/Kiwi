@@ -136,25 +136,28 @@ public class BlockCodecs {
 			CustomizationCodecs.BLOCK_SET_TYPE.fieldOf("block_set_type").forGetter(BlockCodecs::notImplemented),
 			ExtraCodecs.POSITIVE_INT.optionalFieldOf("ticks_to_stay_pressed").forGetter(BlockCodecs::notImplemented),
 			Codec.BOOL.optionalFieldOf("arrows_can_press").forGetter(BlockCodecs::notImplemented)
-	).apply(instance, (
-			(properties, blockSetType, ticksToStayPressed, arrowsCanPress) -> {
-				return new ButtonBlock(
-						properties,
-						blockSetType,
-						ticksToStayPressed.orElse(blockSetType.canOpenByHand() ? 30 : 20),
-						arrowsCanPress.orElse(blockSetType.canOpenByHand()));
-			})));
+	).apply(
+			instance, (
+					(properties, blockSetType, ticksToStayPressed, arrowsCanPress) -> {
+						return new ButtonBlock(
+								properties,
+								blockSetType,
+								ticksToStayPressed.orElse(blockSetType.canOpenByHand() ? 30 : 20),
+								arrowsCanPress.orElse(blockSetType.canOpenByHand()));
+					})));
 
 	public static final MapCodec<PressurePlateBlock> PRESSURE_PLATE = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			CustomizationCodecs.SENSITIVITY_CODEC.optionalFieldOf("sensitivity").forGetter(BlockCodecs::notImplemented),
 			propertiesCodec(),
 			CustomizationCodecs.BLOCK_SET_TYPE.fieldOf("block_set_type").forGetter(BlockCodecs::notImplemented)
-	).apply(instance, (
-			(sensitivity, properties, blockSetType) -> {
-				return new PressurePlateBlock(sensitivity.orElse(blockSetType.canOpenByHand() ?
-						PressurePlateBlock.Sensitivity.EVERYTHING :
-						PressurePlateBlock.Sensitivity.MOBS), properties, blockSetType);
-			})));
+	).apply(
+			instance, (
+					(sensitivity, properties, blockSetType) -> {
+						return new PressurePlateBlock(
+								sensitivity.orElse(blockSetType.canOpenByHand() ?
+										PressurePlateBlock.Sensitivity.EVERYTHING :
+										PressurePlateBlock.Sensitivity.MOBS), properties, blockSetType);
+					})));
 
 	public static final MapCodec<WeatheringCopperFullBlock> WEATHERING_COPPER_FULL = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			CustomizationCodecs.WEATHER_STATE.fieldOf("weather_state").forGetter(ChangeOverTimeBlock::getAge),
@@ -193,7 +196,6 @@ public class BlockCodecs {
 	public static final MapCodec<WallHangingSignBlock> WALL_HANGING_SIGN = woodTyped(WallHangingSignBlock::new);
 	public static final MapCodec<CeilingHangingSignBlock> CEILING_HANGING_SIGN = woodTyped(CeilingHangingSignBlock::new);
 
-
 	static {
 		register("block", BLOCK);
 		register("stair", STAIR);
@@ -220,8 +222,12 @@ public class BlockCodecs {
 	}
 
 	public static void register(String key, MapCodec<? extends Block> codec) {
+		register(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, key), codec);
+	}
+
+	public static void register(ResourceLocation key, MapCodec<? extends Block> codec) {
 		//noinspection unchecked
-		CODECS.put(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, key), (MapCodec<Block>) codec);
+		CODECS.put(key, (MapCodec<Block>) codec);
 	}
 
 	public static MapCodec<Block> get(ResourceLocation key) {
