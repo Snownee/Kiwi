@@ -2,6 +2,7 @@ package snownee.kiwi.customization.block.loader;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.apache.commons.lang3.NotImplementedException;
@@ -24,6 +25,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BrushableBlock;
 import net.minecraft.world.level.block.ButtonBlock;
+import net.minecraft.world.level.block.CeilingHangingSignBlock;
 import net.minecraft.world.level.block.ChangeOverTimeBlock;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.DropExperienceBlock;
@@ -34,7 +36,10 @@ import net.minecraft.world.level.block.MushroomBlock;
 import net.minecraft.world.level.block.PressurePlateBlock;
 import net.minecraft.world.level.block.SandBlock;
 import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.StandingSignBlock;
 import net.minecraft.world.level.block.TrapDoorBlock;
+import net.minecraft.world.level.block.WallHangingSignBlock;
+import net.minecraft.world.level.block.WallSignBlock;
 import net.minecraft.world.level.block.WeatheringCopperFullBlock;
 import net.minecraft.world.level.block.WeatheringCopperSlabBlock;
 import net.minecraft.world.level.block.WeatheringCopperStairBlock;
@@ -88,10 +93,7 @@ public class BlockCodecs {
 			CustomizationCodecs.BLOCK_SET_TYPE.fieldOf("block_set_type").forGetter(block -> block.type)
 	).apply(instance, TrapDoorBlock::new));
 
-	public static final MapCodec<FenceGateBlock> FENCE_GATE = RecordCodecBuilder.mapCodec(instance -> instance.group(
-			propertiesCodec(),
-			CustomizationCodecs.WOOD_TYPE.optionalFieldOf("wood_type", WoodType.OAK).forGetter($ -> WoodType.OAK)
-	).apply(instance, FenceGateBlock::new));
+	public static final MapCodec<FenceGateBlock> FENCE_GATE = woodTyped(FenceGateBlock::new);
 
 	public static final MapCodec<SandBlock> SAND = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			Codec.INT.optionalFieldOf("falling_dust_color", 14406560).forGetter($ -> 14406560),
@@ -186,30 +188,40 @@ public class BlockCodecs {
 					.forGetter(BrushableBlock::getBrushCompletedSound)
 	).apply(instance, BrushableBlock::new));
 
+	public static final MapCodec<WallSignBlock> WALL_SIGN = woodTyped(WallSignBlock::new);
+	public static final MapCodec<StandingSignBlock> STANDING_SIGN = woodTyped(StandingSignBlock::new);
+	public static final MapCodec<WallHangingSignBlock> WALL_HANGING_SIGN = woodTyped(WallHangingSignBlock::new);
+	public static final MapCodec<CeilingHangingSignBlock> CEILING_HANGING_SIGN = woodTyped(CeilingHangingSignBlock::new);
+
+
 	static {
-		register(new ResourceLocation("block"), BLOCK);
-		register(new ResourceLocation("stair"), STAIR);
-		register(new ResourceLocation("door"), DOOR);
-		register(new ResourceLocation("trapdoor"), TRAPDOOR);
-		register(new ResourceLocation("fence_gate"), FENCE_GATE);
-		register(new ResourceLocation("colored_falling"), SAND);
-		register(new ResourceLocation("drop_experience"), DROP_EXPERIENCE);
-		register(new ResourceLocation("mushroom"), MUSHROOM);
-		register(new ResourceLocation("flower"), FLOWER);
-		register(new ResourceLocation("flower_pot"), FLOWER_POT);
-		register(new ResourceLocation("wither_rose"), WITHER_ROSE);
-		register(new ResourceLocation("button"), BUTTON);
-		register(new ResourceLocation("pressure_plate"), PRESSURE_PLATE);
-		register(new ResourceLocation("weathering_copper_full"), WEATHERING_COPPER_FULL);
-		register(new ResourceLocation("weathering_copper_slab"), WEATHERING_COPPER_SLAB);
-		register(new ResourceLocation("weathering_copper_stair"), WEATHERING_COPPER_STAIR);
-		register(new ResourceLocation("bed"), BED);
-		register(new ResourceLocation("brushable"), BRUSHABLE);
+		register("block", BLOCK);
+		register("stair", STAIR);
+		register("door", DOOR);
+		register("trapdoor", TRAPDOOR);
+		register("fence_gate", FENCE_GATE);
+		register("colored_falling", SAND);
+		register("drop_experience", DROP_EXPERIENCE);
+		register("mushroom", MUSHROOM);
+		register("flower", FLOWER);
+		register("flower_pot", FLOWER_POT);
+		register("wither_rose", WITHER_ROSE);
+		register("button", BUTTON);
+		register("pressure_plate", PRESSURE_PLATE);
+		register("weathering_copper_full", WEATHERING_COPPER_FULL);
+		register("weathering_copper_slab", WEATHERING_COPPER_SLAB);
+		register("weathering_copper_stair", WEATHERING_COPPER_STAIR);
+		register("bed", BED);
+		register("brushable", BRUSHABLE);
+		register("wall_sign", WALL_SIGN);
+		register("standing_sign", STANDING_SIGN);
+		register("wall_hanging_sign", WALL_HANGING_SIGN);
+		register("ceiling_hanging_sign", CEILING_HANGING_SIGN);
 	}
 
-	public static void register(ResourceLocation key, MapCodec<? extends Block> codec) {
+	public static void register(String key, MapCodec<? extends Block> codec) {
 		//noinspection unchecked
-		CODECS.put(key, (MapCodec<Block>) codec);
+		CODECS.put(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, key), (MapCodec<Block>) codec);
 	}
 
 	public static MapCodec<Block> get(ResourceLocation key) {
@@ -218,5 +230,12 @@ public class BlockCodecs {
 
 	public static <O, A> A notImplemented(O block) {
 		throw new NotImplementedException();
+	}
+
+	public static <T extends Block> MapCodec<T> woodTyped(BiFunction<Block.Properties, WoodType, T> factory) {
+		return RecordCodecBuilder.mapCodec(instance -> instance.group(
+				propertiesCodec(),
+				CustomizationCodecs.WOOD_TYPE.optionalFieldOf("wood_type", WoodType.OAK).forGetter($ -> WoodType.OAK)
+		).apply(instance, factory));
 	}
 }
