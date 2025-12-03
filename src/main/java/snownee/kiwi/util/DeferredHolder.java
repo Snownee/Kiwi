@@ -118,7 +118,7 @@ public class DeferredHolder<T> implements Holder<T> {
 	 * @throws IllegalStateException If the backing registry is unavailable.
 	 * @throws NullPointerException  If the underlying Holder has not been populated (the target object is not registered).
 	 */
-	@Override
+//	@Override
 	public T get() {
 		return this.value();
 	}

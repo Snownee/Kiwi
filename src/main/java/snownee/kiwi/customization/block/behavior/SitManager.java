@@ -32,7 +32,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.common.ForgeMod;
 import snownee.kiwi.customization.CustomFeatureTags;
 import snownee.kiwi.customization.block.KBlockSettings;
 import snownee.kiwi.customization.block.KBlockUtils;
@@ -82,7 +81,7 @@ public class SitManager {
 				return false;
 			}
 		} else if (player.getEyePosition().distanceToSqr(hitResult.getLocation()) >
-				Mth.square(player.getAttributeValue(ForgeMod.BLOCK_REACH.get()) * KSitCommonConfig.sitActionReachDistanceRatio)) {
+				Mth.square(4.5F * KSitCommonConfig.sitActionReachDistanceRatio)) {
 			return false;
 		}
 		if (!player.getMainHandItem().isEmpty() && player.getMainHandItem().is(block.asItem())) {
