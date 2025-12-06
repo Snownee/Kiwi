@@ -9,7 +9,6 @@ import org.jetbrains.annotations.Nullable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.datafixers.util.Pair;
 
@@ -98,8 +97,7 @@ public final class CustomizationClient {
 			Map<ResourceLocation, KItemDefinition> items,
 			Map<ResourceLocation, KBlockDefinition> blocks,
 			ClientProxy.Context context) {
-		buildersButtonKey = new SmartKey.Builder("key.kiwi.builders_button", KeyMapping.CATEGORY_GAMEPLAY)
-				.key(InputConstants.getKey("key.mouse.4"))
+		buildersButtonKey = new SmartKey.Builder("key.kiwi.builders_button2", KeyMapping.CATEGORY_GAMEPLAY)
 				.onLongPress(BuildersButton::onLongPress)
 				.onShortPress(BuildersButton::onShortPress)
 				.build();
