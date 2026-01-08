@@ -35,6 +35,9 @@
 		],
 		"rei_client": [
 			"snownee.kiwi.customization.compat.rei.REICompat"
+		],
+		"emi": [
+			"snownee.kiwi.customization.compat.emi.EMICompat"
 		]
 	},
 	"mixins": [
