@@ -490,11 +490,7 @@ public class Kiwi implements ModInitializer {
 
 			ResourceLocation rl = new ResourceLocation(modid, name);
 			if (disabledModules.contains(rl)) {
-				if (KiwiConfigManager.modules.containsKey(rl)) { // module is optional
-					continue;
-				} else {
-					throw new RuntimeException("Cannot load mandatory module: " + rl);
-				}
+				continue;
 			}
 			if (KiwiConfigManager.modules.containsKey(rl) && !KiwiConfigManager.modules.get(rl).get()) {
 				continue;
