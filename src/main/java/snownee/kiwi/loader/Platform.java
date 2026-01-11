@@ -69,19 +69,20 @@ public final class Platform {
 		return DATA_GEN;
 	}
 
-	public static int getVersionNumber(String id) {
+	public static int[] getVersionNumber(String id) {
 		ModContainer container = FabricLoader.getInstance().getModContainer(id).orElseThrow();
 		String version = container.getMetadata().getVersion().getFriendlyString();
 		Matcher matcher = VERSION_PATTERN.matcher(version);
-		int result = 0;
-		if (!matcher.matches()) {
-			throw new RuntimeException("Invalid version string: " + version);
+		if (matcher.matches()) {
+			try {
+				return new int[]{
+						Integer.parseInt(matcher.group(1)),
+						Integer.parseInt(matcher.group(2)),
+						Integer.parseInt(matcher.group(3))};
+			} catch (Exception ignored) {
+			}
 		}
-		for (int i = 1; i <= 3; i++) {
-			int group = Math.min(Integer.parseInt(matcher.group(i)), 99);
-			result = result * 100 + group;
-		}
-		return result;
+		return new int[]{0, 0, 0};
 	}
 
 	public static Path getGameDir() {

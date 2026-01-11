@@ -39,12 +39,13 @@ import snownee.kiwi.config.ConfigUI.Hide;
 import snownee.kiwi.config.ConfigUI.Slider;
 import snownee.kiwi.config.ConfigUI.TextDescription;
 import snownee.kiwi.config.ConfigUI.Typed;
-import snownee.kiwi.util.LocalizableItem;
 import snownee.kiwi.util.KUtil;
+import snownee.kiwi.util.LocalizableItem;
 
 public class ClothConfigIntegration {
 
-	private static final ConfigLibAttributes ATTRIBUTES = new ConfigLibAttributes("cloth-config",
+	private static final ConfigLibAttributes ATTRIBUTES = new ConfigLibAttributes(
+			"cloth-config",
 			namespace -> create(Minecraft.getInstance().screen, namespace),
 			true,
 			false,
@@ -78,19 +79,20 @@ public class ClothConfigIntegration {
 				List<String> path = Lists.newArrayList(value.path.split("\\."));
 				titleKey = path.remove(path.size() - 1);
 				String subCatKey = String.join(".", path);
-				Consumer<AbstractConfigListEntry<?>> subCat = subCatsMap.computeIfAbsent(subCatKey, $ -> {
-					String key0 = namespace + ".config." + $;
-					Component title0;
-					if (I18n.exists(key0)) {
-						title0 = Component.translatable(key0);
-					} else {
-						title0 = Component.literal(KUtil.friendlyText(path.get(path.size() - 1)));
-					}
-					SubCategoryBuilder builder0 = entryBuilder.startSubCategory(title0);
-					builder0.setExpanded(true);
-					subCats.add(builder0);
-					return builder0::add;
-				});
+				Consumer<AbstractConfigListEntry<?>> subCat = subCatsMap.computeIfAbsent(
+						subCatKey, $ -> {
+							String key0 = namespace + ".config." + $;
+							Component title0;
+							if (I18n.exists(key0)) {
+								title0 = Component.translatable(key0);
+							} else {
+								title0 = Component.literal(KUtil.friendlyText(path.get(path.size() - 1)));
+							}
+							SubCategoryBuilder builder0 = entryBuilder.startSubCategory(title0);
+							builder0.setExpanded(true);
+							subCats.add(builder0);
+							return builder0::add;
+						});
 
 				TextDescription description = value.getAnnotation(TextDescription.class);
 				putDescription(subCat, entryBuilder, description, false);
@@ -219,7 +221,7 @@ public class ClothConfigIntegration {
 					entry = field.build();
 				} else if (value.field != null && List.class.isAssignableFrom(type)) {
 					Typed typed = value.field.getAnnotation(Typed.class);
-					if (typed.value() == String.class) {
+					if (typed != null && typed.value() == String.class) {
 						StringListBuilder field = entryBuilder.startStrList(title, (List<String>) value.value);
 						field.setTooltip(createComment(value));
 						field.setSaveConsumer(value::accept);

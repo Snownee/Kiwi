@@ -33,8 +33,6 @@ import com.mojang.logging.LogUtils;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
@@ -52,11 +50,11 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import snownee.kiwi.build.KiwiMetadata;
 import snownee.kiwi.build.KiwiMetadataParser;
-import snownee.kiwi.command.KiwiClientCommand;
 import snownee.kiwi.command.KiwiCommand;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfig.ConfigType;
 import snownee.kiwi.config.KiwiConfigManager;
+import snownee.kiwi.loader.ClientPlatform;
 import snownee.kiwi.loader.KiwiMetadataLoader;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.loader.event.InitEvent;
@@ -385,7 +383,9 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 		}
 
 		KiwiConfigManager.init();
-		CommandRegistrationCallback.EVENT.register((dispatcher, context, environment) -> KiwiCommand.register(dispatcher));
+		CommandRegistrationCallback.EVENT.register((dispatcher, context, environment) -> {
+			KiwiCommand.register(dispatcher);
+		});
 		ServerLifecycleEvents.SERVER_STARTING.register(Kiwi::serverInit);
 		ServerLifecycleEvents.SERVER_STOPPED.register($ -> currentServer = null);
 		AttackEntityCallback.EVENT.register(KUtil::onAttackEntity);
@@ -394,8 +394,7 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 			RenderLayerEnum.CUTOUT_MIPPED.value = ChunkSectionLayer.CUTOUT_MIPPED;
 			RenderLayerEnum.TRANSLUCENT.value = ChunkSectionLayer.TRANSLUCENT;
 
-			ClientCommandRegistrationCallback.EVENT.register(KiwiClientCommand::register);
-			ClientLifecycleEvents.CLIENT_STARTED.register(Kiwi::clientInit);
+			ClientPlatform.init();
 		}
 		preInit();
 	}
@@ -572,7 +571,7 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 		KiwiModules.fire(m -> m.init(e));
 	}
 
-	private static void clientInit(Minecraft mc) {
+	public static void clientInit(Minecraft mc) {
 		init();
 		postInit();
 		loadComplete();
