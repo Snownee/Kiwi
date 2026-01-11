@@ -1,0 +1,6 @@
+switch:
+  enabled: true
+  cascading: true
+blocks:
+  - packed_mud
+  - mud_bricks

@@ -287,6 +287,8 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 			throw new RuntimeException(e);
 		}
 
+		CustomizationHooks.init();
+
 		if (!Platform.isProduction()) {
 			enableDataModule();
 		}

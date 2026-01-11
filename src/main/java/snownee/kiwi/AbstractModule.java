@@ -95,7 +95,10 @@ public abstract class AbstractModule {
 			BlockEntityType.BlockEntitySupplier<? extends T> factory,
 			boolean onlyOpCanSetNbt,
 			Supplier<? extends Block>... blocks) {
-		return go(() -> new ExtendedBlockEntityType<>(factory, Stream.of(blocks).map(Supplier::get).collect(Collectors.toSet()), onlyOpCanSetNbt));
+		return go(() -> new ExtendedBlockEntityType<>(
+				factory,
+				Stream.of(blocks).map(Supplier::get).collect(Collectors.toSet()),
+				onlyOpCanSetNbt));
 	}
 
 	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(
