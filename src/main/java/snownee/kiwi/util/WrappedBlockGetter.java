@@ -1,5 +1,7 @@
 package snownee.kiwi.util;
 
+import org.jetbrains.annotations.Nullable;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -18,6 +20,7 @@ public abstract class WrappedBlockGetter implements BlockAndTintGetter {
 	}
 
 	@Override
+	@Nullable
 	public BlockEntity getBlockEntity(BlockPos pos) {
 		return delegate.getBlockEntity(pos);
 	}
@@ -53,8 +56,7 @@ public abstract class WrappedBlockGetter implements BlockAndTintGetter {
 	}
 
 	@Override
-	public int getMinBuildHeight() {
-		return delegate.getMinBuildHeight();
+	public int getMinY() {
+		return delegate.getMinY();
 	}
-
 }

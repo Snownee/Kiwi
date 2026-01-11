@@ -8,7 +8,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import snownee.kiwi.KiwiGOHolder;
+import snownee.kiwi.KiwiGO;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModules;
 
@@ -20,8 +20,8 @@ public interface GameObjectLookup {
 
 	@SuppressWarnings("unchecked")
 	static <T> Stream<Holder.Reference<T>> allHolders(ResourceKey<Registry<T>> registryKey, String modId) {
-		Registry<T> registry = (Registry<T>) Objects.requireNonNull(BuiltInRegistries.REGISTRY.get(registryKey.location()));
-		return registry.holders().filter($ -> $.key().location().getNamespace().equals(modId));
+		Registry<T> registry = (Registry<T>) Objects.requireNonNull(BuiltInRegistries.REGISTRY.getValue(registryKey.location()));
+		return registry.listElements().filter($ -> $.key().location().getNamespace().equals(modId));
 	}
 
 	static <T> Stream<OptionalEntry<T>> fromModules(ResourceKey<Registry<T>> registryKey, String... ids) {
@@ -37,7 +37,7 @@ public interface GameObjectLookup {
 				});
 	}
 
-	record OptionalEntry<T>(KiwiGOHolder<T> holder, boolean optional) {
+	record OptionalEntry<T>(KiwiGO<T> holder, boolean optional) {
 	}
 
 }

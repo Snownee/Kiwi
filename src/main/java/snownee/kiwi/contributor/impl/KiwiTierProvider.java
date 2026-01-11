@@ -6,17 +6,6 @@ import java.util.Set;
 
 import com.google.common.collect.Sets;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.client.model.PlayerModel;
-import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.entity.RenderLayerParent;
-import snownee.kiwi.contributor.client.CosmeticLayer;
-import snownee.kiwi.contributor.impl.client.layer.FoxTailLayer;
-import snownee.kiwi.contributor.impl.client.layer.PlanetLayer;
-import snownee.kiwi.contributor.impl.client.layer.SantaHatLayer;
-import snownee.kiwi.contributor.impl.client.layer.SunnyMilkLayer;
-
 public class KiwiTierProvider extends JsonTierProvider {
 	private final List<String> renderableTiers = List.of("2020q3", "2020q4"/*, "2021q1"*/, "sunny_milk", "xmas");
 
@@ -53,21 +42,6 @@ public class KiwiTierProvider extends JsonTierProvider {
 	@Override
 	public List<String> getRenderableTiers() {
 		return renderableTiers;
-	}
-
-	@Override
-	@Environment(EnvType.CLIENT)
-	public CosmeticLayer createRenderer(
-			RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer,
-			String tier) {
-		return switch (tier) {
-			case "2020q3" -> new PlanetLayer(entityRenderer);
-			case "2020q4" -> new FoxTailLayer(entityRenderer);
-			// case "2021q1" -> new ElectronicatLayer(entityRenderer);
-			case "xmas" -> new SantaHatLayer(entityRenderer);
-			case "sunny_milk" -> new SunnyMilkLayer(entityRenderer);
-			default -> null;
-		};
 	}
 
 }

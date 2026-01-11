@@ -1,3 +1,4 @@
+/*
 package snownee.kiwi.util;
 
 import java.util.Objects;
@@ -194,3 +195,4 @@ public class KiwiEntityTypeBuilder<T extends Entity> {
 		return builder.build();
 	}
 }
+ */

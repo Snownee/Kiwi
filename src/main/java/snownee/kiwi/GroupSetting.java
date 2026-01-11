@@ -62,20 +62,23 @@ public class GroupSetting {
 				.toList();
 		for (ResourceKey<CreativeModeTab> tabKey : tabKeys) {
 			ItemGroupEvents.modifyEntriesEvent(tabKey).register(entries -> {
-				Set<Item> afterItems = Stream.of(after)
-						.map(ResourceLocation::tryParse)
-						.filter(Objects::nonNull)
-						.map(BuiltInRegistries.ITEM::get)
-						.filter(Predicate.not(Items.AIR::equals))
-						.collect(Collectors.toSet());
 				List<ItemStack> items = Lists.newArrayList();
 				for (ItemCategoryFiller filler : fillers) {
-					CreativeModeTab tab = BuiltInRegistries.CREATIVE_MODE_TAB.get(tabKey);
+					CreativeModeTab tab = BuiltInRegistries.CREATIVE_MODE_TAB.getValue(tabKey);
 					filler.fillItemCategory(tab, entries.getEnabledFeatures(), entries.shouldShowOpRestrictedItems(), items);
 				}
 				items = getEnabledStacks(items, entries.getEnabledFeatures());
-				addAfter(items, entries.getDisplayStacks(), afterItems);
-				addAfter(items, entries.getSearchTabStacks(), afterItems);
+
+				if (after != null) {
+					Set<Item> afterItems = Stream.of(after)
+							.map(ResourceLocation::tryParse)
+							.filter(Objects::nonNull)
+							.map(BuiltInRegistries.ITEM::getValue)
+							.filter(Predicate.not(Items.AIR::equals))
+							.collect(Collectors.toSet());
+					addAfter(items, entries.getDisplayStacks(), afterItems);
+					addAfter(items, entries.getSearchTabStacks(), afterItems);
+				}
 			});
 		}
 	}

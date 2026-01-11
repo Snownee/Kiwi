@@ -49,11 +49,6 @@ public final class KPacketSender {
 		send(payload, PlayerLookup.all(server).stream());
 	}
 
-	@Deprecated
-	public static void sendToAllExcept(CustomPacketPayload payload, ServerPlayer player) {
-		send(payload, PlayerLookup.all(player.server).stream().filter(p -> p != player));
-	}
-
 	public static void sendToAround(
 			CustomPacketPayload payload,
 			ServerLevel world,

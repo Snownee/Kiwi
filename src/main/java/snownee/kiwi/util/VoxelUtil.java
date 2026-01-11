@@ -24,7 +24,8 @@ public final class VoxelUtil {
 	 * Prints out an easy to copy-paste string representing the cuboid of a shape
 	 */
 	public static void print(double x1, double y1, double z1, double x2, double y2, double z2) {
-		Kiwi.LOGGER.info("box({}, {}, {}, {}, {}, {}),", Math.min(x1, x2), Math.min(y1, y2), Math.min(z1, z2),
+		Kiwi.LOGGER.info(
+				"box({}, {}, {}, {}, {}, {}),", Math.min(x1, x2), Math.min(y1, y2), Math.min(z1, z2),
 				Math.max(x1, x2), Math.max(y1, y2), Math.max(z1, z2));
 	}
 
@@ -237,7 +238,7 @@ public final class VoxelUtil {
 	}
 
 	public static void setShape(VoxelShape shape, VoxelShape[] dest, boolean verticalAxis, boolean invert) {
-		List<Direction> dirs = verticalAxis ? KUtil.DIRECTIONS : KUtil.HORIZONTAL_DIRECTIONS;
+		Iterable<Direction> dirs = verticalAxis ? KUtil.DIRECTIONS : Direction.Plane.HORIZONTAL;
 		for (Direction side : dirs) {
 			dest[verticalAxis ? side.ordinal() : side.ordinal() - 2] = verticalAxis ? VoxelUtil.rotate(
 					shape,

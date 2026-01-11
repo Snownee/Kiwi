@@ -21,6 +21,7 @@ public class CachedSupplier<T> implements Supplier<T> {
 		this.fallback = fallback;
 	}
 
+	@Nullable
 	@Override
 	public T get() {
 		if (value != null) {

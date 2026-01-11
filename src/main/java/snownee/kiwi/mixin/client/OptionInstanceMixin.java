@@ -23,7 +23,7 @@ public class OptionInstanceMixin {
 			return;
 		}
 		//noinspection ConstantValue
-		if (mc.options != null && this == (Object) mc.options.mouseWheelSensitivity() && Screen.hasControlDown()) {
+		if (mc.getWindow() != null && mc.options != null && this == (Object) mc.options.mouseWheelSensitivity() && Screen.hasControlDown()) {
 			ci.setReturnValue((Double) value * 4);
 		}
 	}

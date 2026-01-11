@@ -1,18 +1,20 @@
 package snownee.kiwi;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.google.common.collect.Maps;
-import com.mojang.datafixers.types.Type;
+import org.jetbrains.annotations.Nullable;
 
-import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
-import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
+import com.google.common.collect.Maps;
+
+import net.fabricmc.fabric.impl.object.builder.ExtendedBlockEntityType;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -28,6 +30,7 @@ import net.minecraft.world.level.material.Fluid;
 import snownee.kiwi.block.entity.InheritanceBlockEntityType;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.loader.event.PostInitEvent;
+import snownee.kiwi.util.KiwiTabBuilder;
 
 /**
  * All your modules should extend {@code AbstractModule}
@@ -35,15 +38,36 @@ import snownee.kiwi.loader.event.PostInitEvent;
  * @author Snownee
  */
 public abstract class AbstractModule {
-	protected final Map<ResourceKey<? extends Registry<?>>, BiConsumer<KiwiModuleContainer, KiwiGOHolder<?>>> decorators = Maps.newHashMap();
-	public ResourceLocation uid;
+	private static final StackWalker STACK_WALKER = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
+	protected final Map<ResourceKey<? extends Registry<?>>, BiConsumer<KiwiModuleContainer, KiwiGO<?>>> decorators = Maps.newIdentityHashMap();
+	public @Nullable ResourceLocation uid;
 
 	protected static <T> KiwiGO<T> go(Supplier<? extends T> factory) {
+		//noinspection unchecked
 		return new KiwiGO<>((Supplier<T>) factory);
 	}
 
 	protected static <T> KiwiGO<T> go(Supplier<? extends T> factory, ResourceKey<? extends Registry<?>> registryKey) {
+		//noinspection unchecked
 		return new KiwiGO.RegistrySpecified<>((Supplier<T>) factory, registryKey);
+	}
+
+	protected static <T extends Item> ItemObject<T> item(Function<Item.Properties, T> factory) {
+		return new ItemObject<>(factory);
+	}
+
+	protected static <T extends Block> BlockObject<T> block(Function<BlockBehaviour.Properties, T> factory) {
+		return block(factory, null);
+	}
+
+	protected static <T extends Block> BlockObject<T> block(
+			Function<BlockBehaviour.Properties, T> factory,
+			@Nullable Supplier<Block> copyFrom) {
+		return new BlockObject<>(factory, copyFrom);
+	}
+
+	protected static <T> KiwiGO<T> ref(ResourceKey<? extends Registry<?>> registryKey) {
+		return new KiwiGO.Ref<>(registryKey);
 	}
 
 	/// helper methods:
@@ -61,22 +85,34 @@ public abstract class AbstractModule {
 
 	@SafeVarargs
 	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(
-			FabricBlockEntityTypeBuilder.Factory<? extends T> factory,
-			Type<?> datafixer,
+			BlockEntityType.BlockEntitySupplier<? extends T> factory,
 			Supplier<? extends Block>... blocks) {
-		return go(() -> FabricBlockEntityTypeBuilder.<T>create(factory, Stream.of(blocks).map(Supplier::get).toArray(Block[]::new))
-				.build(datafixer));
+		return blockEntity(factory, false, blocks);
+	}
+
+	@SafeVarargs
+	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(
+			BlockEntityType.BlockEntitySupplier<? extends T> factory,
+			boolean onlyOpCanSetNbt,
+			Supplier<? extends Block>... blocks) {
+		return go(() -> new ExtendedBlockEntityType<>(factory, Stream.of(blocks).map(Supplier::get).collect(Collectors.toSet()), onlyOpCanSetNbt));
 	}
 
 	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(
-			FabricBlockEntityTypeBuilder.Factory<? extends T> factory,
-			Type<?> datafixer,
+			BlockEntityType.BlockEntitySupplier<? extends T> factory,
 			Class<? extends Block> blockClass) {
-		return go(() -> new InheritanceBlockEntityType<>(factory, blockClass, datafixer));
+		return blockEntity(factory, false, blockClass);
 	}
 
-	public static CreativeModeTab.Builder itemCategory(String namespace, String path, Supplier<ItemStack> icon) {
-		return FabricItemGroup.builder().title(Component.translatable("itemGroup.%s.%s".formatted(namespace, path))).icon(icon);
+	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(
+			BlockEntityType.BlockEntitySupplier<? extends T> factory,
+			boolean onlyOpCanSetNbt,
+			Class<? extends Block> blockClass) {
+		return go(() -> new InheritanceBlockEntityType<>(factory, blockClass, onlyOpCanSetNbt));
+	}
+
+	public static CreativeModeTab.Builder itemCategory(ResourceLocation id, Supplier<ItemStack> icon) {
+		return new KiwiTabBuilder(id).icon(icon);
 	}
 
 	public static TagKey<Item> itemTag(String namespace, String path) {
@@ -99,6 +135,44 @@ public abstract class AbstractModule {
 		return TagKey.create(registryKey, ResourceLocation.fromNamespaceAndPath(namespace, path));
 	}
 
+	public static TagKey<Item> itemTag(String id) {
+		return tag(Registries.ITEM, id);
+	}
+
+	public static TagKey<EntityType<?>> entityTag(String id) {
+		return tag(Registries.ENTITY_TYPE, id);
+	}
+
+	public static TagKey<Block> blockTag(String id) {
+		return tag(Registries.BLOCK, id);
+	}
+
+	public static TagKey<Fluid> fluidTag(String id) {
+		return tag(Registries.FLUID, id);
+	}
+
+	public static <T> TagKey<T> tag(ResourceKey<? extends Registry<T>> registryKey, String id) {
+		ResourceLocation location;
+		if (id.contains(":")) {
+			location = ResourceLocation.parse(id);
+		} else {
+			Class<?> callerClass = STACK_WALKER.walk(stream -> stream
+					.map(StackWalker.StackFrame::getDeclaringClass)
+					.filter(cls -> cls != AbstractModule.class)
+					.findFirst()
+			).orElse(null);
+			if (callerClass == null) {
+				throw new IllegalStateException("No caller class found");
+			}
+			KiwiModule annotation = callerClass.getDeclaredAnnotation(KiwiModule.class);
+			if (annotation == null || annotation.modId().isEmpty()) {
+				throw new IllegalStateException("No KiwiModule modId found on " + callerClass.getName());
+			}
+			location = ResourceLocation.fromNamespaceAndPath(annotation.modId(), id);
+		}
+		return TagKey.create(registryKey, location);
+	}
+
 	public void addRegistries() {
 	}
 
@@ -115,10 +189,10 @@ public abstract class AbstractModule {
 	}
 
 	public ResourceLocation id(String path) {
-		return ResourceLocation.fromNamespaceAndPath(uid.getNamespace(), path);
+		return ResourceLocation.fromNamespaceAndPath(Objects.requireNonNull(uid).getNamespace(), path);
 	}
 
 	public KiwiModuleContainer container() {
-		return KiwiModules.get(uid);
+		return KiwiModules.get(Objects.requireNonNull(uid));
 	}
 }

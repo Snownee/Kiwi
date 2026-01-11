@@ -1,3 +1,4 @@
+/*
 package snownee.kiwi.recipe.crafting;
 
 import com.mojang.serialization.Codec;
@@ -86,3 +87,4 @@ public class NoContainersShapedRecipe extends ShapedRecipe {
 		}
 	}
 }
+*/

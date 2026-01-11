@@ -1,8 +1,13 @@
 package snownee.kiwi.contributor.network;
 
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -15,8 +20,8 @@ import snownee.kiwi.network.PayloadContext;
 import snownee.kiwi.network.PlayPacketHandler;
 
 @KiwiPacket
-public record SSyncCosmeticPacket(ImmutableMap<String, ResourceLocation> data) implements CustomPacketPayload {
-	public static final Type<SSyncCosmeticPacket> TYPE = new CustomPacketPayload.Type<>(Kiwi.id("sync_cosmetic"));
+public record SSyncCosmeticPacket(Map<UUID, ResourceLocation> add, List<UUID> remove) implements CustomPacketPayload {
+	public static final Type<SSyncCosmeticPacket> TYPE = new Type<>(Kiwi.id("sync_cosmetic"));
 
 	@Override
 	public Type<? extends CustomPacketPayload> type() {
@@ -25,9 +30,14 @@ public record SSyncCosmeticPacket(ImmutableMap<String, ResourceLocation> data) i
 
 	public static class Handler implements PlayPacketHandler<SSyncCosmeticPacket> {
 		public static final StreamCodec<RegistryFriendlyByteBuf, SSyncCosmeticPacket> STREAM_CODEC = StreamCodec.composite(
-				ByteBufCodecs.map(Maps::newHashMapWithExpectedSize, ByteBufCodecs.STRING_UTF8, ResourceLocation.STREAM_CODEC)
+				ByteBufCodecs.map(
+								Maps::newHashMapWithExpectedSize,
+								UUIDUtil.STREAM_CODEC,
+								ResourceLocation.STREAM_CODEC)
 						.map(ImmutableMap::copyOf, Maps::newHashMap),
-				SSyncCosmeticPacket::data,
+				SSyncCosmeticPacket::add,
+				UUIDUtil.STREAM_CODEC.apply(ByteBufCodecs.list()),
+				SSyncCosmeticPacket::remove,
 				SSyncCosmeticPacket::new
 		);
 
@@ -38,7 +48,7 @@ public record SSyncCosmeticPacket(ImmutableMap<String, ResourceLocation> data) i
 
 		@Override
 		public void handle(SSyncCosmeticPacket packet, PayloadContext context) {
-			context.execute(() -> ContributorsClient.changeCosmetic(packet.data()));
+			context.execute(() -> ContributorsClient.changeCosmetic(packet));
 		}
 	}
 }

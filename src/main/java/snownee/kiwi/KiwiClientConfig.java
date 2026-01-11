@@ -32,6 +32,9 @@ public final class KiwiClientConfig {
 	@KiwiConfig.Path("debug.tagsTooltip")
 	public static boolean tagsTooltip = true;
 
+	@KiwiConfig.Path("debug.F3CopyInInventory")
+	public static boolean f3CopyInInventory = true;
+
 	@KiwiConfig.Path("debug.showTranslatedTagsByDefault")
 	public static boolean showTranslatedTagsByDefault = false;
 
@@ -45,4 +48,7 @@ public final class KiwiClientConfig {
 	@ConfigUI.Hide
 	@KiwiConfig.Path("debug.debugTooltipMsg")
 	public static boolean debugTooltipMsg = true;
+
+	@KiwiModule.Skip
+	public static boolean exportBlocksMore;
 }

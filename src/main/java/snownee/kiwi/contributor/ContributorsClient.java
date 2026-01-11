@@ -1,15 +1,15 @@
 package snownee.kiwi.contributor;
 
-import java.util.Map;
+import java.util.UUID;
+import java.util.function.Function;
 
 import com.mojang.blaze3d.platform.InputConstants;
 
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRendererRegistrationCallback;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.entity.state.PlayerRenderState;
 import net.minecraft.resources.ResourceLocation;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.Kiwi;
@@ -18,7 +18,12 @@ import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.contributor.client.CosmeticLayer;
 import snownee.kiwi.contributor.client.gui.CosmeticScreen;
+import snownee.kiwi.contributor.impl.client.layer.FoxTailLayer;
+import snownee.kiwi.contributor.impl.client.layer.PlanetLayer;
+import snownee.kiwi.contributor.impl.client.layer.SantaHatLayer;
+import snownee.kiwi.contributor.impl.client.layer.SunnyMilkLayer;
 import snownee.kiwi.contributor.network.CSetCosmeticPacket;
+import snownee.kiwi.contributor.network.SSyncCosmeticPacket;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.network.KPacketSender;
 import snownee.kiwi.util.KUtil;
@@ -27,23 +32,14 @@ public class ContributorsClient extends AbstractModule {
 
 	@Override
 	protected void init(InitEvent event) {
-		event.enqueueWork(() -> {
-			LivingEntityFeatureRendererRegistrationCallback.EVENT.register((entityType, entityRenderer, registrationHelper, context) -> {
-				if (entityRenderer instanceof PlayerRenderer) {
-					CosmeticLayer layer = new CosmeticLayer((PlayerRenderer) entityRenderer);
-					CosmeticLayer.ALL_LAYERS.add(layer);
-					registrationHelper.register(layer);
-				}
-			});
-			ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
-				ContributorsClient.changeCosmetic();
-			});
-			ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
-				Contributors.PLAYER_COSMETICS.clear();
-				CosmeticLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidateAll());
-			});
-			ClientTickEvents.END_CLIENT_TICK.register(ContributorsClient::onKeyInput);
-		});
+		registerRenderer("2020q3", PlanetLayer::new);
+		registerRenderer("2020q4", FoxTailLayer::new);
+		registerRenderer("xmas", SantaHatLayer::new);
+		registerRenderer("sunny_milk", SunnyMilkLayer::new);
+	}
+
+	private static void registerRenderer(String id, Function<RenderLayerParent<PlayerRenderState, PlayerModel>, CosmeticLayer> creator) {
+		CosmeticLayer.registerRenderer(ResourceLocation.fromNamespaceAndPath("snownee", id), creator);
 	}
 
 	private static int hold;
@@ -69,7 +65,7 @@ public class ContributorsClient extends AbstractModule {
 			id = null;
 		}
 		ResourceLocation cosmetic = id;
-		Contributors.canPlayerUseCosmetic(getPlayerName(), cosmetic).thenAccept(bl -> {
+		Contributors.canPlayerUseCosmetic(getSelfName(), cosmetic).thenAccept(bl -> {
 			if (!bl) {
 				ConfigHandler cfg = KiwiConfigManager.getHandler(KiwiClientConfig.class);
 				KiwiClientConfig.contributorCosmetic = "";
@@ -78,27 +74,38 @@ public class ContributorsClient extends AbstractModule {
 			}
 			KPacketSender.sendToServer(new CSetCosmeticPacket(cosmetic));
 			if (cosmetic == null) {
-				Contributors.PLAYER_COSMETICS.remove(getPlayerName());
+				Contributors.PLAYER_COSMETICS.remove(getSelfUUID());
 			} else {
-				Contributors.PLAYER_COSMETICS.put(getPlayerName(), cosmetic);
+				Contributors.PLAYER_COSMETICS.put(getSelfUUID(), cosmetic);
 				Kiwi.LOGGER.info("Enabled contributor effect: {}", cosmetic);
 			}
-			CosmeticLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidate(getPlayerName()));
+			CosmeticLayer.getCache().remove(getSelfUUID());
 		});
 	}
 
-	public static void changeCosmetic(Map<String, ResourceLocation> changes) {
-		changes.forEach((k, v) -> {
-			if (v == null) {
-				Contributors.PLAYER_COSMETICS.remove(k);
-			} else {
-				Contributors.PLAYER_COSMETICS.put(k, v);
-			}
-		});
-		CosmeticLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidateAll(changes.keySet()));
+	public static void changeCosmetic(SSyncCosmeticPacket changes) {
+		if (changes.add().isEmpty() && changes.remove().isEmpty()) {
+			clear();
+			return;
+		}
+		Contributors.PLAYER_COSMETICS.putAll(changes.add());
+		for (UUID s : changes.remove()) {
+			Contributors.PLAYER_COSMETICS.remove(s);
+		}
+		changes.add().keySet().forEach(CosmeticLayer.getCache()::remove);
+		changes.remove().forEach(CosmeticLayer.getCache()::remove);
 	}
 
-	private static String getPlayerName() {
+	public static void clear() {
+		Contributors.PLAYER_COSMETICS.clear();
+		CosmeticLayer.getCache().clear();
+	}
+
+	public static UUID getSelfUUID() {
+		return Minecraft.getInstance().getUser().getProfileId();
+	}
+
+	public static String getSelfName() {
 		return Minecraft.getInstance().getUser().getName();
 	}
 

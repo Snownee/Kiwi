@@ -6,16 +6,19 @@
 	"compatibilityLevel": "JAVA_16",
 	"refmap": "kiwi.refmap.json",
 	"mixins": [
-		"RecipeManagerMixin",
-		"ReloadableServerResourcesMixin"
+		"IngredientAccess"
 	],
 	"client": [
 		"client.ClientPacketListenerMixin",
 		"client.ClientTelemetryManagerMixin",
 		"client.CreativeModeInventoryScreenMixin",
-		"client.FogRendererMixin",
+		"client.EntityRenderDispatcherAccess",
+		"client.EntityRendererMixin",
+		"client.LavaFogEnvironmentMixin",
 		"client.LoadingOverlayMixin",
 		"client.OptionInstanceMixin",
+		"client.PlayerRenderStateMixin",
+		"client.RenderLayerAccess",
 		"client.ScreenEffectRendererMixin",
 		"client.ScreenMixin",
 		"client.TitleScreenMixin",

@@ -1,11 +1,12 @@
 package snownee.kiwi.contributor.client;
 
-import java.util.Collection;
-import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
+import java.util.function.Function;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.Lists;
+import org.jetbrains.annotations.Nullable;
+
+import com.google.common.collect.Maps;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.model.PlayerModel;
@@ -13,24 +14,55 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.entity.state.PlayerRenderState;
+import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.resources.ResourceLocation;
 import snownee.kiwi.contributor.Contributors;
-import snownee.kiwi.contributor.ITierProvider;
+import snownee.kiwi.contributor.CosmeticRenderState;
+import snownee.kiwi.mixin.client.RenderLayerAccess;
 
-public class CosmeticLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
+public class CosmeticLayer extends RenderLayer<PlayerRenderState, PlayerModel> {
 
-	public static final Collection<CosmeticLayer> ALL_LAYERS = Lists.newLinkedList();
-	private final Cache<String, RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>>> player2renderer;
-	public final RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> renderer;
+	public static Map<PlayerSkin.Model, CosmeticLayer> ALL_LAYERS = Maps.newHashMap();
+	private static final Map<UUID, CosmeticLayer> PLAYER_CACHE = Maps.newHashMap();
+	private static final Map<ResourceLocation, Function<RenderLayerParent<PlayerRenderState, PlayerModel>, CosmeticLayer>> LAYER_CREATORS = Maps.newHashMap();
+	private final Map<ResourceLocation, CosmeticLayer> renderers = Maps.newHashMap();
 
-	public CosmeticLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRendererIn) {
+	public CosmeticLayer(RenderLayerParent<PlayerRenderState, PlayerModel> entityRendererIn) {
 		super(entityRendererIn);
-		this.renderer = entityRendererIn;
-		if (getClass() == CosmeticLayer.class) {
-			player2renderer = CacheBuilder.newBuilder().build();
-		} else {
-			player2renderer = null;
-		}
+	}
+
+	@Nullable
+	public static CosmeticLayer getRendererOf(AbstractClientPlayer player) {
+		return PLAYER_CACHE.computeIfAbsent(
+				player.getUUID(), uuid -> {
+					CosmeticLayer parent = ALL_LAYERS.get(player.getSkin().model());
+					ResourceLocation id = Contributors.PLAYER_COSMETICS.get(uuid);
+					if (parent == null || id == null) {
+						return null;
+					}
+					return createRenderer(id, parent);
+				});
+	}
+
+	@Nullable
+	public static CosmeticLayer createRenderer(ResourceLocation id, CosmeticLayer parent) {
+		return parent.renderers.computeIfAbsent(
+				id, key -> {
+					Function<RenderLayerParent<PlayerRenderState, PlayerModel>, CosmeticLayer> creator = LAYER_CREATORS.get(key);
+					if (creator != null) {
+						//noinspection unchecked,rawtypes
+						RenderLayerParent<PlayerRenderState, PlayerModel> layerParent = ((RenderLayerAccess) parent).getRenderer();
+						return creator.apply(layerParent);
+					}
+					return null;
+				});
+	}
+
+	public synchronized static void registerRenderer(
+			ResourceLocation id,
+			Function<RenderLayerParent<PlayerRenderState, PlayerModel>, CosmeticLayer> creator) {
+		LAYER_CREATORS.put(id, creator);
 	}
 
 	@Override
@@ -38,50 +70,19 @@ public class CosmeticLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
 			PoseStack matrixStackIn,
 			MultiBufferSource bufferIn,
 			int packedLightIn,
-			AbstractClientPlayer entitylivingbaseIn,
-			float limbSwing,
-			float limbSwingAmount,
-			float partialTicks,
-			float ageInTicks,
-			float netHeadYaw,
-			float headPitch) {
-		if (player2renderer == null) {
+			PlayerRenderState renderState,
+			float yRot,
+			float xRot) {
+		if (renderState.isInvisible) {
 			return;
 		}
-		RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> renderer = player2renderer.getIfPresent(entitylivingbaseIn.getGameProfile()
-				.getName());
-		if (renderer == null) {
-			String name = entitylivingbaseIn.getGameProfile().getName();
-			ResourceLocation id = Contributors.PLAYER_COSMETICS.get(name);
-			if (id != null) {
-				ITierProvider provider = Contributors.REWARD_PROVIDERS.get(id.getNamespace().toLowerCase(Locale.ENGLISH));
-				if (provider == null) {
-					Contributors.PLAYER_COSMETICS.remove(name);
-				} else {
-					renderer = provider.createRenderer(this.renderer, id.getPath());
-					if (renderer != null) {
-						player2renderer.put(name, renderer);
-					}
-				}
-			}
-		}
+		CosmeticLayer renderer = ((CosmeticRenderState) renderState).kiwi$getCosmeticLayer();
 		if (renderer != null) {
-			renderer.render(
-					matrixStackIn,
-					bufferIn,
-					packedLightIn,
-					entitylivingbaseIn,
-					limbSwing,
-					limbSwingAmount,
-					partialTicks,
-					ageInTicks,
-					netHeadYaw,
-					headPitch);
+			renderer.render(matrixStackIn, bufferIn, packedLightIn, renderState, yRot, xRot);
 		}
 	}
 
-	public Cache<String, RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>>> getCache() {
-		return player2renderer;
+	public static Map<UUID, CosmeticLayer> getCache() {
+		return PLAYER_CACHE;
 	}
-
 }
