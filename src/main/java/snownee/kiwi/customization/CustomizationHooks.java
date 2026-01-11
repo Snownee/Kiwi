@@ -57,6 +57,7 @@ import snownee.kiwi.customization.block.soundtype.DeferredSoundType;
 import snownee.kiwi.customization.block.soundtype.SoundTypes;
 import snownee.kiwi.customization.block.tier.KiwiTiers;
 import snownee.kiwi.customization.block.tier.SimpleTier;
+import snownee.kiwi.customization.builder.BuilderRule;
 import snownee.kiwi.customization.builder.BuilderRules;
 import snownee.kiwi.customization.item.ItemFundamentals;
 import snownee.kiwi.customization.item.loader.KCreativeTab;
@@ -153,6 +154,9 @@ public final class CustomizationHooks {
 		CustomizationRegistries.ITEM_TEMPLATE = FabricRegistryBuilder.createSimple(CustomizationRegistries.ITEM_TEMPLATE_KEY)
 				.buildAndRegister();
 		Kiwi.registerRegistry(CustomizationRegistries.ITEM_TEMPLATE_KEY, KItemTemplate.Type.class);
+		CustomizationRegistries.BUILDER_RULE = FabricRegistryBuilder.createSimple(CustomizationRegistries.BUILDER_RULE_KEY)
+				.buildAndRegister();
+		Kiwi.registerRegistry(CustomizationRegistries.BUILDER_RULE_KEY, BuilderRule.Type.class);
 		PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, entity) -> {
 			if (PlacementSystem.isDebugEnabled(player)) {
 				PlacementSystem.removeDebugBlocks(world, pos);

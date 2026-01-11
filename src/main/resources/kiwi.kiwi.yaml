@@ -2,6 +2,10 @@ clientOnly: true
 conditions:
   - data:
       method: shouldLoad
+      value: [block_components, block_templates, item_templates, builder_rules]
+    target: snownee.kiwi.customization.CustomizationHooks
+  - data:
+      method: shouldLoad
       value: [data]
     target: snownee.kiwi.data.DataModule
   - data:
@@ -18,11 +22,19 @@ configs:
 modules:
   - data: {value: contributors}
     target: snownee.kiwi.contributor.Contributors
+  - data: {value: block_components}
+    target: snownee.kiwi.customization.block.loader.KBlockComponents
+  - data: {value: block_templates}
+    target: snownee.kiwi.customization.block.loader.KBlockTemplates
+  - data: {value: builder_rules}
+    target: snownee.kiwi.customization.builder.BuilderRuleTypes
+  - data: {value: item_templates}
+    target: snownee.kiwi.customization.item.loader.KItemTemplates
   - data: {value: data}
     target: snownee.kiwi.data.DataModule
   - data: {value: test}
     target: snownee.kiwi.test.TestModule
-  - data: {value: test2}
+  - data: {dependencies: 'minecraft;@kiwi:test', modId: kiwi, value: test2}
     target: snownee.kiwi.test.TestModule2
 optionals:
   - data: {defaultEnabled: false}
@@ -34,5 +46,13 @@ packets:
     target: snownee.kiwi.contributor.network.CSetCosmeticPacket
   - data: {}
     target: snownee.kiwi.contributor.network.SSyncCosmeticPacket
+  - data: {}
+    target: snownee.kiwi.customization.network.CApplyBuilderRulePacket
+  - data: {}
+    target: snownee.kiwi.customization.network.CConvertItemPacket
+  - data: {}
+    target: snownee.kiwi.customization.network.SItemPopTimePacket
+  - data: {}
+    target: snownee.kiwi.customization.network.SSyncPlaceCountPacket
   - data: {}
     target: snownee.kiwi.test.SMyPacket
