@@ -18,7 +18,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import snownee.kiwi.Kiwi;
-import snownee.kiwi.util.Util;
+import snownee.kiwi.util.KUtil;
 import snownee.kiwi.util.resource.AlternativesFileToIdConverter;
 import snownee.kiwi.util.resource.OneTimeLoader;
 
@@ -49,7 +49,7 @@ public record CustomizationMetadata(ImmutableListMultimap<String, String> regist
 		var fileToIdConverter = AlternativesFileToIdConverter.yamlOrJson(Kiwi.ID);
 		Map<String, CustomizationMetadata> metadataMap = Maps.newHashMap();
 		for (String namespace : resourceManager.getNamespaces()) {
-			ResourceLocation file = fileToIdConverter.idToFile(new ResourceLocation(namespace, "metadata"));
+			ResourceLocation file = fileToIdConverter.idToFile(ResourceLocation.fromNamespaceAndPath(namespace, "metadata"));
 			Optional<Resource> resource = resourceManager.getResource(file);
 			if (resource.isEmpty()) {
 				metadataMap.put(namespace, emptyMetadata);
@@ -79,7 +79,7 @@ public record CustomizationMetadata(ImmutableListMultimap<String, String> regist
 		Set<ResourceLocation> order = Sets.newLinkedHashSet();
 		metadataMap.forEach((namespace, metadata) -> {
 			for (String s : metadata.registryOrder().get(key)) {
-				order.add(Util.RL(s, namespace));
+				order.add(KUtil.RL(s, namespace));
 			}
 		});
 		for (ResourceLocation id : order) {

@@ -1,35 +1,86 @@
 package snownee.kiwi.customization.builder;
 
+import java.util.function.Consumer;
+
+import org.jetbrains.annotations.Nullable;
+
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.navigation.CommonInputs;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
-import snownee.kiwi.util.NotNullByDefault;
 
-@NotNullByDefault
 public class ItemButton extends Button {
 	private final ItemStack itemStack;
 	private final boolean inContainer;
-	private ClientTooltipPositioner tooltipPositioner;
 	private float hoverProgress;
+	private float pressTime = -1;
+	public @Nullable Consumer<ItemButton> onPress;
+	public @Nullable Consumer<ItemButton> onRelease;
+	public @Nullable Tooltip rawTooltip; // we dont want the delay
 
-	protected ItemButton(Builder builder) {
-		super(builder.x, builder.y, builder.width, builder.height, builder.message, builder.onPress, builder.createNarration);
-		itemStack = builder.itemStack;
-		inContainer = builder.inContainer;
+	protected ItemButton(
+			int x,
+			int y,
+			int width,
+			int height,
+			Component component,
+			OnPress onPress,
+			CreateNarration createNarration,
+			ItemStack itemStack,
+			boolean inContainer) {
+		super(x, y, width, height, component, onPress, createNarration);
+		this.itemStack = itemStack;
+		this.inContainer = inContainer;
 	}
+
 
 	public static Builder builder(ItemStack itemStack, boolean inContainer, OnPress pOnPress) {
 		return new Builder(itemStack, inContainer, pOnPress);
 	}
 
-	public ItemStack getItem() {
+	@Override
+	public void setTooltip(@Nullable Tooltip tooltip) {
+		rawTooltip = tooltip;
+	}
+
+	@Override
+	public @Nullable Tooltip getTooltip() {
+		return rawTooltip;
+	}
+
+	public ItemStack item() {
 		return itemStack;
+	}
+
+	public int pressTime() {
+		return (int) pressTime;
+	}
+
+	public void unpress() {
+		pressTime = -1;
 	}
 
 	@Override
 	protected void renderWidget(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
+		if (rawTooltip != null && isHovered() || isFocused() && Minecraft.getInstance().getLastInputType().isKeyboard()) {
+			Screen screen = Minecraft.getInstance().screen;
+			if (screen != null) {
+				screen.setTooltipForNextRenderPass(rawTooltip, DefaultTooltipPositioner.INSTANCE, true);
+			}
+		}
+		if (pressTime >= 0) {
+			int i = (int) pressTime;
+			pressTime += pPartialTick;
+			if (onPress != null && i != (int) pressTime) {
+				onPress.accept(this);
+			}
+		}
 		int x = getX();
 		int y = getY();
 		int width = getWidth() - 1;
@@ -49,13 +100,34 @@ public class ItemButton extends Button {
 		pGuiGraphics.renderItem(itemStack, x + 2, y + 2);
 	}
 
-	public void setTooltipPositioner(ClientTooltipPositioner tooltipPositioner) {
-		this.tooltipPositioner = tooltipPositioner;
+	@Override
+	public void onPress() {
+		super.onPress();
+		pressTime = 0;
 	}
 
 	@Override
-	protected ClientTooltipPositioner createTooltipPositioner() {
-		return tooltipPositioner != null ? tooltipPositioner : super.createTooltipPositioner();
+	public void onRelease(double mouseX, double mouseY) {
+		onRelease();
+	}
+
+	@Override
+	public boolean keyReleased(int button, int p_94751_, int p_94752_) {
+		if (!this.active || !this.visible) {
+			return false;
+		}
+		if (CommonInputs.selected(button)) {
+			onRelease();
+			return true;
+		}
+		return false;
+	}
+
+	public void onRelease() {
+		if (onRelease != null && pressTime >= 0) {
+			onRelease.accept(this);
+		}
+		pressTime = -1;
 	}
 
 	public static class Builder extends Button.Builder {
@@ -70,7 +142,17 @@ public class ItemButton extends Button {
 
 		@Override
 		public ItemButton build() {
-			return new ItemButton(this);
+			var button = super.build();
+			return new ItemButton(
+					button.getX(),
+					button.getY(),
+					button.getWidth(),
+					button.getHeight(),
+					button.getMessage(),
+					button.onPress,
+					button.createNarration,
+					itemStack,
+					inContainer);
 		}
 	}
 }

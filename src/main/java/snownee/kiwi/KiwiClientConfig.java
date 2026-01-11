@@ -35,6 +35,9 @@ public final class KiwiClientConfig {
 	@KiwiConfig.Path("debug.F3CopyInInventory")
 	public static boolean f3CopyInInventory = true;
 
+	@KiwiConfig.Path("debug.printDataComponentsWhenCopy")
+	public static boolean printDataComponentsWhenCopy = true;
+
 	@KiwiConfig.Path("debug.showTranslatedTagsByDefault")
 	public static boolean showTranslatedTagsByDefault = false;
 
@@ -43,7 +46,7 @@ public final class KiwiClientConfig {
 	public static int tagsTooltipTagsPerPage = 6;
 
 	@KiwiConfig.Path("debug.tagsTooltipAppendKeybindHint")
-	public static boolean tagsTooltipAppendKeybindHint = true;
+	public static boolean tagsTooltipAppendKeybindHint = false;
 
 	@ConfigUI.Hide
 	@KiwiConfig.Path("debug.debugTooltipMsg")

@@ -1,7 +1,5 @@
 package snownee.kiwi.customization.block.component;
 
-import org.jetbrains.annotations.Nullable;
-
 import net.minecraft.core.Direction;
 import net.minecraft.core.FrontAndTop;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -39,7 +37,7 @@ public record FrontAndTopComponent() implements KBlockComponent {
 	}
 
 	@Override
-	public @Nullable BlockState getStateForPlacement(KBlockSettings settings, BlockState state, BlockPlaceContext context) {
+	public BlockState getStateForPlacement(KBlockSettings settings, BlockState state, BlockPlaceContext context) {
 		if (settings.customPlacement) {
 			return state;
 		}

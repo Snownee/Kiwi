@@ -4,11 +4,13 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
+import me.shedaniel.rei.plugincompatibilities.api.REIPluginCompatIgnore;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.customization.CustomizationHooks;
@@ -16,10 +18,9 @@ import snownee.kiwi.customization.block.family.BlockFamilies;
 import snownee.kiwi.customization.block.family.BlockFamily;
 import snownee.kiwi.customization.block.family.StonecutterRecipeMaker;
 import snownee.kiwi.util.KHolder;
-import snownee.kiwi.util.NotNullByDefault;
 
 @JeiPlugin
-@NotNullByDefault
+@REIPluginCompatIgnore
 public class JEICompat implements IModPlugin {
 	public static final ResourceLocation ID = Kiwi.id("customization");
 
@@ -31,7 +32,7 @@ public class JEICompat implements IModPlugin {
 	@Override
 	public void registerRecipes(IRecipeRegistration registration) {
 		if (CustomizationHooks.isEnabled()) {
-			List<StonecutterRecipe> recipes = Lists.newArrayList();
+			List<RecipeHolder<StonecutterRecipe>> recipes = Lists.newArrayList();
 			for (KHolder<BlockFamily> holder : BlockFamilies.all()) {
 				BlockFamily family = holder.value();
 				if (family.stonecutterSource().isPresent()) {

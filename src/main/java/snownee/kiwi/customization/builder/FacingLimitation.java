@@ -2,9 +2,7 @@ package snownee.kiwi.customization.builder;
 
 import net.minecraft.core.Direction;
 import net.minecraft.util.StringRepresentable;
-import snownee.kiwi.util.NotNullByDefault;
 
-@NotNullByDefault
 public enum FacingLimitation implements StringRepresentable {
 	None("none"),
 	FrontAndBack("front_and_back"),

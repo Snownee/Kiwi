@@ -1,30 +1,43 @@
 package snownee.kiwi.customization.block.component;
 
+import java.util.Optional;
+
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import snownee.kiwi.customization.block.KBlockSettings;
 import snownee.kiwi.customization.block.KBlockUtils;
 import snownee.kiwi.customization.block.behavior.BlockBehaviorRegistry;
 import snownee.kiwi.customization.block.loader.KBlockComponents;
 
-public record CycleVariantsComponent(IntegerProperty property, boolean rightClickToCycle) implements KBlockComponent, LayeredComponent {
-	public static final Codec<CycleVariantsComponent> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+public record CycleVariantsComponent(
+		IntegerProperty property,
+		boolean rightClickToCycle,
+		Optional<String> onPlace) implements KBlockComponent, LayeredComponent {
+	public static final MapCodec<CycleVariantsComponent> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(CycleVariantsComponent::maxValue),
-			Codec.BOOL.optionalFieldOf("right_click_to_cycle", true).forGetter(CycleVariantsComponent::rightClickToCycle)
+			Codec.BOOL.optionalFieldOf("right_click_to_cycle", true).forGetter(CycleVariantsComponent::rightClickToCycle),
+			ExtraCodecs.NON_EMPTY_STRING.optionalFieldOf("on_place").forGetter(CycleVariantsComponent::onPlace)
 	).apply(instance, CycleVariantsComponent::create));
 
 	public static CycleVariantsComponent create(int amount) {
-		return create(amount, true);
+		return create(amount, true, Optional.empty());
 	}
 
-	public static CycleVariantsComponent create(int amount, boolean rightClickToCycle) {
-		return new CycleVariantsComponent(KBlockUtils.internProperty(IntegerProperty.create("variant", 1, amount)), rightClickToCycle);
+	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+	public static CycleVariantsComponent create(int amount, boolean rightClickToCycle, Optional<String> onPlace) {
+		return new CycleVariantsComponent(
+				KBlockUtils.internProperty(IntegerProperty.create("variant", 1, amount)),
+				rightClickToCycle,
+				onPlace);
 	}
 
 	@Override
@@ -40,6 +53,15 @@ public record CycleVariantsComponent(IntegerProperty property, boolean rightClic
 	@Override
 	public BlockState registerDefaultState(BlockState state) {
 		return state.setValue(property, getDefaultLayer());
+	}
+
+	@Override
+	public BlockState getStateForPlacement(KBlockSettings settings, BlockState state, BlockPlaceContext context) {
+		if (onPlace.isPresent() && "randomize".equals(onPlace.get())) {
+			int randomValue = context.getLevel().random.nextInt(maxValue() - minValue() + 1) + minValue();
+			state = state.setValue(property, randomValue);
+		}
+		return state;
 	}
 
 	public int minValue() {

@@ -5,26 +5,47 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Interner;
 import com.google.common.collect.Interners;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
-import snownee.kiwi.util.codec.CustomizationCodecs;
+import snownee.kiwi.util.codec.KCodecs;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class BlockFamily {
-	public static final Codec<BlockFamily> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+	public static final Codec<BlockFamily> CODEC = ResourceLocation.CODEC.flatXmap(
+			$ -> {
+				BlockFamily family = BlockFamilies.get($);
+				if (family == null) {
+					return DataResult.error(() -> "Block family " + $ + " not found");
+				}
+				return DataResult.success(family);
+			},
+			family -> {
+				ResourceLocation id = BlockFamilies.getKey(family);
+				if (id == null) {
+					return DataResult.error(() -> "Block family " + family + " not registered");
+				}
+				return DataResult.success(id);
+			}
+	);
+
+	public static final Codec<BlockFamily> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			Codec.BOOL.optionalFieldOf("strict", false).forGetter($ -> true),
 			ResourceKey.codec(Registries.BLOCK).listOf()
 					.optionalFieldOf("blocks", List.of())
@@ -32,7 +53,7 @@ public class BlockFamily {
 			ResourceKey.codec(Registries.ITEM).listOf()
 					.optionalFieldOf("items", List.of())
 					.forGetter($ -> $.itemHolders().stream().map(Holder.Reference::key).toList()),
-			CustomizationCodecs.compactList(ResourceKey.codec(Registries.ITEM))
+			KCodecs.compactList(ResourceKey.codec(Registries.ITEM))
 					.optionalFieldOf("exchange_inputs_in_viewer", List.of())
 					.forGetter($ -> $.exchangeInputsInViewer().stream().map(Holder.Reference::key).toList()),
 			Codec.BOOL.optionalFieldOf("stonecutter_exchange", false).forGetter(BlockFamily::stonecutterExchange),
@@ -69,20 +90,21 @@ public class BlockFamily {
 			}
 			return holder;
 		}).filter(Optional::isPresent).map(Optional::get).toList();
-		this.items = Stream.concat(this.blocks.stream()
-				.map(Holder::value)
-				.map(ItemLike::asItem)
-				.filter(Predicate.not(Items.AIR::equals))
-				.mapToInt(BuiltInRegistries.ITEM::getId)
-				.distinct()
-				.mapToObj(BuiltInRegistries.ITEM::getHolder)
-				.map(Optional::orElseThrow), items.stream().map($ -> {
-			Optional<Holder.Reference<Item>> holder = BuiltInRegistries.ITEM.getHolder($);
-			if (strict) {
-				Preconditions.checkArgument(holder.isPresent(), "Item %s not found", $);
-			}
-			return holder;
-		}).filter(Optional::isPresent).map(Optional::get)).toList();
+		this.items = Stream.concat(
+				this.blocks.stream()
+						.map(Holder::value)
+						.map(ItemLike::asItem)
+						.filter(Predicate.not(Items.AIR::equals))
+						.mapToInt(BuiltInRegistries.ITEM::getId)
+						.distinct()
+						.mapToObj(BuiltInRegistries.ITEM::getHolder)
+						.map(Optional::orElseThrow), items.stream().map($ -> {
+					Optional<Holder.Reference<Item>> holder = BuiltInRegistries.ITEM.getHolder($);
+					if (strict) {
+						Preconditions.checkArgument(holder.isPresent(), "Item %s not found", $);
+					}
+					return holder;
+				}).filter(Optional::isPresent).map(Optional::get)).toList();
 		this.exchangeInputsInViewer = exchangeInputsInViewer.stream().map($ -> {
 			Optional<Holder.Reference<Item>> holder = BuiltInRegistries.ITEM.getHolder($);
 			if (strict) {
@@ -127,8 +149,18 @@ public class BlockFamily {
 		return blocks.stream().map(Holder::value);
 	}
 
+	public boolean hasBlock(Block block) {
+		//noinspection deprecation
+		return blocks.contains(block.builtInRegistryHolder());
+	}
+
 	public Stream<Item> items() {
 		return items.stream().map(Holder::value);
+	}
+
+	public boolean hasItem(Item item) {
+		//noinspection deprecation
+		return items.contains(item.builtInRegistryHolder());
 	}
 
 	public boolean stonecutterExchange() {
@@ -181,11 +213,15 @@ public class BlockFamily {
 
 	@Override
 	public String toString() {
-		return "BlockFamily{" +
-				"blocks=" + blocks +
-				", items=" + items +
-				", stonecutterFrom=" + stonecutterFrom +
-				'}';
+		return new ToStringBuilder(this)
+				.append("blocks", blocks)
+				.append("items", items)
+//				.append("exchangeInputsInViewer", exchangeInputsInViewer)
+//				.append("stonecutterExchange", stonecutterExchange)
+				.append("stonecutterFrom", stonecutterFrom)
+//				.append("stonecutterFromMultiplier", stonecutterFromMultiplier)
+//				.append("switchAttrs", switchAttrs)
+				.toString();
 	}
 
 	public record SwitchAttrs(boolean enabled, boolean cascading, boolean creativeOnly) {

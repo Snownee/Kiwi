@@ -3,6 +3,8 @@ package snownee.kiwi.customization.block.behavior;
 import java.util.Map;
 import java.util.Objects;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.google.common.collect.Maps;
 
 import net.minecraft.world.InteractionHand;
@@ -30,7 +32,7 @@ public final class BlockBehaviorRegistry {
 		this.useHandlers.put(context, handler);
 	}
 
-	public void setContext(Block block) {
+	public void setContext(@Nullable Block block) {
 		this.context = block;
 	}
 

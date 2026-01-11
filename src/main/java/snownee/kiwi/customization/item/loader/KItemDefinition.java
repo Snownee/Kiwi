@@ -6,11 +6,11 @@ import com.google.common.base.Preconditions;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import net.minecraft.core.component.TypedDataComponent;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import snownee.kiwi.customization.item.KItemSettings;
-import snownee.kiwi.util.codec.CustomizationCodecs;
 
 public record KItemDefinition(ConfiguredItemTemplate template, ItemDefinitionProperties properties) {
 	public KItemDefinition(ConfiguredItemTemplate template, ItemDefinitionProperties properties) {
@@ -19,19 +19,18 @@ public record KItemDefinition(ConfiguredItemTemplate template, ItemDefinitionPro
 	}
 
 	public static Codec<KItemDefinition> codec(Map<ResourceLocation, KItemTemplate> templates) {
-		KItemTemplate defaultTemplate = templates.get(new ResourceLocation("item"));
+		KItemTemplate defaultTemplate = templates.get(ResourceLocation.withDefaultNamespace("item"));
 		Preconditions.checkNotNull(defaultTemplate);
 		ConfiguredItemTemplate defaultConfiguredTemplate = new ConfiguredItemTemplate(defaultTemplate);
 		return RecordCodecBuilder.create(instance -> instance.group(
-				CustomizationCodecs.strictOptionalField(
-								ConfiguredItemTemplate.codec(templates),
-								"template",
-								defaultConfiguredTemplate)
+				ConfiguredItemTemplate.codec(templates)
+						.optionalFieldOf("template", defaultConfiguredTemplate)
 						.forGetter(KItemDefinition::template),
 				ItemDefinitionProperties.mapCodec().forGetter(KItemDefinition::properties)
 		).apply(instance, KItemDefinition::new));
 	}
 
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public KItemSettings.Builder createSettings(ResourceLocation id) {
 		KItemSettings.Builder builder = KItemSettings.builder();
 		ItemDefinitionProperties.PartialVanillaProperties vanilla = properties.vanillaProperties();
@@ -39,8 +38,11 @@ public record KItemDefinition(ConfiguredItemTemplate template, ItemDefinitionPro
 			vanilla.maxStackSize().ifPresent($::stacksTo);
 			vanilla.maxDamage().ifPresent($::durability);
 			vanilla.craftingRemainingItem().map(BuiltInRegistries.ITEM::get).ifPresent($::craftRemainder);
-			vanilla.food().ifPresent($::food);
-			vanilla.rarity().ifPresent($::rarity);
+			vanilla.components().ifPresent(componentMap -> {
+				for (TypedDataComponent component : componentMap) {
+					$.component(component.type(), component.value());
+				}
+			});
 		});
 		return builder;
 	}

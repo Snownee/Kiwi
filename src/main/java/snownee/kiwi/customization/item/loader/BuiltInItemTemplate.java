@@ -1,9 +1,11 @@
 package snownee.kiwi.customization.item.loader;
 
+import java.util.Objects;
 import java.util.Optional;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.google.gson.JsonObject;
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.MapCodec;
@@ -11,23 +13,23 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import snownee.kiwi.util.codec.CustomizationCodecs;
 import snownee.kiwi.util.resource.OneTimeLoader;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public final class BuiltInItemTemplate extends KItemTemplate {
+	public static final ThreadLocal<Item.Properties> PROPERTIES_INJECTOR = new ThreadLocal<>();
 	private final Optional<ResourceLocation> key;
-	private MapCodec<Item> codec;
+	private @Nullable MapCodec<Item> codec;
 
 	public BuiltInItemTemplate(Optional<ItemDefinitionProperties> properties, Optional<ResourceLocation> key) {
 		super(properties);
 		this.key = key;
 	}
 
-	public static Codec<BuiltInItemTemplate> directCodec() {
-		return RecordCodecBuilder.create(instance -> instance.group(
+	public static MapCodec<BuiltInItemTemplate> directCodec() {
+		return RecordCodecBuilder.mapCodec(instance -> instance.group(
 				ItemDefinitionProperties.mapCodecField().forGetter(BuiltInItemTemplate::properties),
-				CustomizationCodecs.strictOptionalField(ResourceLocation.CODEC, "codec").forGetter(BuiltInItemTemplate::key)
+				ResourceLocation.CODEC.optionalFieldOf("codec").forGetter(BuiltInItemTemplate::key)
 		).apply(instance, BuiltInItemTemplate::new));
 	}
 
@@ -46,8 +48,10 @@ public final class BuiltInItemTemplate extends KItemTemplate {
 		if (!json.has(ItemCodecs.ITEM_PROPERTIES_KEY)) {
 			json.add(ItemCodecs.ITEM_PROPERTIES_KEY, new JsonObject());
 		}
-//		InjectedBlockPropertiesCodec.INJECTED.set(properties);
-		DataResult<Item> result = codec.decode(JsonOps.INSTANCE, JsonOps.INSTANCE.getMap(json).result().orElseThrow());
+		PROPERTIES_INJECTOR.set(properties);
+		DataResult<Item> result = Objects.requireNonNull(codec).decode(
+				JsonOps.INSTANCE,
+				JsonOps.INSTANCE.getMap(json).result().orElseThrow());
 		if (result.error().isPresent()) {
 			throw new IllegalStateException(result.error().get().message());
 		}

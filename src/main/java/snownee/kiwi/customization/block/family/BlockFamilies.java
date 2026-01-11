@@ -4,7 +4,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
+
+import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
@@ -54,22 +57,28 @@ public class BlockFamilies {
 	}
 
 	public static void reloadResources(ResourceManager resourceManager, OneTimeLoader.Context context) {
-		Map<ResourceLocation, BlockFamily> families = OneTimeLoader.load(resourceManager, "kiwi/family", BlockFamily.CODEC, context);
+		Map<ResourceLocation, BlockFamily> families = OneTimeLoader.load(resourceManager, "kiwi/family", BlockFamily.DIRECT_CODEC, context);
 		fromResources = families.entrySet()
 				.stream()
 				.map(e -> new KHolder<>(e.getKey(), e.getValue()))
 				.collect(ImmutableList.toImmutableList());
+		// we need the byItem cache for automatically generating families
+		// we also need the byId cache because it is referenced by BuilderRules
+		reloadComplete(List::of);
 	}
 
 	public static int reloadTags() {
-		reloadComplete(List.of()); // we need the byItem cache for automatically generating families
 		if (CustomizationHooks.kswitch) {
-			reloadComplete(new BlockFamilyInferrer().generate());
+			reloadComplete(new BlockFamilyInferrer()::generate);
 		}
 		return byId.size();
 	}
 
-	private static void reloadComplete(Collection<KHolder<BlockFamily>> additional) {
+	private static void reloadComplete(Supplier<Collection<KHolder<BlockFamily>>> additionalSupplier) {
+		byId = ImmutableMap.of();
+		byItem = ImmutableListMultimap.of();
+		byStonecutterSource = ImmutableListMultimap.of();
+		Collection<KHolder<BlockFamily>> additional = additionalSupplier.get();
 		Map<ResourceLocation, KHolder<BlockFamily>> byIdBuilder = Maps.newHashMapWithExpectedSize(fromResources.size() + additional.size());
 		ImmutableListMultimap.Builder<Item, KHolder<BlockFamily>> byItemBuilder = ImmutableListMultimap.builder();
 		ImmutableListMultimap.Builder<Item, KHolder<BlockFamily>> byStonecutterBuilder = ImmutableListMultimap.builder();
@@ -94,6 +103,7 @@ public class BlockFamilies {
 		StonecutterRecipeMaker.invalidateCache();
 	}
 
+	@Nullable
 	public static BlockFamily get(ResourceLocation id) {
 		KHolder<BlockFamily> holder = byId.get(id);
 		return holder == null ? null : holder.value();
@@ -101,10 +111,6 @@ public class BlockFamilies {
 
 	public static Collection<KHolder<BlockFamily>> all() {
 		return byId.values();
-	}
-
-	public static boolean isEmpty() {
-		return byId.isEmpty() && fromResources.isEmpty();
 	}
 
 	public static float getConvertRatio(Item item) {
@@ -129,5 +135,15 @@ public class BlockFamilies {
 			return 2;
 		}
 		return 1;
+	}
+
+	@Nullable
+	public static ResourceLocation getKey(BlockFamily family) {
+		for (KHolder<BlockFamily> holder : all()) {
+			if (holder.value() == family) {
+				return holder.key();
+			}
+		}
+		return null;
 	}
 }

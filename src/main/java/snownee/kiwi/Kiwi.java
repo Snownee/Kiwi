@@ -54,6 +54,7 @@ import snownee.kiwi.command.KiwiCommand;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfig.ConfigType;
 import snownee.kiwi.config.KiwiConfigManager;
+import snownee.kiwi.customization.CustomizationHooks;
 import snownee.kiwi.loader.ClientPlatform;
 import snownee.kiwi.loader.KiwiMetadataLoader;
 import snownee.kiwi.loader.Platform;
@@ -537,6 +538,10 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 		KiwiModules.ALL_USED_REGISTRIES.add(Registries.CREATIVE_MODE_TAB);
 		KiwiModules.ALL_USED_REGISTRIES.add(Registries.ITEM);
 		KiwiModules.fire(KiwiModuleContainer::addEntries);
+
+		if (CustomizationHooks.isEnabled()) {
+			CustomizationHooks.initLoader();
+		}
 
 		List<String> entries = Lists.newArrayList();
 		for (KiwiModuleContainer container : KiwiModules.get()) {

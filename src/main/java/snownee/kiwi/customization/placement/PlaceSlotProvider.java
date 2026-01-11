@@ -43,8 +43,8 @@ import snownee.kiwi.customization.block.loader.KBlockDefinition;
 import snownee.kiwi.customization.block.loader.KBlockTemplate;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.KHolder;
-import snownee.kiwi.util.Util;
-import snownee.kiwi.util.codec.CustomizationCodecs;
+import snownee.kiwi.util.KUtil;
+import snownee.kiwi.util.codec.KCodecs;
 
 public record PlaceSlotProvider(
 		List<PlaceTarget> target,
@@ -52,7 +52,7 @@ public record PlaceSlotProvider(
 		List<String> tag,
 		List<Slot> slots) {
 	public static final Predicate<String> TAG_PATTERN = Pattern.compile("^[*@]?(?:[a-z0-9_/.]+:)?[a-z0-9_/.]+$").asPredicate();
-	public static final Codec<String> TAG_CODEC = ExtraCodecs.validate(Codec.STRING, s -> {
+	public static final Codec<String> TAG_CODEC = Codec.STRING.validate(s -> {
 		if (TAG_PATTERN.test(s)) {
 			return DataResult.success(s);
 		} else {
@@ -60,9 +60,9 @@ public record PlaceSlotProvider(
 		}
 	});
 	public static final Codec<PlaceSlotProvider> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-			CustomizationCodecs.compactList(PlaceTarget.CODEC).fieldOf("target").forGetter(PlaceSlotProvider::target),
-			CustomizationCodecs.strictOptionalField(Codec.STRING, "transform_with").forGetter(PlaceSlotProvider::transformWith),
-			CustomizationCodecs.strictOptionalField(TAG_CODEC.listOf(), "tag", List.of()).forGetter(PlaceSlotProvider::tag),
+			KCodecs.compactList(PlaceTarget.CODEC).fieldOf("target").forGetter(PlaceSlotProvider::target),
+			Codec.STRING.optionalFieldOf("transform_with").forGetter(PlaceSlotProvider::transformWith),
+			TAG_CODEC.listOf().optionalFieldOf("tag", List.of()).forGetter(PlaceSlotProvider::tag),
 			Slot.CODEC.listOf().fieldOf("slots").forGetter(PlaceSlotProvider::slots)
 	).apply(instance, PlaceSlotProvider::new));
 
@@ -72,14 +72,12 @@ public record PlaceSlotProvider(
 			List<String> tag,
 			Map<Direction, Side> sides) {
 		public static final Codec<Slot> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				CustomizationCodecs.strictOptionalField(
-								ExtraCodecs.nonEmptyList(CustomizationCodecs.compactList(StatePropertiesPredicate.CODEC)),
-								"when",
-								List.of())
+				ExtraCodecs.nonEmptyList(KCodecs.compactList(StatePropertiesPredicate.CODEC))
+						.optionalFieldOf("when", List.of())
 						.forGetter(Slot::when),
-				CustomizationCodecs.strictOptionalField(Codec.STRING, "transform_with").forGetter(Slot::transformWith),
-				CustomizationCodecs.strictOptionalField(TAG_CODEC.listOf(), "tag", List.of()).forGetter(Slot::tag),
-				Codec.unboundedMap(CustomizationCodecs.DIRECTION, Side.CODEC)
+				Codec.STRING.optionalFieldOf("transform_with").forGetter(Slot::transformWith),
+				TAG_CODEC.listOf().optionalFieldOf("tag", List.of()).forGetter(Slot::tag),
+				Codec.unboundedMap(Direction.CODEC, Side.CODEC)
 						.xmap(Map::copyOf, Function.identity())
 						.fieldOf("sides")
 						.forGetter(Slot::sides)
@@ -88,7 +86,7 @@ public record PlaceSlotProvider(
 
 	public record Side(List<String> tag) {
 		public static final Codec<Side> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				CustomizationCodecs.strictOptionalField(TAG_CODEC.listOf(), "tag", List.of()).forGetter(Side::tag)
+				TAG_CODEC.listOf().optionalFieldOf("tag", List.of()).forGetter(Side::tag)
 		).apply(instance, Side::new));
 	}
 
@@ -192,7 +190,7 @@ public record PlaceSlotProvider(
 				if (!slot.when.isEmpty() && slot.when.stream().noneMatch(predicate -> predicate.test(blockState))) {
 					continue;
 				}
-				for (Direction direction : Util.DIRECTIONS) {
+				for (Direction direction : KUtil.DIRECTIONS) {
 					Side side = slot.sides.get(direction);
 					if (side == null) {
 						continue;
@@ -230,7 +228,7 @@ public record PlaceSlotProvider(
 			if (rotation == null) {
 				throw new IllegalStateException("Invalid direction: " + newDirection);
 			}
-			for (Direction direction : Util.DIRECTIONS) {
+			for (Direction direction : KUtil.DIRECTIONS) {
 				Side side = slot.sides.get(direction);
 				if (side == null) {
 					continue;

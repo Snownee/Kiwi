@@ -2,7 +2,7 @@ package snownee.kiwi.customization.item.loader;
 
 import java.util.function.Supplier;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiGO;
@@ -17,7 +17,7 @@ public class KItemTemplates extends AbstractModule {
 	@KiwiModule.Name("minecraft:block")
 	public static final KiwiGO<KItemTemplate.Type<BlockItemTemplate>> BLOCK = register(BlockItemTemplate::directCodec);
 
-	private static <T extends KItemTemplate> KiwiGO<KItemTemplate.Type<T>> register(Supplier<Codec<T>> codec) {
+	private static <T extends KItemTemplate> KiwiGO<KItemTemplate.Type<T>> register(Supplier<MapCodec<T>> codec) {
 		return go(() -> new KItemTemplate.Type<>(codec));
 	}
 }

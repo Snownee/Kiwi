@@ -33,13 +33,11 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import snownee.kiwi.Kiwi;
-import snownee.kiwi.KiwiModule;
+import snownee.kiwi.RenderLayerEnum;
 import snownee.kiwi.customization.block.GlassType;
 import snownee.kiwi.customization.block.behavior.SitManager;
-import snownee.kiwi.customization.block.family.BlockFamilies;
 import snownee.kiwi.customization.block.loader.BlockDefinitionProperties;
 import snownee.kiwi.customization.block.loader.KBlockDefinition;
-import snownee.kiwi.customization.builder.BuilderRules;
 import snownee.kiwi.customization.builder.BuildersButton;
 import snownee.kiwi.customization.builder.ConvertScreen;
 import snownee.kiwi.customization.command.ExportBlocksCommand;
@@ -53,8 +51,8 @@ import snownee.kiwi.customization.command.ReloadSlotsCommand;
 import snownee.kiwi.customization.item.loader.KItemDefinition;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.ClientProxy;
-import snownee.kiwi.util.ColorProviderUtil;
 import snownee.kiwi.util.SmartKey;
+import snownee.kiwi.util.client.ColorProviderUtil;
 
 public final class CustomizationClient {
 	@Nullable
@@ -100,15 +98,13 @@ public final class CustomizationClient {
 			Map<ResourceLocation, KItemDefinition> items,
 			Map<ResourceLocation, KBlockDefinition> blocks,
 			ClientProxy.Context context) {
-		if (CustomizationHooks.kswitch || !BlockFamilies.isEmpty() || !BuilderRules.all().isEmpty()) {
-			buildersButtonKey = new SmartKey.Builder("key.kiwi.builders_button", KeyMapping.CATEGORY_GAMEPLAY)
-					.key(InputConstants.getKey("key.mouse.4"))
-					.onLongPress(BuildersButton::onLongPress)
-					.onShortPress(BuildersButton::onShortPress)
-					.build();
-			KeyBindingHelper.registerKeyBinding(buildersButtonKey);
-			ClientProxy.afterRegisterSmartKey(buildersButtonKey);
-		}
+		buildersButtonKey = new SmartKey.Builder("key.kiwi.builders_button", KeyMapping.CATEGORY_GAMEPLAY)
+				.key(InputConstants.getKey("key.mouse.4"))
+				.onLongPress(BuildersButton::onLongPress)
+				.onShortPress(BuildersButton::onShortPress)
+				.build();
+		KeyBindingHelper.registerKeyBinding(buildersButtonKey);
+		ClientProxy.afterRegisterSmartKey(buildersButtonKey);
 		Map<Block, BlockColor> blockColors = Maps.newHashMap();
 		Map<Item, ItemColor> itemColors = Maps.newHashMap();
 		List<Pair<Block, BlockColor>> blocksToAdd = Lists.newArrayList();
@@ -133,7 +129,7 @@ public final class CustomizationClient {
 		for (var entry : blocks.entrySet()) {
 			BlockDefinitionProperties properties = entry.getValue().properties();
 			if (context.loading()) {
-				KiwiModule.RenderLayer.Layer renderType = properties.renderType().orElse(null);
+				RenderLayerEnum renderType = properties.renderType().orElse(null);
 				if (renderType == null) {
 					renderType = properties.glassType().map(GlassType::renderType).orElse(null);
 				}

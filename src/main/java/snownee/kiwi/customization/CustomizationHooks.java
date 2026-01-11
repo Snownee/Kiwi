@@ -37,11 +37,14 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.StainedGlassBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.validation.DirectoryValidator;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.Kiwi;
+import snownee.kiwi.KiwiModule;
+import snownee.kiwi.LoadingContext;
 import snownee.kiwi.customization.block.BlockFundamentals;
 import snownee.kiwi.customization.block.GlassType;
 import snownee.kiwi.customization.block.KBlockSettings;
@@ -50,6 +53,10 @@ import snownee.kiwi.customization.block.behavior.SitManager;
 import snownee.kiwi.customization.block.component.KBlockComponent;
 import snownee.kiwi.customization.block.family.BlockFamilies;
 import snownee.kiwi.customization.block.loader.KBlockTemplate;
+import snownee.kiwi.customization.block.soundtype.DeferredSoundType;
+import snownee.kiwi.customization.block.soundtype.SoundTypes;
+import snownee.kiwi.customization.block.tier.KiwiTiers;
+import snownee.kiwi.customization.block.tier.SimpleTier;
 import snownee.kiwi.customization.builder.BuilderRules;
 import snownee.kiwi.customization.item.ItemFundamentals;
 import snownee.kiwi.customization.item.loader.KCreativeTab;
@@ -65,6 +72,7 @@ public final class CustomizationHooks {
 	private static final Set<String> lenientBETypeNamespaces = Sets.newHashSet();
 	private static boolean enabled = true;
 	public static boolean kswitch = Platform.isModLoaded("kswitch") || !Platform.isProduction();
+	private static @Nullable GlassType clearGlassType;
 
 	private CustomizationHooks() {
 	}
@@ -125,7 +133,7 @@ public final class CustomizationHooks {
 			return settings.glassType;
 		}
 		if (isColorlessGlass(blockState)) {
-			return GlassType.CLEAR;
+			return clearGlassType;
 		}
 		return null;
 	}
@@ -138,13 +146,13 @@ public final class CustomizationHooks {
 		Kiwi.LOGGER.info("Kiwi Customization is enabled");
 		CustomizationRegistries.BLOCK_COMPONENT = FabricRegistryBuilder.createSimple(CustomizationRegistries.BLOCK_COMPONENT_KEY)
 				.buildAndRegister();
-		Kiwi.registerRegistry(CustomizationRegistries.BLOCK_COMPONENT, KBlockComponent.Type.class);
+		Kiwi.registerRegistry(CustomizationRegistries.BLOCK_COMPONENT_KEY, KBlockComponent.Type.class);
 		CustomizationRegistries.BLOCK_TEMPLATE = FabricRegistryBuilder.createSimple(CustomizationRegistries.BLOCK_TEMPLATE_KEY)
 				.buildAndRegister();
-		Kiwi.registerRegistry(CustomizationRegistries.BLOCK_TEMPLATE, KBlockTemplate.Type.class);
+		Kiwi.registerRegistry(CustomizationRegistries.BLOCK_TEMPLATE_KEY, KBlockTemplate.Type.class);
 		CustomizationRegistries.ITEM_TEMPLATE = FabricRegistryBuilder.createSimple(CustomizationRegistries.ITEM_TEMPLATE_KEY)
 				.buildAndRegister();
-		Kiwi.registerRegistry(CustomizationRegistries.ITEM_TEMPLATE, KItemTemplate.Type.class);
+		Kiwi.registerRegistry(CustomizationRegistries.ITEM_TEMPLATE_KEY, KItemTemplate.Type.class);
 		PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, entity) -> {
 			if (PlacementSystem.isDebugEnabled(player)) {
 				PlacementSystem.removeDebugBlocks(world, pos);
@@ -171,7 +179,15 @@ public final class CustomizationHooks {
 		ResourceManager resourceManager = collectKiwiPacks();
 		OneTimeLoader.Context context = new OneTimeLoader.Context();
 		Map<String, CustomizationMetadata> metadataMap = CustomizationMetadata.loadMap(resourceManager, context);
+
+		SoundTypes.refreshWithValues(OneTimeLoader.load(
+				resourceManager,
+				"kiwi/sound_type",
+				DeferredSoundType.DIRECT_CODEC.codec(),
+				context));
+
 		BlockFundamentals blockFundamentals = BlockFundamentals.reload(resourceManager, context, true);
+		clearGlassType = blockFundamentals.glassTypes().get(ResourceLocation.withDefaultNamespace("clear"));
 		blockNamespaces.clear();
 		blockFundamentals.blocks().keySet().stream().map(ResourceLocation::getNamespace).forEach(blockNamespaces::add);
 		lenientBETypeNamespaces.clear();
@@ -194,13 +210,20 @@ public final class CustomizationHooks {
 						Kiwi.LOGGER.error("Failed to create block %s".formatted(id), e);
 					}
 				});
+
+		KiwiTiers.refreshWithValues(OneTimeLoader.load(
+				resourceManager,
+				"kiwi/tier",
+				SimpleTier.DIRECT_CODEC.codec(),
+				context));
+
 		ItemFundamentals itemFundamentals = ItemFundamentals.reload(resourceManager, context, true);
 		for (ResourceLocation blockId : blockIds) {
 			if (!itemFundamentals.items().containsKey(blockId)) {
 				itemFundamentals.addDefaultBlockItem(blockId);
 			}
 		}
-		KItemTemplate none = itemFundamentals.templates().get(new ResourceLocation("none"));
+		KItemTemplate none = itemFundamentals.templates().get(ResourceLocation.withDefaultNamespace("none"));
 		Preconditions.checkNotNull(none, "Missing 'none' item definition");
 		CustomizationMetadata.sortedForEach(
 				metadataMap, "item", itemFundamentals.items(), (id, definition) -> {
@@ -287,7 +310,8 @@ public final class CustomizationHooks {
 		var folderRepositorySource = new RequiredFolderRepositorySource(
 				CustomizationServiceFinder.PACK_DIRECTORY,
 				PackType.CLIENT_RESOURCES,
-				PackSource.BUILT_IN);
+				PackSource.BUILT_IN,
+				new DirectoryValidator($ -> true));
 		PackRepository packRepository = new PackRepository(folderRepositorySource);
 //		ResourcePackLoader.loadResourcePacks(packRepository, CustomizationHooks::buildPackFinder);
 		packRepository.reload();
@@ -347,6 +371,15 @@ public final class CustomizationHooks {
 
 	public static boolean isColorlessGlass(BlockState blockState) {
 		return blockState.is(ConventionalBlockTags.GLASS_BLOCKS) && !(blockState.getBlock() instanceof StainedGlassBlock);
+	}
+
+	public static GlassType clearGlassType() {
+		return Objects.requireNonNull(clearGlassType);
+	}
+
+	@KiwiModule.LoadingCondition({"block_components", "block_templates", "item_templates", "builder_rules"})
+	public static boolean shouldLoad(LoadingContext ctx) {
+		return isEnabled();
 	}
 
 	public static void frozen() {

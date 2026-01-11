@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 
 import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -37,5 +38,5 @@ public abstract class KItemTemplate {
 		return properties;
 	}
 
-	public record Type<T extends KItemTemplate>(Supplier<Codec<T>> codec) {}
+	public record Type<T extends KItemTemplate>(Supplier<MapCodec<T>> codec) {}
 }

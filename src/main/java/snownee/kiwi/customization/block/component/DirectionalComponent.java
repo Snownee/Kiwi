@@ -3,6 +3,7 @@ package snownee.kiwi.customization.block.component;
 import org.jetbrains.annotations.Nullable;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.Direction;
@@ -21,7 +22,7 @@ public record DirectionalComponent(boolean oppose) implements KBlockComponent {
 	public static final DirectionProperty FACING = BlockStateProperties.FACING;
 	private static final DirectionalComponent NORMAL = new DirectionalComponent(false);
 	private static final DirectionalComponent OPPOSE = new DirectionalComponent(true);
-	public static final Codec<DirectionalComponent> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+	public static final MapCodec<DirectionalComponent> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			Codec.BOOL.optionalFieldOf("oppose", false).forGetter(DirectionalComponent::oppose)
 	).apply(instance, DirectionalComponent::getInstance));
 

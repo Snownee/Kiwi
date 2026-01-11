@@ -150,7 +150,7 @@ public class ExportCreativeTabsCommand {
 				String item = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
 				if (!items.add(item)) {
 					for (Pair<BlockPos, Container> pair1 : pairs) {
-						if (pair1.getSecond().hasAnyMatching($ -> ItemStack.isSameItemSameTags($, stack))) {
+						if (pair1.getSecond().hasAnyMatching($ -> ItemStack.isSameItemSameComponents($, stack))) {
 							level.setBlockAndUpdate(pair1.getFirst().below(), Blocks.RED_WOOL.defaultBlockState());
 						}
 					}

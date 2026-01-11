@@ -1,34 +1,50 @@
 package snownee.kiwi.customization.network;
 
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
-
-import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
+import snownee.kiwi.Kiwi;
 import snownee.kiwi.customization.duck.KPlayer;
+import snownee.kiwi.network.KPacketSender;
 import snownee.kiwi.network.KiwiPacket;
-import snownee.kiwi.network.PacketHandler;
+import snownee.kiwi.network.PayloadContext;
+import snownee.kiwi.network.PlayPacketHandler;
 
-@KiwiPacket(value = "sync_place_count", dir = KiwiPacket.Direction.PLAY_TO_CLIENT)
-public class SSyncPlaceCountPacket extends PacketHandler {
-	public static SSyncPlaceCountPacket I;
+@KiwiPacket
+public record SSyncPlaceCountPacket(int placeCount) implements CustomPacketPayload {
+
+	public static final Type<SSyncPlaceCountPacket> TYPE = new Type<>(Kiwi.id("sync_place_count"));
 
 	@Override
-	public CompletableFuture<FriendlyByteBuf> receive(
-			Function<Runnable, CompletableFuture<FriendlyByteBuf>> executor,
-			FriendlyByteBuf friendlyByteBuf,
-			@Nullable ServerPlayer serverPlayer) {
-		int count = friendlyByteBuf.readVarInt();
-		return executor.apply(() -> {
-			(Objects.requireNonNull((KPlayer) Minecraft.getInstance().player)).kiwi$setPlaceCount(count);
-		});
+	public Type<SSyncPlaceCountPacket> type() {
+		return TYPE;
+	}
+
+	public static final class Handler implements PlayPacketHandler<SSyncPlaceCountPacket> {
+
+		public static final StreamCodec<RegistryFriendlyByteBuf, SSyncPlaceCountPacket> STREAM_CODEC = StreamCodec.composite(
+				ByteBufCodecs.VAR_INT, SSyncPlaceCountPacket::placeCount,
+				SSyncPlaceCountPacket::new
+		);
+
+		@Override
+		public void handle(SSyncPlaceCountPacket packet, PayloadContext context) {
+			context.execute(() -> (Objects.requireNonNull((KPlayer) Minecraft.getInstance().player)).kiwi$setPlaceCount(packet.placeCount));
+		}
+
+		@Override
+		public StreamCodec<RegistryFriendlyByteBuf, SSyncPlaceCountPacket> streamCodec() {
+			return STREAM_CODEC;
+		}
 	}
 
 	public static void sync(ServerPlayer player) {
-		I.send(player, buf -> buf.writeVarInt(((KPlayer) player).kiwi$getPlaceCount()));
+		KPacketSender.send(new SSyncPlaceCountPacket(((KPlayer) player).kiwi$getPlaceCount()), player);
 	}
+
 }

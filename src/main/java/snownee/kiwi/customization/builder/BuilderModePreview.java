@@ -34,9 +34,7 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import snownee.kiwi.util.KHolder;
-import snownee.kiwi.util.NotNullByDefault;
 
-@NotNullByDefault
 public class BuilderModePreview implements DebugRenderer.SimpleDebugRenderer {
 	public KHolder<BuilderRule> rule;
 	public BlockPos pos;
@@ -91,32 +89,33 @@ public class BuilderModePreview implements DebugRenderer.SimpleDebugRenderer {
 		this.pos = null;
 		positions = List.of();
 		for (KHolder<BuilderRule> holder : BuilderRules.find(blockState.getBlock())) {
-			if (holder.value().matches(player, itemStack, blockState)) {
-				positions = holder.value().searchPositions(new UseOnContext(player, hand, hitResult));
-				if (positions.isEmpty()) {
-					continue;
-				}
-				this.rule = holder;
-				this.pos = hitResult.getBlockPos();
-				faces.clear();
-				VoxelShape fullShape = positions.stream().map(BuilderModePreview::getShape).reduce(
-						Shapes.empty(),
-						(a, b) -> Shapes.joinUnoptimized(a, b, BooleanOp.OR));
-				fullShape = fullShape.optimize();
-				List<AABB> aabbs = fullShape.toAabbs();
-				for (Direction direction : snownee.kiwi.util.Util.DIRECTIONS) {
-					for (AABB aabb : aabbs) {
-						VoxelShape faceShape = getFaceShape(aabb, direction);
-						faceShape = Shapes.join(faceShape, fullShape, BooleanOp.ONLY_FIRST);
-						if (!faceShape.isEmpty()) {
-							for (AABB faceShapeAabb : faceShape.toAabbs()) {
-								faces.put(direction, faceShapeAabb);
-							}
+			if (!holder.value().matches(player, itemStack, blockState)) {
+				continue;
+			}
+			positions = holder.value().searchPositions(blockState, new UseOnContext(player, hand, hitResult));
+			if (positions.isEmpty()) {
+				continue;
+			}
+			this.rule = holder;
+			this.pos = hitResult.getBlockPos();
+			faces.clear();
+			VoxelShape fullShape = positions.stream().map(BuilderModePreview::getShape).reduce(
+					Shapes.empty(),
+					(a, b) -> Shapes.joinUnoptimized(a, b, BooleanOp.OR));
+			fullShape = fullShape.optimize();
+			List<AABB> aabbs = fullShape.toAabbs();
+			for (Direction direction : snownee.kiwi.util.KUtil.DIRECTIONS) {
+				for (AABB aabb : aabbs) {
+					VoxelShape faceShape = getFaceShape(aabb, direction);
+					faceShape = Shapes.join(faceShape, fullShape, BooleanOp.ONLY_FIRST);
+					if (!faceShape.isEmpty()) {
+						for (AABB faceShapeAabb : faceShape.toAabbs()) {
+							faces.put(direction, faceShapeAabb);
 						}
 					}
 				}
-				break;
 			}
+			break;
 		}
 	}
 
@@ -129,40 +128,40 @@ public class BuilderModePreview implements DebugRenderer.SimpleDebugRenderer {
 		float maxZ = (float) aabb.maxZ;
 		switch (face) {
 			case DOWN -> {
-				consumer.vertex(pose, minX, minY, minZ).color(r, g, b, a).endVertex();
-				consumer.vertex(pose, minX, minY, maxZ).color(r, g, b, a).endVertex();
-				consumer.vertex(pose, maxX, minY, maxZ).color(r, g, b, a).endVertex();
-				consumer.vertex(pose, maxX, minY, minZ).color(r, g, b, a).endVertex();
+				consumer.addVertex(pose, minX, minY, minZ).setColor(r, g, b, a);
+				consumer.addVertex(pose, minX, minY, maxZ).setColor(r, g, b, a);
+				consumer.addVertex(pose, maxX, minY, maxZ).setColor(r, g, b, a);
+				consumer.addVertex(pose, maxX, minY, minZ).setColor(r, g, b, a);
 			}
 			case UP -> {
-				consumer.vertex(pose, minX, maxY, minZ).color(r, g, b, a).endVertex();
-				consumer.vertex(pose, maxX, maxY, minZ).color(r, g, b, a).endVertex();
-				consumer.vertex(pose, maxX, maxY, maxZ).color(r, g, b, a).endVertex();
-				consumer.vertex(pose, minX, maxY, maxZ).color(r, g, b, a).endVertex();
+				consumer.addVertex(pose, minX, maxY, minZ).setColor(r, g, b, a);
+				consumer.addVertex(pose, maxX, maxY, minZ).setColor(r, g, b, a);
+				consumer.addVertex(pose, maxX, maxY, maxZ).setColor(r, g, b, a);
+				consumer.addVertex(pose, minX, maxY, maxZ).setColor(r, g, b, a);
 			}
 			case NORTH -> {
-				consumer.vertex(pose, minX, minY, minZ).color(r, g, b, a).endVertex();
-				consumer.vertex(pose, maxX, minY, minZ).color(r, g, b, a).endVertex();
-				consumer.vertex(pose, maxX, maxY, minZ).color(r, g, b, a).endVertex();
-				consumer.vertex(pose, minX, maxY, minZ).color(r, g, b, a).endVertex();
+				consumer.addVertex(pose, minX, minY, minZ).setColor(r, g, b, a);
+				consumer.addVertex(pose, maxX, minY, minZ).setColor(r, g, b, a);
+				consumer.addVertex(pose, maxX, maxY, minZ).setColor(r, g, b, a);
+				consumer.addVertex(pose, minX, maxY, minZ).setColor(r, g, b, a);
 			}
 			case SOUTH -> {
-				consumer.vertex(pose, minX, minY, maxZ).color(r, g, b, a).endVertex();
-				consumer.vertex(pose, minX, maxY, maxZ).color(r, g, b, a).endVertex();
-				consumer.vertex(pose, maxX, maxY, maxZ).color(r, g, b, a).endVertex();
-				consumer.vertex(pose, maxX, minY, maxZ).color(r, g, b, a).endVertex();
+				consumer.addVertex(pose, minX, minY, maxZ).setColor(r, g, b, a);
+				consumer.addVertex(pose, minX, maxY, maxZ).setColor(r, g, b, a);
+				consumer.addVertex(pose, maxX, maxY, maxZ).setColor(r, g, b, a);
+				consumer.addVertex(pose, maxX, minY, maxZ).setColor(r, g, b, a);
 			}
 			case WEST -> {
-				consumer.vertex(pose, minX, minY, minZ).color(r, g, b, a).endVertex();
-				consumer.vertex(pose, minX, minY, maxZ).color(r, g, b, a).endVertex();
-				consumer.vertex(pose, minX, maxY, maxZ).color(r, g, b, a).endVertex();
-				consumer.vertex(pose, minX, maxY, minZ).color(r, g, b, a).endVertex();
+				consumer.addVertex(pose, minX, minY, minZ).setColor(r, g, b, a);
+				consumer.addVertex(pose, minX, minY, maxZ).setColor(r, g, b, a);
+				consumer.addVertex(pose, minX, maxY, maxZ).setColor(r, g, b, a);
+				consumer.addVertex(pose, minX, maxY, minZ).setColor(r, g, b, a);
 			}
 			case EAST -> {
-				consumer.vertex(pose, maxX, minY, minZ).color(r, g, b, a).endVertex();
-				consumer.vertex(pose, maxX, maxY, minZ).color(r, g, b, a).endVertex();
-				consumer.vertex(pose, maxX, maxY, maxZ).color(r, g, b, a).endVertex();
-				consumer.vertex(pose, maxX, minY, maxZ).color(r, g, b, a).endVertex();
+				consumer.addVertex(pose, maxX, minY, minZ).setColor(r, g, b, a);
+				consumer.addVertex(pose, maxX, maxY, minZ).setColor(r, g, b, a);
+				consumer.addVertex(pose, maxX, maxY, maxZ).setColor(r, g, b, a);
+				consumer.addVertex(pose, maxX, minY, maxZ).setColor(r, g, b, a);
 			}
 		}
 	}

@@ -1,12 +1,12 @@
 package snownee.kiwi.customization.block.loader;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import com.google.common.base.Preconditions;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.Direction;
@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.customization.CustomizationRegistries;
+import snownee.kiwi.customization.block.BlockFundamentals;
 import snownee.kiwi.customization.block.KBlockSettings;
 import snownee.kiwi.customization.block.behavior.BlockBehaviorRegistry;
 import snownee.kiwi.customization.block.component.KBlockComponent;
@@ -29,7 +30,6 @@ import snownee.kiwi.customization.shape.ShapeStorage;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.VanillaActions;
 import snownee.kiwi.util.VoxelUtil;
-import snownee.kiwi.util.codec.CustomizationCodecs;
 
 public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinitionProperties properties) {
 	public KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinitionProperties properties) {
@@ -39,17 +39,15 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 
 	public static Codec<KBlockDefinition> codec(
 			Map<ResourceLocation, KBlockTemplate> templates,
-			MapCodec<Optional<KMaterial>> materialCodec) {
-		KBlockTemplate defaultTemplate = templates.get(new ResourceLocation("block"));
+			BlockFundamentals.CodecCreationContext context) {
+		KBlockTemplate defaultTemplate = templates.get(ResourceLocation.withDefaultNamespace("block"));
 		Preconditions.checkNotNull(defaultTemplate);
 		ConfiguredBlockTemplate defaultConfiguredTemplate = new ConfiguredBlockTemplate(defaultTemplate);
 		return RecordCodecBuilder.create(instance -> instance.group(
-				CustomizationCodecs.strictOptionalField(
-								ConfiguredBlockTemplate.codec(templates),
-								"template",
-								defaultConfiguredTemplate)
+				ConfiguredBlockTemplate.codec(templates)
+						.optionalFieldOf("template", defaultConfiguredTemplate)
 						.forGetter(KBlockDefinition::template),
-				BlockDefinitionProperties.mapCodec(materialCodec).forGetter(KBlockDefinition::properties)
+				BlockDefinitionProperties.mapCodec(context).forGetter(KBlockDefinition::properties)
 		).apply(instance, KBlockDefinition::new));
 	}
 
@@ -110,7 +108,7 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 				if (remove) {
 					s = s.substring(1);
 				}
-				KBlockComponent.Type<?> type = CustomizationRegistries.BLOCK_COMPONENT.get(new ResourceLocation(s));
+				KBlockComponent.Type<?> type = CustomizationRegistries.BLOCK_COMPONENT.get(ResourceLocation.parse(s));
 				Preconditions.checkNotNull(type, "Unknown component type %s", s);
 				if (remove) {
 					builder.removeComponent(type);
@@ -130,11 +128,11 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 	public Block createBlock(ResourceLocation id, ShapeStorage shapes) {
 		KBlockSettings.Builder builder = createSettings(id, shapes);
 		Block block = template.template().createBlock(id, builder.get(), template.json());
-		setConfiguringShape(block);
+		setConfiguringShape(block, shapes);
 		properties.material().ifPresent(mat -> {
 			VanillaActions.setFireInfo(block, mat.igniteOdds(), mat.burnOdds());
 		});
-		KBlockSettings settings = KBlockSettings.of(block);
+		KBlockSettings settings = Objects.requireNonNull(KBlockSettings.of(block));
 		BlockBehaviorRegistry behaviorRegistry = BlockBehaviorRegistry.getInstance();
 		for (KBlockComponent component : settings.components.values()) {
 			behaviorRegistry.setContext(block);
@@ -144,7 +142,7 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 		return block;
 	}
 
-	public static void setConfiguringShape(Block block) {
+	public static void setConfiguringShape(Block block, ShapeStorage shapes) {
 		KBlockSettings settings = KBlockSettings.of(block);
 		if (settings == null) {
 			return;
@@ -152,7 +150,7 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 		for (BlockShapeType shapeType : BlockShapeType.VALUES) {
 			ConfiguringShape shape = settings.removeIfPossible(shapeType);
 			if (shape != null) {
-				shape.configure(block, shapeType);
+				shape.configure(block, shapeType, shapes);
 			}
 		}
 	}
@@ -184,13 +182,14 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 		} else if (builder.hasComponent(KBlockComponents.FRONT_AND_TOP.getOrCreate())) {
 			shape = shapes.transform(shape, KBlockComponents.FRONT_AND_TOP.getOrCreate(), $ -> DirectionalShape.create($, "orientation"));
 		} else if (builder.hasComponent(KBlockComponents.HORIZONTAL_AXIS.getOrCreate())) {
-			shape = shapes.transform(shape, KBlockComponents.HORIZONTAL_AXIS.getOrCreate(), $ -> ChoicesShape.chooseOneProperty(
-					BlockStateProperties.HORIZONTAL_AXIS,
-					Map.of(
-							Direction.Axis.X,
-							$,
-							Direction.Axis.Z,
-							ShapeGenerator.unit(VoxelUtil.rotateHorizontal(ShapeGenerator.Unit.unboxOrThrow($), Direction.EAST)))));
+			shape = shapes.transform(
+					shape, KBlockComponents.HORIZONTAL_AXIS.getOrCreate(), $ -> ChoicesShape.chooseOneProperty(
+							BlockStateProperties.HORIZONTAL_AXIS,
+							Map.of(
+									Direction.Axis.X,
+									$,
+									Direction.Axis.Z,
+									ShapeGenerator.unit(VoxelUtil.rotateHorizontal(ShapeGenerator.Unit.unboxOrThrow($), Direction.EAST)))));
 		}
 		builder.shape(type, shape);
 	}

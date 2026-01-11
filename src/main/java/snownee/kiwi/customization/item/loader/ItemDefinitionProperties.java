@@ -4,17 +4,16 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.JavaOps;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.food.FoodProperties;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Rarity;
-import snownee.kiwi.util.codec.CustomizationCodecs;
-import snownee.kiwi.util.codec.JavaOps;
 
 public record ItemDefinitionProperties(
 		Optional<ResourceLocation> colorProvider,
@@ -25,7 +24,7 @@ public record ItemDefinitionProperties(
 	static {
 		PartialVanillaProperties vanillaProperties = PartialVanillaProperties.MAP_CODEC.codec()
 				.parse(JavaOps.INSTANCE, Map.of())
-				.getOrThrow(false, e -> {
+				.getOrThrow(e -> {
 					throw new IllegalStateException("Failed to parse empty ItemDefinitionProperties: " + e);
 				});
 		EMPTY = new ItemDefinitionProperties(Optional.empty(), vanillaProperties);
@@ -33,8 +32,7 @@ public record ItemDefinitionProperties(
 
 	public static MapCodec<ItemDefinitionProperties> mapCodec() {
 		return RecordCodecBuilder.mapCodec(instance -> instance.group(
-				CustomizationCodecs.strictOptionalField(ResourceLocation.CODEC, "color_provider")
-						.forGetter(ItemDefinitionProperties::colorProvider),
+				ResourceLocation.CODEC.optionalFieldOf("color_provider").forGetter(ItemDefinitionProperties::colorProvider),
 				PartialVanillaProperties.MAP_CODEC.forGetter(ItemDefinitionProperties::vanillaProperties)
 		).apply(instance, ItemDefinitionProperties::new));
 	}
@@ -62,17 +60,15 @@ public record ItemDefinitionProperties(
 			Optional<Integer> maxStackSize,
 			Optional<Integer> maxDamage,
 			Optional<ResourceKey<Item>> craftingRemainingItem,
-			Optional<FoodProperties> food,
-			Optional<Rarity> rarity
+			Optional<DataComponentMap> components
 	) {
 		public static final MapCodec<PartialVanillaProperties> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-				Codec.intRange(1, 64).optionalFieldOf("stacks_to").forGetter(PartialVanillaProperties::maxStackSize),
-				Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("max_damage").forGetter(PartialVanillaProperties::maxDamage),
+				Codec.intRange(1, 99).optionalFieldOf("stacks_to").forGetter(PartialVanillaProperties::maxStackSize),
+				ExtraCodecs.POSITIVE_INT.optionalFieldOf("max_damage").forGetter(PartialVanillaProperties::maxDamage),
 				ResourceKey.codec(Registries.ITEM)
 						.optionalFieldOf("crafting_remaining_item")
 						.forGetter(PartialVanillaProperties::craftingRemainingItem),
-				CustomizationCodecs.FOOD.optionalFieldOf("food").forGetter(PartialVanillaProperties::food),
-				CustomizationCodecs.RARITY_CODEC.optionalFieldOf("rarity").forGetter(PartialVanillaProperties::rarity)
+				DataComponentMap.CODEC.optionalFieldOf("components").forGetter(PartialVanillaProperties::components)
 		).apply(instance, PartialVanillaProperties::new));
 
 		public PartialVanillaProperties merge(PartialVanillaProperties templateProps) {
@@ -80,8 +76,7 @@ public record ItemDefinitionProperties(
 					or(this.maxStackSize, templateProps.maxStackSize),
 					or(this.maxDamage, templateProps.maxDamage),
 					or(this.craftingRemainingItem, templateProps.craftingRemainingItem),
-					or(this.food, templateProps.food),
-					or(this.rarity, templateProps.rarity));
+					or(this.components, templateProps.components));
 		}
 	}
 }

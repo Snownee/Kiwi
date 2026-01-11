@@ -3,9 +3,7 @@ package snownee.kiwi.customization.shape;
 import java.util.List;
 
 import net.minecraft.util.StringRepresentable;
-import snownee.kiwi.util.NotNullByDefault;
 
-@NotNullByDefault
 public enum BlockShapeType implements StringRepresentable {
 	MAIN("main"),
 	COLLISION("collision"),

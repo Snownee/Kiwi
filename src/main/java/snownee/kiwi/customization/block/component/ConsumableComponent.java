@@ -2,7 +2,7 @@ package snownee.kiwi.customization.block.component;
 
 import java.util.Optional;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.BlockPos;
@@ -12,7 +12,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -23,16 +22,15 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import snownee.kiwi.customization.block.KBlockUtils;
 import snownee.kiwi.customization.block.behavior.BlockBehaviorRegistry;
 import snownee.kiwi.customization.block.loader.KBlockComponents;
-import snownee.kiwi.util.codec.CustomizationCodecs;
 
 public record ConsumableComponent(
 		IntegerProperty property,
 		Optional<FoodProperties> food,
 		Optional<ResourceKey<ResourceLocation>> stat) implements KBlockComponent, LayeredComponent {
-	public static final Codec<ConsumableComponent> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+	public static final MapCodec<ConsumableComponent> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			ExtraCodecs.intRange(0, 1).fieldOf("min").forGetter(ConsumableComponent::minValue),
 			ExtraCodecs.POSITIVE_INT.fieldOf("max").forGetter(ConsumableComponent::maxValue),
-			CustomizationCodecs.FOOD.optionalFieldOf("food").forGetter(ConsumableComponent::food),
+			FoodProperties.DIRECT_CODEC.optionalFieldOf("food").forGetter(ConsumableComponent::food),
 			ResourceKey.codec(Registries.CUSTOM_STAT).optionalFieldOf("stat").forGetter(ConsumableComponent::stat)
 	).apply(instance, ConsumableComponent::create));
 
@@ -103,12 +101,12 @@ public record ConsumableComponent(
 						1.0f,
 						1.0f + (pLevel.random.nextFloat() - pLevel.random.nextFloat()) * 0.4f);
 				if (!pLevel.isClientSide) {
-					pPlayer.getFoodData().eat(food.getNutrition(), food.getSaturationModifier());
-					for (var pair : food.getEffects()) {
-						if (pair.getFirst() == null || !(pLevel.random.nextFloat() < pair.getSecond())) {
+					pPlayer.getFoodData().eat(food.nutrition(), food.saturation());
+					for (var effect : food.effects()) {
+						if (effect.effect() == null || !(pLevel.random.nextFloat() >= effect.probability())) {
 							continue;
 						}
-						pPlayer.addEffect(new MobEffectInstance(pair.getFirst()));
+						pPlayer.addEffect(effect.effect());
 					}
 				}
 				pLevel.gameEvent(pPlayer, GameEvent.EAT, pos);
