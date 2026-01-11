@@ -1,5 +1,6 @@
 package snownee.kiwi.customization.block.behavior;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -14,9 +15,12 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Leashable;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.LeadItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Block;
@@ -34,6 +38,7 @@ import snownee.kiwi.customization.CustomFeatureTags;
 import snownee.kiwi.customization.block.KBlockSettings;
 import snownee.kiwi.customization.block.KBlockUtils;
 import snownee.kiwi.customization.block.component.KBlockComponent;
+import snownee.kiwi.mixin.customization.sit.EntityAccess;
 
 public class SitManager {
 	public static final Component ENTITY_NAME = Component.literal("Seat from Kiwi");
@@ -56,7 +61,10 @@ public class SitManager {
 		if (KSitCommonConfig.requireEmptyHand && (!player.getMainHandItem().isEmpty() || !player.getOffhandItem().isEmpty())) {
 			return false;
 		}
-		if (hitResult.getDirection() == Direction.DOWN || player.isSecondaryUseActive()) {
+		if (!KSitCommonConfig.allowClickBlockBottomToSit && hitResult.getDirection() == Direction.DOWN) {
+			return false;
+		}
+		if (player.isSecondaryUseActive()) {
 			return false;
 		}
 		Level level = player.level();
@@ -127,8 +135,29 @@ public class SitManager {
 			}
 			double clampedY = Mth.clamp(seatPos.y, pos.getY(), pos.getY() + 0.999);
 			display.setPos(seatPos.x, clampedY, seatPos.z);
+			Entity rider = player;
+			if (KSitCommonConfig.makeLeashedMobSit) {
+				List<Leashable> list = LeadItem.leashableInArea(
+						level,
+						player.blockPosition(),
+						leashable -> leashable.getLeashHolder() == player);
+				double dist = Double.MAX_VALUE;
+				for (Leashable leashable : list) {
+					if (!(leashable instanceof Mob mob) || mob.isNoAi() || !((EntityAccess) mob).callCanRide(display)) {
+						continue;
+					}
+					double d = mob.distanceToSqr(player);
+					if (rider == player || d < dist) {
+						rider = mob;
+						dist = d;
+					}
+				}
+			}
 			if (level.addFreshEntity(display)) {
-				player.startRiding(display, true);
+				rider.startRiding(display, true);
+				if (rider != player) {
+					((Leashable) rider).dropLeash(true, true);
+				}
 			}
 		}
 		return true;
