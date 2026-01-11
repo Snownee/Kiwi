@@ -3,7 +3,6 @@ package snownee.kiwi.recipe;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import com.google.common.base.Preconditions;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -22,23 +21,14 @@ import net.minecraft.world.item.crafting.display.DisplayContentsFactory;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.minecraft.world.level.ItemLike;
 import snownee.kiwi.data.DataModule;
-import snownee.kiwi.mixin.IngredientAccess;
 
 public final class SizedIngredient {
 	public static final SizedIngredient EMPTY = new SizedIngredient(RecipeUtil.emptyIngredient(), 1);
 
-	private static final Codec<SizedIngredient> FLAT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-			Ingredient.NON_AIR_HOLDER_SET_CODEC.xmap(Ingredient::of, it -> ((IngredientAccess) (Object) it).getValues())
-					.fieldOf("ingredient")
-					.forGetter(SizedIngredient::ingredient),
-			ExtraCodecs.POSITIVE_INT.fieldOf("count").forGetter(SizedIngredient::count)
+	public static final Codec<SizedIngredient> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+			Ingredient.CODEC.fieldOf("ingredient").forGetter(SizedIngredient::ingredient),
+			ExtraCodecs.POSITIVE_INT.optionalFieldOf("count", 1).forGetter(SizedIngredient::count)
 	).apply(instance, SizedIngredient::new));
-
-	public static final Codec<SizedIngredient> CODEC = Codec.withAlternative(
-			RecordCodecBuilder.create(instance -> instance.group(
-					Ingredient.CODEC.fieldOf("ingredient").forGetter(SizedIngredient::ingredient),
-					ExtraCodecs.POSITIVE_INT.optionalFieldOf("count", 1).forGetter(SizedIngredient::count)
-			).apply(instance, SizedIngredient::new)), FLAT_CODEC);
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, SizedIngredient> STREAM_CODEC = StreamCodec.composite(
 			Ingredient.CONTENTS_STREAM_CODEC,
@@ -59,7 +49,9 @@ public final class SizedIngredient {
 	private final int count;
 
 	public SizedIngredient(Ingredient ingredient, int count) {
-		Preconditions.checkArgument(count > 0, "Count must be positive");
+		if (count <= 0) {
+			throw new IllegalArgumentException("Size must be positive");
+		}
 		this.ingredient = ingredient;
 		this.count = count;
 	}
