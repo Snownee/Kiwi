@@ -1,5 +1,5 @@
 modLoader = "lowcodefml"
-loaderVersion = "[46,)"
+loaderVersion = "[1,)"
 license = "Apache-2.0"
 issueTrackerURL = "https://github.com/Snownee/Kiwi/issues"
 
@@ -14,4 +14,3 @@ description = "Allow you to see more easily under lava when you have fire resist
 [[dependencies.lavaclearview]]
 modId = "kiwi"
 versionRange = "[15,)"
-ordering = "CLIENT"

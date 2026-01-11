@@ -2,6 +2,7 @@
 	"schemaVersion": 1,
 	"id": "fastscroll",
 	"version": "${version}",
+	"environment": "client",
 	"name": "Fast Scrolling",
 	"description": "Let you scroll faster when holding CTRL.",
 	"authors": [

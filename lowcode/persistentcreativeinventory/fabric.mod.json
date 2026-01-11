@@ -2,6 +2,7 @@
 	"schemaVersion": 1,
 	"id": "persistentcreativeinventory",
 	"version": "${version}",
+	"environment": "client",
 	"name": "Persistent Creative Inventory",
 	"description": "Restore the location of the creative inventory you last scrolled to.",
 	"authors": [
