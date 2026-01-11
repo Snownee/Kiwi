@@ -1,4 +1,3 @@
-/*
 package snownee.kiwi.datagen;
 
 import java.util.List;
@@ -21,7 +20,9 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.LootTable.Builder;
 import snownee.kiwi.KiwiModuleContainer;
 import snownee.kiwi.KiwiModules;
+import snownee.kiwi.util.NotNullByDefault;
 
+@NotNullByDefault
 public abstract class KiwiBlockLoot extends FabricBlockLootTableProvider {
 	protected final ResourceLocation moduleId;
 	private final List<Block> knownBlocks;
@@ -29,7 +30,10 @@ public abstract class KiwiBlockLoot extends FabricBlockLootTableProvider {
 	private final Set<Block> added = Sets.newHashSet();
 	private Function<Block, LootTable.Builder> defaultHandler;
 
-	protected KiwiBlockLoot(ResourceLocation moduleId, FabricDataOutput dataOutput, CompletableFuture<HolderLookup.Provider> registryLookup) {
+	protected KiwiBlockLoot(
+			ResourceLocation moduleId,
+			FabricDataOutput dataOutput,
+			CompletableFuture<HolderLookup.Provider> registryLookup) {
 		super(dataOutput, registryLookup);
 		this.moduleId = moduleId;
 		KiwiModuleContainer container = Objects.requireNonNull(KiwiModules.get(moduleId));
@@ -82,4 +86,3 @@ public abstract class KiwiBlockLoot extends FabricBlockLootTableProvider {
 		return super.getName() + " - " + moduleId;
 	}
 }
- */

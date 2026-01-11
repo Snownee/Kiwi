@@ -1,4 +1,3 @@
-/*
 package snownee.kiwi.datagen;
 
 import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
@@ -11,4 +10,3 @@ public class KiwiDataGen implements DataGeneratorEntrypoint {
 		pack.addProvider(KiwiLanguageProvider::new);
 	}
 }
- */
