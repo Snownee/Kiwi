@@ -10,6 +10,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -52,9 +53,14 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 	}
 
 	public KBlockSettings.Builder createSettings(ResourceLocation id, ShapeStorage shapes) {
-		KBlockSettings.Builder builder = KBlockSettings.builder();
-		properties.glassType().ifPresent(builder::glassType);
 		BlockDefinitionProperties.PartialVanillaProperties vanilla = properties.vanillaProperties();
+		KBlockSettings.Builder builder;
+		if (vanilla.copy().isEmpty()) {
+			builder = KBlockSettings.builder();
+		} else {
+			builder = KBlockSettings.copyProperties(BuiltInRegistries.BLOCK.getOrThrow(vanilla.copy().get()));
+		}
+		properties.glassType().ifPresent(builder::glassType);
 		builder.configure($ -> {
 			vanilla.lightEmission().ifPresent(i -> $.lightLevel($$ -> i));
 			vanilla.pushReaction().ifPresent($::pushReaction);
@@ -65,6 +71,14 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 			vanilla.isViewBlocking().ifPresent($::isViewBlocking);
 			vanilla.isValidSpawn().ifPresent($::isValidSpawn);
 			vanilla.offsetType().ifPresent($::offsetType);
+			vanilla.legacySolid().ifPresent(bl -> {
+				if (bl) {
+					$.forceSolidOn();
+				} else {
+					//noinspection deprecation
+					$.forceSolidOff();
+				}
+			});
 			if (vanilla.noCollision().orElse(false)) {
 				$.noCollission();
 			}

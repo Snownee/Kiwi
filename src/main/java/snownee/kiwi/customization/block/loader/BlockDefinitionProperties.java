@@ -9,8 +9,11 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.PushReaction;
 import snownee.kiwi.RenderLayerEnum;
@@ -84,11 +87,13 @@ public record BlockDefinitionProperties(
 	}
 
 	public record PartialVanillaProperties(
+			Optional<ResourceKey<Block>> copy,
 			Optional<Boolean> noCollision,
 			Optional<Boolean> isRandomlyTicking,
 			Optional<Integer> lightEmission,
 			Optional<Boolean> dynamicShape,
 			Optional<Boolean> noOcclusion,
+			Optional<Boolean> legacySolid,
 			Optional<PushReaction> pushReaction,
 			Optional<BlockBehaviour.OffsetType> offsetType,
 			Optional<Boolean> replaceable,
@@ -99,11 +104,13 @@ public record BlockDefinitionProperties(
 			Optional<BlockBehaviour.StatePredicate> hasPostProcess,
 			Optional<BlockBehaviour.StatePredicate> emissiveRendering) {
 		public static final MapCodec<PartialVanillaProperties> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+				ResourceKey.codec(Registries.BLOCK).optionalFieldOf("copy").forGetter(PartialVanillaProperties::copy),
 				Codec.BOOL.optionalFieldOf("no_collision").forGetter(PartialVanillaProperties::noCollision),
 				Codec.BOOL.optionalFieldOf("is_randomly_ticking").forGetter(PartialVanillaProperties::isRandomlyTicking),
 				Codec.INT.optionalFieldOf("light_emission").forGetter(PartialVanillaProperties::lightEmission),
 				Codec.BOOL.optionalFieldOf("dynamic_shape").forGetter(PartialVanillaProperties::dynamicShape),
 				Codec.BOOL.optionalFieldOf("no_occlusion").forGetter(PartialVanillaProperties::noOcclusion),
+				Codec.BOOL.optionalFieldOf("legacy_solid").forGetter(PartialVanillaProperties::legacySolid),
 				CustomizationCodecs.PUSH_REACTION.optionalFieldOf("push_reaction").forGetter(PartialVanillaProperties::pushReaction),
 				CustomizationCodecs.OFFSET_TYPE.optionalFieldOf("offset_function")
 						.forGetter(PartialVanillaProperties::offsetType),
@@ -121,11 +128,13 @@ public record BlockDefinitionProperties(
 
 		public PartialVanillaProperties merge(PartialVanillaProperties templateProps) {
 			return new PartialVanillaProperties(
+					or(this.copy, templateProps.copy),
 					or(this.noCollision, templateProps.noCollision),
 					or(this.isRandomlyTicking, templateProps.isRandomlyTicking),
 					or(this.lightEmission, templateProps.lightEmission),
 					or(this.dynamicShape, templateProps.dynamicShape),
 					or(this.noOcclusion, templateProps.noOcclusion),
+					or(this.legacySolid, templateProps.legacySolid),
 					or(this.pushReaction, templateProps.pushReaction),
 					or(this.offsetType, templateProps.offsetType),
 					or(this.replaceable, templateProps.replaceable),
