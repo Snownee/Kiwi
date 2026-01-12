@@ -188,7 +188,7 @@ public class PlacementSystem {
 					offsets = Lists.newArrayListWithExpectedSize(theirSlotsMap.size());
 				}
 				results.add(result);
-				offsets.add(side.getNormal());
+				offsets.add(BlockPos.ZERO.relative(side));
 			}
 		}
 		if (interest < 0) {
@@ -220,7 +220,7 @@ public class PlacementSystem {
 		}
 	}
 
-	public static void onBlockRemoved(Level level, BlockPos pos, BlockState oldState, BlockState newState) {
+	public static void onBlockRemoved(Level level, BlockPos pos, BlockState oldState) {
 		if (PlaceSlot.hasNoSlots(oldState.getBlock())) {
 			return;
 		}

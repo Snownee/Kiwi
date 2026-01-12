@@ -12,10 +12,13 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.EmptyBlockGetter;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
@@ -67,20 +70,20 @@ public class KBlockSettings {
 //		}
 	}
 
-	public static KBlockSettings empty() {
-		return new KBlockSettings(builder());
+	public static KBlockSettings defaulted(Block block) {
+		return new KBlockSettings(builder(BuiltInRegistries.BLOCK.getResourceKey(block).orElseThrow()));
 	}
 
-	public static Builder builder() {
-		return new Builder(BlockBehaviour.Properties.of());
+	public static KBlockSettings.Builder builder(ResourceKey<Block> key) {
+		return new Builder(BlockBehaviour.Properties.of().setId(key));
 	}
 
-	public static Builder copyProperties(Block block) {
-		return new Builder(BlockBehaviour.Properties.ofFullCopy(block));
+	public static KBlockSettings.Builder copyProperties(ResourceKey<Block> key, Block block) {
+		return new Builder(BlockBehaviour.Properties.ofFullCopy(block).setId(key));
 	}
 
-	public static Builder copyProperties(Block block, MapColor mapColor) {
-		return new Builder(BlockBehaviour.Properties.ofFullCopy(block).mapColor(mapColor));
+	public static KBlockSettings.Builder copyProperties(ResourceKey<Block> key, Block block, MapColor mapColor) {
+		return new Builder(BlockBehaviour.Properties.ofFullCopy(block).setId(key).mapColor(mapColor));
 	}
 
 	@Nullable
@@ -101,7 +104,7 @@ public class KBlockSettings {
 		if (shape.isEmpty()) {
 			return Shapes.empty();
 		}
-		return Shapes.getFaceShape(shape, direction);
+		return shape.getFaceShape(direction);
 	}
 
 	public boolean hasComponent(KBlockComponent.Type<?> type) {
@@ -144,11 +147,12 @@ public class KBlockSettings {
 			BlockState pState,
 			Direction pDirection,
 			BlockState pNeighborState,
-			LevelAccessor pLevel,
+			LevelReader pLevel,
+			ScheduledTickAccess scheduledTickAccess,
 			BlockPos pPos,
 			BlockPos pNeighborPos) {
 		for (KBlockComponent component : components.values()) {
-			pState = component.updateShape(pState, pDirection, pNeighborState, pLevel, pPos, pNeighborPos);
+			pState = component.updateShape(pState, pDirection, pNeighborState, pLevel, scheduledTickAccess, pPos, pNeighborPos);
 		}
 		return pState;
 	}

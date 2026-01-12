@@ -1,3 +1,4 @@
+/*
 package snownee.kiwi.customization.compat.rei;
 
 import java.util.List;
@@ -33,4 +34,4 @@ public class REICompat implements REIClientPlugin {
 			}
 		}
 	}
-}
+}*/

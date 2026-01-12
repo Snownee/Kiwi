@@ -1,13 +1,14 @@
 package snownee.kiwi.customization.shape;
 
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
-import java.util.stream.Stream;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.CrossCollisionBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public record ConfigureCrossCollisionShape(
@@ -31,15 +32,15 @@ public record ConfigureCrossCollisionShape(
 		if (!(block instanceof CrossCollisionBlock crossCollisionBlock)) {
 			throw new IllegalArgumentException("Block %s is not a CrossCollisionBlock".formatted(block));
 		}
-		VoxelShape[] shapes = crossCollisionBlock.makeShapes(
+		Function<BlockState, VoxelShape> shapes = crossCollisionBlock.makeShapes(
 				nodeWidth / 2,
 				extensionWidth / 2,
 				nodeHeight,
 				extensionBottom,
 				extensionHeight);
 		switch (type) {
-			case MAIN -> crossCollisionBlock.shapeByIndex = shapes;
-			case COLLISION -> crossCollisionBlock.collisionShapeByIndex = shapes;
+			case MAIN -> crossCollisionBlock.shapes = shapes;
+			case COLLISION -> crossCollisionBlock.collisionShapes = shapes;
 			case INTERACTION -> throw new UnsupportedOperationException();
 		}
 	}
@@ -49,13 +50,16 @@ public record ConfigureCrossCollisionShape(
 		if (!(block instanceof CrossCollisionBlock crossCollisionBlock)) {
 			throw new IllegalArgumentException("Block %s is not a CrossCollisionBlock".formatted(block));
 		}
+		Function<BlockState, VoxelShape> shapes = switch (type) {
+			case MAIN -> crossCollisionBlock.shapes;
+			case COLLISION -> crossCollisionBlock.collisionShapes;
+			default -> throw new IllegalStateException();
+		};
+		Function<BlockState, VoxelShape> newShapes = MergeConfiguredShape.transform(block, operator, shapes);
 		switch (type) {
-			case MAIN ->
-					crossCollisionBlock.shapeByIndex = Stream.of(crossCollisionBlock.shapeByIndex).map(operator).toArray(VoxelShape[]::new);
-			case COLLISION ->
-					crossCollisionBlock.collisionShapeByIndex = Stream.of(crossCollisionBlock.collisionShapeByIndex).map(operator).toArray(
-							VoxelShape[]::new);
-			case INTERACTION -> throw new UnsupportedOperationException();
+			case MAIN -> crossCollisionBlock.shapes = newShapes;
+			case COLLISION -> crossCollisionBlock.collisionShapes = newShapes;
+			default -> throw new IllegalStateException();
 		}
 	}
 }

@@ -10,6 +10,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.debug.DebugRenderer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Items;
@@ -20,19 +21,20 @@ import snownee.kiwi.customization.placement.PlaceDebugRenderer;
 public class DebugRendererMixin {
 	@Inject(method = "render", at = @At("HEAD"))
 	private void kiwi$render(
-			PoseStack pPoseStack,
-			MultiBufferSource.BufferSource pBufferSource,
-			double pCamX,
-			double pCamY,
-			double pCamZ,
+			PoseStack poseStack,
+			Frustum frustum,
+			MultiBufferSource.BufferSource bufferSource,
+			double camX,
+			double camY,
+			double camZ,
 			CallbackInfo ci) {
 		LocalPlayer player = Minecraft.getInstance().player;
 		if (player == null) {
 			return;
 		}
 		if ((player.isCreative() || player.isSpectator()) && player.getItemBySlot(EquipmentSlot.HEAD).is(Items.CHAINMAIL_HELMET)) {
-			PlaceDebugRenderer.getInstance().render(pPoseStack, pBufferSource, pCamX, pCamY, pCamZ);
+			PlaceDebugRenderer.getInstance().render(poseStack, bufferSource, camX, camY, camZ);
 		}
-		BuildersButton.getPreviewRenderer().render(pPoseStack, pBufferSource, pCamX, pCamY, pCamZ);
+		BuildersButton.getPreviewRenderer().render(poseStack, bufferSource, camX, camY, camZ);
 	}
 }

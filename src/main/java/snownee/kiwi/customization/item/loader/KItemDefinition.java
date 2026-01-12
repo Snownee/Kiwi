@@ -8,6 +8,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.component.TypedDataComponent;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import snownee.kiwi.customization.item.KItemSettings;
@@ -31,13 +32,13 @@ public record KItemDefinition(ConfiguredItemTemplate template, ItemDefinitionPro
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	public KItemSettings.Builder createSettings(ResourceLocation id) {
-		KItemSettings.Builder builder = KItemSettings.builder();
+	public KItemSettings.Builder createSettings(ResourceKey<Item> key) {
+		KItemSettings.Builder builder = KItemSettings.builder(key);
 		ItemDefinitionProperties.PartialVanillaProperties vanilla = properties.vanillaProperties();
 		builder.configure($ -> {
 			vanilla.maxStackSize().ifPresent($::stacksTo);
 			vanilla.maxDamage().ifPresent($::durability);
-			vanilla.craftingRemainingItem().map(BuiltInRegistries.ITEM::get).ifPresent($::craftRemainder);
+			vanilla.craftingRemainingItem().map(BuiltInRegistries.ITEM::getValue).ifPresent($::craftRemainder);
 			vanilla.components().ifPresent(componentMap -> {
 				for (TypedDataComponent component : componentMap) {
 					$.component(component.type(), component.value());
@@ -47,8 +48,8 @@ public record KItemDefinition(ConfiguredItemTemplate template, ItemDefinitionPro
 		return builder;
 	}
 
-	public Item createItem(ResourceLocation id) {
-		KItemSettings.Builder builder = createSettings(id);
-		return template.template().createItem(id, builder.get(), template.json());
+	public Item createItem(ResourceKey<Item> key) {
+		KItemSettings.Builder builder = createSettings(key);
+		return template.template().createItem(key, builder.get(), template.json());
 	}
 }

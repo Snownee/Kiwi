@@ -255,7 +255,10 @@ public record CConvertItemPacket(
 			Inventory inventory = player.getInventory();
 			IntStream intStream = IntStream.range(0, 9);
 			if (nextToSelected) {
-				IntStream leftAndRight = IntStream.of(inventory.selected, inventory.selected + 1, inventory.selected - 1);
+				IntStream leftAndRight = IntStream.of(
+						inventory.getSelectedSlot(),
+						inventory.getSelectedSlot() + 1,
+						inventory.getSelectedSlot() - 1);
 				intStream = IntStream.concat(leftAndRight, intStream);
 			}
 			int slot = intStream.filter(Inventory::isHotbarSlot).filter(i -> {

@@ -84,12 +84,16 @@ public class CustomizationCodecs {
 				if (stringValue.startsWith("#")) {
 					return DataResult.success(Pair.of(
 							BlockPredicate.Builder.block()
-									.of(TagKey.create(Registries.BLOCK, ResourceLocation.parse(stringValue.substring(1))))
+									.of(
+											BuiltInRegistries.BLOCK,
+											TagKey.create(Registries.BLOCK, ResourceLocation.parse(stringValue.substring(1))))
 									.build(), ops.empty()));
 				}
 				return DataResult.success(Pair.of(
 						BlockPredicate.Builder.block()
-								.of(BuiltInRegistries.BLOCK.get(ResourceLocation.parse(stringValue)))
+								.of(
+										BuiltInRegistries.BLOCK,
+										BuiltInRegistries.BLOCK.get(ResourceLocation.parse(stringValue)).orElseThrow().value())
 								.build(), ops.empty()));
 			}
 			//return ExtraCodecs.JSON.decode(ops, input).map($ -> $.mapFirst(BlockPredicate::fromJson));

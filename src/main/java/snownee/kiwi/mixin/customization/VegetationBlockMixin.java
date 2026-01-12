@@ -8,13 +8,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.block.BushBlock;
 import net.minecraft.world.level.block.SupportType;
+import net.minecraft.world.level.block.VegetationBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import snownee.kiwi.customization.CustomFeatureTags;
 
-@Mixin(BushBlock.class)
-public abstract class BushBlockMixin {
+@Mixin(VegetationBlock.class)
+public abstract class VegetationBlockMixin {
 	@Inject(method = "mayPlaceOn", at = @At("HEAD"), cancellable = true)
 	private void kiwi$mayPlaceOn(BlockState pState, BlockGetter pLevel, BlockPos pPos, CallbackInfoReturnable<Boolean> cir) {
 		if (pState.isFaceSturdy(pLevel, pPos, Direction.UP, SupportType.CENTER) && pState.is(CustomFeatureTags.SUSTAIN_PLANT)) {

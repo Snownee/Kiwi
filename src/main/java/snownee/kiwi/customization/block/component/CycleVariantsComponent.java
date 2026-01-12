@@ -88,7 +88,7 @@ public record CycleVariantsComponent(
 			registry.addUseHandler((pState, pPlayer, pLevel, pHand, pHit) -> {
 				BlockState newState = pState.cycle(property);
 				pLevel.setBlock(pHit.getBlockPos(), newState, 3);
-				return InteractionResult.sidedSuccess(pLevel.isClientSide);
+				return InteractionResult.SUCCESS_SERVER;
 			});
 		}
 	}

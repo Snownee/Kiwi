@@ -8,6 +8,7 @@ import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -33,7 +34,7 @@ public final class BuiltInBlockTemplate extends KBlockTemplate {
 	}
 
 	@Override
-	public Type<?> type() {
+	public KBlockTemplate.Type<?> type() {
 		return KBlockTemplates.BUILT_IN.getOrCreate();
 	}
 
@@ -43,7 +44,7 @@ public final class BuiltInBlockTemplate extends KBlockTemplate {
 	}
 
 	@Override
-	public Block createBlock(ResourceLocation id, BlockBehaviour.Properties properties, JsonObject json) {
+	public Block createBlock(ResourceKey<Block> key, BlockBehaviour.Properties properties, JsonObject json) {
 		if (!json.has(BlockCodecs.BLOCK_PROPERTIES_KEY)) {
 			json.add(BlockCodecs.BLOCK_PROPERTIES_KEY, new JsonObject());
 		}

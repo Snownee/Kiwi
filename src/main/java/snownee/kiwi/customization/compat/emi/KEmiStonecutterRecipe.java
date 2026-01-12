@@ -1,3 +1,4 @@
+/*
 package snownee.kiwi.customization.compat.emi;
 
 import java.util.List;
@@ -63,3 +64,4 @@ public class KEmiStonecutterRecipe implements EmiRecipe {
 		widgets.addSlot(output, 58, 0).recipeContext(this);
 	}
 }
+*/

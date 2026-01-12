@@ -31,7 +31,6 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Unit;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.contributor.ContributorsClient;
@@ -70,12 +69,9 @@ public final class ClientProxy {
 		ClientTickEvents.END_CLIENT_TICK.register(ContributorsClient::onKeyInput);
 	}
 
-	public static void registerColors(Context context, List<Pair<Block, BlockColor>> blocksToAdd, List<Pair<Item, ItemColor>> itemsToAdd) {
+	public static void registerColors(Context context, List<Pair<Block, BlockColor>> blocksToAdd) {
 		for (var pair : blocksToAdd) {
 			ColorProviderRegistry.BLOCK.register(pair.getSecond(), pair.getFirst());
-		}
-		for (var pair : itemsToAdd) {
-			ColorProviderRegistry.ITEM.register(pair.getSecond(), pair.getFirst());
 		}
 	}
 

@@ -6,13 +6,13 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix3x2fStack;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFW;
 
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.ChatFormatting;
@@ -29,10 +29,10 @@ import net.minecraft.client.gui.screens.inventory.tooltip.BelowOrAboveWidgetTool
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.Rect2i;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -164,7 +164,7 @@ public class ConvertScreen extends Screen {
 					x = width / 2 + 91 + 17;
 				}
 			} else {
-				x = width / 2 - 91 + 11 + player.getInventory().selected * 20;
+				x = width / 2 - 91 + 11 + player.getInventory().getSelectedSlot() * 20;
 			}
 			y = height - 24;
 			anchor = new Vector2f(0.5f, 1f);
@@ -307,26 +307,26 @@ public class ConvertScreen extends Screen {
 	@Override
 	public void render(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
 		Objects.requireNonNull(minecraft);
-		PoseStack pose = pGuiGraphics.pose();
+		Matrix3x2fStack pose = pGuiGraphics.pose();
 		layout.update();
 		Vector2i pos = layout.getAnchoredPos();
 		float openValue = openProgress.getValue(pPartialTick);
-		pose.pushPose();
-		pose.translate(pos.x, pos.y, 0);
-		pose.scale(openValue, openValue, openValue);
-		pose.translate(-pos.x, -pos.y, 0);
+		pose.pushMatrix();
+		pose.translate(pos.x, pos.y);
+		pose.scale(openValue);
+		pose.translate(-pos.x, -pos.y);
 		if (inContainer) {
 			Rect2i bounds = layout.bounds();
 			pGuiGraphics.blitSprite(
+					RenderPipelines.GUI_TEXTURED,
 					ResourceLocation.withDefaultNamespace("recipe_book/overlay_recipe"),
 					bounds.getX() - 2,
 					bounds.getY() - 2,
-					0,
 					bounds.getWidth() + 3,
 					bounds.getHeight() + 3);
 		}
 		super.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
-		pose.popPose();
+		pose.popMatrix();
 	}
 
 	@Override
@@ -334,14 +334,14 @@ public class ConvertScreen extends Screen {
 		// NO-OP
 	}
 
-	@Override
-	public void setTooltipForNextRenderPass(List<FormattedCharSequence> list, ClientTooltipPositioner tooltipPositioner, boolean force) {
-		float openValue = openProgress.getValue(Objects.requireNonNull(minecraft)./*getPartialTick()*/ getTimer()
-				.getGameTimeDeltaPartialTick(true));
-		if (openValue > 0.95f) {
-			super.setTooltipForNextRenderPass(list, forcedTooltipPositioner, force);
-		}
-	}
+//	@Override
+//	public void setTooltipForNextRenderPass(List<FormattedCharSequence> list, ClientTooltipPositioner tooltipPositioner, boolean force) {
+//		float openValue = openProgress.getValue(Objects.requireNonNull(minecraft)./*getPartialTick()*/ getTimer()
+//				.getGameTimeDeltaPartialTick(true));
+//		if (openValue > 0.95f) {
+//			super.setTooltipForNextRenderPass(list, forcedTooltipPositioner, force);
+//		}
+//	}
 
 	@Override
 	public void onClose() {
@@ -375,7 +375,7 @@ public class ConvertScreen extends Screen {
 				pGuiGraphics,
 				Integer.MAX_VALUE,
 				Integer.MAX_VALUE,
-				mc.getTimer().getGameTimeDeltaPartialTick(true));
+				mc.getDeltaTracker().getGameTimeDeltaPartialTick(true));
 	}
 
 	public static void tickLingering() {

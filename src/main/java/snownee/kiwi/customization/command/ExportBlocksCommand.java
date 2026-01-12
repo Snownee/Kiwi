@@ -26,7 +26,7 @@ import com.mojang.serialization.JsonOps;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.resources.language.LanguageManager;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -154,10 +154,11 @@ public class ExportBlocksCommand {
 				}
 				if ("door".equals(template) || "trapdoor".equals(template)) {
 					Codec<Block> codec = BlockCodecs.get(ResourceLocation.parse(template)).codec();
-					template += toYaml(codec, block, json -> {
-						json.getAsJsonObject().remove(BlockCodecs.BLOCK_PROPERTIES_KEY);
-						return json;
-					});
+					template += toYaml(
+							codec, block, json -> {
+								json.getAsJsonObject().remove(BlockCodecs.BLOCK_PROPERTIES_KEY);
+								return json;
+							});
 				}
 				row.put("Template", template);
 				row.put("ID", BuiltInRegistries.BLOCK.getKey(block).getPath());
@@ -170,12 +171,12 @@ public class ExportBlocksCommand {
 					}
 				}
 				RenderLayerEnum layer = null;
-				RenderType renderType = ItemBlockRenderTypes.getChunkRenderType(block.defaultBlockState());
-				if (renderType == RenderType.cutout()) {
+				ChunkSectionLayer chunkSectionLayer = ItemBlockRenderTypes.getChunkRenderType(block.defaultBlockState());
+				if (chunkSectionLayer == ChunkSectionLayer.CUTOUT) {
 					layer = RenderLayerEnum.CUTOUT;
-				} else if (renderType == RenderType.cutoutMipped()) {
+				} else if (chunkSectionLayer == ChunkSectionLayer.CUTOUT_MIPPED) {
 					layer = RenderLayerEnum.CUTOUT_MIPPED;
-				} else if (renderType == RenderType.translucent()) {
+				} else if (chunkSectionLayer == ChunkSectionLayer.TRANSLUCENT) {
 					layer = RenderLayerEnum.TRANSLUCENT;
 				}
 				row.put("RenderType", layer == null ? "solid" : layer.name().toLowerCase(Locale.ENGLISH));
@@ -194,7 +195,7 @@ public class ExportBlocksCommand {
 				}
 				KBlockSettings settings = KBlockSettings.of(block);
 				if (settings == null) {
-					settings = KBlockSettings.empty();
+					settings = KBlockSettings.defaulted(block);
 				}
 				if (settings.glassType == null) {
 					row.put("GlassType", "");
@@ -249,7 +250,7 @@ public class ExportBlocksCommand {
 		if (decorator != null) {
 			json = decorator.apply(json);
 		}
-		if (json.isJsonObject() && json.getAsJsonObject().size() == 0) {
+		if (json.isJsonObject() && json.getAsJsonObject().isEmpty()) {
 			return "";
 		}
 		Yaml yaml = YAML.get();

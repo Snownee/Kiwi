@@ -143,7 +143,7 @@ public class BlockFamilyInferrer {
 				List<Holder.Reference<Block>> blocks = collectBlocks(id, general);
 				if (id.getPath().endsWith("brick")) {
 					ResourceLocation id1 = id.withSuffix("s");
-					Optional<Holder.Reference<Block>> holder1 = BuiltInRegistries.BLOCK.getHolder(ResourceKey.create(
+					Optional<Holder.Reference<Block>> holder1 = BuiltInRegistries.BLOCK.get(ResourceKey.create(
 							Registries.BLOCK,
 							id1));
 					if (holder1.isPresent()) {
@@ -185,7 +185,7 @@ public class BlockFamilyInferrer {
 		List<Holder.Reference<Block>> blocks = Lists.newArrayList();
 		for (String template : templates) {
 			ResourceLocation blockId = id.withPath(String.format(template, id.getPath()));
-			Optional<Holder.Reference<Block>> holder = BuiltInRegistries.BLOCK.getHolder(ResourceKey.create(Registries.BLOCK, blockId));
+			Optional<Holder.Reference<Block>> holder = BuiltInRegistries.BLOCK.get(ResourceKey.create(Registries.BLOCK, blockId));
 			holder.ifPresent(blocks::add);
 		}
 		return blocks;
@@ -214,7 +214,7 @@ public class BlockFamilyInferrer {
 				false,
 				blockKeys,
 				List.of(),
-				List.of(),
+				Optional.empty(),
 				false,
 				Optional.empty(),
 				1,

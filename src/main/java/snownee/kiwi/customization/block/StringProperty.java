@@ -1,19 +1,18 @@
 package snownee.kiwi.customization.block;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
-
-import com.google.common.collect.ImmutableSortedSet;
 
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 
 public class StringProperty extends Property<String> {
-	private final ImmutableSortedSet<String> values;
+	private final List<String> values;
 
 	public StringProperty(String pName, Collection<String> values) {
 		super(pName, String.class);
-		this.values = ImmutableSortedSet.copyOf(values.stream().map(String::intern).toList());
+		this.values = values.stream().map(String::intern).toList();
 	}
 
 	public static StringProperty convert(EnumProperty<?> property) {
@@ -23,7 +22,7 @@ public class StringProperty extends Property<String> {
 	}
 
 	@Override
-	public Collection<String> getPossibleValues() {
+	public List<String> getPossibleValues() {
 		return values;
 	}
 
@@ -35,6 +34,11 @@ public class StringProperty extends Property<String> {
 	@Override
 	public Optional<String> getValue(String key) {
 		return values.contains(key) ? Optional.of(key) : Optional.empty();
+	}
+
+	@Override
+	public int getInternalIndex(String key) {
+		return values.indexOf(key);
 	}
 
 	@Override

@@ -15,19 +15,20 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import snownee.kiwi.customization.item.loader.ItemCodecs;
+import snownee.kiwi.util.codec.KCodecs;
 
 public class MultipleBlockItem extends BlockItem {
 	public static final MapCodec<MultipleBlockItem> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-			Codec.compoundList(Codec.STRING, BuiltInRegistries.BLOCK.byNameCodec()).fieldOf("blocks").forGetter($ -> {
-				throw new UnsupportedOperationException();
-			}),
+			Codec.compoundList(Codec.STRING, BuiltInRegistries.BLOCK.byNameCodec())
+					.fieldOf("blocks")
+					.forGetter(KCodecs.unsupportedGetter()),
 			ItemCodecs.propertiesCodec()
 	).apply(instance, MultipleBlockItem::new));
 
 	private final List<Pair<String, Block>> blocks;
 
 	public MultipleBlockItem(List<Pair<String, Block>> blocks, Properties properties) {
-		super(blocks.get(0).getSecond(), properties);
+		super(blocks.getFirst().getSecond(), properties);
 		this.blocks = blocks;
 		Preconditions.checkArgument(blocks.size() > 1, "MultipleBlockItem must have more than one block");
 		Preconditions.checkArgument(

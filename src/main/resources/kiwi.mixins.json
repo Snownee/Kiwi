@@ -14,7 +14,7 @@
 		"customization.BlockPropertiesMixin",
 		"customization.BlockStateMixin",
 		"customization.BuiltInRegistriesMixin",
-		"customization.BushBlockMixin",
+		"customization.VegetationBlockMixin",
 		"customization.HalfTransparentBlockMixin",
 		"customization.fabric.PackRepositoryMixin",
 		"customization.family.RecipeManagerMixin",

@@ -2,10 +2,10 @@ package snownee.kiwi.customization.item.loader;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import com.google.common.collect.Maps;
+import com.mojang.datafixers.util.Function4;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -14,14 +14,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.item.ShovelItem;
-import net.minecraft.world.item.SwordItem;
-import net.minecraft.world.item.Tier;
-import net.minecraft.world.item.TieredItem;
+import net.minecraft.world.item.ToolMaterial;
 import snownee.kiwi.customization.block.loader.InjectedCodec;
-import snownee.kiwi.customization.block.tier.KiwiTiers;
+import snownee.kiwi.customization.block.toolmaterial.ToolMaterials;
 import snownee.kiwi.customization.item.MultipleBlockItem;
+import snownee.kiwi.util.codec.KCodecs;
 
 public class ItemCodecs {
 	private static final Map<ResourceLocation, MapCodec<Item>> CODECS = Maps.newHashMap();
@@ -32,34 +30,36 @@ public class ItemCodecs {
 			BuiltInItemTemplate.PROPERTIES_INJECTOR);
 
 	public static <I extends Item> RecordCodecBuilder<I, Item.Properties> propertiesCodec() {
-		return ITEM_PROPERTIES.fieldOf(ITEM_PROPERTIES_KEY).forGetter(item -> {
-			throw new UnsupportedOperationException();
-		});
+		return ITEM_PROPERTIES.fieldOf(ITEM_PROPERTIES_KEY).forGetter(KCodecs.unsupportedGetter());
 	}
 
 	public static <I extends Item> MapCodec<I> simpleCodec(Function<Item.Properties, I> function) {
 		return RecordCodecBuilder.mapCodec(instance -> instance.group(propertiesCodec()).apply(instance, function));
 	}
 
-	public static <I extends TieredItem> MapCodec<I> tieredItemCodec(BiFunction<Tier, Item.Properties, I> function) {
+	public static <I extends Item> MapCodec<I> toolCodec(Function4<ToolMaterial, Float, Float, Item.Properties, I> function) {
 		return RecordCodecBuilder.mapCodec(instance -> instance.group(
-				KiwiTiers.CODEC.fieldOf("tier").forGetter(TieredItem::getTier),
+				ToolMaterials.CODEC.fieldOf("tier").forGetter(KCodecs.unsupportedGetter()),
+				Codec.FLOAT.fieldOf("attack_damage").forGetter(KCodecs.unsupportedGetter()),
+				Codec.FLOAT.fieldOf("attack_speed").forGetter(KCodecs.unsupportedGetter()),
 				propertiesCodec()
 		).apply(instance, function));
 	}
 
 	public static final Function<Item.Properties, Item> SIMPLE_ITEM_FACTORY = Item::new;
 
-	public static final MapCodec<Item> ITEM = simpleCodec(SIMPLE_ITEM_FACTORY);
-
 	static {
-		register(ResourceLocation.withDefaultNamespace("item"), ITEM);
+		register(ResourceLocation.withDefaultNamespace("item"), simpleCodec(SIMPLE_ITEM_FACTORY));
 		register(ResourceLocation.withDefaultNamespace("blocks"), MultipleBlockItem.CODEC);
-		register(ResourceLocation.withDefaultNamespace("axe"), tieredItemCodec(AxeItem::new));
-		register(ResourceLocation.withDefaultNamespace("hoe"), tieredItemCodec(HoeItem::new));
-		register(ResourceLocation.withDefaultNamespace("pickaxe"), tieredItemCodec(PickaxeItem::new));
-		register(ResourceLocation.withDefaultNamespace("shovel"), tieredItemCodec(ShovelItem::new));
-		register(ResourceLocation.withDefaultNamespace("sword"), tieredItemCodec(SwordItem::new));
+		register(ResourceLocation.withDefaultNamespace("axe"), toolCodec(AxeItem::new));
+		register(ResourceLocation.withDefaultNamespace("hoe"), toolCodec(HoeItem::new));
+		register(ResourceLocation.withDefaultNamespace("shovel"), toolCodec(ShovelItem::new));
+		register(
+				ResourceLocation.withDefaultNamespace("pickaxe"),
+				toolCodec((mat, damage, speed, properties) -> new Item(properties.pickaxe(mat, damage, speed))));
+		register(
+				ResourceLocation.withDefaultNamespace("sword"),
+				toolCodec((mat, damage, speed, properties) -> new Item(properties.sword(mat, damage, speed))));
 	}
 
 	public static void register(ResourceLocation key, MapCodec<? extends Item> codec) {

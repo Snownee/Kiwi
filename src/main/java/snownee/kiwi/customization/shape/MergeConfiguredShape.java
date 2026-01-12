@@ -1,13 +1,19 @@
 package snownee.kiwi.customization.shape;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -30,5 +36,20 @@ public record MergeConfiguredShape(ConfiguringShape configuring, ResourceLocatio
 	@Override
 	public void replaceAll(Block block, BlockShapeType type, UnaryOperator<VoxelShape> operator) {
 		configuring.replaceAll(block, type, operator);
+	}
+
+	public static Function<BlockState, VoxelShape> transform(
+			Block block,
+			UnaryOperator<VoxelShape> operator,
+			Function<BlockState, VoxelShape> original) {
+		List<BlockState> possibleStates = block.getStateDefinition().getPossibleStates();
+		Map<VoxelShape, VoxelShape> cache = Maps.newHashMapWithExpectedSize(possibleStates.size());
+		ImmutableMap.Builder<BlockState, VoxelShape> builder = ImmutableMap.builder();
+		for (BlockState state : possibleStates) {
+			VoxelShape originalShape = original.apply(state);
+			VoxelShape newShape = cache.computeIfAbsent(originalShape, operator);
+			builder.put(state, newShape);
+		}
+		return builder.build()::get;
 	}
 }

@@ -91,7 +91,7 @@ public class BlockFamilies {
 			for (var item : family.value().itemHolders()) {
 				byItemBuilder.put(item.value(), family);
 			}
-			Optional<Holder.Reference<Item>> stonecutterSource = family.value().stonecutterSource();
+			Optional<Holder.Reference<Item>> stonecutterSource = family.value().stonecutterFrom();
 			//noinspection OptionalIsPresent
 			if (stonecutterSource.isPresent()) {
 				byStonecutterBuilder.put(stonecutterSource.get().value(), family);
@@ -100,7 +100,6 @@ public class BlockFamilies {
 		byId = ImmutableMap.copyOf(byIdBuilder);
 		byItem = byItemBuilder.build();
 		byStonecutterSource = byStonecutterBuilder.build();
-		StonecutterRecipeMaker.invalidateCache();
 	}
 
 	@Nullable

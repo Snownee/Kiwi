@@ -11,7 +11,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.customization.CustomizationHooks;
 import snownee.kiwi.customization.block.BlockFundamentals;
@@ -34,16 +34,22 @@ public class ReloadBlockSettingsCommand {
 		long parseTime = stopwatch.elapsed().toMillis();
 		stopwatch.reset().start();
 		Set<Block> set = Sets.newHashSet();
-		BuiltInRegistries.BLOCK.holders().forEach(holder -> {
+		BuiltInRegistries.BLOCK.listElements().forEach(holder -> {
 			KBlockDefinition definition = fundamentals.blocks().get(holder.key().location());
 			if (definition == null || !set.add(holder.value())) {
 				return;
 			}
-			KBlockSettings.Builder builder = definition.createSettings(holder.key().location(), fundamentals.shapes());
+			KBlockSettings.Builder builder = definition.createSettings(holder.key(), fundamentals.shapes());
 			holder.value().properties = builder.get();
 			KBlockDefinition.setConfiguringShape(holder.value(), fundamentals.shapes());
 		});
-		Blocks.rebuildCache();
+
+		for (Block block : BuiltInRegistries.BLOCK) {
+			for (BlockState blockState : block.getStateDefinition().getPossibleStates()) {
+				blockState.initCache();
+			}
+		}
+
 		ReloadSlotsCommand.reload(fundamentals);
 		long attachTime = stopwatch.elapsed().toMillis();
 		Kiwi.LOGGER.info("Parse time %dms + Attach time %dms = %dms".formatted(parseTime, attachTime, parseTime + attachTime));

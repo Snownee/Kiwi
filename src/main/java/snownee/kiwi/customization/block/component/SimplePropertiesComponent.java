@@ -26,7 +26,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -85,10 +84,11 @@ public record SimplePropertiesComponent(
 				} else if (values != null && defaultValue instanceof String s) {
 					if (DIRECTION_STRINGS.containsKey(s) && DIRECTION_STRINGS.keySet().containsAll(values)) {
 						if (values.size() == DIRECTION_STRINGS.size()) {
-							property = DirectionProperty.create(name);
+							property = EnumProperty.create(name, Direction.class);
 						} else {
-							property = DirectionProperty.create(
+							property = EnumProperty.create(
 									name,
+									Direction.class,
 									values.stream().map(DIRECTION_STRINGS::get).toArray(Direction[]::new));
 						}
 					} else {
@@ -118,14 +118,15 @@ public record SimplePropertiesComponent(
 			List<String> values = List.of();
 			if (s == null) {
 				mapBuilder.add("name", ops.createString(property.getName()));
-				if (property instanceof IntegerProperty integerProperty) {
-					mapBuilder.add("min", ops.createInt(integerProperty.min));
-					mapBuilder.add("max", ops.createInt(integerProperty.max));
-				} else if (property instanceof EnumProperty<?> || property instanceof StringProperty) {
+				EnumProperty<Direction> directionProperty = KBlockUtils.toDirectionProperty(property);
+				if (directionProperty != null) {
 					values = property.getPossibleValues()
 							.stream()
 							.map($ -> KBlockUtils.getNameByValue(property, $))
 							.collect(Collectors.toCollection(ArrayList::new));
+				} else if (property instanceof IntegerProperty integerProperty) {
+					mapBuilder.add("min", ops.createInt(integerProperty.min));
+					mapBuilder.add("max", ops.createInt(integerProperty.max));
 				} else if (!(property instanceof BooleanProperty)) {
 					return DataResult.error(() -> "Unsupported property type: " + property);
 				}
@@ -145,7 +146,7 @@ public record SimplePropertiesComponent(
 			}
 			if (!values.isEmpty()) {
 				values.remove(input.getSecond());
-				values.add(0, input.getSecond());
+				values.addFirst(input.getSecond());
 				mapBuilder.add("values", ops.createList(values.stream().map(ops::createString)));
 			} else {
 				mapBuilder.add("default", defaultValue);

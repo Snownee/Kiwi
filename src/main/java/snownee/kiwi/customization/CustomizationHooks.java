@@ -23,6 +23,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
@@ -55,8 +56,7 @@ import snownee.kiwi.customization.block.family.BlockFamilies;
 import snownee.kiwi.customization.block.loader.KBlockTemplate;
 import snownee.kiwi.customization.block.soundtype.DeferredSoundType;
 import snownee.kiwi.customization.block.soundtype.SoundTypes;
-import snownee.kiwi.customization.block.tier.KiwiTiers;
-import snownee.kiwi.customization.block.tier.SimpleTier;
+import snownee.kiwi.customization.block.toolmaterial.ToolMaterials;
 import snownee.kiwi.customization.builder.BuilderRule;
 import snownee.kiwi.customization.builder.BuilderRules;
 import snownee.kiwi.customization.item.ItemFundamentals;
@@ -78,11 +78,10 @@ public final class CustomizationHooks {
 	private CustomizationHooks() {
 	}
 
-	// a custom implementation of the Block.shouldRenderFace
+	/// a custom implementation of the {@link Block#shouldRenderFace(BlockState, BlockState, Direction)}
 	private static final int CACHE_SIZE = 512;
-	//TODO try not to initialize this during class loading
-	private static final ThreadLocal<Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey>> OCCLUSION_CACHE = ThreadLocal.withInitial(() -> {
-		Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey> object2bytelinkedopenhashmap = new Object2ByteLinkedOpenHashMap<>(
+	private static final ThreadLocal<Object2ByteLinkedOpenHashMap<BlockStatePairKey>> OCCLUSION_CACHE = ThreadLocal.withInitial(() -> {
+		Object2ByteLinkedOpenHashMap<BlockStatePairKey> object2bytelinkedopenhashmap = new Object2ByteLinkedOpenHashMap<>(
 				CACHE_SIZE,
 				0.25F) {
 			@Override
@@ -108,8 +107,8 @@ public final class CustomizationHooks {
 		if (!pState.is(pAdjacentBlockState.getBlock()) && glassType != getGlassType(pAdjacentBlockState)) {
 			return false;
 		}
-		Block.BlockStatePairKey key = new Block.BlockStatePairKey(pState, pAdjacentBlockState, pDirection);
-		Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey> map = OCCLUSION_CACHE.get();
+		BlockStatePairKey key = new BlockStatePairKey(pState, pAdjacentBlockState, pDirection);
+		Object2ByteLinkedOpenHashMap<BlockStatePairKey> map = OCCLUSION_CACHE.get();
 		byte b0 = map.getAndMoveToFirst(key);
 		if (b0 != 127) {
 			return b0 == 0;
@@ -167,7 +166,7 @@ public final class CustomizationHooks {
 		});
 		UseBlockCallback.EVENT.register((player, level, hand, hitResult) -> {
 			if (hand == InteractionHand.MAIN_HAND && SitManager.sit(player, hitResult)) {
-				return InteractionResult.sidedSuccess(level.isClientSide);
+				return InteractionResult.SUCCESS_SERVER;
 			}
 			return InteractionResult.PASS;
 		});
@@ -202,11 +201,9 @@ public final class CustomizationHooks {
 		CustomizationMetadata.sortedForEach(
 				metadataMap, "block", blockFundamentals.blocks(), (id, definition) -> {
 					try {
-						Block block = definition.createBlock(id, blockFundamentals.shapes());
-						if (block == null) {
-							return;
-						}
-						Registry.register(BuiltInRegistries.BLOCK, id, block);
+						ResourceKey<Block> key = ResourceKey.create(Registries.BLOCK, id);
+						Block block = definition.createBlock(key, blockFundamentals.shapes());
+						Registry.register(BuiltInRegistries.BLOCK, key, block);
 						blockFundamentals.slotProviders().attachSlotsA(block, definition);
 						blockFundamentals.placeChoices().attachChoicesA(block, definition);
 						blockIds.add(id);
@@ -215,10 +212,10 @@ public final class CustomizationHooks {
 					}
 				});
 
-		KiwiTiers.refreshWithValues(OneTimeLoader.load(
+		ToolMaterials.refreshWithValues(OneTimeLoader.load(
 				resourceManager,
 				"kiwi/tier",
-				SimpleTier.DIRECT_CODEC.codec(),
+				ToolMaterials.DIRECT_CODEC.codec(),
 				context));
 
 		ItemFundamentals itemFundamentals = ItemFundamentals.reload(resourceManager, context, true);
@@ -230,16 +227,14 @@ public final class CustomizationHooks {
 		KItemTemplate none = itemFundamentals.templates().get(ResourceLocation.withDefaultNamespace("none"));
 		Preconditions.checkNotNull(none, "Missing 'none' item definition");
 		CustomizationMetadata.sortedForEach(
-				metadataMap, "item", itemFundamentals.items(), (id, definition) -> {
+				metadataMap, List.of("item", "block"), itemFundamentals.items(), (id, definition) -> {
 					try {
 						if (definition.template().template() == none) {
 							return;
 						}
-						Item item = definition.createItem(id);
-						if (item == null) {
-							return;
-						}
-						Registry.register(BuiltInRegistries.ITEM, id, item);
+						ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, id);
+						Item item = definition.createItem(key);
+						Registry.register(BuiltInRegistries.ITEM, key, item);
 					} catch (Exception e) {
 						Kiwi.LOGGER.error("Failed to create item %s".formatted(id), e);
 					}
@@ -262,20 +257,21 @@ public final class CustomizationHooks {
 			ResourceLocation key = entry.getKey();
 			KCreativeTab value = entry.getValue();
 			CreativeModeTab.Builder tab = AbstractModule.itemCategory(
-							key.getNamespace(),
-							key.getPath(),
+							key,
 							() -> BuiltInRegistries.ITEM.getOptional(value.icon()).orElse(Items.BARRIER).getDefaultInstance())
 					.displayItems((params, output) -> {
 						output.acceptAll(value.contents()
 								.stream()
-								.map(BuiltInRegistries.ITEM::get)
+								.map(BuiltInRegistries.ITEM::getValue)
 								.filter(Objects::nonNull)
 								.map(Item::getDefaultInstance)
 								.toList());
 					});
-			//TODO
+			//TODO fix tab order
 //			if (i > 0) {
-//				tab.withTabsBefore(newTabs.get(i - 1).getKey());
+//				tab.withTabsBefore(CreativeModeTabs.SPAWN_EGGS.location(), newTabs.get(i - 1).getKey());
+//			} else {
+//				tab.withTabsBefore(CreativeModeTabs.SPAWN_EGGS.location());
 //			}
 //			if (i < newTabs.size() - 1) {
 //				tab.withTabsAfter(newTabs.get(i + 1).getKey());
@@ -299,7 +295,7 @@ public final class CustomizationHooks {
 		}
 		ItemGroupEvents.modifyEntriesEvent(kCreativeTab.insert().orElseThrow()).register(entries -> {
 			for (ResourceKey<Item> content : kCreativeTab.contents()) {
-				Item item = BuiltInRegistries.ITEM.get(content);
+				Item item = BuiltInRegistries.ITEM.getValue(content);
 				if (item == null) {
 					return;
 				}
@@ -392,4 +388,6 @@ public final class CustomizationHooks {
 		BlockFamilies.reloadResources(resourceManager, context);
 		BuilderRules.reload(resourceManager, context);
 	}
+
+	private record BlockStatePairKey(BlockState pState, BlockState pAdjacentBlockState, Direction pDirection) {}
 }

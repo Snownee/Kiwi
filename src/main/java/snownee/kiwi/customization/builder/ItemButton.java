@@ -10,7 +10,6 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.navigation.CommonInputs;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
@@ -49,11 +48,6 @@ public class ItemButton extends Button {
 		rawTooltip = tooltip;
 	}
 
-	@Override
-	public @Nullable Tooltip getTooltip() {
-		return rawTooltip;
-	}
-
 	public ItemStack item() {
 		return itemStack;
 	}
@@ -71,7 +65,7 @@ public class ItemButton extends Button {
 		if (rawTooltip != null && isHovered() || isFocused() && Minecraft.getInstance().getLastInputType().isKeyboard()) {
 			Screen screen = Minecraft.getInstance().screen;
 			if (screen != null) {
-				screen.setTooltipForNextRenderPass(rawTooltip, DefaultTooltipPositioner.INSTANCE, true);
+				pGuiGraphics.setTooltipForNextFrame(rawTooltip.toCharSequence(Minecraft.getInstance()), pMouseX, pMouseY);
 			}
 		}
 		if (pressTime >= 0) {

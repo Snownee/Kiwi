@@ -7,6 +7,7 @@ import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -34,7 +35,7 @@ public abstract class KBlockTemplate {
 
 	public abstract void resolve(ResourceLocation key, OneTimeLoader.Context context);
 
-	abstract Block createBlock(ResourceLocation id, BlockBehaviour.Properties properties, JsonObject input);
+	abstract Block createBlock(ResourceKey<Block> key, BlockBehaviour.Properties properties, JsonObject input);
 
 	public final Optional<BlockDefinitionProperties> properties() {
 		return properties;

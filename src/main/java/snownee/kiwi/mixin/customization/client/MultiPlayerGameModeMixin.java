@@ -18,7 +18,9 @@ import snownee.kiwi.customization.builder.BuildersButton;
 public class MultiPlayerGameModeMixin {
 	@Inject(
 			method = "startDestroyBlock",
-			at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/GameType;isCreative()Z"),
+			at = @At(
+					value = "INVOKE",
+					target = "Lnet/minecraft/client/player/LocalPlayer;getAbilities()Lnet/minecraft/world/entity/player/Abilities;"),
 			cancellable = true)
 	private void kiwi$startDestroyBlock(BlockPos pos, Direction pFace, CallbackInfoReturnable<Boolean> cir) {
 		if (BuildersButton.startDestroyBlock(pos, pFace)) {

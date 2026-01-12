@@ -20,7 +20,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.LeadItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Block;
@@ -137,10 +136,7 @@ public class SitManager {
 			display.setPos(seatPos.x, clampedY, seatPos.z);
 			Entity rider = player;
 			if (KSitCommonConfig.makeLeashedMobSit) {
-				List<Leashable> list = LeadItem.leashableInArea(
-						level,
-						player.blockPosition(),
-						leashable -> leashable.getLeashHolder() == player);
+				List<Leashable> list = Leashable.leashableLeashedTo(player);
 				double dist = Double.MAX_VALUE;
 				for (Leashable leashable : list) {
 					if (!(leashable instanceof Mob mob) || mob.isNoAi() || !((EntityAccess) mob).callCanRide(display)) {
@@ -157,7 +153,7 @@ public class SitManager {
 				rider.setYRot(display.getYRot());
 				rider.startRiding(display, true);
 				if (rider != player) {
-					((Leashable) rider).dropLeash(true, true);
+					((Leashable) rider).dropLeash();
 				}
 			}
 		}

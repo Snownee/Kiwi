@@ -108,7 +108,7 @@ public class BuildersButton {
 		}
 		List<CConvertItemPacket.Group> groups = findConvertGroups(player, player.getMainHandItem());
 		if (!groups.isEmpty()) {
-			mc.setScreen(new ConvertScreen(null, null, player.getInventory().selected, groups));
+			mc.setScreen(new ConvertScreen(null, null, player.getInventory().getSelectedSlot(), groups));
 			return true;
 		}
 		groups = findConvertGroups(player, player.getOffhandItem());

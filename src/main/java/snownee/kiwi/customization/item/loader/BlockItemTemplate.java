@@ -10,6 +10,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BedItem;
 import net.minecraft.world.item.BlockItem;
@@ -82,8 +83,8 @@ public final class BlockItemTemplate extends KItemTemplate {
 	}
 
 	@Override
-	public Item createItem(ResourceLocation id, Item.Properties properties, JsonObject json) {
-		Block block = BuiltInRegistries.BLOCK.get(this.block.orElse(id));
+	public Item createItem(ResourceKey<Item> key, Item.Properties properties, JsonObject json) {
+		Block block = BuiltInRegistries.BLOCK.getValue(this.block.orElse(key.location()));
 		Preconditions.checkState(block != Blocks.AIR, "Block %s not found", this.block);
 		return constructor.apply(block, properties);
 	}

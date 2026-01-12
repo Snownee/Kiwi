@@ -61,14 +61,14 @@ accessible field net/minecraft/client/gui/screens/Screen renderables Ljava/util/
 accessible field net/minecraft/client/gui/screens/Screen children Ljava/util/List;
 accessible field net/minecraft/client/gui/screens/Screen narratables Ljava/util/List;
 
-accessible field net/minecraft/world/level/block/CrossCollisionBlock shapeByIndex [Lnet/minecraft/world/phys/shapes/VoxelShape;
-accessible field net/minecraft/world/level/block/CrossCollisionBlock collisionShapeByIndex [Lnet/minecraft/world/phys/shapes/VoxelShape;
-mutable field net/minecraft/world/level/block/CrossCollisionBlock shapeByIndex [Lnet/minecraft/world/phys/shapes/VoxelShape;
-mutable field net/minecraft/world/level/block/CrossCollisionBlock collisionShapeByIndex [Lnet/minecraft/world/phys/shapes/VoxelShape;
-accessible method net/minecraft/world/level/block/CrossCollisionBlock makeShapes (FFFFF)[Lnet/minecraft/world/phys/shapes/VoxelShape;
+accessible method net/minecraft/world/level/block/Block getShapeForEachState (Ljava/util/function/Function;[Lnet/minecraft/world/level/block/state/properties/Property;)Ljava/util/function/Function;
 
-accessible field net/minecraft/world/level/block/WallBlock shapeByIndex Ljava/util/Map;
-accessible field net/minecraft/world/level/block/WallBlock collisionShapeByIndex Ljava/util/Map;
-mutable field net/minecraft/world/level/block/WallBlock shapeByIndex Ljava/util/Map;
-mutable field net/minecraft/world/level/block/WallBlock collisionShapeByIndex Ljava/util/Map;
-accessible method net/minecraft/world/level/block/WallBlock makeShapes (FFFFFF)Ljava/util/Map;
+accessible method net/minecraft/world/level/block/CrossCollisionBlock makeShapes (FFFFF)Ljava/util/function/Function;
+accessible field net/minecraft/world/level/block/CrossCollisionBlock shapes Ljava/util/function/Function;
+mutable field net/minecraft/world/level/block/CrossCollisionBlock shapes Ljava/util/function/Function;
+accessible field net/minecraft/world/level/block/CrossCollisionBlock collisionShapes Ljava/util/function/Function;
+mutable field net/minecraft/world/level/block/CrossCollisionBlock collisionShapes Ljava/util/function/Function;
+accessible field net/minecraft/world/level/block/WallBlock shapes Ljava/util/function/Function;
+mutable field net/minecraft/world/level/block/WallBlock shapes Ljava/util/function/Function;
+accessible field net/minecraft/world/level/block/WallBlock collisionShapes Ljava/util/function/Function;
+mutable field net/minecraft/world/level/block/WallBlock collisionShapes Ljava/util/function/Function;
