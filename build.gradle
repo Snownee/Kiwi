@@ -1,14 +1,14 @@
 plugins {
-    id "io.github.goooler.shadow" version "8.1.7"
+    id "com.gradleup.shadow" version "9.3.1"
     id 'fabric-loom' version '1.11-SNAPSHOT'
     id 'maven-publish'
-    id "me.shedaniel.unified-publishing" version "0.1.+"
+    id "me.modmuss50.mod-publish-plugin" version "1.1.0"
 }
 
-sourceCompatibility = JavaVersion.VERSION_21
-targetCompatibility = JavaVersion.VERSION_21
+base {
+    archivesName = project.archives_base_name
+}
 
-archivesBaseName = project.archives_base_name
 version = project.minecraft_version + "-Fabric-" + project.mod_version
 group = project.maven_group
 var realVersion = project.mod_version + '+fabric'
@@ -192,7 +192,7 @@ remapJar {
     archiveClassifier.set("")
 
     from("LICENSE") {
-        rename { "${it}_${project.archivesBaseName}" }
+        rename { "${it}_${project.archives_base_name}" }
     }
 }
 
@@ -213,39 +213,33 @@ publishing {
     }
 }
 
-unifiedPublishing {
-    project {
-        displayName = "[Fabric $project.supported_version] $project.mod_version"
-        version = realVersion // Optional, Inferred from project by default
-        changelog = file("CHANGELOG.md").exists() ? file("CHANGELOG.md").text : "" // Optional, in markdown format
-        releaseType = project.release_type // Optional, use "release", "beta" or "alpha"
-        gameVersions = [project.minecraft_version]
-        gameLoaders = ["fabric", "quilt"]
+publishMods {
+    file = remapJar.archiveFile
+    additionalFiles.from(sourcesJar.archiveFile)
+    changelog = file('CHANGELOG.md').exists() ? file('CHANGELOG.md').text : ''
+    type = switch (release_type) {
+        case 'release' -> STABLE
+        case 'beta' -> BETA
+        case 'alpha' -> ALPHA
+        default -> throw new GradleException("Unknown release type: $release_type")
+    }
+    modLoaders.add("fabric")
+    modLoaders.add("quilt")
+    displayName = "[Fabric ${supported_version}] ${mod_version}"
+    version = realVersion
 
-        mainPublication tasks.remapJar // Declares the publicated jar
-
-        if (System.getenv("CURSE_TOKEN") != null) {
-            curseforge {
-                token = System.getenv("CURSE_TOKEN")
-                id = "549404" // Required, must be a string, ID of CurseForge project
-
-                relations { // Optional, Inferred from the relations above by default
-                    depends "fabric-api"
-                    optional "cloth-config"
-                }
-            }
-        }
-
-        if (System.getenv("MODRINTH_TOKEN") != null) {
-            modrinth {
-                token = System.getenv("MODRINTH_TOKEN")
-                id = "ufdDoWPd" // Required, must be a string, ID of Modrinth project
-
-                relations { // Optional, Inferred from the relations above by default
-                    depends "fabric-api"
-                    optional "cloth-config"
-                }
-            }
-        }
+    curseforge {
+        projectId = "549404"
+        accessToken = providers.environmentVariable("CURSE_TOKEN")
+        minecraftVersions.add(minecraft_version)
+        requires("fabric-api")
+        optional("cloth-config")
+    }
+    modrinth {
+        projectId = "ufdDoWPd"
+        accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+        minecraftVersions.add(minecraft_version)
+        requires("fabric-api")
+        optional("cloth-config")
     }
 }
