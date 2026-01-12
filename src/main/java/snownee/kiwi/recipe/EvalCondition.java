@@ -11,7 +11,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceCondition;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditionType;
 import net.minecraft.resources.RegistryOps;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.util.KEval;
 
@@ -22,7 +22,7 @@ public record EvalCondition(String expression) implements ResourceCondition {
 					instance.group(Codec.STRING.fieldOf("ex").forGetter(EvalCondition::expression)).apply(instance, EvalCondition::new))
 	);
 
-	public static final ResourceLocation ID = Kiwi.id("eval");
+	public static final Identifier ID = Kiwi.id("eval");
 
 	@Override
 	public ResourceConditionType<?> getType() {

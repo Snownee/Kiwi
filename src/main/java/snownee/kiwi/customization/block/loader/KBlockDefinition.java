@@ -11,8 +11,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import snownee.kiwi.Kiwi;
@@ -39,9 +39,9 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 	}
 
 	public static Codec<KBlockDefinition> codec(
-			Map<ResourceLocation, KBlockTemplate> templates,
+			Map<Identifier, KBlockTemplate> templates,
 			BlockFundamentals.CodecCreationContext context) {
-		KBlockTemplate defaultTemplate = templates.get(ResourceLocation.withDefaultNamespace("block"));
+		KBlockTemplate defaultTemplate = templates.get(Identifier.withDefaultNamespace("block"));
 		Preconditions.checkNotNull(defaultTemplate);
 		ConfiguredBlockTemplate defaultConfiguredTemplate = new ConfiguredBlockTemplate(defaultTemplate);
 		return RecordCodecBuilder.create(instance -> instance.group(
@@ -80,7 +80,7 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 				}
 			});
 			if (vanilla.noCollision().orElse(false)) {
-				$.noCollission();
+				$.noCollision();
 			}
 			if (vanilla.noOcclusion().orElse(properties.glassType().isPresent())) {
 				$.noOcclusion();
@@ -122,7 +122,7 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 				if (remove) {
 					s = s.substring(1);
 				}
-				KBlockComponent.Type<?> type = CustomizationRegistries.BLOCK_COMPONENT.getValue(ResourceLocation.parse(s));
+				KBlockComponent.Type<?> type = CustomizationRegistries.BLOCK_COMPONENT.getValue(Identifier.parse(s));
 				Preconditions.checkNotNull(type, "Unknown component type %s", s);
 				if (remove) {
 					builder.removeComponent(type);
@@ -172,7 +172,7 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 			ShapeStorage shapes,
 			KBlockSettings.Builder builder,
 			BlockShapeType type,
-			Optional<ResourceLocation> shapeId) {
+			Optional<Identifier> shapeId) {
 		if (shapeId.isEmpty()) {
 			return;
 		}

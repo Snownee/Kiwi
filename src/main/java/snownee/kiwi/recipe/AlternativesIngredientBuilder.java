@@ -10,7 +10,7 @@ import com.mojang.serialization.JsonOps;
 import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredient;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -46,9 +46,9 @@ public class AlternativesIngredientBuilder {
 
 	public AlternativesIngredientBuilder add(String tagOrItem) {
 		if (tagOrItem.startsWith("#")) {
-			add(TagKey.create(Registries.ITEM, ResourceLocation.parse(tagOrItem.substring(1))));
+			add(TagKey.create(Registries.ITEM, Identifier.parse(tagOrItem.substring(1))));
 		} else {
-			Item item = BuiltInRegistries.ITEM.getValue(ResourceLocation.parse(tagOrItem));
+			Item item = BuiltInRegistries.ITEM.getValue(Identifier.parse(tagOrItem));
 			Preconditions.checkState(item != Items.AIR);
 			add(item);
 		}

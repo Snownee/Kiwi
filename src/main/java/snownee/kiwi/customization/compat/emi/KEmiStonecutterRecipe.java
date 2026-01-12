@@ -12,12 +12,12 @@ import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.widget.WidgetHolder;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
 
 public class KEmiStonecutterRecipe implements EmiRecipe {
-	private final ResourceLocation id;
+	private final Identifier id;
 	private final EmiIngredient input;
 	private final EmiStack output;
 
@@ -33,7 +33,7 @@ public class KEmiStonecutterRecipe implements EmiRecipe {
 	}
 
 	@Override
-	public ResourceLocation getId() {
+	public Identifier getId() {
 		return id;
 	}
 

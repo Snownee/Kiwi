@@ -10,8 +10,8 @@ import net.minecraft.core.component.DataComponentHolder;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
@@ -27,7 +27,7 @@ import snownee.kiwi.customization.block.loader.KBlockComponents;
 public record ConsumableComponent(
 		IntegerProperty property,
 		DataComponentMap components,
-		Optional<ResourceKey<ResourceLocation>> stat) implements KBlockComponent, LayeredComponent, DataComponentHolder {
+		Optional<ResourceKey<Identifier>> stat) implements KBlockComponent, LayeredComponent, DataComponentHolder {
 	public static final MapCodec<ConsumableComponent> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			ExtraCodecs.intRange(0, 1).fieldOf("min").forGetter(ConsumableComponent::minValue),
 			ExtraCodecs.POSITIVE_INT.fieldOf("max").forGetter(ConsumableComponent::maxValue),
@@ -40,7 +40,7 @@ public record ConsumableComponent(
 			int min,
 			int max,
 			DataComponentMap components,
-			Optional<ResourceKey<ResourceLocation>> stat) {
+			Optional<ResourceKey<Identifier>> stat) {
 		return new ConsumableComponent(KBlockUtils.internProperty(IntegerProperty.create("uses", min, max)), components, stat);
 	}
 
@@ -84,7 +84,7 @@ public record ConsumableComponent(
 			if (value == 0) {
 				return InteractionResult.PASS;
 			}
-			stat.map(ResourceKey::location).ifPresent(pPlayer::awardStat);
+			stat.map(ResourceKey::identifier).ifPresent(pPlayer::awardStat);
 			ItemStack itemStack = pState.getBlock().asItem().getDefaultInstance();
 			Consumable consumable = get(DataComponents.CONSUMABLE);
 			if (consumable != null && consumable.canConsume(pPlayer, itemStack)) {

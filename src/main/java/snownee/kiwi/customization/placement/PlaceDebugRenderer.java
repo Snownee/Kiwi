@@ -2,17 +2,17 @@ package snownee.kiwi.customization.placement;
 
 import java.util.List;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShapeRenderer;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.debug.DebugRenderer;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.Util;
+import net.minecraft.util.debug.DebugValueAccess;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -31,7 +31,7 @@ public class PlaceDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 	private long lastUpdateTime;
 
 	@Override
-	public void render(PoseStack pPoseStack, MultiBufferSource pBuffer, double pCamX, double pCamY, double pCamZ) {
+	public void emitGizmos(double pCamX, double pCamY, double pCamZ, DebugValueAccess debugValues, Frustum frustum, float partialTicks) {
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.isPaused()) {
 			return;
@@ -39,7 +39,7 @@ public class PlaceDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 		long millis = Util.getMillis();
 		if (millis - this.lastUpdateTime > 300) {
 			this.lastUpdateTime = millis;
-			Entity entity = mc.gameRenderer.getMainCamera().getEntity();
+			Entity entity = mc.gameRenderer.getMainCamera().entity();
 			Level level = entity.level();
 			this.slots = BlockPos.betweenClosedStream(entity.getBoundingBox().inflate(4)).map(BlockPos::immutable).flatMap(pos -> {
 				BlockState blockState = level.getBlockState(pos);
@@ -49,7 +49,7 @@ public class PlaceDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 			}).toList();
 		}
 
-		VertexConsumer vertexconsumer = pBuffer.getBuffer(RenderType.lines());
+		VertexConsumer vertexconsumer = pBuffer.getBuffer(RenderTypes.lines());
 		for (SlotRenderInstance instance : slots) {
 			ShapeRenderer.renderShape(
 					pPoseStack,

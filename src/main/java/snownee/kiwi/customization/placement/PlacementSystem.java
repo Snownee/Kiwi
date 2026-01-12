@@ -121,7 +121,7 @@ public class PlacementSystem {
 			}
 		}
 		if (results.isEmpty()) {
-			if (debug && !level.isClientSide) {
+			if (debug && !level.isClientSide()) {
 				Kiwi.LOGGER.info("No match");
 				level.setBlockAndUpdate(mutable.move(Direction.UP), Blocks.BEDROCK.defaultBlockState());
 			}
@@ -145,7 +145,7 @@ public class PlacementSystem {
 		if (result == null) {
 			return blockState;
 		}
-		if (debug && maxInterest > 0 && !level.isClientSide) {
+		if (debug && maxInterest > 0 && !level.isClientSide()) {
 			mutable.setWithOffset(pos, Direction.UP);
 			Kiwi.LOGGER.info("Interest: %d".formatted(result.interest()));
 			results.forEach($ -> {

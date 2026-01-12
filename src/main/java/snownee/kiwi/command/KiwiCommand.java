@@ -32,12 +32,12 @@ public class KiwiCommand {
 		builder.then(Commands
 				.literal("dev_env_rules")
 				.then(Commands.literal("do_not_run_this_if_you_do_not_know_what_it_does")
-						.requires(ctx -> ctx.hasPermission(2))
+						.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 						.executes(ctx -> debugRules(ctx.getSource()))));
 
 		builder.then(Commands
 				.literal("reload")
-				.requires(ctx -> ctx.hasPermission(2))
+				.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 				.then(Commands.argument("fileName", StringArgumentType.greedyString())
 						.executes(ctx -> {
 							String fileName = StringArgumentType.getString(ctx, "fileName");
@@ -54,7 +54,7 @@ public class KiwiCommand {
 
 		builder.then(Commands
 				.literal("eval")
-				.requires(ctx -> ctx.hasPermission(2))
+				.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 				.executes(ctx -> evalHelp(ctx.getSource(), CommandSourceStack::sendFailure))
 				.then(Commands.argument("expression", StringArgumentType.greedyString())
 						.executes(ctx -> eval(

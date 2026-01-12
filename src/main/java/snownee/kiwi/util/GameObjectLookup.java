@@ -6,8 +6,8 @@ import java.util.stream.Stream;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import snownee.kiwi.KiwiGO;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModules;
@@ -20,14 +20,14 @@ public interface GameObjectLookup {
 
 	@SuppressWarnings("unchecked")
 	static <T> Stream<Holder.Reference<T>> allHolders(ResourceKey<Registry<T>> registryKey, String modId) {
-		Registry<T> registry = (Registry<T>) Objects.requireNonNull(BuiltInRegistries.REGISTRY.getValue(registryKey.location()));
-		return registry.listElements().filter($ -> $.key().location().getNamespace().equals(modId));
+		Registry<T> registry = (Registry<T>) Objects.requireNonNull(BuiltInRegistries.REGISTRY.getValue(registryKey.identifier()));
+		return registry.listElements().filter($ -> $.key().identifier().getNamespace().equals(modId));
 	}
 
 	static <T> Stream<OptionalEntry<T>> fromModules(ResourceKey<Registry<T>> registryKey, String... ids) {
 		/* off */
 		return Stream.of(ids)
-				.map(ResourceLocation::parse)
+				.map(Identifier::parse)
 				.map(KiwiModules::get)
 				.mapMulti(($, consumer) -> {
 					boolean optional = $.module.getClass().getDeclaredAnnotation(KiwiModule.Optional.class) != null;

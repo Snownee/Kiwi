@@ -10,9 +10,7 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.InputConstants;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Holder;
@@ -22,8 +20,9 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.TranslatableContents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.Util;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
@@ -38,9 +37,10 @@ import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.item.ModItem;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.KUtil;
+import snownee.kiwi.util.client.SmartKey;
 
 public final class TooltipEvents {
-	public static final ResourceLocation DISABLE_DEBUG_TOOLTIP = Kiwi.id("disable_debug_tooltip");
+	public static final Identifier DISABLE_DEBUG_TOOLTIP = Kiwi.id("disable_debug_tooltip");
 	private static final DebugTooltipCache cache = new DebugTooltipCache();
 	private static boolean firstSeenDebugTooltip = true;
 	private static long latestPressF3;
@@ -65,7 +65,7 @@ public final class TooltipEvents {
 		Minecraft mc = Minecraft.getInstance();
 		long millis = Util.getMillis();
 		if (KiwiClientConfig.f3CopyInInventory && mc.player != null && millis - latestPressF3 > 500 &&
-				InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), InputConstants.KEY_F3)) {
+				InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), InputConstants.KEY_F3)) {
 			latestPressF3 = millis;
 			MutableComponent component = Component.literal(BuiltInRegistries.ITEM.getKey(itemStack.getItem()).toString());
 			mc.keyboardHandler.setClipboard(component.getString());
@@ -78,13 +78,13 @@ public final class TooltipEvents {
 		}
 		if (KiwiClientConfig.tagsTooltip) {
 			cache.maybeUpdateTags(itemStack);
-			boolean alt = Screen.hasAltDown();
+			boolean alt = SmartKey.hasAltDown();
 			if (!holdAlt && alt) {
 				holdAltStart = millis;
 				showTagsBeforeAlt = cache.showTags;
 			} else if (holdAlt && !alt) {
 				if (cache.showTags && millis - holdAltStart < 500) {
-					cache.pageNow += Screen.hasControlDown() ? -1 : 1;
+					cache.pageNow += SmartKey.hasControlDown() ? -1 : 1;
 					cache.needUpdatePreferredType = true;
 				}
 			}
@@ -136,7 +136,7 @@ public final class TooltipEvents {
 			translatedPages.clear();
 			pageTypes.clear();
 			pageNow = 0;
-			addPages("item", itemStack.getTags());
+			addPages("item", itemStack.tags());
 			Item item = itemStack.getItem();
 			Block block = Block.byItem(item);
 			if (block != Blocks.AIR) {
@@ -144,7 +144,7 @@ public final class TooltipEvents {
 			}
 			ClientLevel level = Minecraft.getInstance().level;
 			if (level != null && item instanceof SpawnEggItem spawnEggItem) {
-				EntityType<?> type = spawnEggItem.getType(level.registryAccess(), itemStack);
+				EntityType<?> type = spawnEggItem.getType(itemStack);
 				addPages("entity_type", getTags(BuiltInRegistries.ENTITY_TYPE, type));
 			} else if (item instanceof BucketItem bucketItem) {
 				addPages("fluid", getTags(BuiltInRegistries.FLUID, Platform.getFluidFromBucket(bucketItem)));
@@ -213,7 +213,7 @@ public final class TooltipEvents {
 				needUpdatePreferredType = false;
 				preferredType = pageTypes.get(pageNow);
 			}
-			boolean showTranslatedTags = KiwiClientConfig.showTranslatedTagsByDefault ^ Screen.hasControlDown();
+			boolean showTranslatedTags = KiwiClientConfig.showTranslatedTagsByDefault ^ SmartKey.hasControlDown();
 			List<String> page = showTranslatedTags ? translatedPages.get(pageNow) : pages.get(pageNow);
 			for (String tag : page) {
 				sub.add(Component.literal(tag).withStyle(ChatFormatting.DARK_GRAY));

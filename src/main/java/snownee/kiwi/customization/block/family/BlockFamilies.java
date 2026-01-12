@@ -17,7 +17,7 @@ import com.google.common.collect.Maps;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.Item;
@@ -32,7 +32,7 @@ import snownee.kiwi.util.resource.OneTimeLoader;
 public class BlockFamilies {
 	private static ImmutableListMultimap<Item, KHolder<BlockFamily>> byItem = ImmutableListMultimap.of();
 	private static ImmutableList<KHolder<BlockFamily>> fromResources = ImmutableList.of();
-	private static ImmutableMap<ResourceLocation, KHolder<BlockFamily>> byId = ImmutableMap.of();
+	private static ImmutableMap<Identifier, KHolder<BlockFamily>> byId = ImmutableMap.of();
 	private static ImmutableListMultimap<Item, KHolder<BlockFamily>> byStonecutterSource = ImmutableListMultimap.of();
 
 	public static Collection<KHolder<BlockFamily>> find(Item item) {
@@ -57,7 +57,7 @@ public class BlockFamilies {
 	}
 
 	public static void reloadResources(ResourceManager resourceManager, OneTimeLoader.Context context) {
-		Map<ResourceLocation, BlockFamily> families = OneTimeLoader.load(resourceManager, "kiwi/family", BlockFamily.DIRECT_CODEC, context);
+		Map<Identifier, BlockFamily> families = OneTimeLoader.load(resourceManager, "kiwi/family", BlockFamily.DIRECT_CODEC, context);
 		fromResources = families.entrySet()
 				.stream()
 				.map(e -> new KHolder<>(e.getKey(), e.getValue()))
@@ -79,7 +79,7 @@ public class BlockFamilies {
 		byItem = ImmutableListMultimap.of();
 		byStonecutterSource = ImmutableListMultimap.of();
 		Collection<KHolder<BlockFamily>> additional = additionalSupplier.get();
-		Map<ResourceLocation, KHolder<BlockFamily>> byIdBuilder = Maps.newHashMapWithExpectedSize(fromResources.size() + additional.size());
+		Map<Identifier, KHolder<BlockFamily>> byIdBuilder = Maps.newHashMapWithExpectedSize(fromResources.size() + additional.size());
 		ImmutableListMultimap.Builder<Item, KHolder<BlockFamily>> byItemBuilder = ImmutableListMultimap.builder();
 		ImmutableListMultimap.Builder<Item, KHolder<BlockFamily>> byStonecutterBuilder = ImmutableListMultimap.builder();
 		for (var family : Iterables.concat(fromResources, additional)) {
@@ -103,7 +103,7 @@ public class BlockFamilies {
 	}
 
 	@Nullable
-	public static BlockFamily get(ResourceLocation id) {
+	public static BlockFamily get(Identifier id) {
 		KHolder<BlockFamily> holder = byId.get(id);
 		return holder == null ? null : holder.value();
 	}
@@ -137,7 +137,7 @@ public class BlockFamilies {
 	}
 
 	@Nullable
-	public static ResourceLocation getKey(BlockFamily family) {
+	public static Identifier getKey(BlockFamily family) {
 		for (KHolder<BlockFamily> holder : all()) {
 			if (holder.value() == family) {
 				return holder.key();

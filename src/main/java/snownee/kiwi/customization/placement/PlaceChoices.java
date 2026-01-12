@@ -18,11 +18,11 @@ import com.google.common.collect.Maps;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.minecraft.advancements.critereon.BlockPredicate;
+import net.minecraft.advancements.criterion.BlockPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -80,15 +80,15 @@ public record PlaceChoices(
 	).apply(instance, PlaceChoices::new));
 
 	public record Preparation(
-			Map<ResourceLocation, PlaceChoices> choices,
+			Map<Identifier, PlaceChoices> choices,
 			Map<KBlockTemplate, KHolder<PlaceChoices>> byTemplate,
-			Map<ResourceLocation, KHolder<PlaceChoices>> byBlock) {
+			Map<Identifier, KHolder<PlaceChoices>> byBlock) {
 		public static Preparation of(
-				Supplier<Map<ResourceLocation, PlaceChoices>> choicesSupplier,
-				Map<ResourceLocation, KBlockTemplate> templates) {
-			Map<ResourceLocation, PlaceChoices> choices = Platform.isDataGen() ? Map.of() : choicesSupplier.get();
+				Supplier<Map<Identifier, PlaceChoices>> choicesSupplier,
+				Map<Identifier, KBlockTemplate> templates) {
+			Map<Identifier, PlaceChoices> choices = Platform.isDataGen() ? Map.of() : choicesSupplier.get();
 			Map<KBlockTemplate, KHolder<PlaceChoices>> byTemplate = Maps.newHashMap();
-			Map<ResourceLocation, KHolder<PlaceChoices>> byBlock = Maps.newHashMap();
+			Map<Identifier, KHolder<PlaceChoices>> byBlock = Maps.newHashMap();
 			for (var entry : choices.entrySet()) {
 				KHolder<PlaceChoices> holder = new KHolder<>(entry.getKey(), entry.getValue());
 				for (PlaceTarget target : holder.value().target) {

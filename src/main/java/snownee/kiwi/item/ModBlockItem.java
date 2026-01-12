@@ -41,7 +41,7 @@ public class ModBlockItem extends BlockItem implements ItemCategoryFiller {
 			@Nullable Player player,
 			ItemStack itemStack,
 			BlockState state) {
-		if (worldIn.isClientSide) {
+		if (worldIn.isClientSide()) {
 			BlockEntity be = worldIn.getBlockEntity(pos);
 			if (be != null && INSTANT_UPDATE_TILES.contains(be.getType())) {
 				CustomData data = itemStack.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY);

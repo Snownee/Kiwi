@@ -15,7 +15,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -23,7 +23,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import snownee.kiwi.Kiwi;
 
 public class AlternativesIngredient implements CustomIngredient {
-	public static final ResourceLocation ID = Kiwi.id("alternatives");
+	public static final Identifier ID = Kiwi.id("alternatives");
 	@Nullable
 	private final List<JsonElement> options;
 	private Ingredient cached;
@@ -85,7 +85,7 @@ public class AlternativesIngredient implements CustomIngredient {
 				Serializer::read);
 
 		@Override
-		public ResourceLocation getIdentifier() {
+		public Identifier getIdentifier() {
 			return ID;
 		}
 

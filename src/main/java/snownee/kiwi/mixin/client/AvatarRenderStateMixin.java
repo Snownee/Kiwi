@@ -2,12 +2,12 @@ package snownee.kiwi.mixin.client;
 
 import org.spongepowered.asm.mixin.Mixin;
 
-import net.minecraft.client.renderer.entity.state.PlayerRenderState;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import snownee.kiwi.contributor.CosmeticRenderState;
 import snownee.kiwi.contributor.client.CosmeticLayer;
 
-@Mixin(PlayerRenderState.class)
-public class PlayerRenderStateMixin implements CosmeticRenderState {
+@Mixin(AvatarRenderState.class)
+public class AvatarRenderStateMixin implements CosmeticRenderState {
 	private CosmeticLayer kiwi$cosmeticLayer;
 
 	@Override

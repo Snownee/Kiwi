@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.CloseableResourceManager;
@@ -48,7 +48,7 @@ public class KiwiPackResourceManager implements CloseableResourceManager {
 		for (PackResources packresources : packs) {
 			ResourceFilterSection resourcefiltersection = this.getPackFilterSection(packresources);
 			Set<String> set = packresources.getNamespaces(PackType.CLIENT_RESOURCES);
-			Predicate<ResourceLocation> predicate = resourcefiltersection != null ? (p_215474_) -> {
+			Predicate<Identifier> predicate = resourcefiltersection != null ? (p_215474_) -> {
 				return resourcefiltersection.isPathFiltered(p_215474_.getPath());
 			} : null;
 
@@ -88,19 +88,19 @@ public class KiwiPackResourceManager implements CloseableResourceManager {
 		return this.namespacedManagers.keySet();
 	}
 
-	public Optional<Resource> getResource(ResourceLocation p_215482_) {
+	public Optional<Resource> getResource(Identifier p_215482_) {
 		ResourceManager resourcemanager = this.namespacedManagers.get(p_215482_.getNamespace());
 		return resourcemanager != null ? resourcemanager.getResource(p_215482_) : Optional.empty();
 	}
 
-	public List<Resource> getResourceStack(ResourceLocation p_215466_) {
+	public List<Resource> getResourceStack(Identifier p_215466_) {
 		ResourceManager resourcemanager = this.namespacedManagers.get(p_215466_.getNamespace());
 		return resourcemanager != null ? resourcemanager.getResourceStack(p_215466_) : List.of();
 	}
 
-	public Map<ResourceLocation, Resource> listResources(String p_215476_, Predicate<ResourceLocation> p_215477_) {
+	public Map<Identifier, Resource> listResources(String p_215476_, Predicate<Identifier> p_215477_) {
 		checkTrailingDirectoryPath(p_215476_);
-		Map<ResourceLocation, Resource> map = new TreeMap<>();
+		Map<Identifier, Resource> map = new TreeMap<>();
 
 		for (FallbackResourceManager fallbackresourcemanager : this.namespacedManagers.values()) {
 			map.putAll(fallbackresourcemanager.listResources(p_215476_, p_215477_));
@@ -109,9 +109,9 @@ public class KiwiPackResourceManager implements CloseableResourceManager {
 		return map;
 	}
 
-	public Map<ResourceLocation, List<Resource>> listResourceStacks(String p_215479_, Predicate<ResourceLocation> p_215480_) {
+	public Map<Identifier, List<Resource>> listResourceStacks(String p_215479_, Predicate<Identifier> p_215480_) {
 		checkTrailingDirectoryPath(p_215479_);
-		Map<ResourceLocation, List<Resource>> map = new TreeMap<>();
+		Map<Identifier, List<Resource>> map = new TreeMap<>();
 
 		for (FallbackResourceManager fallbackresourcemanager : this.namespacedManagers.values()) {
 			map.putAll(fallbackresourcemanager.listResourceStacks(p_215479_, p_215480_));

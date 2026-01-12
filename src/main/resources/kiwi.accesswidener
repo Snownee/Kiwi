@@ -1,4 +1,4 @@
-accessWidener   v2  named
+accessWidener   v2  official
 accessible class net/minecraft/world/level/block/entity/BlockEntityType$BlockEntitySupplier
 
 accessible field net/minecraft/world/item/crafting/ShapedRecipe result Lnet/minecraft/world/item/ItemStack;
@@ -36,8 +36,8 @@ accessible method net/minecraft/world/level/block/entity/BlockEntityType <init> 
 
 accessible field net/minecraft/client/renderer/ItemBlockRenderTypes TYPE_BY_BLOCK Ljava/util/Map;
 
-accessible method net/minecraft/advancements/critereon/BlockPredicate matchesBlockEntity (Lnet/minecraft/world/level/LevelReader;Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/advancements/critereon/NbtPredicate;)Z
-accessible method net/minecraft/advancements/critereon/BlockPredicate matchesComponents (Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/advancements/critereon/DataComponentMatchers;)Z
+accessible method net/minecraft/advancements/criterion/BlockPredicate matchesBlockEntity (Lnet/minecraft/world/level/LevelReader;Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/advancements/criterion/NbtPredicate;)Z
+accessible method net/minecraft/advancements/criterion/BlockPredicate matchesComponents (Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/advancements/criterion/DataComponentMatchers;)Z
 
 accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen hoveredSlot Lnet/minecraft/world/inventory/Slot;
 

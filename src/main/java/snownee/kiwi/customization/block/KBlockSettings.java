@@ -13,8 +13,8 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.LevelReader;
@@ -250,7 +250,7 @@ public class KBlockSettings {
 		}
 
 		public Builder noCollision() {
-			properties.noCollission();
+			properties.noCollision();
 			return this;
 		}
 
@@ -323,6 +323,6 @@ public class KBlockSettings {
 	}
 
 	@Deprecated
-	public record MoreInfo(ResourceLocation shape, ResourceLocation collisionShape, ResourceLocation interactionShape) {
+	public record MoreInfo(Identifier shape, Identifier collisionShape, Identifier interactionShape) {
 	}
 }

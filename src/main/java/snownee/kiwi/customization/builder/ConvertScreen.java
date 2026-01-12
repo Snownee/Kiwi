@@ -27,12 +27,13 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.tooltip.BelowOrAboveWidgetTooltipPositioner;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -44,6 +45,7 @@ import snownee.kiwi.loader.Platform;
 import snownee.kiwi.network.KPacketSender;
 import snownee.kiwi.util.LerpedFloat;
 import snownee.kiwi.util.MultilineTooltip;
+import snownee.kiwi.util.client.SmartKey;
 
 public class ConvertScreen extends Screen {
 	private static @Nullable ConvertScreen lingeringScreen;
@@ -120,8 +122,8 @@ public class ConvertScreen extends Screen {
 						longPress(btn, entry);
 					}
 				};
-				button.onRelease = btn -> {
-					if (!hasControlDown()) {
+				button.onRelease = _ -> {
+					if (!SmartKey.hasControlDown()) {
 						onClose();
 					}
 				};
@@ -182,11 +184,11 @@ public class ConvertScreen extends Screen {
 		setFocused(button);
 		Window window = Objects.requireNonNull(minecraft.getWindow());
 		double scale = window.getGuiScale();
-		GLFW.glfwSetCursorPos(window.getWindow(), (button.getX() + 15) * scale, (button.getY() + 15) * scale);
+		GLFW.glfwSetCursorPos(window.handle(), (button.getX() + 15) * scale, (button.getY() + 15) * scale);
 	}
 
 	private void longPress(ItemButton button, CConvertItemPacket.Entry entry) {
-		boolean convertOne = hasControlDown();
+		boolean convertOne = SmartKey.hasControlDown();
 		if (convertOne) {
 			shortPress(button, entry);
 		} else if ((!inContainer || Objects.requireNonNull(minecraft.player).containerMenu instanceof InventoryMenu) &&
@@ -206,7 +208,7 @@ public class ConvertScreen extends Screen {
 		LocalPlayer player = Objects.requireNonNull(minecraft.player);
 		boolean creative = player.isCreative();
 		ItemStack sourceItem = getSourceItem();
-		boolean convertOne = hasControlDown();
+		boolean convertOne = SmartKey.hasControlDown();
 		if (convertOne) {
 			if (!creative && sourceItem.getCount() <= 1) {
 				onClose();
@@ -262,14 +264,14 @@ public class ConvertScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
-		if (super.mouseClicked(pMouseX, pMouseY, pButton)) {
+	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+		if (super.mouseClicked(event, doubleClick)) {
 			return true;
 		}
-		if (pButton == 0) {
+		if (event.button() == 0) {
 			Rect2i bounds = layout.bounds();
 			Rect2i tolerance = new Rect2i(bounds.getX() - 10, bounds.getY() - 10, bounds.getWidth() + 20, bounds.getHeight() + 20);
-			if (!tolerance.contains((int) pMouseX, (int) pMouseY)) {
+			if (!tolerance.contains((int) event.x(), (int) event.y())) {
 				onClose();
 				return true;
 			}
@@ -319,7 +321,7 @@ public class ConvertScreen extends Screen {
 			Rect2i bounds = layout.bounds();
 			pGuiGraphics.blitSprite(
 					RenderPipelines.GUI_TEXTURED,
-					ResourceLocation.withDefaultNamespace("recipe_book/overlay_recipe"),
+					Identifier.withDefaultNamespace("recipe_book/overlay_recipe"),
 					bounds.getX() - 2,
 					bounds.getY() - 2,
 					bounds.getWidth() + 3,
@@ -349,7 +351,7 @@ public class ConvertScreen extends Screen {
 		lingeringScreen = this;
 		super.onClose();
 		if (inContainer) {
-			GLFW.glfwSetCursorPos(minecraft.getWindow().getWindow(), originalMousePos.x, originalMousePos.y);
+			GLFW.glfwSetCursorPos(minecraft.getWindow().handle(), originalMousePos.x, originalMousePos.y);
 		}
 	}
 

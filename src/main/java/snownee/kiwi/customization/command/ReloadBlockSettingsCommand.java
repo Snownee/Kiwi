@@ -35,7 +35,7 @@ public class ReloadBlockSettingsCommand {
 		stopwatch.reset().start();
 		Set<Block> set = Sets.newHashSet();
 		BuiltInRegistries.BLOCK.listElements().forEach(holder -> {
-			KBlockDefinition definition = fundamentals.blocks().get(holder.key().location());
+			KBlockDefinition definition = fundamentals.blocks().get(holder.key().identifier());
 			if (definition == null || !set.add(holder.value())) {
 				return;
 			}

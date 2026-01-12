@@ -16,7 +16,7 @@ import net.fabricmc.fabric.impl.object.builder.ExtendedBlockEntityType;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.CreativeModeTab;
@@ -40,7 +40,7 @@ import snownee.kiwi.util.KiwiTabBuilder;
 public abstract class AbstractModule {
 	private static final StackWalker STACK_WALKER = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
 	protected final Map<ResourceKey<? extends Registry<?>>, BiConsumer<KiwiModuleContainer, KiwiGO<?>>> decorators = Maps.newIdentityHashMap();
-	public @Nullable ResourceLocation uid;
+	public @Nullable Identifier uid;
 
 	protected static <T> KiwiGO<T> go(Supplier<? extends T> factory) {
 		//noinspection unchecked
@@ -114,7 +114,7 @@ public abstract class AbstractModule {
 		return go(() -> new InheritanceBlockEntityType<>(factory, blockClass, onlyOpCanSetNbt));
 	}
 
-	public static CreativeModeTab.Builder itemCategory(ResourceLocation id, Supplier<ItemStack> icon) {
+	public static CreativeModeTab.Builder itemCategory(Identifier id, Supplier<ItemStack> icon) {
 		return new KiwiTabBuilder(id).icon(icon);
 	}
 
@@ -135,7 +135,7 @@ public abstract class AbstractModule {
 	}
 
 	public static <T> TagKey<T> tag(ResourceKey<? extends Registry<T>> registryKey, String namespace, String path) {
-		return TagKey.create(registryKey, ResourceLocation.fromNamespaceAndPath(namespace, path));
+		return TagKey.create(registryKey, Identifier.fromNamespaceAndPath(namespace, path));
 	}
 
 	public static TagKey<Item> itemTag(String id) {
@@ -155,9 +155,9 @@ public abstract class AbstractModule {
 	}
 
 	public static <T> TagKey<T> tag(ResourceKey<? extends Registry<T>> registryKey, String id) {
-		ResourceLocation location;
+		Identifier location;
 		if (id.contains(":")) {
-			location = ResourceLocation.parse(id);
+			location = Identifier.parse(id);
 		} else {
 			Class<?> callerClass = STACK_WALKER.walk(stream -> stream
 					.map(StackWalker.StackFrame::getDeclaringClass)
@@ -171,7 +171,7 @@ public abstract class AbstractModule {
 			if (annotation == null || annotation.modId().isEmpty()) {
 				throw new IllegalStateException("No KiwiModule modId found on " + callerClass.getName());
 			}
-			location = ResourceLocation.fromNamespaceAndPath(annotation.modId(), id);
+			location = Identifier.fromNamespaceAndPath(annotation.modId(), id);
 		}
 		return TagKey.create(registryKey, location);
 	}
@@ -191,8 +191,8 @@ public abstract class AbstractModule {
 		// NO-OP
 	}
 
-	public ResourceLocation id(String path) {
-		return ResourceLocation.fromNamespaceAndPath(Objects.requireNonNull(uid).getNamespace(), path);
+	public Identifier id(String path) {
+		return Identifier.fromNamespaceAndPath(Objects.requireNonNull(uid).getNamespace(), path);
 	}
 
 	public KiwiModuleContainer container() {

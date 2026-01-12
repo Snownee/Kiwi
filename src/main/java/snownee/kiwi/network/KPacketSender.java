@@ -42,7 +42,7 @@ public final class KPacketSender {
 	}
 
 	public static void sendToWorld(CustomPacketPayload payload, ServerLevel level) {
-		send(payload, PlayerLookup.world(level).stream());
+		send(payload, PlayerLookup.level(level).stream());
 	}
 
 	public static void sendToAll(CustomPacketPayload payload, MinecraftServer server) {

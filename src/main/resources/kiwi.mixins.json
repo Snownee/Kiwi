@@ -14,8 +14,8 @@
 		"customization.BlockPropertiesMixin",
 		"customization.BlockStateMixin",
 		"customization.BuiltInRegistriesMixin",
-		"customization.VegetationBlockMixin",
 		"customization.HalfTransparentBlockMixin",
+		"customization.VegetationBlockMixin",
 		"customization.fabric.PackRepositoryMixin",
 		"customization.family.RecipeManagerMixin",
 		"customization.placement.BlockItemGetPlacementStateMixin",
@@ -28,6 +28,7 @@
 		"customization.sit.EntityMixin"
 	],
 	"client": [
+		"client.AvatarRenderStateMixin",
 		"client.ClientPacketListenerMixin",
 		"client.ClientTelemetryManagerMixin",
 		"client.CreativeModeInventoryScreenMixin",
@@ -36,7 +37,6 @@
 		"client.LavaFogEnvironmentMixin",
 		"client.LoadingOverlayMixin",
 		"client.OptionInstanceMixin",
-		"client.PlayerRenderStateMixin",
 		"client.RenderLayerAccess",
 		"client.ScreenEffectRendererMixin",
 		"client.ScreenMixin",

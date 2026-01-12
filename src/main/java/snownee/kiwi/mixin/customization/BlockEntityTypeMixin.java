@@ -14,7 +14,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 
 import javax.annotation.Nullable;
 import net.minecraft.core.Holder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import snownee.kiwi.customization.CustomizationHooks;
@@ -54,7 +54,7 @@ public abstract class BlockEntityTypeMixin {
 			if (reference == null) {
 				return false;
 			}
-			ResourceLocation key = reference.key().location();
+			Identifier key = reference.key().identifier();
 			lenient = CustomizationHooks.getLenientBETypeNamespaces().contains(key.getNamespace());
 		}
 		if (lenient == Boolean.FALSE) {

@@ -6,11 +6,10 @@ import java.util.function.Function;
 import com.mojang.blaze3d.platform.InputConstants;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
-import net.minecraft.client.renderer.entity.state.PlayerRenderState;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.resources.Identifier;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiClientConfig;
@@ -27,6 +26,7 @@ import snownee.kiwi.contributor.network.SSyncCosmeticPacket;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.network.KPacketSender;
 import snownee.kiwi.util.KUtil;
+import snownee.kiwi.util.client.SmartKey;
 
 public class ContributorsClient extends AbstractModule {
 
@@ -38,8 +38,8 @@ public class ContributorsClient extends AbstractModule {
 		registerRenderer("sunny_milk", SunnyMilkLayer::new);
 	}
 
-	private static void registerRenderer(String id, Function<RenderLayerParent<PlayerRenderState, PlayerModel>, CosmeticLayer> creator) {
-		CosmeticLayer.registerRenderer(ResourceLocation.fromNamespaceAndPath("snownee", id), creator);
+	private static void registerRenderer(String id, Function<RenderLayerParent<AvatarRenderState, PlayerModel>, CosmeticLayer> creator) {
+		CosmeticLayer.registerRenderer(Identifier.fromNamespaceAndPath("snownee", id), creator);
 	}
 
 	private static int hold;
@@ -48,8 +48,8 @@ public class ContributorsClient extends AbstractModule {
 		if (!KiwiClientConfig.cosmeticScreenKeybind || mc.screen != null || mc.player == null || !mc.isWindowActive()) {
 			return;
 		}
-		boolean K = InputConstants.isKeyDown(mc.getWindow().getWindow(), InputConstants.KEY_K);
-		if (!K || Screen.hasAltDown() || Screen.hasControlDown() || Screen.hasShiftDown()) {
+		boolean K = InputConstants.isKeyDown(mc.getWindow(), InputConstants.KEY_K);
+		if (!K || SmartKey.hasAltDown() || SmartKey.hasControlDown() || SmartKey.hasShiftDown()) {
 			hold = 0;
 			return;
 		}
@@ -60,11 +60,11 @@ public class ContributorsClient extends AbstractModule {
 	}
 
 	public static void changeCosmetic() {
-		ResourceLocation id = KUtil.RL(KiwiClientConfig.contributorCosmetic);
+		Identifier id = KUtil.RL(KiwiClientConfig.contributorCosmetic);
 		if (id != null && id.getPath().isEmpty()) {
 			id = null;
 		}
-		ResourceLocation cosmetic = id;
+		Identifier cosmetic = id;
 		Contributors.canPlayerUseCosmetic(getSelfName(), cosmetic).thenAccept(bl -> {
 			if (!bl) {
 				ConfigHandler cfg = KiwiConfigManager.getHandler(KiwiClientConfig.class);

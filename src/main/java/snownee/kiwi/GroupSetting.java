@@ -10,11 +10,11 @@ import java.util.stream.Stream;
 
 import com.google.common.collect.Lists;
 
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -57,11 +57,11 @@ public class GroupSetting {
 					if (tab != null) {
 						return tab;
 					}
-					return ResourceKey.create(Registries.CREATIVE_MODE_TAB, ResourceLocation.parse($));
+					return ResourceKey.create(Registries.CREATIVE_MODE_TAB, Identifier.parse($));
 				})
 				.toList();
 		for (ResourceKey<CreativeModeTab> tabKey : tabKeys) {
-			ItemGroupEvents.modifyEntriesEvent(tabKey).register(entries -> {
+			CreativeModeTabEvents.modifyOutputEvent(tabKey).register(entries -> {
 				List<ItemStack> items = Lists.newArrayList();
 				for (ItemCategoryFiller filler : fillers) {
 					CreativeModeTab tab = BuiltInRegistries.CREATIVE_MODE_TAB.getValue(tabKey);
@@ -71,7 +71,7 @@ public class GroupSetting {
 
 				if (after != null) {
 					Set<Item> afterItems = Stream.of(after)
-							.map(ResourceLocation::tryParse)
+							.map(Identifier::tryParse)
 							.filter(Objects::nonNull)
 							.map(BuiltInRegistries.ITEM::getValue)
 							.filter(Predicate.not(Items.AIR::equals))

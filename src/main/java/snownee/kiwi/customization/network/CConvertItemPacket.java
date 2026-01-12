@@ -18,7 +18,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -94,7 +94,7 @@ public record CConvertItemPacket(
 				Item item = from;
 				int index = 0;
 				float ratio = 1;
-				for (Pair<ResourceLocation, Item> step : steps) {
+				for (Pair<Identifier, Item> step : steps) {
 					BlockFamily family = BlockFamilies.get(step.getFirst());
 					if (family == null || !family.switchAttrs().enabled() || !family.contains(item) || !family.contains(step.getSecond())) {
 						return;
@@ -292,9 +292,9 @@ public record CConvertItemPacket(
 		}
 	}
 
-	public record Entry(float ratio, List<Pair<ResourceLocation, Item>> steps) {
-		public static final StreamCodec<RegistryFriendlyByteBuf, Pair<ResourceLocation, Item>> ENTRY_PAIR_STREAM_CODEC = StreamCodec.composite(
-				ResourceLocation.STREAM_CODEC, Pair::getFirst,
+	public record Entry(float ratio, List<Pair<Identifier, Item>> steps) {
+		public static final StreamCodec<RegistryFriendlyByteBuf, Pair<Identifier, Item>> ENTRY_PAIR_STREAM_CODEC = StreamCodec.composite(
+				Identifier.STREAM_CODEC, Pair::getFirst,
 				ByteBufCodecs.registry(Registries.ITEM), Pair::getSecond,
 				Pair::of);
 

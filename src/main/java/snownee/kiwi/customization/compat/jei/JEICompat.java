@@ -10,7 +10,7 @@ import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.registration.IRecipeRegistration;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
 import snownee.kiwi.Kiwi;
@@ -23,10 +23,10 @@ import snownee.kiwi.util.KHolder;
 @JeiPlugin
 @REIPluginCompatIgnore
 public class JEICompat implements IModPlugin {
-	public static final ResourceLocation ID = Kiwi.id("customization");
+	public static final Identifier ID = Kiwi.id("customization");
 
 	@Override
-	public ResourceLocation getPluginUid() {
+	public Identifier getPluginUid() {
 		return ID;
 	}
 

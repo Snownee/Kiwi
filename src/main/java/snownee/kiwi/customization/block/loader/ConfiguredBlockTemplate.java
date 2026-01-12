@@ -9,7 +9,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.KeyDispatchCodec;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 import snownee.kiwi.util.codec.CustomizationCodecs;
 
@@ -25,7 +25,7 @@ public record ConfiguredBlockTemplate(KBlockTemplate template, JsonObject json) 
 		this(template, DEFAULT_JSON);
 	}
 
-	public static Codec<ConfiguredBlockTemplate> codec(Map<ResourceLocation, KBlockTemplate> templates) {
+	public static Codec<ConfiguredBlockTemplate> codec(Map<Identifier, KBlockTemplate> templates) {
 		Function<ConfiguredBlockTemplate, DataResult<KBlockTemplate>> type = $ -> DataResult.success($.template());
 		Function<KBlockTemplate, DataResult<MapCodec<ConfiguredBlockTemplate>>> codec = $ -> DataResult.success(MapCodec.assumeMapUnsafe(
 				ExtraCodecs.JSON).flatXmap(
@@ -39,7 +39,7 @@ public record ConfiguredBlockTemplate(KBlockTemplate template, JsonObject json) 
 				type,
 				codec
 		).codec();
-		Codec<ConfiguredBlockTemplate> codec2 = ResourceLocation.CODEC.flatXmap(
+		Codec<ConfiguredBlockTemplate> codec2 = Identifier.CODEC.flatXmap(
 				id -> {
 					KBlockTemplate template = templates.get(id);
 					if (template == null) {

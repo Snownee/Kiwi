@@ -6,8 +6,8 @@ import java.util.Objects;
 import com.google.common.collect.Lists;
 
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -38,7 +38,7 @@ public class StonecutterRecipeMaker {
 		if (input.isEmpty()) {
 			return List.of();
 		}
-		ResourceLocation prefix = holder.key().withPath("/stonecutter/%s".formatted(holder.key().getPath()));
+		Identifier prefix = holder.key().withPath("/stonecutter/%s".formatted(holder.key().getPath()));
 		List<RecipeHolder<StonecutterRecipe>> recipes = Lists.newArrayList();
 		recipes.addAll(family.items().map(item -> {
 			int count = Mth.floor(1 / BlockFamilies.getConvertRatio(item));
@@ -46,7 +46,7 @@ public class StonecutterRecipeMaker {
 				return null;
 			}
 			ItemStack itemStack = new ItemStack(item, count);
-			ResourceLocation itemKey = itemStack.getItemHolder().unwrapKey().orElseThrow().location();
+			Identifier itemKey = itemStack.typeHolder().unwrapKey().orElseThrow().identifier();
 			var recipeId = prefix.withSuffix("/%s/%s".formatted(itemKey.getNamespace(), itemKey.getPath()));
 			var recipe = new StonecutterRecipe(prefix.toString(), input, itemStack);
 			return new RecipeHolder<>(ResourceKey.create(Registries.RECIPE, recipeId), recipe);
@@ -59,7 +59,7 @@ public class StonecutterRecipeMaker {
 					return null;
 				}
 				ItemStack itemStack = new ItemStack(item, count);
-				ResourceLocation itemKey = itemStack.getItemHolder().unwrapKey().orElseThrow().location();
+				Identifier itemKey = itemStack.typeHolder().unwrapKey().orElseThrow().identifier();
 				var recipeId = prefix.withSuffix("/%s/%s/from".formatted(itemKey.getNamespace(), itemKey.getPath()));
 				var recipe = new StonecutterRecipe(prefix.toString(), ingredient, itemStack);
 				return new RecipeHolder<>(ResourceKey.create(Registries.RECIPE, recipeId), recipe);

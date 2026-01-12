@@ -4,7 +4,7 @@ package snownee.kiwi.recipe;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.common.crafting.conditions.IConditionSerializer;
@@ -12,7 +12,7 @@ import snownee.kiwi.Kiwi;
 
 public class TryParseCondition implements ICondition {
 
-	private static final ResourceLocation NAME = new ResourceLocation(Kiwi.MODID, "try_parse");
+	private static final Identifier NAME = new Identifier(Kiwi.MODID, "try_parse");
 
 	private final JsonElement e;
 
@@ -21,7 +21,7 @@ public class TryParseCondition implements ICondition {
 	}
 
 	@Override
-	public ResourceLocation getID() {
+	public Identifier getID() {
 		return NAME;
 	}
 
@@ -49,7 +49,7 @@ public class TryParseCondition implements ICondition {
 		}
 
 		@Override
-		public ResourceLocation getID() {
+		public Identifier getID() {
 			return NAME;
 		}
 

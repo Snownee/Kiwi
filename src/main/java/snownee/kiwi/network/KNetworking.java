@@ -21,17 +21,19 @@ public final class KNetworking {
 			KiwiPacket.Direction direction) {
 		Preconditions.checkArgument(direction != KiwiPacket.Direction.AUTO, "Direction must be specified");
 		if (direction == KiwiPacket.Direction.TO_CLIENT) {
-			PayloadTypeRegistry.playS2C().register(type, handler.streamCodec());
+			PayloadTypeRegistry.clientboundPlay().register(type, handler.streamCodec());
 			if (Platform.isPhysicalClient()) {
-				ClientPlayNetworking.registerGlobalReceiver(type, (payload, context) -> {
-					handler.handle(payload, context.client()::execute);
-				});
+				ClientPlayNetworking.registerGlobalReceiver(
+						type, (payload, context) -> {
+							handler.handle(payload, context.client()::execute);
+						});
 			}
 		} else if (direction == KiwiPacket.Direction.TO_SERVER) {
-			PayloadTypeRegistry.playC2S().register(type, handler.streamCodec());
-			ServerPlayNetworking.registerGlobalReceiver(type, (payload, context) -> {
-				handler.handle(payload, (ServerPayloadContext) context::player);
-			});
+			PayloadTypeRegistry.serverboundPlay().register(type, handler.streamCodec());
+			ServerPlayNetworking.registerGlobalReceiver(
+					type, (payload, context) -> {
+						handler.handle(payload, (ServerPayloadContext) context::player);
+					});
 		}
 	}
 

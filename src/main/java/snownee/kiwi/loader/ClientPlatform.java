@@ -5,13 +5,14 @@ import java.util.Locale;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
-import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
+import net.fabricmc.fabric.api.client.particle.v1.ParticleProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.core.particles.ParticleOptions;
@@ -45,14 +46,14 @@ public final class ClientPlatform {
 		EntityRendererRegistry.register(entityType, entityRendererFactory);
 	}
 
-	public static <T extends BlockEntity> void registerBlockEntityRenderer(
+	public static <T extends BlockEntity, S extends BlockEntityRenderState> void registerBlockEntityRenderer(
 			BlockEntityType<? extends T> blockEntityType,
-			BlockEntityRendererProvider<T> blockEntityRendererProvider) {
+			BlockEntityRendererProvider<T, S> blockEntityRendererProvider) {
 		BlockEntityRenderers.register(blockEntityType, blockEntityRendererProvider);
 	}
 
 	public static <T extends ParticleOptions> void registerParticleType(ParticleType<T> type, ParticleProvider<T> factory) {
-		ParticleFactoryRegistry.getInstance().register(type, factory);
+		ParticleProviderRegistry.getInstance().register(type, factory);
 	}
 
 	public static void setRenderType(Block block, ChunkSectionLayer layer) {

@@ -12,17 +12,17 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import snownee.kiwi.util.resource.OneTimeLoader;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public final class BuiltInItemTemplate extends KItemTemplate {
 	public static final ThreadLocal<Item.Properties> PROPERTIES_INJECTOR = new ThreadLocal<>();
-	private final Optional<ResourceLocation> key;
+	private final Optional<Identifier> key;
 	private @Nullable MapCodec<Item> codec;
 
-	public BuiltInItemTemplate(Optional<ItemDefinitionProperties> properties, Optional<ResourceLocation> key) {
+	public BuiltInItemTemplate(Optional<ItemDefinitionProperties> properties, Optional<Identifier> key) {
 		super(properties);
 		this.key = key;
 	}
@@ -30,7 +30,7 @@ public final class BuiltInItemTemplate extends KItemTemplate {
 	public static MapCodec<BuiltInItemTemplate> directCodec() {
 		return RecordCodecBuilder.mapCodec(instance -> instance.group(
 				ItemDefinitionProperties.mapCodecField().forGetter(BuiltInItemTemplate::properties),
-				ResourceLocation.CODEC.optionalFieldOf("codec").forGetter(BuiltInItemTemplate::key)
+				Identifier.CODEC.optionalFieldOf("codec").forGetter(BuiltInItemTemplate::key)
 		).apply(instance, BuiltInItemTemplate::new));
 	}
 
@@ -40,7 +40,7 @@ public final class BuiltInItemTemplate extends KItemTemplate {
 	}
 
 	@Override
-	public void resolve(ResourceLocation key, OneTimeLoader.Context context) {
+	public void resolve(Identifier key, OneTimeLoader.Context context) {
 		codec = ItemCodecs.get(this.key.orElse(key));
 	}
 
@@ -59,7 +59,7 @@ public final class BuiltInItemTemplate extends KItemTemplate {
 		return result.result().orElseThrow();
 	}
 
-	public Optional<ResourceLocation> key() {
+	public Optional<Identifier> key() {
 		return key;
 	}
 

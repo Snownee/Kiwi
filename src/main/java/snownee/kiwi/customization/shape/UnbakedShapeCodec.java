@@ -18,7 +18,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapLike;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -40,7 +40,7 @@ public class UnbakedShapeCodec implements Codec<UnbakedShape> {
 			Map.entry("caused_by", BooleanOp.CAUSED_BY));
 
 	private final Map<String, Codec<? extends UnbakedShape>> typedCodecMap;
-	private final Map<ResourceLocation, ShapeRef> refInterner = Maps.newHashMap();
+	private final Map<Identifier, ShapeRef> refInterner = Maps.newHashMap();
 
 	public UnbakedShapeCodec() {
 		typedCodecMap = Map.ofEntries(
@@ -101,8 +101,8 @@ public class UnbakedShapeCodec implements Codec<UnbakedShape> {
 			throw new IllegalArgumentException("Empty shape string");
 		}
 		// blame mods that modify the vanilla rules (OptiFine, AAA Particles)
-		if (ResourceLocation.tryParse(s) != null && s.indexOf('(') == -1 && s.indexOf(',') == -1) {
-			return refInterner.computeIfAbsent(ResourceLocation.parse(s), ShapeRef::new);
+		if (Identifier.tryParse(s) != null && s.indexOf('(') == -1 && s.indexOf(',') == -1) {
+			return refInterner.computeIfAbsent(Identifier.parse(s), ShapeRef::new);
 		}
 		return new UnbakedShape.Inlined(recursiveDecodeVoxelShape(s));
 	}

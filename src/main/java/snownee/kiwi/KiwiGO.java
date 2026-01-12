@@ -11,8 +11,8 @@ import org.jetbrains.annotations.Nullable;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -51,7 +51,7 @@ public class KiwiGO<T> implements Supplier<T> {
 	}
 
 	@Nullable
-	public T preRegister(ResourceLocation id) {
+	public T preRegister(Identifier id) {
 		getOrCreate();
 		ResourceKey<? extends Registry<?>> registryKey = findRegistry();
 		//noinspection unchecked,rawtypes
@@ -106,8 +106,8 @@ public class KiwiGO<T> implements Supplier<T> {
 		return stack;
 	}
 
-	public ResourceLocation key() {
-		return resourceKey().location();
+	public Identifier key() {
+		return resourceKey().identifier();
 	}
 
 	public ResourceKey<T> resourceKey() {
@@ -188,7 +188,7 @@ public class KiwiGO<T> implements Supplier<T> {
 
 		@Override
 		@Nullable
-		public T preRegister(ResourceLocation id) {
+		public T preRegister(Identifier id) {
 			//noinspection unchecked
 			setKey(ResourceKey.create((ResourceKey<? extends Registry<T>>) registryKey, id));
 			return null;

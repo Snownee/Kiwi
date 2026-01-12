@@ -9,18 +9,18 @@ import org.joml.Matrix4f;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.debug.DebugRenderer;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Util;
+import net.minecraft.util.debug.DebugValueAccess;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -44,7 +44,7 @@ public class BuilderModePreview implements DebugRenderer.SimpleDebugRenderer {
 	private long lastUpdateTime;
 
 	@Override
-	public void render(PoseStack pPoseStack, MultiBufferSource pBuffer, double pCamX, double pCamY, double pCamZ) {
+	public void emitGizmos(double camX, double camY, double camZ, DebugValueAccess debugValues, Frustum frustum, float partialTicks) {
 		Minecraft mc = Minecraft.getInstance();
 		if (!BuildersButton.isBuilderModeOn() || !(mc.hitResult instanceof BlockHitResult hitResult) ||
 				mc.hitResult.getType() == HitResult.Type.MISS) {
@@ -72,7 +72,7 @@ public class BuilderModePreview implements DebugRenderer.SimpleDebugRenderer {
 		for (Map.Entry<Direction, Collection<AABB>> entry : faces.asMap().entrySet()) {
 			Direction direction = entry.getKey();
 			for (AABB aabb : entry.getValue()) {
-				aabb = aabb.move(-pCamX, -pCamY, -pCamZ);
+				aabb = aabb.move(-camX, -camY, -camZ);
 				drawFace(pose, vertexconsumer, aabb, direction, r, g, b, a);
 			}
 		}

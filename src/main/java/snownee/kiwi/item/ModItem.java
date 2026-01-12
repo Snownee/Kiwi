@@ -7,12 +7,12 @@ import com.google.common.collect.Lists;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import snownee.kiwi.util.client.SmartKey;
 
 public class ModItem extends Item {
 	public ModItem(Properties builder) {
@@ -25,8 +25,8 @@ public class ModItem extends Item {
 			return;
 		}
 		String key;
-		boolean shift = Screen.hasShiftDown();
-		boolean ctrl = Screen.hasControlDown();
+		boolean shift = SmartKey.hasShiftDown();
+		boolean ctrl = SmartKey.hasControlDown();
 		String descriptionId = stack.getItem().getDescriptionId();
 		if (shift == ctrl) {
 			key = descriptionId + ".tip";

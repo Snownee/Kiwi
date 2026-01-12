@@ -14,13 +14,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import snownee.kiwi.util.NotNullByDefault;
 
 /**
  * Base BlockEntity skeleton used by all BlockEntity. It contains several standardized
  * implementations regarding networking.
  */
-@NotNullByDefault
 public abstract class ModBlockEntity extends BlockEntity {
 	public boolean persistData = false;
 
@@ -60,7 +58,7 @@ public abstract class ModBlockEntity extends BlockEntity {
 	protected abstract void writePacketData(ValueOutput valueOutput);
 
 	public void refresh() {
-		if (hasLevel() && !level.isClientSide) {
+		if (hasLevel() && !level.isClientSide()) {
 			BlockState state = getBlockState();
 			level.sendBlockUpdated(worldPosition, state, state, 11);
 			setChanged();

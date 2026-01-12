@@ -58,7 +58,7 @@ public record CycleVariantsComponent(
 	@Override
 	public BlockState getStateForPlacement(KBlockSettings settings, BlockState state, BlockPlaceContext context) {
 		if (onPlace.isPresent() && "randomize".equals(onPlace.get())) {
-			int randomValue = context.getLevel().random.nextInt(maxValue() - minValue() + 1) + minValue();
+			int randomValue = context.getLevel().getRandom().nextInt(maxValue() - minValue() + 1) + minValue();
 			state = state.setValue(property, randomValue);
 		}
 		return state;

@@ -55,7 +55,7 @@ import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.numbers.NumberFormatType;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.sounds.SoundEvent;
@@ -68,10 +68,7 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
-import net.minecraft.world.entity.npc.VillagerProfession;
-import net.minecraft.world.entity.npc.VillagerType;
 import net.minecraft.world.entity.schedule.Activity;
-import net.minecraft.world.entity.schedule.Schedule;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -110,12 +107,6 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProc
 import net.minecraft.world.level.levelgen.structure.templatesystem.rule.blockentity.RuleBlockEntityModifierType;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.saveddata.maps.MapDecorationType;
-import net.minecraft.world.level.storage.loot.entries.LootPoolEntryType;
-import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
-import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
-import net.minecraft.world.level.storage.loot.providers.nbt.LootNbtProviderType;
-import net.minecraft.world.level.storage.loot.providers.number.LootNumberProviderType;
-import net.minecraft.world.level.storage.loot.providers.score.LootScoreProviderType;
 import snownee.kiwi.build.KiwiMetadata;
 import snownee.kiwi.build.KiwiMetadataParser;
 import snownee.kiwi.command.KiwiCommand;
@@ -129,6 +120,7 @@ import snownee.kiwi.loader.Platform;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.loader.event.PostInitEvent;
 import snownee.kiwi.network.KNetworking;
+import snownee.kiwi.test.RegistryNameScanner;
 import snownee.kiwi.util.KUtil;
 import snownee.kiwi.util.toposort.TopologicalSort;
 
@@ -139,15 +131,15 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 	static final Marker MARKER = MarkerFactory.getMarker("INIT");
 	private static final Map<String, ResourceKey<CreativeModeTab>> GROUPS = Maps.newHashMap();
 	public static final Logger LOGGER = LogUtils.getLogger();
-	public static Map<ResourceLocation, Boolean> defaultOptions = Maps.newHashMap();
+	public static Map<Identifier, Boolean> defaultOptions = Maps.newHashMap();
 	public static MinecraftServer currentServer;
 	private static Multimap<String, KiwiAnnotationData> moduleData = ArrayListMultimap.create();
 	private static Map<KiwiAnnotationData, String> conditions = Maps.newHashMap();
 	public static boolean enableDataModule;
 	private static boolean initialized;
 
-	public static ResourceLocation id(String path) {
-		return ResourceLocation.fromNamespaceAndPath(ID, path);
+	public static Identifier id(String path) {
+		return Identifier.fromNamespaceAndPath(ID, path);
 	}
 
 	private static boolean shouldLoad(KiwiAnnotationData annotationData, String dist) {
@@ -184,76 +176,10 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 	}
 
 	private static void registerRegistries() throws Exception {
-//		if (!Platform.isProduction()) {
-//			RegistryNameScanner.run();
-//		}
+		if (!Platform.isProduction()) {
+			RegistryNameScanner.run();
+		}
 
-		registerRegistry(Registries.ACTIVITY, Activity.class);
-		registerRegistry(Registries.ATTRIBUTE, Attribute.class);
-		registerRegistry(Registries.BLOCK_ENTITY_TYPE, BlockEntityType.class);
-		registerRegistry(Registries.BLOCK_PREDICATE_TYPE, BlockPredicateType.class);
-		registerRegistry(Registries.BLOCK_STATE_PROVIDER_TYPE, BlockStateProviderType.class);
-		registerRegistry(Registries.BLOCK, Block.class);
-		registerRegistry(Registries.CARVER, WorldCarver.class);
-		registerRegistry(Registries.CHUNK_STATUS, ChunkStatus.class);
-		registerRegistry(Registries.COMMAND_ARGUMENT_TYPE, ArgumentTypeInfo.class);
-		registerRegistry(Registries.CONSUME_EFFECT_TYPE, ConsumeEffect.Type.class);
-		registerRegistry(Registries.CREATIVE_MODE_TAB, CreativeModeTab.class);
-		registerRegistry(Registries.DATA_COMPONENT_PREDICATE_TYPE, DataComponentPredicate.Type.class);
-		registerRegistry(Registries.DATA_COMPONENT_TYPE, DataComponentType.class);
-		registerRegistry(Registries.DECORATED_POT_PATTERN, DecoratedPotPattern.class);
-		registerRegistry(Registries.ENCHANTMENT_EFFECT_COMPONENT_TYPE, DataComponentType.class);
-		registerRegistry(Registries.ENTITY_TYPE, EntityType.class);
-		registerRegistry(Registries.FEATURE_SIZE_TYPE, FeatureSizeType.class);
-		registerRegistry(Registries.FEATURE, Feature.class);
-		registerRegistry(Registries.FLOAT_PROVIDER_TYPE, FloatProviderType.class);
-		registerRegistry(Registries.FLUID, Fluid.class);
-		registerRegistry(Registries.FOLIAGE_PLACER_TYPE, FoliagePlacerType.class);
-		registerRegistry(Registries.GAME_EVENT, GameEvent.class);
-		registerRegistry(Registries.HEIGHT_PROVIDER_TYPE, HeightProviderType.class);
-		registerRegistry(Registries.INT_PROVIDER_TYPE, IntProviderType.class);
-		registerRegistry(Registries.ITEM, Item.class);
-		registerRegistry(Registries.LOOT_CONDITION_TYPE, LootItemConditionType.class);
-		registerRegistry(Registries.LOOT_FUNCTION_TYPE, LootItemFunctionType.class);
-		registerRegistry(Registries.LOOT_NBT_PROVIDER_TYPE, LootNbtProviderType.class);
-		registerRegistry(Registries.LOOT_NUMBER_PROVIDER_TYPE, LootNumberProviderType.class);
-		registerRegistry(Registries.LOOT_POOL_ENTRY_TYPE, LootPoolEntryType.class);
-		registerRegistry(Registries.LOOT_SCORE_PROVIDER_TYPE, LootScoreProviderType.class);
-		registerRegistry(Registries.MAP_DECORATION_TYPE, MapDecorationType.class);
-		registerRegistry(Registries.MEMORY_MODULE_TYPE, MemoryModuleType.class);
-		registerRegistry(Registries.MENU, MenuType.class);
-		registerRegistry(Registries.MOB_EFFECT, MobEffect.class);
-		registerRegistry(Registries.NUMBER_FORMAT_TYPE, NumberFormatType.class);
-		registerRegistry(Registries.PARTICLE_TYPE, ParticleType.class);
-		registerRegistry(Registries.PLACEMENT_MODIFIER_TYPE, PlacementModifierType.class);
-		registerRegistry(Registries.POINT_OF_INTEREST_TYPE, PoiType.class);
-		registerRegistry(Registries.POSITION_SOURCE_TYPE, PositionSourceType.class);
-		registerRegistry(Registries.POS_RULE_TEST, PosRuleTestType.class);
-		registerRegistry(Registries.POTION, Potion.class);
-		registerRegistry(Registries.RECIPE_BOOK_CATEGORY, RecipeBookCategory.class);
-		registerRegistry(Registries.RECIPE_DISPLAY, RecipeDisplay.Type.class);
-		registerRegistry(Registries.RECIPE_SERIALIZER, RecipeSerializer.class);
-		registerRegistry(Registries.RECIPE_TYPE, RecipeType.class);
-		registerRegistry(Registries.ROOT_PLACER_TYPE, RootPlacerType.class);
-		registerRegistry(Registries.RULE_BLOCK_ENTITY_MODIFIER, RuleBlockEntityModifierType.class);
-		registerRegistry(Registries.RULE_TEST, RuleTestType.class);
-		registerRegistry(Registries.SCHEDULE, Schedule.class);
-		registerRegistry(Registries.SENSOR_TYPE, SensorType.class);
-		registerRegistry(Registries.SLOT_DISPLAY, SlotDisplay.Type.class);
-		registerRegistry(Registries.SOUND_EVENT, SoundEvent.class);
-		registerRegistry(Registries.STAT_TYPE, StatType.class);
-		registerRegistry(Registries.STRUCTURE_PIECE, StructurePieceType.class);
-		registerRegistry(Registries.STRUCTURE_PLACEMENT, StructurePlacementType.class);
-		registerRegistry(Registries.STRUCTURE_POOL_ELEMENT, StructurePoolElementType.class);
-		registerRegistry(Registries.STRUCTURE_PROCESSOR, StructureProcessorType.class);
-		registerRegistry(Registries.STRUCTURE_TYPE, StructureType.class);
-		registerRegistry(Registries.TEST_FUNCTION, Consumer.class);
-		registerRegistry(Registries.TICKET_TYPE, TicketType.class);
-		registerRegistry(Registries.TREE_DECORATOR_TYPE, TreeDecoratorType.class);
-		registerRegistry(Registries.TRUNK_PLACER_TYPE, TrunkPlacerType.class);
-		registerRegistry(Registries.VILLAGER_PROFESSION, VillagerProfession.class);
-		registerRegistry(Registries.VILLAGER_TYPE, VillagerType.class);
-		registerRegistry(Registries.TRIGGER_TYPE, CriterionTrigger.class);
 	}
 
 	public static void registerTab(String id, ResourceKey<CreativeModeTab> tab) {
@@ -280,7 +206,7 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 		return GROUPS.get(path);
 	}
 
-	public static boolean isLoaded(ResourceLocation module) {
+	public static boolean isLoaded(Identifier module) {
 		return KiwiModules.isLoaded(module);
 	}
 
@@ -407,7 +333,7 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 				if (defaultEnabled == null) {
 					defaultEnabled = Boolean.TRUE;
 				}
-				defaultOptions.put(ResourceLocation.fromNamespaceAndPath(modid, name), defaultEnabled);
+				defaultOptions.put(Identifier.fromNamespaceAndPath(modid, name), defaultEnabled);
 			}
 		}
 
@@ -420,7 +346,7 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 		AttackEntityCallback.EVENT.register(KUtil::onAttackEntity);
 		if (Platform.isPhysicalClient()) {
 			RenderLayerEnum.CUTOUT.value = ChunkSectionLayer.CUTOUT;
-			RenderLayerEnum.CUTOUT_MIPPED.value = ChunkSectionLayer.CUTOUT_MIPPED;
+			RenderLayerEnum.TRIPWIRE.value = ChunkSectionLayer.TRIPWIRE;
 			RenderLayerEnum.TRANSLUCENT.value = ChunkSectionLayer.TRANSLUCENT;
 
 			ClientPlatform.init();
@@ -429,7 +355,7 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 	}
 
 	private static void preInit() {
-		Set<ResourceLocation> disabledModules = Sets.newHashSet();
+		Set<Identifier> disabledModules = Sets.newHashSet();
 		conditions.forEach((k, v) -> {
 			try {
 				Class<?> clazz = Class.forName(k.getTarget());
@@ -438,8 +364,8 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 				if (values == null) {
 					values = List.of(v);
 				}
-				List<ResourceLocation> ids = values.stream().map(s -> KUtil.RL(s, v)).toList();
-				for (ResourceLocation id : ids) {
+				List<Identifier> ids = values.stream().map(s -> KUtil.RL(s, v)).toList();
+				for (Identifier id : ids) {
 					LoadingContext context = new LoadingContext(id);
 					try {
 						Boolean bl = (Boolean) MethodUtils.invokeExactStaticMethod(clazz, methodName, context);
@@ -457,7 +383,7 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 			}
 		});
 
-		final Map<ResourceLocation, Info> infos = Maps.newHashMap();
+		final Map<Identifier, Info> infos = Maps.newHashMap();
 		boolean checkDep = false;
 
 		load:
@@ -473,7 +399,7 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 				name = "core";
 			}
 
-			ResourceLocation rl = ResourceLocation.fromNamespaceAndPath(modid, name);
+			Identifier rl = Identifier.fromNamespaceAndPath(modid, name);
 			if (disabledModules.contains(rl)) {
 				continue;
 			}
@@ -501,11 +427,11 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 			infos.put(rl, info);
 		}
 
-		List<ResourceLocation> moduleLoadingQueue;
+		List<Identifier> moduleLoadingQueue;
 		if (checkDep) {
 			List<Info> errorList = Lists.newLinkedList();
 			for (Info i : infos.values()) {
-				for (ResourceLocation id : i.moduleRules) {
+				for (Identifier id : i.moduleRules) {
 					if (!infos.containsKey(id)) {
 						errorList.add(i);
 						break;
@@ -536,7 +462,7 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 				}
 				return;
 			}
-			MutableGraph<ResourceLocation> graph =
+			MutableGraph<Identifier> graph =
 					GraphBuilder.directed().allowsSelfLoops(false).expectedNodeCount(infos.size()).build();
 			infos.keySet().forEach(graph::addNode);
 			infos.values().forEach($ -> {
@@ -547,7 +473,7 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 			moduleLoadingQueue = ImmutableList.copyOf(infos.keySet());
 		}
 
-		for (ResourceLocation id : moduleLoadingQueue) {
+		for (Identifier id : moduleLoadingQueue) {
 			Info info = infos.get(id);
 			ModContext context = ModContext.get(id.getNamespace());
 			context.setActiveContainer();
@@ -590,7 +516,7 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 
 		List<String> entries = Lists.newArrayList();
 		for (KiwiModuleContainer container : KiwiModules.get()) {
-			ResourceLocation uid = container.module.uid;
+			Identifier uid = container.module.uid;
 			if (ID.equals(uid.getNamespace()) && uid.getPath().startsWith("contributors")) {
 				continue;
 			}
@@ -608,7 +534,7 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 	}
 
 	private static void instantiateModule(
-			ResourceLocation id,
+			Identifier id,
 			Class<?> clazz,
 			ModContext context
 	) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
@@ -648,8 +574,8 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 		registryLookup.cache.invalidateAll();
 	}
 
-	private record Info(ResourceLocation id, String className, List<ResourceLocation> moduleRules) {
-		Info(ResourceLocation id, String className) {
+	private record Info(Identifier id, String className, List<Identifier> moduleRules) {
+		Info(Identifier id, String className) {
 			this(id, className, Lists.newArrayList());
 		}
 	}

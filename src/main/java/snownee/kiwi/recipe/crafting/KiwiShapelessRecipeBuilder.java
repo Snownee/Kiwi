@@ -11,12 +11,10 @@ import net.minecraft.data.recipes.RecipeBuilder;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
-import snownee.kiwi.util.NotNullByDefault;
 
-@NotNullByDefault
 public class KiwiShapelessRecipeBuilder extends ShapelessRecipeBuilder {
 	private boolean noContainers;
 
@@ -38,7 +36,7 @@ public class KiwiShapelessRecipeBuilder extends ShapelessRecipeBuilder {
 	}
 
 	@Override
-	public void save(RecipeOutput recipeOutput, ResourceLocation resourceLocation) {
+	public void save(RecipeOutput recipeOutput, Identifier resourceLocation) {
 		ensureValid(resourceLocation);
 		Advancement.Builder builder = recipeOutput.advancement().addCriterion(
 				"has_the_recipe",

@@ -9,7 +9,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.component.TypedDataComponent;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import snownee.kiwi.customization.item.KItemSettings;
 
@@ -19,8 +19,8 @@ public record KItemDefinition(ConfiguredItemTemplate template, ItemDefinitionPro
 		this.properties = template.template().properties().map(properties::merge).orElse(properties);
 	}
 
-	public static Codec<KItemDefinition> codec(Map<ResourceLocation, KItemTemplate> templates) {
-		KItemTemplate defaultTemplate = templates.get(ResourceLocation.withDefaultNamespace("item"));
+	public static Codec<KItemDefinition> codec(Map<Identifier, KItemTemplate> templates) {
+		KItemTemplate defaultTemplate = templates.get(Identifier.withDefaultNamespace("item"));
 		Preconditions.checkNotNull(defaultTemplate);
 		ConfiguredItemTemplate defaultConfiguredTemplate = new ConfiguredItemTemplate(defaultTemplate);
 		return RecordCodecBuilder.create(instance -> instance.group(

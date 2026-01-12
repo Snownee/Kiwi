@@ -31,7 +31,7 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -76,7 +76,7 @@ public final class KUtil {
 		return Long.toString(number);
 	}
 
-	public static String trimRL(ResourceLocation rl) {
+	public static String trimRL(Identifier rl) {
 		return trimRL(rl, "minecraft");
 	}
 
@@ -87,7 +87,7 @@ public final class KUtil {
 	/**
 	 * @since 2.7.0
 	 */
-	public static String trimRL(ResourceLocation rl, String defaultNamespace) {
+	public static String trimRL(Identifier rl, String defaultNamespace) {
 		return rl.getNamespace().equals(defaultNamespace) ? rl.getPath() : rl.toString();
 	}
 
@@ -103,12 +103,12 @@ public final class KUtil {
 	}
 
 	@Nullable
-	public static ResourceLocation RL(@Nullable String string) {
+	public static Identifier RL(@Nullable String string) {
 		if (string == null) {
 			return null;
 		}
 		try {
-			return ResourceLocation.tryParse(string);
+			return Identifier.tryParse(string);
 		} catch (Exception e) {
 			return null;
 		}
@@ -118,7 +118,7 @@ public final class KUtil {
 	 * @since 2.4.2
 	 */
 	@Nullable
-	public static ResourceLocation RL(@Nullable String string, String defaultNamespace) {
+	public static Identifier RL(@Nullable String string, String defaultNamespace) {
 		if (string != null && !string.contains(":")) {
 			string = defaultNamespace + ":" + string;
 		}
@@ -242,7 +242,7 @@ public final class KUtil {
 		if (player == null) {
 			return;
 		}
-		if (client != player.level().isClientSide) {
+		if (client != player.level().isClientSide()) {
 			return;
 		}
 		player.displayClientMessage(Component.translatable(key, args), false);

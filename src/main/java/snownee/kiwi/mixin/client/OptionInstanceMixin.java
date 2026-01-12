@@ -8,8 +8,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.options.MouseSettingsScreen;
+import snownee.kiwi.util.client.SmartKey;
 
 @Mixin(OptionInstance.class)
 public class OptionInstanceMixin {
@@ -23,7 +23,8 @@ public class OptionInstanceMixin {
 			return;
 		}
 		//noinspection ConstantValue
-		if (mc.getWindow() != null && mc.options != null && this == (Object) mc.options.mouseWheelSensitivity() && Screen.hasControlDown()) {
+		if (mc.getWindow() != null && mc.options != null && this == (Object) mc.options.mouseWheelSensitivity() &&
+				SmartKey.hasControlDown()) {
 			ci.setReturnValue((Double) value * 4);
 		}
 	}

@@ -16,18 +16,17 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonObject;
 
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.PackOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Util;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -39,19 +38,17 @@ import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.GameObjectLookup;
 import snownee.kiwi.util.KUtil;
-import snownee.kiwi.util.NotNullByDefault;
 
-@NotNullByDefault
 public class KiwiLanguageProvider extends FabricLanguageProvider {
 	protected final String languageCode;
 	protected final CompletableFuture<HolderLookup.Provider> registryLookup;
 
-	public KiwiLanguageProvider(FabricDataOutput dataOutput, CompletableFuture<HolderLookup.Provider> registryLookup) {
-		this(dataOutput, "en_us", registryLookup);
+	public KiwiLanguageProvider(FabricPackOutput packOutput, CompletableFuture<HolderLookup.Provider> registryLookup) {
+		this(packOutput, "en_us", registryLookup);
 	}
 
-	public KiwiLanguageProvider(FabricDataOutput dataOutput, String languageCode, CompletableFuture<HolderLookup.Provider> registryLookup) {
-		super(dataOutput, languageCode, registryLookup);
+	public KiwiLanguageProvider(FabricPackOutput packOutput, String languageCode, CompletableFuture<HolderLookup.Provider> registryLookup) {
+		super(packOutput, languageCode, registryLookup);
 		this.languageCode = languageCode;
 		this.registryLookup = registryLookup;
 	}
@@ -61,7 +58,7 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 	}
 
 	public Optional<Path> createPath(String path, String extension) {
-		String modId = dataOutput.getModId();
+		String modId = packOutput.getModId();
 		return Platform.findResource(modId, "assets/%s/lang/%s.%s".formatted(modId, path, extension));
 	}
 
@@ -142,7 +139,7 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 
 	protected void generateConfigEntries(Map<String, String> translationEntries) {
 		for (ConfigHandler handler : KiwiConfigManager.allConfigs) {
-			if (!Objects.equals(handler.getModId(), dataOutput.getModId())) {
+			if (!Objects.equals(handler.getModId(), packOutput.getModId())) {
 				continue;
 			}
 			String fileName = handler.getFileName();
@@ -191,12 +188,12 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 						return null;
 					}
 				});
-		generateGameObjectEntries(translationEntries, Registries.CUSTOM_STAT, stat -> net.minecraft.Util.makeDescriptionId("stat", stat));
+		generateGameObjectEntries(translationEntries, Registries.CUSTOM_STAT, stat -> Util.makeDescriptionId("stat", stat));
 		generateGameObjectEntries(translationEntries, Registries.MOB_EFFECT, MobEffect::getDescriptionId);
 	}
 
 	protected void generateModNameAndDescription(Map<String, String> translationEntries) {
-		String modId = dataOutput.getModId();
+		String modId = packOutput.getModId();
 		translationEntries.put("modmenu.nameTranslation.%s".formatted(modId), Platform.getModName(modId));
 		translationEntries.put("modmenu.descriptionTranslation.%s".formatted(modId), Platform.getModDescription(modId));
 	}
@@ -205,17 +202,11 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 			Map<String, String> translationEntries,
 			ResourceKey<Registry<T>> registryKey,
 			Function<T, String> keyMapper) {
-		GameObjectLookup.allHolders(registryKey, dataOutput.getModId()).forEach(holder -> {
+		GameObjectLookup.allHolders(registryKey, packOutput.getModId()).forEach(holder -> {
 			String key = keyMapper.apply(holder.value());
 			if (key != null) {
-				translationEntries.put(key, KUtil.friendlyText(holder.key().location().getPath()));
+				translationEntries.put(key, KUtil.friendlyText(holder.key().identifier().getPath()));
 			}
 		});
-	}
-
-	private Path getLangFilePath(String code) {
-		return dataOutput
-				.createPathProvider(PackOutput.Target.RESOURCE_PACK, "lang")
-				.json(ResourceLocation.fromNamespaceAndPath(dataOutput.getModId(), code));
 	}
 }

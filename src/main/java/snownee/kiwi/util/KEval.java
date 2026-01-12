@@ -20,7 +20,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 
 import it.unimi.dsi.fastutil.ints.IntList;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import snownee.kiwi.KiwiCommonConfig;
 import snownee.kiwi.KiwiModules;
 import snownee.kiwi.loader.Platform;
@@ -43,7 +43,7 @@ public class KEval {
 
 	private static Map<String, EvaluationValue> generateConstants() {
 		Map<String, EvaluationValue> map = new TreeMap<>(ExpressionConfiguration.StandardConstants);
-		map.put("MC", EvaluationValue.arrayValue(IntList.of(Platform.getVersionNumber(ResourceLocation.DEFAULT_NAMESPACE))));
+		map.put("MC", EvaluationValue.arrayValue(IntList.of(Platform.getVersionNumber(Identifier.DEFAULT_NAMESPACE))));
 		map.put("DEVENV", EvaluationValue.booleanValue(!Platform.isProduction()));
 		map.put("ISCLIENT", EvaluationValue.booleanValue(Platform.isPhysicalClient()));
 		map.put("MODLOADER", EvaluationValue.stringValue(Platform.getPlatform().name()));
@@ -60,7 +60,7 @@ public class KEval {
 		public EvaluationValue evaluate(Expression expression, Token functionToken, EvaluationValue... parameterValues) {
 			String string = parameterValues[0].getStringValue();
 			if (string.startsWith("@")) {
-				return EvaluationValue.booleanValue(KiwiModules.isLoaded(ResourceLocation.parse(string.substring(1))));
+				return EvaluationValue.booleanValue(KiwiModules.isLoaded(Identifier.parse(string.substring(1))));
 			} else {
 				return EvaluationValue.booleanValue(Platform.isModLoaded(string));
 			}

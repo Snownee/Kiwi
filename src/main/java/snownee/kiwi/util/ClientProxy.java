@@ -1,10 +1,7 @@
 package snownee.kiwi.util;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.base.Preconditions;
@@ -16,19 +13,14 @@ import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
-import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import net.fabricmc.fabric.mixin.client.rendering.LivingEntityRendererAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColor;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.model.PlayerModel;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
-import net.minecraft.client.renderer.entity.state.PlayerRenderState;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.model.player.PlayerModel;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Unit;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.level.block.Block;
@@ -36,33 +28,21 @@ import snownee.kiwi.Kiwi;
 import snownee.kiwi.contributor.ContributorsClient;
 import snownee.kiwi.contributor.client.CosmeticLayer;
 import snownee.kiwi.mixin.client.EntityRenderDispatcherAccess;
+import snownee.kiwi.util.client.SmartKey;
 
 public final class ClientProxy {
 	public static void init() {
-		ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new IdentifiableResourceReloadListener() {
-			private static final ResourceLocation ID = Kiwi.id("contributors");
-
-			@Override
-			public ResourceLocation getFabricId() {
-				return ID;
-			}
-
-			@Override
-			public @NotNull CompletableFuture<Void> reload(
-					PreparationBarrier barrier,
-					ResourceManager manager,
-					Executor backgroundExecutor,
-					Executor gameExecutor) {
-				return barrier.wait(Unit.INSTANCE).thenRunAsync(
-						() -> ((EntityRenderDispatcherAccess) Minecraft.getInstance().getEntityRenderDispatcher())
-								.getPlayerRenderers()
-								.forEach((skin, renderer) -> {
-									CosmeticLayer layer = new CosmeticLayer((PlayerRenderer) renderer);
-									CosmeticLayer.ALL_LAYERS.put(skin, layer);
-									((LivingEntityRendererAccessor<PlayerRenderState, PlayerModel>) renderer).callAddFeature(layer);
-								}), backgroundExecutor);
-			}
-		});
+		ResourceLoader.get(PackType.CLIENT_RESOURCES).registerReloadListener(
+				Kiwi.id("contributors"), (currentReload, taskExecutor, barrier, reloadExecutor) -> {
+					return barrier.wait(Unit.INSTANCE).thenRunAsync(
+							() -> ((EntityRenderDispatcherAccess) Minecraft.getInstance().getEntityRenderDispatcher())
+									.getPlayerRenderers()
+									.forEach((skin, renderer) -> {
+										CosmeticLayer layer = new CosmeticLayer(renderer);
+										CosmeticLayer.ALL_LAYERS.put(skin, layer);
+										((LivingEntityRendererAccessor<AvatarRenderState, PlayerModel>) renderer).callAddFeature(layer);
+									}), backgroundExecutor);
+				});
 
 		ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> ContributorsClient.changeCosmetic());
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> ContributorsClient.clear());
@@ -82,28 +62,28 @@ public final class ClientProxy {
 
 	public static void afterRegisterSmartKey(SmartKey smartKey) {
 		Preconditions.checkNotNull(smartKey);
-		ClientTickEvents.END_CLIENT_TICK.register(mc -> smartKey.tick());
-		ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
-			ScreenMouseEvents.allowMouseClick(screen).register((Screen screen1, double mouseX, double mouseY, int button) -> {
-				if (smartKey.matchesMouse(button) && smartKey.setDownWithResult(true)) {
+		ClientTickEvents.END_CLIENT_TICK.register(_ -> smartKey.tick());
+		ScreenEvents.AFTER_INIT.register((_, screen, _, _) -> {
+			ScreenMouseEvents.allowMouseClick(screen).register((_, event) -> {
+				if (smartKey.matchesMouse(event) && smartKey.setDownWithResult(true)) {
 					return false;
 				}
 				return true;
 			});
-			ScreenMouseEvents.allowMouseRelease(screen).register((Screen screen1, double mouseX, double mouseY, int button) -> {
-				if (smartKey.matchesMouse(button) && smartKey.setDownWithResult(false)) {
+			ScreenMouseEvents.allowMouseRelease(screen).register((_, event) -> {
+				if (smartKey.matchesMouse(event) && smartKey.setDownWithResult(false)) {
 					return false;
 				}
 				return true;
 			});
-			ScreenKeyboardEvents.allowKeyPress(screen).register((Screen screen1, int keyCode, int scanCode, int modifiers) -> {
-				if (smartKey.matches(keyCode, scanCode) && smartKey.setDownWithResult(true)) {
+			ScreenKeyboardEvents.allowKeyPress(screen).register((_, event) -> {
+				if (smartKey.matches(event) && smartKey.setDownWithResult(true)) {
 					return false;
 				}
 				return true;
 			});
-			ScreenKeyboardEvents.allowKeyRelease(screen).register((Screen screen1, int keyCode, int scanCode, int modifiers) -> {
-				if (smartKey.matches(keyCode, scanCode) && smartKey.setDownWithResult(false)) {
+			ScreenKeyboardEvents.allowKeyRelease(screen).register((_, event) -> {
+				if (smartKey.matches(event) && smartKey.setDownWithResult(false)) {
 					return false;
 				}
 				return true;

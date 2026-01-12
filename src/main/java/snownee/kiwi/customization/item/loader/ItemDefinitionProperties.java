@@ -11,12 +11,12 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.Item;
 
 public record ItemDefinitionProperties(
-		Optional<ResourceLocation> colorProvider,
+		Optional<Identifier> colorProvider,
 		PartialVanillaProperties vanillaProperties) {
 
 	private static final ItemDefinitionProperties EMPTY;
@@ -32,7 +32,7 @@ public record ItemDefinitionProperties(
 
 	public static MapCodec<ItemDefinitionProperties> mapCodec() {
 		return RecordCodecBuilder.mapCodec(instance -> instance.group(
-				ResourceLocation.CODEC.optionalFieldOf("color_provider").forGetter(ItemDefinitionProperties::colorProvider),
+				Identifier.CODEC.optionalFieldOf("color_provider").forGetter(ItemDefinitionProperties::colorProvider),
 				PartialVanillaProperties.MAP_CODEC.forGetter(ItemDefinitionProperties::vanillaProperties)
 		).apply(instance, ItemDefinitionProperties::new));
 	}

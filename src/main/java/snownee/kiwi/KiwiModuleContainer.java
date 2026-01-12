@@ -22,8 +22,8 @@ import com.google.common.collect.Sets;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -40,7 +40,7 @@ import snownee.kiwi.util.KUtil;
 
 public final class KiwiModuleContainer {
 	public static final class RegistryEntryStore {
-		final Multimap<ResourceLocation, KiwiGO<?>> registries = ListMultimapBuilder.linkedHashKeys().linkedListValues().build();
+		final Multimap<Identifier, KiwiGO<?>> registries = ListMultimapBuilder.linkedHashKeys().linkedListValues().build();
 
 		<T> void put(KiwiGO<T> entry) {
 			registries.put(entry.resourceKey().registry(), entry);
@@ -48,7 +48,7 @@ public final class KiwiModuleContainer {
 
 		@SuppressWarnings("unchecked")
 		<T> Collection<KiwiGO<T>> get(ResourceKey<Registry<T>> registry) {
-			return (Collection<KiwiGO<T>>) (Object) registries.get(registry.location());
+			return (Collection<KiwiGO<T>>) (Object) registries.get(registry.identifier());
 		}
 	}
 
@@ -60,7 +60,7 @@ public final class KiwiModuleContainer {
 	Set<Object> noCategories = Sets.newHashSet();
 	Set<Block> noItems = Sets.newHashSet();
 
-	public KiwiModuleContainer(ResourceLocation id, AbstractModule module, ModContext context) {
+	public KiwiModuleContainer(Identifier id, AbstractModule module, ModContext context) {
 		this.module = module;
 		this.context = context;
 		module.uid = id;
@@ -105,7 +105,7 @@ public final class KiwiModuleContainer {
 				continue;
 			}
 
-			ResourceLocation id;
+			Identifier id;
 			KiwiModule.Name nameAnnotation = field.getAnnotation(KiwiModule.Name.class);
 			if (nameAnnotation != null) {
 				id = KUtil.RL(nameAnnotation.value(), modId);
@@ -200,7 +200,7 @@ public final class KiwiModuleContainer {
 			return;
 		}
 		context.setActiveContainer();
-		Collection<KiwiGO<?>> entries = registries.registries.get(registryKey.location());
+		Collection<KiwiGO<?>> entries = registries.registries.get(registryKey.identifier());
 		BiConsumer<KiwiModuleContainer, KiwiGO<?>> decorator = module.decorators.getOrDefault(
 				registryKey, (a, b) -> {
 				});

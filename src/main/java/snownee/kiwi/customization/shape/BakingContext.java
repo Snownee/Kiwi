@@ -5,28 +5,28 @@ import java.util.Map;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.shapes.Shapes;
 import snownee.kiwi.Kiwi;
 
 public interface BakingContext {
-	ShapeGenerator getShape(ResourceLocation id);
+	ShapeGenerator getShape(Identifier id);
 
 	class Impl implements BakingContext {
-		public final Map<ResourceLocation, ShapeGenerator> byId;
+		public final Map<Identifier, ShapeGenerator> byId;
 		private final ShapeGenerator fallbackShape;
 
-		public Impl(Map<ResourceLocation, UnbakedShape> unbaked) {
+		public Impl(Map<Identifier, UnbakedShape> unbaked) {
 			byId = Maps.newHashMapWithExpectedSize(unbaked.size());
 			fallbackShape = ShapeGenerator.unit(Shapes.block());
 		}
 
 		@Override
-		public ShapeGenerator getShape(ResourceLocation id) {
+		public ShapeGenerator getShape(Identifier id) {
 			return Preconditions.checkNotNull(byId.get(id), "Shape not found: %s", id);
 		}
 
-		public void bake(ResourceLocation id, UnbakedShape unbaked) {
+		public void bake(Identifier id, UnbakedShape unbaked) {
 			ShapeGenerator baked;
 			try {
 				baked = unbaked.bake(this);

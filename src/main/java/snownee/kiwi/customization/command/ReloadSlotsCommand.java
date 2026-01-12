@@ -50,7 +50,7 @@ public class ReloadSlotsCommand {
 		AtomicInteger choicesCounter = new AtomicInteger();
 		BuiltInRegistries.BLOCK.listElements().forEach(holder -> {
 			PlaceChoices.setTo(holder.value(), null);
-			KBlockDefinition definition = fundamentals.blocks().get(holder.key().location());
+			KBlockDefinition definition = fundamentals.blocks().get(holder.key().identifier());
 			if (definition == null) {
 				return;
 			}

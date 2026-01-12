@@ -11,25 +11,25 @@ import com.google.common.collect.Sets;
 
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import snownee.kiwi.loader.Platform;
 
 public final class KiwiModules {
-	private static Map<ResourceLocation, KiwiModuleContainer> MODULES = Maps.newLinkedHashMap();
-	private static final Set<ResourceLocation> LOADED_MODULES = Sets.newHashSet();
+	private static Map<Identifier, KiwiModuleContainer> MODULES = Maps.newLinkedHashMap();
+	private static final Set<Identifier> LOADED_MODULES = Sets.newHashSet();
 
 	static final Set<ResourceKey<? extends Registry<?>>> ALL_USED_REGISTRIES = Sets.newLinkedHashSet();
 
 	private KiwiModules() {
 	}
 
-	public static void add(ResourceLocation resourceLocation, AbstractModule module, ModContext context) {
+	public static void add(Identifier resourceLocation, AbstractModule module, ModContext context) {
 		Preconditions.checkArgument(!isLoaded(resourceLocation), "Duplicate module: %s", resourceLocation);
 		LOADED_MODULES.add(resourceLocation);
 		MODULES.put(resourceLocation, new KiwiModuleContainer(resourceLocation, module, context));
 	}
 
-	public static boolean isLoaded(ResourceLocation module) {
+	public static boolean isLoaded(Identifier module) {
 		return LOADED_MODULES.contains(module);
 	}
 
@@ -37,7 +37,7 @@ public final class KiwiModules {
 		return MODULES.values();
 	}
 
-	public static KiwiModuleContainer get(ResourceLocation moduleId) {
+	public static KiwiModuleContainer get(Identifier moduleId) {
 		return MODULES.get(moduleId);
 	}
 

@@ -22,7 +22,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.EnumUtils;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.base.Joiner;
@@ -45,9 +44,7 @@ import snownee.kiwi.config.KiwiConfig.Range;
 import snownee.kiwi.config.KiwiConfig.Translation;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.KUtil;
-import snownee.kiwi.util.NotNullByDefault;
 
-@NotNullByDefault
 public class ConfigHandler {
 
 	public static final Component RESTART = Component.translatable("kiwi.config.requiresRestart").withStyle(ChatFormatting.RED);
@@ -394,11 +391,9 @@ public class ConfigHandler {
 	}
 
 	public static class Value<T> {
-		@NotNull
 		public final T defValue;
 		@Nullable
 		public Field field;
-		@NotNull
 		public T value;
 		public boolean requiresRestart;
 		public String translation;

@@ -5,8 +5,8 @@ import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.advancements.critereon.BlockPredicate;
-import net.minecraft.advancements.critereon.DataComponentMatchers;
+import net.minecraft.advancements.criterion.BlockPredicate;
+import net.minecraft.advancements.criterion.DataComponentMatchers;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -22,7 +22,7 @@ public class BlockPredicateHelper {
 		if (predicate == ANY) {
 			return true;
 		}
-		if (predicate.blocks().isPresent() && !predicate.blocks().get().contains(blockstate.getBlockHolder())) {
+		if (predicate.blocks().isPresent() && !predicate.blocks().get().contains(blockstate.typeHolder())) {
 			return false;
 		}
 		if (!predicate.properties().map(propPredicate -> propPredicate.matches(blockstate)).orElse(Boolean.TRUE)) {

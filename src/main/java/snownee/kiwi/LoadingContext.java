@@ -1,7 +1,7 @@
 package snownee.kiwi;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
-public record LoadingContext(ResourceLocation id) {
+public record LoadingContext(Identifier id) {
 
 }

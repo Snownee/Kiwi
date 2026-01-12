@@ -11,7 +11,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.config.ConfigHandler.Value;
 import snownee.kiwi.config.KiwiConfig.ConfigType;
@@ -20,7 +20,7 @@ public class KiwiConfigManager {
 
 	public static final List<ConfigHandler> allConfigs = Lists.newLinkedList();
 	private static final Map<Class<?>, ConfigHandler> clazz2Configs = Maps.newHashMap();
-	public static final Map<ResourceLocation, Value<Boolean>> modules = Maps.newHashMap();
+	public static final Map<Identifier, Value<Boolean>> modules = Maps.newHashMap();
 
 	public static synchronized void register(ConfigHandler configHandler) {
 		allConfigs.add(configHandler);
@@ -42,7 +42,7 @@ public class KiwiConfigManager {
 			//			}
 			config.init();
 		}
-		for (ResourceLocation rl : Kiwi.defaultOptions.keySet()) {
+		for (Identifier rl : Kiwi.defaultOptions.keySet()) {
 			if (settledMods.contains(rl.getNamespace())) {
 				continue;
 			}
@@ -54,8 +54,8 @@ public class KiwiConfigManager {
 
 	public static void defineModules(String modId, ConfigHandler builder, boolean subcategory) {
 		String prefix = subcategory ? "modules." : "";
-		for (Entry<ResourceLocation, Boolean> entry : Kiwi.defaultOptions.entrySet()) {
-			ResourceLocation rl = entry.getKey();
+		for (Entry<Identifier, Boolean> entry : Kiwi.defaultOptions.entrySet()) {
+			Identifier rl = entry.getKey();
 			if (rl.getNamespace().equals(modId)) {
 				Value<Boolean> value = builder.define(
 						prefix + rl.getPath(),

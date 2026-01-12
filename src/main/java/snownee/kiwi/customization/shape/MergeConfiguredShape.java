@@ -11,17 +11,17 @@ import com.google.common.collect.Maps;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public record MergeConfiguredShape(ConfiguringShape configuring, ResourceLocation additional) implements ConfiguringShape {
+public record MergeConfiguredShape(ConfiguringShape configuring, Identifier additional) implements ConfiguringShape {
 	public static Codec<MergeConfiguredShape> codec(UnbakedShapeCodec parentCodec) {
 		return RecordCodecBuilder.create(i -> i.group(
 						parentCodec.fieldOf("configuring").forGetter(MergeConfiguredShape::configuring),
-						ResourceLocation.CODEC.fieldOf("additional").forGetter(MergeConfiguredShape::additional)
+						Identifier.CODEC.fieldOf("additional").forGetter(MergeConfiguredShape::additional)
 				)
 				.apply(i, (configuring, additional) -> new MergeConfiguredShape((ConfiguringShape) configuring, additional)));
 	}

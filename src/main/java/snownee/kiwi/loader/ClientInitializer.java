@@ -3,14 +3,14 @@ package snownee.kiwi.loader;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.event.Event;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.client.TooltipEvents;
 
 public class ClientInitializer implements ClientModInitializer {
 
-	public static final ResourceLocation HIGH = Kiwi.id("high");
-	public static final ResourceLocation LOW = Kiwi.id("low");
+	public static final Identifier HIGH = Kiwi.id("high");
+	public static final Identifier LOW = Kiwi.id("low");
 
 	@Override
 	public void onInitializeClient() {

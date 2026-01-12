@@ -13,19 +13,19 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import it.unimi.dsi.fastutil.objects.Object2ByteLinkedOpenHashMap;
+import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.CommonLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
-import net.fabricmc.fabric.api.tag.convention.v1.ConventionalBlockTags;
+import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.PackSource;
@@ -144,16 +144,16 @@ public final class CustomizationHooks {
 			return;
 		}
 		Kiwi.LOGGER.info("Kiwi Customization is enabled");
-		CustomizationRegistries.BLOCK_COMPONENT = FabricRegistryBuilder.createSimple(CustomizationRegistries.BLOCK_COMPONENT_KEY)
+		CustomizationRegistries.BLOCK_COMPONENT = FabricRegistryBuilder.create(CustomizationRegistries.BLOCK_COMPONENT_KEY)
 				.buildAndRegister();
 		Kiwi.registerRegistry(CustomizationRegistries.BLOCK_COMPONENT_KEY, KBlockComponent.Type.class);
-		CustomizationRegistries.BLOCK_TEMPLATE = FabricRegistryBuilder.createSimple(CustomizationRegistries.BLOCK_TEMPLATE_KEY)
+		CustomizationRegistries.BLOCK_TEMPLATE = FabricRegistryBuilder.create(CustomizationRegistries.BLOCK_TEMPLATE_KEY)
 				.buildAndRegister();
 		Kiwi.registerRegistry(CustomizationRegistries.BLOCK_TEMPLATE_KEY, KBlockTemplate.Type.class);
-		CustomizationRegistries.ITEM_TEMPLATE = FabricRegistryBuilder.createSimple(CustomizationRegistries.ITEM_TEMPLATE_KEY)
+		CustomizationRegistries.ITEM_TEMPLATE = FabricRegistryBuilder.create(CustomizationRegistries.ITEM_TEMPLATE_KEY)
 				.buildAndRegister();
 		Kiwi.registerRegistry(CustomizationRegistries.ITEM_TEMPLATE_KEY, KItemTemplate.Type.class);
-		CustomizationRegistries.BUILDER_RULE = FabricRegistryBuilder.createSimple(CustomizationRegistries.BUILDER_RULE_KEY)
+		CustomizationRegistries.BUILDER_RULE = FabricRegistryBuilder.create(CustomizationRegistries.BUILDER_RULE_KEY)
 				.buildAndRegister();
 		Kiwi.registerRegistry(CustomizationRegistries.BUILDER_RULE_KEY, BuilderRule.Type.class);
 		PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, entity) -> {
@@ -190,14 +190,14 @@ public final class CustomizationHooks {
 				context));
 
 		BlockFundamentals blockFundamentals = BlockFundamentals.reload(resourceManager, context, true);
-		clearGlassType = blockFundamentals.glassTypes().get(ResourceLocation.withDefaultNamespace("clear"));
+		clearGlassType = blockFundamentals.glassTypes().get(Identifier.withDefaultNamespace("clear"));
 		blockNamespaces.clear();
-		blockFundamentals.blocks().keySet().stream().map(ResourceLocation::getNamespace).forEach(blockNamespaces::add);
+		blockFundamentals.blocks().keySet().stream().map(Identifier::getNamespace).forEach(blockNamespaces::add);
 		lenientBETypeNamespaces.clear();
-		lenientBETypeNamespaces.add(ResourceLocation.DEFAULT_NAMESPACE);
+		lenientBETypeNamespaces.add(Identifier.DEFAULT_NAMESPACE);
 		lenientBETypeNamespaces.addAll(blockNamespaces);
 		metadataMap.values().forEach(metadata -> lenientBETypeNamespaces.addAll(metadata.lenientBETypeNamespaces()));
-		List<ResourceLocation> blockIds = Lists.newArrayList();
+		List<Identifier> blockIds = Lists.newArrayList();
 		CustomizationMetadata.sortedForEach(
 				metadataMap, "block", blockFundamentals.blocks(), (id, definition) -> {
 					try {
@@ -219,12 +219,12 @@ public final class CustomizationHooks {
 				context));
 
 		ItemFundamentals itemFundamentals = ItemFundamentals.reload(resourceManager, context, true);
-		for (ResourceLocation blockId : blockIds) {
+		for (Identifier blockId : blockIds) {
 			if (!itemFundamentals.items().containsKey(blockId)) {
 				itemFundamentals.addDefaultBlockItem(blockId);
 			}
 		}
-		KItemTemplate none = itemFundamentals.templates().get(ResourceLocation.withDefaultNamespace("none"));
+		KItemTemplate none = itemFundamentals.templates().get(Identifier.withDefaultNamespace("none"));
 		Preconditions.checkNotNull(none, "Missing 'none' item definition");
 		CustomizationMetadata.sortedForEach(
 				metadataMap, List.of("item", "block"), itemFundamentals.items(), (id, definition) -> {
@@ -243,7 +243,7 @@ public final class CustomizationHooks {
 		blockFundamentals.placeChoices().attachChoicesB();
 		blockFundamentals.slotLinks().finish();
 		var tabs = OneTimeLoader.load(resourceManager, "kiwi/creative_tab", KCreativeTab.CODEC, context);
-		List<Map.Entry<ResourceLocation, KCreativeTab>> newTabs = tabs.entrySet().stream().sorted(Comparator.comparingInt($ -> $.getValue()
+		List<Map.Entry<Identifier, KCreativeTab>> newTabs = tabs.entrySet().stream().sorted(Comparator.comparingInt($ -> $.getValue()
 				.order())).filter(entry -> {
 			KCreativeTab value = entry.getValue();
 			if (value.insert().isPresent()) {
@@ -253,8 +253,8 @@ public final class CustomizationHooks {
 			return true;
 		}).toList();
 		for (int i = 0; i < newTabs.size(); i++) {
-			Map.Entry<ResourceLocation, KCreativeTab> entry = newTabs.get(i);
-			ResourceLocation key = entry.getKey();
+			Map.Entry<Identifier, KCreativeTab> entry = newTabs.get(i);
+			Identifier key = entry.getKey();
 			KCreativeTab value = entry.getValue();
 			CreativeModeTab.Builder tab = AbstractModule.itemCategory(
 							key,
@@ -293,7 +293,7 @@ public final class CustomizationHooks {
 		if (!Platform.isPhysicalClient()) {
 			return;
 		}
-		ItemGroupEvents.modifyEntriesEvent(kCreativeTab.insert().orElseThrow()).register(entries -> {
+		CreativeModeTabEvents.modifyOutputEvent(kCreativeTab.insert().orElseThrow()).register(entries -> {
 			for (ResourceKey<Item> content : kCreativeTab.contents()) {
 				Item item = BuiltInRegistries.ITEM.getValue(content);
 				if (item == null) {

@@ -6,7 +6,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.contributor.Contributors;
 import snownee.kiwi.network.KiwiPacket;
@@ -15,7 +15,7 @@ import snownee.kiwi.network.PlayPacketHandler;
 import snownee.kiwi.util.KUtil;
 
 @KiwiPacket
-public record CSetCosmeticPacket(@Nullable ResourceLocation id) implements CustomPacketPayload {
+public record CSetCosmeticPacket(@Nullable Identifier id) implements CustomPacketPayload {
 	public static final Type<CSetCosmeticPacket> TYPE = new Type<>(Kiwi.id("set_cosmetic"));
 
 	@Override

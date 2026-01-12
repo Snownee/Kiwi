@@ -10,7 +10,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ByIdMap;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.context.UseOnContext;
@@ -30,7 +30,7 @@ import snownee.kiwi.util.KHolder;
 public record CApplyBuilderRulePacket(
 		InteractionHand hand,
 		BlockPos clickPos,
-		ResourceLocation key,
+		Identifier key,
 		List<BlockPos> positions) implements CustomPacketPayload {
 
 	public CApplyBuilderRulePacket(UseOnContext context, KHolder<BuilderRule> holder, List<BlockPos> positions) {
@@ -56,7 +56,7 @@ public record CApplyBuilderRulePacket(
 		public static final StreamCodec<RegistryFriendlyByteBuf, CApplyBuilderRulePacket> STREAM_CODEC = StreamCodec.composite(
 				HAND_STREAM_CODEC, CApplyBuilderRulePacket::hand,
 				BlockPos.STREAM_CODEC, CApplyBuilderRulePacket::clickPos,
-				ResourceLocation.STREAM_CODEC, CApplyBuilderRulePacket::key,
+				Identifier.STREAM_CODEC, CApplyBuilderRulePacket::key,
 				ByteBufCodecs.collection(ArrayList::new, BlockPos.STREAM_CODEC), CApplyBuilderRulePacket::positions,
 				CApplyBuilderRulePacket::new
 		);
@@ -66,7 +66,7 @@ public record CApplyBuilderRulePacket(
 			var player = context.serverPlayer();
 			InteractionHand hand = packet.hand;
 			BlockPos pos = packet.clickPos;
-			ResourceLocation ruleId = packet.key;
+			Identifier ruleId = packet.key;
 			List<BlockPos> positions = packet.positions;
 			if (Stream.concat(Stream.of(pos), positions.stream()).anyMatch($ -> !player.level().isLoaded($))) {
 				return;

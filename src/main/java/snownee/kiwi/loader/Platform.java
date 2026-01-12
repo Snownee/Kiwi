@@ -12,7 +12,7 @@ import com.mojang.datafixers.util.Pair;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.entity.FakePlayer;
-import net.fabricmc.fabric.api.registry.CompostingChanceRegistry;
+import net.fabricmc.fabric.api.registry.CompostableRegistry;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.fabric.api.registry.FlattenableBlockRegistry;
 import net.fabricmc.fabric.api.registry.StrippableBlockRegistry;
@@ -107,7 +107,7 @@ public final class Platform {
 	}
 
 	public static ItemStack getCraftingRemainingItem(ItemStack stack) {
-		return stack.getRecipeRemainder();
+		return stack.getCraftingRemainder();
 	}
 
 	public static boolean isFakePlayer(Player player) {
@@ -123,11 +123,11 @@ public final class Platform {
 	}
 
 	public static boolean isShearsLeftClickable(ItemStack stack) {
-		return stack.is(ConventionalItemTags.SHEARS_TOOLS);
+		return stack.is(ConventionalItemTags.SHEAR_TOOLS);
 	}
 
 	public static boolean isShearsRightClickable(ItemStack stack) {
-		return stack.is(ConventionalItemTags.SHEARS_TOOLS);
+		return stack.is(ConventionalItemTags.SHEAR_TOOLS);
 	}
 
 	public static Fluid getFluidFromBucket(BucketItem item) {
@@ -171,11 +171,7 @@ public final class Platform {
 	}
 
 	public static void registerCompostable(float chance, ItemLike itemIn) {
-		CompostingChanceRegistry.INSTANCE.add(itemIn, chance);
-	}
-
-	public static void registerVillagerCollectable(ItemLike item) {
-		VillagerInteractionRegistries.registerCollectable(item);
+		CompostableRegistry.INSTANCE.add(itemIn, chance);
 	}
 
 	public static void registerVillagerCompostable(ItemLike item) {

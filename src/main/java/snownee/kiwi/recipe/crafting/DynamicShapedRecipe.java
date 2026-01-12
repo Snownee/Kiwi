@@ -23,9 +23,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipePattern;
 import net.minecraft.world.level.Level;
-import snownee.kiwi.util.NotNullByDefault;
 
-@NotNullByDefault
 public abstract class DynamicShapedRecipe extends CustomRecipe {
 	protected ShapedRecipePattern pattern;
 	protected String rawPattern;

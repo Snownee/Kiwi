@@ -10,7 +10,7 @@
 //import net.minecraft.client.renderer.entity.ItemRenderer;
 //import net.minecraft.client.renderer.entity.RenderLayerParent;
 //import net.minecraft.client.renderer.texture.OverlayTexture;
-//import net.minecraft.resources.ResourceLocation;
+//import net.minecraft.resources.Identifier;
 //import net.minecraft.util.Mth;
 //import net.minecraft.world.entity.EquipmentSlot;
 //import net.minecraft.world.item.ItemStack;
@@ -21,7 +21,7 @@
 //import snownee.kiwi.contributor.impl.client.model.ElectronicatModel;
 //
 //public class ElectronicatLayer extends CosmeticLayer {
-//	private static final ResourceLocation TEXTURE = new ResourceLocation(Kiwi.MODID, "textures/reward/electronicat.png");
+//	private static final Identifier TEXTURE = new Identifier(Kiwi.MODID, "textures/reward/electronicat.png");
 //	private final ElectronicatModel<AbstractClientPlayer> model;
 //	private final ElectronicatModel.Emissive<AbstractClientPlayer> emissive;
 //

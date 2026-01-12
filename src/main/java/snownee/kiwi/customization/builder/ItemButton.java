@@ -8,8 +8,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.gui.navigation.CommonInputs;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.InputWithModifiers;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
@@ -61,7 +63,7 @@ public class ItemButton extends Button {
 	}
 
 	@Override
-	protected void renderWidget(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
+	protected void renderContents(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
 		if (rawTooltip != null && isHovered() || isFocused() && Minecraft.getInstance().getLastInputType().isKeyboard()) {
 			Screen screen = Minecraft.getInstance().screen;
 			if (screen != null) {
@@ -95,22 +97,22 @@ public class ItemButton extends Button {
 	}
 
 	@Override
-	public void onPress() {
-		super.onPress();
+	public void onPress(InputWithModifiers input) {
+		super.onPress(input);
 		pressTime = 0;
 	}
 
 	@Override
-	public void onRelease(double mouseX, double mouseY) {
+	public void onRelease(MouseButtonEvent event) {
 		onRelease();
 	}
 
 	@Override
-	public boolean keyReleased(int button, int p_94751_, int p_94752_) {
+	public boolean keyPressed(KeyEvent event) {
 		if (!this.active || !this.visible) {
 			return false;
 		}
-		if (CommonInputs.selected(button)) {
+		if (event.isSelection()) {
 			onRelease();
 			return true;
 		}

@@ -9,7 +9,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import snownee.kiwi.customization.block.BlockFundamentals;
@@ -18,10 +18,10 @@ import snownee.kiwi.util.resource.OneTimeLoader;
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public final class BuiltInBlockTemplate extends KBlockTemplate {
 	public static final ThreadLocal<Block.Properties> PROPERTIES_INJECTOR = new ThreadLocal<>();
-	private final Optional<ResourceLocation> key;
+	private final Optional<Identifier> key;
 	private MapCodec<Block> codec;
 
-	public BuiltInBlockTemplate(Optional<BlockDefinitionProperties> properties, Optional<ResourceLocation> key) {
+	public BuiltInBlockTemplate(Optional<BlockDefinitionProperties> properties, Optional<Identifier> key) {
 		super(properties);
 		this.key = key;
 	}
@@ -29,7 +29,7 @@ public final class BuiltInBlockTemplate extends KBlockTemplate {
 	public static MapCodec<BuiltInBlockTemplate> directCodec(BlockFundamentals.CodecCreationContext context) {
 		return RecordCodecBuilder.mapCodec(instance -> instance.group(
 						BlockDefinitionProperties.mapCodecField(context).forGetter(BuiltInBlockTemplate::properties),
-						ResourceLocation.CODEC.optionalFieldOf("codec").forGetter(BuiltInBlockTemplate::key))
+						Identifier.CODEC.optionalFieldOf("codec").forGetter(BuiltInBlockTemplate::key))
 				.apply(instance, BuiltInBlockTemplate::new));
 	}
 
@@ -39,7 +39,7 @@ public final class BuiltInBlockTemplate extends KBlockTemplate {
 	}
 
 	@Override
-	public void resolve(ResourceLocation key, OneTimeLoader.Context context) {
+	public void resolve(Identifier key, OneTimeLoader.Context context) {
 		codec = BlockCodecs.get(this.key.orElse(key));
 	}
 
@@ -56,7 +56,7 @@ public final class BuiltInBlockTemplate extends KBlockTemplate {
 		return result.result().orElseThrow();
 	}
 
-	public Optional<ResourceLocation> key() {
+	public Optional<Identifier> key() {
 		return key;
 	}
 

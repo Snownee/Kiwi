@@ -4,16 +4,18 @@ import java.util.Objects;
 
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Util;
 import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfigManager;
@@ -24,7 +26,7 @@ public class CosmeticScreen extends Screen {
 
 	private List list;
 	@Nullable
-	private ResourceLocation currentCosmetic;
+	private Identifier currentCosmetic;
 	private Entry selectedEntry;
 
 	public CosmeticScreen() {
@@ -39,7 +41,7 @@ public class CosmeticScreen extends Screen {
 		list.addEntry(selectedEntry = new Entry(this, null));
 		String playerName = ContributorsClient.getSelfName();
 		boolean added = false;
-		for (ResourceLocation tier : Contributors.getRenderableTiers()) {
+		for (Identifier tier : Contributors.getRenderableTiers()) {
 			if (Contributors.isContributor(tier.getNamespace(), playerName, tier.getPath())) {
 				Entry entry = new Entry(this, tier);
 				list.addEntry(entry);
@@ -68,26 +70,21 @@ public class CosmeticScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseClicked(double p_mouseClicked_1_, double p_mouseClicked_3_, int p_mouseClicked_5_) {
-		list.mouseClicked(p_mouseClicked_1_, p_mouseClicked_3_, p_mouseClicked_5_);
-		return super.mouseClicked(p_mouseClicked_1_, p_mouseClicked_3_, p_mouseClicked_5_);
+	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+		list.mouseClicked(event, doubleClick);
+		return super.mouseClicked(event, doubleClick);
 	}
 
 	@Override
-	public boolean mouseDragged(
-			double p_mouseDragged_1_,
-			double p_mouseDragged_3_,
-			int p_mouseDragged_5_,
-			double p_mouseDragged_6_,
-			double p_mouseDragged_8_) {
-		list.mouseDragged(p_mouseDragged_1_, p_mouseDragged_3_, p_mouseDragged_5_, p_mouseDragged_6_, p_mouseDragged_8_);
-		return super.mouseDragged(p_mouseDragged_1_, p_mouseDragged_3_, p_mouseDragged_5_, p_mouseDragged_6_, p_mouseDragged_8_);
+	public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
+		list.mouseDragged(event, dx, dy);
+		return super.mouseDragged(event, dx, dy);
 	}
 
 	@Override
-	public boolean mouseReleased(double p_mouseReleased_1_, double p_mouseReleased_3_, int p_mouseReleased_5_) {
-		list.mouseReleased(p_mouseReleased_1_, p_mouseReleased_3_, p_mouseReleased_5_);
-		return super.mouseReleased(p_mouseReleased_1_, p_mouseReleased_3_, p_mouseReleased_5_);
+	public boolean mouseReleased(MouseButtonEvent event) {
+		list.mouseReleased(event);
+		return super.mouseReleased(event);
 	}
 
 	@Override
@@ -97,9 +94,9 @@ public class CosmeticScreen extends Screen {
 	}
 
 	@Override
-	public boolean keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_) {
-		list.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_);
-		return super.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_);
+	public boolean keyPressed(KeyEvent event) {
+		list.keyPressed(event);
+		return super.keyPressed(event);
 	}
 
 	@Override
@@ -135,36 +132,26 @@ public class CosmeticScreen extends Screen {
 
 		private final CosmeticScreen parent;
 		@Nullable
-		private final ResourceLocation id;
+		private final Identifier id;
 		private final String name;
 
-		public Entry(CosmeticScreen parent, @Nullable ResourceLocation id) {
+		public Entry(CosmeticScreen parent, @Nullable Identifier id) {
 			this.parent = parent;
 			this.id = id;
 			name = id == null ? "-" : I18n.get(Util.makeDescriptionId("cosmetic", id));
 		}
 
 		@Override
-		public void render(
-				GuiGraphics guiGraphics,
-				int entryIdx,
-				int top,
-				int left,
-				int entryWidth,
-				int entryHeight,
-				int mouseX,
-				int mouseY,
-				boolean hover,
-				float partialTicks) {
-			int color = hover ? 0xFFFFFFAA : 0xFFFFFFFF;
+		public void renderContent(GuiGraphics graphics, int mouseX, int mouseY, boolean hovered, float a) {
+			int color = hovered ? 0xFFFFFFAA : 0xFFFFFFFF;
 			if (this == parent.selectedEntry) {
 				color = 0xFFFFFF77;
 			}
-			guiGraphics.drawString(parent.font, name, left + 43, top + 2, color);
+			graphics.drawString(parent.font, name, mouseX + 43, mouseY + 2, color);
 		}
 
 		@Override
-		public boolean mouseClicked(double p_mouseClicked_1_, double p_mouseClicked_3_, int p_mouseClicked_5_) {
+		public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
 			parent.selectedEntry = this;
 			return false;
 		}
@@ -173,7 +160,6 @@ public class CosmeticScreen extends Screen {
 		public Component getNarration() {
 			return Component.translatable(name);
 		}
-
 	}
 
 }
