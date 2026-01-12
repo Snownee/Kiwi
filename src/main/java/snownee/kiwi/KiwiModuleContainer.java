@@ -12,7 +12,7 @@ import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;

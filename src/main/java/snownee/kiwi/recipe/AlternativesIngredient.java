@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
@@ -38,7 +38,7 @@ public class AlternativesIngredient implements CustomIngredient {
 	}
 
 	@Override
-	public Stream<Holder<Item>> getMatchingItems() {
+	public Stream<Holder<Item>> items() {
 		return internal().items();
 	}
 
@@ -106,7 +106,7 @@ public class AlternativesIngredient implements CustomIngredient {
 		}
 
 		@Override
-		public StreamCodec<RegistryFriendlyByteBuf, AlternativesIngredient> getPacketCodec() {
+		public StreamCodec<RegistryFriendlyByteBuf, AlternativesIngredient> getStreamCodec() {
 			return STREAM_CODEC;
 		}
 	}

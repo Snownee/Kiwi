@@ -1,6 +1,6 @@
 package snownee.kiwi.recipe;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.ezylang.evalex.EvaluationException;
 import com.ezylang.evalex.Expression;

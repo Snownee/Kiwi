@@ -15,7 +15,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.debug.DebugRenderer;
-import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
@@ -63,7 +63,7 @@ public class BuilderModePreview implements DebugRenderer.SimpleDebugRenderer {
 			return;
 		}
 
-		VertexConsumer vertexconsumer = pBuffer.getBuffer(RenderType.debugQuads());
+		VertexConsumer vertexconsumer = pBuffer.getBuffer(RenderTypes.debugQuads());
 		Matrix4f pose = pPoseStack.last().pose();
 		float r = 1.0F;
 		float g = 1.0F;

@@ -2,7 +2,7 @@ package snownee.kiwi.util;
 
 import java.util.function.Supplier;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class CachedSupplier<T> implements Supplier<T> {
 	private final Object lock = new Object();

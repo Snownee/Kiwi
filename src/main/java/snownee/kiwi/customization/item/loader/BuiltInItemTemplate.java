@@ -3,7 +3,7 @@ package snownee.kiwi.customization.item.loader;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.google.gson.JsonObject;
 import com.mojang.serialization.DataResult;
