@@ -29,22 +29,22 @@ public class PlanetLayer extends CosmeticLayer {
 		modelPlanet = new PlanetModel<>(definition.get().bakeRoot());
 	}
 
-	@Override
-	public void render(
-			PoseStack matrixStackIn,
-			MultiBufferSource bufferIn,
-			int packedLightIn,
-			AvatarRenderState renderState,
-			float yRot,
-			float xRot) {
-		matrixStackIn.pushPose();
-		matrixStackIn.mulPose(Axis.YP.rotationDegrees(-renderState.ageInTicks));
-		float scale = 0.7f;
-		matrixStackIn.scale(scale, scale, scale);
-		modelPlanet.setupAnim(renderState);
-		VertexConsumer ivertexbuilder = ItemRenderer.getFoilBuffer(bufferIn, RenderTypes.entityTranslucent(TEXTURE), false, false);
-		modelPlanet.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY);
-		matrixStackIn.popPose();
-	}
+//	@Override
+//	public void render(
+//			PoseStack matrixStackIn,
+//			MultiBufferSource bufferIn,
+//			int packedLightIn,
+//			AvatarRenderState renderState,
+//			float yRot,
+//			float xRot) {
+//		matrixStackIn.pushPose();
+//		matrixStackIn.mulPose(Axis.YP.rotationDegrees(-renderState.ageInTicks));
+//		float scale = 0.7f;
+//		matrixStackIn.scale(scale, scale, scale);
+//		modelPlanet.setupAnim(renderState);
+//		VertexConsumer ivertexbuilder = ItemRenderer.getFoilBuffer(bufferIn, RenderTypes.entityTranslucent(TEXTURE), false, false);
+//		modelPlanet.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY);
+//		matrixStackIn.popPose();
+//	}
 
 }

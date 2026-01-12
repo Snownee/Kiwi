@@ -28,22 +28,22 @@ public class SantaHatLayer extends CosmeticLayer {
 		modelSantaHat = new SantaHatModel<>(entityRendererIn.getModel(), definition.get().bakeRoot());
 	}
 
-	@Override
-	public void render(
-			PoseStack matrixStackIn,
-			MultiBufferSource bufferIn,
-			int packedLightIn,
-			AvatarRenderState renderState,
-			float yRot,
-			float xRot) {
-		if (!renderState.headEquipment.isEmpty()) {
-			return;
-		}
-		matrixStackIn.pushPose();
-		modelSantaHat.setupAnim(renderState);
-		VertexConsumer ivertexbuilder = ItemRenderer.getFoilBuffer(bufferIn, RenderTypes.entitySolid(TEXTURE), false, false);
-		modelSantaHat.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY);
-		matrixStackIn.popPose();
-	}
+//	@Override
+//	public void render(
+//			PoseStack matrixStackIn,
+//			MultiBufferSource bufferIn,
+//			int packedLightIn,
+//			AvatarRenderState renderState,
+//			float yRot,
+//			float xRot) {
+//		if (!renderState.headEquipment.isEmpty()) {
+//			return;
+//		}
+//		matrixStackIn.pushPose();
+//		modelSantaHat.setupAnim(renderState);
+//		VertexConsumer ivertexbuilder = ItemRenderer.getFoilBuffer(bufferIn, RenderTypes.entitySolid(TEXTURE), false, false);
+//		modelSantaHat.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY);
+//		matrixStackIn.popPose();
+//	}
 
 }

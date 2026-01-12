@@ -54,20 +54,27 @@ import net.minecraft.core.component.predicates.DataComponentPredicate;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.numbers.NumberFormatType;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.jsonrpc.IncomingRpcMethod;
+import net.minecraft.server.jsonrpc.OutgoingRpcMethod;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.StatType;
+import net.minecraft.util.debug.DebugSubscription;
 import net.minecraft.util.valueproviders.FloatProviderType;
 import net.minecraft.util.valueproviders.IntProviderType;
+import net.minecraft.world.attribute.AttributeType;
+import net.minecraft.world.attribute.EnvironmentAttribute;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
+import net.minecraft.world.entity.npc.villager.VillagerProfession;
+import net.minecraft.world.entity.npc.villager.VillagerType;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
@@ -86,6 +93,7 @@ import net.minecraft.world.level.block.entity.DecoratedPotPattern;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.PositionSourceType;
+import net.minecraft.world.level.gamerules.GameRule;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicateType;
 import net.minecraft.world.level.levelgen.carver.WorldCarver;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -120,7 +128,6 @@ import snownee.kiwi.loader.Platform;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.loader.event.PostInitEvent;
 import snownee.kiwi.network.KNetworking;
-import snownee.kiwi.test.RegistryNameScanner;
 import snownee.kiwi.util.KUtil;
 import snownee.kiwi.util.toposort.TopologicalSort;
 
@@ -176,10 +183,74 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 	}
 
 	private static void registerRegistries() throws Exception {
-		if (!Platform.isProduction()) {
-			RegistryNameScanner.run();
-		}
-
+//		if (!Platform.isProduction()) {
+//			RegistryNameScanner.run();
+//		}
+		registerRegistry(Registries.ACTIVITY, Activity.class);
+		registerRegistry(Registries.ATTRIBUTE, Attribute.class);
+		registerRegistry(Registries.BLOCK_ENTITY_TYPE, BlockEntityType.class);
+		registerRegistry(Registries.BLOCK_PREDICATE_TYPE, BlockPredicateType.class);
+		registerRegistry(Registries.BLOCK_STATE_PROVIDER_TYPE, BlockStateProviderType.class);
+		registerRegistry(Registries.BLOCK, Block.class);
+		registerRegistry(Registries.CARVER, WorldCarver.class);
+		registerRegistry(Registries.CHUNK_STATUS, ChunkStatus.class);
+		registerRegistry(Registries.COMMAND_ARGUMENT_TYPE, ArgumentTypeInfo.class);
+		registerRegistry(Registries.CONSUME_EFFECT_TYPE, ConsumeEffect.Type.class);
+		registerRegistry(Registries.CREATIVE_MODE_TAB, CreativeModeTab.class);
+		registerRegistry(Registries.DATA_COMPONENT_PREDICATE_TYPE, DataComponentPredicate.Type.class);
+		registerRegistry(Registries.DATA_COMPONENT_TYPE, DataComponentType.class);
+		registerRegistry(Registries.GAME_RULE, GameRule.class);
+		registerRegistry(Registries.DEBUG_SUBSCRIPTION, DebugSubscription.class);
+		registerRegistry(Registries.DECORATED_POT_PATTERN, DecoratedPotPattern.class);
+		registerRegistry(Registries.ENCHANTMENT_EFFECT_COMPONENT_TYPE, DataComponentType.class);
+		registerRegistry(Registries.ENTITY_TYPE, EntityType.class);
+		registerRegistry(Registries.ENVIRONMENT_ATTRIBUTE, EnvironmentAttribute.class);
+		registerRegistry(Registries.ATTRIBUTE_TYPE, AttributeType.class);
+		registerRegistry(Registries.FEATURE_SIZE_TYPE, FeatureSizeType.class);
+		registerRegistry(Registries.FEATURE, Feature.class);
+		registerRegistry(Registries.FLOAT_PROVIDER_TYPE, FloatProviderType.class);
+		registerRegistry(Registries.FLUID, Fluid.class);
+		registerRegistry(Registries.FOLIAGE_PLACER_TYPE, FoliagePlacerType.class);
+		registerRegistry(Registries.GAME_EVENT, GameEvent.class);
+		registerRegistry(Registries.HEIGHT_PROVIDER_TYPE, HeightProviderType.class);
+		registerRegistry(Registries.INT_PROVIDER_TYPE, IntProviderType.class);
+		registerRegistry(Registries.ITEM, Item.class);
+		registerRegistry(Registries.MAP_DECORATION_TYPE, MapDecorationType.class);
+		registerRegistry(Registries.MEMORY_MODULE_TYPE, MemoryModuleType.class);
+		registerRegistry(Registries.MENU, MenuType.class);
+		registerRegistry(Registries.MOB_EFFECT, MobEffect.class);
+		registerRegistry(Registries.NUMBER_FORMAT_TYPE, NumberFormatType.class);
+		registerRegistry(Registries.PARTICLE_TYPE, ParticleType.class);
+		registerRegistry(Registries.PLACEMENT_MODIFIER_TYPE, PlacementModifierType.class);
+		registerRegistry(Registries.POINT_OF_INTEREST_TYPE, PoiType.class);
+		registerRegistry(Registries.POSITION_SOURCE_TYPE, PositionSourceType.class);
+		registerRegistry(Registries.POS_RULE_TEST, PosRuleTestType.class);
+		registerRegistry(Registries.POTION, Potion.class);
+		registerRegistry(Registries.RECIPE_BOOK_CATEGORY, RecipeBookCategory.class);
+		registerRegistry(Registries.RECIPE_DISPLAY, RecipeDisplay.Type.class);
+		registerRegistry(Registries.RECIPE_SERIALIZER, RecipeSerializer.class);
+		registerRegistry(Registries.RECIPE_TYPE, RecipeType.class);
+		registerRegistry(Registries.ROOT_PLACER_TYPE, RootPlacerType.class);
+		registerRegistry(Registries.RULE_BLOCK_ENTITY_MODIFIER, RuleBlockEntityModifierType.class);
+		registerRegistry(Registries.RULE_TEST, RuleTestType.class);
+		registerRegistry(Registries.SENSOR_TYPE, SensorType.class);
+		registerRegistry(Registries.SLOT_DISPLAY, SlotDisplay.Type.class);
+		registerRegistry(Registries.SOUND_EVENT, SoundEvent.class);
+		registerRegistry(Registries.STAT_TYPE, StatType.class);
+		registerRegistry(Registries.STRUCTURE_PIECE, StructurePieceType.class);
+		registerRegistry(Registries.STRUCTURE_PLACEMENT, StructurePlacementType.class);
+		registerRegistry(Registries.STRUCTURE_POOL_ELEMENT, StructurePoolElementType.class);
+		registerRegistry(Registries.STRUCTURE_PROCESSOR, StructureProcessorType.class);
+		registerRegistry(Registries.STRUCTURE_TYPE, StructureType.class);
+		registerRegistry(Registries.TEST_FUNCTION, Consumer.class);
+		registerRegistry(Registries.TICKET_TYPE, TicketType.class);
+		registerRegistry(Registries.TREE_DECORATOR_TYPE, TreeDecoratorType.class);
+		registerRegistry(Registries.TRUNK_PLACER_TYPE, TrunkPlacerType.class);
+		registerRegistry(Registries.VILLAGER_PROFESSION, VillagerProfession.class);
+		registerRegistry(Registries.VILLAGER_TYPE, VillagerType.class);
+		registerRegistry(Registries.INCOMING_RPC_METHOD, IncomingRpcMethod.class);
+		registerRegistry(Registries.OUTGOING_RPC_METHOD, OutgoingRpcMethod.class);
+		registerRegistry(Registries.TRIGGER_TYPE, CriterionTrigger.class);
 	}
 
 	public static void registerTab(String id, ResourceKey<CreativeModeTab> tab) {

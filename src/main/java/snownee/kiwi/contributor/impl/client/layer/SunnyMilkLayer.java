@@ -30,26 +30,26 @@ public class SunnyMilkLayer extends CosmeticLayer {
 		model = new SunnyMilkModel<>(definition.get().bakeRoot());
 	}
 
-	@Override
-	public void submit(
-			PoseStack matrixStackIn,
-			SubmitNodeCollector submitNodeCollector,
-			int lightCoords,
-			AvatarRenderState renderState,
-			float yRot,
-			float xRot) {
-		if (renderState.pose == Pose.SLEEPING) {
-			return;
-		}
-		if (renderState.showCape && renderState.chestEquipment.get(DataComponents.GLIDER) != null) {
-			return;
-		}
-		matrixStackIn.pushPose();
-//		model.young = renderState.isBaby;
-		model.setupAnim(renderState);
-		VertexConsumer ivertexbuilder = ItemRenderer.getFoilBuffer(bufferIn, RenderTypes.entityTranslucent(TEXTURE), false, false);
-		getParentModel().body.translateAndRotate(matrixStackIn);
-		model.renderToBuffer(matrixStackIn, ivertexbuilder, lightCoords, OverlayTexture.NO_OVERLAY);
-		matrixStackIn.popPose();
-	}
+//	@Override
+//	public void submit(
+//			PoseStack matrixStackIn,
+//			SubmitNodeCollector submitNodeCollector,
+//			int lightCoords,
+//			AvatarRenderState renderState,
+//			float yRot,
+//			float xRot) {
+//		if (renderState.pose == Pose.SLEEPING) {
+//			return;
+//		}
+//		if (renderState.showCape && renderState.chestEquipment.get(DataComponents.GLIDER) != null) {
+//			return;
+//		}
+//		matrixStackIn.pushPose();
+////		model.young = renderState.isBaby;
+//		model.setupAnim(renderState);
+//		VertexConsumer ivertexbuilder = ItemRenderer.getFoilBuffer(bufferIn, RenderTypes.entityTranslucent(TEXTURE), false, false);
+//		getParentModel().body.translateAndRotate(matrixStackIn);
+//		model.renderToBuffer(matrixStackIn, ivertexbuilder, lightCoords, OverlayTexture.NO_OVERLAY);
+//		matrixStackIn.popPose();
+//	}
 }

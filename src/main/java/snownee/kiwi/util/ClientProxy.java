@@ -40,8 +40,8 @@ public final class ClientProxy {
 									.forEach((skin, renderer) -> {
 										CosmeticLayer layer = new CosmeticLayer(renderer);
 										CosmeticLayer.ALL_LAYERS.put(skin, layer);
-										((LivingEntityRendererAccessor<AvatarRenderState, PlayerModel>) renderer).callAddFeature(layer);
-									}), backgroundExecutor);
+										((LivingEntityRendererAccessor<AvatarRenderState, PlayerModel>) renderer).callAddLayer(layer);
+									}), reloadExecutor);
 				});
 
 		ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> ContributorsClient.changeCosmetic());
@@ -65,28 +65,16 @@ public final class ClientProxy {
 		ClientTickEvents.END_CLIENT_TICK.register(_ -> smartKey.tick());
 		ScreenEvents.AFTER_INIT.register((_, screen, _, _) -> {
 			ScreenMouseEvents.allowMouseClick(screen).register((_, event) -> {
-				if (smartKey.matchesMouse(event) && smartKey.setDownWithResult(true)) {
-					return false;
-				}
-				return true;
+				return !smartKey.matchesMouse(event) || !smartKey.setDownWithResult(true);
 			});
 			ScreenMouseEvents.allowMouseRelease(screen).register((_, event) -> {
-				if (smartKey.matchesMouse(event) && smartKey.setDownWithResult(false)) {
-					return false;
-				}
-				return true;
+				return !smartKey.matchesMouse(event) || !smartKey.setDownWithResult(false);
 			});
 			ScreenKeyboardEvents.allowKeyPress(screen).register((_, event) -> {
-				if (smartKey.matches(event) && smartKey.setDownWithResult(true)) {
-					return false;
-				}
-				return true;
+				return !smartKey.matches(event) || !smartKey.setDownWithResult(true);
 			});
 			ScreenKeyboardEvents.allowKeyRelease(screen).register((_, event) -> {
-				if (smartKey.matches(event) && smartKey.setDownWithResult(false)) {
-					return false;
-				}
-				return true;
+				return !smartKey.matches(event) || !smartKey.setDownWithResult(false);
 			});
 		});
 	}

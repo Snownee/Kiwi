@@ -104,10 +104,15 @@ public class BlockBehaviourMixin {
 	}
 
 	@Inject(method = "getAnalogOutputSignal", at = @At("HEAD"), cancellable = true)
-	private void kiwi$getAnalogOutputSignal(BlockState pState, Level pLevel, BlockPos pPos, CallbackInfoReturnable<Integer> cir) {
+	private void kiwi$getAnalogOutputSignal(
+			BlockState state,
+			Level level,
+			BlockPos pos,
+			Direction direction,
+			CallbackInfoReturnable<Integer> cir) {
 		KBlockSettings settings = KBlockSettings.of(this);
 		if (settings != null && settings.analogOutputSignal != null) {
-			cir.setReturnValue(settings.analogOutputSignal.applyAsInt(pState));
+			cir.setReturnValue(settings.analogOutputSignal.applyAsInt(state));
 		}
 	}
 }

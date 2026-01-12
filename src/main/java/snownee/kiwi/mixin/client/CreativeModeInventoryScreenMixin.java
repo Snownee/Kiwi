@@ -1,5 +1,6 @@
 package snownee.kiwi.mixin.client;
 
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -12,6 +13,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.CreativeModeTab;
@@ -28,7 +30,7 @@ public abstract class CreativeModeInventoryScreenMixin extends AbstractContainer
 	@Unique
 	private static float persistentScrollOffs = 0;
 	@Unique
-	private CreativeModeTab clickedTab;
+	private @Nullable CreativeModeTab clickedTab;
 
 	public CreativeModeInventoryScreenMixin(
 			CreativeModeInventoryScreen.ItemPickerMenu menu,
@@ -50,11 +52,11 @@ public abstract class CreativeModeInventoryScreenMixin extends AbstractContainer
 
 	//fix https://bugs.mojang.com/browse/MC-179165
 	@Inject(method = "mouseClicked", at = @At("HEAD"))
-	private void kiwi$mouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
-		if (button == 0) {
+	private void kiwi$mouseClicked(MouseButtonEvent event, boolean doubleClick, CallbackInfoReturnable<Boolean> cir) {
+		if (event.button() == 0) {
 			clickedTab = null;
-			double x = mouseX - (double) this.leftPos;
-			double y = mouseY - (double) this.topPos;
+			double x = event.x() - (double) this.leftPos;
+			double y = event.y() - (double) this.topPos;
 			for (CreativeModeTab tab : CreativeModeTabs.tabs()) {
 				if (this.checkTabClicked(tab, x, y)) {
 					clickedTab = tab;
@@ -69,12 +71,7 @@ public abstract class CreativeModeInventoryScreenMixin extends AbstractContainer
 					value = "INVOKE",
 					target = "Lnet/minecraft/client/gui/screens/inventory/CreativeModeInventoryScreen;selectTab(Lnet/minecraft/world/item/CreativeModeTab;)V"),
 			cancellable = true)
-	private void kiwi$mouseReleased(
-			double mouseX,
-			double mouseY,
-			int button,
-			CallbackInfoReturnable<Boolean> ci,
-			@Local CreativeModeTab tab) {
+	private void kiwi$mouseReleased(MouseButtonEvent event, CallbackInfoReturnable<Boolean> ci, @Local CreativeModeTab tab) {
 		if (clickedTab != tab) {
 			ci.setReturnValue(true);
 		}

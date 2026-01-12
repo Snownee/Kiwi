@@ -2,21 +2,20 @@ package snownee.kiwi.customization.placement;
 
 import java.util.List;
 
-import com.mojang.blaze3d.vertex.VertexConsumer;
-
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.debug.DebugRenderer;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.gizmos.GizmoStyle;
+import net.minecraft.gizmos.Gizmos;
 import net.minecraft.util.Util;
 import net.minecraft.util.debug.DebugValueAccess;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import snownee.kiwi.util.VoxelUtil;
 
@@ -49,16 +48,19 @@ public class PlaceDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 			}).toList();
 		}
 
-		VertexConsumer vertexconsumer = pBuffer.getBuffer(RenderTypes.lines());
+		GizmoStyle style = GizmoStyle.stroke(-1);
 		for (SlotRenderInstance instance : slots) {
-			ShapeRenderer.renderShape(
-					pPoseStack,
-					vertexconsumer,
-					instance.shape,
-					instance.pos.getX() - pCamX,
-					instance.pos.getY() - pCamY,
-					instance.pos.getZ() - pCamZ,
-					instance.color);
+			for (AABB aabb : instance.shape.toAabbs()) {
+				Gizmos.cuboid(aabb, style);
+			}
+//			ShapeRenderer.renderShape(
+//					pPoseStack,
+//					vertexconsumer,
+//					instance.shape,
+//					instance.pos.getX() - pCamX,
+//					instance.pos.getY() - pCamY,
+//					instance.pos.getZ() - pCamZ,
+//					instance.color);
 		}
 	}
 

@@ -41,23 +41,20 @@ sourceSets {
 
 loom {
     accessWidenerPath = file("src/main/resources/${project.mod_id}.accesswidener")
-    mixin {
-        defaultRefmapName = "${project.mod_id}.refmap.json"
-    }
-    runs {
-        //
-        // This adds a new gradle task that runs the datagen API: "gradlew runDatagenClient"
-        //
-        datagenClient {
-            inherit client
-            name "Data Generation"
-            vmArg "-Dfabric-api.datagen"
-            vmArg "-Dfabric-api.datagen.output-dir=${file("src/generated/resources")}"
-            vmArg "-Dfabric-api.datagen.modid=${mod_id}"
-
-            runDir "build/datagen"
-        }
-    }
+//    runs {
+//        //
+//        // This adds a new gradle task that runs the datagen API: "gradlew runDatagenClient"
+//        //
+//        datagenClient {
+//            inherit client
+//            name "Data Generation"
+//            vmArg "-Dfabric-api.datagen"
+//            vmArg "-Dfabric-api.datagen.output-dir=${file("src/generated/resources")}"
+//            vmArg "-Dfabric-api.datagen.modid=${mod_id}"
+//
+//            runDir "build/datagen"
+//        }
+//    }
 }
 
 configurations {
@@ -142,17 +139,20 @@ tasks.withType(Jar).configureEach {
                 "/third_party"])
 }
 
-def excludes = ["/assets/${project.mod_id}/blockstates",
-                "/assets/${project.mod_id}/models",
-                "/assets/${project.mod_id}/lang/en_us.existing.yaml",
-                "/assets/kaleidos",
-                "/assets/kswitch",
-                "/assets/test",
-                "/snownee/${project.mod_id}/datagen/KiwiDataGen.class",
-                "/snownee/${project.mod_id}/test",
-                "/data",
-                "/.cache",
-                "/third_party"]
+def excludes = [
+        "/assets/${project.mod_id}/blockstates",
+        "/assets/${project.mod_id}/models",
+        "/assets/${project.mod_id}/lang/en_us.existing.yaml",
+        "/assets/kaleidos",
+        "/assets/kswitch",
+        "/assets/test",
+        "/snownee/${project.mod_id}/datagen/KiwiDataGen.class",
+        "/snownee/${project.mod_id}/test",
+        '**/*.bat',
+        '**/*.py',
+        "/data",
+        "/.cache",
+        "/third_party"]
 
 shadowJar {
     exclude(excludes)

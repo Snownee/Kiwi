@@ -13,6 +13,7 @@ import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.google.gson.Strictness;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
@@ -27,7 +28,7 @@ import snownee.kiwi.util.KEval;
 import snownee.kiwi.util.KUtil;
 
 public class OneTimeLoader {
-	private static final Gson GSON = new GsonBuilder().setLenient().create();
+	private static final Gson GSON = new GsonBuilder().setStrictness(Strictness.LENIENT).create();
 
 	public static <T> Map<Identifier, T> load(ResourceManager resourceManager, String directory, Codec<T> codec, Context context) {
 		var fileToIdConverter = AlternativesFileToIdConverter.yamlOrJson(directory);
@@ -111,8 +112,8 @@ public class OneTimeLoader {
 	}
 
 	public static class Context {
-		private Map<String, Expression> cachedExpressions;
-		private Set<String> disabledNamespaces;
+		private @Nullable Map<String, Expression> cachedExpressions;
+		private @Nullable Set<String> disabledNamespaces;
 
 		public Expression getExpression(String expression) {
 			if (cachedExpressions == null) {

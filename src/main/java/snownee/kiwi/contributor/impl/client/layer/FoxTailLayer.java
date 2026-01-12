@@ -31,25 +31,25 @@ public class FoxTailLayer extends CosmeticLayer {
 		modelFoxTail = new FoxTailModel<>(entityRendererIn.getModel(), definition.get().bakeRoot());
 	}
 
-	@Override
-	public void render(
-			PoseStack matrixStackIn,
-			MultiBufferSource bufferIn,
-			int packedLightIn,
-			AvatarRenderState renderState,
-			float yRot,
-			float xRot) {
-		if (renderState.showCape && renderState.chestEquipment.get(DataComponents.GLIDER) != null) {
-			return;
-		}
-		//FIXME attach extra name data
-		String name = renderState.name.toLowerCase(Locale.ENGLISH);
-		Identifier texture = name.contains("snow") || name.contains("xue") || name.contains("yuki") ? SNOW_FOX : FOX;
-		matrixStackIn.pushPose();
-		modelFoxTail.setupAnim(renderState);
-		VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(bufferIn, RenderTypes.entitySolid(texture), false, false);
-		modelFoxTail.renderToBuffer(matrixStackIn, vertexConsumer, packedLightIn, OverlayTexture.NO_OVERLAY);
-		matrixStackIn.popPose();
-	}
+//	@Override
+//	public void render(
+//			PoseStack matrixStackIn,
+//			MultiBufferSource bufferIn,
+//			int packedLightIn,
+//			AvatarRenderState renderState,
+//			float yRot,
+//			float xRot) {
+//		if (renderState.showCape && renderState.chestEquipment.get(DataComponents.GLIDER) != null) {
+//			return;
+//		}
+//		//FIXME attach extra name data
+//		String name = renderState.name.toLowerCase(Locale.ENGLISH);
+//		Identifier texture = name.contains("snow") || name.contains("xue") || name.contains("yuki") ? SNOW_FOX : FOX;
+//		matrixStackIn.pushPose();
+//		modelFoxTail.setupAnim(renderState);
+//		VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(bufferIn, RenderTypes.entitySolid(texture), false, false);
+//		modelFoxTail.renderToBuffer(matrixStackIn, vertexConsumer, packedLightIn, OverlayTexture.NO_OVERLAY);
+//		matrixStackIn.popPose();
+//	}
 
 }

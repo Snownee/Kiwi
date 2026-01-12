@@ -36,7 +36,7 @@ public class BlockPropertiesMixin implements KBlockProperties {
 			method = "<clinit>",
 			at = @At(
 					value = "INVOKE",
-					target = "Lcom/mojang/serialization/Codec;unit(Ljava/util/function/Supplier;)Lcom/mojang/serialization/Codec;"))
+					target = "Lcom/mojang/serialization/MapCodec;unitCodec(Ljava/util/function/Supplier;)Lcom/mojang/serialization/Codec;"))
 	private static Codec<BlockBehaviour.Properties> kiwi$injectCodec(
 			Supplier<BlockBehaviour.Properties> defaultValue,
 			Operation<Codec<BlockBehaviour.Properties>> original) {

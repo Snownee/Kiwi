@@ -26,7 +26,7 @@ public class ItemCodecs {
 
 	public static final String ITEM_PROPERTIES_KEY = "properties";
 	private static final Codec<Item.Properties> ITEM_PROPERTIES = new InjectedCodec<>(
-			Codec.unit(Item.Properties::new),
+			MapCodec.unitCodec(Item.Properties::new),
 			BuiltInItemTemplate.PROPERTIES_INJECTOR);
 
 	public static <I extends Item> RecordCodecBuilder<I, Item.Properties> propertiesCodec() {

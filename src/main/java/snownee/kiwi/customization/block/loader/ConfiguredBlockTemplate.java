@@ -7,7 +7,6 @@ import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.KeyDispatchCodec;
 
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
@@ -26,17 +25,15 @@ public record ConfiguredBlockTemplate(KBlockTemplate template, JsonObject json) 
 	}
 
 	public static Codec<ConfiguredBlockTemplate> codec(Map<Identifier, KBlockTemplate> templates) {
-		Function<ConfiguredBlockTemplate, DataResult<KBlockTemplate>> type = $ -> DataResult.success($.template());
-		Function<KBlockTemplate, DataResult<MapCodec<ConfiguredBlockTemplate>>> codec = $ -> DataResult.success(MapCodec.assumeMapUnsafe(
+		Function<KBlockTemplate, MapCodec<ConfiguredBlockTemplate>> codec = $ -> MapCodec.assumeMapUnsafe(
 				ExtraCodecs.JSON).flatXmap(
 				json -> DataResult.success(new ConfiguredBlockTemplate($, json.getAsJsonObject())),
 				template -> DataResult.error(() -> "Unsupported operation", template.json)
-		));
+		);
 
-		Codec<ConfiguredBlockTemplate> codec1 = new KeyDispatchCodec<>(
+		Codec<ConfiguredBlockTemplate> codec1 = CustomizationCodecs.simpleByNameCodec(templates).dispatchMap(
 				"kiwi:type",
-				CustomizationCodecs.simpleByNameCodec(templates),
-				type,
+				ConfiguredBlockTemplate::template,
 				codec
 		).codec();
 		Codec<ConfiguredBlockTemplate> codec2 = Identifier.CODEC.flatXmap(

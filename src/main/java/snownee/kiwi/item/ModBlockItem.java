@@ -16,7 +16,7 @@ import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.TypedEntityData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -44,13 +44,13 @@ public class ModBlockItem extends BlockItem implements ItemCategoryFiller {
 		if (worldIn.isClientSide()) {
 			BlockEntity be = worldIn.getBlockEntity(pos);
 			if (be != null && INSTANT_UPDATE_TILES.contains(be.getType())) {
-				CustomData data = itemStack.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY);
-				if (!data.isEmpty()) {
+				TypedEntityData<BlockEntityType<?>> data = itemStack.get(DataComponents.BLOCK_ENTITY_DATA);
+				if (data != null) {
 					try (
 							ProblemReporter.ScopedCollector scopedCollector = new ProblemReporter.ScopedCollector(
 									be.problemPath(),
 									Kiwi.LOGGER)) {
-						be.loadWithComponents(TagValueInput.create(scopedCollector, worldIn.registryAccess(), data.copyTag()));
+						be.loadWithComponents(TagValueInput.create(scopedCollector, worldIn.registryAccess(), data.copyTagWithoutId()));
 						be.setChanged();
 					}
 				}

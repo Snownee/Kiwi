@@ -10,13 +10,18 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.ScreenEffectRenderer;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.world.effect.MobEffects;
 
 @Mixin(ScreenEffectRenderer.class)
 public class ScreenEffectRendererMixin {
 
 	@WrapMethod(method = "renderFire")
-	private static void kiwi$renderFire(PoseStack poseStack, MultiBufferSource bufferSource, Operation<Void> original) {
+	private static void kiwi$renderFire(
+			PoseStack poseStack,
+			MultiBufferSource bufferSource,
+			TextureAtlasSprite sprite,
+			Operation<Void> original) {
 		LocalPlayer player = Minecraft.getInstance().player;
 		if (player == null) {
 			original.call(poseStack, bufferSource);

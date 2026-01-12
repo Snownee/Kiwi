@@ -15,16 +15,13 @@ import snownee.kiwi.block.entity.ModBlockEntity;
 public class ClientPacketListenerMixin {
 
 	@WrapOperation(
-			method = {"method_38542", "lambda$handleBlockEntityData$5"},
-			remap = false,
+			method = "lambda$handleBlockEntityData$0",
 			at = @At(
 					value = "INVOKE",
-					target = "Lnet/minecraft/world/level/block/entity/BlockEntity;loadWithComponents(Lnet/minecraft/world/level/storage/ValueInput;)V",
-					remap = true
+					target = "Lnet/minecraft/world/level/block/entity/BlockEntity;loadWithComponents(Lnet/minecraft/world/level/storage/ValueInput;)V"
 			)
 	)
-	private void kiwi$handleBlockEntityData(
-			final BlockEntity blockEntity, final ValueInput valueInput, final Operation<Void> original) {
+	private void kiwi$handleBlockEntityData(BlockEntity blockEntity, ValueInput valueInput, Operation<Void> original) {
 		if (blockEntity instanceof ModBlockEntity) {
 			ClientPacketListener listener = (ClientPacketListener) (Object) this;
 			((ModBlockEntity) blockEntity).onDataPacket(listener.getConnection(), valueInput);

@@ -5,19 +5,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.joml.Matrix4f;
-
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.debug.DebugRenderer;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.gizmos.GizmoStyle;
+import net.minecraft.gizmos.Gizmos;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
 import net.minecraft.util.debug.DebugValueAccess;
@@ -63,8 +62,6 @@ public class BuilderModePreview implements DebugRenderer.SimpleDebugRenderer {
 			return;
 		}
 
-		VertexConsumer vertexconsumer = pBuffer.getBuffer(RenderTypes.debugQuads());
-		Matrix4f pose = pPoseStack.last().pose();
 		float r = 1.0F;
 		float g = 1.0F;
 		float b = 1.0F;
@@ -73,7 +70,7 @@ public class BuilderModePreview implements DebugRenderer.SimpleDebugRenderer {
 			Direction direction = entry.getKey();
 			for (AABB aabb : entry.getValue()) {
 				aabb = aabb.move(-camX, -camY, -camZ);
-				drawFace(pose, vertexconsumer, aabb, direction, r, g, b, a);
+				drawFace(aabb, direction, r, g, b, a);
 			}
 		}
 	}
@@ -119,51 +116,53 @@ public class BuilderModePreview implements DebugRenderer.SimpleDebugRenderer {
 		}
 	}
 
-	private void drawFace(Matrix4f pose, VertexConsumer consumer, AABB aabb, Direction face, float r, float g, float b, float a) {
-		float minX = (float) aabb.minX;
-		float minY = (float) aabb.minY;
-		float minZ = (float) aabb.minZ;
-		float maxX = (float) aabb.maxX;
-		float maxY = (float) aabb.maxY;
-		float maxZ = (float) aabb.maxZ;
-		switch (face) {
-			case DOWN -> {
-				consumer.addVertex(pose, minX, minY, minZ).setColor(r, g, b, a);
-				consumer.addVertex(pose, minX, minY, maxZ).setColor(r, g, b, a);
-				consumer.addVertex(pose, maxX, minY, maxZ).setColor(r, g, b, a);
-				consumer.addVertex(pose, maxX, minY, minZ).setColor(r, g, b, a);
-			}
-			case UP -> {
-				consumer.addVertex(pose, minX, maxY, minZ).setColor(r, g, b, a);
-				consumer.addVertex(pose, maxX, maxY, minZ).setColor(r, g, b, a);
-				consumer.addVertex(pose, maxX, maxY, maxZ).setColor(r, g, b, a);
-				consumer.addVertex(pose, minX, maxY, maxZ).setColor(r, g, b, a);
-			}
-			case NORTH -> {
-				consumer.addVertex(pose, minX, minY, minZ).setColor(r, g, b, a);
-				consumer.addVertex(pose, maxX, minY, minZ).setColor(r, g, b, a);
-				consumer.addVertex(pose, maxX, maxY, minZ).setColor(r, g, b, a);
-				consumer.addVertex(pose, minX, maxY, minZ).setColor(r, g, b, a);
-			}
-			case SOUTH -> {
-				consumer.addVertex(pose, minX, minY, maxZ).setColor(r, g, b, a);
-				consumer.addVertex(pose, minX, maxY, maxZ).setColor(r, g, b, a);
-				consumer.addVertex(pose, maxX, maxY, maxZ).setColor(r, g, b, a);
-				consumer.addVertex(pose, maxX, minY, maxZ).setColor(r, g, b, a);
-			}
-			case WEST -> {
-				consumer.addVertex(pose, minX, minY, minZ).setColor(r, g, b, a);
-				consumer.addVertex(pose, minX, minY, maxZ).setColor(r, g, b, a);
-				consumer.addVertex(pose, minX, maxY, maxZ).setColor(r, g, b, a);
-				consumer.addVertex(pose, minX, maxY, minZ).setColor(r, g, b, a);
-			}
-			case EAST -> {
-				consumer.addVertex(pose, maxX, minY, minZ).setColor(r, g, b, a);
-				consumer.addVertex(pose, maxX, maxY, minZ).setColor(r, g, b, a);
-				consumer.addVertex(pose, maxX, maxY, maxZ).setColor(r, g, b, a);
-				consumer.addVertex(pose, maxX, minY, maxZ).setColor(r, g, b, a);
-			}
-		}
+	private void drawFace(AABB aabb, Direction face, float r, float g, float b, float a) {
+		GizmoStyle style = GizmoStyle.stroke(ARGB.colorFromFloat(a, r, g, b));
+		Gizmos.rect(aabb.getMinPosition(), aabb.getMaxPosition(), face, style);
+//		float minX = (float) aabb.minX;
+//		float minY = (float) aabb.minY;
+//		float minZ = (float) aabb.minZ;
+//		float maxX = (float) aabb.maxX;
+//		float maxY = (float) aabb.maxY;
+//		float maxZ = (float) aabb.maxZ;
+//		switch (face) {
+//			case DOWN -> {
+//				consumer.addVertex(pose, minX, minY, minZ).setColor(r, g, b, a);
+//				consumer.addVertex(pose, minX, minY, maxZ).setColor(r, g, b, a);
+//				consumer.addVertex(pose, maxX, minY, maxZ).setColor(r, g, b, a);
+//				consumer.addVertex(pose, maxX, minY, minZ).setColor(r, g, b, a);
+//			}
+//			case UP -> {
+//				consumer.addVertex(pose, minX, maxY, minZ).setColor(r, g, b, a);
+//				consumer.addVertex(pose, maxX, maxY, minZ).setColor(r, g, b, a);
+//				consumer.addVertex(pose, maxX, maxY, maxZ).setColor(r, g, b, a);
+//				consumer.addVertex(pose, minX, maxY, maxZ).setColor(r, g, b, a);
+//			}
+//			case NORTH -> {
+//				consumer.addVertex(pose, minX, minY, minZ).setColor(r, g, b, a);
+//				consumer.addVertex(pose, maxX, minY, minZ).setColor(r, g, b, a);
+//				consumer.addVertex(pose, maxX, maxY, minZ).setColor(r, g, b, a);
+//				consumer.addVertex(pose, minX, maxY, minZ).setColor(r, g, b, a);
+//			}
+//			case SOUTH -> {
+//				consumer.addVertex(pose, minX, minY, maxZ).setColor(r, g, b, a);
+//				consumer.addVertex(pose, minX, maxY, maxZ).setColor(r, g, b, a);
+//				consumer.addVertex(pose, maxX, maxY, maxZ).setColor(r, g, b, a);
+//				consumer.addVertex(pose, maxX, minY, maxZ).setColor(r, g, b, a);
+//			}
+//			case WEST -> {
+//				consumer.addVertex(pose, minX, minY, minZ).setColor(r, g, b, a);
+//				consumer.addVertex(pose, minX, minY, maxZ).setColor(r, g, b, a);
+//				consumer.addVertex(pose, minX, maxY, maxZ).setColor(r, g, b, a);
+//				consumer.addVertex(pose, minX, maxY, minZ).setColor(r, g, b, a);
+//			}
+//			case EAST -> {
+//				consumer.addVertex(pose, maxX, minY, minZ).setColor(r, g, b, a);
+//				consumer.addVertex(pose, maxX, maxY, minZ).setColor(r, g, b, a);
+//				consumer.addVertex(pose, maxX, maxY, maxZ).setColor(r, g, b, a);
+//				consumer.addVertex(pose, maxX, minY, maxZ).setColor(r, g, b, a);
+//			}
+//		}
 	}
 
 	private static VoxelShape getFaceShape(AABB aabb, Direction face) {
