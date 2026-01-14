@@ -27,6 +27,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -311,15 +312,13 @@ public final class CustomizationHooks {
 				CustomizationServiceFinder.PACK_DIRECTORY,
 				PackType.CLIENT_RESOURCES,
 				PackSource.BUILT_IN,
-				new DirectoryValidator($ -> true));
+				new DirectoryValidator(_ -> true));
 		PackRepository packRepository = new PackRepository(folderRepositorySource);
 //		ResourcePackLoader.loadResourcePacks(packRepository, CustomizationHooks::buildPackFinder);
 		packRepository.reload();
-		List<String> selected = Lists.newArrayList(packRepository.getAvailableIds());
 //		selected.remove("mod_resources");
 //		selected.add(0, "mod_resources");
-		packRepository.setSelected(selected);
-		return new KiwiPackResourceManager(packRepository.openAllSelected());
+		return new KiwiPackResourceManager(packRepository.getAvailablePacks().stream().map(Pack::open).toList());
 	}
 
 //	private static RepositorySource buildPackFinder(Map<IModFile, ? extends PathPackResources> modResourcePacks) {

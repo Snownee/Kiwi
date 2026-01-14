@@ -1,6 +1,5 @@
 package snownee.kiwi.customization;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,96 +39,100 @@ public class KiwiPackResourceManager implements CloseableResourceManager {
 			return true;
 		}).toList();
 		packs = this.packs;
-		Map<String, FallbackResourceManager> map = new HashMap<>();
-		List<String> list = packs.stream().flatMap(pack -> {
-			return pack.getNamespaces(PackType.CLIENT_RESOURCES).stream();
-		}).distinct().toList();
 
-		for (PackResources packresources : packs) {
-			ResourceFilterSection resourcefiltersection = this.getPackFilterSection(packresources);
-			Set<String> set = packresources.getNamespaces(PackType.CLIENT_RESOURCES);
-			Predicate<Identifier> predicate = resourcefiltersection != null ? (p_215474_) -> {
-				return resourcefiltersection.isPathFiltered(p_215474_.getPath());
-			} : null;
+		Map<String, FallbackResourceManager> namespacedManagers = new HashMap<>();
+		List<String> namespaces = packs.stream().flatMap(p -> p.getNamespaces(PackType.CLIENT_RESOURCES).stream()).distinct().toList();
 
-			for (String s : list) {
-				boolean flag = set.contains(s);
-				boolean flag1 = resourcefiltersection != null && resourcefiltersection.isNamespaceFiltered(s);
-				if (flag || flag1) {
-					FallbackResourceManager fallbackresourcemanager = map.computeIfAbsent(
-							s,
-							s1 -> new FallbackResourceManager(PackType.CLIENT_RESOURCES, s1));
+		for (PackResources pack : packs) {
+			ResourceFilterSection filterSection = this.getPackFilterSection(pack);
+			Set<String> providedNamespaces = pack.getNamespaces(PackType.CLIENT_RESOURCES);
+			Predicate<Identifier> pathFilter = filterSection != null ? location -> filterSection.isPathFiltered(location.getPath()) : null;
 
-					if (flag && flag1) {
-						fallbackresourcemanager.push(packresources, predicate);
-					} else if (flag) {
-						fallbackresourcemanager.push(packresources);
+			for (String namespace : namespaces) {
+				boolean packContainsNamespace = providedNamespaces.contains(namespace);
+				boolean filterMatchesNamespace = filterSection != null && filterSection.isNamespaceFiltered(namespace);
+				if (packContainsNamespace || filterMatchesNamespace) {
+					FallbackResourceManager fallbackResourceManager = namespacedManagers.computeIfAbsent(
+							namespace,
+							n -> new FallbackResourceManager(PackType.CLIENT_RESOURCES, n));
+
+					if (packContainsNamespace && filterMatchesNamespace) {
+						fallbackResourceManager.push(pack, pathFilter);
+					} else if (packContainsNamespace) {
+						fallbackResourceManager.push(pack);
 					} else {
-						fallbackresourcemanager.pushFilterOnly(packresources.packId(), predicate);
+						fallbackResourceManager.pushFilterOnly(pack.packId(), pathFilter);
 					}
 				}
 			}
 		}
 
-		this.namespacedManagers = map;
+		this.namespacedManagers = namespacedManagers;
 	}
 
 	@Nullable
-	private ResourceFilterSection getPackFilterSection(PackResources p_215468_) {
+	private ResourceFilterSection getPackFilterSection(final PackResources pack) {
 		try {
-			return p_215468_.getMetadataSection(ResourceFilterSection.TYPE);
-		} catch (IOException ioexception) {
-			LOGGER.error("Failed to get filter section from pack {}", p_215468_.packId());
+			return pack.getMetadataSection(ResourceFilterSection.TYPE);
+		} catch (Exception var3) {
+			LOGGER.error("Failed to get filter section from pack {}", pack.packId());
 			return null;
 		}
 	}
 
+	@Override
 	public Set<String> getNamespaces() {
 		return this.namespacedManagers.keySet();
 	}
 
-	public Optional<Resource> getResource(Identifier p_215482_) {
-		ResourceManager resourcemanager = this.namespacedManagers.get(p_215482_.getNamespace());
-		return resourcemanager != null ? resourcemanager.getResource(p_215482_) : Optional.empty();
+	@Override
+	public Optional<Resource> getResource(final Identifier location) {
+		ResourceManager pack = this.namespacedManagers.get(location.getNamespace());
+		return pack != null ? pack.getResource(location) : Optional.empty();
 	}
 
-	public List<Resource> getResourceStack(Identifier p_215466_) {
-		ResourceManager resourcemanager = this.namespacedManagers.get(p_215466_.getNamespace());
-		return resourcemanager != null ? resourcemanager.getResourceStack(p_215466_) : List.of();
+	@Override
+	public List<Resource> getResourceStack(final Identifier location) {
+		ResourceManager pack = this.namespacedManagers.get(location.getNamespace());
+		return pack != null ? pack.getResourceStack(location) : List.of();
 	}
 
-	public Map<Identifier, Resource> listResources(String p_215476_, Predicate<Identifier> p_215477_) {
-		checkTrailingDirectoryPath(p_215476_);
-		Map<Identifier, Resource> map = new TreeMap<>();
+	@Override
+	public Map<Identifier, Resource> listResources(final String directory, final Predicate<Identifier> filter) {
+		checkTrailingDirectoryPath(directory);
+		Map<Identifier, Resource> result = new TreeMap<>();
 
-		for (FallbackResourceManager fallbackresourcemanager : this.namespacedManagers.values()) {
-			map.putAll(fallbackresourcemanager.listResources(p_215476_, p_215477_));
+		for (FallbackResourceManager manager : this.namespacedManagers.values()) {
+			result.putAll(manager.listResources(directory, filter));
 		}
 
-		return map;
+		return result;
 	}
 
-	public Map<Identifier, List<Resource>> listResourceStacks(String p_215479_, Predicate<Identifier> p_215480_) {
-		checkTrailingDirectoryPath(p_215479_);
-		Map<Identifier, List<Resource>> map = new TreeMap<>();
+	@Override
+	public Map<Identifier, List<Resource>> listResourceStacks(final String directory, final Predicate<Identifier> filter) {
+		checkTrailingDirectoryPath(directory);
+		Map<Identifier, List<Resource>> result = new TreeMap<>();
 
-		for (FallbackResourceManager fallbackresourcemanager : this.namespacedManagers.values()) {
-			map.putAll(fallbackresourcemanager.listResourceStacks(p_215479_, p_215480_));
+		for (FallbackResourceManager manager : this.namespacedManagers.values()) {
+			result.putAll(manager.listResourceStacks(directory, filter));
 		}
 
-		return map;
+		return result;
 	}
 
-	private static void checkTrailingDirectoryPath(String p_249608_) {
-		if (p_249608_.endsWith("/")) {
-			throw new IllegalArgumentException("Trailing slash in path " + p_249608_);
+	private static void checkTrailingDirectoryPath(final String directory) {
+		if (directory.endsWith("/")) {
+			throw new IllegalArgumentException("Trailing slash in path " + directory);
 		}
 	}
 
+	@Override
 	public Stream<PackResources> listPacks() {
 		return this.packs.stream();
 	}
 
+	@Override
 	public void close() {
 		this.packs.forEach(PackResources::close);
 	}

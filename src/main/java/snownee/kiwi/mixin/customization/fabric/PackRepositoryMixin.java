@@ -66,7 +66,7 @@ public class PackRepositoryMixin {
 					CustomizationServiceFinder.PACK_DIRECTORY,
 					packType,
 					PackSource.BUILT_IN,
-					new DirectoryValidator($ -> true)));
+					new DirectoryValidator(_ -> true)));
 		}
 	}
 }

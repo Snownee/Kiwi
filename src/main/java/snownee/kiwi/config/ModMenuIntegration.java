@@ -3,6 +3,8 @@ package snownee.kiwi.config;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import com.google.common.collect.Maps;
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
@@ -12,7 +14,7 @@ import snownee.kiwi.loader.Platform;
 
 public class ModMenuIntegration implements ModMenuApi {
 
-	private Map<String, ConfigScreenFactory<?>> cachedFactories;
+	private @Nullable Map<String, ConfigScreenFactory<?>> cachedFactories;
 
 	public Map<String, ConfigScreenFactory<?>> factories() {
 		if (cachedFactories == null) {
@@ -33,7 +35,7 @@ public class ModMenuIntegration implements ModMenuApi {
 
 	@Override
 	public ConfigScreenFactory<?> getModConfigScreenFactory() {
-		return factories().getOrDefault(Kiwi.ID, screen -> null);
+		return factories().getOrDefault(Kiwi.ID, _ -> null);
 	}
 
 	@Override

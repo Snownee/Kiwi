@@ -120,13 +120,6 @@ tasks.withType(JavaCompile).configureEach {
     it.options.compilerArgs.add("-Akiwi.clientOnlyMod")
 }
 
-java {
-    withSourcesJar()
-
-    sourceCompatibility = JavaVersion.VERSION_25
-    targetCompatibility = JavaVersion.VERSION_25
-}
-
 tasks.withType(Jar).configureEach {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     it.exclude(["/assets/${project.mod_id}/blockstates",
@@ -139,37 +132,44 @@ tasks.withType(Jar).configureEach {
                 "/third_party"])
 }
 
-def excludes = [
-        "/assets/${project.mod_id}/blockstates",
-        "/assets/${project.mod_id}/models",
-        "/assets/${project.mod_id}/lang/en_us.existing.yaml",
-        "/assets/kaleidos",
-        "/assets/kswitch",
-        "/assets/test",
-        "/snownee/${project.mod_id}/datagen/KiwiDataGen.class",
-        "/snownee/${project.mod_id}/test",
-        '**/*.bat',
-        '**/*.py',
-        "/data",
-        "/.cache",
-        "/third_party"]
+java {
+    withSourcesJar()
+
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+}
 
 shadowJar {
-    exclude(excludes)
+    exclude([
+            "/assets/${project.mod_id}/blockstates",
+            "/assets/${project.mod_id}/models",
+            "/assets/${project.mod_id}/lang/en_us.existing.yaml",
+            "/assets/kaleidos",
+            "/assets/kswitch",
+            "/assets/test",
+            "/snownee/${project.mod_id}/datagen/KiwiDataGen.class",
+            "/snownee/${project.mod_id}/test",
+            '**/*.bat',
+            '**/*.py',
+            "/data",
+            "/.cache",
+            "/third_party"])
     relocate "org.yaml.snakeyaml", "${project.group}.shadowed.org.yaml.snakeyaml"
     relocate "com.ezylang.evalex", "${project.group}.shadowed.com.ezylang.evalex"
     configurations = [project.configurations.shadowCommon]
-    archiveClassifier.set('shadow')
-}
-
-jar {
-    dependsOn(shadowJar)
-//    inputFile.set(shadowJar.archiveFile)
-    archiveClassifier.set("")
+    archiveClassifier.set('')
 
     from("LICENSE") {
         rename { "${it}_${project.archives_base_name}" }
     }
+}
+
+jar {
+    enabled = false // disable plain jar creation
+}
+
+assemble {
+    dependsOn(tasks.shadowJar)
 }
 
 // configure the maven publication
@@ -190,7 +190,7 @@ publishing {
 }
 
 publishMods {
-    file = jar.archiveFile
+    file = shadowJar.archiveFile
     additionalFiles.from(sourcesJar.archiveFile)
     changelog = file('CHANGELOG.md').exists() ? file('CHANGELOG.md').text : ''
     type = switch (release_type) {

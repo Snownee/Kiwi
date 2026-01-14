@@ -25,6 +25,8 @@
   "kiwi.config.debug.F3CopyInInventory": "F3 Copy In Inventory",
   "kiwi.config.debug.F3CopyInInventory.desc": "",
   "kiwi.config.debug.NBTTooltip.desc": "Shows item NBT in advanced tooltips (F3+H) while holding shift",
+  "kiwi.config.debug.printDataComponentsWhenCopy": "Print Data Components When Copy",
+  "kiwi.config.debug.printDataComponentsWhenCopy.desc": "",
   "kiwi.config.debug.showTranslatedTagsByDefault": "Show Translated Tags By Default",
   "kiwi.config.debug.showTranslatedTagsByDefault.desc": "",
   "kiwi.config.debug.tagsPerPage": "Tags Per Page",

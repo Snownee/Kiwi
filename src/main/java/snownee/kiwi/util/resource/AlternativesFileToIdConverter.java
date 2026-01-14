@@ -18,7 +18,7 @@ public class AlternativesFileToIdConverter {
 	private Predicate<Identifier> listFilter;
 
 	public AlternativesFileToIdConverter(String pPrefix, List<String> pExtensions) {
-		this(pPrefix, pExtensions, $ -> true);
+		this(pPrefix, pExtensions, _ -> true);
 	}
 
 	public AlternativesFileToIdConverter(String pPrefix, List<String> pExtensions, Predicate<Identifier> listFilter) {
@@ -62,14 +62,16 @@ public class AlternativesFileToIdConverter {
 	}
 
 	public Map<Identifier, Resource> listMatchingResources(ResourceManager pResourceManager) {
-		return pResourceManager.listResources(this.prefix, (location) -> {
-			return this.extensions.stream().anyMatch(location.getPath()::endsWith) && listFilter.test(location);
-		});
+		return pResourceManager.listResources(
+				this.prefix, (location) -> {
+					return this.extensions.stream().anyMatch(location.getPath()::endsWith) && listFilter.test(location);
+				});
 	}
 
 	public Map<Identifier, List<Resource>> listMatchingResourceStacks(ResourceManager pResourceManager) {
-		return pResourceManager.listResourceStacks(this.prefix, (location) -> {
-			return this.extensions.stream().anyMatch(location.getPath()::endsWith) && listFilter.test(location);
-		});
+		return pResourceManager.listResourceStacks(
+				this.prefix, (location) -> {
+					return this.extensions.stream().anyMatch(location.getPath()::endsWith) && listFilter.test(location);
+				});
 	}
 }
