@@ -4,7 +4,6 @@
 	"package": "snownee.kiwi.mixin",
 	"plugin": "snownee.kiwi.mixin.MixinPlugin",
 	"compatibilityLevel": "JAVA_25",
-	"refmap": "kiwi.refmap.json",
 	"mixins": [
 		"IngredientAccess",
 		"customization.AbstractContainerMenuMixin",

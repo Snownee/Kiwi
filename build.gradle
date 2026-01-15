@@ -5,13 +5,13 @@ plugins {
     id "me.modmuss50.mod-publish-plugin" version "1.1.0"
 }
 
+version = "mc${archive_minecraft_version}-Fabric-${mod_version}"
+group = project.maven_group
+var realVersion = project.mod_version + '+fabric'
+
 base {
     archivesName = project.archives_base_name
 }
-
-version = project.minecraft_version + "-Fabric-" + project.mod_version
-group = project.maven_group
-var realVersion = project.mod_version + '+fabric'
 
 repositories {
     maven { url "https://api.modrinth.com/maven" }
@@ -41,20 +41,6 @@ sourceSets {
 
 loom {
     accessWidenerPath = file("src/main/resources/${project.mod_id}.accesswidener")
-//    runs {
-//        //
-//        // This adds a new gradle task that runs the datagen API: "gradlew runDatagenClient"
-//        //
-//        datagenClient {
-//            inherit client
-//            name "Data Generation"
-//            vmArg "-Dfabric-api.datagen"
-//            vmArg "-Dfabric-api.datagen.output-dir=${file("src/generated/resources")}"
-//            vmArg "-Dfabric-api.datagen.modid=${mod_id}"
-//
-//            runDir "build/datagen"
-//        }
-//    }
 }
 
 configurations {
@@ -64,12 +50,7 @@ configurations {
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     implementation "net.fabricmc:fabric-loader:${project.loader_version}"
-
-    // Fabric API. This is technically optional, but you probably want it anyway.
     implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-
-    // PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
-    // You may need to force-disable transitiveness on them.
 
 //    api("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}") {
 //        exclude(group: "net.fabricmc.fabric-api")
@@ -147,7 +128,6 @@ shadowJar {
             "/assets/kaleidos",
             "/assets/kswitch",
             "/assets/test",
-            "/snownee/${project.mod_id}/datagen/KiwiDataGen.class",
             "/snownee/${project.mod_id}/test",
             '**/*.bat',
             '**/*.py',
@@ -193,12 +173,7 @@ publishMods {
     file = shadowJar.archiveFile
     additionalFiles.from(sourcesJar.archiveFile)
     changelog = file('CHANGELOG.md').exists() ? file('CHANGELOG.md').text : ''
-    type = switch (release_type) {
-        case 'release' -> STABLE
-        case 'beta' -> BETA
-        case 'alpha' -> ALPHA
-        default -> throw new GradleException("Unknown release type: $release_type")
-    }
+    type = ['release': STABLE, 'beta': BETA, 'alpha': ALPHA][release_type]
     modLoaders.add("fabric")
     modLoaders.add("quilt")
     displayName = "[Fabric ${supported_version}] ${mod_version}"
