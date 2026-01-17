@@ -174,8 +174,6 @@ public class ExportBlocksCommand {
 				ChunkSectionLayer chunkSectionLayer = ItemBlockRenderTypes.getChunkRenderType(block.defaultBlockState());
 				if (chunkSectionLayer == ChunkSectionLayer.CUTOUT) {
 					layer = RenderLayerEnum.CUTOUT;
-				} else if (chunkSectionLayer == ChunkSectionLayer.TRIPWIRE) {
-					layer = RenderLayerEnum.TRIPWIRE;
 				} else if (chunkSectionLayer == ChunkSectionLayer.TRANSLUCENT) {
 					layer = RenderLayerEnum.TRANSLUCENT;
 				}

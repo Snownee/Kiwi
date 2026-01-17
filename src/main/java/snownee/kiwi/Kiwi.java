@@ -417,7 +417,6 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 		AttackEntityCallback.EVENT.register(KUtil::onAttackEntity);
 		if (Platform.isPhysicalClient()) {
 			RenderLayerEnum.CUTOUT.value = ChunkSectionLayer.CUTOUT;
-			RenderLayerEnum.TRIPWIRE.value = ChunkSectionLayer.TRIPWIRE;
 			RenderLayerEnum.TRANSLUCENT.value = ChunkSectionLayer.TRANSLUCENT;
 
 			ClientPlatform.init();

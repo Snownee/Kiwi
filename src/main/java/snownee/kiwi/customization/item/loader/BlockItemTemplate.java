@@ -1,7 +1,10 @@
 package snownee.kiwi.customization.item.loader;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
+
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonObject;
@@ -29,7 +32,7 @@ import snownee.kiwi.util.resource.OneTimeLoader;
 public final class BlockItemTemplate extends KItemTemplate {
 	private final Optional<Identifier> block;
 	private final String clazz;
-	private BiFunction<Block, Item.Properties, Item> constructor;
+	private @Nullable BiFunction<Block, Item.Properties, Item> constructor;
 
 	public BlockItemTemplate(
 			Optional<ItemDefinitionProperties> properties,
@@ -86,7 +89,7 @@ public final class BlockItemTemplate extends KItemTemplate {
 	public Item createItem(ResourceKey<Item> key, Item.Properties properties, JsonObject json) {
 		Block block = BuiltInRegistries.BLOCK.getValue(this.block.orElse(key.identifier()));
 		Preconditions.checkState(block != Blocks.AIR, "Block %s not found", this.block);
-		return constructor.apply(block, properties);
+		return Objects.requireNonNull(constructor).apply(block, properties);
 	}
 
 	public Optional<Identifier> block() {

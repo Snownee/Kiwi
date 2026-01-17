@@ -10,6 +10,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
@@ -48,7 +49,7 @@ public class StonecutterRecipeMaker {
 			ItemStack itemStack = new ItemStack(item, count);
 			Identifier itemKey = itemStack.typeHolder().unwrapKey().orElseThrow().identifier();
 			var recipeId = prefix.withSuffix("/%s/%s".formatted(itemKey.getNamespace(), itemKey.getPath()));
-			var recipe = new StonecutterRecipe(prefix.toString(), input, itemStack);
+			var recipe = new StonecutterRecipe(prefix.toString(), input, ItemStackTemplate.fromNonEmptyStack(itemStack));
 			return new RecipeHolder<>(ResourceKey.create(Registries.RECIPE, recipeId), recipe);
 		}).filter(Objects::nonNull).toList());
 		if (family.stonecutterFrom().isPresent() && family.stonecutterFromMultiplier() != 1) {
@@ -61,7 +62,7 @@ public class StonecutterRecipeMaker {
 				ItemStack itemStack = new ItemStack(item, count);
 				Identifier itemKey = itemStack.typeHolder().unwrapKey().orElseThrow().identifier();
 				var recipeId = prefix.withSuffix("/%s/%s/from".formatted(itemKey.getNamespace(), itemKey.getPath()));
-				var recipe = new StonecutterRecipe(prefix.toString(), ingredient, itemStack);
+				var recipe = new StonecutterRecipe(prefix.toString(), ingredient, ItemStackTemplate.fromNonEmptyStack(itemStack));
 				return new RecipeHolder<>(ResourceKey.create(Registries.RECIPE, recipeId), recipe);
 			}).filter(Objects::nonNull).toList());
 		}

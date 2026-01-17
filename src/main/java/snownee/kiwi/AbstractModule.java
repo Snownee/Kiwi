@@ -15,8 +15,8 @@ import com.google.common.collect.Maps;
 import net.fabricmc.fabric.impl.object.builder.ExtendedBlockEntityType;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.CreativeModeTab;
@@ -103,14 +103,14 @@ public abstract class AbstractModule {
 
 	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(
 			BlockEntityType.BlockEntitySupplier<? extends T> factory,
-			Class<? extends Block> blockClass) {
+			Class<?> blockClass) {
 		return blockEntity(factory, false, blockClass);
 	}
 
 	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(
 			BlockEntityType.BlockEntitySupplier<? extends T> factory,
 			boolean onlyOpCanSetNbt,
-			Class<? extends Block> blockClass) {
+			Class<?> blockClass) {
 		return go(() -> new InheritanceBlockEntityType<>(factory, blockClass, onlyOpCanSetNbt));
 	}
 

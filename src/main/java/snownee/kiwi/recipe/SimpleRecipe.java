@@ -1,6 +1,5 @@
 package snownee.kiwi.recipe;
 
-import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.PlacementInfo;
 import net.minecraft.world.item.crafting.Recipe;
@@ -15,7 +14,7 @@ public abstract class SimpleRecipe<T extends RecipeInput> implements Recipe<T> {
 	}
 
 	@Override
-	public ItemStack assemble(T input, HolderLookup.Provider registryAccess) {
+	public ItemStack assemble(T input) {
 		return ItemStack.EMPTY;
 	}
 

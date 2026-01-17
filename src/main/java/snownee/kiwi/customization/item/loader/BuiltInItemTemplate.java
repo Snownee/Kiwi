@@ -11,14 +11,14 @@ import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
 import snownee.kiwi.util.resource.OneTimeLoader;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public final class BuiltInItemTemplate extends KItemTemplate {
-	public static final ThreadLocal<Item.Properties> PROPERTIES_INJECTOR = new ThreadLocal<>();
+	public static final ThreadLocal<Item.@Nullable Properties> PROPERTIES_INJECTOR = new ThreadLocal<>();
 	private final Optional<Identifier> key;
 	private @Nullable MapCodec<Item> codec;
 

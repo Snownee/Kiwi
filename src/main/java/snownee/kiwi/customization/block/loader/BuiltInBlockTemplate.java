@@ -1,6 +1,9 @@
 package snownee.kiwi.customization.block.loader;
 
+import java.util.Objects;
 import java.util.Optional;
+
+import org.jspecify.annotations.Nullable;
 
 import com.google.gson.JsonObject;
 import com.mojang.serialization.DataResult;
@@ -8,8 +11,8 @@ import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import snownee.kiwi.customization.block.BlockFundamentals;
@@ -17,9 +20,9 @@ import snownee.kiwi.util.resource.OneTimeLoader;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public final class BuiltInBlockTemplate extends KBlockTemplate {
-	public static final ThreadLocal<Block.Properties> PROPERTIES_INJECTOR = new ThreadLocal<>();
+	public static final ThreadLocal<Block.@Nullable Properties> PROPERTIES_INJECTOR = new ThreadLocal<>();
 	private final Optional<Identifier> key;
-	private MapCodec<Block> codec;
+	private @Nullable MapCodec<Block> codec;
 
 	public BuiltInBlockTemplate(Optional<BlockDefinitionProperties> properties, Optional<Identifier> key) {
 		super(properties);
@@ -49,7 +52,9 @@ public final class BuiltInBlockTemplate extends KBlockTemplate {
 			json.add(BlockCodecs.BLOCK_PROPERTIES_KEY, new JsonObject());
 		}
 		PROPERTIES_INJECTOR.set(properties);
-		DataResult<Block> result = codec.decode(JsonOps.INSTANCE, JsonOps.INSTANCE.getMap(json).result().orElseThrow());
+		DataResult<Block> result = Objects.requireNonNull(codec).decode(
+				JsonOps.INSTANCE,
+				JsonOps.INSTANCE.getMap(json).result().orElseThrow());
 		if (result.error().isPresent()) {
 			throw new IllegalStateException(result.error().get().message());
 		}

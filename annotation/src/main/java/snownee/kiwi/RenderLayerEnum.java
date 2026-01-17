@@ -1,6 +1,6 @@
 package snownee.kiwi;
 
 public enum RenderLayerEnum {
-	TRIPWIRE, CUTOUT, TRANSLUCENT;
+	CUTOUT, TRANSLUCENT;
 	public Object value;
 }

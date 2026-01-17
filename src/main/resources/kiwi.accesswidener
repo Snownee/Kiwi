@@ -1,11 +1,6 @@
 accessWidener   v2  official
 accessible class net/minecraft/world/level/block/entity/BlockEntityType$BlockEntitySupplier
 
-accessible field net/minecraft/world/item/crafting/ShapedRecipe result Lnet/minecraft/world/item/ItemStack;
-accessible field net/minecraft/world/item/crafting/ShapedRecipe pattern Lnet/minecraft/world/item/crafting/ShapedRecipePattern;
-accessible field net/minecraft/world/item/crafting/ShapedRecipePattern data Ljava/util/Optional;
-accessible field net/minecraft/world/item/crafting/ShapelessRecipe result Lnet/minecraft/world/item/ItemStack;
-
 accessible field net/minecraft/world/item/CreativeModeTabs BUILDING_BLOCKS Lnet/minecraft/resources/ResourceKey;
 accessible field net/minecraft/world/item/CreativeModeTabs COLORED_BLOCKS Lnet/minecraft/resources/ResourceKey;
 accessible field net/minecraft/world/item/CreativeModeTabs COMBAT Lnet/minecraft/resources/ResourceKey;
@@ -17,13 +12,6 @@ accessible field net/minecraft/world/item/CreativeModeTabs OP_BLOCKS Lnet/minecr
 accessible field net/minecraft/world/item/CreativeModeTabs REDSTONE_BLOCKS Lnet/minecraft/resources/ResourceKey;
 accessible field net/minecraft/world/item/CreativeModeTabs SPAWN_EGGS Lnet/minecraft/resources/ResourceKey;
 accessible field net/minecraft/world/item/CreativeModeTabs TOOLS_AND_UTILITIES Lnet/minecraft/resources/ResourceKey;
-
-accessible field net/minecraft/data/recipes/ShapelessRecipeBuilder criteria Ljava/util/Map;
-accessible field net/minecraft/data/recipes/ShapelessRecipeBuilder group Ljava/lang/String;
-accessible field net/minecraft/data/recipes/ShapelessRecipeBuilder ingredients Ljava/util/List;
-accessible field net/minecraft/data/recipes/ShapelessRecipeBuilder result Lnet/minecraft/world/item/ItemStack;
-accessible field net/minecraft/data/recipes/ShapelessRecipeBuilder category Lnet/minecraft/data/recipes/RecipeCategory;
-accessible method net/minecraft/data/recipes/ShapelessRecipeBuilder ensureValid (Lnet/minecraft/resources/ResourceKey;)V
 
 accessible field net/minecraft/world/item/BucketItem content Lnet/minecraft/world/level/material/Fluid;
 

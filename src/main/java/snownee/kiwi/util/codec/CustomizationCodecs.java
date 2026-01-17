@@ -44,7 +44,6 @@ public class CustomizationCodecs {
 			"push_only", PushReaction.PUSH_ONLY));
 	public static final Codec<RenderLayerEnum> RENDER_TYPE = simpleByNameCodec(ImmutableBiMap.of(
 			"cutout", RenderLayerEnum.CUTOUT,
-			"tripwire", RenderLayerEnum.TRIPWIRE,
 			"translucent", RenderLayerEnum.TRANSLUCENT));
 	public static final Codec<BlockBehaviour.OffsetType> OFFSET_TYPE = simpleByNameCodec(ImmutableBiMap.of(
 			"xz", BlockBehaviour.OffsetType.XZ,

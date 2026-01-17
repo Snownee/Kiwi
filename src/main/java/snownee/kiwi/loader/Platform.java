@@ -8,6 +8,8 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jspecify.annotations.Nullable;
+
 import com.mojang.datafixers.util.Pair;
 
 import net.fabricmc.api.EnvType;
@@ -35,6 +37,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -106,7 +109,7 @@ public final class Platform {
 		return FabricLoader.getInstance().getConfigDir();
 	}
 
-	public static ItemStack getCraftingRemainingItem(ItemStack stack) {
+	public static @Nullable ItemStackTemplate getCraftingRemainingItem(ItemStack stack) {
 		return stack.getCraftingRemainder();
 	}
 

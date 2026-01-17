@@ -50,7 +50,7 @@ configurations {
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     implementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
 //    api("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}") {
 //        exclude(group: "net.fabricmc.fabric-api")
@@ -75,7 +75,7 @@ dependencies {
 //    implementation "me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}"
     compileOnly "me.shedaniel:REIPluginCompatibilities-forge-annotations:12.+"
 
-    implementation "maven.modrinth:jade:26.0.0+fabric"
+    implementation "maven.modrinth:jade:${jade_version}+fabric"
 
 //    // compile against the JEI API but do not include it at runtime
 //    modCompileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
