@@ -24,9 +24,8 @@ import snownee.kiwi.Kiwi;
 
 public class AlternativesIngredient implements CustomIngredient {
 	public static final Identifier ID = Kiwi.id("alternatives");
-	@Nullable
-	private final List<JsonElement> options;
-	private Ingredient cached;
+	private final @Nullable List<JsonElement> options;
+	private @Nullable Ingredient cached;
 
 	public AlternativesIngredient(@Nullable List<JsonElement> options) {
 		this.options = options;

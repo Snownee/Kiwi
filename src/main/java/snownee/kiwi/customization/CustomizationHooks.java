@@ -57,12 +57,12 @@ import snownee.kiwi.customization.block.family.BlockFamilies;
 import snownee.kiwi.customization.block.loader.KBlockTemplate;
 import snownee.kiwi.customization.block.soundtype.DeferredSoundType;
 import snownee.kiwi.customization.block.soundtype.SoundTypes;
-import snownee.kiwi.customization.block.toolmaterial.ToolMaterials;
 import snownee.kiwi.customization.builder.BuilderRule;
 import snownee.kiwi.customization.builder.BuilderRules;
 import snownee.kiwi.customization.item.ItemFundamentals;
 import snownee.kiwi.customization.item.loader.KCreativeTab;
 import snownee.kiwi.customization.item.loader.KItemTemplate;
+import snownee.kiwi.customization.item.toolmaterial.ToolMaterials;
 import snownee.kiwi.customization.placement.PlacementSystem;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.ClientProxy;
@@ -253,8 +253,7 @@ public final class CustomizationHooks {
 			}
 			return true;
 		}).toList();
-		for (int i = 0; i < newTabs.size(); i++) {
-			Map.Entry<Identifier, KCreativeTab> entry = newTabs.get(i);
+		for (Map.Entry<Identifier, KCreativeTab> entry : newTabs) {
 			Identifier key = entry.getKey();
 			KCreativeTab value = entry.getValue();
 			CreativeModeTab.Builder tab = AbstractModule.itemCategory(

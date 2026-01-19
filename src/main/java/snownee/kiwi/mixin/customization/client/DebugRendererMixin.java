@@ -27,7 +27,7 @@ public class DebugRendererMixin {
 			double camZ,
 			float partialTicks,
 			CallbackInfo ci,
-			@Local DebugValueAccess debugValues) {
+			@Local(name = "debugValues") DebugValueAccess debugValues) {
 		LocalPlayer player = Minecraft.getInstance().player;
 		if (player == null) {
 			return;

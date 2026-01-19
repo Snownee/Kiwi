@@ -32,7 +32,7 @@ public abstract class ClientPacketListenerMixin extends ClientCommonPacketListen
 			at = @At(
 					value = "INVOKE",
 					target = "Lnet/minecraft/client/gui/Gui;setOverlayMessage(Lnet/minecraft/network/chat/Component;Z)V"))
-	private void kiwi$setPlayerYRotOnSeat(ClientboundSetPassengersPacket pPacket, CallbackInfo ci, @Local(ordinal = 0) Entity vehicle) {
+	private void kiwi$setPlayerYRotOnSeat(ClientboundSetPassengersPacket packet, CallbackInfo ci, @Local(name = "vehicle") Entity vehicle) {
 		if (SitManager.isSeatEntity(vehicle)) {
 			Objects.requireNonNull(minecraft.player);
 			minecraft.player.yRotO = vehicle.getYRot();

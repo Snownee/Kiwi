@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.jspecify.annotations.Nullable;
+
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.JavaOps;
 import com.mojang.serialization.MapCodec;
@@ -46,7 +48,7 @@ public class KBlockComponents extends AbstractModule {
 	public static final KiwiGO<KBlockComponent.Type<CycleVariantsComponent>> CYCLE_VARIANTS = register(CycleVariantsComponent.CODEC);
 	@KiwiModule.Name("minecraft:simple")
 	public static final KiwiGO<KBlockComponent.Type<SimplePropertiesComponent>> SIMPLE_PROPERTIES = register(SimplePropertiesComponent.CODEC);
-	private static Map<KBlockComponent.Type<?>, KBlockComponent> SIMPLE_INSTANCES;
+	private static @Nullable Map<KBlockComponent.Type<?>, KBlockComponent> SIMPLE_INSTANCES;
 
 	private static <T extends KBlockComponent> KiwiGO<KBlockComponent.Type<T>> register(MapCodec<T> codec) {
 		return go(() -> new KBlockComponent.Type<>(codec));

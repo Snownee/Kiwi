@@ -24,19 +24,19 @@ public class BlockItemGetPlacementStateMixin {
 			at = @At(
 					value = "INVOKE",
 					target = "Lnet/minecraft/world/level/block/Block;getStateForPlacement(Lnet/minecraft/world/item/context/BlockPlaceContext;)Lnet/minecraft/world/level/block/state/BlockState;"))
-	private BlockState kiwi$getPlacementState(Block block, BlockPlaceContext pContext, Operation<BlockState> original) {
-		BlockState blockState = original.call(block, pContext);
+	private BlockState kiwi$getPlacementState(Block block, BlockPlaceContext context, Operation<@Nullable BlockState> original) {
+		BlockState blockState = original.call(block, context);
 		if (blockState == null || !blockState.is(block)) {
 			return blockState;
 		}
 		KBlockSettings settings = KBlockSettings.of(block);
 		if (settings != null) {
-			blockState = settings.getStateForPlacement(blockState, pContext);
+			blockState = settings.getStateForPlacement(blockState, context);
 		}
 		try {
 			//noinspection DataFlowIssue
 			BlockItem item = (BlockItem) (Object) this;
-			blockState = PlacementSystem.onPlace(item, blockState, pContext);
+			blockState = PlacementSystem.onPlace(item, blockState, context);
 		} catch (Throwable t) {
 			Kiwi.LOGGER.error("Failed to handle placement for %s".formatted(blockState), t);
 		}

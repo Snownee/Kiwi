@@ -186,7 +186,7 @@ public record PlaceChoices(
 		flow:
 		for (Flow f : flow) {
 			for (Map.Entry<Direction, Limit> entry : f.when.entrySet()) {
-				Direction direction = rotation.getValue().rotate(entry.getKey());
+				Direction direction = rotation.get().rotate(entry.getKey());
 				try {
 					if (!entry.getValue().testFace(level.getBlockState(mutable.setWithOffset(pos, direction)), direction.getOpposite())) {
 						continue flow;

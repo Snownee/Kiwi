@@ -20,7 +20,11 @@ public class GameRendererMixin {
 					value = "INVOKE",
 					target = "Lnet/minecraft/client/Minecraft;getOverlay()Lnet/minecraft/client/gui/screens/Overlay;",
 					ordinal = 0))
-	private void kiwi$renderLingeringScreen(DeltaTracker p_348648_, boolean p_109096_, CallbackInfo ci, @Local GuiGraphics graphics) {
+	private void kiwi$renderLingeringScreen(
+			DeltaTracker deltaTracker,
+			boolean renderLevel,
+			CallbackInfo ci,
+			@Local(name = "graphics") GuiGraphics graphics) {
 		ConvertScreen.renderLingering(graphics);
 	}
 }

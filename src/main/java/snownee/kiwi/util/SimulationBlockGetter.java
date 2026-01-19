@@ -10,8 +10,8 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class SimulationBlockGetter extends WrappedBlockGetter {
 
-	private BlockEntity simulatedBlockEntity;
-	private BlockPos simulatedPos;
+	private @Nullable BlockEntity simulatedBlockEntity;
+	private @Nullable BlockPos simulatedPos;
 	private boolean useSelfLight;
 	private int globalLight = -1;
 

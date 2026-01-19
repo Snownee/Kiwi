@@ -39,7 +39,7 @@ public class AlternativesFileToIdConverter {
 	}
 
 	public Identifier idToFile(Identifier pId) {
-		return pId.withPath(this.prefix + "/" + pId.getPath() + extensions.get(0));
+		return pId.withPath(this.prefix + "/" + pId.getPath() + extensions.getFirst());
 	}
 
 	public Stream<Identifier> idToAllPossibleFiles(Identifier pId) {

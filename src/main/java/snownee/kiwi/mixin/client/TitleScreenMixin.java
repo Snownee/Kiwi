@@ -16,9 +16,9 @@ public class TitleScreenMixin {
 	private boolean fading;
 
 	@Inject(method = "<init>(ZLnet/minecraft/client/gui/components/LogoRenderer;)V", at = @At("RETURN"))
-	private void kiwi$init(boolean bl, LogoRenderer logoRenderer, CallbackInfo ci) {
+	private void kiwi$init(boolean fading, LogoRenderer logoRenderer, CallbackInfo ci) {
 		if (KiwiClientConfig.titleScreenNoFade) {
-			fading = false;
+			this.fading = false;
 		}
 	}
 }

@@ -18,14 +18,14 @@ import snownee.kiwi.config.KiwiConfigManager;
 public class ScreenMixin {
 
 	@Inject(method = "defaultHandleGameClickEvent", at = @At("HEAD"), cancellable = true)
-	private static void kiwi$defaultHandleGameClickEvent(ClickEvent clickEvent, Minecraft mc, Screen screen, CallbackInfo ci) {
-		if (clickEvent instanceof ClickEvent.Custom custom) {
+	private static void kiwi$defaultHandleGameClickEvent(ClickEvent event, Minecraft minecraft, Screen activeScreen, CallbackInfo ci) {
+		if (event instanceof ClickEvent.Custom custom) {
 			if (custom.id().equals(TooltipEvents.DISABLE_DEBUG_TOOLTIP)) {
 				if (KiwiClientConfig.tagsTooltip) {
 					KiwiClientConfig.tagsTooltip = false;
 					KiwiConfigManager.getHandler(KiwiClientConfig.class).save();
 				}
-				LocalPlayer player = mc.player;
+				LocalPlayer player = minecraft.player;
 				if (player != null) {
 					player.displayClientMessage(Component.translatable("tip.kiwi.debug_tooltip.success"), false);
 				}

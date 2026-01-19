@@ -56,9 +56,9 @@ public final class KiwiModuleContainer {
 	public final ModContext context;
 	public @Nullable GroupSetting groupSetting;
 	final RegistryEntryStore registries = new RegistryEntryStore();
-	Map<Block, Item.Properties> blockItemBuilders = Maps.newHashMap();
-	Set<Object> noCategories = Sets.newHashSet();
-	Set<Block> noItems = Sets.newHashSet();
+	@Nullable Map<Block, Item.Properties> blockItemBuilders = Maps.newHashMap();
+	@Nullable Set<Object> noCategories = Sets.newHashSet();
+	@Nullable Set<Block> noItems = Sets.newHashSet();
 
 	public KiwiModuleContainer(Identifier id, AbstractModule module, ModContext context) {
 		this.module = module;
@@ -78,6 +78,9 @@ public final class KiwiModuleContainer {
 
 	public void loadGameObjects() {
 		context.setActiveContainer();
+		Objects.requireNonNull(noItems);
+		Objects.requireNonNull(noCategories);
+		Objects.requireNonNull(blockItemBuilders);
 
 		final boolean useOwnGroup;
 		if (groupSetting == null) {
@@ -190,7 +193,7 @@ public final class KiwiModuleContainer {
 
 	private void checkNoGroup(Field field, Object o) {
 		if (field.getAnnotation(KiwiModule.NoCategory.class) != null) {
-			noCategories.add(o);
+			Objects.requireNonNull(noCategories).add(o);
 		}
 	}
 
@@ -205,6 +208,9 @@ public final class KiwiModuleContainer {
 				registryKey, (a, b) -> {
 				});
 		if (Registries.ITEM == registryKey) {
+			Objects.requireNonNull(noItems);
+			Objects.requireNonNull(noCategories);
+			Objects.requireNonNull(blockItemBuilders);
 			registries.get(Registries.BLOCK).forEach(e -> {
 				if (noItems.contains(e.get())) {
 					return;
@@ -228,7 +234,7 @@ public final class KiwiModuleContainer {
 				entries.add(itemEntry);
 			});
 			Set<GroupSetting> groupSettings = Sets.newLinkedHashSet();
-			MutableObject<GroupSetting> prevSetting = new MutableObject<>();
+			MutableObject<@Nullable GroupSetting> prevSetting = new MutableObject<>();
 			if (groupSetting != null) {
 				prevSetting.setValue(groupSetting);
 				groupSettings.add(groupSetting);
@@ -243,14 +249,14 @@ public final class KiwiModuleContainer {
 				if (item instanceof ItemCategoryFiller) {
 					filler = (ItemCategoryFiller) item;
 				} else {
-					filler = (tab, flags, hasPermissions, items) -> items.add(new ItemStack(item));
+					filler = (_, _, _, items) -> items.add(new ItemStack(item));
 				}
 				if (e.groupSetting != null) {
 					e.groupSetting.apply(filler);
 					groupSettings.add(e.groupSetting);
 					prevSetting.setValue(e.groupSetting);
-				} else if (prevSetting.getValue() != null) {
-					prevSetting.getValue().apply(filler);
+				} else if (prevSetting.get() != null) {
+					Objects.requireNonNull(prevSetting.get()).apply(filler);
 				}
 			});
 			groupSettings.forEach(GroupSetting::postApply);

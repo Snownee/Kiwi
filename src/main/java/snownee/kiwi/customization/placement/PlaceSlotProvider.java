@@ -12,6 +12,7 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.mutable.MutableObject;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableSortedMap;
@@ -240,27 +241,27 @@ public record PlaceSlotProvider(
 
 	private ImmutableSortedMap<String, String> generateTags(Slot slot, Side side, BlockState rotatedState, Rotation rotation) {
 		Map<String, String> map = Maps.newHashMap();
-		MutableObject<String> primaryKey = new MutableObject<>();
+		MutableObject<@Nullable String> primaryKey = new MutableObject<>();
 		Streams.concat(tag.stream(), slot.tag.stream(), side.tag.stream()).forEach(s -> {
 			ParsedProtoTag tag = ParsedProtoTag.of(s).resolve(rotatedState, rotation);
 			if (tag.prefix().equals("*")) {
-				if (primaryKey.getValue() == null) {
+				if (primaryKey.get() == null) {
 					primaryKey.setValue(tag.key());
-				} else if (!Objects.equals(primaryKey.getValue(), tag.key())) {
+				} else if (!Objects.equals(primaryKey.get(), tag.key())) {
 					throw new IllegalArgumentException("Only one primary tag is allowed");
 				}
 			}
 			map.put(tag.key(), tag.value());
 		});
-		if (primaryKey.getValue() == null) {
+		if (primaryKey.get() == null) {
 			throw new IllegalArgumentException("Primary tag is required");
 		}
-		String primaryValue = map.get(primaryKey.getValue());
-		map.remove(primaryKey.getValue());
+		String primaryValue = map.get(primaryKey.get());
+		map.remove(primaryKey.get());
 		if (primaryValue.isEmpty()) {
-			map.put("*%s".formatted(primaryKey.getValue()), "");
+			map.put("*%s".formatted(primaryKey.get()), "");
 		} else {
-			map.put("*%s:%s".formatted(primaryKey.getValue(), primaryValue), "");
+			map.put("*%s:%s".formatted(primaryKey.get(), primaryValue), "");
 		}
 		return ImmutableSortedMap.copyOf(map, PlaceSlot.TAG_COMPARATOR);
 	}

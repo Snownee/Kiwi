@@ -7,6 +7,8 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
+
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -17,7 +19,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.LootTable.Builder;
 import snownee.kiwi.KiwiModuleContainer;
 import snownee.kiwi.KiwiModules;
 
@@ -26,7 +27,7 @@ public abstract class KiwiBlockLoot extends FabricBlockLootSubProvider {
 	private final List<Block> knownBlocks;
 	private final Map<Class<?>, Function<Block, LootTable.Builder>> handlers = Maps.newIdentityHashMap();
 	private final Set<Block> added = Sets.newHashSet();
-	private Function<Block, LootTable.Builder> defaultHandler;
+	private @Nullable Function<Block, LootTable.Builder> defaultHandler;
 
 	protected KiwiBlockLoot(
 			Identifier moduleId,
@@ -38,8 +39,9 @@ public abstract class KiwiBlockLoot extends FabricBlockLootSubProvider {
 		knownBlocks = container.getRegistries(Registries.BLOCK);
 	}
 
-	protected <T extends Block> void handle(Class<T> clazz, Function<T, LootTable.Builder> handler) {
-		handlers.put(clazz, (Function<Block, Builder>) handler);
+	protected <T extends Block> void handle(Class<T> clazz, Function<T, LootTable.@Nullable Builder> handler) {
+		//noinspection unchecked
+		handlers.put(clazz, (Function<Block, LootTable.@Nullable Builder>) handler);
 	}
 
 	protected void handleDefault(Function<Block, LootTable.Builder> handler) {
@@ -54,7 +56,7 @@ public abstract class KiwiBlockLoot extends FabricBlockLootSubProvider {
 				continue;
 			}
 			added.add(block);
-			Function<Block, LootTable.Builder> handler = handlers.get(block.getClass());
+			Function<Block, LootTable.@Nullable Builder> handler = handlers.get(block.getClass());
 			if (handler == null) {
 				handler = defaultHandler;
 			}

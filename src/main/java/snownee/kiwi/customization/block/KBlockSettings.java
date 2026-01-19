@@ -49,8 +49,7 @@ public class KBlockSettings {
 	@Nullable
 	public final ToIntFunction<BlockState> analogOutputSignal;
 	public final Map<KBlockComponent.Type<?>, KBlockComponent> components;
-	@Nullable
-	private ShapeGenerator[] shapes;
+	private @Nullable ShapeGenerator @Nullable [] shapes;
 	@Nullable
 	public PlaceChoices placeChoices;
 
@@ -221,7 +220,7 @@ public class KBlockSettings {
 		private boolean customPlacement;
 		@Nullable
 		private GlassType glassType;
-		private final ShapeGenerator[] shapes = new ShapeGenerator[BlockShapeType.VALUES.size()];
+		private final @Nullable ShapeGenerator[] shapes = new ShapeGenerator[BlockShapeType.VALUES.size()];
 		@Nullable
 		private CanSurviveHandler canSurviveHandler;
 		private final Map<KBlockComponent.Type<?>, KBlockComponent> components = Maps.newLinkedHashMap();

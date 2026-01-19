@@ -15,17 +15,17 @@ import snownee.kiwi.customization.block.KBlockSettings;
 public abstract class HalfTransparentBlockMixin {
 	@Inject(method = "skipRendering", at = @At("HEAD"), cancellable = true)
 	private void kiwi$skipRendering(
-			BlockState pState,
-			BlockState pAdjacentBlockState,
-			Direction pSide,
+			BlockState state,
+			BlockState neighborState,
+			Direction direction,
 			CallbackInfoReturnable<Boolean> cir) {
 		KBlockSettings settings = KBlockSettings.of(this);
 		if (settings != null && settings.glassType != null) {
 			// generally, XKDeco blocks should not extend HalfTransparentBlock. avoids stack overflow here.
-			cir.setReturnValue(CustomizationHooks.skipGlassRendering(pState, pAdjacentBlockState, pSide));
+			cir.setReturnValue(CustomizationHooks.skipGlassRendering(state, neighborState, direction));
 		}
-		settings = KBlockSettings.of(pAdjacentBlockState.getBlock());
-		if (settings != null && settings.glassType != null && pAdjacentBlockState.skipRendering(pState, pSide.getOpposite())) {
+		settings = KBlockSettings.of(neighborState.getBlock());
+		if (settings != null && settings.glassType != null && neighborState.skipRendering(state, direction.getOpposite())) {
 			cir.setReturnValue(true);
 		}
 	}

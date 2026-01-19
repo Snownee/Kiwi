@@ -5,11 +5,8 @@ import org.spongepowered.asm.mixin.injection.At;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.llamalad7.mixinextras.sugar.Local;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import snownee.kiwi.customization.CustomizationHooks;
 
@@ -21,12 +18,7 @@ public class AbstractContainerMenuMixin {
 					value = "INVOKE",
 					target = "Lnet/minecraft/world/level/block/state/BlockState;is(Ljava/lang/Object;)Z"
 			))
-	private static boolean kiwi$is(
-			BlockState instance,
-			Object block,
-			Operation<Boolean> original,
-			@Local(argsOnly = true) Level level,
-			@Local(argsOnly = true) BlockPos pos) {
+	private static boolean kiwi$is(BlockState instance, Object block, Operation<Boolean> original) {
 		boolean result = original.call(instance, block);
 		if (result || !CustomizationHooks.isEnabled()) {
 			return result;

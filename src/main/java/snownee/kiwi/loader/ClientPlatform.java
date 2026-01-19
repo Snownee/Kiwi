@@ -6,7 +6,6 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleProviderRegistry;
-import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -15,6 +14,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.world.entity.Entity;
@@ -43,7 +43,7 @@ public final class ClientPlatform {
 	public static <E extends Entity> void registerEntityRenderer(
 			EntityType<? extends E> entityType,
 			EntityRendererProvider<E> entityRendererFactory) {
-		EntityRendererRegistry.register(entityType, entityRendererFactory);
+		EntityRenderers.register(entityType, entityRendererFactory);
 	}
 
 	public static <T extends BlockEntity, S extends BlockEntityRenderState> void registerBlockEntityRenderer(
@@ -62,6 +62,6 @@ public final class ClientPlatform {
 
 	public static Locale getLocale() {
 		String[] langSplit = Minecraft.getInstance().getLanguageManager().getSelected().split("_", 2);
-		return langSplit.length == 1 ? new Locale(langSplit[0]) : new Locale(langSplit[0], langSplit[1]);
+		return langSplit.length == 1 ? Locale.of(langSplit[0]) : Locale.of(langSplit[0], langSplit[1]);
 	}
 }

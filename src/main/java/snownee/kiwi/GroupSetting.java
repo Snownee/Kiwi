@@ -8,6 +8,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.Nullable;
+
 import com.google.common.collect.Lists;
 
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
@@ -25,7 +27,7 @@ import snownee.kiwi.item.ItemCategoryFiller;
 
 public class GroupSetting {
 
-	public static GroupSetting of(Category category, GroupSetting preset) {
+	public static GroupSetting of(Category category, @Nullable GroupSetting preset) {
 		if (preset != null) {
 			if (category.value().length == 0 && category.after().length == 0) {
 				return preset;
@@ -38,10 +40,10 @@ public class GroupSetting {
 	}
 
 	private final String[] groups;
-	private final String[] after;
+	private final String @Nullable [] after;
 	private final List<ItemCategoryFiller> fillers = Lists.newArrayList();
 
-	public GroupSetting(String[] groups, String[] after) {
+	public GroupSetting(String[] groups, String @Nullable [] after) {
 		this.groups = groups;
 		this.after = after;
 	}
@@ -64,7 +66,7 @@ public class GroupSetting {
 			CreativeModeTabEvents.modifyOutputEvent(tabKey).register(entries -> {
 				List<ItemStack> items = Lists.newArrayList();
 				for (ItemCategoryFiller filler : fillers) {
-					CreativeModeTab tab = BuiltInRegistries.CREATIVE_MODE_TAB.getValue(tabKey);
+					CreativeModeTab tab = Objects.requireNonNull(BuiltInRegistries.CREATIVE_MODE_TAB.getValue(tabKey));
 					filler.fillItemCategory(tab, entries.getEnabledFeatures(), entries.shouldShowOpRestrictedItems(), items);
 				}
 				items = getEnabledStacks(items, entries.getEnabledFeatures());

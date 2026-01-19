@@ -16,7 +16,7 @@ public class LoadingOverlayMixin {
 	private long fadeOutStart;
 
 	@Inject(method = "render", at = @At("TAIL"))
-	private void kiwi$render(GuiGraphics guiGraphics, int i, int j, float f, CallbackInfo ci) {
+	private void kiwi$render(GuiGraphics graphics, int mouseX, int mouseY, float a, CallbackInfo ci) {
 		if (KiwiClientConfig.loadingOverlayNoFade && fadeOutStart > 0L) {
 			fadeOutStart = 0L;
 		}

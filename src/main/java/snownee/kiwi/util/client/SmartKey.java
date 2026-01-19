@@ -2,6 +2,8 @@ package snownee.kiwi.util.client;
 
 import java.util.function.BooleanSupplier;
 
+import org.jspecify.annotations.Nullable;
+
 import com.mojang.blaze3d.platform.InputConstants;
 
 import net.minecraft.client.KeyMapping;
@@ -17,10 +19,10 @@ public class SmartKey extends KeyMapping {
 	protected long pressSince = -1;
 	protected long lastShortPress = -1;
 	protected State state = State.Idle;
-	private final BooleanSupplier onShortPress;
-	private final BooleanSupplier onLongPress;
-	private final BooleanSupplier onDoublePress;
-	private final BooleanSupplier hasDoublePress;
+	private final @Nullable BooleanSupplier onShortPress;
+	private final @Nullable BooleanSupplier onLongPress;
+	private final @Nullable BooleanSupplier onDoublePress;
+	private final @Nullable BooleanSupplier hasDoublePress;
 	private final long longPressMinMs;
 
 	private SmartKey(Builder builder) {
@@ -125,10 +127,10 @@ public class SmartKey extends KeyMapping {
 		private final KeyMapping.Category category;
 		private InputConstants.Type type = InputConstants.Type.KEYSYM;
 		private int keyCode = -1; // unbound
-		private BooleanSupplier onShortPress;
-		private BooleanSupplier onLongPress;
-		private BooleanSupplier onDoublePress;
-		private BooleanSupplier hasDoublePress;
+		private @Nullable BooleanSupplier onShortPress;
+		private @Nullable BooleanSupplier onLongPress;
+		private @Nullable BooleanSupplier onDoublePress;
+		private @Nullable BooleanSupplier hasDoublePress;
 		private long longPressMinMs = LONG_PRESS_MIN_MS;
 
 		public Builder(String name, KeyMapping.Category category) {

@@ -24,7 +24,7 @@ public class ScreenEffectRendererMixin {
 			Operation<Void> original) {
 		LocalPlayer player = Minecraft.getInstance().player;
 		if (player == null) {
-			original.call(poseStack, bufferSource);
+			original.call(poseStack, bufferSource, sprite);
 			return;
 		}
 		if (player.isCreative()) {
@@ -33,7 +33,7 @@ public class ScreenEffectRendererMixin {
 		if (player.fireImmune() || player.hasEffect(MobEffects.FIRE_RESISTANCE)) {
 			poseStack.pushPose();
 			poseStack.translate(0, -0.25, 0);
-			original.call(poseStack, bufferSource);
+			original.call(poseStack, bufferSource, sprite);
 			poseStack.popPose();
 		}
 	}

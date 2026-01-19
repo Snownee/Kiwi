@@ -25,7 +25,7 @@ public abstract class CreativeModeInventoryScreenMixin extends AbstractContainer
 	private float scrollOffs;
 
 	@Shadow
-	protected abstract boolean checkTabClicked(CreativeModeTab p_98563_, double p_98564_, double p_98565_);
+	protected abstract boolean checkTabClicked(CreativeModeTab tab, double xm, double ym);
 
 	@Unique
 	private static float persistentScrollOffs = 0;
@@ -71,7 +71,7 @@ public abstract class CreativeModeInventoryScreenMixin extends AbstractContainer
 					value = "INVOKE",
 					target = "Lnet/minecraft/client/gui/screens/inventory/CreativeModeInventoryScreen;selectTab(Lnet/minecraft/world/item/CreativeModeTab;)V"),
 			cancellable = true)
-	private void kiwi$mouseReleased(MouseButtonEvent event, CallbackInfoReturnable<Boolean> ci, @Local CreativeModeTab tab) {
+	private void kiwi$mouseReleased(MouseButtonEvent event, CallbackInfoReturnable<Boolean> ci, @Local(name = "tab") CreativeModeTab tab) {
 		if (clickedTab != tab) {
 			ci.setReturnValue(true);
 		}

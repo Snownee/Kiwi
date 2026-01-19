@@ -1,4 +1,4 @@
-package snownee.kiwi.customization.block.toolmaterial;
+package snownee.kiwi.customization.item.toolmaterial;
 
 import java.util.HashMap;
 import java.util.Map;

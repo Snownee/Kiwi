@@ -11,6 +11,6 @@ public @interface KiwiPacket {
 	Direction dir() default Direction.AUTO;
 
 	enum Direction {
-		AUTO, TO_SERVER, TO_CLIENT, CUSTOM;
+		AUTO, TO_SERVER, TO_CLIENT, CUSTOM
 	}
 }

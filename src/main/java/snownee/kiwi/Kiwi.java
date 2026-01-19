@@ -138,10 +138,10 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 	static final Marker MARKER = MarkerFactory.getMarker("INIT");
 	private static final Map<String, ResourceKey<CreativeModeTab>> GROUPS = Maps.newHashMap();
 	public static final Logger LOGGER = LogUtils.getLogger();
-	public static Map<Identifier, Boolean> defaultOptions = Maps.newHashMap();
-	public static MinecraftServer currentServer;
-	private static Multimap<String, KiwiAnnotationData> moduleData = ArrayListMultimap.create();
-	private static Map<KiwiAnnotationData, String> conditions = Maps.newHashMap();
+	private static @Nullable Map<Identifier, Boolean> defaultOptions = Maps.newHashMap();
+	public static @Nullable MinecraftServer currentServer;
+	private static @Nullable Multimap<String, KiwiAnnotationData> moduleData = ArrayListMultimap.create();
+	private static @Nullable Map<KiwiAnnotationData, String> conditions = Maps.newHashMap();
 	public static boolean enableDataModule;
 	private static boolean initialized;
 
@@ -182,6 +182,7 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 		registryLookup.registries.put(baseClass, registry);
 	}
 
+	@SuppressWarnings("RedundantThrows")
 	private static void registerRegistries() throws Exception {
 //		if (!Platform.isProduction()) {
 //			RegistryNameScanner.run();
@@ -302,6 +303,9 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 			return;
 		}
 		initialized = true;
+		Objects.requireNonNull(moduleData);
+		Objects.requireNonNull(defaultOptions);
+		Objects.requireNonNull(conditions);
 
 		try {
 			registerRegistries();
@@ -408,8 +412,8 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 			}
 		}
 
-		KiwiConfigManager.init();
-		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+		KiwiConfigManager.init(defaultOptions);
+		CommandRegistrationCallback.EVENT.register((dispatcher, _, _) -> {
 			KiwiCommand.register(dispatcher);
 		});
 		ServerLifecycleEvents.SERVER_STARTING.register(Kiwi::serverInit);
@@ -424,17 +428,23 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 		preInit();
 	}
 
+	@SuppressWarnings("UnstableApiUsage")
 	private static void preInit() {
+		Objects.requireNonNull(moduleData);
+		Objects.requireNonNull(defaultOptions);
+		Objects.requireNonNull(conditions);
+
 		Set<Identifier> disabledModules = Sets.newHashSet();
 		conditions.forEach((k, v) -> {
 			try {
 				Class<?> clazz = Class.forName(k.getTarget());
 				String methodName = (String) k.getData().get("method");
+				//noinspection unchecked
 				List<String> values = (List<String>) k.getData().get("value");
 				if (values == null) {
 					values = List.of(v);
 				}
-				List<Identifier> ids = values.stream().map(s -> KUtil.RL(s, v)).toList();
+				List<Identifier> ids = values.stream().map(s -> Objects.requireNonNull(KUtil.RL(s, v))).toList();
 				for (Identifier id : ids) {
 					LoadingContext context = new LoadingContext(id);
 					try {
@@ -488,7 +498,7 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 
 			for (String rule : rules) {
 				if (rule.startsWith("@")) {
-					info.moduleRules.add(KUtil.RL(rule.substring(1), modid));
+					info.moduleRules.add(Objects.requireNonNull(KUtil.RL(rule.substring(1), modid)));
 					checkDep = true;
 				} else if (!Platform.isModLoaded(rule)) {
 					continue load;
@@ -586,7 +596,7 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 
 		List<String> entries = Lists.newArrayList();
 		for (KiwiModuleContainer container : KiwiModules.get()) {
-			Identifier uid = container.module.uid;
+			Identifier uid = Objects.requireNonNull(container.module.uid);
 			if (ID.equals(uid.getNamespace()) && uid.getPath().startsWith("contributors")) {
 				continue;
 			}

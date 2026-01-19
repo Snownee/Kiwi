@@ -12,7 +12,6 @@ import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeMap;
 import snownee.kiwi.customization.block.family.StonecutterRecipeMaker;
 
-@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 @Mixin(RecipeManager.class)
 public class RecipeManagerMixin {
 	@WrapOperation(

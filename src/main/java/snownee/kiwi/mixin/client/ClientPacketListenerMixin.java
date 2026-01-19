@@ -21,12 +21,12 @@ public class ClientPacketListenerMixin {
 					target = "Lnet/minecraft/world/level/block/entity/BlockEntity;loadWithComponents(Lnet/minecraft/world/level/storage/ValueInput;)V"
 			)
 	)
-	private void kiwi$handleBlockEntityData(BlockEntity blockEntity, ValueInput valueInput, Operation<Void> original) {
+	private void kiwi$handleBlockEntityData(BlockEntity blockEntity, ValueInput input, Operation<Void> original) {
 		if (blockEntity instanceof ModBlockEntity) {
 			ClientPacketListener listener = (ClientPacketListener) (Object) this;
-			((ModBlockEntity) blockEntity).onDataPacket(listener.getConnection(), valueInput);
+			((ModBlockEntity) blockEntity).onDataPacket(listener.getConnection(), input);
 		} else {
-			original.call(blockEntity, valueInput);
+			original.call(blockEntity, input);
 		}
 	}
 }

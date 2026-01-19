@@ -33,6 +33,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiModule.Skip;
@@ -173,8 +174,8 @@ public class ConfigHandler {
 		return Platform.getConfigDir().resolve(fileName + FILE_EXTENSION);
 	}
 
-	public void init() {
-		build();
+	public void init(Map<Identifier, Boolean> moduleOptions) {
+		build(moduleOptions);
 		Path configPath = getConfigPath();
 		if (Files.exists(configPath)) {
 			refresh();
@@ -237,9 +238,9 @@ public class ConfigHandler {
 		}
 	}
 
-	private void build() {
+	private void build(Map<Identifier, Boolean> moduleOptions) {
 		if (hasModules) {
-			KiwiConfigManager.defineModules(modId, this, !fileName.equals(modId + "-modules"));
+			KiwiConfigManager.defineModules(modId, this, moduleOptions, !fileName.equals(modId + "-modules"));
 		}
 		if (clazz == null) {
 			return;
@@ -268,7 +269,7 @@ public class ConfigHandler {
 			}
 			Value<?> value = define(pathKey, converted, field, translationKey);
 			if (field.getAnnotation(LevelRestart.class) != null || field.getAnnotation(GameRestart.class) != null) {
-				// since there is no difference between these two options..
+				// since there is no difference between these two options...
 				value.requiresRestart = true;
 			}
 			Range range = field.getAnnotation(Range.class);
@@ -341,6 +342,7 @@ public class ConfigHandler {
 		return clazz;
 	}
 
+	@SuppressWarnings("unchecked")
 	public <T> Value<T> get(String path) {
 		return (Value<T>) valueMap.get(path);
 	}
@@ -392,8 +394,7 @@ public class ConfigHandler {
 
 	public static class Value<T> {
 		public final T defValue;
-		@Nullable
-		public Field field;
+		public final @Nullable Field field;
 		public T value;
 		public boolean requiresRestart;
 		public String translation;
@@ -483,6 +484,7 @@ public class ConfigHandler {
 					}
 				}
 				boolean changed = !Objects.equals(value, $);
+				//noinspection unchecked
 				value = (T) $;
 				if (changed && listener != null) {
 					listener.invoke(null, path);

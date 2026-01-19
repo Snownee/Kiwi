@@ -8,15 +8,15 @@ import org.jspecify.annotations.Nullable;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 
 public class BlockObject<T extends Block> extends KiwiGO<T> implements ItemLike {
-	private Function<Block.Properties, T> factory;
+	private @Nullable Function<Block.Properties, T> factory;
 	private @Nullable Supplier<Block> copyFrom;
 
 	public BlockObject(Function<Block.Properties, T> factory, @Nullable Supplier<Block> copyFrom) {
@@ -42,7 +42,7 @@ public class BlockObject<T extends Block> extends KiwiGO<T> implements ItemLike 
 			} else {
 				properties = BlockBehaviour.Properties.of();
 			}
-			//noinspection unchecked
+			//noinspection unchecked,NullableProblems
 			properties.setId((ResourceKey<Block>) resourceKey());
 			value = Objects.requireNonNull(factory.apply(properties));
 			factory = null;

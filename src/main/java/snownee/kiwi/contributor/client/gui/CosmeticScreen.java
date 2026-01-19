@@ -24,10 +24,9 @@ import snownee.kiwi.contributor.ContributorsClient;
 
 public class CosmeticScreen extends Screen {
 
-	private List list;
-	@Nullable
-	private Identifier currentCosmetic;
-	private Entry selectedEntry;
+	private @Nullable List list;
+	private @Nullable Identifier currentCosmetic;
+	private @Nullable Entry selectedEntry;
 
 	public CosmeticScreen() {
 		super(Component.translatable("gui.kiwi.cosmetic"));

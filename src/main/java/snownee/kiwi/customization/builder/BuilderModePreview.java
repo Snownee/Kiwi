@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.jspecify.annotations.Nullable;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
@@ -35,8 +37,8 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import snownee.kiwi.util.KHolder;
 
 public class BuilderModePreview implements DebugRenderer.SimpleDebugRenderer {
-	public KHolder<BuilderRule> rule;
-	public BlockPos pos;
+	public @Nullable KHolder<BuilderRule> rule;
+	public @Nullable BlockPos pos;
 	private BlockState blockState = Blocks.AIR.defaultBlockState();
 	public List<BlockPos> positions = List.of();
 	private final ListMultimap<Direction, AABB> faces = ArrayListMultimap.create(6, 32);

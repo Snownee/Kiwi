@@ -60,7 +60,7 @@ public record SimplePropertiesComponent(
 				if (values == null) {
 					return DataResult.error(() -> "Missing default value for property");
 				} else {
-					defaultValue = values.get(0);
+					defaultValue = values.getFirst();
 				}
 			}
 			Property<?> property;
@@ -71,12 +71,12 @@ public record SimplePropertiesComponent(
 					return DataResult.error(() -> "Unknown common property: " + s);
 				}
 			} else {
-				String name = ops.getStringValue(map.get("name")).getOrThrow($ -> new IllegalStateException("Missing name for property"));
+				String name = ops.getStringValue(map.get("name")).getOrThrow(_ -> new IllegalStateException("Missing name for property"));
 
 				if (defaultValue instanceof Integer) {
-					int min = ops.getNumberValue(map.get("min")).getOrThrow($ -> new IllegalStateException(
+					int min = ops.getNumberValue(map.get("min")).getOrThrow(_ -> new IllegalStateException(
 							"Missing min for integer property")).intValue();
-					int max = ops.getNumberValue(map.get("max")).getOrThrow($ -> new IllegalStateException(
+					int max = ops.getNumberValue(map.get("max")).getOrThrow(_ -> new IllegalStateException(
 							"Missing max for integer property")).intValue();
 					property = IntegerProperty.create(name, min, max);
 				} else if (defaultValue instanceof Boolean) { // will the NbtOps break this?

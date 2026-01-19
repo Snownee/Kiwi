@@ -42,9 +42,15 @@ public class CustomizationCodecs {
 			"block", PushReaction.BLOCK,
 			"ignore", PushReaction.IGNORE,
 			"push_only", PushReaction.PUSH_ONLY));
-	public static final Codec<RenderLayerEnum> RENDER_TYPE = simpleByNameCodec(ImmutableBiMap.of(
-			"cutout", RenderLayerEnum.CUTOUT,
-			"translucent", RenderLayerEnum.TRANSLUCENT));
+	public static final Codec<RenderLayerEnum> RENDER_TYPE = Codec.STRING.flatXmap(
+			s -> switch (s) {
+				case "cutout", "cutout_mipped" -> DataResult.success(RenderLayerEnum.CUTOUT);
+				case "translucent" -> DataResult.success(RenderLayerEnum.TRANSLUCENT);
+				default -> DataResult.error(() -> "Unknown render type: " + s);
+			}, type -> switch (type) {
+				case CUTOUT -> DataResult.success("cutout");
+				case TRANSLUCENT -> DataResult.success("translucent");
+			});
 	public static final Codec<BlockBehaviour.OffsetType> OFFSET_TYPE = simpleByNameCodec(ImmutableBiMap.of(
 			"xz", BlockBehaviour.OffsetType.XZ,
 			"xyz", BlockBehaviour.OffsetType.XYZ));

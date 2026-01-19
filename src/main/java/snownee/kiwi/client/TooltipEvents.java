@@ -144,7 +144,7 @@ public final class TooltipEvents {
 			}
 			ClientLevel level = Minecraft.getInstance().level;
 			if (level != null && item instanceof SpawnEggItem spawnEggItem) {
-				EntityType<?> type = spawnEggItem.getType(itemStack);
+				EntityType<?> type = SpawnEggItem.getType(itemStack);
 				addPages("entity_type", getTags(BuiltInRegistries.ENTITY_TYPE, type));
 			} else if (item instanceof BucketItem bucketItem) {
 				addPages("fluid", getTags(BuiltInRegistries.FLUID, Platform.getFluidFromBucket(bucketItem)));

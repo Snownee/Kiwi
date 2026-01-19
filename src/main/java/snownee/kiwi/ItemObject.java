@@ -3,6 +3,8 @@ package snownee.kiwi;
 import java.util.Objects;
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
+
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -11,7 +13,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 
 public class ItemObject<T extends Item> extends KiwiGO<T> implements ItemLike {
-	private Function<Item.Properties, T> factory;
+	private @Nullable Function<Item.Properties, T> factory;
 
 	public ItemObject(Function<Item.Properties, T> factory) {
 		super(null);
@@ -29,7 +31,7 @@ public class ItemObject<T extends Item> extends KiwiGO<T> implements ItemLike {
 	public T getOrCreate() {
 		if (value == null) {
 			Objects.requireNonNull(factory);
-			//noinspection unchecked
+			//noinspection unchecked,NullableProblems
 			value = Objects.requireNonNull(factory.apply(new Item.Properties().setId((ResourceKey<Item>) resourceKey())));
 			factory = null;
 		}

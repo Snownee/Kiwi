@@ -40,25 +40,26 @@ public abstract class BlockStateMixin {
 	protected abstract BlockState asState();
 
 	@Inject(method = "canSurvive", at = @At("HEAD"), cancellable = true)
-	private void kiwi$canSurvive(LevelReader pLevel, BlockPos pPos, CallbackInfoReturnable<Boolean> cir) {
+	private void kiwi$canSurvive(LevelReader level, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
 		KBlockSettings settings = KBlockSettings.of(getBlock());
 		if (settings != null && settings.canSurviveHandler != null) {
-			cir.setReturnValue(settings.canSurviveHandler.canSurvive(asState(), pLevel, pPos));
+			cir.setReturnValue(settings.canSurviveHandler.canSurvive(asState(), level, pos));
 		}
 	}
 
 	@Inject(method = "updateShape", at = @At("HEAD"), cancellable = true)
 	private void kiwi$checkCanSurvive(
 			LevelReader level,
-			ScheduledTickAccess scheduledTickAccess,
+			ScheduledTickAccess ticks,
 			BlockPos pos,
-			Direction direction,
-			BlockPos neighborPos,
-			BlockState neighborState,
+			Direction directionToNeighbour,
+			BlockPos neighbourPos,
+			BlockState neighbourState,
 			RandomSource random,
 			CallbackInfoReturnable<BlockState> cir) {
 		KBlockSettings settings = KBlockSettings.of(getBlock());
-		if (settings != null && settings.canSurviveHandler != null && settings.canSurviveHandler.isSensitiveSide(asState(), direction) &&
+		if (settings != null && settings.canSurviveHandler != null && settings.canSurviveHandler.isSensitiveSide(asState(),
+				directionToNeighbour) &&
 				!settings.canSurviveHandler.canSurvive(asState(), level, pos)) {
 			cir.setReturnValue(Blocks.AIR.defaultBlockState());
 		}
@@ -67,11 +68,11 @@ public abstract class BlockStateMixin {
 	@Inject(method = "updateShape", at = @At("RETURN"), cancellable = true)
 	private void kiwi$updateShape(
 			LevelReader level,
-			ScheduledTickAccess scheduledTickAccess,
+			ScheduledTickAccess ticks,
 			BlockPos pos,
-			Direction direction,
-			BlockPos neighborPos,
-			BlockState neighborState,
+			Direction directionToNeighbour,
+			BlockPos neighbourPos,
+			BlockState neighbourState,
 			RandomSource random,
 			CallbackInfoReturnable<BlockState> cir) {
 		if (!cir.getReturnValue().is(getBlock())) {
@@ -81,22 +82,22 @@ public abstract class BlockStateMixin {
 		if (settings != null) {
 			cir.setReturnValue(settings.updateShape(
 					cir.getReturnValue(),
-					direction,
-					neighborState,
+					directionToNeighbour,
+					neighbourState,
 					level,
-					scheduledTickAccess,
+					ticks,
 					pos,
-					neighborPos));
+					neighbourPos));
 		}
 	}
 
 	@Inject(method = "canBeReplaced(Lnet/minecraft/world/item/context/BlockPlaceContext;)Z", at = @At("HEAD"), cancellable = true)
-	private void kiwi$canBeReplaced(BlockPlaceContext pUseContext, CallbackInfoReturnable<Boolean> cir) {
+	private void kiwi$canBeReplaced(BlockPlaceContext context, CallbackInfoReturnable<Boolean> cir) {
 		KBlockSettings settings = KBlockSettings.of(getBlock());
 		if (settings == null) {
 			return;
 		}
-		Boolean triState = settings.canBeReplaced(asState(), pUseContext);
+		Boolean triState = settings.canBeReplaced(asState(), context);
 		if (triState != null) {
 			cir.setReturnValue(triState);
 		}

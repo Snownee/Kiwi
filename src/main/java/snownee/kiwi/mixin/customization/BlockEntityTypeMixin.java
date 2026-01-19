@@ -2,6 +2,7 @@ package snownee.kiwi.mixin.customization;
 
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -12,7 +13,6 @@ import com.google.common.collect.Sets;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 
-import javax.annotation.Nullable;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
@@ -26,23 +26,23 @@ public abstract class BlockEntityTypeMixin {
 	private Set<Block> validBlocks;
 
 	@Unique
-	private Boolean lenient;
+	private @Nullable Boolean lenient;
 	@Unique
-	private volatile Set<Block> lenientValidBlocks;
+	private volatile @Nullable Set<Block> lenientValidBlocks;
 
 	@Shadow
-	@Nullable
-	public abstract Holder.Reference<BlockEntityType<?>> builtInRegistryHolder();
+	public abstract Holder.@Nullable Reference<BlockEntityType<?>> builtInRegistryHolder();
 
 	@SuppressWarnings("SuspiciousMethodCalls")
 	@WrapOperation(method = "isValid", at = @At(value = "INVOKE", target = "Ljava/util/Set;contains(Ljava/lang/Object;)Z"))
-	public boolean isValid(Set<Block> instance, Object object, Operation<Boolean> original) {
+	public boolean isValid(Set<Block> instance, @Nullable Object object, Operation<Boolean> original) {
 		if (!CustomizationHooks.isEnabled()) {
 			return original.call(instance, object);
 		}
 		if (object == null) {
 			return false;
 		}
+		Set<Block> lenientValidBlocks = this.lenientValidBlocks;
 		if (lenientValidBlocks != null && lenientValidBlocks.contains(object)) {
 			return true;
 		}
@@ -57,20 +57,19 @@ public abstract class BlockEntityTypeMixin {
 			Identifier key = reference.key().identifier();
 			lenient = CustomizationHooks.getLenientBETypeNamespaces().contains(key.getNamespace());
 		}
-		if (lenient == Boolean.FALSE) {
+		if (!lenient) {
 			return false;
 		}
 		for (Block validBlock : validBlocks) {
 			if (validBlock.getClass() == object.getClass()) {
-				if (lenientValidBlocks == null) {
-					//noinspection SynchronizeOnNonFinalField
-					synchronized (validBlocks) {
-						if (lenientValidBlocks == null) {
-							lenientValidBlocks = Sets.newHashSet(validBlocks);
-						}
+				//noinspection SynchronizeOnNonFinalField
+				synchronized (validBlocks) {
+					lenientValidBlocks = this.lenientValidBlocks;
+					if (lenientValidBlocks == null) {
+						lenientValidBlocks = this.lenientValidBlocks = Sets.newHashSet(validBlocks);
 					}
+					lenientValidBlocks.add((Block) object);
 				}
-				lenientValidBlocks.add((Block) object);
 				return true;
 			}
 		}

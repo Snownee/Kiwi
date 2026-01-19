@@ -14,7 +14,7 @@ import snownee.kiwi.util.client.SmartKey;
 @Mixin(OptionInstance.class)
 public class OptionInstanceMixin {
 	@Shadow
-	Object value;
+	private Object value;
 
 	@Inject(at = @At("HEAD"), method = "get", cancellable = true)
 	private void kiwi$get(CallbackInfoReturnable<Object> ci) {

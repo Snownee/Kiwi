@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import org.jspecify.annotations.Nullable;
 import org.joml.Matrix3x2fStack;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
+import org.jspecify.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import com.google.common.collect.Sets;
@@ -56,7 +56,7 @@ public class ConvertScreen extends Screen {
 	private final int slotIndex;
 	private final Collection<CConvertItemPacket.Group> groups;
 	private final LerpedFloat openProgress = LerpedFloat.linear();
-	private PanelLayout layout;
+	private @Nullable PanelLayout layout;
 	private final Vector2i originalMousePos;
 	private final ItemStack sourceItem;
 	private ClientTooltipPositioner forcedTooltipPositioner;

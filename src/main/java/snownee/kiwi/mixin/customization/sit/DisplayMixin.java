@@ -2,6 +2,7 @@ package snownee.kiwi.mixin.customization.sit;
 
 import java.util.Objects;
 
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -28,7 +29,7 @@ public abstract class DisplayMixin extends Entity {
 	}
 
 	@Inject(method = "renderState", at = @At("HEAD"), cancellable = true)
-	private void kiwi$renderState(CallbackInfoReturnable<Display.RenderState> cir) {
+	private void kiwi$renderState(CallbackInfoReturnable<Display.@Nullable RenderState> cir) {
 		if (level().isClientSide() && SitManager.isSeatEntity(this)) {
 			cir.setReturnValue(null);
 		}

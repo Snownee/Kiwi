@@ -31,12 +31,11 @@ public class PackRepositoryMixin {
 	@Final
 	private Set<RepositorySource> sources;
 
-	@SuppressWarnings("UnstableApiUsage")
 	@Inject(method = "<init>", at = @At("RETURN"))
-	private void kiwi$init(RepositorySource[] repositorySources, CallbackInfo ci) {
+	private void kiwi$init(RepositorySource[] sources, CallbackInfo ci) {
 		PackType packType = null;
 		boolean hasModSource = false;
-		for (RepositorySource source : repositorySources) {
+		for (RepositorySource source : sources) {
 			if (packType == null) {
 				if (source instanceof FolderRepositorySource) {
 					PackType t = ((FolderRepositorySource) source).packType;
@@ -52,17 +51,17 @@ public class PackRepositoryMixin {
 			}
 		}
 		if (packType != null) {
-			if (sources instanceof ImmutableCollection) {
-				sources = Sets.newLinkedHashSet(sources);
+			if (this.sources instanceof ImmutableCollection) {
+				this.sources = Sets.newLinkedHashSet(this.sources);
 			}
 			if (!hasModSource) {
 				if (packType == PackType.CLIENT_RESOURCES) {
-					sources.add(ModResourcePackCreator.CLIENT_RESOURCE_PACK_PROVIDER);
+					this.sources.add(ModResourcePackCreator.CLIENT_RESOURCE_PACK_PROVIDER);
 				} else {
-					sources.add(new ModResourcePackCreator(PackType.SERVER_DATA));
+					this.sources.add(new ModResourcePackCreator(PackType.SERVER_DATA));
 				}
 			}
-			sources.add(new RequiredFolderRepositorySource(
+			this.sources.add(new RequiredFolderRepositorySource(
 					CustomizationServiceFinder.PACK_DIRECTORY,
 					packType,
 					PackSource.BUILT_IN,

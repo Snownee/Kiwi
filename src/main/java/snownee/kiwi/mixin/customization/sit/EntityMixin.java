@@ -13,10 +13,10 @@ import snownee.kiwi.customization.block.behavior.SitManager;
 @Mixin(Entity.class)
 public class EntityMixin {
 	@Inject(method = "getDismountLocationForPassenger", at = @At("HEAD"), cancellable = true)
-	private void kiwi$getDismountLocationForPassenger(LivingEntity pPassenger, CallbackInfoReturnable<Vec3> cir) {
+	private void kiwi$getDismountLocationForPassenger(LivingEntity passenger, CallbackInfoReturnable<Vec3> cir) {
 		Entity self = (Entity) (Object) this;
 		if (SitManager.isSeatEntity(self)) {
-			cir.setReturnValue(SitManager.dismount(self, pPassenger));
+			cir.setReturnValue(SitManager.dismount(self, passenger));
 		}
 	}
 }
