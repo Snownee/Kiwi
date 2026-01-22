@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.function.IntConsumer;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.Nullable;
+
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.InputConstants;
 
@@ -70,6 +72,7 @@ public final class TooltipEvents {
 			MutableComponent component = Component.literal(BuiltInRegistries.ITEM.getKey(itemStack.getItem()).toString());
 			mc.keyboardHandler.setClipboard(component.getString());
 			mc.player.displayClientMessage(KUtil.clickToCopy(component), false);
+			mc.debugEntries.toggleDebugOverlay();
 		}
 
 		if (KiwiClientConfig.hideDataComponentsTooltip) {
@@ -124,7 +127,7 @@ public final class TooltipEvents {
 		private ItemStack itemStack = ItemStack.EMPTY;
 		private boolean showTags;
 		private long lastShowTags;
-		private String preferredType;
+		private @Nullable String preferredType;
 		public boolean needUpdatePreferredType;
 
 		public void maybeUpdateTags(ItemStack itemStack) {
@@ -145,7 +148,9 @@ public final class TooltipEvents {
 			ClientLevel level = Minecraft.getInstance().level;
 			if (level != null && item instanceof SpawnEggItem spawnEggItem) {
 				EntityType<?> type = SpawnEggItem.getType(itemStack);
-				addPages("entity_type", getTags(BuiltInRegistries.ENTITY_TYPE, type));
+				if (type != null) {
+					addPages("entity_type", getTags(BuiltInRegistries.ENTITY_TYPE, type));
+				}
 			} else if (item instanceof BucketItem bucketItem) {
 				addPages("fluid", getTags(BuiltInRegistries.FLUID, Platform.getFluidFromBucket(bucketItem)));
 			}

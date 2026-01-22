@@ -77,7 +77,7 @@ public final class CustomizationClient {
 //		forgeEventBus.addListener((CustomizeGuiOverlayEvent.DebugText event) -> {
 //			BuildersButton.renderDebugText(event.getLeft(), event.getRight());
 //		});
-		LevelRenderEvents.BEFORE_BLOCK_OUTLINE.register((worldRenderContext, blockOutlineContext) -> {
+		LevelRenderEvents.BEFORE_BLOCK_OUTLINE.register((_, _) -> {
 			return !BuildersButton.cancelRenderHighlight();
 		});
 		LevelRenderEvents.START_MAIN.register(context -> {

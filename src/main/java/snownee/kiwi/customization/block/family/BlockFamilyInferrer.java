@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -44,7 +45,10 @@ public class BlockFamilyInferrer {
 			"%s_door",
 			"%s_trapdoor",
 			"%s_button",
-			"%s_pressure_plate");
+			"%s_pressure_plate",
+			"%s_bars",
+			"%s_chain",
+			"%s_shelf");
 	private final List<String> variants = List.of(
 			"%s",
 			"chiseled_%s",
@@ -84,7 +88,7 @@ public class BlockFamilyInferrer {
 		for (Holder<Block> holder : BuiltInRegistries.BLOCK.asHolderIdMap()) {
 			String path = holder.unwrapKey().orElseThrow().identifier().getPath();
 			if (path.startsWith("pink_") || path.endsWith("_pink") || path.endsWith("_log") || path.endsWith("_stem") || path.endsWith(
-					"_stairs") || path.endsWith("_slab") || path.startsWith("smooth_")) {
+					"_stairs") || path.endsWith("_slab") || path.startsWith("smooth_") || path.endsWith("_block")) {
 				if (holder.is(IGNORE)) {
 					continue;
 				}
@@ -155,7 +159,11 @@ public class BlockFamilyInferrer {
 				family(id, "variants", blocks.stream().distinct().toList(), true);
 				continue;
 			}
-			if (path.endsWith("_slab")) {
+			if (path.endsWith("_block")) {
+				Identifier id = key.withPath(path.substring(0, path.length() - 6));
+				fromTemplates(id, "general", general, true);
+				captured = true;
+			} else if (path.endsWith("_slab")) {
 				Identifier id = key.withPath(path.substring(0, path.length() - 5));
 				fromTemplates(id, "general", general, true);
 				captured = true;
@@ -168,14 +176,20 @@ public class BlockFamilyInferrer {
 				throw new IllegalStateException("Unrecognized block: " + holder.value());
 			}
 		}
-		List<String> normalCopperTemplate = List.of("%s_block", "cut_%s", "chiseled_%s", "%s_grate");
-		List<String> otherCopperTemplate = List.of("%s", "cut_%s", "chiseled_%s", "%s_grate");
+		List<String> commonCopperTemplate = List.of(
+				"cut_%s",
+				"chiseled_%s",
+				"%s_door",
+				"%s_trapdoor",
+				"%s_chain",
+				"%s_grate",
+				"%s_bars");
 		Identifier copperId = Identifier.withDefaultNamespace("copper");
 		for (String waxed : List.of("", "waxed_")) {
 			for (String variant : List.of("", "exposed_", "weathered_", "oxidized_")) {
-				List<String> template = variant.isEmpty() ? normalCopperTemplate : otherCopperTemplate;
-				template = template.stream().map($ -> waxed + variant + $).toList();
-				fromTemplates(copperId, waxed + variant + "copper", template, true);
+				Stream<String> template = Stream.of(variant.isEmpty() ? "%s_block" : "%s");
+				template = Stream.concat(template, commonCopperTemplate.stream()).map($ -> waxed + variant + $);
+				fromTemplates(copperId, waxed + variant + "copper", template.toList(), true);
 			}
 		}
 		return families;

@@ -65,7 +65,7 @@ public final class SizedIngredient {
 	}
 
 	public boolean test(ItemStack stack) {
-		return ingredient.test(stack) && (stack.isEmpty() || stack.getCount() >= count);
+		return ingredient.test(stack) && (stack.isEmpty() || stack.count() >= count);
 	}
 
 	public SlotDisplay display() {

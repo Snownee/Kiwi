@@ -53,7 +53,7 @@ public class TestRecipe extends DynamicShapedRecipe {
 		ItemStack stack = item('#', input, pos);
 		CustomData customData = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
 		if ("SSR".equals(customData.copyTag().getString("Rarity"))) {
-			res.grow(res.getCount());
+			res.grow(res.count());
 		}
 		return res;
 	}

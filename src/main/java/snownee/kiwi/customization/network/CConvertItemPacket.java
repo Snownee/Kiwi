@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.IntFunction;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -23,7 +22,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.ByIdMap;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
@@ -48,7 +46,7 @@ public record CConvertItemPacket(
 ) implements CustomPacketPayload {
 
 	public static final Type<CConvertItemPacket> TYPE = new Type<>(Kiwi.id("convert_item"));
-
+	public static final int SLOT_UNKNOWN_SOURCE = -500;
 	public static final int MAX_STEPS = 4;
 
 	@Override
@@ -75,7 +73,7 @@ public record CConvertItemPacket(
 		@Override
 		public void handle(CConvertItemPacket packet, PayloadContext context) {
 			var player = context.serverPlayer();
-			if (KiwiCommonConfig.kSwitchCreativeOnly && !player.isCreative()) {
+			if (KiwiCommonConfig.kSwitchCreativeOnly && !player.hasInfiniteMaterials()) {
 				return;
 			}
 			var action = packet.action;
@@ -91,115 +89,68 @@ public record CConvertItemPacket(
 			}
 			Item to = steps.getLast().getSecond();
 			context.execute(() -> {
-				Item item = from;
-				int index = 0;
-				float ratio = 1;
-				for (Pair<Identifier, Item> step : steps) {
-					BlockFamily family = BlockFamilies.get(step.getFirst());
-					if (family == null || !family.switchAttrs().enabled() || !family.contains(item) || !family.contains(step.getSecond())) {
-						return;
-					}
-					if (!family.switchAttrs().cascading() && index != steps.size() - 1) {
-						return;
-					}
-					if (!player.isCreative()) {
-						ratio *= BlockFamilies.getConvertRatio(item) / BlockFamilies.getConvertRatio(step.getSecond());
-					}
-					item = step.getSecond();
-					++index;
-				}
-				ItemStack sourceItem;
-				Slot slot = null;
 				Inventory playerInventory = player.getInventory();
-				try {
-					if (slotIndex == -500) {
-						if (player.isCreative()) {
-							sourceItem = from.getDefaultInstance();
-						} else {
+				ItemStack sourceItem;
+				{
+					Item item = from;
+					int index = 0;
+					for (Pair<Identifier, Item> step : steps) {
+						BlockFamily family = BlockFamilies.get(step.getFirst());
+						if (family == null || !family.switchAttrs().enabled() || !family.contains(item) ||
+								!family.contains(step.getSecond())) {
 							return;
 						}
-					} else if (inContainer) {
-						slot = player.containerMenu.slots.get(slotIndex);
-						if (!slot.allowModification(player)) {
+						if (!family.switchAttrs().cascading() && index != steps.size() - 1) {
 							return;
 						}
-						sourceItem = slot.getItem();
-					} else {
-						sourceItem = playerInventory.getItem(slotIndex);
+						item = step.getSecond();
+						++index;
 					}
-				} catch (Exception e) {
-					return;
-				}
-				if (!sourceItem.is(from)) {
-					return;
-				}
-				if (action == Action.CONVERT_FAMILY) {
-					convertFamily(player, to, slotIndex, ratio);
-					return;
-				}
-				boolean skipSettingSlot = false;
-				ItemStack newItem;
-				int inventorySwap = Integer.MIN_VALUE;
-				if (ratio >= 1) {
-					newItem = to.getDefaultInstance();
-				} else if (action == Action.CONVERT_ONE) {
-					return;
-				} else {
-					for (int i = 0; i < playerInventory.getContainerSize(); i++) {
-						ItemStack stack = playerInventory.getItem(i);
-						if (stack.is(to)) {
-							inventorySwap = i;
-							break;
-						}
-					}
-					if (inventorySwap == Integer.MIN_VALUE) {
-						return;
-					}
-					newItem = playerInventory.getItem(inventorySwap);
-				}
-				int ratioInt = Mth.floor(ratio);
-				if (action == Action.CONVERT_ONE) {
-					if (!player.isCreative()) {
-						sourceItem.shrink(1);
-						newItem.setCount(ratioInt);
-					}
-					if (!sourceItem.isEmpty()) {
-						addToPlayer(player, newItem, !inContainer);
-						skipSettingSlot = true;
-					}
-				} else if (inventorySwap == Integer.MIN_VALUE) {
-					int maxSize = newItem.getMaxStackSize();
-					int count = Math.min(sourceItem.getCount(), maxSize / ratioInt);
-					newItem.setCount(count * ratioInt);
-					if (!player.isCreative()) {
-						sourceItem.shrink(count);
-					}
-				}
-				if (slotIndex != -500 && !skipSettingSlot) {
 					try {
-						if (inContainer) {
-							if (!slot.mayPlace(newItem)) {
+						if (slotIndex == SLOT_UNKNOWN_SOURCE) {
+							if (player.hasInfiniteMaterials()) {
+								sourceItem = from.getDefaultInstance();
+							} else {
 								return;
 							}
-							slot.setByPlayer(newItem);
+						} else if (inContainer) {
+							Slot slot = player.containerMenu.slots.get(slotIndex);
+							if (!slot.allowModification(player)) {
+								return;
+							}
+							sourceItem = slot.getItem();
 						} else {
-							newItem.setPopTime(Inventory.POP_TIME_DURATION);
-							playerInventory.setItem(slotIndex, newItem);
+							sourceItem = playerInventory.getItem(slotIndex);
 						}
 					} catch (Exception e) {
 						return;
 					}
 				}
-				if (inventorySwap != Integer.MIN_VALUE) {
-					playerInventory.setItem(inventorySwap, sourceItem);
-				} else if (!skipSettingSlot && !player.isCreative()) {
-					addToPlayer(player, sourceItem.copy(), !inContainer);
+				if (!sourceItem.is(from)) {
+					return;
 				}
+				if (action == Action.CONVERT_FAMILY) {
+					convertFamily(player, to, slotIndex);
+					return;
+				}
+				int consumedCount = action == Action.CONVERT_ONE ? 1 : sourceItem.count();
+				long matValue = BlockFamilies.getMatValue(from) * consumedCount;
+				int newCount = player.hasInfiniteMaterials() ? consumedCount : (int) (matValue / BlockFamilies.getMatValue(to));
+				if (newCount < 1) {
+					return;
+				}
+				if (player.hasInfiniteMaterials() && action == Action.CONVERT_ALL && slotIndex != SLOT_UNKNOWN_SOURCE) {
+					sourceItem.shrink(consumedCount);
+				} else if (!player.hasInfiniteMaterials()) {
+					sourceItem.shrink(consumedCount);
+				}
+				addToPlayer(player, to.getDefaultInstance(), newCount, true);
 				broadcastChanges(player);
 			});
 		}
 
 		private static void broadcastChanges(ServerPlayer player) {
+			player.containerMenu.broadcastChanges();
 			Inventory inventory = player.getInventory();
 			boolean success = false;
 			for (int i = 0; i < inventory.getContainerSize(); i++) {
@@ -207,42 +158,6 @@ public record CConvertItemPacket(
 			}
 			if (success) {
 				playPickupSound(player);
-				player.containerMenu.broadcastChanges();
-			}
-		}
-
-		public static void convertFamily(ServerPlayer player, Item to, int slotIndex, float ratio) {
-			Set<Item> set = BlockFamilies.findQuickSwitch(to, player.isCreative()).stream()
-					.map(KHolder::value)
-					.flatMap(BlockFamily::items)
-					.filter(Predicate.not(to::equals))
-					.collect(Collectors.toSet());
-			Inventory inventory = player.getInventory();
-			boolean success = false;
-			for (int i = 0; i < inventory.getContainerSize(); i++) {
-				ItemStack stack = inventory.getItem(i);
-				if (!set.contains(stack.getItem())) {
-					continue;
-				}
-				success = true;
-				inventory.setItem(i, ItemStack.EMPTY);
-				ItemStack newItem = to.getDefaultInstance();
-				newItem.setPopTime(Inventory.POP_TIME_DURATION);
-				int newCount = Mth.floor(stack.getCount() * ratio);
-				while (newCount > 0) {
-					int count = Math.min(newCount, newItem.getMaxStackSize());
-					newItem.setCount(count);
-					newCount -= count;
-					if (!inventory.add(slotIndex, newItem) && !inventory.add(newItem)) {
-						player.drop(newItem, true);
-					}
-					if (newCount > 0) {
-						newItem = newItem.copy();
-					}
-				}
-			}
-			if (success) {
-				broadcastChanges(player);
 			}
 		}
 
@@ -251,8 +166,37 @@ public record CConvertItemPacket(
 			return STREAM_CODEC;
 		}
 
-		private static void addToPlayer(ServerPlayer player, ItemStack itemStack, boolean nextToSelected) {
+		private static void convertFamily(ServerPlayer player, Item to, int slotIndex) {
+			Set<Item> set = BlockFamilies.findQuickSwitch(to, player.hasInfiniteMaterials()).stream()
+					.map(KHolder::value)
+					.flatMap(BlockFamily::items)
+					.collect(Collectors.toSet());
 			Inventory inventory = player.getInventory();
+			long matValue = 0;
+			for (int i = 0; i < inventory.getContainerSize(); i++) {
+				ItemStack stack = inventory.getItem(i);
+				if (!set.contains(stack.getItem())) {
+					continue;
+				}
+				inventory.setItem(i, ItemStack.EMPTY);
+				matValue += BlockFamilies.getMatValue(stack);
+			}
+			ItemStack itemStack = to.getDefaultInstance();
+			if (player.hasInfiniteMaterials()) {
+				itemStack.setPopTime(Inventory.POP_TIME_DURATION);
+				inventory.setItem(slotIndex, itemStack);
+			} else {
+				int count = (int) (matValue / BlockFamilies.getMatValue(to));
+				addToPlayer(player, itemStack, count, true);
+			}
+		}
+
+		private static void addToPlayer(ServerPlayer player, ItemStack template, int count, boolean nextToSelected) {
+			if (count == 0) {
+				return;
+			}
+			Inventory inventory = player.getInventory();
+
 			IntStream intStream = IntStream.range(0, 9);
 			if (nextToSelected) {
 				IntStream leftAndRight = IntStream.of(
@@ -261,15 +205,31 @@ public record CConvertItemPacket(
 						inventory.getSelectedSlot() - 1);
 				intStream = IntStream.concat(leftAndRight, intStream);
 			}
-			int slot = intStream.filter(Inventory::isHotbarSlot).filter(i -> {
-				ItemStack stack = inventory.getItem(i);
-				if (stack.isEmpty()) {
-					return true;
+			int[] slots = intStream.filter(Inventory::isHotbarSlot).toArray();
+
+			while (count > 0) {
+				int selectedSlot = -1;
+				int singleCount = Math.min(count, template.getMaxStackSize());
+				for (int slot : slots) {
+					ItemStack itemInSlot = inventory.getItem(slot);
+					if (itemInSlot.isEmpty()) {
+						selectedSlot = slot;
+						break;
+					}
+					if (itemInSlot.getMaxStackSize() > itemInSlot.count() && ItemStack.isSameItemSameComponents(itemInSlot, template)) {
+						selectedSlot = slot;
+						singleCount = Math.min(singleCount, itemInSlot.getMaxStackSize() - itemInSlot.count());
+						break;
+					}
 				}
-				return stack.getCount() < stack.getMaxStackSize() && ItemStack.isSameItemSameComponents(stack, itemStack);
-			}).findFirst().orElse(-1);
-			if (!inventory.add(slot, itemStack) && !inventory.add(itemStack) && !player.isCreative()) {
-				player.drop(itemStack, true);
+
+				ItemStack itemStack = template.copyWithCount(singleCount);
+				itemStack.setPopTime(Inventory.POP_TIME_DURATION);
+				count -= singleCount;
+
+				if (!inventory.add(selectedSlot, itemStack) && !inventory.add(itemStack)) {
+					player.drop(itemStack, true);
+				}
 			}
 		}
 
@@ -292,20 +252,20 @@ public record CConvertItemPacket(
 		}
 	}
 
-	public record Entry(float ratio, List<Pair<Identifier, Item>> steps) {
+	public record Entry(List<Pair<Identifier, Item>> steps) {
 		public static final StreamCodec<RegistryFriendlyByteBuf, Pair<Identifier, Item>> ENTRY_PAIR_STREAM_CODEC = StreamCodec.composite(
 				Identifier.STREAM_CODEC, Pair::getFirst,
 				ByteBufCodecs.registry(Registries.ITEM), Pair::getSecond,
 				Pair::of);
 
 		public static final StreamCodec<RegistryFriendlyByteBuf, Entry> STREAM_CODEC = StreamCodec.composite(
-				ByteBufCodecs.FLOAT, Entry::ratio,
-				ByteBufCodecs.collection(ArrayList::new, ENTRY_PAIR_STREAM_CODEC), Entry::steps,
+				ByteBufCodecs.collection(ArrayList::new, ENTRY_PAIR_STREAM_CODEC),
+				Entry::steps,
 				Entry::new
 		);
 
-		public Entry(float ratio) {
-			this(ratio, Lists.newArrayList());
+		public Entry() {
+			this(Lists.newArrayList());
 		}
 
 		public Item item() {

@@ -19,8 +19,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -62,7 +62,7 @@ public class BlockFamily {
 			ResourceKey.codec(Registries.ITEM)
 					.optionalFieldOf("stonecutter_from")
 					.forGetter($ -> $.stonecutterFrom().map(Holder.Reference::key)),
-			Codec.intRange(1, 64).optionalFieldOf("stonecutter_from_multiplier", 1).forGetter(BlockFamily::stonecutterFromMultiplier),
+			Codec.intRange(1, 99).optionalFieldOf("stonecutter_from_multiplier", 1).forGetter(BlockFamily::stonecutterFromMultiplier),
 			SwitchAttrs.CODEC.optionalFieldOf("switch", SwitchAttrs.DISABLED).forGetter(BlockFamily::switchAttrs)
 	).apply(instance, BlockFamily::new));
 
@@ -189,7 +189,7 @@ public class BlockFamily {
 
 	protected Ingredient toIngredient(Stream<? extends Holder<Item>> items) {
 		return Ingredient.of(items.map(Holder::value).filter(item -> {
-			return BlockFamilies.getConvertRatio(item) >= 1;
+			return BlockFamilies.getMatValue(item) >= BlockFamilies.BASE_MAT_VALUE;
 		}));
 	}
 

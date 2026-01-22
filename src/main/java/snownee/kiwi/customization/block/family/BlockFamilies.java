@@ -15,21 +15,22 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 
+import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.customization.CustomizationHooks;
 import snownee.kiwi.util.KHolder;
 import snownee.kiwi.util.resource.OneTimeLoader;
 
 public class BlockFamilies {
+	public static final long BASE_MAT_VALUE = 81000;
 	private static ImmutableListMultimap<Item, KHolder<BlockFamily>> byItem = ImmutableListMultimap.of();
 	private static ImmutableList<KHolder<BlockFamily>> fromResources = ImmutableList.of();
 	private static ImmutableMap<Identifier, KHolder<BlockFamily>> byId = ImmutableMap.of();
@@ -42,9 +43,9 @@ public class BlockFamilies {
 		return byItem.get(item);
 	}
 
-	public static List<KHolder<BlockFamily>> findQuickSwitch(Item item, boolean creative) {
+	public static List<KHolder<BlockFamily>> findQuickSwitch(Item item, boolean hasInfiniteMaterials) {
 		Stream<KHolder<BlockFamily>> stream = find(item).stream();
-		if (creative) {
+		if (hasInfiniteMaterials) {
 			stream = stream.filter(f -> f.value().switchAttrs().enabled());
 		} else {
 			stream = stream.filter(f -> f.value().switchAttrs().enabled() && !f.value().switchAttrs().creativeOnly());
@@ -112,28 +113,37 @@ public class BlockFamilies {
 		return byId.values();
 	}
 
-	public static float getConvertRatio(Item item) {
-		Block block = Block.byItem(item);
-		if (block == Blocks.AIR) {
-			return 1;
+	public static long getMatValue(ItemInstance item) {
+		return getMatValue(item.typeHolder()) * item.count();
+	}
+
+	public static long getMatValue(Item item) {
+		return getMatValue(BuiltInRegistries.ITEM.wrapAsHolder(item));
+	}
+
+	private static long getMatValue(Holder<Item> holder) {
+		if (holder.is(ConventionalItemTags.STORAGE_BLOCKS)) {
+			return BASE_MAT_VALUE * 9;
 		}
-		Holder<Block> holder = BuiltInRegistries.BLOCK.wrapAsHolder(block);
-		if (holder.is(BlockTags.SLABS)) {
-			return 0.5f;
+		if (holder.is(ItemTags.SLABS)) {
+			return BASE_MAT_VALUE / 2;
 		}
-		if (holder.is(BlockTags.DOORS)) {
-			return 2;
+		if (holder.is(ItemTags.DOORS)) {
+			return BASE_MAT_VALUE * 2;
 		}
-		if (holder.is(BlockTags.TRAPDOORS)) {
-			return 3;
+		if (holder.is(ItemTags.TRAPDOORS)) {
+			return BASE_MAT_VALUE * 3;
 		}
-		if (holder.is(BlockTags.FENCE_GATES)) {
-			return 4;
+		if (holder.is(ItemTags.FENCE_GATES)) {
+			return BASE_MAT_VALUE * 4;
 		}
-		if (holder.is(BlockTags.PRESSURE_PLATES)) {
-			return 2;
+		if (holder.is(ItemTags.WOODEN_PRESSURE_PLATES)) {
+			return BASE_MAT_VALUE * 2;
 		}
-		return 1;
+		if (holder.is(ItemTags.BARS)) {
+			return BASE_MAT_VALUE / 24;
+		}
+		return BASE_MAT_VALUE;
 	}
 
 	@Nullable
