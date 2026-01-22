@@ -47,6 +47,8 @@ public class KiwiClientCommand {
 			}
 		}
 		builder.then(configure);
+		builder.then(context.literal("quiet")
+				.executes(ctx -> quiet()));
 		return builder;
 	}
 
@@ -72,6 +74,15 @@ public class KiwiClientCommand {
 				return 1;
 			}));
 		}
+	}
+
+	private static int quiet() {
+		Minecraft mc = Minecraft.getInstance();
+		mc.gui.getChat().trimmedMessages.clear();
+		mc.gui.clear();
+		mc.getToasts().clear();
+		mc.getSoundManager().stop();
+		return 0;
 	}
 
 }

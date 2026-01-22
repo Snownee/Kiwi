@@ -72,3 +72,5 @@ accessible field net/minecraft/world/level/block/WallBlock collisionShapeByIndex
 mutable field net/minecraft/world/level/block/WallBlock shapeByIndex Ljava/util/Map;
 mutable field net/minecraft/world/level/block/WallBlock collisionShapeByIndex Ljava/util/Map;
 accessible method net/minecraft/world/level/block/WallBlock makeShapes (FFFFFF)Ljava/util/Map;
+
+accessible field net/minecraft/client/gui/components/ChatComponent trimmedMessages Ljava/util/List;
