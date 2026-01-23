@@ -33,6 +33,7 @@
 		"client.CreativeModeInventoryScreenMixin",
 		"client.EntityRenderDispatcherAccess",
 		"client.EntityRendererMixin",
+		"client.KeyboardHandlerMixin",
 		"client.LavaFogEnvironmentMixin",
 		"client.LoadingOverlayMixin",
 		"client.OptionInstanceMixin",

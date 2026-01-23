@@ -29,6 +29,9 @@ public final class KiwiClientConfig {
 	@KiwiConfig.Path("qol.loadingOverlayNoFade")
 	public static boolean loadingOverlayNoFade;
 
+	@KiwiConfig.Path("qol.superClearChat")
+	public static boolean superClearChat;
+
 	@KiwiConfig.Path("debug.tagsTooltip")
 	public static boolean tagsTooltip = true;
 
@@ -39,14 +42,14 @@ public final class KiwiClientConfig {
 	public static boolean printDataComponentsWhenCopy = true;
 
 	@KiwiConfig.Path("debug.showTranslatedTagsByDefault")
-	public static boolean showTranslatedTagsByDefault = false;
+	public static boolean showTranslatedTagsByDefault;
 
 	@KiwiConfig.Path("debug.tagsPerPage")
 	@KiwiConfig.Range(min = 0)
 	public static int tagsTooltipTagsPerPage = 6;
 
 	@KiwiConfig.Path("debug.tagsTooltipAppendKeybindHint")
-	public static boolean tagsTooltipAppendKeybindHint = false;
+	public static boolean tagsTooltipAppendKeybindHint;
 
 	@ConfigUI.Hide
 	@KiwiConfig.Path("debug.debugTooltipMsg")
