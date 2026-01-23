@@ -2,6 +2,7 @@ package snownee.kiwi.client;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.IntConsumer;
 import java.util.stream.Stream;
@@ -10,17 +11,25 @@ import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.serialization.Codec;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
@@ -72,6 +81,58 @@ public final class TooltipEvents {
 			MutableComponent component = Component.literal(BuiltInRegistries.ITEM.getKey(itemStack.getItem()).toString());
 			mc.keyboardHandler.setClipboard(component.getString());
 			mc.player.displayClientMessage(KUtil.clickToCopy(component), false);
+			if (KiwiClientConfig.printDataComponentsWhenCopy) {
+				List<DataComponentType<?>> list = itemStack.getComponents()
+						.keySet()
+						.stream()
+						.sorted(Comparator.<DataComponentType<?>, Boolean>comparing(DataComponentType::isTransient)
+								.thenComparing($ -> Objects.equals(
+										itemStack.getComponents().get($),
+										DataComponents.COMMON_ITEM_COMPONENTS.get($)))
+								.thenComparing($ -> Objects.requireNonNull(BuiltInRegistries.DATA_COMPONENT_TYPE.getKey($))))
+						.toList();
+				Font font = Minecraft.getInstance().font;
+				for (DataComponentType<?> type : list) {
+					Identifier id = Objects.requireNonNull(BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(type));
+					Component hoverText;
+					boolean isTransient = type.isTransient();
+					if (isTransient) {
+						hoverText = Component.literal("<transient>");
+					} else {
+						//noinspection unchecked
+						hoverText = NbtUtils.toPrettyComponent(((Codec<Object>) type.codecOrThrow())
+								.encodeStart(NbtOps.INSTANCE, itemStack.get(type)).getOrThrow()).copy().withStyle(ChatFormatting.WHITE);
+					}
+					ChatFormatting color;
+					if (isTransient) {
+						color = ChatFormatting.YELLOW;
+					} else if (Objects.equals(itemStack.getComponents().get(type), DataComponents.COMMON_ITEM_COMPONENTS.get(type))) {
+						color = ChatFormatting.GRAY;
+					} else {
+						color = ChatFormatting.GREEN;
+					}
+					Component value;
+					if (font.width(hoverText) > 300) {
+						FormattedText text = font.substrByWidth(hoverText, 300);
+						List<MutableComponent> parts = Lists.newArrayList();
+						text.visit(
+								(style, s) -> {
+									parts.add(Component.literal(s).setStyle(style));
+									return Optional.empty();
+								}, Style.EMPTY);
+						value = parts.stream().reduce(Component.empty(), MutableComponent::append).append(Component.literal("...")
+								.withStyle(ChatFormatting.GRAY));
+					} else {
+						value = hoverText;
+					}
+
+					mc.player.displayClientMessage(
+							KUtil.clickToCopy(
+									Component.literal("- %s: ".formatted(id)).withStyle(color).append(value),
+									hoverText,
+									hoverText.getString()), false);
+				}
+			}
 			mc.debugEntries.toggleDebugOverlay();
 		}
 

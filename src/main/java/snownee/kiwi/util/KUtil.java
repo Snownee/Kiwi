@@ -259,7 +259,11 @@ public final class KUtil {
 	}
 
 	public static InteractionResult onAttackEntity(
-			Player player, Level world, InteractionHand hand, Entity entity, @Nullable EntityHitResult hitResult) {
+			Player player,
+			Level world,
+			InteractionHand hand,
+			Entity entity,
+			@Nullable EntityHitResult hitResult) {
 		if (entity instanceof ItemFrame frame && !frame.getItem().isEmpty() && !frame.isNoGravity() && !frame.isInvulnerable()) {
 			ItemStack stack = player.getItemInHand(hand);
 			if (stack.is(Items.END_PORTAL_FRAME)) {
@@ -271,10 +275,13 @@ public final class KUtil {
 	}
 
 	public static MutableComponent clickToCopy(MutableComponent component) {
-		String str = component.getString();
-		return component.withStyle(s -> s.withClickEvent(new ClickEvent.CopyToClipboard(str))
-				.withHoverEvent(new HoverEvent.ShowText(Component.translatable("chat.copy.click")))
-				.withInsertion(str));
+		return clickToCopy(component, Component.translatable("chat.copy.click"), component.getString());
+	}
+
+	public static MutableComponent clickToCopy(MutableComponent component, Component hoverText, String toCopy) {
+		return component.withStyle(s -> s.withClickEvent(new ClickEvent.CopyToClipboard(toCopy))
+				.withHoverEvent(new HoverEvent.ShowText(hoverText))
+				.withInsertion(toCopy));
 	}
 
 	public static <T> T loadYaml(String yaml, Class<? super T> type) {
