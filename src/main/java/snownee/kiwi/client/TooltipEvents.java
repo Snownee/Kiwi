@@ -200,26 +200,29 @@ public final class TooltipEvents {
 			translatedPages.clear();
 			pageTypes.clear();
 			pageNow = 0;
-			addPages("item", itemStack.tags());
-			Item item = itemStack.getItem();
-			Block block = Block.byItem(item);
-			if (block != Blocks.AIR) {
-				addPages("block", getTags(BuiltInRegistries.BLOCK, block));
-			}
-			ClientLevel level = Minecraft.getInstance().level;
-			if (level != null && item instanceof SpawnEggItem spawnEggItem) {
-				EntityType<?> type = SpawnEggItem.getType(itemStack);
-				if (type != null) {
-					addPages("entity_type", getTags(BuiltInRegistries.ENTITY_TYPE, type));
+			try {
+				addPages("item", itemStack.tags());
+				Item item = itemStack.getItem();
+				Block block = Block.byItem(item);
+				if (block != Blocks.AIR) {
+					addPages("block", getTags(BuiltInRegistries.BLOCK, block));
 				}
-			} else if (item instanceof BucketItem bucketItem) {
-				addPages("fluid", getTags(BuiltInRegistries.FLUID, Platform.getFluidFromBucket(bucketItem)));
-			}
-			for (int i = 0; i < pages.size(); i++) {
-				if (pageTypes.get(i).equals(preferredType)) {
-					pageNow = i;
-					break;
+				ClientLevel level = Minecraft.getInstance().level;
+				if (level != null && item instanceof SpawnEggItem) {
+					EntityType<?> type = SpawnEggItem.getType(itemStack);
+					if (type != null) {
+						addPages("entity_type", getTags(BuiltInRegistries.ENTITY_TYPE, type));
+					}
+				} else if (item instanceof BucketItem bucketItem) {
+					addPages("fluid", getTags(BuiltInRegistries.FLUID, Platform.getFluidFromBucket(bucketItem)));
 				}
+				for (int i = 0; i < pages.size(); i++) {
+					if (pageTypes.get(i).equals(preferredType)) {
+						pageNow = i;
+						break;
+					}
+				}
+			} catch (Exception _) {
 			}
 		}
 
