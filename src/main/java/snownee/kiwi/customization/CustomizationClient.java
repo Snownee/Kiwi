@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -18,6 +19,9 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColor;
+import net.minecraft.client.gui.components.debug.DebugScreenEntries;
+import net.minecraft.client.gui.components.debug.DebugScreenEntryStatus;
+import net.minecraft.client.gui.components.debug.DebugScreenProfile;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.commands.CommandSourceStack;
@@ -34,6 +38,7 @@ import snownee.kiwi.customization.block.loader.BlockDefinitionProperties;
 import snownee.kiwi.customization.block.loader.KBlockDefinition;
 import snownee.kiwi.customization.builder.BuildersButton;
 import snownee.kiwi.customization.builder.ConvertScreen;
+import snownee.kiwi.customization.builder.DebugEntryBuilderMode;
 import snownee.kiwi.customization.command.ExportBlocksCommand;
 import snownee.kiwi.customization.command.ExportCreativeTabsCommand;
 import snownee.kiwi.customization.command.ExportMappingsCommand;
@@ -74,9 +79,6 @@ public final class CustomizationClient {
 			}
 			dispatcher.register(kiwi.then(customization.then(export).then(reload)));
 		});
-//		forgeEventBus.addListener((CustomizeGuiOverlayEvent.DebugText event) -> {
-//			BuildersButton.renderDebugText(event.getLeft(), event.getRight());
-//		});
 		LevelRenderEvents.BEFORE_BLOCK_OUTLINE.register((_, _) -> {
 			return !BuildersButton.cancelRenderHighlight();
 		});
@@ -86,6 +88,21 @@ public final class CustomizationClient {
 				SitManager.clampRotation(player, player.getVehicle());
 			}
 		});
+
+		Identifier debugEntryId = Kiwi.id("builder_mode");
+		DebugScreenEntries.register(debugEntryId, new DebugEntryBuilderMode());
+		List<Map.Entry<DebugScreenProfile, Map<Identifier, DebugScreenEntryStatus>>> profiles = DebugScreenEntries.PROFILES.entrySet()
+				.stream()
+				.toList();
+		var newProfiles = ImmutableMap.<DebugScreenProfile, Map<Identifier, DebugScreenEntryStatus>>builder();
+		for (var profile : profiles) {
+			var map = ImmutableMap.<Identifier, DebugScreenEntryStatus>builder()
+					.putAll(profile.getValue())
+					.put(debugEntryId, DebugScreenEntryStatus.ALWAYS_ON)
+					.build();
+			newProfiles.put(profile.getKey(), map);
+		}
+		DebugScreenEntries.PROFILES = newProfiles.build();
 	}
 
 	public static void afterRegister(

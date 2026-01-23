@@ -77,3 +77,5 @@ key.kiwi.builders_button2: Builder's Button (Kiwi)
 kiwi.builder_mode.on: "Builder Mode: §aON"
 kiwi.builder_mode.off: "Builder Mode: §cOFF"
 gui.kiwi.builder.convert: Convert items
+kiwi.builder_mode.debug_entry: "Builder Mode is ON."
+kiwi.builder_mode.debug_key_hint: "Long press %s to exit"

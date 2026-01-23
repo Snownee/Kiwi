@@ -1,7 +1,6 @@
 package snownee.kiwi.customization.builder;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -228,15 +227,6 @@ public class BuildersButton {
 			return null;
 		}
 		return Minecraft.getInstance().player;
-	}
-
-	public static void renderDebugText(List<String> left, List<String> right) {
-		if (!isBuilderModeOn() /*|| Minecraft.getInstance().options.renderDebug*/) {
-			return;
-		}
-		left.add("Builder Mode is on, long press %s to toggle".formatted(Objects.requireNonNull(CustomizationClient.buildersButtonKey)
-				.getTranslatedKeyMessage()
-				.getString()));
 	}
 
 	public static boolean cancelRenderHighlight() {

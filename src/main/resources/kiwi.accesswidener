@@ -60,3 +60,5 @@ accessible field net/minecraft/world/level/block/WallBlock shapes Ljava/util/fun
 mutable field net/minecraft/world/level/block/WallBlock shapes Ljava/util/function/Function;
 accessible field net/minecraft/world/level/block/WallBlock collisionShapes Ljava/util/function/Function;
 mutable field net/minecraft/world/level/block/WallBlock collisionShapes Ljava/util/function/Function;
+
+mutable field net/minecraft/client/gui/components/debug/DebugScreenEntries PROFILES Ljava/util/Map;
