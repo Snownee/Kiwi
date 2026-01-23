@@ -71,7 +71,6 @@ public class BuilderModePreview implements DebugRenderer.SimpleDebugRenderer {
 		for (Map.Entry<Direction, Collection<AABB>> entry : faces.asMap().entrySet()) {
 			Direction direction = entry.getKey();
 			for (AABB aabb : entry.getValue()) {
-				aabb = aabb.move(-camX, -camY, -camZ);
 				drawFace(aabb, direction, r, g, b, a);
 			}
 		}
@@ -119,52 +118,8 @@ public class BuilderModePreview implements DebugRenderer.SimpleDebugRenderer {
 	}
 
 	private void drawFace(AABB aabb, Direction face, float r, float g, float b, float a) {
-		GizmoStyle style = GizmoStyle.stroke(ARGB.colorFromFloat(a, r, g, b));
+		GizmoStyle style = GizmoStyle.fill(ARGB.colorFromFloat(a, r, g, b));
 		Gizmos.rect(aabb.getMinPosition(), aabb.getMaxPosition(), face, style);
-//		float minX = (float) aabb.minX;
-//		float minY = (float) aabb.minY;
-//		float minZ = (float) aabb.minZ;
-//		float maxX = (float) aabb.maxX;
-//		float maxY = (float) aabb.maxY;
-//		float maxZ = (float) aabb.maxZ;
-//		switch (face) {
-//			case DOWN -> {
-//				consumer.addVertex(pose, minX, minY, minZ).setColor(r, g, b, a);
-//				consumer.addVertex(pose, minX, minY, maxZ).setColor(r, g, b, a);
-//				consumer.addVertex(pose, maxX, minY, maxZ).setColor(r, g, b, a);
-//				consumer.addVertex(pose, maxX, minY, minZ).setColor(r, g, b, a);
-//			}
-//			case UP -> {
-//				consumer.addVertex(pose, minX, maxY, minZ).setColor(r, g, b, a);
-//				consumer.addVertex(pose, maxX, maxY, minZ).setColor(r, g, b, a);
-//				consumer.addVertex(pose, maxX, maxY, maxZ).setColor(r, g, b, a);
-//				consumer.addVertex(pose, minX, maxY, maxZ).setColor(r, g, b, a);
-//			}
-//			case NORTH -> {
-//				consumer.addVertex(pose, minX, minY, minZ).setColor(r, g, b, a);
-//				consumer.addVertex(pose, maxX, minY, minZ).setColor(r, g, b, a);
-//				consumer.addVertex(pose, maxX, maxY, minZ).setColor(r, g, b, a);
-//				consumer.addVertex(pose, minX, maxY, minZ).setColor(r, g, b, a);
-//			}
-//			case SOUTH -> {
-//				consumer.addVertex(pose, minX, minY, maxZ).setColor(r, g, b, a);
-//				consumer.addVertex(pose, minX, maxY, maxZ).setColor(r, g, b, a);
-//				consumer.addVertex(pose, maxX, maxY, maxZ).setColor(r, g, b, a);
-//				consumer.addVertex(pose, maxX, minY, maxZ).setColor(r, g, b, a);
-//			}
-//			case WEST -> {
-//				consumer.addVertex(pose, minX, minY, minZ).setColor(r, g, b, a);
-//				consumer.addVertex(pose, minX, minY, maxZ).setColor(r, g, b, a);
-//				consumer.addVertex(pose, minX, maxY, maxZ).setColor(r, g, b, a);
-//				consumer.addVertex(pose, minX, maxY, minZ).setColor(r, g, b, a);
-//			}
-//			case EAST -> {
-//				consumer.addVertex(pose, maxX, minY, minZ).setColor(r, g, b, a);
-//				consumer.addVertex(pose, maxX, maxY, minZ).setColor(r, g, b, a);
-//				consumer.addVertex(pose, maxX, maxY, maxZ).setColor(r, g, b, a);
-//				consumer.addVertex(pose, maxX, minY, maxZ).setColor(r, g, b, a);
-//			}
-//		}
 	}
 
 	private static VoxelShape getFaceShape(AABB aabb, Direction face) {

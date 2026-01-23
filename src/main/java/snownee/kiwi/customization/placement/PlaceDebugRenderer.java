@@ -15,7 +15,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import snownee.kiwi.util.VoxelUtil;
 
@@ -48,19 +47,8 @@ public class PlaceDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 			}).toList();
 		}
 
-		GizmoStyle style = GizmoStyle.stroke(-1);
 		for (SlotRenderInstance instance : slots) {
-			for (AABB aabb : instance.shape.toAabbs()) {
-				Gizmos.cuboid(aabb, style);
-			}
-//			ShapeRenderer.renderShape(
-//					pPoseStack,
-//					vertexconsumer,
-//					instance.shape,
-//					instance.pos.getX() - pCamX,
-//					instance.pos.getY() - pCamY,
-//					instance.pos.getZ() - pCamZ,
-//					instance.color);
+			Gizmos.cuboid(instance.shape.bounds(), GizmoStyle.stroke(instance.color));
 		}
 	}
 
@@ -80,7 +68,7 @@ public class PlaceDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 			} else if (tag.endsWith("back") || tag.endsWith("bottom")) {
 				color = 0xFFAAAAFF;
 			}
-			return new SlotRenderInstance(slot, pos, side, SHAPES[side.ordinal()], color);
+			return new SlotRenderInstance(slot, pos, side, SHAPES[side.ordinal()].move(pos), color);
 		}
 	}
 }
