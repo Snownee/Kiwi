@@ -3,7 +3,9 @@ package snownee.kiwi.test;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,13 +17,14 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
 
-import com.mojang.serialization.MapCodec;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import snownee.kiwi.Kiwi;
 
 public class RegistryNameScanner {
@@ -34,17 +37,30 @@ public class RegistryNameScanner {
 		List<FieldNode> fields = scanStaticFields(Registries.class, ResourceKey.class);
 
 		Function<FieldNode, Class<?>> func = matchGeneric(Pattern.compile("Lnet/minecraft/core/Registry<L([^<;]+?)[<;]"));
+		Map<Class<?>, List<String>> lines = Maps.newLinkedHashMapWithExpectedSize(fields.size());
+		Set<Class<?>> ambiguousKeys = Sets.newLinkedHashSet();
 		for (FieldNode field : fields) {
 			Class<?> registryClass = func.apply(field);
 			if (!registryClasses.contains(registryClass)) {
 				continue;
 			}
-			if (registryClass == Identifier.class || registryClass == MapCodec.class) {
+			if (registryClass == Identifier.class) {
 				continue;
 			}
 			String name = registryClass.getName();
 			name = name.substring(name.lastIndexOf('.') + 1).replace("$", ".");
-			sb.append("registerRegistry(Registries.%s, %s.class);\n".formatted(field.name, name));
+			if (lines.containsKey(registryClass)) {
+				ambiguousKeys.add(registryClass);
+			} else {
+				lines.put(registryClass, List.of(field.name, name));
+			}
+		}
+		for (Class<?> key : ambiguousKeys) {
+			Kiwi.LOGGER.info("Ambiguous registry key: {}", key.getName());
+			lines.remove(key);
+		}
+		for (List<String> line : lines.values()) {
+			sb.append("registerRegistry(Registries.%s, %s.class);\n".formatted(line.toArray()));
 		}
 		Kiwi.LOGGER.info(sb.toString());
 	}
