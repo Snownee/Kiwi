@@ -1,5 +1,8 @@
 package snownee.kiwi.test;
 
+import org.jspecify.annotations.Nullable;
+
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.effect.InstantenousMobEffect;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
@@ -25,7 +28,7 @@ public class TestModule extends AbstractModule {
 	// Register a simple item
 	@Category(value = Categories.FOOD_AND_DRINKS, after = "apple")
 	public static final ItemObject<TestItem> FIRST_ITEM = item(p -> new TestItem(p.rarity(Rarity.EPIC)));
-	public static final ItemObject<TestItem> ITEM2 = item(TestItem::new);
+	public static final KiwiGO<TestItem> ITEM2 = go(Registries.ITEM, key -> new TestItem(itemProp().setId(key)));
 	@Category(value = Categories.FOOD_AND_DRINKS, after = "kiwi:item2")
 	public static final ItemObject<TestItem> ITEM3 = item(TestItem::new);
 	public static final ItemObject<TestItem> ITEM4 = item(TestItem::new);
@@ -50,7 +53,7 @@ public class TestModule extends AbstractModule {
 //	public static final KiwiGO<TestBlock> TEX_BLOCK = go(() -> new TestBlock(blockProp()));
 //	public static final KiwiGO<BlockEntityType<TexBlockEntity>> TEX_TILE = blockEntity(TexBlockEntity::new, null, TEX_BLOCK);
 
-	public static TestModule INSTANCE;
+	public static @Nullable TestModule INSTANCE;
 
 	public static final KiwiGO<RecipeType<?>> RECIPE_TYPE = go(() -> {
 		return new RecipeType<>() {};

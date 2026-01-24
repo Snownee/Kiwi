@@ -12,12 +12,12 @@ import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.Maps;
 
-import net.fabricmc.fabric.impl.object.builder.ExtendedBlockEntityType;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -50,6 +50,11 @@ public abstract class AbstractModule {
 	protected static <T> KiwiGO<T> go(Supplier<? extends T> factory, ResourceKey<? extends Registry<?>> registryKey) {
 		//noinspection unchecked
 		return new KiwiGO.RegistrySpecified<>((Supplier<T>) factory, registryKey);
+	}
+
+	protected static <T, U> KiwiGO<T> go(ResourceKey<Registry<U>> registryKey, Function<ResourceKey<U>, ? extends T> factory) {
+		//noinspection unchecked
+		return new KiwiGO.Keyed<>(registryKey, (Function<ResourceKey<U>, T>) factory);
 	}
 
 	protected static <T extends Item> ItemObject<T> item(Function<Item.Properties, T> factory) {
@@ -90,15 +95,24 @@ public abstract class AbstractModule {
 		return blockEntity(factory, false, blocks);
 	}
 
+	public static <T extends Entity, U extends Entity> KiwiGO<EntityType<U>> entity(Function<ResourceKey<EntityType<?>>, ? extends EntityType<T>> factory) {
+		//noinspection unchecked
+		return (KiwiGO<EntityType<U>>) (Object) go(Registries.ENTITY_TYPE, factory);
+	}
+
 	@SafeVarargs
 	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(
 			BlockEntityType.BlockEntitySupplier<? extends T> factory,
 			boolean onlyOpCanSetNbt,
 			Supplier<? extends Block>... blocks) {
-		return go(() -> new ExtendedBlockEntityType<>(
+		return go(() -> new BlockEntityType<>(
 				factory,
-				Stream.of(blocks).map(Supplier::get).collect(Collectors.toSet()),
-				onlyOpCanSetNbt));
+				Stream.of(blocks).map(Supplier::get).collect(Collectors.toSet())) {
+			@Override
+			public boolean onlyOpCanSetNbt() {
+				return onlyOpCanSetNbt;
+			}
+		});
 	}
 
 	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(

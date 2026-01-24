@@ -3,6 +3,7 @@ package snownee.kiwi;
 import java.lang.reflect.Field;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -215,4 +216,37 @@ public class KiwiGO<T> implements Supplier<T> {
 		}
 	}
 
+	public static class Keyed<T, U> extends KiwiGO<T> {
+		private final ResourceKey<Registry<U>> registryKey;
+		private @Nullable Function<ResourceKey<U>, T> factory;
+
+		public Keyed(ResourceKey<Registry<U>> registryKey, Function<ResourceKey<U>, T> factory) {
+			super(null);
+			this.registryKey = registryKey;
+			this.factory = factory;
+		}
+
+		@Override
+		public T preRegister(Identifier id) {
+			//noinspection unchecked
+			setKey((ResourceKey<T>) ResourceKey.create(registryKey, id));
+			return getOrCreate();
+		}
+
+		@Override
+		public T getOrCreate() {
+			if (value == null) {
+				Objects.requireNonNull(factory);
+				//noinspection unchecked
+				value = Objects.requireNonNull(factory.apply((ResourceKey<U>) resourceKey()));
+				factory = null;
+			}
+			return get();
+		}
+
+		@Override
+		public @Nullable ResourceKey<? extends Registry<?>> findRegistry() {
+			return registryKey;
+		}
+	}
 }
