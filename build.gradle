@@ -17,19 +17,21 @@ repositories {
     maven { url "https://api.modrinth.com/maven" }
     maven { url "https://maven.shedaniel.me/" }
     maven { url "https://maven.terraformersmc.com/releases/" }
-    maven {
-        // location of a maven mirror for JEI files, as a fallback
-        name = "ModMaven"
-        url = "https://modmaven.dev"
-    }
-}
-
-sourceSets {
-    main.resources.srcDirs += "$rootDir/src/generated/resources"
+    maven { url "https://modmaven.dev" }
 }
 
 loom {
     accessWidenerPath = file("src/main/resources/${project.mod_id}.accesswidener")
+}
+
+fabricApi {
+    configureDataGeneration() {
+        modId = project.mod_id
+        client = true
+        outputDirectory = file("src/generated/resources")
+        createSourceSet = true
+        strictValidation = true
+    }
 }
 
 configurations {
@@ -66,12 +68,9 @@ dependencies {
 
     implementation "maven.modrinth:jade:${jade_version}+fabric"
 
-//    // compile against the JEI API but do not include it at runtime
-//    modCompileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
-//    modCompileOnly("mezz.jei:jei-${minecraft_version}-fabric-api:${jei_version}")
-//    // at runtime, use the full JEI jar for Forge
-//    implementation("mezz.jei:jei-${minecraft_version}-fabric:${jei_version}")
-//
+//    compileOnlyApi "mezz.jei:jei-${minecraft_version}-fabric-api:${jei_version}"
+    implementation "mezz.jei:jei-${minecraft_version}-fabric:${jei_version}"
+
 //    modCompileOnly "dev.emi:emi-fabric:${emi_version}:api"
 //    modRuntimeOnly "dev.emi:emi-fabric:${emi_version}"
 }
@@ -110,19 +109,18 @@ java {
 }
 
 shadowJar {
-    exclude([
-            "/assets/${project.mod_id}/blockstates",
-            "/assets/${project.mod_id}/models",
-            "/assets/${project.mod_id}/lang/en_us.existing.yaml",
-            "/assets/kaleidos",
-            "/assets/kswitch",
-            "/assets/test",
-            "/snownee/${project.mod_id}/test",
-            '**/*.bat',
-            '**/*.py',
-            "/data",
-            "/.cache",
-            "/third_party"])
+    exclude(["/assets/${project.mod_id}/blockstates",
+             "/assets/${project.mod_id}/models",
+             "/assets/${project.mod_id}/lang/en_us.existing.yaml",
+             "/assets/kaleidos",
+             "/assets/kswitch",
+             "/assets/test",
+             "/snownee/${project.mod_id}/test",
+             '**/*.bat',
+             '**/*.py',
+             "/data",
+             "/.cache",
+             "/third_party"])
     relocate "org.yaml.snakeyaml", "${project.group}.shadowed.org.yaml.snakeyaml"
     relocate "com.ezylang.evalex", "${project.group}.shadowed.com.ezylang.evalex"
     configurations = [project.configurations.shadowCommon]
