@@ -1,7 +1,7 @@
 package snownee.kiwi.recipe;
 
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
@@ -14,6 +14,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
@@ -33,23 +34,25 @@ public class AlternativesIngredient implements CustomIngredient {
 
 	@Override
 	public boolean test(ItemStack stack) {
-		return internal().test(stack);
+		internal();
+		return cached != null && cached.test(stack);
 	}
 
 	@Override
 	public Stream<Holder<Item>> items() {
-		return internal().items();
+		internal();
+		//noinspection deprecation
+		return cached != null ? cached.items() : Stream.empty();
 	}
 
 	@Override
 	public boolean requiresTesting() {
-		return internal().requiresTesting();
+		internal();
+		return cached != null && cached.requiresTesting();
 	}
 
-	public Ingredient internal() {
-		if (cached == null) {
-			Objects.requireNonNull(options);
-			cached = RecipeUtil.emptyIngredient();
+	public Optional<Ingredient> internal() {
+		if (cached == null && options != null) {
 			for (JsonElement option : options) {
 				Ingredient ingredient;
 				try {
@@ -64,7 +67,7 @@ public class AlternativesIngredient implements CustomIngredient {
 				break;
 			}
 		}
-		return cached;
+		return Optional.ofNullable(cached);
 	}
 
 	@Override
@@ -78,6 +81,9 @@ public class AlternativesIngredient implements CustomIngredient {
 		public static final MapCodec<AlternativesIngredient> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
 				Codec.list(ExtraCodecs.JSON).fieldOf("options").forGetter(o -> o.options)
 		).apply(i, AlternativesIngredient::new));
+
+		public static final StreamCodec<RegistryFriendlyByteBuf, Optional<Ingredient>> INGREDIENT_STREAM_CODEC = Ingredient.CONTENTS_STREAM_CODEC.apply(
+				ByteBufCodecs::optional);
 
 		public static final StreamCodec<RegistryFriendlyByteBuf, AlternativesIngredient> STREAM_CODEC = StreamCodec.of(
 				Serializer::write,
@@ -94,14 +100,14 @@ public class AlternativesIngredient implements CustomIngredient {
 		}
 
 		public static AlternativesIngredient read(RegistryFriendlyByteBuf buf) {
-			Ingredient internal = Ingredient.CONTENTS_STREAM_CODEC.decode(buf);
+			Optional<Ingredient> internal = INGREDIENT_STREAM_CODEC.decode(buf);
 			AlternativesIngredient ingredient = new AlternativesIngredient(null);
-			ingredient.cached = internal;
+			ingredient.cached = internal.orElse(null);
 			return ingredient;
 		}
 
 		public static void write(RegistryFriendlyByteBuf buf, AlternativesIngredient ingredient) {
-			Ingredient.CONTENTS_STREAM_CODEC.encode(buf, ingredient.internal());
+			INGREDIENT_STREAM_CODEC.encode(buf, ingredient.internal());
 		}
 
 		@Override

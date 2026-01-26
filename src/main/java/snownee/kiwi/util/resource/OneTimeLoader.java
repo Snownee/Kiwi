@@ -20,6 +20,7 @@ import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JavaOps;
 import com.mojang.serialization.JsonOps;
 
+import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -31,9 +32,12 @@ public class OneTimeLoader {
 	private static final Gson GSON = new GsonBuilder().setStrictness(Strictness.LENIENT).create();
 
 	public static <T> Map<Identifier, T> load(ResourceManager resourceManager, String directory, Codec<T> codec, Context context) {
-		var fileToIdConverter = AlternativesFileToIdConverter.yamlOrJson(directory);
+		return load(resourceManager, AlternativesFileToIdConverter.yamlOrJson(directory), codec, context);
+	}
+
+	public static <T> Map<Identifier, T> load(ResourceManager resourceManager, FileToIdConverter lister, Codec<T> codec, Context context) {
 		Map<Identifier, T> results = Maps.newHashMap();
-		for (Map.Entry<Identifier, Resource> entry : fileToIdConverter.listMatchingResources(resourceManager).entrySet()) {
+		for (Map.Entry<Identifier, Resource> entry : lister.listMatchingResources(resourceManager).entrySet()) {
 			Identifier key = entry.getKey();
 			if (context.isNamespaceDisabled(key.getNamespace())) {
 				continue;
@@ -46,7 +50,7 @@ public class OneTimeLoader {
 				Kiwi.LOGGER.error("Failed to parse " + key + ": " + result.error().get());
 				continue;
 			}
-			Identifier id = fileToIdConverter.fileToId(key);
+			Identifier id = lister.fileToId(key);
 			results.put(id, result.result().orElseThrow());
 		}
 		return results;

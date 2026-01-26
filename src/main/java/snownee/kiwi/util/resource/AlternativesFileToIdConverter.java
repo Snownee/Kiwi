@@ -7,11 +7,12 @@ import java.util.stream.Stream;
 
 import com.google.common.base.Preconditions;
 
+import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 
-public class AlternativesFileToIdConverter {
+public class AlternativesFileToIdConverter extends FileToIdConverter {
 	private final String prefix;
 	private final List<String> extensions;
 	private final int sameExtensionLength;
@@ -22,6 +23,7 @@ public class AlternativesFileToIdConverter {
 	}
 
 	public AlternativesFileToIdConverter(String pPrefix, List<String> pExtensions, Predicate<Identifier> listFilter) {
+		super(pPrefix, pExtensions.getFirst());
 		this.prefix = pPrefix;
 		this.extensions = pExtensions;
 		sameExtensionLength = pExtensions.stream().mapToInt(String::length).distinct().reduce((a, b) -> -1).orElseThrow();
@@ -38,40 +40,42 @@ public class AlternativesFileToIdConverter {
 		return new AlternativesFileToIdConverter(pName, List.of(".yaml", ".json"));
 	}
 
+	@Override
 	public Identifier idToFile(Identifier pId) {
-		return pId.withPath(this.prefix + "/" + pId.getPath() + extensions.getFirst());
+		return pId.withPath(prefix + "/" + pId.getPath() + extensions.getFirst());
 	}
 
 	public Stream<Identifier> idToAllPossibleFiles(Identifier pId) {
-		return extensions.stream().map((ext) -> pId.withPath(this.prefix + "/" + pId.getPath() + ext));
+		return extensions.stream().map((ext) -> pId.withPath(prefix + "/" + pId.getPath() + ext));
 	}
 
+	@Override
 	public Identifier fileToId(Identifier pFile) {
 		if (sameExtensionLength >= 0) {
 			String s = pFile.getPath();
-			return pFile.withPath(s.substring(this.prefix.length() + 1, s.length() - sameExtensionLength));
+			return pFile.withPath(s.substring(prefix.length() + 1, s.length() - sameExtensionLength));
 		} else {
 			for (String ext : extensions) {
 				if (pFile.getPath().endsWith(ext)) {
 					String s = pFile.getPath();
-					return pFile.withPath(s.substring(this.prefix.length() + 1, s.length() - ext.length()));
+					return pFile.withPath(s.substring(prefix.length() + 1, s.length() - ext.length()));
 				}
 			}
 			throw new IllegalArgumentException("Unknown extension for " + pFile);
 		}
 	}
 
+	@Override
 	public Map<Identifier, Resource> listMatchingResources(ResourceManager pResourceManager) {
 		return pResourceManager.listResources(
-				this.prefix, (location) -> {
-					return this.extensions.stream().anyMatch(location.getPath()::endsWith) && listFilter.test(location);
-				});
+				prefix,
+				location -> extensions.stream().anyMatch(location.getPath()::endsWith) && listFilter.test(location));
 	}
 
+	@Override
 	public Map<Identifier, List<Resource>> listMatchingResourceStacks(ResourceManager pResourceManager) {
 		return pResourceManager.listResourceStacks(
-				this.prefix, (location) -> {
-					return this.extensions.stream().anyMatch(location.getPath()::endsWith) && listFilter.test(location);
-				});
+				prefix,
+				location -> extensions.stream().anyMatch(location.getPath()::endsWith) && listFilter.test(location));
 	}
 }

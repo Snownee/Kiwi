@@ -23,8 +23,6 @@ import net.minecraft.world.level.ItemLike;
 import snownee.kiwi.data.DataModule;
 
 public final class SizedIngredient {
-	public static final SizedIngredient EMPTY = new SizedIngredient(RecipeUtil.emptyIngredient(), 1);
-
 	public static final Codec<SizedIngredient> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			Ingredient.CODEC.fieldOf("ingredient").forGetter(SizedIngredient::ingredient),
 			ExtraCodecs.POSITIVE_INT.optionalFieldOf("count", 1).forGetter(SizedIngredient::count)
