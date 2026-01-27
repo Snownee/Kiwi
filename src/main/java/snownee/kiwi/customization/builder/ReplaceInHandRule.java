@@ -10,6 +10,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -22,11 +23,10 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.customization.block.family.BlockFamily;
-import snownee.kiwi.util.codec.KCodecs;
 
 public record ReplaceInHandRule(Map<BlockFamily, Object> families, BlockSpread spread) implements BuilderRule {
 	public static final MapCodec<ReplaceInHandRule> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-					KCodecs.compactList(BlockFamily.CODEC).fieldOf("family").forGetter($ -> List.copyOf($.families().keySet())),
+					ExtraCodecs.compactListCodec(BlockFamily.CODEC).fieldOf("family").forGetter($ -> List.copyOf($.families().keySet())),
 					BlockSpread.CODEC.fieldOf("spread").forGetter(ReplaceInHandRule::spread))
 			.apply(instance, ReplaceInHandRule::new));
 
