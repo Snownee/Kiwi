@@ -4,6 +4,7 @@ package snownee.kiwi.mixin;
 import java.util.List;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -16,6 +17,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
 	private boolean persistentCreativeInventory;
 	private boolean fastScrolling;
 	private boolean lavaClearView;
+	private boolean miniEffects;
 
 	public static boolean isModLoaded(String modId) {
 		return FabricLoader.getInstance().isModLoaded(modId);
@@ -28,10 +30,11 @@ public class MixinPlugin implements IMixinConfigPlugin {
 		persistentCreativeInventory = customization || isModLoaded("persistentcreativeinventory") || devEnv;
 		fastScrolling = isModLoaded("fastscroll") || devEnv;
 		lavaClearView = isModLoaded("lavaclearview") || devEnv;
+		miniEffects = isModLoaded("minieffects") || devEnv;
 	}
 
 	@Override
-	public String getRefMapperConfig() {
+	public @Nullable String getRefMapperConfig() {
 		return null;
 	}
 
@@ -39,6 +42,9 @@ public class MixinPlugin implements IMixinConfigPlugin {
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
 		if (mixinClassName.startsWith("snownee.kiwi.mixin.customization.")) {
 			return customization;
+		}
+		if (mixinClassName.startsWith("snownee.kiwi.mixin.minieffects.")) {
+			return miniEffects;
 		}
 		return switch (mixinClassName) {
 			case "snownee.kiwi.mixin.client.CreativeModeInventoryScreenMixin" -> persistentCreativeInventory;
@@ -53,7 +59,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
 	}
 
 	@Override
-	public List<String> getMixins() {
+	public @Nullable List<String> getMixins() {
 		return null;
 	}
 

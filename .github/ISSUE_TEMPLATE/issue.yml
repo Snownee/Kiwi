@@ -14,6 +14,7 @@ body:
         - Fast Scrolling
         - Persistent Creative Inventory
         - Lava Clear View
+        - Mini Effects
     validations:
       required: true
   - type: dropdown

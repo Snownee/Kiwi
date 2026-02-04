@@ -7,6 +7,10 @@
 	"authors": [
 		"Snownee"
 	],
+	"contributors": [
+		"3TUSK",
+		"SettingDust"
+	],
 	"contact": {
 		"homepage": "https://www.curseforge.com/minecraft/mc-mods/kiwi-fabric",
 		"sources": "https://github.com/Snownee/Kiwi",
@@ -16,11 +20,10 @@
 	"icon": "assets/kiwi/logo.png",
 	"entrypoints": {
 		"server": [
-			"snownee.kiwi.Kiwi"
+			"snownee.kiwi.loader.Platform"
 		],
 		"client": [
-			"snownee.kiwi.Kiwi",
-			"snownee.kiwi.loader.ClientInitializer"
+			"snownee.kiwi.loader.ClientPlatform"
 		],
 		"fabric-datagen": [
 			"snownee.kiwi.datagen.KiwiDataGen"

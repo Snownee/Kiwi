@@ -12,6 +12,7 @@ import org.jspecify.annotations.Nullable;
 
 import com.mojang.datafixers.util.Pair;
 
+import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.registry.CompostableRegistry;
@@ -45,7 +46,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import snownee.kiwi.Kiwi;
 
-public final class Platform {
+public final class Platform implements DedicatedServerModInitializer {
 
 	private static final Pattern VERSION_PATTERN = Pattern.compile("^(\\d+)\\.(\\d+)\\.(\\d+).*?$");
 	private static final boolean DATA_GEN = System.getProperty("fabric-api.datagen") != null;
@@ -183,6 +184,13 @@ public final class Platform {
 
 	public static void registerVillagerFood(ItemLike item, int value) {
 		VillagerInteractionRegistries.registerFood(item, value);
+	}
+
+	@Override
+	public void onInitializeServer() {
+		// a hack to make sure our mod is loaded after all other mods,
+		// so that other mods can call `enableDataModule` in their `onInitialize` method
+		Kiwi.onInitialize();
 	}
 
 	public enum Type {

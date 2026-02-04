@@ -61,3 +61,9 @@ accessible field net/minecraft/world/level/block/WallBlock collisionShapes Ljava
 mutable field net/minecraft/world/level/block/WallBlock collisionShapes Ljava/util/function/Function;
 
 mutable field net/minecraft/client/gui/components/debug/DebugScreenEntries PROFILES Ljava/util/Map;
+
+accessible field net/minecraft/client/KeyMapping key Lcom/mojang/blaze3d/platform/InputConstants$Key;
+
+accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen leftPos I
+accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen topPos I
+accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen imageWidth I

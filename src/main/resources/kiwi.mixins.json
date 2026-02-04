@@ -46,7 +46,12 @@
 		"customization.client.GameRendererMixin",
 		"customization.client.MultiPlayerGameModeMixin",
 		"customization.sit.ClientPacketListenerMixin",
-		"customization.sit.LocalPlayerMixin"
+		"customization.sit.LocalPlayerMixin",
+		"minieffects.CreativeModeInventoryScreenMixin",
+		"minieffects.EffectsInInventoryMixin",
+		"minieffects.EffectsInInventoryPositionMixin",
+		"minieffects.InventoryScreenMixin",
+		"minieffects.jei.InventoryEffectRendererGuiHandlerMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

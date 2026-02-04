@@ -1,0 +1,18 @@
+modLoader = "lowcodefml"
+loaderVersion = "[1,)"
+license = "MIT"
+issueTrackerURL = "https://github.com/Snownee/Kiwi/issues"
+
+[[mods]]
+modId = "minieffects"
+version = "${version}"
+displayName = "Mini Effects"
+displayURL = "https://github.com/Snownee/Kiwi"
+authors = "Snownee"
+credits = "SettingDust"
+description = "Add a toggle to show/hide potion effects view in inventory"
+
+[[dependencies.minieffects]]
+modId = "kiwi"
+versionRange = "[26,)"
+side = "CLIENT"

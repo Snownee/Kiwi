@@ -33,8 +33,6 @@ import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.MutableGraph;
 import com.mojang.logging.LogUtils;
 
-import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -46,7 +44,6 @@ import net.fabricmc.loader.impl.gui.FabricGuiEntry;
 import net.fabricmc.loader.impl.gui.FabricStatusTree;
 import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.predicates.DataComponentPredicate;
@@ -121,7 +118,6 @@ import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfig.ConfigType;
 import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.customization.CustomizationHooks;
-import snownee.kiwi.loader.ClientPlatform;
 import snownee.kiwi.loader.KiwiMetadataLoader;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.loader.event.InitEvent;
@@ -131,7 +127,7 @@ import snownee.kiwi.util.KUtil;
 import snownee.kiwi.util.toposort.TopologicalSort;
 
 @Mod(Kiwi.ID)
-public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer {
+public class Kiwi {
 	public static final String ID = "kiwi";
 	public static final RegistryLookup registryLookup = new RegistryLookup();
 	static final Marker MARKER = MarkerFactory.getMarker("INIT");
@@ -283,18 +279,6 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 		enableDataModule = true;
 	}
 
-	// a hack to make sure our mod is loaded after all other mods,
-	// so that other mods can call `enableDataModule` in their `onInitialize` method
-	@Override
-	public void onInitializeClient() {
-		onInitialize();
-	}
-
-	@Override
-	public void onInitializeServer() {
-		onInitialize();
-	}
-
 	public static void onInitialize() {
 		if (initialized) {
 			return;
@@ -414,14 +398,8 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
 			KiwiCommand.register(dispatcher);
 		});
 		ServerLifecycleEvents.SERVER_STARTING.register(Kiwi::serverInit);
-		ServerLifecycleEvents.SERVER_STOPPED.register($ -> currentServer = null);
+		ServerLifecycleEvents.SERVER_STOPPED.register(_ -> currentServer = null);
 		AttackEntityCallback.EVENT.register(KUtil::onAttackEntity);
-		if (Platform.isPhysicalClient()) {
-			RenderLayerEnum.CUTOUT.value = ChunkSectionLayer.CUTOUT;
-			RenderLayerEnum.TRANSLUCENT.value = ChunkSectionLayer.TRANSLUCENT;
-
-			ClientPlatform.init();
-		}
 		preInit();
 	}
 

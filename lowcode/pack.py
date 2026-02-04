@@ -18,6 +18,7 @@ def main():
         pack('persistentcreativeinventory')
         pack('fastscroll')
         pack('lavaclearview')
+        pack('minieffects')
         return
     pack(sys.argv[1])
 
