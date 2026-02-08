@@ -20,7 +20,6 @@ import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JavaOps;
 import com.mojang.serialization.JsonOps;
 
-import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -35,7 +34,11 @@ public class OneTimeLoader {
 		return load(resourceManager, AlternativesFileToIdConverter.yamlOrJson(directory), codec, context);
 	}
 
-	public static <T> Map<Identifier, T> load(ResourceManager resourceManager, FileToIdConverter lister, Codec<T> codec, Context context) {
+	public static <T> Map<Identifier, T> load(
+			ResourceManager resourceManager,
+			AlternativesFileToIdConverter lister,
+			Codec<T> codec,
+			Context context) {
 		Map<Identifier, T> results = Maps.newHashMap();
 		for (Map.Entry<Identifier, Resource> entry : lister.listMatchingResources(resourceManager).entrySet()) {
 			Identifier key = entry.getKey();

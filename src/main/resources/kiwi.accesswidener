@@ -67,3 +67,5 @@ accessible field net/minecraft/client/KeyMapping key Lcom/mojang/blaze3d/platfor
 accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen leftPos I
 accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen topPos I
 accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen imageWidth I
+
+accessible field net/minecraft/client/color/block/BlockColors blockColors Lnet/minecraft/core/IdMapper;

@@ -5,9 +5,10 @@ import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
 
-import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -15,7 +16,7 @@ import snownee.kiwi.util.CachedSupplier;
 
 public class ColorProviderUtil {
 	public static BlockColor delegate(Block block) {
-		return new BlockDelegate(() -> ColorProviderRegistry.BLOCK.get(block));
+		return new BlockDelegate(() -> Minecraft.getInstance().getBlockColors().blockColors.byId(BuiltInRegistries.BLOCK.getId(block)));
 	}
 
 	public static class Dummy implements BlockColor {
@@ -28,7 +29,7 @@ public class ColorProviderUtil {
 	}
 
 	private static class BlockDelegate extends CachedSupplier<BlockColor> implements BlockColor {
-		public BlockDelegate(Supplier<BlockColor> getter) {
+		public BlockDelegate(Supplier<@Nullable BlockColor> getter) {
 			super(getter, Dummy.INSTANCE);
 		}
 

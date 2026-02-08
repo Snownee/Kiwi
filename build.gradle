@@ -69,7 +69,8 @@ dependencies {
     implementation "maven.modrinth:jade:${jade_version}+fabric"
 
 //    compileOnlyApi "mezz.jei:jei-${minecraft_version}-fabric-api:${jei_version}"
-    implementation "mezz.jei:jei-${minecraft_version}-fabric:${jei_version}"
+//    implementation "mezz.jei:jei-${minecraft_version}-fabric:${jei_version}"
+    implementation "mezz.jei:jei-26.1-snapshot-4-fabric:${jei_version}"
 
 //    modCompileOnly "dev.emi:emi-fabric:${emi_version}:api"
 //    modRuntimeOnly "dev.emi:emi-fabric:${emi_version}"

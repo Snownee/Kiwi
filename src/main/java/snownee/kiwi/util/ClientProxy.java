@@ -8,7 +8,7 @@ import com.google.common.base.Preconditions;
 import com.mojang.datafixers.util.Pair;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.BlockColorRegistry;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
@@ -22,7 +22,7 @@ public final class ClientProxy {
 
 	public static void registerColors(Context context, List<Pair<Block, BlockColor>> blocksToAdd) {
 		for (var pair : blocksToAdd) {
-			ColorProviderRegistry.BLOCK.register(pair.getSecond(), pair.getFirst());
+			BlockColorRegistry.register(pair.getSecond(), pair.getFirst());
 		}
 	}
 

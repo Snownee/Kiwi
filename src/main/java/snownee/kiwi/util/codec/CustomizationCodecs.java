@@ -57,7 +57,7 @@ public class CustomizationCodecs {
 	public static final Codec<BlockBehaviour.StatePredicate> STATE_PREDICATE = Codec.BOOL.flatComapMap(
 			bl -> {
 				return bl ? Blocks::always : Blocks::never;
-			}, p -> {
+			}, _ -> {
 				return DataResult.error(() -> "Unsupported operation");
 			});
 	public static final Codec<TreeGrower> TREE_GROWER = Codec.withAlternative(
@@ -194,7 +194,7 @@ public class CustomizationCodecs {
 						return DataResult.error(() -> "Unknown key: " + key);
 					}
 					return DataResult.success(value);
-				}, value -> {
+				}, _ -> {
 					return DataResult.error(() -> "Unsupported operation");
 				});
 	}

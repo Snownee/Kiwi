@@ -10,6 +10,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
 import snownee.kiwi.util.KHolder;
@@ -48,7 +49,7 @@ public class StonecutterRecipeMaker {
 			ItemStackTemplate result = new ItemStackTemplate(item, Math.min(count, 99));
 			Identifier itemKey = result.typeHolder().unwrapKey().orElseThrow().identifier();
 			var recipeId = prefix.withSuffix("/%s/%s".formatted(itemKey.getNamespace(), itemKey.getPath()));
-			var recipe = new StonecutterRecipe(prefix.toString(), input, result);
+			var recipe = new StonecutterRecipe(new Recipe.CommonInfo(true), input, result);
 			return new RecipeHolder<>(ResourceKey.create(Registries.RECIPE, recipeId), recipe);
 		}).filter(Objects::nonNull).toList());
 		if (family.stonecutterFrom().isPresent() && family.stonecutterFromMultiplier() != 1) {
@@ -61,7 +62,7 @@ public class StonecutterRecipeMaker {
 				ItemStackTemplate result = new ItemStackTemplate(item, Math.min(count, 99));
 				Identifier itemKey = result.typeHolder().unwrapKey().orElseThrow().identifier();
 				var recipeId = prefix.withSuffix("/%s/%s/from".formatted(itemKey.getNamespace(), itemKey.getPath()));
-				var recipe = new StonecutterRecipe(prefix.toString(), ingredient, result);
+				var recipe = new StonecutterRecipe(new Recipe.CommonInfo(true), ingredient, result);
 				return new RecipeHolder<>(ResourceKey.create(Registries.RECIPE, recipeId), recipe);
 			}).filter(Objects::nonNull).toList());
 		}

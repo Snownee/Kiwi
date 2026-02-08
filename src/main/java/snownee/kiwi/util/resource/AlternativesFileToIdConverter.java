@@ -7,12 +7,11 @@ import java.util.stream.Stream;
 
 import com.google.common.base.Preconditions;
 
-import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 
-public class AlternativesFileToIdConverter extends FileToIdConverter {
+public class AlternativesFileToIdConverter {
 	private final String prefix;
 	private final List<String> extensions;
 	private final int sameExtensionLength;
@@ -23,7 +22,6 @@ public class AlternativesFileToIdConverter extends FileToIdConverter {
 	}
 
 	public AlternativesFileToIdConverter(String pPrefix, List<String> pExtensions, Predicate<Identifier> listFilter) {
-		super(pPrefix, pExtensions.getFirst());
 		this.prefix = pPrefix;
 		this.extensions = pExtensions;
 		sameExtensionLength = pExtensions.stream().mapToInt(String::length).distinct().reduce((a, b) -> -1).orElseThrow();
@@ -40,7 +38,6 @@ public class AlternativesFileToIdConverter extends FileToIdConverter {
 		return new AlternativesFileToIdConverter(pName, List.of(".yaml", ".json"));
 	}
 
-	@Override
 	public Identifier idToFile(Identifier pId) {
 		return pId.withPath(prefix + "/" + pId.getPath() + extensions.getFirst());
 	}
@@ -49,7 +46,6 @@ public class AlternativesFileToIdConverter extends FileToIdConverter {
 		return extensions.stream().map((ext) -> pId.withPath(prefix + "/" + pId.getPath() + ext));
 	}
 
-	@Override
 	public Identifier fileToId(Identifier pFile) {
 		if (sameExtensionLength >= 0) {
 			String s = pFile.getPath();
@@ -65,14 +61,12 @@ public class AlternativesFileToIdConverter extends FileToIdConverter {
 		}
 	}
 
-	@Override
 	public Map<Identifier, Resource> listMatchingResources(ResourceManager pResourceManager) {
 		return pResourceManager.listResources(
 				prefix,
 				location -> extensions.stream().anyMatch(location.getPath()::endsWith) && listFilter.test(location));
 	}
 
-	@Override
 	public Map<Identifier, List<Resource>> listMatchingResourceStacks(ResourceManager pResourceManager) {
 		return pResourceManager.listResourceStacks(
 				prefix,
