@@ -8,6 +8,8 @@ import me.shedaniel.rei.plugincompatibilities.api.REIPluginCompatIgnore;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
+import mezz.jei.api.recipe.RecipeType;
+import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -23,10 +25,18 @@ import snownee.kiwi.util.KHolder;
 @REIPluginCompatIgnore
 public class JEICompat implements IModPlugin {
 	public static final ResourceLocation ID = Kiwi.id("customization");
+	public static final RecipeType<KSwitchGroupRecipe> KSWITCH = RecipeType.create(Kiwi.ID, "kswitch", KSwitchGroupRecipe.class);
 
 	@Override
 	public ResourceLocation getPluginUid() {
 		return ID;
+	}
+
+	@Override
+	public void registerCategories(IRecipeCategoryRegistration registration) {
+		if (CustomizationHooks.isEnabled()) {
+			registration.addRecipeCategories(new KSwitchGroupRecipeCategory(registration.getJeiHelpers().getGuiHelper(), KSWITCH));
+		}
 	}
 
 	@Override
@@ -40,6 +50,9 @@ public class JEICompat implements IModPlugin {
 				}
 				if (family.stonecutterExchange()) {
 					recipes.addAll(StonecutterRecipeMaker.makeRecipes("exchange_in_viewer", holder));
+				}
+				if (family.switchAttrs().enabled()) {
+					registration.addRecipes(KSWITCH, List.of(new KSwitchGroupRecipe(holder)));
 				}
 			}
 			registration.addRecipes(RecipeTypes.STONECUTTING, recipes);
