@@ -12,6 +12,8 @@ import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonObject;
@@ -54,7 +56,7 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 	}
 
 	@Override
-	public void generateTranslations(HolderLookup.Provider registryLookup, TranslationBuilder translationBuilder) {
+	public void generateTranslations(HolderLookup.Provider lookup, TranslationBuilder translationBuilder) {
 	}
 
 	public Optional<Path> createPath(String path, String extension) {
@@ -146,7 +148,7 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 			if (fileName.equals("test") || fileName.equals("kiwi-modules")) {
 				continue; // skip test entries
 			}
-			if (handler.getClazz().getDeclaredAnnotation(KiwiModule.Skip.class) != null) {
+			if (Objects.requireNonNull(handler.getClazz()).getDeclaredAnnotation(KiwiModule.Skip.class) != null) {
 				continue;
 			}
 			String key = handler.getTranslationKey();
@@ -175,12 +177,12 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 		}
 	}
 
-	protected void generateGameObjectsEntries(Map<String, String> translationEntries) {
-		generateGameObjectEntries(translationEntries, Registries.BLOCK, Block::getDescriptionId);
-		generateGameObjectEntries(translationEntries, Registries.ITEM, Item::getDescriptionId);
-		generateGameObjectEntries(translationEntries, Registries.ENTITY_TYPE, EntityType::getDescriptionId);
+	protected void generateGameObjectsEntries(HolderLookup.Provider lookup, Map<String, String> translationEntries) {
+		generateGameObjectEntries(translationEntries, lookup, Registries.BLOCK, Block::getDescriptionId);
+		generateGameObjectEntries(translationEntries, lookup, Registries.ITEM, Item::getDescriptionId);
+		generateGameObjectEntries(translationEntries, lookup, Registries.ENTITY_TYPE, EntityType::getDescriptionId);
 		generateGameObjectEntries(
-				translationEntries, Registries.CREATIVE_MODE_TAB, tab -> {
+				translationEntries, lookup, Registries.CREATIVE_MODE_TAB, tab -> {
 					Component component = tab.getDisplayName();
 					if (component.getContents() instanceof TranslatableContents contents) {
 						return contents.getKey();
@@ -188,21 +190,24 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 						return null;
 					}
 				});
-		generateGameObjectEntries(translationEntries, Registries.CUSTOM_STAT, stat -> Util.makeDescriptionId("stat", stat));
-		generateGameObjectEntries(translationEntries, Registries.MOB_EFFECT, MobEffect::getDescriptionId);
+		generateGameObjectEntries(translationEntries, lookup, Registries.CUSTOM_STAT, stat -> Util.makeDescriptionId("stat", stat));
+		generateGameObjectEntries(translationEntries, lookup, Registries.MOB_EFFECT, MobEffect::getDescriptionId);
 	}
 
 	protected void generateModNameAndDescription(Map<String, String> translationEntries) {
 		String modId = packOutput.getModId();
 		translationEntries.put("modmenu.nameTranslation.%s".formatted(modId), Platform.getModName(modId));
-		translationEntries.put("modmenu.descriptionTranslation.%s".formatted(modId), Platform.getModDescription(modId));
+		String description = Platform.getModDescription(modId);
+		translationEntries.put("modmenu.descriptionTranslation.%s".formatted(modId), description);
+		translationEntries.put("fml.menu.mods.info.description.%s".formatted(modId), description);
 	}
 
 	protected <T> void generateGameObjectEntries(
 			Map<String, String> translationEntries,
+			HolderLookup.Provider lookup,
 			ResourceKey<Registry<T>> registryKey,
-			Function<T, String> keyMapper) {
-		GameObjectLookup.allHolders(registryKey, packOutput.getModId()).forEach(holder -> {
+			Function<T, @Nullable String> keyMapper) {
+		GameObjectLookup.allHolders(lookup, registryKey, packOutput.getModId()).forEach(holder -> {
 			String key = keyMapper.apply(holder.value());
 			if (key != null) {
 				translationEntries.put(key, KUtil.friendlyText(holder.key().identifier().getPath()));

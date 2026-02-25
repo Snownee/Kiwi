@@ -51,9 +51,6 @@ public final class Platform implements DedicatedServerModInitializer {
 	private static final Pattern VERSION_PATTERN = Pattern.compile("^(\\d+)\\.(\\d+)\\.(\\d+).*?$");
 	private static final boolean DATA_GEN = System.getProperty("fabric-api.datagen") != null;
 
-	private Platform() {
-	}
-
 	public static boolean isModLoaded(String id) {
 		return FabricLoader.getInstance().isModLoaded(id);
 	}

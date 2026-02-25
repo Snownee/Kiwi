@@ -38,7 +38,7 @@
 	"mixins": [
 		"kiwi.mixins.json"
 	],
-	"accessWidener": "kiwi.accesswidener",
+	"accessWidener": "kiwi.classtweaker",
 	"depends": {
 		"fabric-api": "*",
 		"minecraft": ">=26.1-",
