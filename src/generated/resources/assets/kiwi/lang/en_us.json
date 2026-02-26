@@ -59,6 +59,8 @@
   "kiwi.config.qol.hideDataComponentsTooltip.desc": "",
   "kiwi.config.qol.loadingOverlayNoFade": "Loading Overlay No Fade",
   "kiwi.config.qol.loadingOverlayNoFade.desc": "",
+  "kiwi.config.qol.noForceBackup": "No Force Backup",
+  "kiwi.config.qol.noForceBackup.desc": "",
   "kiwi.config.qol.superClearChat": "Super Clear Chat",
   "kiwi.config.qol.superClearChat.desc": "",
   "kiwi.config.qol.suppressExperimentalSettingsWarning": "Suppress Experimental Settings Warning",

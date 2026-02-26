@@ -28,6 +28,7 @@
 	],
 	"client": [
 		"client.AvatarRenderStateMixin",
+		"client.BackupConfirmScreenMixin",
 		"client.ClientPacketListenerMixin",
 		"client.ClientTelemetryManagerMixin",
 		"client.CreativeModeInventoryScreenMixin",
