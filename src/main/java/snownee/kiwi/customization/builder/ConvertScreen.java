@@ -19,7 +19,7 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
@@ -318,19 +318,19 @@ public class ConvertScreen extends Screen {
 	}
 
 	@Override
-	public void render(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
+	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
 		Objects.requireNonNull(minecraft);
-		Matrix3x2fStack pose = pGuiGraphics.pose();
+		Matrix3x2fStack pose = graphics.pose();
 		layout().update();
 		Vector2i pos = layout().getAnchoredPos();
-		float openValue = openProgress.getValue(pPartialTick);
+		float openValue = openProgress.getValue(partialTick);
 		pose.pushMatrix();
 		pose.translate(pos.x, pos.y);
 		pose.scale(openValue);
 		pose.translate(-pos.x, -pos.y);
 		if (inContainer) {
 			Rect2i bounds = layout().bounds();
-			pGuiGraphics.blitSprite(
+			graphics.blitSprite(
 					RenderPipelines.GUI_TEXTURED,
 					Identifier.withDefaultNamespace("recipe_book/overlay_recipe"),
 					bounds.getX() - 2,
@@ -338,16 +338,15 @@ public class ConvertScreen extends Screen {
 					bounds.getWidth() + 3,
 					bounds.getHeight() + 3);
 		}
-		super.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
+		super.extractRenderState(graphics, mouseX, mouseY, partialTick);
 		pose.popMatrix();
 	}
 
 	@Override
-	public void renderBackground(GuiGraphics p_283688_, int p_296369_, int p_296477_, float p_294317_) {
-		// NO-OP
+	public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 	}
 
-//	@Override
+	//	@Override
 //	public void setTooltipForNextRenderPass(List<FormattedCharSequence> list, ClientTooltipPositioner tooltipPositioner, boolean force) {
 //		float openValue = openProgress.getValue(Objects.requireNonNull(minecraft)./*getPartialTick()*/ getTimer()
 //				.getGameTimeDeltaPartialTick(true));
@@ -375,7 +374,7 @@ public class ConvertScreen extends Screen {
 		return false;
 	}
 
-	public static void renderLingering(GuiGraphics pGuiGraphics) {
+	public static void extractLingering(GuiGraphicsExtractor graphics) {
 		if (lingeringScreen == null) {
 			return;
 		}
@@ -384,8 +383,8 @@ public class ConvertScreen extends Screen {
 			lingeringScreen = null;
 			return;
 		}
-		lingeringScreen.render(
-				pGuiGraphics,
+		lingeringScreen.extractRenderState(
+				graphics,
 				Integer.MAX_VALUE,
 				Integer.MAX_VALUE,
 				mc.getDeltaTracker().getGameTimeDeltaPartialTick(true));

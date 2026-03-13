@@ -13,7 +13,6 @@ import com.mojang.datafixers.util.Pair;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
-import net.fabricmc.fabric.api.client.rendering.v1.ChunkSectionLayerMap;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.client.KeyMapping;
@@ -23,7 +22,6 @@ import net.minecraft.client.gui.components.debug.DebugScreenEntries;
 import net.minecraft.client.gui.components.debug.DebugScreenEntryStatus;
 import net.minecraft.client.gui.components.debug.DebugScreenProfile;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -31,8 +29,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import snownee.kiwi.Kiwi;
-import snownee.kiwi.RenderLayerEnum;
-import snownee.kiwi.customization.block.GlassType;
 import snownee.kiwi.customization.block.behavior.SitManager;
 import snownee.kiwi.customization.block.loader.BlockDefinitionProperties;
 import snownee.kiwi.customization.block.loader.KBlockDefinition;
@@ -119,16 +115,6 @@ public final class CustomizationClient {
 		List<Pair<Block, BlockColor>> blocksToAdd = Lists.newArrayList();
 		for (var entry : blocks.entrySet()) {
 			BlockDefinitionProperties properties = entry.getValue().properties();
-			if (context.loading()) {
-				RenderLayerEnum renderType = properties.renderType().orElse(null);
-				if (renderType == null) {
-					renderType = properties.glassType().map(GlassType::renderType).orElse(null);
-				}
-				if (renderType != null) {
-					Block block = BuiltInRegistries.BLOCK.getValue(entry.getKey());
-					ChunkSectionLayerMap.putBlock(block, (ChunkSectionLayer) renderType.value);
-				}
-			}
 			if (properties.colorProvider().isEmpty()) {
 				continue;
 			}

@@ -19,7 +19,6 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder.ListMultimapBuilder;
 import com.google.common.collect.Sets;
 
-import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
@@ -32,8 +31,6 @@ import net.minecraft.world.level.block.Block;
 import snownee.kiwi.block.IKiwiBlock;
 import snownee.kiwi.item.ItemCategoryFiller;
 import snownee.kiwi.item.ModBlockItem;
-import snownee.kiwi.loader.ClientPlatform;
-import snownee.kiwi.loader.Platform;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.loader.event.PostInitEvent;
 import snownee.kiwi.util.KUtil;
@@ -269,38 +266,6 @@ public final class KiwiModuleContainer {
 			blockItemBuilders = null;
 			noCategories = null;
 			noItems = null;
-		} else if (Registries.BLOCK == registryKey && Platform.isPhysicalClient() && !Platform.isDataGen()) {
-			final ChunkSectionLayer solid = ChunkSectionLayer.SOLID;
-			Map<Class<?>, ChunkSectionLayer> cache = Maps.newHashMap();
-			entries.forEach(e -> {
-				Block block = (Block) e.get();
-				if (e.field != null) {
-					KiwiModule.RenderLayer layer = e.field.getAnnotation(KiwiModule.RenderLayer.class);
-					if (layer != null) {
-						ChunkSectionLayer type = (ChunkSectionLayer) layer.value().value;
-						if (type != solid && type != null) {
-							ClientPlatform.setRenderType(block, type);
-							return;
-						}
-					}
-				}
-				Class<?> klass = block.getClass();
-				ChunkSectionLayer type = cache.computeIfAbsent(
-						klass, k -> {
-							KiwiModule.RenderLayer layer;
-							while (k != Block.class) {
-								layer = k.getDeclaredAnnotation(KiwiModule.RenderLayer.class);
-								if (layer != null) {
-									return (ChunkSectionLayer) layer.value().value;
-								}
-								k = k.getSuperclass();
-							}
-							return solid;
-						});
-				if (type != solid && type != null) {
-					ClientPlatform.setRenderType(block, type);
-				}
-			});
 		}
 	}
 
