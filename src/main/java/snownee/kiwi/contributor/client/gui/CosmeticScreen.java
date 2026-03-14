@@ -146,7 +146,7 @@ public class CosmeticScreen extends Screen {
 			if (this == parent.selectedEntry) {
 				color = 0xFFFFFF77;
 			}
-			graphics.text(parent.font, name, mouseX + 43, mouseY + 2, color);
+			graphics.text(parent.font, name, getContentX() + 43, getContentY(), color);
 		}
 
 		@Override

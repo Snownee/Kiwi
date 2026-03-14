@@ -8,4 +8,7 @@ public interface CosmeticRenderState {
 	@Nullable CosmeticLayer kiwi$getCosmeticLayer();
 
 	void kiwi$setCosmeticLayer(CosmeticLayer layer);
+
+	@Nullable String kiwi$getName();
+	void kiwi$setName(String name);
 }

@@ -138,9 +138,9 @@ public class Contributors extends AbstractModule {
 		ITierProvider provider = REWARD_PROVIDERS.getOrDefault(
 				cosmetic.getNamespace().toLowerCase(Locale.ENGLISH),
 				ITierProvider.Empty.INSTANCE);
-		if (!provider.isContributor(playerName, cosmetic.getPath())) {
+		if (!isContributor(playerName, cosmetic.getPath())) {
 			if (!Platform.isPhysicalClient()) {
-				return provider.refresh().thenApply($ -> provider.isContributor(playerName, cosmetic.getPath()));
+				return provider.refresh().thenApply($ -> isContributor(playerName, cosmetic.getPath()));
 			} else {
 				return CompletableFuture.completedFuture(Boolean.FALSE);
 			}

@@ -4,6 +4,9 @@
 	"package": "snownee.kiwi.mixin",
 	"plugin": "snownee.kiwi.mixin.MixinPlugin",
 	"compatibilityLevel": "JAVA_25",
+	"mixinextras": {
+		"minVersion": "0.5.0"
+	},
 	"mixins": [
 		"IngredientAccess",
 		"customization.AbstractContainerMenuMixin",
@@ -28,7 +31,6 @@
 	],
 	"client": [
 		"client.AvatarRenderStateMixin",
-		"client.BackupConfirmScreenMixin",
 		"client.ClientPacketListenerMixin",
 		"client.ClientTelemetryManagerMixin",
 		"client.CreativeModeInventoryScreenMixin",

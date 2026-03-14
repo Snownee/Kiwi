@@ -12,6 +12,7 @@ import snownee.kiwi.contributor.client.CosmeticLayer;
 public class AvatarRenderStateMixin implements CosmeticRenderState {
 	@Unique
 	private @Nullable CosmeticLayer kiwi$cosmeticLayer;
+	@Unique @Nullable String kiwi$name;
 
 	@Override
 	public @Nullable CosmeticLayer kiwi$getCosmeticLayer() {
@@ -21,5 +22,15 @@ public class AvatarRenderStateMixin implements CosmeticRenderState {
 	@Override
 	public void kiwi$setCosmeticLayer(CosmeticLayer layer) {
 		kiwi$cosmeticLayer = layer;
+	}
+
+	@Override
+	public @Nullable String kiwi$getName() {
+		return kiwi$name;
+	}
+
+	@Override
+	public void kiwi$setName(String name) {
+		kiwi$name = name;
 	}
 }
