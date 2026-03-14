@@ -44,6 +44,9 @@ public class CustomizationCodecs {
 	public static final Codec<BlockBehaviour.OffsetType> OFFSET_TYPE = simpleByNameCodec(ImmutableBiMap.of(
 			"xz", BlockBehaviour.OffsetType.XZ,
 			"xyz", BlockBehaviour.OffsetType.XYZ));
+	public static final Codec<BlockBehaviour.PostProcess> POST_PROCESS = simpleByNameCodec(ImmutableBiMap.of(
+			"self", (state, level, pos) -> pos,
+			"above", (state, level, pos) -> pos.above()));
 	public static final Codec<BlockBehaviour.StatePredicate> STATE_PREDICATE = Codec.BOOL.flatComapMap(
 			bl -> {
 				return bl ? Blocks::always : Blocks::never;

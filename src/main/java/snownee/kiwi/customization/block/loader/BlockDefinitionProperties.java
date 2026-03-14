@@ -97,7 +97,7 @@ public record BlockDefinitionProperties(
 			Optional<BlockBehaviour.StatePredicate> isRedstoneConductor,
 			Optional<BlockBehaviour.StatePredicate> isSuffocating,
 			Optional<BlockBehaviour.StatePredicate> isViewBlocking,
-			Optional<BlockBehaviour.StatePredicate> hasPostProcess,
+			Optional<BlockBehaviour.PostProcess> postProcess,
 			Optional<BlockBehaviour.StatePredicate> emissiveRendering) {
 		public static final MapCodec<PartialVanillaProperties> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 				ResourceKey.codec(Registries.BLOCK).optionalFieldOf("copy").forGetter(PartialVanillaProperties::copy),
@@ -117,7 +117,7 @@ public record BlockDefinitionProperties(
 						.forGetter(PartialVanillaProperties::isRedstoneConductor),
 				CustomizationCodecs.STATE_PREDICATE.optionalFieldOf("is_suffocating").forGetter(PartialVanillaProperties::isSuffocating),
 				CustomizationCodecs.STATE_PREDICATE.optionalFieldOf("is_view_blocking").forGetter(PartialVanillaProperties::isViewBlocking),
-				CustomizationCodecs.STATE_PREDICATE.optionalFieldOf("has_post_process").forGetter(PartialVanillaProperties::hasPostProcess),
+				CustomizationCodecs.POST_PROCESS.optionalFieldOf("post_process").forGetter(PartialVanillaProperties::postProcess),
 				CustomizationCodecs.STATE_PREDICATE.optionalFieldOf("emissive_rendering")
 						.forGetter(PartialVanillaProperties::emissiveRendering)
 		).apply(instance, PartialVanillaProperties::new));
@@ -138,7 +138,7 @@ public record BlockDefinitionProperties(
 					or(this.isRedstoneConductor, templateProps.isRedstoneConductor),
 					or(this.isSuffocating, templateProps.isSuffocating),
 					or(this.isViewBlocking, templateProps.isViewBlocking),
-					or(this.hasPostProcess, templateProps.hasPostProcess),
+					or(this.postProcess, templateProps.postProcess),
 					or(this.emissiveRendering, templateProps.emissiveRendering));
 		}
 	}
