@@ -1,41 +1,27 @@
 package snownee.kiwi.util.client;
 
-import java.util.Objects;
-import java.util.function.Supplier;
-
-import org.jspecify.annotations.Nullable;
-
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.color.block.BlockColor;
-import net.minecraft.client.renderer.block.BlockAndTintGetter;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
-import snownee.kiwi.util.CachedSupplier;
-
 public class ColorProviderUtil {
-	public static BlockColor delegate(Block block) {
-		return new BlockDelegate(() -> Minecraft.getInstance().getBlockColors().blockColors.byId(BuiltInRegistries.BLOCK.getId(block)));
-	}
-
-	public static class Dummy implements BlockColor {
-		public static final Dummy INSTANCE = new Dummy();
-
-		@Override
-		public int getColor(BlockState blockState, @Nullable BlockAndTintGetter blockAndTintGetter, @Nullable BlockPos blockPos, int i) {
-			return -1;
-		}
-	}
-
-	private static class BlockDelegate extends CachedSupplier<BlockColor> implements BlockColor {
-		public BlockDelegate(Supplier<@Nullable BlockColor> getter) {
-			super(getter, Dummy.INSTANCE);
-		}
-
-		@Override
-		public int getColor(BlockState blockState, @Nullable BlockAndTintGetter blockAndTintGetter, @Nullable BlockPos blockPos, int i) {
-			return Objects.requireNonNull(this.get()).getColor(blockState, blockAndTintGetter, blockPos, i);
-		}
-	}
+//	public static BlockColor delegate(Block block) {
+//		return new BlockDelegate(() -> Minecraft.getInstance().getBlockColors().blockColors.byId(BuiltInRegistries.BLOCK.getId(block)));
+//	}
+//
+//	public static class Dummy implements BlockColor {
+//		public static final Dummy INSTANCE = new Dummy();
+//
+//		@Override
+//		public int getColor(BlockState blockState, @Nullable BlockAndTintGetter blockAndTintGetter, @Nullable BlockPos blockPos, int i) {
+//			return -1;
+//		}
+//	}
+//
+//	private static class BlockDelegate extends CachedSupplier<BlockColor> implements BlockColor {
+//		public BlockDelegate(Supplier<@Nullable BlockColor> getter) {
+//			super(getter, Dummy.INSTANCE);
+//		}
+//
+//		@Override
+//		public int getColor(BlockState blockState, @Nullable BlockAndTintGetter blockAndTintGetter, @Nullable BlockPos blockPos, int i) {
+//			return Objects.requireNonNull(this.get()).getColor(blockState, blockAndTintGetter, blockPos, i);
+//		}
+//	}
 }
