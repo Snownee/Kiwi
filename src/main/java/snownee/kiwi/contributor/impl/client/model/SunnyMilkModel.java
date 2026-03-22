@@ -1,6 +1,5 @@
 package snownee.kiwi.contributor.impl.client.model;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -14,7 +13,6 @@ import net.minecraft.util.Mth;
 
 public class SunnyMilkModel<T extends HumanoidRenderState> extends HumanoidModel<T> {
 
-	private float ticks;
 	private final ModelPart wingRight;
 	private final ModelPart wingLeft;
 
@@ -52,11 +50,7 @@ public class SunnyMilkModel<T extends HumanoidRenderState> extends HumanoidModel
 	@Override
 	public void setupAnim(T renderState) {
 		super.setupAnim(renderState);
-
-		float f = renderState.speedValue * 10;
-		ticks += Minecraft.getInstance().getDeltaTracker()
-				.getGameTimeDeltaPartialTick(!renderState.isFullyFrozen) * (1 + Math.min(9, f * f * f)) * 0.1f;
-		wingLeft.yRot = -1.0472F + Mth.sin(ticks) * 0.25f;
+		wingLeft.yRot = -1.0472F + Mth.sin(renderState.ageInTicks * 0.5f) * 0.25f;
 		wingRight.yRot = -wingLeft.yRot;
 	}
 

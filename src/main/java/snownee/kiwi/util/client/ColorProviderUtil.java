@@ -1,27 +1,57 @@
 package snownee.kiwi.util.client;
 
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Supplier;
+
+import org.jspecify.annotations.Nullable;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.color.block.BlockTintSource;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
+import snownee.kiwi.util.CachedSupplier;
+
 public class ColorProviderUtil {
-//	public static BlockColor delegate(Block block) {
-//		return new BlockDelegate(() -> Minecraft.getInstance().getBlockColors().blockColors.byId(BuiltInRegistries.BLOCK.getId(block)));
-//	}
-//
-//	public static class Dummy implements BlockColor {
-//		public static final Dummy INSTANCE = new Dummy();
-//
-//		@Override
-//		public int getColor(BlockState blockState, @Nullable BlockAndTintGetter blockAndTintGetter, @Nullable BlockPos blockPos, int i) {
-//			return -1;
-//		}
-//	}
-//
-//	private static class BlockDelegate extends CachedSupplier<BlockColor> implements BlockColor {
-//		public BlockDelegate(Supplier<@Nullable BlockColor> getter) {
-//			super(getter, Dummy.INSTANCE);
-//		}
-//
-//		@Override
-//		public int getColor(BlockState blockState, @Nullable BlockAndTintGetter blockAndTintGetter, @Nullable BlockPos blockPos, int i) {
-//			return Objects.requireNonNull(this.get()).getColor(blockState, blockAndTintGetter, blockPos, i);
-//		}
-//	}
+	public static BlockTintSource delegate(Block block, int layer) {
+		return new BlockDelegate(() -> Minecraft.getInstance().getBlockColors().getTintSource(block.defaultBlockState(), layer));
+	}
+
+	public static class Dummy implements BlockTintSource {
+		public static final Dummy INSTANCE = new Dummy();
+
+		@Override
+		public int color(BlockState state) {
+			return -1;
+		}
+	}
+
+	private static class BlockDelegate extends CachedSupplier<BlockTintSource> implements BlockTintSource {
+		public BlockDelegate(Supplier<@Nullable BlockTintSource> getter) {
+			super(getter, Dummy.INSTANCE);
+		}
+
+		@Override
+		public int color(BlockState state) {
+			return Objects.requireNonNull(get()).color(state);
+		}
+
+		@Override
+		public int colorInWorld(BlockState state, BlockAndTintGetter level, BlockPos pos) {
+			return Objects.requireNonNull(get()).colorInWorld(state, level, pos);
+		}
+
+		@Override
+		public int colorAsTerrainParticle(BlockState state, BlockAndTintGetter level, BlockPos pos) {
+			return Objects.requireNonNull(get()).colorAsTerrainParticle(state, level, pos);
+		}
+
+		@Override
+		public Set<Property<?>> relevantProperties() {
+			return Objects.requireNonNull(get()).relevantProperties();
+		}
+	}
 }

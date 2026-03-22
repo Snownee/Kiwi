@@ -6,7 +6,10 @@ import java.util.Map;
 import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.datafixers.util.Pair;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
@@ -14,15 +17,20 @@ import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.color.block.BlockTintSource;
 import net.minecraft.client.gui.components.debug.DebugScreenEntries;
 import net.minecraft.client.gui.components.debug.DebugScreenEntryStatus;
 import net.minecraft.client.gui.components.debug.DebugScreenProfile;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.customization.block.behavior.SitManager;
+import snownee.kiwi.customization.block.loader.BlockDefinitionProperties;
 import snownee.kiwi.customization.block.loader.KBlockDefinition;
 import snownee.kiwi.customization.builder.BuildersButton;
 import snownee.kiwi.customization.builder.ConvertScreen;
@@ -38,6 +46,7 @@ import snownee.kiwi.customization.command.ReloadSlotsCommand;
 import snownee.kiwi.customization.item.loader.KItemDefinition;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.ClientProxy;
+import snownee.kiwi.util.client.ColorProviderUtil;
 import snownee.kiwi.util.client.SmartKey;
 
 public final class CustomizationClient {
@@ -102,23 +111,31 @@ public final class CustomizationClient {
 				.build();
 		KeyMappingHelper.registerKeyMapping(buildersButtonKey);
 		ClientProxy.afterRegisterSmartKey(buildersButtonKey);
-//		Map<Block, BlockColor> blockColors = Maps.newHashMap();
-//		List<Pair<Block, BlockColor>> blocksToAdd = Lists.newArrayList();
-//		for (var entry : blocks.entrySet()) {
-//			BlockDefinitionProperties properties = entry.getValue().properties();
-//			if (properties.colorProvider().isEmpty()) {
-//				continue;
-//			}
-//			Block block = BuiltInRegistries.BLOCK.getValue(entry.getKey());
-//			Block providerBlock = BuiltInRegistries.BLOCK.getValue(properties.colorProvider().get());
-//			if (providerBlock == Blocks.AIR) {
-//				Kiwi.LOGGER.warn("Cannot find color provider block %s for block %s".formatted(
-//						properties.colorProvider().get(),
-//						entry.getKey()));
-//			} else {
-//				blocksToAdd.add(Pair.of(block, blockColors.computeIfAbsent(providerBlock, ColorProviderUtil::delegate)));
-//			}
-//		}
-//		ClientProxy.registerColors(context, blocksToAdd);
+		Map<Pair<Block, Integer>, BlockTintSource> blockColors = Maps.newHashMap();
+		List<Pair<Block, List<BlockTintSource>>> blocksToAdd = Lists.newArrayList();
+		blocks:
+		for (var entry : blocks.entrySet()) {
+			BlockDefinitionProperties properties = entry.getValue().properties();
+			if (properties.colorProvider().isEmpty() || properties.colorProvider().get().isEmpty()) {
+				continue;
+			}
+			Block block = BuiltInRegistries.BLOCK.getValue(entry.getKey());
+			int layer = 0;
+			List<BlockTintSource> tintSources = Lists.newArrayList();
+			for (Identifier id : properties.colorProvider().get()) {
+				Block providerBlock = BuiltInRegistries.BLOCK.getValue(id);
+				if (providerBlock == Blocks.AIR) {
+					Kiwi.LOGGER.warn("Cannot find color provider block %s for block %s".formatted(id, entry.getKey()));
+					continue blocks;
+				}
+
+				tintSources.add(blockColors.computeIfAbsent(
+						Pair.of(providerBlock, layer),
+						$ -> ColorProviderUtil.delegate($.getFirst(), $.getSecond())));
+				layer++;
+			}
+			blocksToAdd.add(Pair.of(block, tintSources));
+		}
+		ClientProxy.registerColors(context, blocksToAdd);
 	}
 }
