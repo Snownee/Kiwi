@@ -18,11 +18,9 @@ import net.fabricmc.fabric.mixin.client.rendering.LivingEntityRendererAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.particle.ParticleProvider;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
-import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
@@ -33,11 +31,9 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.util.Unit;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import snownee.kiwi.Kiwi;
-import snownee.kiwi.RenderLayerEnum;
 import snownee.kiwi.client.TooltipEvents;
 import snownee.kiwi.command.ClientCommandContext;
 import snownee.kiwi.command.KalcCommand;
@@ -69,10 +65,6 @@ public final class ClientPlatform implements ClientModInitializer {
 		ParticleProviderRegistry.getInstance().register(type, factory);
 	}
 
-	public static void setRenderType(Block block, ChunkSectionLayer layer) {
-		ItemBlockRenderTypes.TYPE_BY_BLOCK.put(block, layer);
-	}
-
 	public static Locale getLocale() {
 		String[] langSplit = Minecraft.getInstance().getLanguageManager().getSelected().split("_", 2);
 		return langSplit.length == 1 ? Locale.of(langSplit[0]) : Locale.of(langSplit[0], langSplit[1]);
@@ -86,9 +78,6 @@ public final class ClientPlatform implements ClientModInitializer {
 			dispatcher.register(KalcCommand.create(context));
 		});
 		ClientLifecycleEvents.CLIENT_STARTED.register(Kiwi::clientInit);
-
-		RenderLayerEnum.CUTOUT.value = ChunkSectionLayer.CUTOUT;
-		RenderLayerEnum.TRANSLUCENT.value = ChunkSectionLayer.TRANSLUCENT;
 
 		ItemTooltipCallback.EVENT.addPhaseOrdering(HIGH, Event.DEFAULT_PHASE);
 		ItemTooltipCallback.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, LOW);

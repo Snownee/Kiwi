@@ -19,7 +19,7 @@ public class SantaHatModel<T extends HumanoidRenderState> extends HumanoidModel<
 	public SantaHatModel(PlayerModel playerModel, ModelPart root) {
 		super(root);
 		this.playerModel = playerModel;
-		main = root.getChild("santa");
+		main = root.getChild("head").getChild("santa");
 	}
 
 	public static LayerDefinition create() {
@@ -32,7 +32,7 @@ public class SantaHatModel<T extends HumanoidRenderState> extends HumanoidModel<
 		builder.texOffs(0, 0).addBox(0.0F, -12.0F, -2.5F, 4.0F, 3.0F, 4.0F);
 		builder.texOffs(16, 4).addBox(4.0F, -12.5F, -1.5F, 2.0F, 4.0F, 2.0F);
 		builder.texOffs(12, 0).addBox(5.0F, -9.0F, -1.0F, 2.0F, 2.0F, 2.0F);
-		root.addOrReplaceChild("santa", builder, PartPose.ZERO);
+		head.addOrReplaceChild("santa", builder, PartPose.ZERO);
 		return LayerDefinition.create(mesh, 32, 32);
 	}
 

@@ -1,7 +1,7 @@
 package snownee.kiwi.minieffects;
 
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -40,7 +40,13 @@ public class MiniEffects {
 		return true;
 	}
 
-	public static void render(GuiGraphics graphics, Font font, ScreenRectangle area, ItemStack iconItem, int effects, int bad) {
+	public static void extractRenderState(
+			GuiGraphicsExtractor graphics,
+			Font font,
+			ScreenRectangle area,
+			ItemStack iconItem,
+			int effects,
+			int bad) {
 		int x = area.left();
 		int y = area.top();
 		graphics.blitSprite(RenderPipelines.GUI_TEXTURED, EFFECT_BUTTON_SPRITE, x, y, area.width(), area.height());
@@ -49,10 +55,10 @@ public class MiniEffects {
 		pose.pushMatrix();
 		pose.translate(x + 1, y + 2);
 		pose.scale(0.5f);
-		graphics.renderFakeItem(iconItem, 0, 0);
+		graphics.fakeItem(iconItem, 0, 0);
 		if (effects > 0) {
 			String s = Integer.toString(effects);
-			graphics.drawString(
+			graphics.text(
 					font,
 					s,
 					18 - font.width(s),

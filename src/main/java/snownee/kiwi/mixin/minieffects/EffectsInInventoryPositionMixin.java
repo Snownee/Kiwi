@@ -5,9 +5,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import com.llamalad7.mixinextras.expression.Definition;
+import com.llamalad7.mixinextras.expression.Expression;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -28,27 +30,31 @@ public class EffectsInInventoryPositionMixin {
 		}
 	}
 
-	@ModifyVariable(method = "render", at = @At(value = "STORE"), name = "xo")
+	@Definition(id = "xo", local = @Local(type = int.class, name = "xo"))
+	@Expression("xo = @(?)")
+	@ModifyExpressionValue(method = "extractRenderState", at = @At(value = "MIXINEXTRAS:EXPRESSION"))
 	private int kiwi$modifyX0(int xo) {
-		if (MiniEffects.isLeftSide()) {
-			// always use compact mode if is left side
-			return screen.leftPos - 32;
-		} else {
+		if (!MiniEffects.isLeftSide()) {
 			return xo;
 		}
+		// always use compact mode if is left side
+		return screen.leftPos - 32;
 	}
 
-	@ModifyVariable(method = "render", at = @At(value = "STORE"), name = "availableWidth")
+	@Definition(id = "availableWidth", local = @Local(type = int.class, name = "availableWidth"))
+	@Expression("availableWidth = @(?)")
+	@ModifyExpressionValue(method = "extractRenderState", at = @At(value = "MIXINEXTRAS:EXPRESSION"))
 	private int kiwi$modifyAvailableWidth(int availableWidth) {
-		if (MiniEffects.isLeftSide()) {
-			// always use compact mode if is left side
-			return screen.leftPos - 2;
-		} else {
+		if (!MiniEffects.isLeftSide()) {
 			return availableWidth;
 		}
+		// always use compact mode if is left side
+		return screen.leftPos - 2;
 	}
 
-	@ModifyVariable(method = "render", at = @At(value = "STORE"), name = "maxWidth")
+	@Definition(id = "maxWidth", local = @Local(type = int.class, name = "maxWidth"))
+	@Expression("maxWidth")
+	@ModifyExpressionValue(method = "extractRenderState", at = @At(value = "MIXINEXTRAS:EXPRESSION"))
 	private int kiwi$renderEffectsBl(int maxWidth, @Local(name = "availableWidth") int availableWidth) {
 		if (MiniEffects.isLeftSide()) {
 			// always use compact mode if is left side

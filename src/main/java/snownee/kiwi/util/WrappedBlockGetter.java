@@ -2,9 +2,9 @@ package snownee.kiwi.util;
 
 import org.jspecify.annotations.Nullable;
 
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.CardinalLighting;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -36,8 +36,8 @@ public abstract class WrappedBlockGetter implements BlockAndTintGetter {
 	}
 
 	@Override
-	public float getShade(Direction p_230487_1_, boolean p_230487_2_) {
-		return delegate.getShade(p_230487_1_, p_230487_2_);
+	public CardinalLighting cardinalLighting() {
+		return delegate.cardinalLighting();
 	}
 
 	@Override

@@ -12,7 +12,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.BlockColorRegistry;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
-import net.minecraft.client.color.block.BlockColor;
+import net.minecraft.client.color.block.BlockTintSource;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.level.block.Block;
@@ -20,7 +20,7 @@ import snownee.kiwi.util.client.SmartKey;
 
 public final class ClientProxy {
 
-	public static void registerColors(Context context, List<Pair<Block, BlockColor>> blocksToAdd) {
+	public static void registerColors(Context context, List<Pair<Block, List<BlockTintSource>>> blocksToAdd) {
 		for (var pair : blocksToAdd) {
 			BlockColorRegistry.register(pair.getSecond(), pair.getFirst());
 		}

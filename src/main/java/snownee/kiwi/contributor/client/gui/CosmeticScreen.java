@@ -5,7 +5,7 @@ import java.util.Objects;
 import org.jspecify.annotations.Nullable;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.StringWidget;
@@ -141,12 +141,12 @@ public class CosmeticScreen extends Screen {
 		}
 
 		@Override
-		public void renderContent(GuiGraphics graphics, int mouseX, int mouseY, boolean hovered, float a) {
+		public void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovered, float a) {
 			int color = hovered ? 0xFFFFFFAA : 0xFFFFFFFF;
 			if (this == parent.selectedEntry) {
 				color = 0xFFFFFF77;
 			}
-			graphics.drawString(parent.font, name, mouseX + 43, mouseY + 2, color);
+			graphics.text(parent.font, name, getContentX() + 43, getContentY(), color);
 		}
 
 		@Override

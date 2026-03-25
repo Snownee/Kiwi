@@ -1,14 +1,12 @@
 package snownee.kiwi.customization.builder;
 
+import java.time.Duration;
 import java.util.function.Consumer;
 
 import org.jspecify.annotations.Nullable;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -23,7 +21,6 @@ public class ItemButton extends Button {
 	private float pressTime = -1;
 	public @Nullable Consumer<ItemButton> onPress;
 	public @Nullable Consumer<ItemButton> onRelease;
-	public @Nullable Tooltip rawTooltip; // we dont want the delay
 
 	protected ItemButton(
 			int x,
@@ -46,8 +43,8 @@ public class ItemButton extends Button {
 	}
 
 	@Override
-	public void setTooltip(@Nullable Tooltip tooltip) {
-		rawTooltip = tooltip;
+	public void setTooltipDelay(Duration delay) {
+		// Needn't delay
 	}
 
 	public ItemStack item() {
@@ -63,13 +60,7 @@ public class ItemButton extends Button {
 	}
 
 	@Override
-	protected void renderContents(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
-		if (rawTooltip != null && isHovered() || isFocused() && Minecraft.getInstance().getLastInputType().isKeyboard()) {
-			Screen screen = Minecraft.getInstance().screen;
-			if (screen != null) {
-				pGuiGraphics.setTooltipForNextFrame(rawTooltip.toCharSequence(Minecraft.getInstance()), pMouseX, pMouseY);
-			}
-		}
+	protected void extractContents(GuiGraphicsExtractor graphics, int pMouseX, int pMouseY, float pPartialTick) {
 		if (pressTime >= 0) {
 			int i = (int) pressTime;
 			pressTime += pPartialTick;
@@ -82,18 +73,18 @@ public class ItemButton extends Button {
 		int width = getWidth() - 1;
 		int height = getHeight() - 1;
 		if (inContainer) {
-			pGuiGraphics.fill(x + 1, y + 1, x + width - 1, y + height - 1, 0x222222 | (int) (alpha * 0xFF) << 24);
+			graphics.fill(x + 1, y + 1, x + width - 1, y + height - 1, 0x222222 | (int) (alpha * 0xFF) << 24);
 		} else {
-			pGuiGraphics.fill(x, y, x + width, y + height, 0x222222 | (int) (alpha * 0xFF) << 24);
+			graphics.fill(x, y, x + width, y + height, 0x222222 | (int) (alpha * 0xFF) << 24);
 		}
 		hoverProgress += isHoveredOrFocused() ? pPartialTick * .2f : -pPartialTick * .2f;
 		hoverProgress = Mth.clamp(hoverProgress, inContainer ? 0 : .4f, 1);
 		int lineColor = 0xFFFFFF | (int) (hoverProgress * 0xFF) << 24;
-		pGuiGraphics.fill(x, y, x + 1, y + height, lineColor);
-		pGuiGraphics.fill(x + width - 1, y, x + width, y + height, lineColor);
-		pGuiGraphics.fill(x + 1, y, x + width - 1, y + 1, lineColor);
-		pGuiGraphics.fill(x + 1, y + height - 1, x + width - 1, y + height, lineColor);
-		pGuiGraphics.renderItem(itemStack, x + 2, y + 2);
+		graphics.fill(x, y, x + 1, y + height, lineColor);
+		graphics.fill(x + width - 1, y, x + width, y + height, lineColor);
+		graphics.fill(x + 1, y, x + width - 1, y + 1, lineColor);
+		graphics.fill(x + 1, y + height - 1, x + width - 1, y + height, lineColor);
+		graphics.item(itemStack, x + 2, y + 2);
 	}
 
 	@Override

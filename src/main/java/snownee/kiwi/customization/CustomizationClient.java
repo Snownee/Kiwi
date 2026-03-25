@@ -13,17 +13,15 @@ import com.mojang.datafixers.util.Pair;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
-import net.fabricmc.fabric.api.client.rendering.v1.ChunkSectionLayerMap;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.color.block.BlockColor;
+import net.minecraft.client.color.block.BlockTintSource;
 import net.minecraft.client.gui.components.debug.DebugScreenEntries;
 import net.minecraft.client.gui.components.debug.DebugScreenEntryStatus;
 import net.minecraft.client.gui.components.debug.DebugScreenProfile;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -31,8 +29,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import snownee.kiwi.Kiwi;
-import snownee.kiwi.RenderLayerEnum;
-import snownee.kiwi.customization.block.GlassType;
 import snownee.kiwi.customization.block.behavior.SitManager;
 import snownee.kiwi.customization.block.loader.BlockDefinitionProperties;
 import snownee.kiwi.customization.block.loader.KBlockDefinition;
@@ -115,32 +111,30 @@ public final class CustomizationClient {
 				.build();
 		KeyMappingHelper.registerKeyMapping(buildersButtonKey);
 		ClientProxy.afterRegisterSmartKey(buildersButtonKey);
-		Map<Block, BlockColor> blockColors = Maps.newHashMap();
-		List<Pair<Block, BlockColor>> blocksToAdd = Lists.newArrayList();
+		Map<Pair<Block, Integer>, BlockTintSource> blockColors = Maps.newHashMap();
+		List<Pair<Block, List<BlockTintSource>>> blocksToAdd = Lists.newArrayList();
+		blocks:
 		for (var entry : blocks.entrySet()) {
 			BlockDefinitionProperties properties = entry.getValue().properties();
-			if (context.loading()) {
-				RenderLayerEnum renderType = properties.renderType().orElse(null);
-				if (renderType == null) {
-					renderType = properties.glassType().map(GlassType::renderType).orElse(null);
-				}
-				if (renderType != null) {
-					Block block = BuiltInRegistries.BLOCK.getValue(entry.getKey());
-					ChunkSectionLayerMap.putBlock(block, (ChunkSectionLayer) renderType.value);
-				}
-			}
-			if (properties.colorProvider().isEmpty()) {
+			if (properties.colorProvider().isEmpty() || properties.colorProvider().get().isEmpty()) {
 				continue;
 			}
 			Block block = BuiltInRegistries.BLOCK.getValue(entry.getKey());
-			Block providerBlock = BuiltInRegistries.BLOCK.getValue(properties.colorProvider().get());
-			if (providerBlock == Blocks.AIR) {
-				Kiwi.LOGGER.warn("Cannot find color provider block %s for block %s".formatted(
-						properties.colorProvider().get(),
-						entry.getKey()));
-			} else {
-				blocksToAdd.add(Pair.of(block, blockColors.computeIfAbsent(providerBlock, ColorProviderUtil::delegate)));
+			int layer = 0;
+			List<BlockTintSource> tintSources = Lists.newArrayList();
+			for (Identifier id : properties.colorProvider().get()) {
+				Block providerBlock = BuiltInRegistries.BLOCK.getValue(id);
+				if (providerBlock == Blocks.AIR) {
+					Kiwi.LOGGER.warn("Cannot find color provider block %s for block %s".formatted(id, entry.getKey()));
+					continue blocks;
+				}
+
+				tintSources.add(blockColors.computeIfAbsent(
+						Pair.of(providerBlock, layer),
+						$ -> ColorProviderUtil.delegate($.getFirst(), $.getSecond())));
+				layer++;
 			}
+			blocksToAdd.add(Pair.of(block, tintSources));
 		}
 		ClientProxy.registerColors(context, blocksToAdd);
 	}

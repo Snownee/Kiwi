@@ -79,3 +79,4 @@ kiwi.builder_mode.off: "Builder Mode: §cOFF"
 gui.kiwi.builder.convert: Convert items
 kiwi.builder_mode.debug_entry: "Builder Mode is ON."
 kiwi.builder_mode.debug_key_hint: "Long press %s to exit"
+emi.category.kiwi.kswitch: KSwitch Groups

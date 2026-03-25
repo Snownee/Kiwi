@@ -238,14 +238,14 @@ public final class KUtil {
 		return player.isCreative() ? attrib : attrib - 0.5F;
 	}
 
-	public static void displayClientMessage(@Nullable Player player, boolean client, String key, Object... args) {
+	public static void sendSystemMessage(@Nullable Player player, boolean client, String key, Object... args) {
 		if (player == null) {
 			return;
 		}
 		if (client != player.level().isClientSide()) {
 			return;
 		}
-		player.displayClientMessage(Component.translatable(key, args), false);
+		player.sendSystemMessage(Component.translatable(key, args));
 	}
 
 	public static void jsonList(JsonElement json, Consumer<JsonElement> collector) {

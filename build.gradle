@@ -22,6 +22,12 @@ repositories {
 
 loom {
     accessWidenerPath = file("src/main/resources/${project.mod_id}.classtweaker")
+
+    runs {
+        configureEach {
+            programArgs("--username", "Dev")
+        }
+    }
 }
 
 fabricApi {
@@ -46,7 +52,7 @@ dependencies {
 //    api("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}") {
 //        exclude(group: "net.fabricmc.fabric-api")
 //    }
-    implementation "com.terraformersmc:modmenu:${project.modmenu_version}"
+    compileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
 
     compileOnly("com.google.errorprone:error_prone_annotations:2.18.0")
 
@@ -66,11 +72,11 @@ dependencies {
 //    implementation "me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}"
     compileOnly "me.shedaniel:REIPluginCompatibilities-forge-annotations:12.+"
 
-    implementation "maven.modrinth:jade:${jade_version}+fabric"
+    compileOnly "maven.modrinth:jade:${jade_version}+fabric"
 
 //    compileOnlyApi "mezz.jei:jei-${minecraft_version}-fabric-api:${jei_version}"
 //    implementation "mezz.jei:jei-${minecraft_version}-fabric:${jei_version}"
-    implementation "mezz.jei:jei-26.1-snapshot-6-fabric:${jei_version}"
+    implementation "mezz.jei:jei-26.1-pre-3-fabric:${jei_version}"
 
 //    modCompileOnly "dev.emi:emi-fabric:${emi_version}:api"
 //    modRuntimeOnly "dev.emi:emi-fabric:${emi_version}"

@@ -27,7 +27,7 @@ public class ScreenMixin {
 				}
 				LocalPlayer player = minecraft.player;
 				if (player != null) {
-					player.displayClientMessage(Component.translatable("tip.kiwi.debug_tooltip.success"), false);
+					player.sendSystemMessage(Component.translatable("tip.kiwi.debug_tooltip.success"));
 				}
 				ci.cancel();
 			}

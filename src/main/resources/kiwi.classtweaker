@@ -21,8 +21,6 @@ accessible field net/minecraft/server/packs/repository/FolderRepositorySource va
 accessible field net/minecraft/server/packs/repository/FolderRepositorySource packType Lnet/minecraft/server/packs/PackType;
 accessible method net/minecraft/server/packs/repository/FolderRepositorySource createDiscoveredFilePackInfo (Ljava/nio/file/Path;)Lnet/minecraft/server/packs/PackLocationInfo;
 
-accessible field net/minecraft/client/renderer/ItemBlockRenderTypes TYPE_BY_BLOCK Ljava/util/Map;
-
 accessible method net/minecraft/advancements/criterion/BlockPredicate matchesBlockEntity (Lnet/minecraft/world/level/LevelReader;Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/advancements/criterion/NbtPredicate;)Z
 accessible method net/minecraft/advancements/criterion/BlockPredicate matchesComponents (Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/advancements/criterion/DataComponentMatchers;)Z
 
@@ -67,8 +65,6 @@ accessible field net/minecraft/client/KeyMapping key Lcom/mojang/blaze3d/platfor
 accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen leftPos I
 accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen topPos I
 accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen imageWidth I
-
-accessible field net/minecraft/client/color/block/BlockColors blockColors Lnet/minecraft/core/IdMapper;
 
 accessible field net/minecraft/data/tags/TagsProvider lookupProvider Ljava/util/concurrent/CompletableFuture;
 accessible field net/minecraft/data/tags/TagsProvider builders Ljava/util/Map;
