@@ -33,6 +33,9 @@
 		],
 		"jade": [
 			"snownee.kiwi.customization.compat.jade.JadeCompat"
+		],
+		"jei_mod_plugin": [
+			"snownee.kiwi.customization.compat.jei.JEICompat"
 		]
 	},
 	"mixins": [
