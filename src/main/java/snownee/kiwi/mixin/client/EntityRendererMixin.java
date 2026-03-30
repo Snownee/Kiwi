@@ -19,11 +19,13 @@ public class EntityRendererMixin {
 			method = "createRenderState(Lnet/minecraft/world/entity/Entity;F)Lnet/minecraft/client/renderer/entity/state/EntityRenderState;",
 			at = @At("RETURN"))
 	private EntityRenderState kiwi$appendState(final EntityRenderState state, Entity entity) {
-		if (state instanceof AvatarRenderState) {
-			CosmeticRenderState cosmeticRenderState = (CosmeticRenderState) state;
-			AbstractClientPlayer player = (AbstractClientPlayer) entity;
-			cosmeticRenderState.kiwi$setCosmeticLayer(CosmeticLayer.getRendererOf(player));
-			cosmeticRenderState.kiwi$setName(player.getGameProfile().name());
+		if (state instanceof AvatarRenderState && entity instanceof AbstractClientPlayer player) {
+			var cosmeticLayer = CosmeticLayer.getRendererOf(player);
+			if (cosmeticLayer != null) {
+				CosmeticRenderState cosmeticRenderState = (CosmeticRenderState) state;
+				cosmeticRenderState.kiwi$setCosmeticLayer(cosmeticLayer);
+				cosmeticRenderState.kiwi$setName(player.getGameProfile().name());
+			}
 		}
 		return state;
 	}
