@@ -1,4 +1,4 @@
-@NotNullByDefault
+@NullMarked
 package snownee.kiwi.command;
 
-import snownee.kiwi.util.NotNullByDefault;
+import org.jspecify.annotations.NullMarked;
