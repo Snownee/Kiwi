@@ -13,6 +13,7 @@ import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.google.gson.Strictness;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
@@ -27,12 +28,19 @@ import snownee.kiwi.util.KEval;
 import snownee.kiwi.util.KUtil;
 
 public class OneTimeLoader {
-	private static final Gson GSON = new GsonBuilder().setLenient().create();
+	private static final Gson GSON = new GsonBuilder().setStrictness(Strictness.LENIENT).create();
 
 	public static <T> Map<Identifier, T> load(ResourceManager resourceManager, String directory, Codec<T> codec, Context context) {
-		var fileToIdConverter = AlternativesFileToIdConverter.yamlOrJson(directory);
+		return load(resourceManager, AlternativesFileToIdConverter.yamlOrJson(directory), codec, context);
+	}
+
+	public static <T> Map<Identifier, T> load(
+			ResourceManager resourceManager,
+			AlternativesFileToIdConverter lister,
+			Codec<T> codec,
+			Context context) {
 		Map<Identifier, T> results = Maps.newHashMap();
-		for (Map.Entry<Identifier, Resource> entry : fileToIdConverter.listMatchingResources(resourceManager).entrySet()) {
+		for (Map.Entry<Identifier, Resource> entry : lister.listMatchingResources(resourceManager).entrySet()) {
 			Identifier key = entry.getKey();
 			if (context.isNamespaceDisabled(key.getNamespace())) {
 				continue;
@@ -45,7 +53,7 @@ public class OneTimeLoader {
 				Kiwi.LOGGER.error("Failed to parse " + key + ": " + result.error().get());
 				continue;
 			}
-			Identifier id = fileToIdConverter.fileToId(key);
+			Identifier id = lister.fileToId(key);
 			results.put(id, result.result().orElseThrow());
 		}
 		return results;
@@ -111,8 +119,8 @@ public class OneTimeLoader {
 	}
 
 	public static class Context {
-		private Map<String, Expression> cachedExpressions;
-		private Set<String> disabledNamespaces;
+		private @Nullable Map<String, Expression> cachedExpressions;
+		private @Nullable Set<String> disabledNamespaces;
 
 		public Expression getExpression(String expression) {
 			if (cachedExpressions == null) {

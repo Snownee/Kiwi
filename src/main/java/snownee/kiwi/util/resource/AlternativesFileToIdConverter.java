@@ -18,7 +18,7 @@ public class AlternativesFileToIdConverter {
 	private Predicate<Identifier> listFilter;
 
 	public AlternativesFileToIdConverter(String pPrefix, List<String> pExtensions) {
-		this(pPrefix, pExtensions, $ -> true);
+		this(pPrefix, pExtensions, _ -> true);
 	}
 
 	public AlternativesFileToIdConverter(String pPrefix, List<String> pExtensions, Predicate<Identifier> listFilter) {
@@ -39,22 +39,22 @@ public class AlternativesFileToIdConverter {
 	}
 
 	public Identifier idToFile(Identifier pId) {
-		return pId.withPath(this.prefix + "/" + pId.getPath() + extensions.get(0));
+		return pId.withPath(prefix + "/" + pId.getPath() + extensions.getFirst());
 	}
 
 	public Stream<Identifier> idToAllPossibleFiles(Identifier pId) {
-		return extensions.stream().map((ext) -> pId.withPath(this.prefix + "/" + pId.getPath() + ext));
+		return extensions.stream().map((ext) -> pId.withPath(prefix + "/" + pId.getPath() + ext));
 	}
 
 	public Identifier fileToId(Identifier pFile) {
 		if (sameExtensionLength >= 0) {
 			String s = pFile.getPath();
-			return pFile.withPath(s.substring(this.prefix.length() + 1, s.length() - sameExtensionLength));
+			return pFile.withPath(s.substring(prefix.length() + 1, s.length() - sameExtensionLength));
 		} else {
 			for (String ext : extensions) {
 				if (pFile.getPath().endsWith(ext)) {
 					String s = pFile.getPath();
-					return pFile.withPath(s.substring(this.prefix.length() + 1, s.length() - ext.length()));
+					return pFile.withPath(s.substring(prefix.length() + 1, s.length() - ext.length()));
 				}
 			}
 			throw new IllegalArgumentException("Unknown extension for " + pFile);
@@ -62,14 +62,14 @@ public class AlternativesFileToIdConverter {
 	}
 
 	public Map<Identifier, Resource> listMatchingResources(ResourceManager pResourceManager) {
-		return pResourceManager.listResources(this.prefix, (location) -> {
-			return this.extensions.stream().anyMatch(location.getPath()::endsWith) && listFilter.test(location);
-		});
+		return pResourceManager.listResources(
+				prefix,
+				location -> extensions.stream().anyMatch(location.getPath()::endsWith) && listFilter.test(location));
 	}
 
 	public Map<Identifier, List<Resource>> listMatchingResourceStacks(ResourceManager pResourceManager) {
-		return pResourceManager.listResourceStacks(this.prefix, (location) -> {
-			return this.extensions.stream().anyMatch(location.getPath()::endsWith) && listFilter.test(location);
-		});
+		return pResourceManager.listResourceStacks(
+				prefix,
+				location -> extensions.stream().anyMatch(location.getPath()::endsWith) && listFilter.test(location));
 	}
 }
