@@ -1,8 +1,10 @@
 package snownee.kiwi.util;
 
+import org.jspecify.annotations.Nullable;
+
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.CardinalLighting;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -18,6 +20,7 @@ public abstract class WrappedBlockGetter implements BlockAndTintGetter {
 	}
 
 	@Override
+	@Nullable
 	public BlockEntity getBlockEntity(BlockPos pos) {
 		return delegate.getBlockEntity(pos);
 	}

@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import com.mojang.serialization.MapCodec;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import snownee.kiwi.customization.block.loader.KBlockDefinition;
 import snownee.kiwi.customization.block.loader.KBlockTemplate;
@@ -19,14 +19,14 @@ import snownee.kiwi.util.codec.CustomizationCodecs;
 import snownee.kiwi.util.resource.OneTimeLoader;
 
 public record BlockFundamentals(
-		Map<ResourceLocation, KMaterial> materials,
-		Map<ResourceLocation, GlassType> glassTypes,
-		Map<ResourceLocation, KBlockTemplate> templates,
+		Map<Identifier, KMaterial> materials,
+		Map<Identifier, GlassType> glassTypes,
+		Map<Identifier, KBlockTemplate> templates,
 		PlaceSlotProvider.Preparation slotProviders,
 		SlotLink.Preparation slotLinks,
 		PlaceChoices.Preparation placeChoices,
 		ShapeStorage shapes,
-		Map<ResourceLocation, KBlockDefinition> blocks) {
+		Map<Identifier, KBlockDefinition> blocks) {
 	public static BlockFundamentals reload(ResourceManager resourceManager, OneTimeLoader.Context context, boolean booting) {
 		var materials = OneTimeLoader.load(resourceManager, "kiwi/material", KMaterial.DIRECT_CODEC, context);
 		MapCodec<Optional<KMaterial>> materialCodec = CustomizationCodecs.simpleByNameCodec(materials).optionalFieldOf("material");

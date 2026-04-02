@@ -17,7 +17,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.BlockGetter;
@@ -84,12 +84,12 @@ public class CustomizationCodecs {
 				if (stringValue.startsWith("#")) {
 					return DataResult.success(Pair.of(
 							BlockPredicate.Builder.block()
-									.of(TagKey.create(Registries.BLOCK, ResourceLocation.parse(stringValue.substring(1))))
+									.of(TagKey.create(Registries.BLOCK, Identifier.parse(stringValue.substring(1))))
 									.build(), ops.empty()));
 				}
 				return DataResult.success(Pair.of(
 						BlockPredicate.Builder.block()
-								.of(BuiltInRegistries.BLOCK.get(ResourceLocation.parse(stringValue)))
+								.of(BuiltInRegistries.BLOCK.get(Identifier.parse(stringValue)))
 								.build(), ops.empty()));
 			}
 			//return ExtraCodecs.JSON.decode(ops, input).map($ -> $.mapFirst(BlockPredicate::fromJson));
@@ -177,8 +177,8 @@ public class CustomizationCodecs {
 		}
 	}
 
-	public static <T> Codec<T> simpleByNameCodec(Map<ResourceLocation, T> map) {
-		return ResourceLocation.CODEC.flatXmap(
+	public static <T> Codec<T> simpleByNameCodec(Map<Identifier, T> map) {
+		return Identifier.CODEC.flatXmap(
 				key -> {
 					T value = map.get(key);
 					if (value == null) {

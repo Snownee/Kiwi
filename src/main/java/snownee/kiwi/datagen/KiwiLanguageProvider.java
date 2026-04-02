@@ -27,7 +27,7 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -214,6 +214,6 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 	private Path getLangFilePath(String code) {
 		return dataOutput
 				.createPathProvider(PackOutput.Target.RESOURCE_PACK, "lang")
-				.json(ResourceLocation.fromNamespaceAndPath(dataOutput.getModId(), code));
+				.json(Identifier.fromNamespaceAndPath(dataOutput.getModId(), code));
 	}
 }

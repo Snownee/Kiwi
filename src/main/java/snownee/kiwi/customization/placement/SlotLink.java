@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -18,7 +18,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -59,11 +59,11 @@ public record SlotLink(
 		return pairCodec.optionalFieldOf(fieldName, Pair.of(ResultAction.EMPTY, ResultAction.EMPTY));
 	}
 
-	public record Preparation(Map<ResourceLocation, SlotLink> slotLinks, PlaceSlotProvider.Preparation slotProviders) {
+	public record Preparation(Map<Identifier, SlotLink> slotLinks, PlaceSlotProvider.Preparation slotProviders) {
 		public static Preparation of(
-				Supplier<Map<ResourceLocation, SlotLink>> slotLinksSupplier,
+				Supplier<Map<Identifier, SlotLink>> slotLinksSupplier,
 				PlaceSlotProvider.Preparation slotProviders) {
-			Map<ResourceLocation, SlotLink> slotLinks = Platform.isDataGen() ? Map.of() : slotLinksSupplier.get();
+			Map<Identifier, SlotLink> slotLinks = Platform.isDataGen() ? Map.of() : slotLinksSupplier.get();
 			return new Preparation(slotLinks, slotProviders);
 		}
 

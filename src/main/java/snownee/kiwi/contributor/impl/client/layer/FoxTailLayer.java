@@ -15,7 +15,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.ItemStack;
@@ -23,8 +23,8 @@ import snownee.kiwi.contributor.client.CosmeticLayer;
 import snownee.kiwi.contributor.impl.client.model.FoxTailModel;
 
 public class FoxTailLayer extends CosmeticLayer {
-	private static final ResourceLocation FOX = ResourceLocation.withDefaultNamespace("textures/entity/fox/fox.png");
-	private static final ResourceLocation SNOW_FOX = ResourceLocation.withDefaultNamespace("textures/entity/fox/snow_fox.png");
+	private static final Identifier FOX = Identifier.withDefaultNamespace("textures/entity/fox/fox.png");
+	private static final Identifier SNOW_FOX = Identifier.withDefaultNamespace("textures/entity/fox/snow_fox.png");
 	private static final Supplier<LayerDefinition> definition = Suppliers.memoize(FoxTailModel::create);
 	private final FoxTailModel<AbstractClientPlayer> modelFoxTail;
 
@@ -53,7 +53,7 @@ public class FoxTailLayer extends CosmeticLayer {
 			return;
 		}
 		String name = entitylivingbaseIn.getName().getString().toLowerCase(Locale.ENGLISH);
-		ResourceLocation texture = name.contains("snow") || name.contains("xue") || name.contains("yuki") ? SNOW_FOX : FOX;
+		Identifier texture = name.contains("snow") || name.contains("xue") || name.contains("yuki") ? SNOW_FOX : FOX;
 		matrixStackIn.pushPose();
 		modelFoxTail.young = entitylivingbaseIn.isBaby();
 		modelFoxTail.setupAnim(entitylivingbaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);

@@ -10,7 +10,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.contributor.ContributorsClient;
 import snownee.kiwi.network.KiwiPacket;
@@ -18,7 +18,7 @@ import snownee.kiwi.network.PayloadContext;
 import snownee.kiwi.network.PlayPacketHandler;
 
 @KiwiPacket
-public record SSyncCosmeticPacket(Map<String, ResourceLocation> add, List<String> remove) implements CustomPacketPayload {
+public record SSyncCosmeticPacket(Map<String, Identifier> add, List<String> remove) implements CustomPacketPayload {
 	public static final Type<SSyncCosmeticPacket> TYPE = new Type<>(Kiwi.id("sync_cosmetic"));
 
 	@Override
@@ -31,7 +31,7 @@ public record SSyncCosmeticPacket(Map<String, ResourceLocation> add, List<String
 				ByteBufCodecs.map(
 								Maps::newHashMapWithExpectedSize,
 								ByteBufCodecs.STRING_UTF8,
-								ResourceLocation.STREAM_CODEC)
+								Identifier.STREAM_CODEC)
 						.map(ImmutableMap::copyOf, Maps::newHashMap),
 				SSyncCosmeticPacket::add,
 				ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()),

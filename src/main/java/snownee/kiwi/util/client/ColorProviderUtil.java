@@ -3,7 +3,7 @@ package snownee.kiwi.util.client;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColor;

@@ -5,7 +5,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -20,7 +20,7 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
@@ -140,7 +140,7 @@ public class BuildersButton {
 			for (Item item : family.value().items().toList()) {
 				float convertRatio = BlockFamilies.getConvertRatio(item);
 				CConvertItemPacket.Entry entry = new CConvertItemPacket.Entry(ratio / convertRatio);
-				Pair<ResourceLocation, Item> pair = Pair.of(family.key(), item);
+				Pair<Identifier, Item> pair = Pair.of(family.key(), item);
 				entry.steps().add(pair);
 				if (cascading) {
 					unresolved.add(entry);
@@ -153,7 +153,7 @@ public class BuildersButton {
 			}
 			while (!unresolved.isEmpty()) {
 				CConvertItemPacket.Entry parentEntry = unresolved.removeFirst();
-				Pair<ResourceLocation, Item> lastStep = parentEntry.steps().getLast();
+				Pair<Identifier, Item> lastStep = parentEntry.steps().getLast();
 				Item lastItem = lastStep.getSecond();
 				ratio = BlockFamilies.getConvertRatio(lastItem);
 				for (KHolder<BlockFamily> nextFamily : BlockFamilies.findQuickSwitch(lastItem, player.isCreative())) {

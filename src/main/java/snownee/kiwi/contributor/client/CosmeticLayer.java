@@ -13,7 +13,7 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import snownee.kiwi.contributor.Contributors;
 import snownee.kiwi.contributor.ITierProvider;
 
@@ -52,7 +52,7 @@ public class CosmeticLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
 				.getName());
 		if (renderer == null) {
 			String name = entitylivingbaseIn.getGameProfile().getName();
-			ResourceLocation id = Contributors.PLAYER_COSMETICS.get(name);
+			Identifier id = Contributors.PLAYER_COSMETICS.get(name);
 			if (id != null) {
 				ITierProvider provider = Contributors.REWARD_PROVIDERS.get(id.getNamespace().toLowerCase(Locale.ENGLISH));
 				if (provider == null) {

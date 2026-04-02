@@ -10,7 +10,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.BedItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DoubleHighBlockItem;
@@ -26,13 +26,13 @@ import snownee.kiwi.util.resource.OneTimeLoader;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public final class BlockItemTemplate extends KItemTemplate {
-	private final Optional<ResourceLocation> block;
+	private final Optional<Identifier> block;
 	private final String clazz;
 	private BiFunction<Block, Item.Properties, Item> constructor;
 
 	public BlockItemTemplate(
 			Optional<ItemDefinitionProperties> properties,
-			Optional<ResourceLocation> block,
+			Optional<Identifier> block,
 			String clazz) {
 		super(properties);
 		this.block = block;
@@ -42,7 +42,7 @@ public final class BlockItemTemplate extends KItemTemplate {
 	public static MapCodec<BlockItemTemplate> directCodec() {
 		return RecordCodecBuilder.mapCodec(instance -> instance.group(
 				ItemDefinitionProperties.mapCodecField().forGetter(BlockItemTemplate::properties),
-				ResourceLocation.CODEC.optionalFieldOf("block").forGetter(BlockItemTemplate::block),
+				Identifier.CODEC.optionalFieldOf("block").forGetter(BlockItemTemplate::block),
 				Codec.STRING.optionalFieldOf("class", "").forGetter(BlockItemTemplate::clazz)
 		).apply(instance, BlockItemTemplate::new));
 	}
@@ -53,7 +53,7 @@ public final class BlockItemTemplate extends KItemTemplate {
 	}
 
 	@Override
-	public void resolve(ResourceLocation key, OneTimeLoader.Context context) {
+	public void resolve(Identifier key, OneTimeLoader.Context context) {
 		if (clazz.isEmpty()) {
 			constructor = (block, properties) -> {
 				if (block instanceof DoorBlock || block instanceof DoublePlantBlock) {
@@ -82,13 +82,13 @@ public final class BlockItemTemplate extends KItemTemplate {
 	}
 
 	@Override
-	public Item createItem(ResourceLocation id, Item.Properties properties, JsonObject json) {
+	public Item createItem(Identifier id, Item.Properties properties, JsonObject json) {
 		Block block = BuiltInRegistries.BLOCK.get(this.block.orElse(id));
 		Preconditions.checkState(block != Blocks.AIR, "Block %s not found", this.block);
 		return constructor.apply(block, properties);
 	}
 
-	public Optional<ResourceLocation> block() {
+	public Optional<Identifier> block() {
 		return block;
 	}
 

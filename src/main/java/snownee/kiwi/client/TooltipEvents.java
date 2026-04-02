@@ -31,7 +31,7 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.contents.TranslatableContents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.BucketItem;
@@ -90,7 +90,7 @@ public final class TooltipEvents {
 						.toList();
 				Font font = Minecraft.getInstance().font;
 				for (DataComponentType<?> type : list) {
-					ResourceLocation id = Objects.requireNonNull(BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(type));
+					Identifier id = Objects.requireNonNull(BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(type));
 					Component hoverText;
 					boolean isTransient = type.isTransient();
 					if (isTransient) {

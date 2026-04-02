@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.google.gson.JsonElement;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.crafting.Recipe;
@@ -23,7 +23,7 @@ public class RecipeManagerMixin {
 			at = @At("HEAD"),
 			method = "apply(Ljava/util/Map;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/util/profiling/ProfilerFiller;)V")
 	private void kiwi$apply(
-			Map<ResourceLocation, JsonElement> pObject,
+			Map<Identifier, JsonElement> pObject,
 			ResourceManager pResourceManager,
 			ProfilerFiller pProfiler,
 			CallbackInfo ci) {

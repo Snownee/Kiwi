@@ -13,7 +13,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.ItemStack;
@@ -22,7 +22,7 @@ import snownee.kiwi.contributor.client.CosmeticLayer;
 import snownee.kiwi.contributor.impl.client.model.SunnyMilkModel;
 
 public class SunnyMilkLayer extends CosmeticLayer {
-	private static final ResourceLocation TEXTURE = Kiwi.id("textures/reward/sunny_milk.png");
+	private static final Identifier TEXTURE = Kiwi.id("textures/reward/sunny_milk.png");
 	private static final Supplier<LayerDefinition> definition = Suppliers.memoize(SunnyMilkModel::create);
 	private final SunnyMilkModel<AbstractClientPlayer> model;
 

@@ -12,7 +12,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
@@ -20,9 +20,10 @@ import com.mojang.serialization.Codec;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderOwner;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.neoforged.neoforge.registries.datamaps.DataMapType;
 
@@ -46,7 +47,7 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 	 * @param registryKey The name of the registry the target value is a member of.
 	 * @param valueName   The name of the target value.
 	 */
-	public static <R, T extends R> DeferredHolder<R, T> create(ResourceKey<? extends Registry<R>> registryKey, ResourceLocation valueName) {
+	public static <R, T extends R> DeferredHolder<R, T> create(ResourceKey<? extends Registry<R>> registryKey, Identifier valueName) {
 		return create(ResourceKey.create(registryKey, valueName));
 	}
 
@@ -57,7 +58,7 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 	 * @param registryName The name of the registry the target value is a member of.
 	 * @param valueName    The name of the target value.
 	 */
-	public static <R, T extends R> DeferredHolder<R, T> create(ResourceLocation registryName, ResourceLocation valueName) {
+	public static <R, T extends R> DeferredHolder<R, T> create(Identifier registryName, Identifier valueName) {
 		return create(ResourceKey.createRegistryKey(registryName), valueName);
 	}
 
@@ -88,8 +89,8 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 	 * <p>Attempts to bind immediately if possible.
 	 *
 	 * @param key The resource key of the target object.
-	 * @see #create(ResourceKey, ResourceLocation)
-	 * @see #create(ResourceLocation, ResourceLocation)
+	 * @see #create(ResourceKey, Identifier)
+	 * @see #create(Identifier, Identifier)
 	 * @see #create(ResourceKey)
 	 */
 	protected DeferredHolder(ResourceKey<R> key) {
@@ -142,7 +143,7 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 	@Nullable
 	@SuppressWarnings("unchecked")
 	protected Registry<R> getRegistry() {
-		return (Registry<R>) BuiltInRegistries.REGISTRY.get(this.key.registry());
+		return (Registry<R>) BuiltInRegistries.REGISTRY.getValue(this.key.registry());
 	}
 
 	/**
@@ -160,7 +161,7 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 
 		Registry<R> registry = getRegistry();
 		if (registry != null) {
-			this.holder = registry.getHolder(this.key).orElse(null);
+			this.holder = registry.get(this.key).orElse(null);
 		} else if (throwOnMissingRegistry) {
 			throw new IllegalStateException("Registry not present for " + this + ": " + this.key.registry());
 		}
@@ -169,8 +170,8 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 	/**
 	 * @return The ID of the object pointed to by this DeferredHolder.
 	 */
-	public ResourceLocation getId() {
-		return this.key.location();
+	public Identifier getId() {
+		return this.key.identifier();
 	}
 
 	/**
@@ -186,7 +187,7 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 		if (this == obj) {
 			return true;
 		}
-		return obj instanceof Holder<?> h && h.kind() == Kind.REFERENCE && h.getKey() == this.key;
+		return obj instanceof Holder<?> h && h.kind() == Kind.REFERENCE && h.unwrapKey().orElse(null) == this.key;
 	}
 
 	@Override
@@ -211,12 +212,17 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 		return this.holder != null && this.holder.isBound();
 	}
 
+	@Override
+	public boolean areComponentsBound() {
+		return holder != null && holder.areComponentsBound();
+	}
+
 	/**
-	 * {@return true if the passed ResourceLocation is the same as the ID of the target object}
+	 * {@return true if the passed Identifier is the same as the ID of the target object}
 	 */
 	@Override
-	public boolean is(ResourceLocation id) {
-		return id.equals(this.key.location());
+	public boolean is(Identifier id) {
+		return id.equals(this.key.identifier());
 	}
 
 	/**
@@ -274,6 +280,11 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 	public Stream<TagKey<R>> tags() {
 		bind(false);
 		return this.holder != null ? this.holder.tags() : Stream.empty();
+	}
+
+	@Override
+	public DataComponentMap components() {
+		return Objects.requireNonNull(holder, "Components not bound yet").components();
 	}
 
 	/**

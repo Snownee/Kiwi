@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFW;
@@ -31,7 +31,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Inventory;
@@ -318,7 +318,7 @@ public class ConvertScreen extends Screen {
 		if (inContainer) {
 			Rect2i bounds = layout.bounds();
 			pGuiGraphics.blitSprite(
-					ResourceLocation.withDefaultNamespace("recipe_book/overlay_recipe"),
+					Identifier.withDefaultNamespace("recipe_book/overlay_recipe"),
 					bounds.getX() - 2,
 					bounds.getY() - 2,
 					0,

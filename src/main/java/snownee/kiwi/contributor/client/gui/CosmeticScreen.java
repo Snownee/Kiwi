@@ -2,7 +2,7 @@ package snownee.kiwi.contributor.client.gui;
 
 import java.util.Objects;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -12,7 +12,7 @@ import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfigManager;
@@ -23,7 +23,7 @@ public class CosmeticScreen extends Screen {
 
 	private List list;
 	@Nullable
-	private ResourceLocation currentCosmetic;
+	private Identifier currentCosmetic;
 	private Entry selectedEntry;
 
 	public CosmeticScreen() {
@@ -42,7 +42,7 @@ public class CosmeticScreen extends Screen {
 		list.addEntry(selectedEntry = new Entry(this, null));
 		String playerName = getPlayerName();
 		boolean added = false;
-		for (ResourceLocation tier : Contributors.getRenderableTiers()) {
+		for (Identifier tier : Contributors.getRenderableTiers()) {
 			if (Contributors.isContributor(tier.getNamespace(), playerName, tier.getPath())) {
 				Entry entry = new Entry(this, tier);
 				list.addEntry(entry);
@@ -142,10 +142,10 @@ public class CosmeticScreen extends Screen {
 
 		private final CosmeticScreen parent;
 		@Nullable
-		private final ResourceLocation id;
+		private final Identifier id;
 		private final String name;
 
-		public Entry(CosmeticScreen parent, @Nullable ResourceLocation id) {
+		public Entry(CosmeticScreen parent, @Nullable Identifier id) {
 			this.parent = parent;
 			this.id = id;
 			name = id == null ? "-" : I18n.get(Util.makeDescriptionId("cosmetic", id));

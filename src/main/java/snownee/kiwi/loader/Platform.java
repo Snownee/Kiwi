@@ -6,7 +6,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;

@@ -28,7 +28,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -91,19 +91,19 @@ public record PlaceSlotProvider(
 	}
 
 	public record Preparation(
-			Map<ResourceLocation, PlaceSlotProvider> providers,
+			Map<Identifier, PlaceSlotProvider> providers,
 			ListMultimap<KBlockTemplate, KHolder<PlaceSlotProvider>> byTemplate,
-			ListMultimap<ResourceLocation, KHolder<PlaceSlotProvider>> byBlock,
+			ListMultimap<Identifier, KHolder<PlaceSlotProvider>> byBlock,
 			ListMultimap<Pair<BlockState, Direction>, PlaceSlot> slots,
 			Interner<PlaceSlot> slotInterner,
 			Set<Block> accessedBlocks,
 			Set<String> knownPrimaryTags) {
 		public static Preparation of(
-				Supplier<Map<ResourceLocation, PlaceSlotProvider>> providersSupplier,
-				Map<ResourceLocation, KBlockTemplate> templates) {
-			Map<ResourceLocation, PlaceSlotProvider> providers = Platform.isDataGen() ? Map.of() : providersSupplier.get();
+				Supplier<Map<Identifier, PlaceSlotProvider>> providersSupplier,
+				Map<Identifier, KBlockTemplate> templates) {
+			Map<Identifier, PlaceSlotProvider> providers = Platform.isDataGen() ? Map.of() : providersSupplier.get();
 			ListMultimap<KBlockTemplate, KHolder<PlaceSlotProvider>> byTemplate = ArrayListMultimap.create();
-			ListMultimap<ResourceLocation, KHolder<PlaceSlotProvider>> byBlock = ArrayListMultimap.create();
+			ListMultimap<Identifier, KHolder<PlaceSlotProvider>> byBlock = ArrayListMultimap.create();
 			for (var entry : providers.entrySet()) {
 				KHolder<PlaceSlotProvider> holder = new KHolder<>(entry.getKey(), entry.getValue());
 				for (PlaceTarget target : holder.value().target) {

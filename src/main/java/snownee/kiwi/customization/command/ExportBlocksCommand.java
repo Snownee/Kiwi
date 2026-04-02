@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
@@ -34,7 +34,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.CsvOutput;
 import net.minecraft.world.level.block.Block;
@@ -153,7 +153,7 @@ public class ExportBlocksCommand {
 					continue;
 				}
 				if ("door".equals(template) || "trapdoor".equals(template)) {
-					Codec<Block> codec = BlockCodecs.get(ResourceLocation.parse(template)).codec();
+					Codec<Block> codec = BlockCodecs.get(Identifier.parse(template)).codec();
 					template += toYaml(codec, block, json -> {
 						json.getAsJsonObject().remove(BlockCodecs.BLOCK_PROPERTIES_KEY);
 						return json;

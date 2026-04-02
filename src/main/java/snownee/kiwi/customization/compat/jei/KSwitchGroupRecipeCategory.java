@@ -21,7 +21,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 
@@ -52,7 +52,7 @@ public class KSwitchGroupRecipeCategory extends AbstractRecipeCategory<KSwitchGr
 
 	@Override
 	public void createRecipeExtras(IRecipeExtrasBuilder builder, KSwitchGroupRecipe recipe, IFocusGroup focuses) {
-		ResourceLocation key = recipe.family().key();
+		Identifier key = recipe.family().key();
 		List<FormattedText> text = Lists.newArrayList();
 		String langKey = "kiwi.family.%s".formatted(key.toLanguageKey());
 		if (I18n.exists(langKey)) {
@@ -77,7 +77,7 @@ public class KSwitchGroupRecipeCategory extends AbstractRecipeCategory<KSwitchGr
 	}
 
 	@Override
-	public ResourceLocation getRegistryName(KSwitchGroupRecipe recipe) {
+	public Identifier getRegistryName(KSwitchGroupRecipe recipe) {
 		return recipe.family().key();
 	}
 }

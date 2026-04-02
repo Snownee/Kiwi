@@ -2,7 +2,7 @@ package snownee.kiwi.util;
 
 import java.util.List;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.Preconditions;
 import com.mojang.datafixers.util.Pair;

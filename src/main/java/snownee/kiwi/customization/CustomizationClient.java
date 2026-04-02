@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -22,7 +22,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
@@ -102,8 +102,8 @@ public final class CustomizationClient {
 	}
 
 	public static void afterRegister(
-			Map<ResourceLocation, KItemDefinition> items,
-			Map<ResourceLocation, KBlockDefinition> blocks,
+			Map<Identifier, KItemDefinition> items,
+			Map<Identifier, KBlockDefinition> blocks,
 			ClientProxy.Context context) {
 		Map<Block, BlockColor> blockColors = Maps.newHashMap();
 		Map<Item, ItemColor> itemColors = Maps.newHashMap();
@@ -116,9 +116,9 @@ public final class CustomizationClient {
 				continue;
 			}
 			Item item = BuiltInRegistries.ITEM.get(entry.getKey());
-			ResourceLocation colorProvider = definition.properties().colorProvider().get();
-			if (ResourceLocation.DEFAULT_NAMESPACE.equals(colorProvider.getNamespace()) && colorProvider.getPath().equals("grass")) {
-				colorProvider = ResourceLocation.withDefaultNamespace("short_grass");
+			Identifier colorProvider = definition.properties().colorProvider().get();
+			if (Identifier.DEFAULT_NAMESPACE.equals(colorProvider.getNamespace()) && colorProvider.getPath().equals("grass")) {
+				colorProvider = Identifier.withDefaultNamespace("short_grass");
 			}
 			Item providerItem = BuiltInRegistries.ITEM.get(colorProvider);
 			if (providerItem == Items.AIR) {
@@ -144,10 +144,10 @@ public final class CustomizationClient {
 				continue;
 			}
 			Block block = BuiltInRegistries.BLOCK.get(entry.getKey());
-			ResourceLocation colorProvider = properties.colorProvider().get();
+			Identifier colorProvider = properties.colorProvider().get();
 			// grass -> short_grass since Minecraft 1.20.3
-			if (ResourceLocation.DEFAULT_NAMESPACE.equals(colorProvider.getNamespace()) && colorProvider.getPath().equals("grass")) {
-				colorProvider = ResourceLocation.withDefaultNamespace("short_grass");
+			if (Identifier.DEFAULT_NAMESPACE.equals(colorProvider.getNamespace()) && colorProvider.getPath().equals("grass")) {
+				colorProvider = Identifier.withDefaultNamespace("short_grass");
 			}
 			Block providerBlock = BuiltInRegistries.BLOCK.get(colorProvider);
 			if (providerBlock == Blocks.AIR) {

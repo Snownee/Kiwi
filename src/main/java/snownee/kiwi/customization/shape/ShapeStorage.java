@@ -12,7 +12,7 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableMap;
@@ -20,30 +20,30 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.shapes.Shapes;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.loader.Platform;
 
 public class ShapeStorage {
-//	private static Map<ResourceLocation, ShapeGenerator> tempResolved;
+//	private static Map<Identifier, ShapeGenerator> tempResolved;
 
-	private final ImmutableMap<ResourceLocation, ShapeGenerator> shapes;
+	private final ImmutableMap<Identifier, ShapeGenerator> shapes;
 	private final Map<Pair<ShapeGenerator, Object>, ShapeGenerator> transformed = Maps.newHashMap();
 
-	public ShapeStorage(Map<ResourceLocation, ShapeGenerator> shapes) {
+	public ShapeStorage(Map<Identifier, ShapeGenerator> shapes) {
 		this.shapes = ImmutableMap.copyOf(shapes);
 	}
 
 	@Nullable
-	public ShapeGenerator get(ResourceLocation id) {
+	public ShapeGenerator get(Identifier id) {
 		return this.shapes.get(id);
 	}
 
-	public static ShapeStorage reload(Supplier<Map<ResourceLocation, UnbakedShape>> shapesSupplier) {
-		Map<ResourceLocation, UnbakedShape> shapes = Platform.isDataGen() ? Maps.newHashMap() : shapesSupplier.get();
-		shapes.put(ResourceLocation.withDefaultNamespace("empty"), new UnbakedShape.Inlined(Shapes.empty()));
-		shapes.put(ResourceLocation.withDefaultNamespace("block"), new UnbakedShape.Inlined(Shapes.block()));
+	public static ShapeStorage reload(Supplier<Map<Identifier, UnbakedShape>> shapesSupplier) {
+		Map<Identifier, UnbakedShape> shapes = Platform.isDataGen() ? Maps.newHashMap() : shapesSupplier.get();
+		shapes.put(Identifier.withDefaultNamespace("empty"), new UnbakedShape.Inlined(Shapes.empty()));
+		shapes.put(Identifier.withDefaultNamespace("block"), new UnbakedShape.Inlined(Shapes.block()));
 		BakingContext.Impl context = new BakingContext.Impl(shapes);
 		LinkedHashSet<ShapeRef> refs = Sets.newLinkedHashSet();
 		List<UnresolvedEntry> unresolved = shapes.entrySet().stream().map(entry -> {
@@ -102,7 +102,7 @@ public class ShapeStorage {
 		return Stream.concat(Stream.of(shape), shape.dependencies().flatMap(ShapeStorage::collectDependencies));
 	}
 
-//	private static void injectLegacyShapes(Map<ResourceLocation, ShapeGenerator> resolved) {
+//	private static void injectLegacyShapes(Map<Identifier, ShapeGenerator> resolved) {
 //		tempResolved = resolved;
 //		put("minecraft:carpet", box(0, 0, 0, 16, 1, 16));
 //		put("small_book_stack", box(2, 0, 2, 14, 8, 14));
@@ -253,7 +253,7 @@ public class ShapeStorage {
 //		tempResolved.put(Util.RL(id, XKDeco.ID), ShapeGenerator.unit(shape));
 //	}
 
-	public void forEach(BiConsumer<? super ResourceLocation, ? super ShapeGenerator> action) {
+	public void forEach(BiConsumer<? super Identifier, ? super ShapeGenerator> action) {
 		shapes.forEach(action);
 	}
 
@@ -268,6 +268,6 @@ public class ShapeStorage {
 		}
 	}
 
-	private record UnresolvedEntry(ResourceLocation key, UnbakedShape unbakedShape, Set<ShapeRef> dependencies) {
+	private record UnresolvedEntry(Identifier key, UnbakedShape unbakedShape, Set<ShapeRef> dependencies) {
 	}
 }

@@ -3,7 +3,7 @@ package snownee.kiwi.recipe;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.Preconditions;
 import com.mojang.serialization.Codec;

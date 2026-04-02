@@ -10,7 +10,7 @@ import net.minecraft.data.recipes.RecipeBuilder;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 
@@ -35,11 +35,11 @@ public class KiwiShapelessRecipeBuilder extends ShapelessRecipeBuilder {
 	}
 
 	@Override
-	public void save(RecipeOutput recipeOutput, ResourceLocation resourceLocation) {
-		ensureValid(resourceLocation);
+	public void save(RecipeOutput recipeOutput, Identifier Identifier) {
+		ensureValid(Identifier);
 		Advancement.Builder builder = recipeOutput.advancement().addCriterion(
 				"has_the_recipe",
-				RecipeUnlockedTrigger.unlocked(resourceLocation)).rewards(AdvancementRewards.Builder.recipe(resourceLocation)).requirements(
+				RecipeUnlockedTrigger.unlocked(Identifier)).rewards(AdvancementRewards.Builder.recipe(Identifier)).requirements(
 				AdvancementRequirements.Strategy.OR);
 		Objects.requireNonNull(builder);
 		criteria.forEach(builder::addCriterion);
@@ -50,9 +50,9 @@ public class KiwiShapelessRecipeBuilder extends ShapelessRecipeBuilder {
 				ingredients,
 				noContainers);
 		recipeOutput.accept(
-				resourceLocation,
+				Identifier,
 				shapelessRecipe,
-				builder.build(resourceLocation.withPrefix("recipes/" + category.getFolderName() + "/")));
+				builder.build(Identifier.withPrefix("recipes/" + category.getFolderName() + "/")));
 	}
 }
 

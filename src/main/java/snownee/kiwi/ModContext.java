@@ -16,13 +16,7 @@ public class ModContext {
 	public ModContainer modContainer;
 
 	public static ModContext get(String modid) {
-		if (ALL_CONTEXTS.containsKey(modid)) {
-			return ALL_CONTEXTS.get(modid);
-		} else {
-			ModContext context = new ModContext(modid);
-			ALL_CONTEXTS.put(modid, context);
-			return context;
-		}
+		return ALL_CONTEXTS.computeIfAbsent(modid, ModContext::new);
 	}
 
 	private ModContext(String modid) {

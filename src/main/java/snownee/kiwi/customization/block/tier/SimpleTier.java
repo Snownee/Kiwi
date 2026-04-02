@@ -5,7 +5,7 @@
 
 package snownee.kiwi.customization.block.tier;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NotNull;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;

@@ -5,14 +5,14 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.Maps;
 import com.mojang.serialization.MapCodec;
 
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -23,7 +23,7 @@ import net.neoforged.neoforge.registries.RegisterEvent;
 
 @EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD)
 public record CustomIngredientImpl<T extends CustomIngredient>(T ingredient) implements ICustomIngredient {
-	static final Map<ResourceLocation, CustomIngredientSerializer<?>> REGISTERED_SERIALIZERS = new ConcurrentHashMap<>();
+	static final Map<Identifier, CustomIngredientSerializer<?>> REGISTERED_SERIALIZERS = new ConcurrentHashMap<>();
 	private static final Map<CustomIngredientSerializer<?>, IngredientType<?>> INGREDIENT_TYPES = Maps.newIdentityHashMap();
 
 	@SubscribeEvent
@@ -56,7 +56,7 @@ public record CustomIngredientImpl<T extends CustomIngredient>(T ingredient) imp
 	}
 
 	@Nullable
-	public static CustomIngredientSerializer<?> getSerializer(ResourceLocation identifier) {
+	public static CustomIngredientSerializer<?> getSerializer(Identifier identifier) {
 		Objects.requireNonNull(identifier, "Identifier may not be null.");
 
 		return REGISTERED_SERIALIZERS.get(identifier);

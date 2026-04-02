@@ -18,7 +18,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -28,7 +28,7 @@ import snownee.kiwi.util.codec.KCodecs;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class BlockFamily {
-	public static final Codec<BlockFamily> CODEC = ResourceLocation.CODEC.flatXmap(
+	public static final Codec<BlockFamily> CODEC = Identifier.CODEC.flatXmap(
 			$ -> {
 				BlockFamily family = BlockFamilies.get($);
 				if (family == null) {
@@ -37,7 +37,7 @@ public class BlockFamily {
 				return DataResult.success(family);
 			},
 			family -> {
-				ResourceLocation id = BlockFamilies.getKey(family);
+				Identifier id = BlockFamilies.getKey(family);
 				if (id == null) {
 					return DataResult.error(() -> "Block family " + family + " not registered");
 				}

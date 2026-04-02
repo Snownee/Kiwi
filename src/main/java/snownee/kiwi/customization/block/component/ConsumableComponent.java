@@ -8,7 +8,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.InteractionResult;
@@ -26,7 +26,7 @@ import snownee.kiwi.customization.block.loader.KBlockComponents;
 public record ConsumableComponent(
 		IntegerProperty property,
 		Optional<FoodProperties> food,
-		Optional<ResourceKey<ResourceLocation>> stat) implements KBlockComponent, LayeredComponent {
+		Optional<ResourceKey<Identifier>> stat) implements KBlockComponent, LayeredComponent {
 	public static final MapCodec<ConsumableComponent> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			ExtraCodecs.intRange(0, 1).fieldOf("min").forGetter(ConsumableComponent::minValue),
 			ExtraCodecs.POSITIVE_INT.fieldOf("max").forGetter(ConsumableComponent::maxValue),
@@ -39,7 +39,7 @@ public record ConsumableComponent(
 			int min,
 			int max,
 			Optional<FoodProperties> food,
-			Optional<ResourceKey<ResourceLocation>> stat) {
+			Optional<ResourceKey<Identifier>> stat) {
 		return new ConsumableComponent(KBlockUtils.internProperty(IntegerProperty.create("uses", min, max)), food, stat);
 	}
 

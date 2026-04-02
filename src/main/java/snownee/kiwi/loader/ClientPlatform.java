@@ -12,7 +12,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.client.resources.model.ModelIdentifier;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.world.entity.Entity;
@@ -26,11 +26,11 @@ public final class ClientPlatform {
 	private ClientPlatform() {
 	}
 
-	public static BakedModel getModel(ModelResourceLocation id) {
+	public static BakedModel getModel(ModelIdentifier id) {
 		return Minecraft.getInstance().getModelManager().getModel(id);
 	}
 
-	public static void addExtraModels(List<? extends ModelResourceLocation> ids) {
+	public static void addExtraModels(List<? extends ModelIdentifier> ids) {
 //		ModelEvent.RegisterAdditional
 //		ModelLoadingPlugin.register(ctx -> ctx.addModels(ids));
 	}

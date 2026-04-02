@@ -3,7 +3,7 @@ package snownee.kiwi.customization.compat.jade;
 import java.util.List;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IBlockComponentProvider;
@@ -27,7 +27,7 @@ public class JadeCompat implements IWailaPlugin {
 	}
 
 	public static class DebugProvider implements IBlockComponentProvider {
-		public static final ResourceLocation ID = Kiwi.id("debug_placement_system");
+		public static final Identifier ID = Kiwi.id("debug_placement_system");
 
 		@Override
 		public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
@@ -42,7 +42,7 @@ public class JadeCompat implements IWailaPlugin {
 		}
 
 		@Override
-		public ResourceLocation getUid() {
+		public Identifier getUid() {
 			return ID;
 		}
 

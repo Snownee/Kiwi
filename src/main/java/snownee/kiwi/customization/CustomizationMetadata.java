@@ -14,7 +14,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import snownee.kiwi.Kiwi;
@@ -49,7 +49,7 @@ public record CustomizationMetadata(ImmutableListMultimap<String, String> regist
 		var fileToIdConverter = AlternativesFileToIdConverter.yamlOrJson(Kiwi.ID);
 		Map<String, CustomizationMetadata> metadataMap = Maps.newHashMap();
 		for (String namespace : resourceManager.getNamespaces()) {
-			ResourceLocation file = fileToIdConverter.idToFile(ResourceLocation.fromNamespaceAndPath(namespace, "metadata"));
+			Identifier file = fileToIdConverter.idToFile(Identifier.fromNamespaceAndPath(namespace, "metadata"));
 			Optional<Resource> resource = resourceManager.getResource(file);
 			if (resource.isEmpty()) {
 				metadataMap.put(namespace, emptyMetadata);
@@ -74,17 +74,17 @@ public record CustomizationMetadata(ImmutableListMultimap<String, String> regist
 	public static <T> void sortedForEach(
 			Map<String, CustomizationMetadata> metadataMap,
 			String key,
-			Map<ResourceLocation, T> values,
-			BiConsumer<ResourceLocation, T> action) {
+			Map<Identifier, T> values,
+			BiConsumer<Identifier, T> action) {
 		sortedForEach(metadataMap, List.of(key), values, action);
 	}
 
 	public static <T> void sortedForEach(
 			Map<String, CustomizationMetadata> metadataMap,
 			List<String> keys,
-			Map<ResourceLocation, T> values,
-			BiConsumer<ResourceLocation, T> action) {
-		Set<ResourceLocation> order = Sets.newLinkedHashSet();
+			Map<Identifier, T> values,
+			BiConsumer<Identifier, T> action) {
+		Set<Identifier> order = Sets.newLinkedHashSet();
 		for (String key : keys) {
 			metadataMap.forEach((namespace, metadata) -> {
 				for (String s : metadata.registryOrder().get(key)) {
@@ -92,7 +92,7 @@ public record CustomizationMetadata(ImmutableListMultimap<String, String> regist
 				}
 			});
 		}
-		for (ResourceLocation id : order) {
+		for (Identifier id : order) {
 			T value = values.get(id);
 			if (value != null) {
 				action.accept(id, value);

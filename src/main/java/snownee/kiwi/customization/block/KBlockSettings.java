@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.ToIntFunction;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
@@ -12,7 +12,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.LevelAccessor;
@@ -319,6 +319,6 @@ public class KBlockSettings {
 	}
 
 	@Deprecated
-	public record MoreInfo(ResourceLocation shape, ResourceLocation collisionShape, ResourceLocation interactionShape) {
+	public record MoreInfo(Identifier shape, Identifier collisionShape, Identifier interactionShape) {
 	}
 }

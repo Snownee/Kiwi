@@ -10,7 +10,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.Item;
@@ -24,7 +24,7 @@ import snownee.kiwi.customization.block.tier.KiwiTiers;
 import snownee.kiwi.customization.item.MultipleBlockItem;
 
 public class ItemCodecs {
-	private static final Map<ResourceLocation, MapCodec<Item>> CODECS = Maps.newHashMap();
+	private static final Map<Identifier, MapCodec<Item>> CODECS = Maps.newHashMap();
 
 	public static final String ITEM_PROPERTIES_KEY = "properties";
 	private static final Codec<Item.Properties> ITEM_PROPERTIES = new InjectedCodec<>(
@@ -53,21 +53,21 @@ public class ItemCodecs {
 	public static final MapCodec<Item> ITEM = simpleCodec(SIMPLE_ITEM_FACTORY);
 
 	static {
-		register(ResourceLocation.withDefaultNamespace("item"), ITEM);
-		register(ResourceLocation.withDefaultNamespace("blocks"), MultipleBlockItem.CODEC);
-		register(ResourceLocation.withDefaultNamespace("axe"), tieredItemCodec(AxeItem::new));
-		register(ResourceLocation.withDefaultNamespace("hoe"), tieredItemCodec(HoeItem::new));
-		register(ResourceLocation.withDefaultNamespace("pickaxe"), tieredItemCodec(PickaxeItem::new));
-		register(ResourceLocation.withDefaultNamespace("shovel"), tieredItemCodec(ShovelItem::new));
-		register(ResourceLocation.withDefaultNamespace("sword"), tieredItemCodec(SwordItem::new));
+		register(Identifier.withDefaultNamespace("item"), ITEM);
+		register(Identifier.withDefaultNamespace("blocks"), MultipleBlockItem.CODEC);
+		register(Identifier.withDefaultNamespace("axe"), tieredItemCodec(AxeItem::new));
+		register(Identifier.withDefaultNamespace("hoe"), tieredItemCodec(HoeItem::new));
+		register(Identifier.withDefaultNamespace("pickaxe"), tieredItemCodec(PickaxeItem::new));
+		register(Identifier.withDefaultNamespace("shovel"), tieredItemCodec(ShovelItem::new));
+		register(Identifier.withDefaultNamespace("sword"), tieredItemCodec(SwordItem::new));
 	}
 
-	public static void register(ResourceLocation key, MapCodec<? extends Item> codec) {
+	public static void register(Identifier key, MapCodec<? extends Item> codec) {
 		//noinspection unchecked
 		CODECS.put(key, (MapCodec<Item>) codec);
 	}
 
-	public static MapCodec<Item> get(ResourceLocation key) {
+	public static MapCodec<Item> get(Identifier key) {
 		return Objects.requireNonNull(CODECS.get(key), key::toString);
 	}
 }

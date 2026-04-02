@@ -22,7 +22,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.EnumUtils;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;

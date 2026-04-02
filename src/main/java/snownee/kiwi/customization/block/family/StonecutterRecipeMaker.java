@@ -15,7 +15,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -101,7 +101,7 @@ public class StonecutterRecipeMaker {
 			default -> throw new IllegalArgumentException();
 		};
 		boolean exchangeInViewer = "exchange_in_viewer".equals(type);
-		ResourceLocation prefix = family.key().withPath("/stonecutter/%s/%s".formatted(
+		Identifier prefix = family.key().withPath("/stonecutter/%s/%s".formatted(
 				family.key().getPath(),
 				exchangeInViewer ? "exchange" : type));
 		return family.value().items().map(item -> {
@@ -120,7 +120,7 @@ public class StonecutterRecipeMaker {
 					family.value().ingredientInViewer().test(itemStack)) {
 				return null;
 			}
-			ResourceLocation itemKey = BuiltInRegistries.ITEM.getKey(item);
+			Identifier itemKey = BuiltInRegistries.ITEM.getKey(item);
 			var recipeId = prefix.withSuffix("/%s/%s".formatted(itemKey.getNamespace(), itemKey.getPath()));
 			var recipe = new StonecutterRecipe(prefix.toString(), input, itemStack);
 			return new RecipeHolder<>(recipeId, recipe);

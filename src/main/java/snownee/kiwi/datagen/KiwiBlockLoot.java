@@ -14,7 +14,7 @@ import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootTableProvider;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.LootTable.Builder;
@@ -22,14 +22,14 @@ import snownee.kiwi.KiwiModuleContainer;
 import snownee.kiwi.KiwiModules;
 
 public abstract class KiwiBlockLoot extends FabricBlockLootTableProvider {
-	protected final ResourceLocation moduleId;
+	protected final Identifier moduleId;
 	private final List<Block> knownBlocks;
 	private final Map<Class<?>, Function<Block, LootTable.Builder>> handlers = Maps.newIdentityHashMap();
 	private final Set<Block> added = Sets.newHashSet();
 	private Function<Block, LootTable.Builder> defaultHandler;
 
 	protected KiwiBlockLoot(
-			ResourceLocation moduleId,
+			Identifier moduleId,
 			FabricDataOutput dataOutput,
 			CompletableFuture<HolderLookup.Provider> registryLookup) {
 		super(dataOutput, registryLookup);

@@ -39,8 +39,8 @@ public interface ShapeGenerator {
 //
 //	static ShapeGenerator layered(
 //			LayeredComponent component,
-//			Function<ResourceLocation, ShapeGenerator> shapeGetter,
-//			ResourceLocation shapeId) {
+//			Function<Identifier, ShapeGenerator> shapeGetter,
+//			Identifier shapeId) {
 //		IntegerProperty property = component.getLayerProperty();
 //		int min = property.min;
 //		int max = property.max;

@@ -3,7 +3,7 @@ package snownee.kiwi.recipe;
 import java.util.List;
 import java.util.Objects;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
@@ -13,14 +13,14 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import snownee.kiwi.Kiwi;
 
 public class AlternativesIngredient implements CustomIngredient {
-	public static final ResourceLocation ID = Kiwi.id("alternatives");
+	public static final Identifier ID = Kiwi.id("alternatives");
 	public static final Serializer SERIALIZER = new Serializer();
 	@Nullable
 	private final List<JsonElement> options;
@@ -92,7 +92,7 @@ public class AlternativesIngredient implements CustomIngredient {
 		}
 
 		@Override
-		public ResourceLocation getIdentifier() {
+		public Identifier getIdentifier() {
 			return ID;
 		}
 

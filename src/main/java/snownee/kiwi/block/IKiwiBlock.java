@@ -1,6 +1,6 @@
 package snownee.kiwi.block;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;

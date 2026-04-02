@@ -2,17 +2,17 @@ package snownee.kiwi.customization.shape;
 
 import java.util.stream.Stream;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class ShapeRef implements UnbakedShape {
-	private final ResourceLocation id;
+	private final Identifier id;
 	private ShapeGenerator baked;
 
-	public ShapeRef(ResourceLocation id) {
+	public ShapeRef(Identifier id) {
 		this.id = id;
 	}
 
-	public ResourceLocation id() {
+	public Identifier id() {
 		return id;
 	}
 

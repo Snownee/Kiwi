@@ -3,19 +3,21 @@ package snownee.kiwi;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.Maps;
-import com.mojang.datafixers.types.Type;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -38,7 +40,7 @@ import snownee.kiwi.util.KiwiTabBuilder;
 public abstract class AbstractModule {
 	private static final StackWalker STACK_WALKER = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
 	protected final Map<ResourceKey<? extends Registry<?>>, BiConsumer<KiwiModuleContainer, KiwiGO<?>>> decorators = Maps.newIdentityHashMap();
-	public @Nullable ResourceLocation uid;
+	public @Nullable Identifier uid;
 
 	protected static <T> KiwiGO<T> go(Supplier<? extends T> factory) {
 		//noinspection unchecked
@@ -48,6 +50,25 @@ public abstract class AbstractModule {
 	protected static <T> KiwiGO<T> go(Supplier<? extends T> factory, ResourceKey<? extends Registry<?>> registryKey) {
 		//noinspection unchecked
 		return new KiwiGO.RegistrySpecified<>((Supplier<T>) factory, registryKey);
+	}
+
+	protected static <T, U> KiwiGO<T> go(ResourceKey<Registry<U>> registryKey, Function<ResourceKey<U>, ? extends T> factory) {
+		//noinspection unchecked
+		return new KiwiGO.Keyed<>(registryKey, (Function<ResourceKey<U>, T>) factory);
+	}
+
+	protected static <T extends Item> ItemObject<T> item(Function<Item.Properties, T> factory) {
+		return new ItemObject<>(factory);
+	}
+
+	protected static <T extends Block> BlockObject<T> block(Function<BlockBehaviour.Properties, T> factory) {
+		return block(factory, null);
+	}
+
+	protected static <T extends Block> BlockObject<T> block(
+			Function<BlockBehaviour.Properties, T> factory,
+			@Nullable Supplier<Block> copyFrom) {
+		return new BlockObject<>(factory, copyFrom);
 	}
 
 	protected static <T> KiwiGO<T> ref(ResourceKey<? extends Registry<?>> registryKey) {
@@ -70,20 +91,44 @@ public abstract class AbstractModule {
 	@SafeVarargs
 	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(
 			BlockEntityType.BlockEntitySupplier<? extends T> factory,
-			Type<?> datafixer,
 			Supplier<? extends Block>... blocks) {
-		return go(() -> BlockEntityType.Builder.<T>of(factory, Stream.of(blocks).map(Supplier::get).toArray(Block[]::new))
-				.build(datafixer));
+		return blockEntity(factory, false, blocks);
+	}
+
+	public static <T extends Entity, U extends Entity> KiwiGO<EntityType<U>> entity(Function<ResourceKey<EntityType<?>>, ? extends EntityType<T>> factory) {
+		//noinspection unchecked
+		return (KiwiGO<EntityType<U>>) (Object) go(Registries.ENTITY_TYPE, factory);
+	}
+
+	@SafeVarargs
+	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(
+			BlockEntityType.BlockEntitySupplier<? extends T> factory,
+			boolean onlyOpCanSetNbt,
+			Supplier<? extends Block>... blocks) {
+		return go(() -> new BlockEntityType<>(
+				factory,
+				Stream.of(blocks).map(Supplier::get).collect(Collectors.toSet())) {
+			@Override
+			public boolean onlyOpCanSetNbt() {
+				return onlyOpCanSetNbt;
+			}
+		});
 	}
 
 	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(
 			BlockEntityType.BlockEntitySupplier<? extends T> factory,
-			Type<?> datafixer,
-			Class<? extends Block> blockClass) {
-		return go(() -> new InheritanceBlockEntityType<>(factory, blockClass, datafixer));
+			Class<?> blockClass) {
+		return blockEntity(factory, false, blockClass);
 	}
 
-	public static CreativeModeTab.Builder itemCategory(ResourceLocation id, Supplier<ItemStack> icon) {
+	public static <T extends BlockEntity> KiwiGO<BlockEntityType<T>> blockEntity(
+			BlockEntityType.BlockEntitySupplier<? extends T> factory,
+			boolean onlyOpCanSetNbt,
+			Class<?> blockClass) {
+		return go(() -> new InheritanceBlockEntityType<>(factory, blockClass, onlyOpCanSetNbt));
+	}
+
+	public static CreativeModeTab.Builder itemCategory(Identifier id, Supplier<ItemStack> icon) {
 		return new KiwiTabBuilder(id).icon(icon);
 	}
 
@@ -104,7 +149,7 @@ public abstract class AbstractModule {
 	}
 
 	public static <T> TagKey<T> tag(ResourceKey<? extends Registry<T>> registryKey, String namespace, String path) {
-		return TagKey.create(registryKey, ResourceLocation.fromNamespaceAndPath(namespace, path));
+		return TagKey.create(registryKey, Identifier.fromNamespaceAndPath(namespace, path));
 	}
 
 	public static TagKey<Item> itemTag(String id) {
@@ -124,9 +169,9 @@ public abstract class AbstractModule {
 	}
 
 	public static <T> TagKey<T> tag(ResourceKey<? extends Registry<T>> registryKey, String id) {
-		ResourceLocation location;
+		Identifier location;
 		if (id.contains(":")) {
-			location = ResourceLocation.parse(id);
+			location = Identifier.parse(id);
 		} else {
 			Class<?> callerClass = STACK_WALKER.walk(stream -> stream
 					.map(StackWalker.StackFrame::getDeclaringClass)
@@ -140,7 +185,7 @@ public abstract class AbstractModule {
 			if (annotation == null || annotation.modId().isEmpty()) {
 				throw new IllegalStateException("No KiwiModule modId found on " + callerClass.getName());
 			}
-			location = ResourceLocation.fromNamespaceAndPath(annotation.modId(), id);
+			location = Identifier.fromNamespaceAndPath(annotation.modId(), id);
 		}
 		return TagKey.create(registryKey, location);
 	}
@@ -160,8 +205,8 @@ public abstract class AbstractModule {
 		// NO-OP
 	}
 
-	public ResourceLocation id(String path) {
-		return ResourceLocation.fromNamespaceAndPath(Objects.requireNonNull(uid).getNamespace(), path);
+	public Identifier id(String path) {
+		return Identifier.fromNamespaceAndPath(Objects.requireNonNull(uid).getNamespace(), path);
 	}
 
 	public KiwiModuleContainer container() {

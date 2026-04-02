@@ -8,7 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.resources.PlayerSkin;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
@@ -69,11 +69,11 @@ public class ContributorsClient extends AbstractModule {
 	}
 
 	public static void changeCosmetic() {
-		ResourceLocation id = KUtil.RL(KiwiClientConfig.contributorCosmetic);
+		Identifier id = KUtil.RL(KiwiClientConfig.contributorCosmetic);
 		if (id != null && id.getPath().isEmpty()) {
 			id = null;
 		}
-		ResourceLocation cosmetic = id;
+		Identifier cosmetic = id;
 		Contributors.canPlayerUseCosmetic(getPlayerName(), cosmetic).thenAccept(bl -> {
 			if (!bl) {
 				ConfigHandler cfg = KiwiConfigManager.getHandler(KiwiClientConfig.class);

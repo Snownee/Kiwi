@@ -11,7 +11,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -29,10 +29,10 @@ public record BlockDefinitionProperties(
 		Optional<KMaterial> material,
 		Optional<GlassType> glassType,
 		Optional<RenderLayerEnum> renderType,
-		Optional<ResourceLocation> colorProvider,
-		Optional<ResourceLocation> shape,
-		Optional<ResourceLocation> collisionShape,
-		Optional<ResourceLocation> interactionShape,
+		Optional<Identifier> colorProvider,
+		Optional<Identifier> shape,
+		Optional<Identifier> collisionShape,
+		Optional<Identifier> interactionShape,
 		Optional<CanSurviveHandler> canSurviveHandler,
 		PartialVanillaProperties vanillaProperties) {
 	public static MapCodec<BlockDefinitionProperties> mapCodec(BlockFundamentals.CodecCreationContext context) {
@@ -44,10 +44,10 @@ public record BlockDefinitionProperties(
 				context.materialCodec().forGetter(BlockDefinitionProperties::material),
 				context.glassTypeCodec().forGetter(BlockDefinitionProperties::glassType),
 				CustomizationCodecs.RENDER_TYPE.optionalFieldOf("render_type").forGetter(BlockDefinitionProperties::renderType),
-				ResourceLocation.CODEC.optionalFieldOf("color_provider").forGetter(BlockDefinitionProperties::colorProvider),
-				ResourceLocation.CODEC.optionalFieldOf("shape").forGetter(BlockDefinitionProperties::shape),
-				ResourceLocation.CODEC.optionalFieldOf("collision_shape").forGetter(BlockDefinitionProperties::collisionShape),
-				ResourceLocation.CODEC.optionalFieldOf("interaction_shape").forGetter(BlockDefinitionProperties::interactionShape),
+				Identifier.CODEC.optionalFieldOf("color_provider").forGetter(BlockDefinitionProperties::colorProvider),
+				Identifier.CODEC.optionalFieldOf("shape").forGetter(BlockDefinitionProperties::shape),
+				Identifier.CODEC.optionalFieldOf("collision_shape").forGetter(BlockDefinitionProperties::collisionShape),
+				Identifier.CODEC.optionalFieldOf("interaction_shape").forGetter(BlockDefinitionProperties::interactionShape),
 				new CanSurviveHandlerCodec().optionalFieldOf("can_survive_handler").forGetter(BlockDefinitionProperties::canSurviveHandler),
 				PartialVanillaProperties.MAP_CODEC.forGetter(BlockDefinitionProperties::vanillaProperties)
 		).apply(instance, BlockDefinitionProperties::new));
