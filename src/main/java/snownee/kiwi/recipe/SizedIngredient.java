@@ -20,8 +20,6 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 
 public final class SizedIngredient {
-	public static final SizedIngredient EMPTY = new SizedIngredient(Ingredient.EMPTY, 1);
-
 	public static final Codec<SizedIngredient> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 					Ingredient.MAP_CODEC_NONEMPTY.forGetter(SizedIngredient::ingredient),
 					ExtraCodecs.POSITIVE_INT.optionalFieldOf("count", 1).forGetter(SizedIngredient::count))
