@@ -48,7 +48,13 @@
 		"customization.sit.ClientPacketListenerMixin",
 		"customization.sit.LocalPlayerMixin",
 		"forge.BlockColorsAccess",
-		"forge.ItemColorsAccess"
+		"forge.ItemColorsAccess",
+		"minieffects.CreativeModeInventoryScreenMixin",
+		"minieffects.EffectsInInventoryMixin",
+		"minieffects.EffectsInInventoryPositionMixin",
+		"minieffects.InventoryScreenMixin",
+		"minieffects.jei.InventoryEffectRendererGuiHandlerMixin",
+		"minieffects.rei.DefaultPotionEffectExclusionZonesMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

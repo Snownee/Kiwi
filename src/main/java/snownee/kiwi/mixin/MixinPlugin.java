@@ -18,6 +18,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
 	private boolean fastScrolling;
 	private boolean lavaClearView;
 	private boolean fastsuite;
+	private boolean miniEffects;
 
 	public static boolean isModLoaded(String modId) {
 		return LoadingModList.get().getModFileById(modId) != null;
@@ -31,6 +32,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
 		fastScrolling = isModLoaded("fastscroll") || devEnv;
 		lavaClearView = isModLoaded("lavaclearview") || devEnv;
 		fastsuite = customization && isModLoaded("fastsuite");
+		miniEffects = isModLoaded("minieffects") || devEnv;
 	}
 
 	@Override
@@ -45,6 +47,9 @@ public class MixinPlugin implements IMixinConfigPlugin {
 		}
 		if (mixinClassName.startsWith("snownee.kiwi.mixin.customization.")) {
 			return customization;
+		}
+		if (mixinClassName.startsWith("snownee.kiwi.mixin.minieffects.")) {
+			return miniEffects;
 		}
 		return switch (mixinClassName) {
 			case "snownee.kiwi.mixin.client.CreativeModeInventoryScreenMixin" -> persistentCreativeInventory;
