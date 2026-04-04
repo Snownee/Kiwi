@@ -46,7 +46,6 @@ import snownee.kiwi.util.BlockPredicateHelper;
 import snownee.kiwi.util.KHolder;
 import snownee.kiwi.util.KUtil;
 import snownee.kiwi.util.codec.CustomizationCodecs;
-import snownee.kiwi.util.codec.KCodecs;
 
 public record PlaceChoices(
 		List<PlaceTarget> target,
@@ -69,12 +68,12 @@ public record PlaceChoices(
 	}
 
 	public static final Codec<PlaceChoices> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-			KCodecs.compactList(PlaceTarget.CODEC).fieldOf("target").forGetter(PlaceChoices::target),
+			ExtraCodecs.compactListCodec(PlaceTarget.CODEC).fieldOf("target").forGetter(PlaceChoices::target),
 			Codec.STRING.optionalFieldOf("transform_with").forGetter(PlaceChoices::transformWith),
-			KCodecs.compactList(Flow.CODEC).optionalFieldOf("flow", List.of()).forGetter(PlaceChoices::flow),
-			KCodecs.compactList(Alter.CODEC).optionalFieldOf("alter", List.of()).forGetter(PlaceChoices::alter),
-			KCodecs.compactList(Limit.CODEC).optionalFieldOf("limit", List.of()).forGetter(PlaceChoices::limit),
-			KCodecs.compactList(Interests.CODEC).optionalFieldOf("interests", List.of()).forGetter(PlaceChoices::interests),
+			ExtraCodecs.compactListCodec(Flow.CODEC).optionalFieldOf("flow", List.of()).forGetter(PlaceChoices::flow),
+			ExtraCodecs.compactListCodec(Alter.CODEC).optionalFieldOf("alter", List.of()).forGetter(PlaceChoices::alter),
+			ExtraCodecs.compactListCodec(Limit.CODEC).optionalFieldOf("limit", List.of()).forGetter(PlaceChoices::limit),
+			ExtraCodecs.compactListCodec(Interests.CODEC).optionalFieldOf("interests", List.of()).forGetter(PlaceChoices::interests),
 			Codec.BOOL.optionalFieldOf("skippable", true).forGetter(PlaceChoices::skippable)
 	).apply(instance, PlaceChoices::new));
 
@@ -213,7 +212,7 @@ public record PlaceChoices(
 	public record Limit(String type, List<ParsedProtoTag> tags) {
 		public static final Codec<Limit> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.STRING.fieldOf("type").forGetter(Limit::type),
-				KCodecs.compactList(ParsedProtoTag.CODEC).fieldOf("tags").forGetter(Limit::tags)
+				ExtraCodecs.compactListCodec(ParsedProtoTag.CODEC).fieldOf("tags").forGetter(Limit::tags)
 		).apply(instance, Limit::new));
 
 		public boolean test(BlockState baseState, BlockState targetState) {
@@ -275,7 +274,7 @@ public record PlaceChoices(
 	//TODO check if `use` exists when attaching choices
 	public record Alter(List<AlterCondition> when, String use) {
 		public static final Codec<Alter> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				ExtraCodecs.nonEmptyList(KCodecs.compactList(AlterCondition.CODEC)).fieldOf("when").forGetter(Alter::when),
+				ExtraCodecs.nonEmptyList(ExtraCodecs.compactListCodec(AlterCondition.CODEC)).fieldOf("when").forGetter(Alter::when),
 				Codec.STRING.fieldOf("use").forGetter(Alter::use)
 		).apply(instance, Alter::new));
 
@@ -314,7 +313,7 @@ public record PlaceChoices(
 						.optionalFieldOf("faces", BlockFaceType.ANY)
 						.forGetter(AlterCondition::faces),
 				CustomizationCodecs.BLOCK_PREDICATE.optionalFieldOf("block", BlockPredicateHelper.ANY).forGetter(AlterCondition::block),
-				KCodecs.compactList(ParsedProtoTag.CODEC).optionalFieldOf("tags", List.of()).forGetter(AlterCondition::tags)
+				ExtraCodecs.compactListCodec(ParsedProtoTag.CODEC).optionalFieldOf("tags", List.of()).forGetter(AlterCondition::tags)
 		).apply(instance, AlterCondition::new));
 
 		public boolean test(BlockPlaceContext context) {

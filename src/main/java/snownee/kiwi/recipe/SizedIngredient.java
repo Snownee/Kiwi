@@ -7,6 +7,7 @@ import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.Preconditions;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -20,10 +21,18 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 
 public final class SizedIngredient {
-	public static final Codec<SizedIngredient> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+	public static final Codec<SizedIngredient> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
 					Ingredient.MAP_CODEC_NONEMPTY.forGetter(SizedIngredient::ingredient),
 					ExtraCodecs.POSITIVE_INT.optionalFieldOf("count", 1).forGetter(SizedIngredient::count))
 			.apply(instance, SizedIngredient::new));
+
+	public static final Codec<SizedIngredient> CODEC = Codec.withAlternative(
+			DIRECT_CODEC,
+			Ingredient.CODEC.flatXmap(
+					$ -> DataResult.success(new SizedIngredient($, 1)),
+					$ -> $.count() == 1 ?
+							DataResult.success($.ingredient()) :
+							DataResult.error(() -> "SizedIngredient's count must be 1 to use this shorthand codec")));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, SizedIngredient> STREAM_CODEC = StreamCodec.composite(
 			Ingredient.CONTENTS_STREAM_CODEC,

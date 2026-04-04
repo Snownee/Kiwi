@@ -9,6 +9,7 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 
 import net.minecraft.core.registries.Registries;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -30,7 +31,7 @@ public class DeferredIngredient implements Supplier<Ingredient> {
 								}
 							});
 	public static final Codec<DeferredIngredient> CODEC =
-			KCodecs.compactList(VALUE_CODEC).xmap(DeferredIngredient::new, it -> it.values);
+			ExtraCodecs.compactListCodec(VALUE_CODEC).xmap(DeferredIngredient::new, it -> it.values);
 
 	private Ingredient resolved;
 	private final List<Ingredient.Value> values;

@@ -33,7 +33,6 @@ import net.minecraft.world.level.block.state.properties.Property;
 import snownee.kiwi.customization.block.KBlockUtils;
 import snownee.kiwi.customization.block.StringProperty;
 import snownee.kiwi.customization.block.loader.KBlockComponents;
-import snownee.kiwi.util.codec.KCodecs;
 
 public record SimplePropertiesComponent(
 		boolean useShapeForLightOcclusion,
@@ -156,7 +155,7 @@ public record SimplePropertiesComponent(
 	public static final MapCodec<SimplePropertiesComponent> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			Codec.BOOL.optionalFieldOf("shape_for_light_occlusion", false)
 					.forGetter(SimplePropertiesComponent::useShapeForLightOcclusion),
-			ExtraCodecs.nonEmptyList(KCodecs.compactList(SINGLE_CODEC))
+				ExtraCodecs.nonEmptyList(ExtraCodecs.compactListCodec(SINGLE_CODEC))
 					.fieldOf("properties")
 					.forGetter(SimplePropertiesComponent::properties)
 	).apply(instance, ($1, $2) -> INTERNER.intern(new SimplePropertiesComponent($1, $2))));

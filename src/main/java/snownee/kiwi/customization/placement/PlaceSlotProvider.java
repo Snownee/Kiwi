@@ -44,7 +44,6 @@ import snownee.kiwi.customization.block.loader.KBlockTemplate;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.KHolder;
 import snownee.kiwi.util.KUtil;
-import snownee.kiwi.util.codec.KCodecs;
 
 public record PlaceSlotProvider(
 		List<PlaceTarget> target,
@@ -60,7 +59,7 @@ public record PlaceSlotProvider(
 		}
 	});
 	public static final Codec<PlaceSlotProvider> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-			KCodecs.compactList(PlaceTarget.CODEC).fieldOf("target").forGetter(PlaceSlotProvider::target),
+			ExtraCodecs.compactListCodec(PlaceTarget.CODEC).fieldOf("target").forGetter(PlaceSlotProvider::target),
 			Codec.STRING.optionalFieldOf("transform_with").forGetter(PlaceSlotProvider::transformWith),
 			TAG_CODEC.listOf().optionalFieldOf("tag", List.of()).forGetter(PlaceSlotProvider::tag),
 			Slot.CODEC.listOf().fieldOf("slots").forGetter(PlaceSlotProvider::slots)
@@ -72,7 +71,7 @@ public record PlaceSlotProvider(
 			List<String> tag,
 			Map<Direction, Side> sides) {
 		public static final Codec<Slot> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				ExtraCodecs.nonEmptyList(KCodecs.compactList(StatePropertiesPredicate.CODEC))
+				ExtraCodecs.nonEmptyList(ExtraCodecs.compactListCodec(StatePropertiesPredicate.CODEC))
 						.optionalFieldOf("when", List.of())
 						.forGetter(Slot::when),
 				Codec.STRING.optionalFieldOf("transform_with").forGetter(Slot::transformWith),

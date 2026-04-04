@@ -24,7 +24,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
-import snownee.kiwi.util.codec.KCodecs;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class BlockFamily {
@@ -53,7 +52,7 @@ public class BlockFamily {
 			ResourceKey.codec(Registries.ITEM).listOf()
 					.optionalFieldOf("items", List.of())
 					.forGetter($ -> $.itemHolders().stream().map(Holder.Reference::key).toList()),
-			KCodecs.compactList(ResourceKey.codec(Registries.ITEM))
+			ExtraCodecs.compactListCodec(ResourceKey.codec(Registries.ITEM))
 					.optionalFieldOf("exchange_inputs_in_viewer", List.of())
 					.forGetter($ -> $.exchangeInputsInViewer().stream().map(Holder.Reference::key).toList()),
 			Codec.BOOL.optionalFieldOf("stonecutter_exchange", false).forGetter(BlockFamily::stonecutterExchange),
