@@ -30,6 +30,7 @@
 		"customization.sit.EntityMixin"
 	],
 	"client": [
+		"client.BackupConfirmScreenMixin",
 		"client.ClientTelemetryManagerMixin",
 		"client.CreativeModeInventoryScreenMixin",
 		"client.FogRendererMixin",
