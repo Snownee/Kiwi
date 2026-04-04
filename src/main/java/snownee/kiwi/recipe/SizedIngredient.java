@@ -10,6 +10,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -46,7 +48,11 @@ public final class SizedIngredient {
 	}
 
 	public static SizedIngredient of(TagKey<Item> tag, int count) {
-		return new SizedIngredient(Ingredient.of(tag), count);
+		return of(BuiltInRegistries.ITEM, tag, count);
+	}
+
+	public static SizedIngredient of(HolderGetter<Item> lookup, TagKey<Item> tag, int count) {
+		return new SizedIngredient(RecipeUtil.tagIngredient(lookup, tag), count);
 	}
 
 	private final Ingredient ingredient;

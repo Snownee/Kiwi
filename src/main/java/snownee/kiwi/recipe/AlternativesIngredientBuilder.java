@@ -7,9 +7,10 @@ import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -18,10 +19,15 @@ import net.minecraft.world.level.ItemLike;
 import net.neoforged.neoforge.common.crafting.ICustomIngredient;
 
 public class AlternativesIngredientBuilder {
+	private final HolderGetter<Item> lookup;
 	List<Ingredient> ingredients = Lists.newArrayList();
 
-	public static AlternativesIngredientBuilder of() {
-		return new AlternativesIngredientBuilder();
+	public AlternativesIngredientBuilder(HolderGetter<Item> lookup) {
+		this.lookup = lookup;
+	}
+
+	public static AlternativesIngredientBuilder of(HolderGetter<Item> lookup) {
+		return new AlternativesIngredientBuilder(lookup);
 	}
 
 	public AlternativesIngredientBuilder add(Ingredient ingredient) {
@@ -35,7 +41,7 @@ public class AlternativesIngredientBuilder {
 	}
 
 	public AlternativesIngredientBuilder add(TagKey<Item> tag) {
-		ingredients.add(Ingredient.of(tag));
+		ingredients.add(RecipeUtil.tagIngredient(lookup, tag));
 		return this;
 	}
 
@@ -48,7 +54,7 @@ public class AlternativesIngredientBuilder {
 		if (tagOrItem.startsWith("#")) {
 			add(TagKey.create(Registries.ITEM, Identifier.parse(tagOrItem.substring(1))));
 		} else {
-			Item item = BuiltInRegistries.ITEM.get(Identifier.parse(tagOrItem));
+			Item item = lookup.getOrThrow(ResourceKey.create(Registries.ITEM, Identifier.parse(tagOrItem))).value();
 			Preconditions.checkState(item != Items.AIR);
 			add(item);
 		}
