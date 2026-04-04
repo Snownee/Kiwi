@@ -122,7 +122,7 @@ public class StonecutterRecipeMaker {
 			}
 			Identifier itemKey = BuiltInRegistries.ITEM.getKey(item);
 			var recipeId = prefix.withSuffix("/%s/%s".formatted(itemKey.getNamespace(), itemKey.getPath()));
-			var recipe = new StonecutterRecipe(prefix.toString(), input, itemStack);
+			var recipe = new StonecutterRecipe(new Recipe.CommonInfo(true), input, itemStack);
 			return new RecipeHolder<>(recipeId, recipe);
 		}).filter(Objects::nonNull).toList();
 	}

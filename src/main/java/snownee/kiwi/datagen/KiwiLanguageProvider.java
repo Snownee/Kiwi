@@ -55,7 +55,7 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 	}
 
 	@Override
-	public void generateTranslations(HolderLookup.Provider registryLookup, TranslationBuilder translationBuilder) {
+	public void generateTranslations(HolderLookup.Provider lookup, TranslationBuilder translationBuilder) {
 	}
 
 	public Optional<Path> createPath(String path, String extension) {
@@ -176,12 +176,12 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 		}
 	}
 
-	protected void generateGameObjectsEntries(Map<String, String> translationEntries) {
-		generateGameObjectEntries(translationEntries, Registries.BLOCK, Block::getDescriptionId);
-		generateGameObjectEntries(translationEntries, Registries.ITEM, Item::getDescriptionId);
-		generateGameObjectEntries(translationEntries, Registries.ENTITY_TYPE, EntityType::getDescriptionId);
+	protected void generateGameObjectsEntries(HolderLookup.Provider lookup, Map<String, String> translationEntries) {
+		generateGameObjectEntries(translationEntries, lookup, Registries.BLOCK, Block::getDescriptionId);
+		generateGameObjectEntries(translationEntries, lookup, Registries.ITEM, Item::getDescriptionId);
+		generateGameObjectEntries(translationEntries, lookup, Registries.ENTITY_TYPE, EntityType::getDescriptionId);
 		generateGameObjectEntries(
-				translationEntries, Registries.CREATIVE_MODE_TAB, tab -> {
+				translationEntries, lookup, Registries.CREATIVE_MODE_TAB, tab -> {
 					Component component = tab.getDisplayName();
 					if (component.getContents() instanceof TranslatableContents contents) {
 						return contents.getKey();
@@ -189,21 +189,24 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 						return null;
 					}
 				});
-		generateGameObjectEntries(translationEntries, Registries.CUSTOM_STAT, stat -> net.minecraft.Util.makeDescriptionId("stat", stat));
-		generateGameObjectEntries(translationEntries, Registries.MOB_EFFECT, MobEffect::getDescriptionId);
+		generateGameObjectEntries(translationEntries, lookup, Registries.CUSTOM_STAT, stat -> net.minecraft.Util.makeDescriptionId("stat", stat));
+		generateGameObjectEntries(translationEntries, lookup, Registries.MOB_EFFECT, MobEffect::getDescriptionId);
 	}
 
 	protected void generateModNameAndDescription(Map<String, String> translationEntries) {
 		String modId = dataOutput.getModId();
 		translationEntries.put("modmenu.nameTranslation.%s".formatted(modId), Platform.getModName(modId));
-		translationEntries.put("modmenu.descriptionTranslation.%s".formatted(modId), Platform.getModDescription(modId));
+		String description = Platform.getModDescription(modId);
+		translationEntries.put("modmenu.descriptionTranslation.%s".formatted(modId), description);
+		translationEntries.put("fml.menu.mods.info.description.%s".formatted(modId), description);
 	}
 
 	protected <T> void generateGameObjectEntries(
 			Map<String, String> translationEntries,
+			HolderLookup.Provider lookup,
 			ResourceKey<Registry<T>> registryKey,
 			Function<T, String> keyMapper) {
-		GameObjectLookup.allHolders(registryKey, dataOutput.getModId()).forEach(holder -> {
+		GameObjectLookup.allHolders(lookup, registryKey, dataOutput.getModId()).forEach(holder -> {
 			String key = keyMapper.apply(holder.value());
 			if (key != null) {
 				translationEntries.put(key, KUtil.friendlyText(holder.key().location().getPath()));

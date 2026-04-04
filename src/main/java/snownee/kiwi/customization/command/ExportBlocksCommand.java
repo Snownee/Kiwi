@@ -147,7 +147,7 @@ public class ExportBlocksCommand {
 					(builder1, builder2) -> {
 						throw new UnsupportedOperationException();
 					}).build(writer);
-			for (Block block : GameObjectLookup.all(Registries.BLOCK, modId).toList()) {
+			for (Block block : GameObjectLookup.all(source.registryAccess(), Registries.BLOCK, modId).toList()) {
 				String template = TEMPLATE_MAPPING.get().getOrDefault(block.getClass(), "block");
 				if ("ignore".equals(template)) {
 					continue;

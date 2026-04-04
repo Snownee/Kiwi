@@ -39,9 +39,6 @@ import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 public class Platform {
 
-	private Platform() {
-	}
-
 	public static boolean isModLoaded(String id) {
 		ModList modList = ModList.get();
 		if (modList == null) {
