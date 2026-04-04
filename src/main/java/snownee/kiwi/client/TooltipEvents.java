@@ -78,7 +78,7 @@ public final class TooltipEvents {
 			latestPressF3 = millis;
 			MutableComponent component = Component.literal(BuiltInRegistries.ITEM.getKey(itemStack.getItem()).toString());
 			mc.keyboardHandler.setClipboard(component.getString());
-			mc.player.displayClientMessage(KUtil.clickToCopy(component), false);
+			mc.player.sendSystemMessage(KUtil.clickToCopy(component));
 			if (KiwiClientConfig.printDataComponentsWhenCopy) {
 				List<DataComponentType<?>> list = itemStack.getComponents()
 						.keySet()
@@ -124,11 +124,11 @@ public final class TooltipEvents {
 						value = hoverText;
 					}
 
-					mc.player.displayClientMessage(
+					mc.player.sendSystemMessage(
 							KUtil.clickToCopy(
 									Component.literal("- %s: ".formatted(id)).withStyle(color).append(value),
 									hoverText,
-									hoverText.getString()), false);
+									hoverText.getString()));
 				}
 			}
 		}
