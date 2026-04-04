@@ -14,6 +14,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import snownee.kiwi.Kiwi;
@@ -72,18 +73,18 @@ public class KiwiCommand {
 	private static int debugRules(CommandSourceStack commandSourceStack) {
 		Commands commands = commandSourceStack.getServer().getCommands();
 		List<String> rules = List.of(
-				"gamerule doDaylightCycle false",
-				"gamerule doWeatherCycle false",
-				"gamerule doMobLoot false",
-				"gamerule doMobSpawning false",
-				"gamerule keepInventory true",
-				"gamerule doTraderSpawning false",
-				"gamerule doInsomnia false",
+				"gamerule %s false".formatted(GameRules.ADVANCE_TIME.id()),
+				"gamerule %s false".formatted(GameRules.ADVANCE_WEATHER.id()),
+				"gamerule %s false".formatted(GameRules.MOB_DROPS.id()),
+				"gamerule %s false".formatted(GameRules.SPAWN_MOBS.id()),
+				"gamerule %s true".formatted(GameRules.KEEP_INVENTORY.id()),
+				"gamerule %s false".formatted(GameRules.SPAWN_WANDERING_TRADERS.id()),
+				"gamerule %s false".formatted(GameRules.SPAWN_PHANTOMS.id()),
 				"difficulty peaceful",
-				"kill @e[type=!minecraft:player]",
+				"kill @e[type=!player]",
 				"time set day",
 				"weather clear",
-				"gamerule doMobLoot true"
+				"gamerule %s true".formatted(GameRules.MOB_DROPS.id())
 		);
 		for (String rule : rules) {
 			commands.performPrefixedCommand(commandSourceStack, rule);
