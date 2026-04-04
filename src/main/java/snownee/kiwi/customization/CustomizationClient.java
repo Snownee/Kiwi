@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -15,6 +16,9 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColor;
+import net.minecraft.client.gui.components.debug.DebugScreenEntries;
+import net.minecraft.client.gui.components.debug.DebugScreenEntryStatus;
+import net.minecraft.client.gui.components.debug.DebugScreenProfile;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -29,7 +33,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RenderFrameEvent;
@@ -43,6 +46,7 @@ import snownee.kiwi.customization.block.loader.BlockDefinitionProperties;
 import snownee.kiwi.customization.block.loader.KBlockDefinition;
 import snownee.kiwi.customization.builder.BuildersButton;
 import snownee.kiwi.customization.builder.ConvertScreen;
+import snownee.kiwi.customization.builder.DebugEntryBuilderMode;
 import snownee.kiwi.customization.command.ExportBlocksCommand;
 import snownee.kiwi.customization.command.ExportCreativeTabsCommand;
 import snownee.kiwi.customization.command.ExportShapesCommand;
@@ -85,9 +89,6 @@ public final class CustomizationClient {
 			PrintFamiliesCommand.register(customization);
 			event.getDispatcher().register(kiwi.then(customization.then(export).then(reload)));
 		});
-		forgeEventBus.addListener((CustomizeGuiOverlayEvent.DebugText event) -> {
-			BuildersButton.renderDebugText(event.getLeft(), event.getRight());
-		});
 		forgeEventBus.addListener((RenderHighlightEvent.Block event) -> {
 			if (BuildersButton.cancelRenderHighlight()) {
 				event.setCanceled(true);
@@ -99,6 +100,21 @@ public final class CustomizationClient {
 				SitManager.clampRotation(player, player.getVehicle());
 			}
 		});
+
+		Identifier debugEntryId = Kiwi.id("builder_mode");
+		DebugScreenEntries.register(debugEntryId, new DebugEntryBuilderMode());
+		List<Map.Entry<DebugScreenProfile, Map<Identifier, DebugScreenEntryStatus>>> profiles = DebugScreenEntries.PROFILES.entrySet()
+				.stream()
+				.toList();
+		var newProfiles = ImmutableMap.<DebugScreenProfile, Map<Identifier, DebugScreenEntryStatus>>builder();
+		for (var profile : profiles) {
+			var map = ImmutableMap.<Identifier, DebugScreenEntryStatus>builder()
+					.putAll(profile.getValue())
+					.put(debugEntryId, DebugScreenEntryStatus.ALWAYS_ON)
+					.build();
+			newProfiles.put(profile.getKey(), map);
+		}
+		DebugScreenEntries.PROFILES = newProfiles.build();
 	}
 
 	public static void afterRegister(
