@@ -65,7 +65,7 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 			vanilla.lightEmission().ifPresent(i -> $.lightLevel($$ -> i));
 			vanilla.pushReaction().ifPresent($::pushReaction);
 			vanilla.emissiveRendering().ifPresent($::emissiveRendering);
-			vanilla.hasPostProcess().ifPresent($::hasPostProcess);
+			vanilla.postProcess().ifPresent($::postProcess);
 			vanilla.isRedstoneConductor().ifPresent($::isRedstoneConductor);
 			vanilla.isSuffocating().ifPresent($::isSuffocating);
 			vanilla.isViewBlocking().ifPresent($::isViewBlocking);
