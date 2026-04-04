@@ -33,6 +33,7 @@
 		"client.ClientTelemetryManagerMixin",
 		"client.CreativeModeInventoryScreenMixin",
 		"client.FogRendererMixin",
+		"client.KeyboardHandlerMixin",
 		"client.LoadingOverlayMixin",
 		"client.NeoForgeLoadingOverlayMixin",
 		"client.OptionInstanceMixin",
