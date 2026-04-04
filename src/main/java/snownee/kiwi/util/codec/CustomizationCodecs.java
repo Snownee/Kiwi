@@ -12,12 +12,12 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.minecraft.advancements.critereon.BlockPredicate;
+import net.minecraft.advancements.criterion.BlockPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.BlockGetter;
@@ -28,7 +28,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
-import snownee.kiwi.RenderLayerEnum;
 import snownee.kiwi.customization.block.loader.BlockCodecs;
 
 public class CustomizationCodecs {
@@ -42,17 +41,13 @@ public class CustomizationCodecs {
 			"block", PushReaction.BLOCK,
 			"ignore", PushReaction.IGNORE,
 			"push_only", PushReaction.PUSH_ONLY));
-	public static final Codec<RenderLayerEnum> RENDER_TYPE = simpleByNameCodec(ImmutableBiMap.of(
-			"cutout", RenderLayerEnum.CUTOUT,
-			"cutout_mipped", RenderLayerEnum.CUTOUT_MIPPED,
-			"translucent", RenderLayerEnum.TRANSLUCENT));
 	public static final Codec<BlockBehaviour.OffsetType> OFFSET_TYPE = simpleByNameCodec(ImmutableBiMap.of(
 			"xz", BlockBehaviour.OffsetType.XZ,
 			"xyz", BlockBehaviour.OffsetType.XYZ));
 	public static final Codec<BlockBehaviour.StatePredicate> STATE_PREDICATE = Codec.BOOL.flatComapMap(
 			bl -> {
 				return bl ? Blocks::always : Blocks::never;
-			}, p -> {
+			}, _ -> {
 				return DataResult.error(() -> "Unsupported operation");
 			});
 	public static final Codec<TreeGrower> TREE_GROWER = Codec.withAlternative(
@@ -84,12 +79,16 @@ public class CustomizationCodecs {
 				if (stringValue.startsWith("#")) {
 					return DataResult.success(Pair.of(
 							BlockPredicate.Builder.block()
-									.of(TagKey.create(Registries.BLOCK, Identifier.parse(stringValue.substring(1))))
+									.of(
+											BuiltInRegistries.BLOCK,
+											TagKey.create(Registries.BLOCK, Identifier.parse(stringValue.substring(1))))
 									.build(), ops.empty()));
 				}
 				return DataResult.success(Pair.of(
 						BlockPredicate.Builder.block()
-								.of(BuiltInRegistries.BLOCK.get(Identifier.parse(stringValue)))
+								.of(
+										BuiltInRegistries.BLOCK,
+										BuiltInRegistries.BLOCK.get(Identifier.parse(stringValue)).orElseThrow().value())
 								.build(), ops.empty()));
 			}
 			//return ExtraCodecs.JSON.decode(ops, input).map($ -> $.mapFirst(BlockPredicate::fromJson));
@@ -185,7 +184,7 @@ public class CustomizationCodecs {
 						return DataResult.error(() -> "Unknown key: " + key);
 					}
 					return DataResult.success(value);
-				}, value -> {
+				}, _ -> {
 					return DataResult.error(() -> "Unsupported operation");
 				});
 	}
