@@ -13,7 +13,7 @@ import snownee.kiwi.KiwiClientConfig;
 @Mixin(LoadingOverlay.class)
 public class LoadingOverlayMixin {
 	@Shadow
-	private long fadeOutStart;
+	protected long fadeOutStart;
 
 	@Inject(method = "extractRenderState", at = @At("TAIL"))
 	private void kiwi$render(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a, CallbackInfo ci) {
