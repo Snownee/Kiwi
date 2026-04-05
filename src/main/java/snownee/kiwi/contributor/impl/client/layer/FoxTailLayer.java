@@ -5,61 +5,48 @@ import java.util.Locale;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 
-import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
-import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.item.ElytraItem;
-import net.minecraft.world.item.ItemStack;
 import snownee.kiwi.contributor.client.CosmeticLayer;
+import snownee.kiwi.contributor.client.CosmeticRenderState;
 import snownee.kiwi.contributor.impl.client.model.FoxTailModel;
 
 public class FoxTailLayer extends CosmeticLayer {
 	private static final Identifier FOX = Identifier.withDefaultNamespace("textures/entity/fox/fox.png");
 	private static final Identifier SNOW_FOX = Identifier.withDefaultNamespace("textures/entity/fox/snow_fox.png");
 	private static final Supplier<LayerDefinition> definition = Suppliers.memoize(FoxTailModel::create);
-	private final FoxTailModel<AbstractClientPlayer> modelFoxTail;
+	private final FoxTailModel modelFoxTail;
 
-	public FoxTailLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRendererIn) {
+	public FoxTailLayer(RenderLayerParent<AvatarRenderState, PlayerModel> entityRendererIn) {
 		super(entityRendererIn);
-		modelFoxTail = new FoxTailModel<>(entityRendererIn.getModel(), definition.get());
+		modelFoxTail = new FoxTailModel(entityRendererIn.getModel(), definition.get());
 	}
 
 	@Override
-	public void render(
-			PoseStack matrixStackIn,
-			MultiBufferSource bufferIn,
-			int packedLightIn,
-			AbstractClientPlayer entitylivingbaseIn,
-			float limbSwing,
-			float limbSwingAmount,
-			float partialTicks,
-			float ageInTicks,
-			float netHeadYaw,
-			float headPitch) {
-		if (entitylivingbaseIn.isInvisible() || entitylivingbaseIn.isSleeping()) {
+	public void submit(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
+		if (state.isInvisible || state.hasPose(Pose.SLEEPING)) {
 			return;
 		}
-		ItemStack itemstack = entitylivingbaseIn.getItemBySlot(EquipmentSlot.CHEST);
-		if (itemstack.getItem() instanceof ElytraItem) {
+		if (state.chestEquipment.getItem() instanceof ElytraItem) {
 			return;
 		}
-		String name = entitylivingbaseIn.getName().getString().toLowerCase(Locale.ENGLISH);
-		Identifier texture = name.contains("snow") || name.contains("xue") || name.contains("yuki") ? SNOW_FOX : FOX;
-		matrixStackIn.pushPose();
-		modelFoxTail.young = entitylivingbaseIn.isBaby();
-		modelFoxTail.setupAnim(entitylivingbaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-		VertexConsumer ivertexbuilder = ItemRenderer.getFoilBuffer(bufferIn, RenderType.entitySolid(texture), false, false);
-		modelFoxTail.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY);
-		matrixStackIn.popPose();
+		String name = ((CosmeticRenderState) state).kiwi$getName();
+		String nameLower = name != null ? name.toLowerCase(Locale.ENGLISH) : "";
+		Identifier texture = nameLower.contains("snow") || nameLower.contains("xue") || nameLower.contains("yuki") ? SNOW_FOX : FOX;
+		poseStack.pushPose();
+		modelFoxTail.setupAnim(state);
+		submitNodeCollector.submitModel(modelFoxTail, state, poseStack, RenderTypes.entitySolid(texture), lightCoords, OverlayTexture.NO_OVERLAY, state.outlineColor, null);
+		poseStack.popPose();
 	}
 
 }
+

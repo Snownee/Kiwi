@@ -7,12 +7,12 @@ import java.util.concurrent.CompletableFuture;
 
 import org.jspecify.annotations.Nullable;
 
-import net.minecraft.client.model.PlayerModel;
-import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import snownee.kiwi.contributor.client.CosmeticLayer;
 
 public interface ITierProvider {
 	String getAuthor();
@@ -29,7 +29,7 @@ public interface ITierProvider {
 
 	@OnlyIn(Dist.CLIENT)
 	@Nullable
-	CosmeticLayer createRenderer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer, String tier);
+	RenderLayer<AvatarRenderState, PlayerModel> createRenderer(RenderLayerParent<AvatarRenderState, PlayerModel> entityRenderer, String tier);
 
 	default boolean isContributor(String playerName) {
 		return !getPlayerTiers(playerName).isEmpty();
@@ -64,8 +64,8 @@ public interface ITierProvider {
 
 		@OnlyIn(Dist.CLIENT)
 		@Override
-		public @Nullable CosmeticLayer createRenderer(
-				RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer,
+		public @Nullable RenderLayer<AvatarRenderState, PlayerModel> createRenderer(
+				RenderLayerParent<AvatarRenderState, PlayerModel> entityRenderer,
 				String tier) {
 			return null;
 		}

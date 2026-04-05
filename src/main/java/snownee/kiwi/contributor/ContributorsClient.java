@@ -6,7 +6,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
@@ -36,7 +36,7 @@ public class ContributorsClient extends AbstractModule {
 			IEventBus eventBus = Objects.requireNonNull(ModContext.get(Kiwi.ID).modContainer.getEventBus());
 			eventBus.addListener((EntityRenderersEvent.AddLayers e) -> {
 				for (PlayerSkin.Model skin : e.getSkins()) {
-					if (e.getSkin(skin) instanceof PlayerRenderer renderer) {
+					if (e.getSkin(skin) instanceof AvatarRenderer renderer) {
 						CosmeticLayer layer = new CosmeticLayer(renderer);
 						CosmeticLayer.ALL_LAYERS.add(layer);
 						renderer.addLayer(layer);

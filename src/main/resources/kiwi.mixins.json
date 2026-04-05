@@ -30,6 +30,8 @@
 		"customization.sit.EntityMixin"
 	],
 	"client": [
+		"client.AvatarRenderStateMixin",
+		"client.AvatarRendererMixin",
 		"client.BackupConfirmScreenMixin",
 		"client.ClientTelemetryManagerMixin",
 		"client.CreativeModeInventoryScreenMixin",

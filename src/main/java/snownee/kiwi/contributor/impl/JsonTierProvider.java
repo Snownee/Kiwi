@@ -19,14 +19,14 @@ import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 
-import net.minecraft.client.model.PlayerModel;
-import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.contributor.ITierProvider;
-import snownee.kiwi.contributor.client.CosmeticLayer;
 
 public class JsonTierProvider implements ITierProvider {
 	public static final Gson GSON = new GsonBuilder().setLenient().create();
@@ -107,8 +107,8 @@ public class JsonTierProvider implements ITierProvider {
 
 	@OnlyIn(Dist.CLIENT)
 	@Override
-	public @Nullable CosmeticLayer createRenderer(
-			RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer,
+	public @Nullable RenderLayer<AvatarRenderState, PlayerModel> createRenderer(
+			RenderLayerParent<AvatarRenderState, PlayerModel> entityRenderer,
 			String tier) {
 		return null;
 	}

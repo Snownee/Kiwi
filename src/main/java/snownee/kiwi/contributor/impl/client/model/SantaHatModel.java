@@ -1,27 +1,25 @@
 package snownee.kiwi.contributor.impl.client.model;
 
-import com.google.common.collect.ImmutableList;
-
-import net.minecraft.client.model.AgeableListModel;
-import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.client.model.player.PlayerModel;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 
-public class SantaHatModel<T extends LivingEntity> extends AgeableListModel<T> {
+public class SantaHatModel extends Model<AvatarRenderState> {
 
-	private PlayerModel<AbstractClientPlayer> playerModel;
-	private ModelPart main;
+	private final PlayerModel playerModel;
+	private final ModelPart main;
 
-	public SantaHatModel(PlayerModel<AbstractClientPlayer> playerModel, LayerDefinition definition) {
+	public SantaHatModel(PlayerModel playerModel, LayerDefinition definition) {
+		super(definition.bakeRoot(), RenderTypes::entitySolid);
 		this.playerModel = playerModel;
-		ModelPart root = definition.bakeRoot();
-		main = root.getChild("main");
+		main = this.root().getChild("main");
 	}
 
 	public static LayerDefinition create() {
@@ -37,17 +35,7 @@ public class SantaHatModel<T extends LivingEntity> extends AgeableListModel<T> {
 	}
 
 	@Override
-	protected Iterable<ModelPart> headParts() {
-		return ImmutableList.of(main);
-	}
-
-	@Override
-	protected Iterable<ModelPart> bodyParts() {
-		return ImmutableList.of();
-	}
-
-	@Override
-	public void setupAnim(T entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+	public void setupAnim(AvatarRenderState state) {
 		main.copyFrom(playerModel.head);
 	}
 

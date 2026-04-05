@@ -10,6 +10,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -157,11 +158,11 @@ public class CosmeticScreen extends Screen {
 			if (this == parent.selectedEntry) {
 				color = 0xFFFFFF77;
 			}
-			graphics.text(parent.font, name, mouseX + 43, mouseY + 2, color);
+			graphics.text(parent.font, name, getContentX() + 43, getContentY(), color);
 		}
 
 		@Override
-		public boolean mouseClicked(double p_mouseClicked_1_, double p_mouseClicked_3_, int p_mouseClicked_5_) {
+		public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
 			parent.selectedEntry = this;
 			return false;
 		}

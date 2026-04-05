@@ -8,12 +8,12 @@ import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.Sets;
 
-import net.minecraft.client.model.PlayerModel;
-import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import snownee.kiwi.contributor.client.CosmeticLayer;
 import snownee.kiwi.contributor.impl.client.layer.FoxTailLayer;
 import snownee.kiwi.contributor.impl.client.layer.PlanetLayer;
 import snownee.kiwi.contributor.impl.client.layer.SantaHatLayer;
@@ -59,8 +59,8 @@ public class KiwiTierProvider extends JsonTierProvider {
 
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public @Nullable CosmeticLayer createRenderer(
-			RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRenderer,
+	public @Nullable RenderLayer<AvatarRenderState, PlayerModel> createRenderer(
+			RenderLayerParent<AvatarRenderState, PlayerModel> entityRenderer,
 			String tier) {
 		return switch (tier) {
 			case "2020q3" -> new PlanetLayer(entityRenderer);
