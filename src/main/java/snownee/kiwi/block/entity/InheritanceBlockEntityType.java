@@ -16,7 +16,7 @@ public class InheritanceBlockEntityType<T extends BlockEntity> extends BlockEnti
 			BlockEntityType.BlockEntitySupplier<? extends T> factory,
 			Class<? extends Block> clazz,
 			boolean onlyOpCanSetNbt) {
-		super(factory::create, Set.of(), onlyOpCanSetNbt);
+		super(factory, Set.of(), onlyOpCanSetNbt);
 		this.clazz = clazz;
 		this.onlyOpCanSetNbt = onlyOpCanSetNbt;
 	}

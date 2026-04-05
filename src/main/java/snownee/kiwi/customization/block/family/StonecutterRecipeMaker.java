@@ -2,12 +2,11 @@ package snownee.kiwi.customization.block.family;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -51,8 +50,8 @@ public class StonecutterRecipeMaker {
 		return recipes;
 	}
 
-	public static <C extends RecipeInput, T extends Recipe<C>> List<RecipeHolder<T>> appendRecipesFor(
-			List<RecipeHolder<T>> recipes,
+	public static <C extends RecipeInput, T extends Recipe<C>> Stream<RecipeHolder<T>> appendRecipesFor(
+			Stream<RecipeHolder<T>> recipes,
 			C input) {
 		ItemStack itemStack = input.getItem(0);
 		if (itemStack.isEmpty()) {
@@ -103,9 +102,8 @@ public class StonecutterRecipeMaker {
 			return recipes;
 		}
 		//noinspection unchecked
-		return Streams.concat(recipes.stream(), exchangeRecipes.stream(), sourceRecipes.stream())
-				.map(r -> (RecipeHolder<T>) r)
-				.collect(Collectors.toCollection(ArrayList::new));
+		return Streams.concat(recipes, exchangeRecipes.stream(), sourceRecipes.stream())
+				.map(r -> (RecipeHolder<T>) r);
 	}
 
 	public static List<RecipeHolder<StonecutterRecipe>> makeRecipes(String type, KHolder<BlockFamily> family) {

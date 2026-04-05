@@ -7,6 +7,7 @@
   "refmap": "kiwi.refmap.json",
   "mixins": [
     "GameDataMixin",
+    "RecipeManagerMixin",
     "customization.AbstractContainerMenuMixin",
     "customization.BlockBehaviourMixin",
     "customization.BlockEntityTypeMixin",
@@ -18,6 +19,7 @@
     "customization.HalfTransparentBlockMixin",
     "customization.WallBlockAccessor",
     "customization.family.RecipeManagerMixin",
+    "customization.family.RecipeMapMixin",
     "customization.fastsuite.AuxRecipeManagerMixin",
     "customization.forge.IBlockStateExtensionMixin",
     "customization.placement.BlockItemGetPlacementStateMixin",
