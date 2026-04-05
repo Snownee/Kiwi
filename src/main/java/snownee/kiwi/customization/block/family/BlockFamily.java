@@ -59,7 +59,7 @@ public class BlockFamily {
 			ResourceKey.codec(Registries.ITEM)
 					.optionalFieldOf("stonecutter_from")
 					.forGetter($ -> $.stonecutterSource().map(Holder.Reference::key)),
-			Codec.intRange(1, 64).optionalFieldOf("stonecutter_from_multiplier", 1).forGetter(BlockFamily::stonecutterSourceMultiplier),
+			Codec.intRange(1, 99).optionalFieldOf("stonecutter_from_multiplier", 1).forGetter(BlockFamily::stonecutterSourceMultiplier),
 			SwitchAttrs.CODEC.optionalFieldOf("switch", SwitchAttrs.DISABLED).forGetter(BlockFamily::switchAttrs)
 	).apply(instance, BlockFamily::new));
 
@@ -184,7 +184,7 @@ public class BlockFamily {
 
 	protected Ingredient toIngredient(List<? extends Holder<Item>> items) {
 		return Ingredient.of(items.stream().map(Holder::value).filter(item -> {
-			return BlockFamilies.getConvertRatio(item) >= 1;
+			return BlockFamilies.getMatValue(item) >= BlockFamilies.BASE_MAT_VALUE;
 		}).toArray(ItemLike[]::new));
 	}
 

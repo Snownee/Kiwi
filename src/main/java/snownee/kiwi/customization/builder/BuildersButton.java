@@ -88,7 +88,7 @@ public class BuildersButton {
 			screen.onClose();
 			return true;
 		}
-		if (KiwiCommonConfig.kSwitchCreativeOnly && !player.isCreative()) {
+		if (KiwiCommonConfig.kSwitchCreativeOnly && !player.hasInfiniteMaterials()) {
 			return false;
 		}
 		if (screen instanceof AbstractContainerScreen<?> containerScreen && containerScreen.getMenu().getCarried().isEmpty()) {
@@ -123,13 +123,12 @@ public class BuildersButton {
 	}
 
 	public static List<CConvertItemPacket.Group> findConvertGroups(Player player, ItemStack itemStack) {
-		List<KHolder<BlockFamily>> families = BlockFamilies.findQuickSwitch(itemStack.getItem(), player.isCreative());
+		List<KHolder<BlockFamily>> families = BlockFamilies.findQuickSwitch(itemStack.getItem(), player.hasInfiniteMaterials());
 		if (families.isEmpty()) {
 			return List.of();
 		}
 		List<CConvertItemPacket.Group> groups = Lists.newArrayListWithExpectedSize(families.size());
 		Set<Item> addedItems = Sets.newHashSet();
-		float ratio = BlockFamilies.getConvertRatio(itemStack.getItem());
 		for (KHolder<BlockFamily> family : families) {
 			CConvertItemPacket.Group group = new CConvertItemPacket.Group();
 			boolean cascading = family.value().switchAttrs().cascading();
@@ -137,8 +136,7 @@ public class BuildersButton {
 			Set<BlockFamily> iteratedFamilies = cascading ? Sets.newHashSet(family.value()) : Set.of();
 			Set<Item> iteratedItems = cascading ? Sets.newHashSet() : Set.of();
 			for (Item item : family.value().items().toList()) {
-				float convertRatio = BlockFamilies.getConvertRatio(item);
-				CConvertItemPacket.Entry entry = new CConvertItemPacket.Entry(ratio / convertRatio);
+				CConvertItemPacket.Entry entry = new CConvertItemPacket.Entry();
 				Pair<Identifier, Item> pair = Pair.of(family.key(), item);
 				entry.steps().add(pair);
 				if (cascading) {
@@ -154,8 +152,7 @@ public class BuildersButton {
 				CConvertItemPacket.Entry parentEntry = unresolved.removeFirst();
 				Pair<Identifier, Item> lastStep = parentEntry.steps().getLast();
 				Item lastItem = lastStep.getSecond();
-				ratio = BlockFamilies.getConvertRatio(lastItem);
-				for (KHolder<BlockFamily> nextFamily : BlockFamilies.findQuickSwitch(lastItem, player.isCreative())) {
+				for (KHolder<BlockFamily> nextFamily : BlockFamilies.findQuickSwitch(lastItem, player.hasInfiniteMaterials())) {
 					if (!iteratedFamilies.add(nextFamily.value())) {
 						continue;
 					}
@@ -163,8 +160,7 @@ public class BuildersButton {
 						if (!iteratedItems.add(nextItem)) {
 							continue;
 						}
-						float convertRatio = BlockFamilies.getConvertRatio(nextItem);
-						CConvertItemPacket.Entry entry = new CConvertItemPacket.Entry(parentEntry.ratio() * ratio / convertRatio);
+						CConvertItemPacket.Entry entry = new CConvertItemPacket.Entry();
 						entry.steps().addAll(parentEntry.steps());
 						entry.steps().add(Pair.of(nextFamily.key(), nextItem));
 						if (!addedItems.contains(nextItem)) {
@@ -181,14 +177,13 @@ public class BuildersButton {
 				groups.add(group);
 			}
 		}
-		if (player.isCreative()) {
+		if (player.hasInfiniteMaterials()) {
 			return groups;
 		}
+		long matValue = BlockFamilies.getMatValue(itemStack);
 		Predicate<CConvertItemPacket.Entry> filter = entry -> {
-			if (entry.ratio() >= 1) {
-				return false;
-			}
-			return !player.getInventory().hasAnyMatching($ -> $.is(entry.item()));
+			// matValue is not enough to convert one
+			return matValue < BlockFamilies.getMatValue(entry.item());
 		};
 		int count = 0;
 		for (CConvertItemPacket.Group group : groups) {

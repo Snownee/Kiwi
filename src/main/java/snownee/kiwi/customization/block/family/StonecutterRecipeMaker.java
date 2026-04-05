@@ -16,7 +16,6 @@ import com.google.common.collect.Streams;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -109,7 +108,11 @@ public class StonecutterRecipeMaker {
 			if ("to".equals(type)) {
 				count = family.value().stonecutterSourceMultiplier();
 			} else {
-				count = Mth.floor(1 / BlockFamilies.getConvertRatio(item));
+				long matValue = BlockFamilies.getMatValue(item);
+				if (matValue < BlockFamilies.BASE_MAT_VALUE) {
+					return null;
+				}
+				count = Math.min((int) (BlockFamilies.BASE_MAT_VALUE / matValue), 99);
 				if (count < 1) {
 					return null;
 				}

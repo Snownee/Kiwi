@@ -1,6 +1,7 @@
 package snownee.kiwi.customization.builder;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -89,6 +90,10 @@ public class ConvertScreen extends Screen {
 		return inventory.getItem(slotIndex);
 	}
 
+	public PanelLayout layout() {
+		return Objects.requireNonNull(layout);
+	}
+
 	@Override
 	protected void init() {
 		lastFocused = null;
@@ -98,54 +103,50 @@ public class ConvertScreen extends Screen {
 		int yStart = 0;
 		int curX = xStart;
 		int curY = yStart;
-		Set<CConvertItemPacket.Entry> accepted = Sets.newHashSet();
+		Set<CConvertItemPacket.Entry> accepted = Sets.newTreeSet(
+				Comparator.comparing($ -> $.item().getDefaultInstance().getHoverName().getString()));
 		LocalPlayer player = Objects.requireNonNull(getMinecraft().player);
 		for (CConvertItemPacket.Group group : groups) {
 			accepted.addAll(group.entries());
 		}
 		int itemsPerLine = accepted.size() > 30 ? 11 : 4;
-		for (CConvertItemPacket.Group group : groups) {
-			for (CConvertItemPacket.Entry entry : group.entries()) {
-				if (!accepted.contains(entry)) {
-					continue;
-				}
-				ItemStack itemStack = new ItemStack(entry.item());
-				ItemButton button = (ItemButton) ItemButton
-						.builder(itemStack, inContainer, btn -> shortPress((ItemButton) btn, entry))
-						.bounds(curX, curY, 21, 21)
-						.build();
+		for (CConvertItemPacket.Entry entry : accepted) {
+			ItemStack itemStack = new ItemStack(entry.item());
+			ItemButton button = (ItemButton) ItemButton
+					.builder(itemStack, inContainer, btn -> shortPress((ItemButton) btn, entry))
+					.bounds(curX, curY, 21, 21)
+					.build();
 
-				button.onPress = btn -> {
-					if (btn.pressTime() >= 10) {
-						longPress(btn, entry);
-					}
-				};
-				button.onRelease = btn -> {
-					if (!hasControlDown()) {
-						onClose();
-					}
-				};
+			button.onPress = btn -> {
+				if (btn.pressTime() >= 10) {
+					longPress(btn, entry);
+				}
+			};
+			button.onRelease = btn -> {
+				if (!hasControlDown()) {
+					onClose();
+				}
+			};
 
-				button.setAlpha(inContainer ? 0.2f : 0.8f);
-				List<Component> tooltip;
-				if (Platform.isProduction()) {
-					tooltip = List.of(itemStack.getHoverName());
-				} else {
-					String steps = String.join(
-							" -> ",
-							entry.steps().stream().map(Pair::getFirst).map(Objects::toString).toList());
-					tooltip = List.of(itemStack.getHoverName(), Component.literal(steps).withStyle(ChatFormatting.GRAY));
-				}
-				button.setTooltip(MultilineTooltip.create(tooltip));
-				if (lastFocused == null && itemStack.is(sourceItem.getItem())) {
-					lastFocused = button;
-				}
-				layout.addWidget(button);
-				curX += step;
-				if (curX >= xStart + itemsPerLine * step) {
-					curX = xStart;
-					curY += step;
-				}
+			button.setAlpha(inContainer ? 0.2f : 0.8f);
+			List<Component> tooltip;
+			if (Platform.isProduction()) {
+				tooltip = List.of(itemStack.getHoverName());
+			} else {
+				String steps = String.join(
+						" -> ",
+						entry.steps().stream().map(Pair::getFirst).map(Objects::toString).toList());
+				tooltip = List.of(itemStack.getHoverName(), Component.literal(steps).withStyle(ChatFormatting.GRAY));
+			}
+			button.setTooltip(MultilineTooltip.create(tooltip));
+			if (lastFocused == null && itemStack.is(sourceItem.getItem())) {
+				lastFocused = button;
+			}
+			layout.addWidget(button);
+			curX += step;
+			if (curX >= xStart + itemsPerLine * step) {
+				curX = xStart;
+				curY += step;
 			}
 		}
 		int x;
@@ -164,7 +165,7 @@ public class ConvertScreen extends Screen {
 					x = width / 2 + 91 + 17;
 				}
 			} else {
-				x = width / 2 - 91 + 11 + player.getInventory().selected * 20;
+				x = width / 2 - 91 + 11 + player.getInventory().getSelectedSlot() * 20;
 			}
 			y = height - 24;
 			anchor = new Vector2f(0.5f, 1f);
@@ -204,23 +205,27 @@ public class ConvertScreen extends Screen {
 
 	private void shortPress(ItemButton button, CConvertItemPacket.Entry entry) {
 		LocalPlayer player = Objects.requireNonNull(getMinecraft().player);
-		boolean creative = player.isCreative();
+		boolean hasInfiniteMaterials = player.hasInfiniteMaterials();
 		ItemStack sourceItem = getSourceItem();
 		boolean convertOne = hasControlDown();
 		if (convertOne) {
-			if (!creative && sourceItem.getCount() <= 1) {
+			if (!hasInfiniteMaterials && sourceItem.getCount() <= 1) {
 				onClose();
 			}
 		}
 		Item from = sourceItem.getItem();
 		Item to = button.item().getItem();
-		if (!(creative && convertOne) && from == to) {
+		if (!(hasInfiniteMaterials && convertOne) && from == to) {
 			return;
 		}
 		chosenItems.add(to);
 		if (inCreativeContainer && convertOne) {
-			// magic number time
-			KPacketSender.sendToServer(new CConvertItemPacket(false, -500, entry, from, CConvertItemPacket.Action.CONVERT_ONE));
+			KPacketSender.sendToServer(new CConvertItemPacket(
+					false,
+					CConvertItemPacket.SLOT_UNKNOWN_SOURCE,
+					entry,
+					from,
+					CConvertItemPacket.Action.CONVERT_ONE));
 		} else if (inCreativeContainer) {
 			Objects.requireNonNull(slot);
 			ItemStack newItem = to.getDefaultInstance();
@@ -267,7 +272,7 @@ public class ConvertScreen extends Screen {
 			return true;
 		}
 		if (pButton == 0) {
-			Rect2i bounds = layout.bounds();
+			Rect2i bounds = layout().bounds();
 			Rect2i tolerance = new Rect2i(bounds.getX() - 10, bounds.getY() - 10, bounds.getWidth() + 20, bounds.getHeight() + 20);
 			if (!tolerance.contains((int) pMouseX, (int) pMouseY)) {
 				onClose();
@@ -283,7 +288,7 @@ public class ConvertScreen extends Screen {
 			return false;
 		}
 		int index = -1;
-		List<AbstractWidget> widgets = layout.widgets();
+		List<AbstractWidget> widgets = layout().widgets();
 		if (widgets.isEmpty()) {
 			return false;
 		}
@@ -308,15 +313,15 @@ public class ConvertScreen extends Screen {
 	public void extractRenderState(GuiGraphicsExtractor pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
 		Objects.requireNonNull(minecraft);
 		Matrix3x2fStack pose = pGuiGraphics.pose();
-		layout.update();
-		Vector2i pos = layout.getAnchoredPos();
+		layout().update();
+		Vector2i pos = layout().getAnchoredPos();
 		float openValue = openProgress.getValue(pPartialTick);
 		pose.pushMatrix();
 		pose.translate(pos.x, pos.y);
 		pose.scale(openValue);
 		pose.translate(-pos.x, -pos.y);
 		if (inContainer) {
-			Rect2i bounds = layout.bounds();
+			Rect2i bounds = layout().bounds();
 			pGuiGraphics.blitSprite(
 					RenderPipelines.GUI_TEXTURED,
 					Identifier.withDefaultNamespace("recipe_book/overlay_recipe"),

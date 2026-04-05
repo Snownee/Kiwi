@@ -1,0 +1,10 @@
+switch:
+  enabled: true
+  cascading: true
+  creative_only: true
+blocks:
+  - snow
+  - snow_block
+  - ice
+  - packed_ice
+  - blue_ice
