@@ -34,7 +34,6 @@ import com.google.common.graph.MutableGraph;
 import com.mojang.logging.LogUtils;
 
 import net.minecraft.advancements.CriterionTrigger;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.predicates.DataComponentPredicate;
@@ -404,10 +403,6 @@ public class Kiwi {
 //		}
 		//modEventBus.register(KiwiModules.class); // Cannot register without at least one event listener
 		if (Platform.isPhysicalClient()) {
-			RenderLayerEnum.CUTOUT.value = RenderType.cutout();
-			RenderLayerEnum.CUTOUT_MIPPED.value = RenderType.cutoutMipped();
-			RenderLayerEnum.TRANSLUCENT.value = RenderType.translucent();
-
 			NeoForge.EVENT_BUS.register(ClientInitializer.class);
 		}
 		NeoForge.EVENT_BUS.addListener(this::onCommandsRegister);

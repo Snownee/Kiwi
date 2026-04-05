@@ -32,7 +32,6 @@
 	"client": [
 		"client.AvatarRenderStateMixin",
 		"client.AvatarRendererMixin",
-		"client.BackupConfirmScreenMixin",
 		"client.ClientTelemetryManagerMixin",
 		"client.CreativeModeInventoryScreenMixin",
 		"client.FogRendererMixin",

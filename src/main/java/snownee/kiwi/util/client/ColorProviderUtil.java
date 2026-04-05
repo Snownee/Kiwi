@@ -1,6 +1,7 @@
 package snownee.kiwi.util.client;
 
 import java.util.List;
+import java.util.Set;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockTintSource;
@@ -8,6 +9,7 @@ import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 import snownee.kiwi.mixin.forge.BlockColorsAccess;
 
 public class ColorProviderUtil {
@@ -38,6 +40,18 @@ public class ColorProviderUtil {
 		public int colorInWorld(BlockState state, BlockAndTintGetter level, BlockPos pos) {
 			List<BlockTintSource> srcs = sources();
 			return srcs.isEmpty() ? -1 : srcs.get(0).colorInWorld(state, level, pos);
+		}
+
+		@Override
+		public int colorAsTerrainParticle(BlockState state, BlockAndTintGetter level, BlockPos pos) {
+			List<BlockTintSource> srcs = sources();
+			return srcs.isEmpty() ? -1 : srcs.get(0).colorAsTerrainParticle(state, level, pos);
+		}
+
+		@Override
+		public Set<Property<?>> relevantProperties() {
+			List<BlockTintSource> srcs = sources();
+			return srcs.isEmpty() ? Set.of() : srcs.get(0).relevantProperties();
 		}
 	}
 }
