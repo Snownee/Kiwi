@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
-import me.shedaniel.rei.plugincompatibilities.api.REIPluginCompatIgnore;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
@@ -22,7 +21,6 @@ import snownee.kiwi.customization.block.family.StonecutterRecipeMaker;
 import snownee.kiwi.util.KHolder;
 
 @JeiPlugin
-@REIPluginCompatIgnore
 public class JEICompat implements IModPlugin {
 	public static final Identifier ID = Kiwi.id("customization");
 	public static final RecipeType<KSwitchGroupRecipe> KSWITCH = RecipeType.create(Kiwi.ID, "kswitch", KSwitchGroupRecipe.class);
