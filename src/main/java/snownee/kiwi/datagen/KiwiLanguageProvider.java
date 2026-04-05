@@ -185,7 +185,7 @@ public class KiwiLanguageProvider extends LanguageProvider {
 					}
 					return null;
 				});
-		generateGameObjectEntries(translationEntries, lookup, Registries.CUSTOM_STAT, stat -> net.minecraft.Util.makeDescriptionId("stat", stat));
+		generateGameObjectEntries(translationEntries, lookup, Registries.CUSTOM_STAT, stat -> net.minecraft.util.Util.makeDescriptionId("stat", stat));
 		generateGameObjectEntries(translationEntries, lookup, Registries.MOB_EFFECT, MobEffect::getDescriptionId);
 	}
 
@@ -204,7 +204,7 @@ public class KiwiLanguageProvider extends LanguageProvider {
 		GameObjectLookup.allHolders(lookup, registryKey, modId).forEach(holder -> {
 			String key = keyMapper.apply(holder.value());
 			if (key != null) {
-				translationEntries.put(key, KUtil.friendlyText(holder.key().location().getPath()));
+				translationEntries.put(key, KUtil.friendlyText(holder.key().identifier().getPath()));
 			}
 		});
 	}

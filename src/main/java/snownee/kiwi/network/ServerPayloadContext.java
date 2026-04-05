@@ -9,7 +9,7 @@ import net.minecraft.server.level.ServerPlayer;
 public interface ServerPayloadContext extends PayloadContext {
 	@Override
 	default void execute(Runnable runnable) {
-		Objects.requireNonNull(serverPlayer().getServer()).execute(runnable);
+		Objects.requireNonNull(serverPlayer().level().getServer()).execute(runnable);
 	}
 
 	@Override

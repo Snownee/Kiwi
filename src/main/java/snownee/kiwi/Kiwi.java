@@ -127,12 +127,14 @@ import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfig.ConfigType;
 import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.config.NeoClothConfigIntegration;
+import snownee.kiwi.datagen.KiwiDataGen;
 import snownee.kiwi.loader.ClientInitializer;
 import snownee.kiwi.loader.KiwiMetadataLoader;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.loader.event.PostInitEvent;
 import snownee.kiwi.network.KNetworking;
+import snownee.kiwi.recipe.CustomIngredientImpl;
 import snownee.kiwi.util.KUtil;
 
 @Mod(Kiwi.ID)
@@ -362,7 +364,7 @@ public class Kiwi {
 			}
 			for (KiwiAnnotationData packet : metadata.get("packets")) {
 				if (shouldLoad(packet, dist)) {
-					KNetworking.processClass(packet);
+					KNetworking.processClass(packet, modEventBus);
 				}
 			}
 		}
@@ -394,10 +396,11 @@ public class Kiwi {
 		if (Platform.isPhysicalClient() && Platform.isModLoaded("cloth_config")) {
 			NeoClothConfigIntegration.init();
 		}
-		var modEventBus =
 		modEventBus.addListener(this::init);
 		modEventBus.addListener(this::postInit);
 		modEventBus.addListener(this::loadComplete);
+		modEventBus.addListener(KiwiDataGen::on);
+		modEventBus.addListener((net.neoforged.neoforge.registries.RegisterEvent event) -> CustomIngredientImpl.onRegister(event));
 //		if (Platform.isModLoaded("fabric_api")) {
 //			modEventBus.addListener(this::gatherData);
 //		}
@@ -408,6 +411,10 @@ public class Kiwi {
 		NeoForge.EVENT_BUS.addListener(this::onCommandsRegister);
 		NeoForge.EVENT_BUS.addListener(this::onAttachEntity);
 		stage = LoadingStage.CONSTRUCTED;
+	}
+
+	public static Map<Identifier, Boolean> getDefaultOptions() {
+		return Objects.requireNonNull(defaultOptions);
 	}
 
 	public static void preInit() {

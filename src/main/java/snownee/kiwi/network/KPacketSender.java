@@ -2,9 +2,12 @@ package snownee.kiwi.network;
 
 import java.util.stream.Stream;
 
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
+
 import org.jspecify.annotations.Nullable;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -35,7 +38,7 @@ public final class KPacketSender {
 	}
 
 	public static void sendToTracking(CustomPacketPayload payload, ServerLevel level, BlockPos blockPos) {
-		sendToTracking(payload, level, new ChunkPos(blockPos));
+		sendToTracking(payload, level, new ChunkPos(SectionPos.blockToSectionCoord(blockPos.getX()), SectionPos.blockToSectionCoord(blockPos.getZ())));
 	}
 
 	public static void sendToWorld(CustomPacketPayload payload, ServerLevel level) {
@@ -48,7 +51,7 @@ public final class KPacketSender {
 
 	@Deprecated
 	public static void sendToAllExcept(CustomPacketPayload payload, ServerPlayer player) {
-		sendToAll(payload, player.server);
+		sendToAll(payload, player.level().getServer());
 	}
 
 	public static void sendToAround(
@@ -79,6 +82,6 @@ public final class KPacketSender {
 	}
 
 	public static void sendToServer(CustomPacketPayload payload) {
-		PacketDistributor.sendToServer(payload);
+		ClientPacketDistributor.sendToServer(payload);
 	}
 }

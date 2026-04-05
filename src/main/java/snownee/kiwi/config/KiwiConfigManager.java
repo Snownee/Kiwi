@@ -41,7 +41,7 @@ public class KiwiConfigManager {
 			//			}
 			config.init();
 		}
-		for (Identifier rl : Kiwi.defaultOptions.keySet()) {
+		for (Identifier rl : Kiwi.getDefaultOptions().keySet()) {
 			if (settledMods.contains(rl.getNamespace())) {
 				continue;
 			}
@@ -53,7 +53,7 @@ public class KiwiConfigManager {
 
 	public static void defineModules(String modId, ConfigHandler builder, boolean subcategory) {
 		String prefix = subcategory ? "modules." : "";
-		for (Entry<Identifier, Boolean> entry : Kiwi.defaultOptions.entrySet()) {
+		for (Entry<Identifier, Boolean> entry : Kiwi.getDefaultOptions().entrySet()) {
 			Identifier rl = entry.getKey();
 			if (rl.getNamespace().equals(modId)) {
 				Value<Boolean> value = builder.define(

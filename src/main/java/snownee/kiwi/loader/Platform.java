@@ -3,7 +3,8 @@ package snownee.kiwi.loader;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.Optional;
-import java.util.Set;
+
+import net.minecraft.SharedConstants;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.jspecify.annotations.Nullable;
@@ -22,15 +23,13 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.fml.loading.LoadingModList;
-import net.neoforged.neoforge.common.EffectCure;
-import net.neoforged.neoforge.common.EffectCures;
 import net.neoforged.neoforge.common.ItemAbilities;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.util.FakePlayer;
@@ -56,11 +55,11 @@ public class Platform {
 	}
 
 	public static Optional<Path> findResource(String id, String path) {
-		return Optional.of(ModList.get().getModContainerById(id).orElseThrow().getModInfo().getOwningFile().getFile().findResource(path));
+		return ModList.get().getModContainerById(id).flatMap($ -> Optional.ofNullable(Platform.class.getClassLoader().getResource(path))).map(url -> Path.of(url.getPath()));
 	}
 
 	public static boolean isPhysicalClient() {
-		return FMLEnvironment.dist.isClient();
+		return FMLEnvironment.getDist().isClient();
 	}
 
 	@Nullable
@@ -69,7 +68,7 @@ public class Platform {
 	}
 
 	public static boolean isProduction() {
-		return FMLEnvironment.production;
+		return !SharedConstants.IS_RUNNING_IN_IDE;
 	}
 
 	public static boolean isDataGen() {
@@ -84,8 +83,8 @@ public class Platform {
 		return FMLPaths.CONFIGDIR.get();
 	}
 
-	public static ItemStack getCraftingRemainingItem(ItemStack stack) {
-		return stack.getCraftingRemainingItem();
+	public static @Nullable ItemStackTemplate getCraftingRemainingItem(ItemStack stack) {
+		return stack.getCraftingRemainder();
 	}
 
 	public static boolean isFakePlayer(Player player) {
@@ -97,14 +96,7 @@ public class Platform {
 	}
 
 	public static boolean isCurativeItem(MobEffectInstance effectInstance, ItemStack stack) {
-		Set<EffectCure> cures = effectInstance.getCures();
-		if (cures.contains(EffectCures.MILK) && stack.is(Tags.Items.BUCKETS_MILK)) {
-			return true;
-		}
-		if (cures.contains(EffectCures.HONEY) && stack.is(Items.HONEY_BOTTLE)) {
-			return true;
-		}
-		return false;
+		return stack.is(Tags.Items.BUCKETS_MILK);
 	}
 
 	public static boolean isShearsLeftClickable(ItemStack stack) {

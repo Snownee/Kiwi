@@ -8,8 +8,8 @@ import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
-import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.LoadingModList;
+import snownee.kiwi.loader.Platform;
 import snownee.kiwi.customization.CustomizationServiceFinder;
 
 public class MixinPlugin implements IMixinConfigPlugin {
@@ -26,7 +26,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
 
 	@Override
 	public void onLoad(String mixinPackage) {
-		boolean devEnv = !FMLEnvironment.production;
+		boolean devEnv = !Platform.isProduction();
 		customization = CustomizationServiceFinder.shouldEnable(LoadingModList.get().getMods());
 		persistentCreativeInventory = customization || isModLoaded("persistentcreativeinventory") || devEnv;
 		fastScrolling = isModLoaded("fastscroll") || devEnv;
