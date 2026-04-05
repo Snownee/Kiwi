@@ -22,7 +22,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.EffectsInInventory;
@@ -60,9 +60,9 @@ public abstract class EffectsInInventoryMixin implements KiwiEffectsInInventory 
 	@Unique
 	private final ItemStack kiwi$iconItem = new ItemStack(Items.POTION);
 
-	@Inject(method = "renderEffects", at = @At("HEAD"), cancellable = true)
-	private void kiwi$renderEffects(
-			GuiGraphics graphics,
+	@Inject(method = "extractEffects", at = @At("HEAD"), cancellable = true)
+	private void kiwi$extractEffects(
+			GuiGraphicsExtractor graphics,
 			Collection<MobEffectInstance> activeEffects,
 			int x0,
 			int yStep,
@@ -97,29 +97,30 @@ public abstract class EffectsInInventoryMixin implements KiwiEffectsInInventory 
 
 		x0 = MiniEffects.isLeftSide() ? screen.leftPos - 12 : x0 - 3;
 		kiwi$buttonArea = new ScreenRectangle(x0, screen.topPos, 12, 12);
-		MiniEffects.render(graphics, minecraft.font, Objects.requireNonNull(kiwi$buttonArea), kiwi$iconItem, effects, bad);
+		MiniEffects.extractRenderState(graphics, minecraft.font, Objects.requireNonNull(kiwi$buttonArea), kiwi$iconItem, effects, bad);
 		ci.cancel();
 	}
 
 	@WrapOperation(
-			method = "renderEffects", at = @At(
+			method = "extractEffects", at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/client/gui/screens/inventory/EffectsInInventory;renderText(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/Component;Lnet/minecraft/client/gui/Font;IIIIII)V"))
+			target = "Lnet/minecraft/client/gui/screens/inventory/EffectsInInventory;renderText(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/Component;Lnet/minecraft/client/gui/Font;IIIIIILnet/minecraft/world/effect/MobEffectInstance;)V"))
 	private void kiwi$recordAreas(
 			EffectsInInventory instance,
-			GuiGraphics graphics,
-			Component effectText,
-			Component duration,
-			Font font,
-			int x0,
-			int y0,
-			int textureWidth,
-			int yStep,
-			int mouseX,
-			int mouseY,
+			final GuiGraphicsExtractor graphics,
+			final Component effectText,
+			final Component duration,
+			final Font font,
+			final int x0,
+			final int y0,
+			final int textureWidth,
+			final int yStep,
+			final int mouseX,
+			final int mouseY,
+			final MobEffectInstance effectInstance,
 			Operation<Void> original) {
 		kiwi$areas.add(new ScreenRectangle(x0, y0, textureWidth, yStep));
-		original.call(instance, graphics, effectText, duration, font, x0, y0, textureWidth, yStep, mouseX, mouseY);
+		original.call(instance, graphics, effectText, duration, font, x0, y0, textureWidth, yStep, mouseX, mouseY, effectInstance);
 	}
 
 	@Override

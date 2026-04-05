@@ -33,7 +33,6 @@ import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -58,7 +57,7 @@ public class ConvertScreen extends Screen {
 	private PanelLayout layout;
 	private final Vector2i originalMousePos;
 	private final ItemStack sourceItem;
-	private ClientTooltipPositioner forcedTooltipPositioner;
+	private ClientTooltipPositioner forcedTooltipPositioner; //FIXME
 	private final Set<Item> chosenItems = Sets.newIdentityHashSet();
 	private @Nullable AbstractWidget lastFocused;
 
@@ -335,14 +334,10 @@ public class ConvertScreen extends Screen {
 		// NO-OP
 	}
 
-	@Override
-	public void setTooltipForNextRenderPass(List<FormattedCharSequence> list, ClientTooltipPositioner tooltipPositioner, boolean force) {
-		float openValue = openProgress.getValue(Objects.requireNonNull(minecraft)./*getPartialTick()*/ getTimer()
-				.getGameTimeDeltaPartialTick(true));
-		if (openValue > 0.95f) {
-			super.setTooltipForNextRenderPass(list, forcedTooltipPositioner, force);
-		}
-	}
+//	@Override
+//	public void setTooltipForNextRenderPass(List<FormattedCharSequence> list, ClientTooltipPositioner tooltipPositioner, boolean force) {
+//		super.setTooltipForNextRenderPass(list, forcedTooltipPositioner, force);
+//	}
 
 	@Override
 	public void onClose() {
@@ -363,7 +358,7 @@ public class ConvertScreen extends Screen {
 		return false;
 	}
 
-	public static void renderLingering(GuiGraphicsExtractor pGuiGraphics) {
+	public static void extractLingering(GuiGraphicsExtractor pGuiGraphics) {
 		if (lingeringScreen == null) {
 			return;
 		}

@@ -28,7 +28,7 @@ public class EffectsInInventoryPositionMixin {
 		}
 	}
 
-	@ModifyVariable(method = "render", at = @At(value = "STORE"), name = "xo")
+	@ModifyVariable(method = "extractRenderState", at = @At(value = "STORE"), name = "xo")
 	private int kiwi$modifyX0(int xo) {
 		if (MiniEffects.isLeftSide()) {
 			// always use compact mode if is left side
@@ -38,7 +38,7 @@ public class EffectsInInventoryPositionMixin {
 		}
 	}
 
-	@ModifyVariable(method = "render", at = @At(value = "STORE"), name = "availableWidth")
+	@ModifyVariable(method = "extractRenderState", at = @At(value = "STORE"), name = "availableWidth")
 	private int kiwi$modifyAvailableWidth(int availableWidth) {
 		if (MiniEffects.isLeftSide()) {
 			// always use compact mode if is left side
@@ -48,7 +48,7 @@ public class EffectsInInventoryPositionMixin {
 		}
 	}
 
-	@ModifyVariable(method = "render", at = @At(value = "STORE"), name = "maxWidth")
+	@ModifyVariable(method = "extractRenderState", at = @At(value = "STORE"), name = "maxWidth")
 	private int kiwi$renderEffectsBl(int maxWidth, @Local(name = "availableWidth") int availableWidth) {
 		if (MiniEffects.isLeftSide()) {
 			// always use compact mode if is left side

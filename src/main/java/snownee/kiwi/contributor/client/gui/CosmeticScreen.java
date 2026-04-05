@@ -6,7 +6,7 @@ import org.jspecify.annotations.Nullable;
 
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
@@ -67,11 +67,11 @@ public class CosmeticScreen extends Screen {
 	}
 
 	@Override
-	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float pTicks) {
-		renderBackground(guiGraphics, mouseX, mouseY, pTicks);
-		super.render(guiGraphics, mouseX, mouseY, pTicks);
-		list.render(guiGraphics, mouseX, mouseY, pTicks);
-		guiGraphics.drawString(getMinecraft().font, title, 180, 10, 0xFFFFFF);
+	public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float pTicks) {
+		extractBackground(guiGraphics, mouseX, mouseY, pTicks);
+		super.extractRenderState(guiGraphics, mouseX, mouseY, pTicks);
+		list.extractRenderState(guiGraphics, mouseX, mouseY, pTicks);
+		guiGraphics.text(getMinecraft().font, title, 180, 10, 0xFFFFFF);
 	}
 
 	@Override
@@ -152,22 +152,12 @@ public class CosmeticScreen extends Screen {
 		}
 
 		@Override
-		public void render(
-				GuiGraphics guiGraphics,
-				int entryIdx,
-				int top,
-				int left,
-				int entryWidth,
-				int entryHeight,
-				int mouseX,
-				int mouseY,
-				boolean hover,
-				float partialTicks) {
-			int color = hover ? 0xFFFFAA : 0xFFFFFF;
+		public void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovered, float a) {
+			int color = hovered ? 0xFFFFFFAA : 0xFFFFFF;
 			if (this == parent.selectedEntry) {
-				color = 0xFFFF77;
+				color = 0xFFFFFF77;
 			}
-			guiGraphics.drawString(parent.font, name, left + 43, top + 2, color);
+			graphics.text(parent.font, name, mouseX + 43, mouseY + 2, color);
 		}
 
 		@Override
