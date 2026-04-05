@@ -1,6 +1,7 @@
 package snownee.kiwi.util;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
@@ -214,7 +215,7 @@ public class KiwiEntityTypeBuilder<T extends Entity> {
 		//		} else {
 		//			throw new IllegalStateException("Unknown entity type: " + type);
 		//		}
-		return new EntityType<>(
+		return new EntityType<T>(
 				factory,
 				category,
 				serialize,
@@ -226,6 +227,9 @@ public class KiwiEntityTypeBuilder<T extends Entity> {
 				spawnDimensionsScale,
 				clientTrackingRange,
 				updateInterval,
-				requiredFeatures);
+				type.getName(),
+				Optional.empty(),
+				requiredFeatures,
+				true);
 	}
 }

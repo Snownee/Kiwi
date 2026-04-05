@@ -125,7 +125,7 @@ public abstract class AbstractModule {
 			BlockEntityType.BlockEntitySupplier<? extends T> factory,
 			boolean onlyOpCanSetNbt,
 			Class<?> blockClass) {
-		return go(() -> new InheritanceBlockEntityType<>(factory, blockClass, onlyOpCanSetNbt));
+		return go(() -> new InheritanceBlockEntityType<>(factory, blockClass.asSubclass(Block.class), onlyOpCanSetNbt));
 	}
 
 	public static CreativeModeTab.Builder itemCategory(Identifier id, Supplier<ItemStack> icon) {
