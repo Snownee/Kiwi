@@ -56,8 +56,8 @@ public abstract class WrappedBlockGetter implements BlockAndTintGetter {
 	}
 
 	@Override
-	public int getMinBuildHeight() {
-		return delegate.getMinBuildHeight();
+	public int getMinY() {
+		return delegate.getMinY();
 	}
 
 }

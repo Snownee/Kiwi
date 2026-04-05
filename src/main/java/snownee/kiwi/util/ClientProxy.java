@@ -25,7 +25,7 @@ public class ClientProxy {
 	public static void registerColors(Context context, List<Pair<Block, List<BlockTintSource>>> blocksToAdd) {
 		var modEventBus = context.modEventBus();
 		if (!blocksToAdd.isEmpty()) {
-			modEventBus.addListener((RegisterColorHandlersEvent.Block event) -> {
+			modEventBus.addListener((RegisterColorHandlersEvent.BlockTintSources event) -> {
 				BlockColors blockColors = event.getBlockColors();
 				for (var pair : blocksToAdd) {
 					blockColors.register(pair.getSecond(), pair.getFirst());
@@ -50,22 +50,22 @@ public class ClientProxy {
 			smartKey.tick();
 		});
 		forgeEventBus.addListener((ScreenEvent.MouseButtonPressed.Pre event) -> {
-			if (smartKey.matchesMouse(event.getButton()) && smartKey.setDownWithResult(true)) {
+			if (smartKey.matchesMouse(event.getMouseButtonEvent()) && smartKey.setDownWithResult(true)) {
 				event.setCanceled(true);
 			}
 		});
 		forgeEventBus.addListener((ScreenEvent.MouseButtonReleased.Pre event) -> {
-			if (smartKey.matchesMouse(event.getButton()) && smartKey.setDownWithResult(false)) {
+			if (smartKey.matchesMouse(event.getMouseButtonEvent()) && smartKey.setDownWithResult(false)) {
 				event.setCanceled(true);
 			}
 		});
 		forgeEventBus.addListener((ScreenEvent.KeyPressed.Pre event) -> {
-			if (smartKey.matches(event.getKeyCode(), event.getScanCode()) && smartKey.setDownWithResult(true)) {
+			if (smartKey.matches(event.getKeyEvent()) && smartKey.setDownWithResult(true)) {
 				event.setCanceled(true);
 			}
 		});
 		forgeEventBus.addListener((ScreenEvent.KeyReleased.Pre event) -> {
-			if (smartKey.matches(event.getKeyCode(), event.getScanCode()) && smartKey.setDownWithResult(false)) {
+			if (smartKey.matches(event.getKeyEvent()) && smartKey.setDownWithResult(false)) {
 				event.setCanceled(true);
 			}
 		});

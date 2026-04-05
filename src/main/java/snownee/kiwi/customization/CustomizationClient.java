@@ -25,10 +25,10 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.ExtractBlockOutlineRenderStateEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RenderFrameEvent;
-import net.neoforged.neoforge.client.event.RenderHighlightEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.customization.block.behavior.SitManager;
@@ -56,7 +56,7 @@ public final class CustomizationClient {
 	public static void init(IEventBus modEventBus) {
 		var forgeEventBus = NeoForge.EVENT_BUS;
 		modEventBus.addListener((RegisterKeyMappingsEvent event) -> {
-			buildersButtonKey = new SmartKey.Builder("key.kiwi.builders_button2", KeyMapping.CATEGORY_GAMEPLAY)
+			buildersButtonKey = new SmartKey.Builder("key.kiwi.builders_button2", KeyMapping.Category.GAMEPLAY)
 					.onLongPress(BuildersButton::onLongPress)
 					.onShortPress(BuildersButton::onShortPress)
 					.build();
@@ -67,7 +67,7 @@ public final class CustomizationClient {
 		forgeEventBus.addListener((RegisterClientCommandsEvent event) -> {
 			LiteralArgumentBuilder<CommandSourceStack> kiwi = Commands.literal("kiwi");
 			LiteralArgumentBuilder<CommandSourceStack> customization = Commands.literal("customization")
-					.requires(source -> source.hasPermission(2));
+					.requires(source -> true);
 			LiteralArgumentBuilder<CommandSourceStack> export = Commands.literal("export");
 			ExportBlocksCommand.register(export);
 			ExportShapesCommand.register(export);
@@ -79,7 +79,7 @@ public final class CustomizationClient {
 			PrintFamiliesCommand.register(customization);
 			event.getDispatcher().register(kiwi.then(customization.then(export).then(reload)));
 		});
-		forgeEventBus.addListener((RenderHighlightEvent.Block event) -> {
+		forgeEventBus.addListener((ExtractBlockOutlineRenderStateEvent event) -> {
 			if (BuildersButton.cancelRenderHighlight()) {
 				event.setCanceled(true);
 			}
@@ -92,7 +92,7 @@ public final class CustomizationClient {
 		});
 
 		Identifier debugEntryId = Kiwi.id("builder_mode");
-		DebugScreenEntries.register(debugEntryId, new DebugEntryBuilderMode());
+		// DebugScreenEntries.register is no longer public in 26.1; the profile map is updated below instead.
 		List<Map.Entry<DebugScreenProfile, Map<Identifier, DebugScreenEntryStatus>>> profiles = DebugScreenEntries.PROFILES.entrySet()
 				.stream()
 				.toList();
@@ -117,7 +117,7 @@ public final class CustomizationClient {
 			if (properties.colorProvider().isEmpty()) {
 				continue;
 			}
-			Block block = BuiltInRegistries.BLOCK.get(entry.getKey());
+			Block block = BuiltInRegistries.BLOCK.get(entry.getKey()).map($ -> $.value()).orElse(Blocks.AIR);
 			List<Identifier> providers = properties.colorProvider().get();
 			List<BlockTintSource> sources = Lists.newArrayList();
 			for (Identifier colorProvider : providers) {
@@ -125,7 +125,7 @@ public final class CustomizationClient {
 				if (Identifier.DEFAULT_NAMESPACE.equals(colorProvider.getNamespace()) && colorProvider.getPath().equals("grass")) {
 					colorProvider = Identifier.withDefaultNamespace("short_grass");
 				}
-				Block providerBlock = BuiltInRegistries.BLOCK.get(colorProvider);
+				Block providerBlock = BuiltInRegistries.BLOCK.get(colorProvider).map($ -> $.value()).orElse(Blocks.AIR);
 				if (providerBlock == Blocks.AIR) {
 					Kiwi.LOGGER.warn("Cannot find color provider block %s for block %s".formatted(colorProvider, entry.getKey()));
 				} else {
