@@ -49,7 +49,6 @@ public final class KUtil {
 	public static final MessageFormat MESSAGE_FORMAT = new MessageFormat("{0,number,#.#}");
 	private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("###,###");
 	private static final Yaml YAML;
-	private static @Nullable RecipeManager recipeManager;
 	public static final List<Direction> DIRECTIONS = Direction.stream().toList();
 
 	static {
@@ -258,14 +257,6 @@ public final class KUtil {
 		} else {
 			collector.accept(json);
 		}
-	}
-
-	public static void setRecipeManager(@Nullable RecipeManager recipeManager) {
-		KUtil.recipeManager = recipeManager;
-	}
-
-	public static @Nullable RecipeManager getRecipeManager() {
-		return recipeManager;
 	}
 
 	public static InteractionResult onAttackEntity(

@@ -28,12 +28,13 @@ public class TestModule2 extends AbstractModule {
 	public static final TagKey<EntityType<?>> BAT = entityTag("bat");
 
 	@Name("kiwi:test_item")
-	public static final KiwiGO<TestItem> FIRST_ITEM = go(() -> new TestItem(itemProp().rarity(Rarity.EPIC)) {
-		@Override
-		public boolean isFoil(ItemStack stack) {
-			return true;
-		}
-	});
+	public static final KiwiGO<TestItem> FIRST_ITEM = go(
+			Registries.ITEM, key -> new TestItem(itemProp().rarity(Rarity.EPIC).setId(key)) {
+				@Override
+				public boolean isFoil(ItemStack stack) {
+					return true;
+				}
+			});
 
 	@Name("minecraft:dandelion")
 	public static final KiwiGO<Item> DANDELION = ref(Registries.ITEM);

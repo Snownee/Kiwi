@@ -26,11 +26,11 @@ public class TestModule extends AbstractModule {
 
 	// Register a simple item
 	@Category(value = Categories.FOOD_AND_DRINKS, after = "apple")
-	public static final KiwiGO<TestItem> FIRST_ITEM = go(() -> new TestItem(itemProp().rarity(Rarity.EPIC)));
+	public static final KiwiGO<TestItem> FIRST_ITEM = go(Registries.ITEM, key -> new TestItem(itemProp().setId(key)));
 	public static final KiwiGO<TestItem> ITEM2 = go(Registries.ITEM, key -> new TestItem(itemProp().setId(key)));
 	@Category(value = Categories.FOOD_AND_DRINKS, after = "kiwi:item2")
-	public static final KiwiGO<TestItem> ITEM3 = go(() -> new TestItem(itemProp()));
-	public static final KiwiGO<TestItem> ITEM4 = go(() -> new TestItem(itemProp()));
+	public static final KiwiGO<TestItem> ITEM3 = go(Registries.ITEM, key -> new TestItem(itemProp().setId(key)));
+	public static final KiwiGO<TestItem> ITEM4 = go(Registries.ITEM, key -> new TestItem(itemProp().setId(key)));
 
 	// The next block will use this builder to build its BlockItem. After that this field will be null
 	public static Item.Properties FIRST_BLOCK_ITEM_BUILDER = itemProp().rarity(Rarity.RARE);
