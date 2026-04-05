@@ -45,6 +45,7 @@ import snownee.kiwi.loader.Platform;
 import snownee.kiwi.network.KPacketSender;
 import snownee.kiwi.util.LerpedFloat;
 import snownee.kiwi.util.MultilineTooltip;
+import snownee.kiwi.util.client.SmartKey;
 
 public class ConvertScreen extends Screen {
 	private static @Nullable ConvertScreen lingeringScreen;
@@ -123,7 +124,7 @@ public class ConvertScreen extends Screen {
 				}
 			};
 			button.onRelease = btn -> {
-				if (!hasControlDown()) {
+				if (!SmartKey.hasControlDown()) {
 					onClose();
 				}
 			};
@@ -183,11 +184,11 @@ public class ConvertScreen extends Screen {
 		setFocused(button);
 		Window window = Objects.requireNonNull(getMinecraft().getWindow());
 		double scale = window.getGuiScale();
-		GLFW.glfwSetCursorPos(window.getWindow(), (button.getX() + 15) * scale, (button.getY() + 15) * scale);
+		GLFW.glfwSetCursorPos(window.handle(), (button.getX() + 15) * scale, (button.getY() + 15) * scale);
 	}
 
 	private void longPress(ItemButton button, CConvertItemPacket.Entry entry) {
-		boolean convertOne = hasControlDown();
+		boolean convertOne = SmartKey.hasControlDown();
 		if (convertOne) {
 			shortPress(button, entry);
 		} else if ((!inContainer || Objects.requireNonNull(getMinecraft().player).containerMenu instanceof InventoryMenu) &&
@@ -207,7 +208,7 @@ public class ConvertScreen extends Screen {
 		LocalPlayer player = Objects.requireNonNull(getMinecraft().player);
 		boolean hasInfiniteMaterials = player.hasInfiniteMaterials();
 		ItemStack sourceItem = getSourceItem();
-		boolean convertOne = hasControlDown();
+		boolean convertOne = SmartKey.hasControlDown();
 		if (convertOne) {
 			if (!hasInfiniteMaterials && sourceItem.getCount() <= 1) {
 				onClose();
@@ -267,14 +268,14 @@ public class ConvertScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
-		if (super.mouseClicked(pMouseX, pMouseY, pButton)) {
+	public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+		if (super.mouseClicked(event, doubleClick)) {
 			return true;
 		}
-		if (pButton == 0) {
+		if (event.button() == 0) {
 			Rect2i bounds = layout().bounds();
 			Rect2i tolerance = new Rect2i(bounds.getX() - 10, bounds.getY() - 10, bounds.getWidth() + 20, bounds.getHeight() + 20);
-			if (!tolerance.contains((int) pMouseX, (int) pMouseY)) {
+			if (!tolerance.contains((int) event.x(), (int) event.y())) {
 				onClose();
 				return true;
 			}
@@ -350,7 +351,7 @@ public class ConvertScreen extends Screen {
 		lingeringScreen = this;
 		super.onClose();
 		if (inContainer) {
-			GLFW.glfwSetCursorPos(getMinecraft().getWindow().getWindow(), originalMousePos.x, originalMousePos.y);
+			GLFW.glfwSetCursorPos(getMinecraft().getWindow().handle(), originalMousePos.x, originalMousePos.y);
 		}
 	}
 
@@ -376,7 +377,7 @@ public class ConvertScreen extends Screen {
 				pGuiGraphics,
 				Integer.MAX_VALUE,
 				Integer.MAX_VALUE,
-				mc.getTimer().getGameTimeDeltaPartialTick(true));
+				mc.getDeltaTracker().getGameTimeDeltaPartialTick(true));
 	}
 
 	public static void tickLingering() {
