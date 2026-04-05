@@ -1,5 +1,6 @@
 package snownee.kiwi.command;
 
+import java.net.URI;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Objects;
@@ -32,12 +33,12 @@ public class KiwiCommand {
 		builder.then(Commands
 				.literal("dev_env_rules")
 				.then(Commands.literal("do_not_run_this_if_you_do_not_know_what_it_does")
-						.requires(ctx -> ctx.hasPermission(2))
+						.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 						.executes(ctx -> debugRules(ctx.getSource()))));
 
 		builder.then(Commands
 				.literal("reload")
-				.requires(ctx -> ctx.hasPermission(2))
+				.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 				.then(Commands.argument("fileName", StringArgumentType.greedyString())
 						.executes(ctx -> {
 							String fileName = StringArgumentType.getString(ctx, "fileName");
@@ -54,7 +55,7 @@ public class KiwiCommand {
 
 		builder.then(Commands
 				.literal("eval")
-				.requires(ctx -> ctx.hasPermission(2))
+				.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 				.executes(ctx -> evalHelp(ctx.getSource(), CommandSourceStack::sendFailure))
 				.then(Commands.argument("expression", StringArgumentType.greedyString())
 						.executes(ctx -> eval(
@@ -94,9 +95,10 @@ public class KiwiCommand {
 
 	public static <T> int evalHelp(T ctx, BiConsumer<T, Component> send) {
 		String url = "https://github.com/Snownee/Kiwi/wiki/Eval-Guide";
-		send.accept(ctx,
+		send.accept(
+				ctx,
 				Component.literal(url)
-						.withStyle(s -> s.withUnderlined(true).withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url))));
+						.withStyle(s -> s.withUnderlined(true).withClickEvent(new ClickEvent.OpenUrl(URI.create(url)))));
 		return 0;
 	}
 
