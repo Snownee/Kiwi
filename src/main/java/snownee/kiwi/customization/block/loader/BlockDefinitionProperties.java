@@ -16,7 +16,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.PushReaction;
-import snownee.kiwi.RenderLayerEnum;
 import snownee.kiwi.customization.block.BlockFundamentals;
 import snownee.kiwi.customization.block.GlassType;
 import snownee.kiwi.customization.block.behavior.CanSurviveHandler;
@@ -28,7 +27,7 @@ public record BlockDefinitionProperties(
 		List<Either<KBlockComponent, String>> components,
 		Optional<KMaterial> material,
 		Optional<GlassType> glassType,
-		Optional<RenderLayerEnum> renderType,
+
 		Optional<Identifier> colorProvider,
 		Optional<Identifier> shape,
 		Optional<Identifier> collisionShape,
@@ -43,7 +42,7 @@ public record BlockDefinitionProperties(
 						.forGetter(BlockDefinitionProperties::components),
 				context.materialCodec().forGetter(BlockDefinitionProperties::material),
 				context.glassTypeCodec().forGetter(BlockDefinitionProperties::glassType),
-				CustomizationCodecs.RENDER_TYPE.optionalFieldOf("render_type").forGetter(BlockDefinitionProperties::renderType),
+
 				Identifier.CODEC.optionalFieldOf("color_provider").forGetter(BlockDefinitionProperties::colorProvider),
 				Identifier.CODEC.optionalFieldOf("shape").forGetter(BlockDefinitionProperties::shape),
 				Identifier.CODEC.optionalFieldOf("collision_shape").forGetter(BlockDefinitionProperties::collisionShape),
@@ -72,7 +71,6 @@ public record BlockDefinitionProperties(
 				components,
 				or(this.material, templateProps.material),
 				or(this.glassType, templateProps.glassType),
-				or(this.renderType, templateProps.renderType),
 				or(this.colorProvider, templateProps.colorProvider),
 				or(this.shape, templateProps.shape),
 				or(this.collisionShape, templateProps.collisionShape),

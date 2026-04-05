@@ -5,7 +5,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -25,8 +24,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.language.LanguageManager;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -53,7 +50,6 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiClientConfig;
-import snownee.kiwi.RenderLayerEnum;
 import snownee.kiwi.customization.CustomizationHooks;
 import snownee.kiwi.customization.CustomizationRegistries;
 import snownee.kiwi.customization.block.KBlockSettings;
@@ -118,7 +114,6 @@ public class ExportBlocksCommand {
 			}
 			row.put("Name:" + languageCode, "");
 			row.put("Template", "");
-			row.put("RenderType", "");
 			row.put("LightEmission", "");
 			row.put("GlassType", "");
 			row.put("SustainsPlant", "");
@@ -169,16 +164,6 @@ public class ExportBlocksCommand {
 						row.put("Name:" + languageCode, "");
 					}
 				}
-				RenderLayerEnum layer = null;
-				RenderType renderType = ItemBlockRenderTypes.getChunkRenderType(block.defaultBlockState());
-				if (renderType == RenderType.cutout()) {
-					layer = RenderLayerEnum.CUTOUT;
-				} else if (renderType == RenderType.cutoutMipped()) {
-					layer = RenderLayerEnum.CUTOUT_MIPPED;
-				} else if (renderType == RenderType.translucent()) {
-					layer = RenderLayerEnum.TRANSLUCENT;
-				}
-				row.put("RenderType", layer == null ? "solid" : layer.name().toLowerCase(Locale.ENGLISH));
 				int lightEmission = -1;
 				for (BlockState blockState : block.getStateDefinition().getPossibleStates()) {
 					if (lightEmission == -1) {

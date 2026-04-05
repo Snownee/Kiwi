@@ -36,8 +36,8 @@ public abstract class WrappedBlockGetter implements BlockAndTintGetter {
 	}
 
 	@Override
-	public float getShade(Direction p_230487_1_, boolean p_230487_2_) {
-		return delegate.getShade(p_230487_1_, p_230487_2_);
+	public CardinalLighting cardinalLighting() {
+		return delegate.cardinalLighting();
 	}
 
 	@Override

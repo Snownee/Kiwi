@@ -7,7 +7,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.particle.ParticleProvider;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -18,7 +17,6 @@ import net.minecraft.core.particles.ParticleType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ItemLike;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
@@ -57,10 +55,6 @@ public final class ClientPlatform {
 
 	public static void registerBlockColor(BlockColor blockColor, Block... blocks) {
 //		ColorProviderRegistry.BLOCK.register(blockColor, blocks);
-	}
-
-	public static void setRenderType(Block block, RenderType renderType) {
-//		BlockRenderLayerMap.INSTANCE.putBlock(block, renderType);
 	}
 
 	public static Locale getLocale() {

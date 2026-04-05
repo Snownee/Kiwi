@@ -6,19 +6,20 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
+import org.joml.Matrix3x2fStack;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFW;
 
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
@@ -305,32 +306,32 @@ public class ConvertScreen extends Screen {
 	}
 
 	@Override
-	public void render(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
+	public void extractRenderState(GuiGraphicsExtractor pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
 		Objects.requireNonNull(minecraft);
-		PoseStack pose = pGuiGraphics.pose();
+		Matrix3x2fStack pose = pGuiGraphics.pose();
 		layout.update();
 		Vector2i pos = layout.getAnchoredPos();
 		float openValue = openProgress.getValue(pPartialTick);
-		pose.pushPose();
-		pose.translate(pos.x, pos.y, 0);
-		pose.scale(openValue, openValue, openValue);
-		pose.translate(-pos.x, -pos.y, 0);
+		pose.pushMatrix();
+		pose.translate(pos.x, pos.y);
+		pose.scale(openValue);
+		pose.translate(-pos.x, -pos.y);
 		if (inContainer) {
 			Rect2i bounds = layout.bounds();
 			pGuiGraphics.blitSprite(
+					RenderPipelines.GUI_TEXTURED,
 					Identifier.withDefaultNamespace("recipe_book/overlay_recipe"),
 					bounds.getX() - 2,
 					bounds.getY() - 2,
-					0,
 					bounds.getWidth() + 3,
 					bounds.getHeight() + 3);
 		}
-		super.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
-		pose.popPose();
+		super.extractRenderState(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
+		pose.popMatrix();
 	}
 
 	@Override
-	public void renderBackground(GuiGraphics p_283688_, int p_296369_, int p_296477_, float p_294317_) {
+	public void extractBackground(GuiGraphicsExtractor p_283688_, int p_296369_, int p_296477_, float p_294317_) {
 		// NO-OP
 	}
 
@@ -362,7 +363,7 @@ public class ConvertScreen extends Screen {
 		return false;
 	}
 
-	public static void renderLingering(GuiGraphics pGuiGraphics) {
+	public static void renderLingering(GuiGraphicsExtractor pGuiGraphics) {
 		if (lingeringScreen == null) {
 			return;
 		}
@@ -371,7 +372,7 @@ public class ConvertScreen extends Screen {
 			lingeringScreen = null;
 			return;
 		}
-		lingeringScreen.render(
+		lingeringScreen.extractRenderState(
 				pGuiGraphics,
 				Integer.MAX_VALUE,
 				Integer.MAX_VALUE,

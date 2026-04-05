@@ -21,8 +21,6 @@ import net.minecraft.client.gui.components.debug.DebugScreenEntryStatus;
 import net.minecraft.client.gui.components.debug.DebugScreenProfile;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -39,8 +37,6 @@ import net.neoforged.neoforge.client.event.RenderFrameEvent;
 import net.neoforged.neoforge.client.event.RenderHighlightEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import snownee.kiwi.Kiwi;
-import snownee.kiwi.RenderLayerEnum;
-import snownee.kiwi.customization.block.GlassType;
 import snownee.kiwi.customization.block.behavior.SitManager;
 import snownee.kiwi.customization.block.loader.BlockDefinitionProperties;
 import snownee.kiwi.customization.block.loader.KBlockDefinition;
@@ -146,16 +142,6 @@ public final class CustomizationClient {
 		}
 		for (var entry : blocks.entrySet()) {
 			BlockDefinitionProperties properties = entry.getValue().properties();
-			if (context.loading()) {
-				RenderLayerEnum renderType = properties.renderType().orElse(null);
-				if (renderType == null) {
-					renderType = properties.glassType().map(GlassType::renderType).orElse(null);
-				}
-				if (renderType != null) {
-					Block block = BuiltInRegistries.BLOCK.get(entry.getKey());
-					ItemBlockRenderTypes.setRenderLayer(block, (RenderType) renderType.value);
-				}
-			}
 			if (properties.colorProvider().isEmpty()) {
 				continue;
 			}
