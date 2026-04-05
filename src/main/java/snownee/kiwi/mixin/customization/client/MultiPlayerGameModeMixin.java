@@ -1,5 +1,6 @@
 package snownee.kiwi.mixin.customization.client;
 
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -18,7 +19,10 @@ import snownee.kiwi.customization.builder.BuildersButton;
 public class MultiPlayerGameModeMixin {
 	@Inject(
 			method = "startDestroyBlock",
-			at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/GameType;isCreative()Z"),
+			at = @At(
+					value = "FIELD",
+					target = "Lnet/minecraft/world/entity/player/Abilities;instabuild:Z",
+					opcode = Opcodes.GETFIELD),
 			cancellable = true)
 	private void kiwi$startDestroyBlock(BlockPos pos, Direction pFace, CallbackInfoReturnable<Boolean> cir) {
 		if (BuildersButton.startDestroyBlock(pos, pFace)) {

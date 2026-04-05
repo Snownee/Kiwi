@@ -38,6 +38,19 @@ public class StonecutterRecipeMaker {
 					1,
 					ChronoUnit.MINUTES)).build();
 
+	public static List<RecipeHolder<StonecutterRecipe>> makeRecipes() {
+		List<RecipeHolder<StonecutterRecipe>> recipes = Lists.newArrayList();
+		for (KHolder<BlockFamily> family : BlockFamilies.all()) {
+			if (family.value().stonecutterExchange()) {
+				recipes.addAll(makeRecipes("exchange", family));
+			}
+			if (family.value().stonecutterSource().isPresent()) {
+				recipes.addAll(makeRecipes("to", family));
+			}
+		}
+		return recipes;
+	}
+
 	public static <C extends RecipeInput, T extends Recipe<C>> List<RecipeHolder<T>> appendRecipesFor(
 			List<RecipeHolder<T>> recipes,
 			C input) {

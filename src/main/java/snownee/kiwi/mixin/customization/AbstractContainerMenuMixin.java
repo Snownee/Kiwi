@@ -17,18 +17,16 @@ import snownee.kiwi.customization.CustomizationHooks;
 @Mixin(AbstractContainerMenu.class)
 public class AbstractContainerMenuMixin {
 	@WrapOperation(
-			method = {"lambda$stillValid$0", "m_38913_", "method_17696"},
+			method = "lambda$stillValid$0",
 			remap = false,
 			at = @At(
 					value = "INVOKE",
-					target = "Lnet/minecraft/world/level/block/state/BlockState;is(Lnet/minecraft/world/level/block/Block;)Z",
+					target = "Lnet/minecraft/world/level/block/state/BlockState;is(Ljava/lang/Object;)Z",
 					remap = true))
 	private static boolean is(
 			BlockState instance,
-			Block block,
-			Operation<Boolean> original,
-			@Local(argsOnly = true) Level level,
-			@Local(argsOnly = true) BlockPos pos) {
+			Object block,
+			Operation<Boolean> original) {
 		boolean result = original.call(instance, block);
 		if (result || !CustomizationHooks.isEnabled()) {
 			return result;

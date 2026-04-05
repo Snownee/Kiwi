@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.ToIntFunction;
 
+import net.minecraft.world.level.LevelReader;
+
 import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.Preconditions;
@@ -16,6 +18,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
@@ -144,11 +147,12 @@ public class KBlockSettings {
 			BlockState pState,
 			Direction pDirection,
 			BlockState pNeighborState,
-			LevelAccessor pLevel,
+			LevelReader pLevel,
+			ScheduledTickAccess scheduledTickAccess,
 			BlockPos pPos,
 			BlockPos pNeighborPos) {
 		for (KBlockComponent component : components.values()) {
-			pState = component.updateShape(pState, pDirection, pNeighborState, pLevel, pPos, pNeighborPos);
+			pState = component.updateShape(pState, pDirection, pNeighborState, pLevel, scheduledTickAccess, pPos, pNeighborPos);
 		}
 		return pState;
 	}

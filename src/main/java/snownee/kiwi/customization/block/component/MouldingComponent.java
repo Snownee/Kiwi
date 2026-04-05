@@ -2,6 +2,8 @@ package snownee.kiwi.customization.block.component;
 
 import java.util.Optional;
 
+import net.minecraft.world.level.LevelReader;
+
 import org.jspecify.annotations.Nullable;
 
 import com.mojang.serialization.MapCodec;
@@ -13,7 +15,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
@@ -114,7 +116,8 @@ public record MouldingComponent(Optional<TagKey<Block>> connectTo) implements KB
 			BlockState pState,
 			Direction pDirection,
 			BlockState pNeighborState,
-			LevelAccessor pLevel,
+			LevelReader pLevel,
+			ScheduledTickAccess scheduledTickAccess,
 			BlockPos pPos,
 			BlockPos pNeighborPos) {
 		if (pDirection.getAxis().isHorizontal()) {
