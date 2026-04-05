@@ -19,7 +19,7 @@ import snownee.kiwi.item.ModBlockItem;
 public interface IKiwiBlock extends IBlockExtension {
 
 	default MutableComponent getName(ItemStack stack) {
-		return Component.translatable(stack.getDescriptionId());
+		return stack.getDisplayName().copy();
 	}
 
 	default BlockItem createItem(Item.Properties builder) {
@@ -36,11 +36,11 @@ public interface IKiwiBlock extends IBlockExtension {
 				level,
 				blockPos,
 				blockState,
-				blockState.getBlock().getCloneItemStack(level, blockPos, blockState));
+				blockState.getBlock().getCloneItemStack(level, blockPos, blockState, false, player));
 	}
 
 	@Override
-	default ItemStack getCloneItemStack(BlockState state, HitResult result, LevelReader level, BlockPos pos, Player player) {
-		return getCloneItemStack(player.level(), pos, state, player, result);
+	default ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state, boolean usePickBlockGameMasterBlocks, Player player) {
+		return getCloneItemStack(level, pos, state, player, null);
 	}
 }

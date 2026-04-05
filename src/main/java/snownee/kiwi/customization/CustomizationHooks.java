@@ -95,8 +95,8 @@ public final class CustomizationHooks {
 
 	// a custom implementation of the Block.shouldRenderFace
 	private static final int CACHE_SIZE = 512;
-	private static final ThreadLocal<Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey>> OCCLUSION_CACHE = ThreadLocal.withInitial(() -> {
-		Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey> object2bytelinkedopenhashmap = new Object2ByteLinkedOpenHashMap<>(
+	private static final ThreadLocal<Object2ByteLinkedOpenHashMap<BlockStatePairKey>> OCCLUSION_CACHE = ThreadLocal.withInitial(() -> {
+		Object2ByteLinkedOpenHashMap<BlockStatePairKey> object2bytelinkedopenhashmap = new Object2ByteLinkedOpenHashMap<>(
 				CACHE_SIZE,
 				0.25F) {
 			@Override
@@ -122,8 +122,8 @@ public final class CustomizationHooks {
 		if (!pState.is(pAdjacentBlockState.getBlock()) && glassType != getGlassType(pAdjacentBlockState)) {
 			return false;
 		}
-		Block.BlockStatePairKey key = new Block.BlockStatePairKey(pState, pAdjacentBlockState, pDirection);
-		Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey> map = OCCLUSION_CACHE.get();
+		BlockStatePairKey key = new BlockStatePairKey(pState, pAdjacentBlockState, pDirection);
+		Object2ByteLinkedOpenHashMap<BlockStatePairKey> map = OCCLUSION_CACHE.get();
 		byte b0 = map.getAndMoveToFirst(key);
 		if (b0 != 127) {
 			return b0 == 0;
@@ -204,7 +204,7 @@ public final class CustomizationHooks {
 		});
 		forgeEventBus.addListener((PlayerInteractEvent.RightClickBlock event) -> {
 			if (event.getHand() == InteractionHand.MAIN_HAND && SitManager.sit(event.getEntity(), event.getHitVec())) {
-				event.setCancellationResult(InteractionResult.sidedSuccess(event.getLevel().isClientSide));
+				event.setCancellationResult(event.getLevel().isClientSide() ? InteractionResult.SUCCESS : InteractionResult.CONSUME);
 				event.setCanceled(true);
 			}
 		});
@@ -310,15 +310,15 @@ public final class CustomizationHooks {
 					.displayItems((params, output) -> {
 						output.acceptAll(value.contents()
 								.stream()
-								.map(BuiltInRegistries.ITEM::get)
+								.map(BuiltInRegistries.ITEM::getValue)
 								.filter(Objects::nonNull)
 								.map(Item::getDefaultInstance)
 								.toList());
 					});
 			if (i > 0) {
-				tab.withTabsBefore(CreativeModeTabs.SPAWN_EGGS.location(), newTabs.get(i - 1).getKey());
+				tab.withTabsBefore(newTabs.get(i - 1).getKey(), CreativeModeTabs.SPAWN_EGGS.identifier());
 			} else {
-				tab.withTabsBefore(CreativeModeTabs.SPAWN_EGGS.location());
+				tab.withTabsBefore(CreativeModeTabs.SPAWN_EGGS);
 			}
 			if (i < newTabs.size() - 1) {
 				tab.withTabsAfter(newTabs.get(i + 1).getKey());
@@ -332,6 +332,9 @@ public final class CustomizationHooks {
 		}
 	}
 
+	private record BlockStatePairKey(BlockState pState, BlockState pAdjacentBlockState, Direction pDirection) {
+	}
+
 	private static void insertToTab(IEventBus modEventBus, KCreativeTab kCreativeTab) {
 		if (!Platform.isPhysicalClient()) {
 			return;
@@ -341,7 +344,7 @@ public final class CustomizationHooks {
 				return;
 			}
 			for (ResourceKey<Item> content : kCreativeTab.contents()) {
-				Item item = BuiltInRegistries.ITEM.get(content);
+				Item item = BuiltInRegistries.ITEM.getValue(content);
 				if (item == null) {
 					return;
 				}

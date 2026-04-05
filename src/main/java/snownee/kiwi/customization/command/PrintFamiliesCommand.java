@@ -24,7 +24,7 @@ public class PrintFamiliesCommand {
 		for (KHolder<BlockFamily> family : BlockFamilies.all()) {
 			Kiwi.LOGGER.info(family.key() + ":");
 			for (Holder.Reference<Block> holder : family.value().blockHolders()) {
-				Kiwi.LOGGER.info("  - " + holder.unwrapKey().orElseThrow().location());
+				Kiwi.LOGGER.info("  - " + holder.unwrapKey().orElseThrow().identifier());
 			}
 		}
 		source.sendSuccess(() -> Component.literal("Done."), false);

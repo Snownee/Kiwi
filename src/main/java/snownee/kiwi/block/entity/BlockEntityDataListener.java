@@ -6,6 +6,5 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.neoforged.neoforge.common.extensions.IBlockEntityExtension;
 
 public interface BlockEntityDataListener extends IBlockEntityExtension {
-	@Override
 	void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider lookupProvider);
 }

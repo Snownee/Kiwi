@@ -1,6 +1,6 @@
 package snownee.kiwi.customization.duck;
 
-import org.jspecify.annotations.ApiStatus;
+import org.jetbrains.annotations.ApiStatus;
 import org.jspecify.annotations.Nullable;
 
 import snownee.kiwi.customization.block.KBlockSettings;

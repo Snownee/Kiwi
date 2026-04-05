@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -33,7 +32,6 @@ public class TestRecipe extends DynamicShapedRecipe {
 		super(category);
 	}
 
-	// optional
 	@Override
 	public boolean matches(CraftingInput input, Level worldIn) {
 		int[] pos = search(input);
@@ -46,7 +44,7 @@ public class TestRecipe extends DynamicShapedRecipe {
 	}
 
 	@Override
-	public ItemStack assemble(CraftingInput input, HolderLookup.Provider registryAccess) {
+	public ItemStack assemble(CraftingInput input) {
 		ItemStack res = result.copy();
 		int[] pos = search(input);
 		ItemStack stack = item('#', input, pos);
@@ -58,14 +56,14 @@ public class TestRecipe extends DynamicShapedRecipe {
 	}
 
 	@Override
-	public RecipeSerializer<?> getSerializer() {
+	public RecipeSerializer<TestRecipe> getSerializer() {
 		return null; //TODO your serializer
 	}
 
 	public static class Serializer extends DynamicShapedRecipe.Serializer<TestRecipe> {
 
 		public static final MapCodec<TestRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-				Codec.STRING.optionalFieldOf("group", "").forGetter(DynamicShapedRecipe::getGroup),
+				Codec.STRING.optionalFieldOf("group", "").forGetter(DynamicShapedRecipe::group),
 				CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(DynamicShapedRecipe::category),
 				ShapedRecipePattern.MAP_CODEC.forGetter(DynamicShapedRecipe::pattern),
 				ItemStack.CODEC.fieldOf("result").forGetter(DynamicShapedRecipe::result),
@@ -77,23 +75,19 @@ public class TestRecipe extends DynamicShapedRecipe {
 				Serializer::toNetwork,
 				Serializer::fromNetwork);
 
-		@Override
 		public MapCodec<TestRecipe> codec() {
 			return CODEC;
 		}
 
-		@Override
 		public StreamCodec<RegistryFriendlyByteBuf, TestRecipe> streamCodec() {
 			return STREAM_CODEC;
 		}
 
 		public static TestRecipe fromNetwork(RegistryFriendlyByteBuf pBuffer) {
-			//TODO customize recipe
 			return DynamicShapedRecipe.Serializer.fromNetwork(TestRecipe::new, pBuffer);
 		}
 
 		public static void toNetwork(RegistryFriendlyByteBuf pBuffer, TestRecipe pRecipe) {
-			//TODO customize recipe
 			DynamicShapedRecipe.Serializer.toNetwork(pBuffer, pRecipe);
 		}
 	}

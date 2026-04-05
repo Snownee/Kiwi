@@ -54,7 +54,7 @@ public abstract class BlockEntityTypeMixin {
 			if (reference == null) {
 				return false;
 			}
-			Identifier key = reference.key().location();
+			Identifier key = reference.key().identifier();
 			lenient = CustomizationHooks.getLenientBETypeNamespaces().contains(key.getNamespace());
 		}
 		if (lenient == Boolean.FALSE) {

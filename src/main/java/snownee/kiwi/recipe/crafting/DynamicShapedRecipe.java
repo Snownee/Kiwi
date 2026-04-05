@@ -1,6 +1,7 @@
 package snownee.kiwi.recipe.crafting;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -9,25 +10,26 @@ import org.jspecify.annotations.Nullable;
 import com.google.common.collect.Lists;
 
 import it.unimi.dsi.fastutil.chars.Char2ObjectArrayMap;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.NonNullList;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.PlacementInfo;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipePattern;
 import net.minecraft.world.level.Level;
 
 public abstract class DynamicShapedRecipe extends CustomRecipe {
 	protected ShapedRecipePattern pattern;
-	protected String rawPattern;
+	protected String rawPattern = "";
 	protected boolean differentInputs;
 	protected boolean showNotification;
-	protected ItemStack result;
-	protected String group;
+	protected ItemStack result = ItemStack.EMPTY;
+	protected String group = "";
+	protected CraftingBookCategory category = CraftingBookCategory.MISC;
+	protected PlacementInfo placementInfo = PlacementInfo.NOT_PLACEABLE;
 
 	public DynamicShapedRecipe(
 			String group,
@@ -36,17 +38,18 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 			ItemStack result,
 			boolean showNotification,
 			boolean differentInputs) {
-		super(category);
 		this.group = group;
+		this.category = category;
 		this.pattern = pattern;
-		this.rawPattern = String.join("", pattern.data.orElseThrow().pattern());
+		this.rawPattern = pattern.data.map(data -> String.join("", data.pattern())).orElse("");
 		this.result = result;
 		this.showNotification = showNotification;
 		this.differentInputs = differentInputs;
+		this.placementInfo = PlacementInfo.createFromOptionals(pattern.ingredients());
 	}
 
 	public DynamicShapedRecipe(CraftingBookCategory category) {
-		super(category);
+		this.category = category;
 	}
 
 	@Override
@@ -88,7 +91,7 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 	}
 
 	@Override
-	public abstract ItemStack assemble(CraftingInput inv, HolderLookup.Provider registryAccess);
+	public abstract ItemStack assemble(CraftingInput inv);
 
 	public int getWidth() {
 		return pattern.width();
@@ -99,18 +102,23 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 	}
 
 	@Override
-	public boolean canCraftInDimensions(int width, int height) {
-		return width >= getWidth() && height >= getHeight();
+	public String group() {
+		return group;
 	}
 
 	@Override
-	public String getGroup() {
-		return group;
+	public CraftingBookCategory category() {
+		return category;
 	}
 
 	@Override
 	public boolean showNotification() {
 		return showNotification;
+	}
+
+	@Override
+	public PlacementInfo placementInfo() {
+		return placementInfo;
 	}
 
 	public ItemStack result() {
@@ -125,13 +133,7 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 		return differentInputs;
 	}
 
-	@Override
-	public NonNullList<Ingredient> getIngredients() {
-		return pattern.ingredients();
-	}
-
-	@Override
-	public abstract RecipeSerializer<?> getSerializer();
+	public abstract RecipeSerializer<? extends DynamicShapedRecipe> getSerializer();
 
 	protected boolean checkMatch(CraftingInput input, int startX, int startY) {
 		Char2ObjectArrayMap<ItemStack> ingredientsArrayMap = null;
@@ -145,7 +147,7 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 				if (!matches(input, x, y, rx, ry)) {
 					return false;
 				}
-				if (!differentInputs) {
+				if (!differentInputs && !rawPattern.isEmpty()) {
 					int i = rx + ry * getWidth();
 					char key = rawPattern.charAt(i);
 					if (key != ' ') {
@@ -164,8 +166,8 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 	}
 
 	public boolean matches(CraftingInput inv, int x, int y, int rx, int ry) {
-		Ingredient ingredient = getIngredients().get(rx + ry * getWidth());
-		return ingredient.test(inv.getItem(x + y * inv.width()));
+		Optional<Ingredient> ingredient = pattern.ingredients().get(rx + ry * getWidth());
+		return Ingredient.testOptionalIngredient(ingredient, inv.getItem(x + y * inv.width()));
 	}
 
 	protected boolean checkEmpty(CraftingInput inv, int startX, int startY) {
@@ -186,10 +188,10 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 	}
 
 	protected Predicate<ItemStack> getEmptyPredicate() {
-		return Ingredient.EMPTY;
+		return ItemStack::isEmpty;
 	}
 
-	public static abstract class Serializer<T extends DynamicShapedRecipe> implements RecipeSerializer<T> {
+	public static abstract class Serializer<T extends DynamicShapedRecipe> {
 		public static <T extends DynamicShapedRecipe> T fromNetwork(
 				Function<CraftingBookCategory, T> constructor,
 				RegistryFriendlyByteBuf buffer) {
@@ -198,15 +200,15 @@ public abstract class DynamicShapedRecipe extends CustomRecipe {
 			recipe.result = ItemStack.STREAM_CODEC.decode(buffer);
 			recipe.pattern = ShapedRecipePattern.STREAM_CODEC.decode(buffer);
 			recipe.differentInputs = buffer.readBoolean();
+			recipe.placementInfo = PlacementInfo.createFromOptionals(recipe.pattern.ingredients());
 			return recipe;
 		}
 
 		public static <T extends DynamicShapedRecipe> void toNetwork(RegistryFriendlyByteBuf buffer, T recipe) {
 			buffer.writeEnum(recipe.category());
-			buffer.writeUtf(recipe.getGroup(), 256);
+			buffer.writeUtf(recipe.group(), 256);
 			ItemStack.STREAM_CODEC.encode(buffer, recipe.result);
 			ShapedRecipePattern.STREAM_CODEC.encode(buffer, recipe.pattern);
-			recipe.rawPattern = String.join("", recipe.pattern.data.orElseThrow().pattern());
 			buffer.writeBoolean(recipe.differentInputs);
 		}
 	}

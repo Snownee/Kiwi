@@ -1,7 +1,6 @@
 package snownee.kiwi.handler;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.util.Mth;
 import net.neoforged.neoforge.energy.EnergyStorage;
 
@@ -24,8 +23,8 @@ public class KEnergyStorage extends EnergyStorage {
 	}
 
 	public KEnergyStorage readFromNBT(CompoundTag nbt) {
-		if (nbt.contains("Energy", Tag.TAG_INT)) {
-			energy = nbt.getInt("Energy");
+		if (nbt.contains("Energy")) {
+			energy = nbt.getInt("Energy").orElse(0);
 		} else {
 			energy = 0;
 		}

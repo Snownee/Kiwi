@@ -54,7 +54,7 @@ public abstract class ModBlockEntity extends BlockEntity implements BlockEntityD
 	protected abstract CompoundTag writePacketData(CompoundTag data, HolderLookup.Provider provider);
 
 	public void refresh() {
-		if (level != null && !level.isClientSide) {
+		if (level != null && !level.isClientSide()) {
 			BlockState state = getBlockState();
 			level.sendBlockUpdated(worldPosition, state, state, 11);
 			setChanged();

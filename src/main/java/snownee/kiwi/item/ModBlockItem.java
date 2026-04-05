@@ -2,6 +2,7 @@ package snownee.kiwi.item;
 
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.jspecify.annotations.Nullable;
 
@@ -16,7 +17,8 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.TooltipDisplay;
+import net.minecraft.world.item.component.TypedEntityData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -35,12 +37,12 @@ public class ModBlockItem extends BlockItem implements ItemCategoryFiller {
 
 	@Override
 	protected boolean updateCustomBlockEntityTag(BlockPos pos, Level worldIn, @Nullable Player player, ItemStack stack, BlockState state) {
-		if (worldIn.isClientSide) {
+		if (worldIn.isClientSide()) {
 			BlockEntity tile = worldIn.getBlockEntity(pos);
 			if (tile != null && INSTANT_UPDATE_TILES.contains(tile.getType())) {
-				CustomData data = stack.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY);
-				if (!data.isEmpty()) {
-					tile.loadWithComponents(data.copyTag(), worldIn.registryAccess());
+				TypedEntityData<BlockEntityType<?>> data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+				if (data != null && data.type() == tile.getType()) {
+					data.loadInto(tile, worldIn.registryAccess());
 					tile.setChanged();
 				}
 			}
@@ -49,10 +51,17 @@ public class ModBlockItem extends BlockItem implements ItemCategoryFiller {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack itemStack, TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag tooltipFlag) {
-		super.appendHoverText(itemStack, tooltipContext, tooltip, tooltipFlag);
+	public void appendHoverText(
+			ItemStack itemStack,
+			TooltipContext tooltipContext,
+			TooltipDisplay tooltipDisplay,
+			Consumer<Component> tooltipAdder,
+			TooltipFlag tooltipFlag) {
+		super.appendHoverText(itemStack, tooltipContext, tooltipDisplay, tooltipAdder, tooltipFlag);
 		if (Platform.isPhysicalClient() && !KiwiClientConfig.globalTooltip) {
+			List<Component> tooltip = com.google.common.collect.Lists.newArrayList();
 			ModItem.addTip(itemStack, tooltip, tooltipFlag);
+			tooltip.forEach(tooltipAdder);
 		}
 	}
 

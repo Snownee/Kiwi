@@ -41,7 +41,6 @@ public class MultipleBlockItem extends BlockItem {
 	}
 
 	@SuppressWarnings("removal")
-	@Override
 	public void removeFromBlockToItemMap(Map<Block, Item> blockToItemMap, Item itemIn) {
 		blocks.stream().map(Pair::getSecond).forEach(blockToItemMap::remove);
 	}

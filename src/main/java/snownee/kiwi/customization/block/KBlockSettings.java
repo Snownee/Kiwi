@@ -101,7 +101,7 @@ public class KBlockSettings {
 		if (shape.isEmpty()) {
 			return Shapes.empty();
 		}
-		return Shapes.getFaceShape(shape, direction);
+		return shape.getFaceShape(direction);
 	}
 
 	public boolean hasComponent(KBlockComponent.Type<?> type) {
@@ -246,7 +246,7 @@ public class KBlockSettings {
 		}
 
 		public Builder noCollision() {
-			properties.noCollission();
+			properties.noCollision();
 			return this;
 		}
 

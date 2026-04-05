@@ -10,8 +10,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.SupportType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.util.TriState;
 import net.neoforged.neoforge.common.extensions.IBlockStateExtension;
-import net.neoforged.neoforge.common.util.TriState;
 import snownee.kiwi.customization.CustomFeatureTags;
 
 @Mixin(IBlockStateExtension.class)

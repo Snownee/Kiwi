@@ -5,3 +5,4 @@ attack_damage_bonus: 1
 enchantment_value: 12
 repair_ingredient:
   tag: minecraft:wool
+repair_items: minecraft:wool

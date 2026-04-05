@@ -11,11 +11,13 @@ import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import snownee.kiwi.Kiwi;
@@ -40,7 +42,7 @@ public class AlternativesIngredient implements CustomIngredient {
 	@Override
 	public List<ItemStack> getMatchingStacks() {
 		internal();
-		return cached != null ? List.of(cached.getItems()) : List.of();
+		return cached != null ? cached.items().map(Holder::value).map(Item::getDefaultInstance).toList() : List.of();
 	}
 
 	@Override
@@ -62,7 +64,7 @@ public class AlternativesIngredient implements CustomIngredient {
 				} catch (Exception e) {
 					continue;
 				}
-				if (ingredient.getItems().length == 0) {
+				if (ingredient.isEmpty()) {
 					continue;
 				}
 				cached = ingredient;

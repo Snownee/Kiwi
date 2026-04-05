@@ -15,9 +15,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -123,10 +126,11 @@ public class StonecutterRecipeMaker {
 					family.value().ingredientInViewer().test(itemStack)) {
 				return null;
 			}
+			ItemStackTemplate result = new ItemStackTemplate(item, count);
 			Identifier itemKey = BuiltInRegistries.ITEM.getKey(item);
 			var recipeId = prefix.withSuffix("/%s/%s".formatted(itemKey.getNamespace(), itemKey.getPath()));
-			var recipe = new StonecutterRecipe(new Recipe.CommonInfo(true), input, itemStack);
-			return new RecipeHolder<>(recipeId, recipe);
+			var recipe = new StonecutterRecipe(new Recipe.CommonInfo(true), input, result);
+			return new RecipeHolder<>(ResourceKey.create(Registries.RECIPE, recipeId), recipe);
 		}).filter(Objects::nonNull).toList();
 	}
 

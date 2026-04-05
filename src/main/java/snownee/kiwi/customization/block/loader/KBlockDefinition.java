@@ -58,7 +58,7 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 		if (vanilla.copy().isEmpty()) {
 			builder = KBlockSettings.builder();
 		} else {
-			builder = KBlockSettings.copyProperties(BuiltInRegistries.BLOCK.getOrThrow(vanilla.copy().get()));
+			builder = KBlockSettings.copyProperties(BuiltInRegistries.BLOCK.getValue(vanilla.copy().get()));
 		}
 		properties.glassType().ifPresent(builder::glassType);
 		builder.configure($ -> {
@@ -80,7 +80,7 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 				}
 			});
 			if (vanilla.noCollision().orElse(false)) {
-				$.noCollission();
+				$.noCollision();
 			}
 			if (vanilla.noOcclusion().orElse(properties.glassType().isPresent())) {
 				$.noOcclusion();
@@ -122,7 +122,7 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 				if (remove) {
 					s = s.substring(1);
 				}
-				KBlockComponent.Type<?> type = CustomizationRegistries.BLOCK_COMPONENT.get(Identifier.parse(s));
+				KBlockComponent.Type<?> type = CustomizationRegistries.BLOCK_COMPONENT.getValue(Identifier.parse(s));
 				Preconditions.checkNotNull(type, "Unknown component type %s", s);
 				if (remove) {
 					builder.removeComponent(type);

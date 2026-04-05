@@ -18,7 +18,7 @@ import com.google.common.collect.Maps;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.minecraft.advancements.critereon.BlockPredicate;
+import net.minecraft.advancements.criterion.BlockPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -32,7 +32,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.customization.block.KBlockSettings;
@@ -123,7 +123,7 @@ public record PlaceChoices(
 		public int attachChoicesB() {
 			AtomicInteger counter = new AtomicInteger();
 			byBlock.forEach((blockId, choices) -> {
-				Block block = BuiltInRegistries.BLOCK.get(blockId);
+				Block block = BuiltInRegistries.BLOCK.getValue(blockId);
 				if (block == Blocks.AIR) {
 					Kiwi.LOGGER.error("Block %s not found for place choices %s".formatted(blockId, choices));
 					return;
@@ -168,10 +168,10 @@ public record PlaceChoices(
 		String transformWith = this.transformWith.orElse("none");
 		if (!transformWith.equals("none")) {
 			Property<?> property = KBlockUtils.getProperty(original, transformWith);
-			if (!(property instanceof DirectionProperty directionProperty)) {
+			if (!(property instanceof EnumProperty<?> enumProperty) || enumProperty.getValueClass() != Direction.class) {
 				throw new IllegalArgumentException("Invalid transform_with property: " + transformWith);
 			}
-			Direction direction = original.getValue(directionProperty);
+			Direction direction = (Direction) original.getValue(enumProperty);
 			for (Rotation r : Rotation.values()) {
 				if (r.rotate(Direction.NORTH) == direction) {
 					rotation.setValue(r);

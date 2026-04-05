@@ -86,7 +86,7 @@ public class BlockFamilyInferrer {
 	public Collection<KHolder<BlockFamily>> generate() {
 		List<Holder<Block>> sorted = Lists.newArrayList();
 		for (Holder<Block> holder : BuiltInRegistries.BLOCK.asHolderIdMap()) {
-			String path = holder.unwrapKey().orElseThrow().location().getPath();
+			String path = holder.unwrapKey().orElseThrow().identifier().getPath();
 			if (path.startsWith("pink_") || path.endsWith("_pink") || path.endsWith("_log") || path.endsWith("_stem") || path.endsWith(
 					"_stairs") || path.endsWith("_slab") || path.startsWith("smooth_") || path.endsWith("_block")) {
 				if (holder.is(IGNORE)) {
@@ -97,8 +97,8 @@ public class BlockFamilyInferrer {
 		}
 		// make stairs come first
 		sorted.sort((a, b) -> {
-			String aPath = a.unwrapKey().orElseThrow().location().getPath();
-			String bPath = b.unwrapKey().orElseThrow().location().getPath();
+			String aPath = a.unwrapKey().orElseThrow().identifier().getPath();
+			String bPath = b.unwrapKey().orElseThrow().identifier().getPath();
 			boolean aIsStairs = aPath.endsWith("_stairs");
 			boolean bIsStairs = bPath.endsWith("_stairs");
 			return Boolean.compare(bIsStairs, aIsStairs);
@@ -114,7 +114,7 @@ public class BlockFamilyInferrer {
 				continue;
 			}
 //			Kiwi.LOGGER.info(holder.unwrapKey().orElseThrow().location().toString());
-			Identifier key = holder.unwrapKey().orElseThrow().location();
+			Identifier key = holder.unwrapKey().orElseThrow().identifier();
 			String path = key.getPath();
 			boolean captured = false;
 			if (path.startsWith("pink_")) {
@@ -147,7 +147,7 @@ public class BlockFamilyInferrer {
 				List<Holder.Reference<Block>> blocks = collectBlocks(id, general);
 				if (id.getPath().endsWith("brick")) {
 					Identifier id1 = id.withSuffix("s");
-					Optional<Holder.Reference<Block>> holder1 = BuiltInRegistries.BLOCK.getHolder(ResourceKey.create(
+					Optional<Holder.Reference<Block>> holder1 = BuiltInRegistries.BLOCK.get(ResourceKey.create(
 							Registries.BLOCK,
 							id1));
 					if (holder1.isPresent()) {
@@ -199,7 +199,7 @@ public class BlockFamilyInferrer {
 		List<Holder.Reference<Block>> blocks = Lists.newArrayList();
 		for (String template : templates) {
 			Identifier blockId = id.withPath(String.format(template, id.getPath()));
-			Optional<Holder.Reference<Block>> holder = BuiltInRegistries.BLOCK.getHolder(ResourceKey.create(Registries.BLOCK, blockId));
+			Optional<Holder.Reference<Block>> holder = BuiltInRegistries.BLOCK.get(ResourceKey.create(Registries.BLOCK, blockId));
 			holder.ifPresent(blocks::add);
 		}
 		return blocks;

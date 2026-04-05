@@ -22,8 +22,10 @@ import snownee.kiwi.recipe.crafting.NoContainersShapedRecipe;
 @KiwiModule("data")
 public final class DataModule extends AbstractModule {
 
-	public static final KiwiGO<RecipeSerializer<NoContainersShapedRecipe>> SHAPED_NO_CONTAINERS = go(NoContainersShapedRecipe.Serializer::new);
-	public static final KiwiGO<RecipeSerializer<KiwiShapelessRecipe>> SHAPELESS = go(KiwiShapelessRecipe.Serializer::new);
+	public static final KiwiGO<RecipeSerializer<NoContainersShapedRecipe>> SHAPED_NO_CONTAINERS = go(
+			() -> new RecipeSerializer<>(NoContainersShapedRecipe.Serializer.CODEC, NoContainersShapedRecipe.Serializer.STREAM_CODEC));
+	public static final KiwiGO<RecipeSerializer<KiwiShapelessRecipe>> SHAPELESS = go(
+			() -> new RecipeSerializer<>(KiwiShapelessRecipe.Serializer.CODEC, KiwiShapelessRecipe.Serializer.STREAM_CODEC));
 	public static final KiwiGO<MapCodec<ModuleLoadedCondition>> IS_LOADED = go(
 			() -> ModuleLoadedCondition.CODEC,
 			NeoForgeRegistries.Keys.CONDITION_CODECS);

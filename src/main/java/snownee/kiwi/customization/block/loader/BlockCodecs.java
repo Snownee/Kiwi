@@ -111,7 +111,7 @@ public class BlockCodecs {
 			return codec;
 		}
 		//noinspection unchecked
-		return (MapCodec<Block>) BuiltInRegistries.BLOCK_TYPE.get(key);
+		return (MapCodec<Block>) BuiltInRegistries.BLOCK_TYPE.getValue(key);
 	}
 
 	public static <O, A> A notImplemented(O block) {
