@@ -239,14 +239,14 @@ dependencies {
     shadowCommon("org.yaml:snakeyaml:${project.snakeyaml_version}")
     shadowCommon("com.ezylang:EvalEx:${project.evalex_version}")
 
-    jarJar(implementation("org.sinytra.forgified-fabric-api:fabric-api-base:0.4.42+d1308ded19"))
-    implementation "org.sinytra.forgified-fabric-api:forgified-fabric-api:0.107.0+2.0.25+1.21.1"
+//    jarJar(implementation("org.sinytra.forgified-fabric-api:fabric-api-base:0.4.42+d1308ded19"))
+//    implementation "org.sinytra.forgified-fabric-api:forgified-fabric-api:0.107.0+2.0.25+1.21.1"
 
-    implementation "dev.architectury:architectury-neoforge:${project.architectury_version}"
-    implementation "me.shedaniel:RoughlyEnoughItems-neoforge:${project.rei_version}"
+    compileOnly "dev.architectury:architectury-neoforge:${project.architectury_version}"
+    compileOnly "me.shedaniel:RoughlyEnoughItems-neoforge:${project.rei_version}"
     compileOnly "me.shedaniel:REIPluginCompatibilities-forge-annotations:12.+"
 
-    implementation "maven.modrinth:jade:15.9.1+neoforge"
+    implementation "maven.modrinth:jade:26.0.6+neoforge"
 
     // compile against the JEI API but do not include it at runtime
     compileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
@@ -255,7 +255,7 @@ dependencies {
     implementation("mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}")
 
     compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
-    runtimeOnly "dev.emi:emi-neoforge:${emi_version}"
+    compileOnly "dev.emi:emi-neoforge:${emi_version}"
 }
 
 processResources {
