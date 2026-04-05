@@ -47,8 +47,8 @@ public class FoxTailModel extends Model<AvatarRenderState> {
 
 	@Override
 	public void setupAnim(AvatarRenderState state) {
-		ear1.copyFrom(playerModel.head);
-		ear2.copyFrom(playerModel.head);
+		ear1.loadPose(playerModel.head.storePose());
+		ear2.loadPose(playerModel.head.storePose());
 		float ageInTicks = state.ageInTicks;
 		if (ageInTicks % 60 < 2) {
 			ear1.yRot += 0.05f;

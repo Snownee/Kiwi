@@ -37,7 +37,7 @@ public class SantaHatModel extends Model<AvatarRenderState> {
 
 	@Override
 	public void setupAnim(AvatarRenderState state) {
-		main.copyFrom(playerModel.head);
+		main.visible = playerModel.head.visible;
 	}
 
 }

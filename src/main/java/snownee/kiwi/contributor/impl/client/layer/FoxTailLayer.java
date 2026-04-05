@@ -15,7 +15,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Pose;
-import net.minecraft.world.item.ElytraItem;
+import net.minecraft.world.item.Items;
 import snownee.kiwi.contributor.client.CosmeticLayer;
 import snownee.kiwi.contributor.client.CosmeticRenderState;
 import snownee.kiwi.contributor.impl.client.model.FoxTailModel;
@@ -36,7 +36,7 @@ public class FoxTailLayer extends CosmeticLayer {
 		if (state.isInvisible || state.hasPose(Pose.SLEEPING)) {
 			return;
 		}
-		if (state.chestEquipment.getItem() instanceof ElytraItem) {
+		if (state.chestEquipment.is(Items.ELYTRA)) {
 			return;
 		}
 		String name = ((CosmeticRenderState) state).kiwi$getName();

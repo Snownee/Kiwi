@@ -4,12 +4,13 @@ import java.util.Objects;
 
 import org.jspecify.annotations.Nullable;
 
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.Util;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
@@ -76,26 +77,21 @@ public class CosmeticScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseClicked(double p_mouseClicked_1_, double p_mouseClicked_3_, int p_mouseClicked_5_) {
-		list.mouseClicked(p_mouseClicked_1_, p_mouseClicked_3_, p_mouseClicked_5_);
-		return super.mouseClicked(p_mouseClicked_1_, p_mouseClicked_3_, p_mouseClicked_5_);
+	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+		list.mouseClicked(event, doubleClick);
+		return super.mouseClicked(event, doubleClick);
 	}
 
 	@Override
-	public boolean mouseDragged(
-			double p_mouseDragged_1_,
-			double p_mouseDragged_3_,
-			int p_mouseDragged_5_,
-			double p_mouseDragged_6_,
-			double p_mouseDragged_8_) {
-		list.mouseDragged(p_mouseDragged_1_, p_mouseDragged_3_, p_mouseDragged_5_, p_mouseDragged_6_, p_mouseDragged_8_);
-		return super.mouseDragged(p_mouseDragged_1_, p_mouseDragged_3_, p_mouseDragged_5_, p_mouseDragged_6_, p_mouseDragged_8_);
+	public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
+		list.mouseDragged(event, dx, dy);
+		return super.mouseDragged(event, dx, dy);
 	}
 
 	@Override
-	public boolean mouseReleased(double p_mouseReleased_1_, double p_mouseReleased_3_, int p_mouseReleased_5_) {
-		list.mouseReleased(p_mouseReleased_1_, p_mouseReleased_3_, p_mouseReleased_5_);
-		return super.mouseReleased(p_mouseReleased_1_, p_mouseReleased_3_, p_mouseReleased_5_);
+	public boolean mouseReleased(MouseButtonEvent event) {
+		list.mouseReleased(event);
+		return super.mouseReleased(event);
 	}
 
 	@Override
@@ -105,9 +101,9 @@ public class CosmeticScreen extends Screen {
 	}
 
 	@Override
-	public boolean keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_) {
-		list.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_);
-		return super.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_);
+	public boolean keyPressed(KeyEvent event) {
+		list.keyPressed(event);
+		return super.keyPressed(event);
 	}
 
 	@Override

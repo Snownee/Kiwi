@@ -48,11 +48,11 @@ public class Contributors extends AbstractModule {
 	}
 
 	public static boolean isContributor(String author, Player player) {
-		return isContributor(author, player.getGameProfile().getName());
+		return isContributor(author, player.getGameProfile().name());
 	}
 
 	public static boolean isContributor(String author, Player player, String tier) {
-		return isContributor(author, player.getGameProfile().getName(), tier);
+		return isContributor(author, player.getGameProfile().name(), tier);
 	}
 
 	public static Set<Identifier> getPlayerTiers(String playerName) {
@@ -82,7 +82,7 @@ public class Contributors extends AbstractModule {
 	}
 
 	public static void changeCosmetic(ServerPlayer player, @Nullable Identifier cosmetic) {
-		String playerName = player.getGameProfile().getName();
+		String playerName = player.getGameProfile().name();
 		canPlayerUseCosmetic(playerName, cosmetic).thenAccept(bl -> {
 			if (bl) {
 				SSyncCosmeticPacket packet;
@@ -93,7 +93,7 @@ public class Contributors extends AbstractModule {
 					PLAYER_COSMETICS.put(playerName, cosmetic);
 					packet = new SSyncCosmeticPacket(Map.of(playerName, cosmetic), List.of());
 				}
-				KPacketSender.sendToAll(packet, player.server);
+				KPacketSender.sendToAll(packet, player.level().getServer());
 			}
 		});
 	}
@@ -147,13 +147,13 @@ public class Contributors extends AbstractModule {
 		registerTierProvider(new KiwiTierProvider());
 		NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedInEvent e) -> {
 			Player player = e.getEntity();
-			if (player.getServer() != null && !player.getServer().isSingleplayerOwner(player.getGameProfile())) {
+			if (player.level().getServer() != null && !player.level().getServer().isSingleplayerOwner(player.nameAndId())) {
 				KPacketSender.send(new SSyncCosmeticPacket(Map.copyOf(PLAYER_COSMETICS), List.of()), player);
 			}
 		});
 		if (!Platform.isPhysicalClient()) {
 			NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedOutEvent e) -> {
-				PLAYER_COSMETICS.remove(e.getEntity().getGameProfile().getName());
+				PLAYER_COSMETICS.remove(e.getEntity().getGameProfile().name());
 			});
 		}
 	}

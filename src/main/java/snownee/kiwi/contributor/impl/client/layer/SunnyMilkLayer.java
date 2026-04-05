@@ -13,7 +13,7 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Pose;
-import net.minecraft.world.item.ElytraItem;
+import net.minecraft.world.item.Items;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.contributor.client.CosmeticLayer;
 import snownee.kiwi.contributor.impl.client.model.SunnyMilkModel;
@@ -33,7 +33,7 @@ public class SunnyMilkLayer extends CosmeticLayer {
 		if (state.isInvisible || state.hasPose(Pose.SLEEPING)) {
 			return;
 		}
-		if (state.chestEquipment.getItem() instanceof ElytraItem) {
+		if (state.chestEquipment.is(Items.ELYTRA)) {
 			return;
 		}
 		poseStack.pushPose();
