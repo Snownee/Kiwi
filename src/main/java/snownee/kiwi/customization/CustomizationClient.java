@@ -2,31 +2,25 @@ package snownee.kiwi.customization;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.color.block.BlockColor;
+import net.minecraft.client.color.block.BlockTintSource;
 import net.minecraft.client.gui.components.debug.DebugScreenEntries;
 import net.minecraft.client.gui.components.debug.DebugScreenEntryStatus;
 import net.minecraft.client.gui.components.debug.DebugScreenProfile;
-import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.bus.api.IEventBus;
@@ -117,67 +111,31 @@ public final class CustomizationClient {
 			Map<Identifier, KItemDefinition> items,
 			Map<Identifier, KBlockDefinition> blocks,
 			ClientProxy.Context context) {
-		Map<Block, BlockColor> blockColors = Maps.newHashMap();
-		Map<Item, ItemColor> itemColors = Maps.newHashMap();
-		List<Pair<Block, BlockColor>> blocksToAdd = Lists.newArrayList();
-		List<Pair<Item, ItemColor>> itemsToAdd = Lists.newArrayList();
-		Set<Item> addedItems = Sets.newHashSet();
-		for (var entry : items.entrySet()) {
-			KItemDefinition definition = entry.getValue();
-			if (definition.properties().colorProvider().isEmpty()) {
-				continue;
-			}
-			Item item = BuiltInRegistries.ITEM.get(entry.getKey());
-			Identifier colorProvider = definition.properties().colorProvider().get();
-			if (Identifier.DEFAULT_NAMESPACE.equals(colorProvider.getNamespace()) && colorProvider.getPath().equals("grass")) {
-				colorProvider = Identifier.withDefaultNamespace("short_grass");
-			}
-			Item providerItem = BuiltInRegistries.ITEM.get(colorProvider);
-			if (providerItem == Items.AIR) {
-				Kiwi.LOGGER.warn("Cannot find color provider item %s for item %s".formatted(colorProvider, entry.getKey()));
-				continue;
-			}
-			itemsToAdd.add(Pair.of(item, itemColors.computeIfAbsent(providerItem, ColorProviderUtil::delegate)));
-			addedItems.add(item);
-		}
+		List<Pair<Block, List<BlockTintSource>>> blocksToAdd = Lists.newArrayList();
 		for (var entry : blocks.entrySet()) {
 			BlockDefinitionProperties properties = entry.getValue().properties();
 			if (properties.colorProvider().isEmpty()) {
 				continue;
 			}
 			Block block = BuiltInRegistries.BLOCK.get(entry.getKey());
-			Identifier colorProvider = properties.colorProvider().get();
-			// grass -> short_grass since Minecraft 1.20.3
-			if (Identifier.DEFAULT_NAMESPACE.equals(colorProvider.getNamespace()) && colorProvider.getPath().equals("grass")) {
-				colorProvider = Identifier.withDefaultNamespace("short_grass");
+			List<Identifier> providers = properties.colorProvider().get();
+			List<BlockTintSource> sources = Lists.newArrayList();
+			for (Identifier colorProvider : providers) {
+				// grass -> short_grass since Minecraft 1.20.3
+				if (Identifier.DEFAULT_NAMESPACE.equals(colorProvider.getNamespace()) && colorProvider.getPath().equals("grass")) {
+					colorProvider = Identifier.withDefaultNamespace("short_grass");
+				}
+				Block providerBlock = BuiltInRegistries.BLOCK.get(colorProvider);
+				if (providerBlock == Blocks.AIR) {
+					Kiwi.LOGGER.warn("Cannot find color provider block %s for block %s".formatted(colorProvider, entry.getKey()));
+				} else {
+					sources.add(ColorProviderUtil.delegateBlock(providerBlock));
+				}
 			}
-			Block providerBlock = BuiltInRegistries.BLOCK.get(colorProvider);
-			if (providerBlock == Blocks.AIR) {
-				Kiwi.LOGGER.warn("Cannot find color provider block %s for block %s".formatted(colorProvider, entry.getKey()));
-			} else {
-				blocksToAdd.add(Pair.of(block, blockColors.computeIfAbsent(providerBlock, ColorProviderUtil::delegate)));
-			}
-			Item item = block.asItem();
-			if (item == Items.AIR) {
-				continue;
-			}
-			if (addedItems.contains(item)) {
-				continue;
-			}
-			addedItems.add(item); //sometimes multiple blocks share the same item
-			Item providerItem = providerBlock.asItem();
-			if (providerItem != Items.AIR) {
-				itemsToAdd.add(Pair.of(
-						item,
-						itemColors.computeIfAbsent(providerItem, ColorProviderUtil::delegate)));
-			} else if (providerBlock == Blocks.WATER) {
-				itemsToAdd.add(Pair.of(item, (stack, i) -> 0x3f76e4));
-			} else {
-				itemsToAdd.add(Pair.of(
-						item,
-						itemColors.computeIfAbsent(providerItem, $ -> ColorProviderUtil.delegateItemFallback(providerBlock))));
+			if (!sources.isEmpty()) {
+				blocksToAdd.add(Pair.of(block, sources));
 			}
 		}
-		ClientProxy.registerColors(context, blocksToAdd, itemsToAdd);
+		ClientProxy.registerColors(context, blocksToAdd);
 	}
 }

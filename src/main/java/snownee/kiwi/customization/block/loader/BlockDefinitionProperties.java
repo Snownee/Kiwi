@@ -28,7 +28,7 @@ public record BlockDefinitionProperties(
 		Optional<KMaterial> material,
 		Optional<GlassType> glassType,
 
-		Optional<Identifier> colorProvider,
+		Optional<List<Identifier>> colorProvider,
 		Optional<Identifier> shape,
 		Optional<Identifier> collisionShape,
 		Optional<Identifier> interactionShape,
@@ -43,7 +43,7 @@ public record BlockDefinitionProperties(
 				context.materialCodec().forGetter(BlockDefinitionProperties::material),
 				context.glassTypeCodec().forGetter(BlockDefinitionProperties::glassType),
 
-				Identifier.CODEC.optionalFieldOf("color_provider").forGetter(BlockDefinitionProperties::colorProvider),
+				Identifier.CODEC.listOf().optionalFieldOf("color_provider").forGetter(BlockDefinitionProperties::colorProvider),
 				Identifier.CODEC.optionalFieldOf("shape").forGetter(BlockDefinitionProperties::shape),
 				Identifier.CODEC.optionalFieldOf("collision_shape").forGetter(BlockDefinitionProperties::collisionShape),
 				Identifier.CODEC.optionalFieldOf("interaction_shape").forGetter(BlockDefinitionProperties::interactionShape),

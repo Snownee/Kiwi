@@ -1,6 +1,5 @@
 package snownee.kiwi.contributor.impl.client.model;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -14,7 +13,6 @@ import net.minecraft.util.Mth;
 
 public class SunnyMilkModel extends Model<AvatarRenderState> {
 
-	private float ticks;
 	private final ModelPart wingRight;
 	private final ModelPart wingLeft;
 
@@ -44,8 +42,7 @@ public class SunnyMilkModel extends Model<AvatarRenderState> {
 
 	@Override
 	public void setupAnim(AvatarRenderState state) {
-		float f = state.walkAnimationSpeed * 10;
-		ticks += Minecraft.getInstance().getTimer().getGameTimeDeltaTicks() * (1 + Math.min(9, f * f * f)) * 0.1f;
+		float ticks = state.ageInTicks * 0.5f;
 		wingLeft.yRot = -1.0472F + Mth.sin(ticks) * 0.25f;
 		wingRight.yRot = -wingLeft.yRot;
 	}

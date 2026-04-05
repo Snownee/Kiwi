@@ -50,7 +50,6 @@
 		"customization.sit.ClientPacketListenerMixin",
 		"customization.sit.LocalPlayerMixin",
 		"forge.BlockColorsAccess",
-		"forge.ItemColorsAccess",
 		"minieffects.CreativeModeInventoryScreenMixin",
 		"minieffects.EffectsInInventoryMixin",
 		"minieffects.EffectsInInventoryPositionMixin",
