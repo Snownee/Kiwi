@@ -4,11 +4,10 @@ import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.Optional;
 
-import net.minecraft.SharedConstants;
-
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.jspecify.annotations.Nullable;
 
+import net.minecraft.SharedConstants;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -28,8 +27,8 @@ import net.minecraft.world.level.material.Fluid;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.fml.loading.FMLPaths;
-import net.neoforged.fml.loading.LoadingModList;
 import net.neoforged.neoforge.common.ItemAbilities;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.util.FakePlayer;
@@ -41,7 +40,7 @@ public class Platform {
 	public static boolean isModLoaded(String id) {
 		ModList modList = ModList.get();
 		if (modList == null) {
-			return LoadingModList.get().getModFileById(id) != null;
+			return FMLLoader.getCurrent().getLoadingModList().getModFileById(id) != null;
 		}
 		return modList.isLoaded(id);
 	}
