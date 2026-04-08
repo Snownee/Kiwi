@@ -4,7 +4,9 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.ToIntFunction;
 
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.level.LevelReader;
+
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
@@ -12,10 +14,11 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
@@ -101,7 +104,7 @@ public class KBlockSettings {
 		if (shape.isEmpty()) {
 			return Shapes.empty();
 		}
-		return Shapes.getFaceShape(shape, direction);
+		return shape.getFaceShape(direction);
 	}
 
 	public boolean hasComponent(KBlockComponent.Type<?> type) {
@@ -144,11 +147,12 @@ public class KBlockSettings {
 			BlockState pState,
 			Direction pDirection,
 			BlockState pNeighborState,
-			LevelAccessor pLevel,
+			LevelReader pLevel,
+			ScheduledTickAccess scheduledTickAccess,
 			BlockPos pPos,
 			BlockPos pNeighborPos) {
 		for (KBlockComponent component : components.values()) {
-			pState = component.updateShape(pState, pDirection, pNeighborState, pLevel, pPos, pNeighborPos);
+			pState = component.updateShape(pState, pDirection, pNeighborState, pLevel, scheduledTickAccess, pPos, pNeighborPos);
 		}
 		return pState;
 	}
@@ -246,7 +250,7 @@ public class KBlockSettings {
 		}
 
 		public Builder noCollision() {
-			properties.noCollission();
+			properties.noCollision();
 			return this;
 		}
 
@@ -319,6 +323,6 @@ public class KBlockSettings {
 	}
 
 	@Deprecated
-	public record MoreInfo(ResourceLocation shape, ResourceLocation collisionShape, ResourceLocation interactionShape) {
+	public record MoreInfo(Identifier shape, Identifier collisionShape, Identifier interactionShape) {
 	}
 }

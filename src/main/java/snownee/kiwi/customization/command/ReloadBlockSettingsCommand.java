@@ -34,16 +34,15 @@ public class ReloadBlockSettingsCommand {
 		long parseTime = stopwatch.elapsed().toMillis();
 		stopwatch.reset().start();
 		Set<Block> set = Sets.newHashSet();
-		BuiltInRegistries.BLOCK.holders().forEach(holder -> {
-			KBlockDefinition definition = fundamentals.blocks().get(holder.key().location());
+		BuiltInRegistries.BLOCK.listElements().forEach(holder -> {
+			KBlockDefinition definition = fundamentals.blocks().get(holder.key().identifier());
 			if (definition == null || !set.add(holder.value())) {
 				return;
 			}
-			KBlockSettings.Builder builder = definition.createSettings(holder.key().location(), fundamentals.shapes());
+			KBlockSettings.Builder builder = definition.createSettings(holder.key().identifier(), fundamentals.shapes());
 			holder.value().properties = builder.get();
 			KBlockDefinition.setConfiguringShape(holder.value(), fundamentals.shapes());
 		});
-		Blocks.rebuildCache();
 		ReloadSlotsCommand.reload(fundamentals);
 		long attachTime = stopwatch.elapsed().toMillis();
 		Kiwi.LOGGER.info("Parse time %dms + Attach time %dms = %dms".formatted(parseTime, attachTime, parseTime + attachTime));

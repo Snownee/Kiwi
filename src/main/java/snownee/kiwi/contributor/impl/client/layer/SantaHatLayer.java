@@ -3,58 +3,41 @@ package snownee.kiwi.contributor.impl.client.layer;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 
-import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
-import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.Identifier;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.contributor.client.CosmeticLayer;
 import snownee.kiwi.contributor.impl.client.model.SantaHatModel;
 
 public class SantaHatLayer extends CosmeticLayer {
-	private static final ResourceLocation TEXTURE = Kiwi.id("textures/reward/santa.png");
+	private static final Identifier TEXTURE = Kiwi.id("textures/reward/santa.png");
 	private static final Supplier<LayerDefinition> definition = Suppliers.memoize(SantaHatModel::create);
-	private final SantaHatModel<AbstractClientPlayer> modelSantaHat;
+	private final SantaHatModel modelSantaHat;
 
-	public SantaHatLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRendererIn) {
+	public SantaHatLayer(RenderLayerParent<AvatarRenderState, PlayerModel> entityRendererIn) {
 		super(entityRendererIn);
-		modelSantaHat = new SantaHatModel<>(entityRendererIn.getModel(), definition.get());
+		modelSantaHat = new SantaHatModel(entityRendererIn.getModel(), definition.get());
 	}
 
 	@Override
-	public void render(
-			PoseStack matrixStackIn,
-			MultiBufferSource bufferIn,
-			int packedLightIn,
-			AbstractClientPlayer entitylivingbaseIn,
-			float limbSwing,
-			float limbSwingAmount,
-			float partialTicks,
-			float ageInTicks,
-			float netHeadYaw,
-			float headPitch) {
-		if (entitylivingbaseIn.isInvisible()) {
+	public void submit(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
+		if (state.isInvisible) {
 			return;
 		}
-		ItemStack itemstack = entitylivingbaseIn.getItemBySlot(EquipmentSlot.HEAD);
-		if (!itemstack.isEmpty()) {
+		if (!state.headEquipment.isEmpty()) {
 			return;
 		}
-		matrixStackIn.pushPose();
-		modelSantaHat.young = entitylivingbaseIn.isBaby();
-		modelSantaHat.setupAnim(entitylivingbaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-		VertexConsumer ivertexbuilder = ItemRenderer.getFoilBuffer(bufferIn, RenderType.entitySolid(TEXTURE), false, false);
-		modelSantaHat.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY);
-		matrixStackIn.popPose();
+		poseStack.pushPose();
+		modelSantaHat.setupAnim(state);
+		submitNodeCollector.submitModel(modelSantaHat, state, poseStack, RenderTypes.entitySolid(TEXTURE), lightCoords, OverlayTexture.NO_OVERLAY, state.outlineColor, null);
+		poseStack.popPose();
 	}
 
 }

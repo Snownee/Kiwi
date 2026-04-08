@@ -1,33 +1,41 @@
 package snownee.kiwi.util;
 
-import java.util.Objects;
 import java.util.stream.Stream;
 
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import snownee.kiwi.KiwiGO;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModules;
 
 public interface GameObjectLookup {
 
-	static <T> Stream<T> all(ResourceKey<Registry<T>> registryKey, String modId) {
-		return allHolders(registryKey, modId).map(Holder::value);
+	static <T> Stream<T> all(HolderLookup.RegistryLookup<T> registry, String modId) {
+		return allHolders(registry, modId).map(Holder::value);
 	}
 
-	@SuppressWarnings("unchecked")
-	static <T> Stream<Holder.Reference<T>> allHolders(ResourceKey<Registry<T>> registryKey, String modId) {
-		Registry<T> registry = (Registry<T>) Objects.requireNonNull(BuiltInRegistries.REGISTRY.get(registryKey.location()));
-		return registry.holders().filter($ -> $.key().location().getNamespace().equals(modId));
+	static <T> Stream<T> all(HolderLookup.Provider registries, ResourceKey<Registry<T>> registryKey, String modId) {
+		return allHolders(registries, registryKey, modId).map(Holder::value);
+	}
+
+	static <T> Stream<Holder.Reference<T>> allHolders(HolderLookup.RegistryLookup<T> registry, String modId) {
+		return registry.listElements().filter($ -> $.key().identifier().getNamespace().equals(modId));
+	}
+
+	static <T> Stream<Holder.Reference<T>> allHolders(
+			HolderLookup.Provider registries,
+			ResourceKey<Registry<T>> registryKey,
+			String modId) {
+		return allHolders(registries.lookupOrThrow(registryKey), modId);
 	}
 
 	static <T> Stream<OptionalEntry<T>> fromModules(ResourceKey<Registry<T>> registryKey, String... ids) {
 		/* off */
 		return Stream.of(ids)
-				.map(ResourceLocation::parse)
+				.map(Identifier::parse)
 				.map(KiwiModules::get)
 				.mapMulti(($, consumer) -> {
 					boolean optional = $.module.getClass().getDeclaredAnnotation(KiwiModule.Optional.class) != null;

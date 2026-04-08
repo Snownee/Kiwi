@@ -7,9 +7,8 @@ import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.KeyDispatchCodec;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 import snownee.kiwi.util.codec.CustomizationCodecs;
 
@@ -25,21 +24,19 @@ public record ConfiguredItemTemplate(KItemTemplate template, JsonObject json) {
 		this(template, DEFAULT_JSON);
 	}
 
-	public static Codec<ConfiguredItemTemplate> codec(Map<ResourceLocation, KItemTemplate> templates) {
-		Function<ConfiguredItemTemplate, DataResult<KItemTemplate>> type = $ -> DataResult.success($.template());
-		Function<KItemTemplate, DataResult<MapCodec<ConfiguredItemTemplate>>> codec = $ -> DataResult.success(MapCodec.assumeMapUnsafe(
+	public static Codec<ConfiguredItemTemplate> codec(Map<Identifier, KItemTemplate> templates) {
+		Function<KItemTemplate, MapCodec<ConfiguredItemTemplate>> codec = $ -> MapCodec.assumeMapUnsafe(
 				ExtraCodecs.JSON).flatXmap(
 				json -> DataResult.success(new ConfiguredItemTemplate($, json.getAsJsonObject())),
 				template -> DataResult.error(() -> "Unsupported operation", template.json)
-		));
+		);
 
-		Codec<ConfiguredItemTemplate> codec1 = new KeyDispatchCodec<>(
+		Codec<ConfiguredItemTemplate> codec1 = CustomizationCodecs.simpleByNameCodec(templates).dispatchMap(
 				"kiwi:type",
-				CustomizationCodecs.simpleByNameCodec(templates),
-				type,
+				ConfiguredItemTemplate::template,
 				codec
 		).codec();
-		Codec<ConfiguredItemTemplate> codec2 = ResourceLocation.CODEC.flatXmap(
+		Codec<ConfiguredItemTemplate> codec2 = Identifier.CODEC.flatXmap(
 				id -> {
 					KItemTemplate template = templates.get(id);
 					if (template == null) {

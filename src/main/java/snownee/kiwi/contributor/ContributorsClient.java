@@ -5,10 +5,8 @@ import java.util.Objects;
 import com.mojang.blaze3d.platform.InputConstants;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
-import net.minecraft.client.resources.PlayerSkin;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.entity.player.AvatarRenderer;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
@@ -35,12 +33,24 @@ public class ContributorsClient extends AbstractModule {
 		event.enqueueWork(() -> {
 			IEventBus eventBus = Objects.requireNonNull(ModContext.get(Kiwi.ID).modContainer.getEventBus());
 			eventBus.addListener((EntityRenderersEvent.AddLayers e) -> {
-				for (PlayerSkin.Model skin : e.getSkins()) {
-					if (e.getSkin(skin) instanceof PlayerRenderer renderer) {
-						CosmeticLayer layer = new CosmeticLayer(renderer);
-						CosmeticLayer.ALL_LAYERS.add(layer);
-						renderer.addLayer(layer);
+				try {
+					Iterable<?> skins = (Iterable<?>) e.getClass().getMethod("getSkins").invoke(e);
+					for (Object skin : skins) {
+						java.lang.reflect.Method getter;
+						try {
+							getter = e.getClass().getMethod("getSkin", skin.getClass());
+						} catch (NoSuchMethodException ignored) {
+							getter = e.getClass().getMethod("getPlayerRenderer", skin.getClass());
+						}
+						AvatarRenderer<?> renderer = (AvatarRenderer<?>) getter.invoke(e, skin);
+						if (renderer != null) {
+							CosmeticLayer layer = new CosmeticLayer(renderer);
+							CosmeticLayer.ALL_LAYERS.add(layer);
+							renderer.addLayer(layer);
+						}
 					}
+				} catch (ReflectiveOperationException ex) {
+					Kiwi.LOGGER.error("Failed to attach contributor cosmetic layers", ex);
 				}
 			});
 			NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingIn e) -> {
@@ -53,12 +63,30 @@ public class ContributorsClient extends AbstractModule {
 
 	private static int hold;
 
+	private static boolean hasControlDown(Minecraft mc) {
+		var window = mc.getWindow();
+		return InputConstants.isKeyDown(window, 341)
+				|| InputConstants.isKeyDown(window, 345)
+				|| InputConstants.isKeyDown(window, 343)
+				|| InputConstants.isKeyDown(window, 347);
+	}
+
+	private static boolean hasShiftDown(Minecraft mc) {
+		var window = mc.getWindow();
+		return InputConstants.isKeyDown(window, 340) || InputConstants.isKeyDown(window, 344);
+	}
+
+	private static boolean hasAltDown(Minecraft mc) {
+		var window = mc.getWindow();
+		return InputConstants.isKeyDown(window, 342) || InputConstants.isKeyDown(window, 346);
+	}
+
 	public static void onKeyInput(Minecraft mc) {
 		if (!KiwiClientConfig.cosmeticScreenKeybind || mc.screen != null || mc.player == null || !mc.isWindowActive()) {
 			return;
 		}
-		boolean K = InputConstants.isKeyDown(mc.getWindow().getWindow(), InputConstants.KEY_K);
-		if (!K || Screen.hasAltDown() || Screen.hasControlDown() || Screen.hasShiftDown()) {
+		boolean K = InputConstants.isKeyDown(mc.getWindow(), InputConstants.KEY_K);
+		if (!K || hasAltDown(mc) || hasControlDown(mc) || hasShiftDown(mc)) {
 			hold = 0;
 			return;
 		}
@@ -69,11 +97,11 @@ public class ContributorsClient extends AbstractModule {
 	}
 
 	public static void changeCosmetic() {
-		ResourceLocation id = KUtil.RL(KiwiClientConfig.contributorCosmetic);
+		Identifier id = KUtil.RL(KiwiClientConfig.contributorCosmetic);
 		if (id != null && id.getPath().isEmpty()) {
 			id = null;
 		}
-		ResourceLocation cosmetic = id;
+		Identifier cosmetic = id;
 		Contributors.canPlayerUseCosmetic(getPlayerName(), cosmetic).thenAccept(bl -> {
 			if (!bl) {
 				ConfigHandler cfg = KiwiConfigManager.getHandler(KiwiClientConfig.class);

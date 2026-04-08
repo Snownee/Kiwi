@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -12,6 +12,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
+import net.minecraft.world.attribute.BedRule;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -20,7 +22,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.LeadItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Block;
@@ -75,7 +76,11 @@ public class SitManager {
 		}
 		Block block = blockState.getBlock();
 		if (block instanceof BedBlock) {
-			if (blockState.getValue(BedBlock.OCCUPIED) || !BedBlock.canSetSpawn(level)) {
+			if (blockState.getValue(BedBlock.OCCUPIED)) {
+				return false;
+			}
+			BedRule bedRule = level.environmentAttributes().getValue(EnvironmentAttributes.BED_RULE, pos);
+			if (!bedRule.canSetSpawn(level)) {
 				return false;
 			}
 			Direction direction = blockState.getValue(BedBlock.FACING);
@@ -99,7 +104,7 @@ public class SitManager {
 		} else if (!level.getEntities(EntityType.BLOCK_DISPLAY, new AABB(pos).expandTowards(0, 1, 0), SitManager::isSeatEntity).isEmpty()) {
 			return false;
 		}
-		if (!level.isClientSide) {
+		if (!level.isClientSide()) {
 			Display.BlockDisplay display = new Display.BlockDisplay(EntityType.BLOCK_DISPLAY, level);
 			display.setCustomName(ENTITY_NAME);
 //			display.setInvisible(true);
@@ -137,10 +142,7 @@ public class SitManager {
 			display.setPos(seatPos.x, clampedY, seatPos.z);
 			Entity rider = player;
 			if (KSitCommonConfig.makeLeashedMobSit) {
-				List<Leashable> list = LeadItem.leashableInArea(
-						level,
-						player.blockPosition(),
-						leashable -> leashable.getLeashHolder() == player);
+				List<Leashable> list = Leashable.leashableLeashedTo(player);
 				double dist = Double.MAX_VALUE;
 				for (Leashable leashable : list) {
 					if (!(leashable instanceof Mob mob) || mob.isNoAi() || !((EntityAccess) mob).callCanRide(display)) {
@@ -155,9 +157,9 @@ public class SitManager {
 			}
 			if (level.addFreshEntity(display)) {
 				rider.setYRot(display.getYRot());
-				rider.startRiding(display, true);
+				rider.startRiding(display, true, true);
 				if (rider != player) {
-					((Leashable) rider).dropLeash(true, true);
+					((Leashable) rider).dropLeash();
 				}
 			}
 		}

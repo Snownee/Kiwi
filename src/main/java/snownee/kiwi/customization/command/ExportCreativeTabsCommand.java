@@ -26,7 +26,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
@@ -48,7 +48,7 @@ public class ExportCreativeTabsCommand {
 	}
 
 	private static int exportCreativeTabs(CommandSourceStack source, BlockPos pos) {
-		DataResult<Pair<ResourceLocation, Direction>> result = checkIsValidSign(source, pos);
+		DataResult<Pair<Identifier, Direction>> result = checkIsValidSign(source, pos);
 		if (result.error().isPresent()) {
 			source.sendFailure(Component.literal(result.error().get().message()));
 			return 0;
@@ -67,12 +67,12 @@ public class ExportCreativeTabsCommand {
 				int failed = 0;
 				while (failed < 5) {
 					mutablePos.move(leftOrRight);
-					DataResult<Pair<ResourceLocation, Direction>> result2 = checkIsValidSign(source, mutablePos);
+					DataResult<Pair<Identifier, Direction>> result2 = checkIsValidSign(source, mutablePos);
 					if (result2.error().isPresent()) {
 						failed++;
 						continue;
 					}
-					Pair<ResourceLocation, Direction> pair = result2.result().orElseThrow();
+					Pair<Identifier, Direction> pair = result2.result().orElseThrow();
 					if (direction != pair.getSecond()) {
 						failed++;
 						continue;
@@ -162,7 +162,7 @@ public class ExportCreativeTabsCommand {
 		return items;
 	}
 
-	private static DataResult<Pair<ResourceLocation, Direction>> checkIsValidSign(CommandSourceStack source, BlockPos pos) {
+	private static DataResult<Pair<Identifier, Direction>> checkIsValidSign(CommandSourceStack source, BlockPos pos) {
 		ServerLevel level = source.getLevel();
 		BlockState blockState = level.getBlockState(pos);
 		if (!(blockState.getBlock() instanceof SignBlock block)) {
@@ -177,7 +177,7 @@ public class ExportCreativeTabsCommand {
 		if (signText.isBlank()) {
 			return DataResult.error(() -> "The sign is empty");
 		}
-		ResourceLocation tabId = ResourceLocation.tryParse(signText);
+		Identifier tabId = Identifier.tryParse(signText);
 		if (tabId == null) {
 			return DataResult.error(() -> "The sign text is not a valid resource location");
 		}

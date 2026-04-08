@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -25,19 +25,13 @@ import org.yaml.snakeyaml.representer.Representer;
 
 import com.google.gson.JsonElement;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -46,21 +40,15 @@ import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.item.crafting.RecipeManager;
-import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.EntityHitResult;
-import snownee.kiwi.loader.Platform;
 
 public final class KUtil {
 	public static final MessageFormat MESSAGE_FORMAT = new MessageFormat("{0,number,#.#}");
 	private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("###,###");
 	private static final Yaml YAML;
-	private static RecipeManager recipeManager;
 	public static final List<Direction> DIRECTIONS = Direction.stream().toList();
 
 	static {
@@ -89,7 +77,7 @@ public final class KUtil {
 		return Long.toString(number);
 	}
 
-	public static String trimRL(ResourceLocation rl) {
+	public static String trimRL(Identifier rl) {
 		return trimRL(rl, "minecraft");
 	}
 
@@ -100,7 +88,7 @@ public final class KUtil {
 	/**
 	 * @since 2.7.0
 	 */
-	public static String trimRL(ResourceLocation rl, String defaultNamespace) {
+	public static String trimRL(Identifier rl, String defaultNamespace) {
 		return rl.getNamespace().equals(defaultNamespace) ? rl.getPath() : rl.toString();
 	}
 
@@ -116,12 +104,12 @@ public final class KUtil {
 	}
 
 	@Nullable
-	public static ResourceLocation RL(@Nullable String string) {
+	public static Identifier RL(@Nullable String string) {
 		if (string == null) {
 			return null;
 		}
 		try {
-			return ResourceLocation.tryParse(string);
+			return Identifier.tryParse(string);
 		} catch (Exception e) {
 			return null;
 		}
@@ -131,35 +119,11 @@ public final class KUtil {
 	 * @since 2.4.2
 	 */
 	@Nullable
-	public static ResourceLocation RL(@Nullable String string, String defaultNamespace) {
+	public static Identifier RL(@Nullable String string, String defaultNamespace) {
 		if (string != null && !string.contains(":")) {
 			string = defaultNamespace + ":" + string;
 		}
 		return RL(string);
-	}
-
-	@Nullable
-	public static RecipeManager getRecipeManager() {
-		if (recipeManager == null && Platform.isPhysicalClient()) {
-			ClientPacketListener connection = Minecraft.getInstance().getConnection();
-			if (connection != null) {
-				return connection.getRecipeManager();
-			}
-		}
-		return recipeManager;
-	}
-
-	public static void setRecipeManager(RecipeManager recipeManager) {
-		KUtil.recipeManager = recipeManager;
-	}
-
-	public static <I extends RecipeInput, T extends Recipe<I>> List<RecipeHolder<T>> getRecipes(RecipeType<T> recipeTypeIn) {
-		RecipeManager manager = getRecipeManager();
-		if (manager == null) {
-			return List.of();
-		} else {
-			return getRecipeManager().getAllRecipesFor(recipeTypeIn);
-		}
 	}
 
 	public static int friendlyCompare(String a, String b) {
@@ -275,11 +239,11 @@ public final class KUtil {
 		return player.isCreative() ? attrib : attrib - 0.5F;
 	}
 
-	public static void displayClientMessage(@Nullable Player player, boolean client, String key, Object... args) {
+	public static void sendSystemMessage(@Nullable Player player, boolean client, String key, Object... args) {
 		if (player == null) {
 			return;
 		}
-		if (client != player.level().isClientSide) {
+		if (client != player.level().isClientSide()) {
 			return;
 		}
 		player.sendSystemMessage(Component.translatable(key, args));
@@ -295,38 +259,12 @@ public final class KUtil {
 		}
 	}
 
-
-	public static String @Nullable [] readNBTStrings(CompoundTag tag, String key, String @Nullable [] strings) {
-		if (!tag.contains(key, Tag.TAG_LIST)) {
-			return null;
-		}
-		ListTag list = tag.getList(key, Tag.TAG_STRING);
-		if (list.isEmpty()) {
-			return null;
-		}
-		if (strings == null || strings.length != list.size()) {
-			strings = new String[list.size()];
-		}
-		for (int i = 0; i < strings.length; i++) {
-			String s = list.getString(i);
-			strings[i] = s;
-		}
-		return strings;
-	}
-
-	public static void writeNBTStrings(CompoundTag tag, String key, String @Nullable [] strings) {
-		if (strings == null || strings.length == 0) {
-			return;
-		}
-		ListTag list = new ListTag();
-		for (String s : strings) {
-			list.add(StringTag.valueOf(s));
-		}
-		tag.put(key, list);
-	}
-
 	public static InteractionResult onAttackEntity(
-			Player player, Level world, InteractionHand hand, Entity entity, @Nullable EntityHitResult hitResult) {
+			Player player,
+			Level world,
+			InteractionHand hand,
+			Entity entity,
+			@Nullable EntityHitResult hitResult) {
 		if (entity instanceof ItemFrame frame && !frame.getItem().isEmpty() && !frame.isNoGravity() && !frame.isInvulnerable()) {
 			ItemStack stack = player.getItemInHand(hand);
 			if (stack.is(Items.END_PORTAL_FRAME)) {
@@ -342,8 +280,8 @@ public final class KUtil {
 	}
 
 	public static MutableComponent clickToCopy(MutableComponent component, Component hoverText, String toCopy) {
-		return component.withStyle(s -> s.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, toCopy))
-				.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText))
+		return component.withStyle(s -> s.withClickEvent(new ClickEvent.CopyToClipboard(toCopy))
+				.withHoverEvent(new HoverEvent.ShowText(hoverText))
 				.withInsertion(toCopy));
 	}
 

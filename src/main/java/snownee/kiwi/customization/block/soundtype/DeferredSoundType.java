@@ -13,7 +13,7 @@ import snownee.kiwi.util.DeferredHolder;
 public class DeferredSoundType extends SoundType {
 	private static final DeferredHolder<SoundEvent, SoundEvent> EMPTY_SOUND_EVENT = DeferredHolder.create(
 			Registries.SOUND_EVENT,
-			SoundEvents.EMPTY.getLocation());
+			SoundEvents.EMPTY.location());
 
 	public static final MapCodec<DeferredSoundType> DIRECT_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			Codec.FLOAT.optionalFieldOf("volume", 1.0f).forGetter(SoundType::getVolume),

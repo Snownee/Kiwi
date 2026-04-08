@@ -7,33 +7,30 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.mojang.serialization.Codec;
 
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Tier;
-import net.minecraft.world.item.Tiers;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ToolMaterial;
 import snownee.kiwi.util.codec.CustomizationCodecs;
 
 public final class KiwiTiers {
-	public static final BiMap<ResourceLocation, Tier> ALL = HashBiMap.create();
-	public static final Map<ResourceLocation, Tier> BUILTINS = new HashMap<>();
-	public static final Codec<Tier> CODEC = CustomizationCodecs.simpleByNameCodec(ALL);
+	public static final BiMap<Identifier, ToolMaterial> ALL = HashBiMap.create();
+	public static final Map<Identifier, ToolMaterial> BUILTINS = new HashMap<>();
+	public static final Codec<ToolMaterial> CODEC = CustomizationCodecs.simpleByNameCodec(ALL);
 
 	static {
-		/*
-		 * https://regex101.com/
-		 * ([A-Z]+)\(
-		 * BUILTINS.put(ResourceLocation.withDefaultNamespace("\L$1\E"), Tiers.$1);\n
-		 */
-		BUILTINS.put(ResourceLocation.withDefaultNamespace("wood"), Tiers.WOOD);
-		BUILTINS.put(ResourceLocation.withDefaultNamespace("stone"), Tiers.STONE);
-		BUILTINS.put(ResourceLocation.withDefaultNamespace("iron"), Tiers.IRON);
-		BUILTINS.put(ResourceLocation.withDefaultNamespace("diamond"), Tiers.DIAMOND);
-		BUILTINS.put(ResourceLocation.withDefaultNamespace("gold"), Tiers.GOLD);
-		BUILTINS.put(ResourceLocation.withDefaultNamespace("netherite"), Tiers.NETHERITE);
+		BUILTINS.put(Identifier.withDefaultNamespace("wood"), ToolMaterial.WOOD);
+		BUILTINS.put(Identifier.withDefaultNamespace("stone"), ToolMaterial.STONE);
+		BUILTINS.put(Identifier.withDefaultNamespace("iron"), ToolMaterial.IRON);
+		BUILTINS.put(Identifier.withDefaultNamespace("diamond"), ToolMaterial.DIAMOND);
+		BUILTINS.put(Identifier.withDefaultNamespace("gold"), ToolMaterial.GOLD);
+		BUILTINS.put(Identifier.withDefaultNamespace("netherite"), ToolMaterial.NETHERITE);
 	}
 
-	public static void refreshWithValues(Map<ResourceLocation, ? extends Tier> values) {
+	public static void refreshWithValues(Map<Identifier, ? extends ToolMaterial> values) {
 		ALL.clear();
 		ALL.putAll(BUILTINS);
 		ALL.putAll(values);
+	}
+
+	private KiwiTiers() {
 	}
 }

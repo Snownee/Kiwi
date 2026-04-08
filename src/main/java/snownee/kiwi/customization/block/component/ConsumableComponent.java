@@ -6,31 +6,32 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponentHolder;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
-import net.minecraft.world.level.gameevent.GameEvent;
 import snownee.kiwi.customization.block.KBlockUtils;
 import snownee.kiwi.customization.block.behavior.BlockBehaviorRegistry;
 import snownee.kiwi.customization.block.loader.KBlockComponents;
 
 public record ConsumableComponent(
 		IntegerProperty property,
-		Optional<FoodProperties> food,
-		Optional<ResourceKey<ResourceLocation>> stat) implements KBlockComponent, LayeredComponent {
+		DataComponentMap components,
+		Optional<ResourceKey<Identifier>> stat) implements KBlockComponent, LayeredComponent, DataComponentHolder {
 	public static final MapCodec<ConsumableComponent> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			ExtraCodecs.intRange(0, 1).fieldOf("min").forGetter(ConsumableComponent::minValue),
 			ExtraCodecs.POSITIVE_INT.fieldOf("max").forGetter(ConsumableComponent::maxValue),
-			FoodProperties.DIRECT_CODEC.optionalFieldOf("food").forGetter(ConsumableComponent::food),
+			DataComponentMap.CODEC.optionalFieldOf("components", DataComponentMap.EMPTY).forGetter(ConsumableComponent::components),
 			ResourceKey.codec(Registries.CUSTOM_STAT).optionalFieldOf("stat").forGetter(ConsumableComponent::stat)
 	).apply(instance, ConsumableComponent::create));
 
@@ -38,9 +39,9 @@ public record ConsumableComponent(
 	public static ConsumableComponent create(
 			int min,
 			int max,
-			Optional<FoodProperties> food,
-			Optional<ResourceKey<ResourceLocation>> stat) {
-		return new ConsumableComponent(KBlockUtils.internProperty(IntegerProperty.create("uses", min, max)), food, stat);
+			DataComponentMap components,
+			Optional<ResourceKey<Identifier>> stat) {
+		return new ConsumableComponent(KBlockUtils.internProperty(IntegerProperty.create("uses", min, max)), components, stat);
 	}
 
 	@Override
@@ -83,40 +84,19 @@ public record ConsumableComponent(
 			if (value == 0) {
 				return InteractionResult.PASS;
 			}
-			stat.map(ResourceKey::location).ifPresent(pPlayer::awardStat);
-			BlockPos pos = pHit.getBlockPos();
-			if (this.food.isPresent()) { //TODO block tag based drinking type
-				FoodProperties food = this.food.get();
-				if (!pPlayer.canEat(food.canAlwaysEat())) {
-					return InteractionResult.FAIL;
-				}
-				Item item = pState.getBlock().asItem();
-				pLevel.playSound(
-						pPlayer,
-						pPlayer.getX(),
-						pPlayer.getY(),
-						pPlayer.getZ(),
-						item.getEatingSound(),
-						SoundSource.NEUTRAL,
-						1.0f,
-						1.0f + (pLevel.random.nextFloat() - pLevel.random.nextFloat()) * 0.4f);
-				if (!pLevel.isClientSide) {
-					pPlayer.getFoodData().eat(food.nutrition(), food.saturation());
-					for (var effect : food.effects()) {
-						if (effect.effect() == null || !(pLevel.random.nextFloat() >= effect.probability())) {
-							continue;
-						}
-						pPlayer.addEffect(effect.effect());
-					}
-				}
-				pLevel.gameEvent(pPlayer, GameEvent.EAT, pos);
+			stat.map(ResourceKey::identifier).ifPresent(pPlayer::awardStat);
+			ItemStack itemStack = pState.getBlock().asItem().getDefaultInstance();
+			Consumable consumable = get(DataComponents.CONSUMABLE);
+			if (consumable != null && consumable.canConsume(pPlayer, itemStack)) {
+				consumable.onConsume(pLevel, pPlayer, itemStack);
 			}
+			BlockPos pos = pHit.getBlockPos();
 			if (value == minValue()) {
 				pLevel.removeBlock(pos, false);
 			} else {
 				pLevel.setBlockAndUpdate(pos, pState.setValue(property, value - 1));
 			}
-			return InteractionResult.sidedSuccess(pLevel.isClientSide);
+			return InteractionResult.SUCCESS_SERVER;
 		});
 	}
 
@@ -128,5 +108,10 @@ public record ConsumableComponent(
 	@Override
 	public int getDefaultLayer() {
 		return maxValue();
+	}
+
+	@Override
+	public DataComponentMap getComponents() {
+		return components;
 	}
 }

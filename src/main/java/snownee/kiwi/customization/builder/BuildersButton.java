@@ -1,11 +1,10 @@
 package snownee.kiwi.customization.builder;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -20,7 +19,7 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
@@ -89,7 +88,7 @@ public class BuildersButton {
 			screen.onClose();
 			return true;
 		}
-		if (KiwiCommonConfig.kSwitchCreativeOnly && !player.isCreative()) {
+		if (KiwiCommonConfig.kSwitchCreativeOnly && !player.hasInfiniteMaterials()) {
 			return false;
 		}
 		if (screen instanceof AbstractContainerScreen<?> containerScreen && containerScreen.getMenu().getCarried().isEmpty()) {
@@ -112,7 +111,7 @@ public class BuildersButton {
 		}
 		List<CConvertItemPacket.Group> groups = findConvertGroups(player, player.getMainHandItem());
 		if (!groups.isEmpty()) {
-			mc.setScreen(new ConvertScreen(null, null, player.getInventory().selected, groups));
+			mc.setScreen(new ConvertScreen(null, null, player.getInventory().getSelectedSlot(), groups));
 			return true;
 		}
 		groups = findConvertGroups(player, player.getOffhandItem());
@@ -124,13 +123,12 @@ public class BuildersButton {
 	}
 
 	public static List<CConvertItemPacket.Group> findConvertGroups(Player player, ItemStack itemStack) {
-		List<KHolder<BlockFamily>> families = BlockFamilies.findQuickSwitch(itemStack.getItem(), player.isCreative());
+		List<KHolder<BlockFamily>> families = BlockFamilies.findQuickSwitch(itemStack.getItem(), player.hasInfiniteMaterials());
 		if (families.isEmpty()) {
 			return List.of();
 		}
 		List<CConvertItemPacket.Group> groups = Lists.newArrayListWithExpectedSize(families.size());
 		Set<Item> addedItems = Sets.newHashSet();
-		float ratio = BlockFamilies.getConvertRatio(itemStack.getItem());
 		for (KHolder<BlockFamily> family : families) {
 			CConvertItemPacket.Group group = new CConvertItemPacket.Group();
 			boolean cascading = family.value().switchAttrs().cascading();
@@ -138,9 +136,8 @@ public class BuildersButton {
 			Set<BlockFamily> iteratedFamilies = cascading ? Sets.newHashSet(family.value()) : Set.of();
 			Set<Item> iteratedItems = cascading ? Sets.newHashSet() : Set.of();
 			for (Item item : family.value().items().toList()) {
-				float convertRatio = BlockFamilies.getConvertRatio(item);
-				CConvertItemPacket.Entry entry = new CConvertItemPacket.Entry(ratio / convertRatio);
-				Pair<ResourceLocation, Item> pair = Pair.of(family.key(), item);
+				CConvertItemPacket.Entry entry = new CConvertItemPacket.Entry();
+				Pair<Identifier, Item> pair = Pair.of(family.key(), item);
 				entry.steps().add(pair);
 				if (cascading) {
 					unresolved.add(entry);
@@ -153,10 +150,9 @@ public class BuildersButton {
 			}
 			while (!unresolved.isEmpty()) {
 				CConvertItemPacket.Entry parentEntry = unresolved.removeFirst();
-				Pair<ResourceLocation, Item> lastStep = parentEntry.steps().getLast();
+				Pair<Identifier, Item> lastStep = parentEntry.steps().getLast();
 				Item lastItem = lastStep.getSecond();
-				ratio = BlockFamilies.getConvertRatio(lastItem);
-				for (KHolder<BlockFamily> nextFamily : BlockFamilies.findQuickSwitch(lastItem, player.isCreative())) {
+				for (KHolder<BlockFamily> nextFamily : BlockFamilies.findQuickSwitch(lastItem, player.hasInfiniteMaterials())) {
 					if (!iteratedFamilies.add(nextFamily.value())) {
 						continue;
 					}
@@ -164,8 +160,7 @@ public class BuildersButton {
 						if (!iteratedItems.add(nextItem)) {
 							continue;
 						}
-						float convertRatio = BlockFamilies.getConvertRatio(nextItem);
-						CConvertItemPacket.Entry entry = new CConvertItemPacket.Entry(parentEntry.ratio() * ratio / convertRatio);
+						CConvertItemPacket.Entry entry = new CConvertItemPacket.Entry();
 						entry.steps().addAll(parentEntry.steps());
 						entry.steps().add(Pair.of(nextFamily.key(), nextItem));
 						if (!addedItems.contains(nextItem)) {
@@ -182,14 +177,13 @@ public class BuildersButton {
 				groups.add(group);
 			}
 		}
-		if (player.isCreative()) {
+		if (player.hasInfiniteMaterials()) {
 			return groups;
 		}
+		long matValue = BlockFamilies.getMatValue(itemStack);
 		Predicate<CConvertItemPacket.Entry> filter = entry -> {
-			if (entry.ratio() >= 1) {
-				return false;
-			}
-			return !player.getInventory().hasAnyMatching($ -> $.is(entry.item()));
+			// matValue is not enough to convert one
+			return matValue < BlockFamilies.getMatValue(entry.item());
 		};
 		int count = 0;
 		for (CConvertItemPacket.Group group : groups) {
@@ -237,15 +231,6 @@ public class BuildersButton {
 			return null;
 		}
 		return Minecraft.getInstance().player;
-	}
-
-	public static void renderDebugText(List<String> left, List<String> right) {
-		if (!isBuilderModeOn() /*|| Minecraft.getInstance().options.renderDebug*/) {
-			return;
-		}
-		left.add("Builder Mode is on, long press %s to toggle".formatted(Objects.requireNonNull(CustomizationClient.buildersButtonKey)
-				.getTranslatedKeyMessage()
-				.getString()));
 	}
 
 	public static boolean cancelRenderHighlight() {

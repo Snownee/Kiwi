@@ -1,25 +1,24 @@
 package snownee.kiwi.contributor.impl.client.model;
 
-import com.google.common.collect.ImmutableList;
-
-import net.minecraft.client.model.AgeableListModel;
+import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 
-public class PlanetModel<T extends LivingEntity> extends AgeableListModel<T> {
+public class PlanetModel extends Model<AvatarRenderState> {
 
 	private final ModelPart largePlanet;
 	private final ModelPart smallPlanet;
 
 	public PlanetModel(LayerDefinition definition) {
-		ModelPart root = definition.bakeRoot();
-		this.largePlanet = root.getChild("large");
-		this.smallPlanet = root.getChild("small");
+		super(definition.bakeRoot(), RenderTypes::entityTranslucent);
+		this.largePlanet = this.root().getChild("large");
+		this.smallPlanet = this.root().getChild("small");
 	}
 
 	public static LayerDefinition create() {
@@ -39,19 +38,9 @@ public class PlanetModel<T extends LivingEntity> extends AgeableListModel<T> {
 	}
 
 	@Override
-	protected Iterable<ModelPart> headParts() {
-		return ImmutableList.of();
-	}
-
-	@Override
-	protected Iterable<ModelPart> bodyParts() {
-		return ImmutableList.of(largePlanet, smallPlanet);
-	}
-
-	@Override
-	public void setupAnim(T entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-		largePlanet.yRot = -ageInTicks / 10;
-		smallPlanet.yRot = -ageInTicks / 6;
+	public void setupAnim(AvatarRenderState state) {
+		largePlanet.yRot = -state.ageInTicks / 10;
+		smallPlanet.yRot = -state.ageInTicks / 6;
 	}
 
 }

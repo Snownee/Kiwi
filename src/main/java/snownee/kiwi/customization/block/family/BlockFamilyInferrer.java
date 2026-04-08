@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -12,7 +13,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.DyeColor;
@@ -44,7 +45,10 @@ public class BlockFamilyInferrer {
 			"%s_door",
 			"%s_trapdoor",
 			"%s_button",
-			"%s_pressure_plate");
+			"%s_pressure_plate",
+			"%s_bars",
+			"%s_chain",
+			"%s_shelf");
 	private final List<String> variants = List.of(
 			"%s",
 			"chiseled_%s",
@@ -82,9 +86,9 @@ public class BlockFamilyInferrer {
 	public Collection<KHolder<BlockFamily>> generate() {
 		List<Holder<Block>> sorted = Lists.newArrayList();
 		for (Holder<Block> holder : BuiltInRegistries.BLOCK.asHolderIdMap()) {
-			String path = holder.unwrapKey().orElseThrow().location().getPath();
+			String path = holder.unwrapKey().orElseThrow().identifier().getPath();
 			if (path.startsWith("pink_") || path.endsWith("_pink") || path.endsWith("_log") || path.endsWith("_stem") || path.endsWith(
-					"_stairs") || path.endsWith("_slab") || path.startsWith("smooth_")) {
+					"_stairs") || path.endsWith("_slab") || path.startsWith("smooth_") || path.endsWith("_block")) {
 				if (holder.is(IGNORE)) {
 					continue;
 				}
@@ -93,8 +97,8 @@ public class BlockFamilyInferrer {
 		}
 		// make stairs come first
 		sorted.sort((a, b) -> {
-			String aPath = a.unwrapKey().orElseThrow().location().getPath();
-			String bPath = b.unwrapKey().orElseThrow().location().getPath();
+			String aPath = a.unwrapKey().orElseThrow().identifier().getPath();
+			String bPath = b.unwrapKey().orElseThrow().identifier().getPath();
 			boolean aIsStairs = aPath.endsWith("_stairs");
 			boolean bIsStairs = bPath.endsWith("_stairs");
 			return Boolean.compare(bIsStairs, aIsStairs);
@@ -110,27 +114,27 @@ public class BlockFamilyInferrer {
 				continue;
 			}
 //			Kiwi.LOGGER.info(holder.unwrapKey().orElseThrow().location().toString());
-			ResourceLocation key = holder.unwrapKey().orElseThrow().location();
+			Identifier key = holder.unwrapKey().orElseThrow().identifier();
 			String path = key.getPath();
 			boolean captured = false;
 			if (path.startsWith("pink_")) {
-				ResourceLocation id = key.withPath(path.substring(5));
+				Identifier id = key.withPath(path.substring(5));
 				generateColored(id, colorPrefixed);
 				captured = true;
 			} else if (path.endsWith("_pink")) {
-				ResourceLocation id = key.withPath(path.substring(0, path.length() - 5));
+				Identifier id = key.withPath(path.substring(0, path.length() - 5));
 				generateColored(id, colorSuffixed);
 				captured = true;
 			}
 			if (path.endsWith("_log")) {
 				if (holder.is(BlockTags.LOGS)) {
-					ResourceLocation id = key.withPath(path.substring(0, path.length() - 4));
+					Identifier id = key.withPath(path.substring(0, path.length() - 4));
 					fromTemplates(id, "logs", logs, true);
 				}
 				continue;
 			} else if (path.endsWith("_stem")) {
 				if (holder.is(BlockTags.LOGS)) {
-					ResourceLocation id = key.withPath(path.substring(0, path.length() - 5));
+					Identifier id = key.withPath(path.substring(0, path.length() - 5));
 					fromTemplates(id, "logs", netherLogs, true);
 				}
 				continue;
@@ -139,11 +143,11 @@ public class BlockFamilyInferrer {
 				if (!(block instanceof StairBlock)) {
 					continue;
 				}
-				ResourceLocation id = key.withPath(path.substring(0, path.length() - 7));
+				Identifier id = key.withPath(path.substring(0, path.length() - 7));
 				List<Holder.Reference<Block>> blocks = collectBlocks(id, general);
 				if (id.getPath().endsWith("brick")) {
-					ResourceLocation id1 = id.withSuffix("s");
-					Optional<Holder.Reference<Block>> holder1 = BuiltInRegistries.BLOCK.getHolder(ResourceKey.create(
+					Identifier id1 = id.withSuffix("s");
+					Optional<Holder.Reference<Block>> holder1 = BuiltInRegistries.BLOCK.get(ResourceKey.create(
 							Registries.BLOCK,
 							id1));
 					if (holder1.isPresent()) {
@@ -155,12 +159,16 @@ public class BlockFamilyInferrer {
 				family(id, "variants", blocks.stream().distinct().toList(), true);
 				continue;
 			}
-			if (path.endsWith("_slab")) {
-				ResourceLocation id = key.withPath(path.substring(0, path.length() - 5));
+			if (path.endsWith("_block")) {
+				Identifier id = key.withPath(path.substring(0, path.length() - 6));
+				fromTemplates(id, "general", general, true);
+				captured = true;
+			} else if (path.endsWith("_slab")) {
+				Identifier id = key.withPath(path.substring(0, path.length() - 5));
 				fromTemplates(id, "general", general, true);
 				captured = true;
 			} else if (path.startsWith("smooth_")) {
-				ResourceLocation id = key.withPath(path.substring(7));
+				Identifier id = key.withPath(path.substring(7));
 				fromTemplates(id, "variants", variants, true);
 				captured = true;
 			}
@@ -168,30 +176,36 @@ public class BlockFamilyInferrer {
 				throw new IllegalStateException("Unrecognized block: " + holder.value());
 			}
 		}
-		List<String> normalCopperTemplate = List.of("%s_block", "cut_%s", "chiseled_%s", "%s_grate");
-		List<String> otherCopperTemplate = List.of("%s", "cut_%s", "chiseled_%s", "%s_grate");
-		ResourceLocation copperId = ResourceLocation.withDefaultNamespace("copper");
+		List<String> commonCopperTemplate = List.of(
+				"cut_%s",
+				"chiseled_%s",
+				"%s_door",
+				"%s_trapdoor",
+				"%s_chain",
+				"%s_grate",
+				"%s_bars");
+		Identifier copperId = Identifier.withDefaultNamespace("copper");
 		for (String waxed : List.of("", "waxed_")) {
 			for (String variant : List.of("", "exposed_", "weathered_", "oxidized_")) {
-				List<String> template = variant.isEmpty() ? normalCopperTemplate : otherCopperTemplate;
-				template = template.stream().map($ -> waxed + variant + $).toList();
-				fromTemplates(copperId, waxed + variant + "copper", template, true);
+				Stream<String> template = Stream.of(variant.isEmpty() ? "%s_block" : "%s");
+				template = Stream.concat(template, commonCopperTemplate.stream()).map($ -> waxed + variant + $);
+				fromTemplates(copperId, waxed + variant + "copper", template.toList(), true);
 			}
 		}
 		return families;
 	}
 
-	private List<Holder.Reference<Block>> collectBlocks(ResourceLocation id, List<String> templates) {
+	private List<Holder.Reference<Block>> collectBlocks(Identifier id, List<String> templates) {
 		List<Holder.Reference<Block>> blocks = Lists.newArrayList();
 		for (String template : templates) {
-			ResourceLocation blockId = id.withPath(String.format(template, id.getPath()));
-			Optional<Holder.Reference<Block>> holder = BuiltInRegistries.BLOCK.getHolder(ResourceKey.create(Registries.BLOCK, blockId));
+			Identifier blockId = id.withPath(String.format(template, id.getPath()));
+			Optional<Holder.Reference<Block>> holder = BuiltInRegistries.BLOCK.get(ResourceKey.create(Registries.BLOCK, blockId));
 			holder.ifPresent(blocks::add);
 		}
 		return blocks;
 	}
 
-	private void fromTemplates(ResourceLocation id, String desc, List<String> templates, boolean cascading) {
+	private void fromTemplates(Identifier id, String desc, List<String> templates, boolean cascading) {
 		List<Holder.Reference<Block>> blocks = collectBlocks(id, templates);
 		if (blocks.size() < 2) {
 			return;
@@ -199,7 +213,7 @@ public class BlockFamilyInferrer {
 		family(id, desc, blocks, cascading);
 	}
 
-	private void generateColored(ResourceLocation id, List<String> templates) {
+	private void generateColored(Identifier id, List<String> templates) {
 		List<Holder.Reference<Block>> blocks = collectBlocks(id, templates);
 		if (blocks.size() != templates.size()) {
 			return;
@@ -207,7 +221,7 @@ public class BlockFamilyInferrer {
 		family(id, "colored", blocks, false);
 	}
 
-	private void family(ResourceLocation id, String desc, List<Holder.Reference<Block>> blocks, boolean cascading) {
+	private void family(Identifier id, String desc, List<Holder.Reference<Block>> blocks, boolean cascading) {
 		List<ResourceKey<Block>> blockKeys = blocks.stream().filter($ -> !$.is(IGNORE)).map(Holder.Reference::key).toList();
 		KHolder<BlockFamily> family = new KHolder<>(
 				id.withPrefix("auto/%s/".formatted(desc)), new BlockFamily(

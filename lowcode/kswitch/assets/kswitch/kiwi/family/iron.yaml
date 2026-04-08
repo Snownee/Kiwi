@@ -1,0 +1,6 @@
+switch:
+  enabled: true
+  cascading: true
+blocks:
+  - iron_block
+  - heavy_weighted_pressure_plate

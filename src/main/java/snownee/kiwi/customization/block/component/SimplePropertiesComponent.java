@@ -26,14 +26,12 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import snownee.kiwi.customization.block.KBlockUtils;
 import snownee.kiwi.customization.block.StringProperty;
 import snownee.kiwi.customization.block.loader.KBlockComponents;
-import snownee.kiwi.util.codec.KCodecs;
 
 public record SimplePropertiesComponent(
 		boolean useShapeForLightOcclusion,
@@ -85,11 +83,12 @@ public record SimplePropertiesComponent(
 				} else if (values != null && defaultValue instanceof String s) {
 					if (DIRECTION_STRINGS.containsKey(s) && DIRECTION_STRINGS.keySet().containsAll(values)) {
 						if (values.size() == DIRECTION_STRINGS.size()) {
-							property = DirectionProperty.create(name);
+							property = EnumProperty.create(name, Direction.class);
 						} else {
-							property = DirectionProperty.create(
+							property = EnumProperty.create(
 									name,
-									values.stream().map(DIRECTION_STRINGS::get).toArray(Direction[]::new));
+									Direction.class,
+									values.stream().map(DIRECTION_STRINGS::get).toList());
 						}
 					} else {
 						property = new StringProperty(name, values);
@@ -156,7 +155,7 @@ public record SimplePropertiesComponent(
 	public static final MapCodec<SimplePropertiesComponent> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			Codec.BOOL.optionalFieldOf("shape_for_light_occlusion", false)
 					.forGetter(SimplePropertiesComponent::useShapeForLightOcclusion),
-			ExtraCodecs.nonEmptyList(KCodecs.compactList(SINGLE_CODEC))
+				ExtraCodecs.nonEmptyList(ExtraCodecs.compactListCodec(SINGLE_CODEC))
 					.fieldOf("properties")
 					.forGetter(SimplePropertiesComponent::properties)
 	).apply(instance, ($1, $2) -> INTERNER.intern(new SimplePropertiesComponent($1, $2))));

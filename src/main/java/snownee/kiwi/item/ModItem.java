@@ -1,16 +1,17 @@
 package snownee.kiwi.item;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import com.google.common.collect.Lists;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import snownee.kiwi.KiwiClientConfig;
@@ -22,10 +23,17 @@ public class ModItem extends Item {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack itemStack, TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag tooltipFlag) {
-		super.appendHoverText(itemStack, tooltipContext, tooltip, tooltipFlag);
+	public void appendHoverText(
+			ItemStack itemStack,
+			TooltipContext tooltipContext,
+			TooltipDisplay tooltipDisplay,
+			Consumer<Component> tooltipAdder,
+			TooltipFlag tooltipFlag) {
+		super.appendHoverText(itemStack, tooltipContext, tooltipDisplay, tooltipAdder, tooltipFlag);
 		if (Platform.isPhysicalClient() && !KiwiClientConfig.globalTooltip) {
+			List<Component> tooltip = Lists.newArrayList();
 			ModItem.addTip(itemStack, tooltip, tooltipFlag);
+			tooltip.forEach(tooltipAdder);
 		}
 	}
 
@@ -35,14 +43,14 @@ public class ModItem extends Item {
 			return;
 		}
 		String key;
-		boolean shift = Screen.hasShiftDown();
-		boolean ctrl = Screen.hasControlDown();
+		boolean shift = flagIn.hasShiftDown();
+		boolean ctrl = flagIn.hasControlDown();
 		if (shift == ctrl) {
-			key = stack.getDescriptionId() + ".tip";
+			key = stack.getItem().getDescriptionId() + ".tip";
 		} else if (shift) {
-			key = stack.getDescriptionId() + ".tip.shift";
+			key = stack.getItem().getDescriptionId() + ".tip.shift";
 		} else { // ctrl
-			key = stack.getDescriptionId() + ".tip.ctrl";
+			key = stack.getItem().getDescriptionId() + ".tip.ctrl";
 		}
 		boolean hasKey = I18n.exists(key);
 		if (!hasKey && (shift != ctrl)) {

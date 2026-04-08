@@ -8,22 +8,22 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import net.minecraft.client.model.PlayerModel;
-import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.model.player.PlayerModel;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.resources.Identifier;
 import snownee.kiwi.contributor.Contributors;
 import snownee.kiwi.contributor.ITierProvider;
 
-public class CosmeticLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
+public class CosmeticLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 
 	public static final Collection<CosmeticLayer> ALL_LAYERS = Lists.newLinkedList();
-	private final Cache<String, RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>>> player2renderer;
-	public final RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> renderer;
+	private final Cache<String, RenderLayer<AvatarRenderState, PlayerModel>> player2renderer;
+	public final RenderLayerParent<AvatarRenderState, PlayerModel> renderer;
 
-	public CosmeticLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRendererIn) {
+	public CosmeticLayer(RenderLayerParent<AvatarRenderState, PlayerModel> entityRendererIn) {
 		super(entityRendererIn);
 		this.renderer = entityRendererIn;
 		if (getClass() == CosmeticLayer.class) {
@@ -34,25 +34,17 @@ public class CosmeticLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
 	}
 
 	@Override
-	public void render(
-			PoseStack matrixStackIn,
-			MultiBufferSource bufferIn,
-			int packedLightIn,
-			AbstractClientPlayer entitylivingbaseIn,
-			float limbSwing,
-			float limbSwingAmount,
-			float partialTicks,
-			float ageInTicks,
-			float netHeadYaw,
-			float headPitch) {
+	public void submit(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
 		if (player2renderer == null) {
 			return;
 		}
-		RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> renderer = player2renderer.getIfPresent(entitylivingbaseIn.getGameProfile()
-				.getName());
+		String name = ((CosmeticRenderState) state).kiwi$getName();
+		if (name == null) {
+			return;
+		}
+		RenderLayer<AvatarRenderState, PlayerModel> renderer = player2renderer.getIfPresent(name);
 		if (renderer == null) {
-			String name = entitylivingbaseIn.getGameProfile().getName();
-			ResourceLocation id = Contributors.PLAYER_COSMETICS.get(name);
+			Identifier id = Contributors.PLAYER_COSMETICS.get(name);
 			if (id != null) {
 				ITierProvider provider = Contributors.REWARD_PROVIDERS.get(id.getNamespace().toLowerCase(Locale.ENGLISH));
 				if (provider == null) {
@@ -66,22 +58,13 @@ public class CosmeticLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
 			}
 		}
 		if (renderer != null) {
-			renderer.render(
-					matrixStackIn,
-					bufferIn,
-					packedLightIn,
-					entitylivingbaseIn,
-					limbSwing,
-					limbSwingAmount,
-					partialTicks,
-					ageInTicks,
-					netHeadYaw,
-					headPitch);
+			renderer.submit(poseStack, submitNodeCollector, lightCoords, state, yRot, xRot);
 		}
 	}
 
-	public Cache<String, RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>>> getCache() {
+	public Cache<String, RenderLayer<AvatarRenderState, PlayerModel>> getCache() {
 		return player2renderer;
 	}
 
 }
+

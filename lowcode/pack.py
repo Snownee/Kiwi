@@ -11,6 +11,7 @@ def main():
         pack('kiwicustomization')
         pack('persistentcreativeinventory')
         pack('fastscroll')
+        pack('minieffects')
         return
     pack(sys.argv[1])
 

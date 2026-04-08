@@ -10,12 +10,12 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.common.NeoForge;
@@ -33,8 +33,8 @@ import snownee.kiwi.network.KPacketSender;
 public class Contributors extends AbstractModule {
 
 	public static final Map<String, ITierProvider> REWARD_PROVIDERS = Maps.newConcurrentMap();
-	public static final Map<String, ResourceLocation> PLAYER_COSMETICS = Maps.newConcurrentMap();
-	private static final Set<ResourceLocation> RENDERABLES = Sets.newLinkedHashSet();
+	public static final Map<String, Identifier> PLAYER_COSMETICS = Maps.newConcurrentMap();
+	private static final Set<Identifier> RENDERABLES = Sets.newLinkedHashSet();
 	private static int DAY = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
 
 	public static boolean isContributor(String author, String playerName) {
@@ -48,27 +48,27 @@ public class Contributors extends AbstractModule {
 	}
 
 	public static boolean isContributor(String author, Player player) {
-		return isContributor(author, player.getGameProfile().getName());
+		return isContributor(author, player.getGameProfile().name());
 	}
 
 	public static boolean isContributor(String author, Player player, String tier) {
-		return isContributor(author, player.getGameProfile().getName(), tier);
+		return isContributor(author, player.getGameProfile().name(), tier);
 	}
 
-	public static Set<ResourceLocation> getPlayerTiers(String playerName) {
+	public static Set<Identifier> getPlayerTiers(String playerName) {
 		/* off */
 		return REWARD_PROVIDERS.values().stream()
 				.flatMap(tp -> tp.getPlayerTiers(playerName).stream()
-						.map(s -> ResourceLocation.fromNamespaceAndPath(tp.getAuthor().toLowerCase(Locale.ENGLISH), s)))
+						.map(s -> Identifier.fromNamespaceAndPath(tp.getAuthor().toLowerCase(Locale.ENGLISH), s)))
 				.collect(Collectors.toSet());
 		/* on */
 	}
 
-	public static Set<ResourceLocation> getTiers() {
+	public static Set<Identifier> getTiers() {
 		/* off */
 		return REWARD_PROVIDERS.values().stream()
 				.flatMap(tp -> tp.getTiers().stream()
-						.map(s -> ResourceLocation.fromNamespaceAndPath(tp.getAuthor().toLowerCase(Locale.ENGLISH), s)))
+						.map(s -> Identifier.fromNamespaceAndPath(tp.getAuthor().toLowerCase(Locale.ENGLISH), s)))
 				.collect(Collectors.toSet());
 		/* on */
 	}
@@ -77,12 +77,12 @@ public class Contributors extends AbstractModule {
 		String namespace = rewardProvider.getAuthor().toLowerCase(Locale.ENGLISH);
 		REWARD_PROVIDERS.put(namespace, rewardProvider);
 		for (String tier : rewardProvider.getRenderableTiers()) {
-			RENDERABLES.add(ResourceLocation.fromNamespaceAndPath(namespace, tier));
+			RENDERABLES.add(Identifier.fromNamespaceAndPath(namespace, tier));
 		}
 	}
 
-	public static void changeCosmetic(ServerPlayer player, @Nullable ResourceLocation cosmetic) {
-		String playerName = player.getGameProfile().getName();
+	public static void changeCosmetic(ServerPlayer player, @Nullable Identifier cosmetic) {
+		String playerName = player.getGameProfile().name();
 		canPlayerUseCosmetic(playerName, cosmetic).thenAccept(bl -> {
 			if (bl) {
 				SSyncCosmeticPacket packet;
@@ -93,17 +93,17 @@ public class Contributors extends AbstractModule {
 					PLAYER_COSMETICS.put(playerName, cosmetic);
 					packet = new SSyncCosmeticPacket(Map.of(playerName, cosmetic), List.of());
 				}
-				KPacketSender.sendToAll(packet, player.server);
+				KPacketSender.sendToAll(packet, player.level().getServer());
 			}
 		});
 	}
 
-	public static boolean isRenderable(ResourceLocation id) {
+	public static boolean isRenderable(Identifier id) {
 		refreshRenderables();
 		return RENDERABLES.contains(id);
 	}
 
-	public static Set<ResourceLocation> getRenderableTiers() {
+	public static Set<Identifier> getRenderableTiers() {
 		refreshRenderables();
 		return Collections.unmodifiableSet(RENDERABLES);
 	}
@@ -116,13 +116,13 @@ public class Contributors extends AbstractModule {
 			for (Entry<String, ITierProvider> entry : REWARD_PROVIDERS.entrySet()) {
 				String namespace = entry.getKey();
 				for (String tier : entry.getValue().getRenderableTiers()) {
-					RENDERABLES.add(ResourceLocation.fromNamespaceAndPath(namespace, tier));
+					RENDERABLES.add(Identifier.fromNamespaceAndPath(namespace, tier));
 				}
 			}
 		}
 	}
 
-	public static CompletableFuture<Boolean> canPlayerUseCosmetic(String playerName, @Nullable ResourceLocation cosmetic) {
+	public static CompletableFuture<Boolean> canPlayerUseCosmetic(String playerName, @Nullable Identifier cosmetic) {
 		if (cosmetic == null || cosmetic.getPath().isEmpty()) { // Set to empty
 			return CompletableFuture.completedFuture(Boolean.TRUE);
 		}
@@ -147,13 +147,13 @@ public class Contributors extends AbstractModule {
 		registerTierProvider(new KiwiTierProvider());
 		NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedInEvent e) -> {
 			Player player = e.getEntity();
-			if (player.getServer() != null && !player.getServer().isSingleplayerOwner(player.getGameProfile())) {
+			if (player.level().getServer() != null && !player.level().getServer().isSingleplayerOwner(player.nameAndId())) {
 				KPacketSender.send(new SSyncCosmeticPacket(Map.copyOf(PLAYER_COSMETICS), List.of()), player);
 			}
 		});
 		if (!Platform.isPhysicalClient()) {
 			NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedOutEvent e) -> {
-				PLAYER_COSMETICS.remove(e.getEntity().getGameProfile().getName());
+				PLAYER_COSMETICS.remove(e.getEntity().getGameProfile().name());
 			});
 		}
 	}

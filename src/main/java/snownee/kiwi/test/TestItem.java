@@ -7,7 +7,6 @@ import com.google.common.collect.Lists;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -43,7 +42,7 @@ public class TestItem extends ModItem {
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, InteractionHand handIn) {
+	public InteractionResult use(Level worldIn, Player playerIn, InteractionHand handIn) {
 		//        if (worldIn.isRemote)
 		//        {
 		//            Vec3 start = playerIn.getEyePosition(1).add(playerIn.getLookVec().scale(3));
@@ -72,6 +71,6 @@ public class TestItem extends ModItem {
 		MathUtil.posOnLine(start, end, list);
 		posList = list;
 
-		return new InteractionResultHolder<>(InteractionResult.SUCCESS, stack);
+		return InteractionResult.SUCCESS;
 	}
 }

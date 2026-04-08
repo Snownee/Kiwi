@@ -3,60 +3,44 @@ package snownee.kiwi.contributor.impl.client.layer;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 
-import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
-import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.item.ElytraItem;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.item.Items;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.contributor.client.CosmeticLayer;
 import snownee.kiwi.contributor.impl.client.model.SunnyMilkModel;
 
 public class SunnyMilkLayer extends CosmeticLayer {
-	private static final ResourceLocation TEXTURE = Kiwi.id("textures/reward/sunny_milk.png");
+	private static final Identifier TEXTURE = Kiwi.id("textures/reward/sunny_milk.png");
 	private static final Supplier<LayerDefinition> definition = Suppliers.memoize(SunnyMilkModel::create);
-	private final SunnyMilkModel<AbstractClientPlayer> model;
+	private final SunnyMilkModel model;
 
-	public SunnyMilkLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> entityRendererIn) {
+	public SunnyMilkLayer(RenderLayerParent<AvatarRenderState, PlayerModel> entityRendererIn) {
 		super(entityRendererIn);
-		model = new SunnyMilkModel<>(definition.get());
+		model = new SunnyMilkModel(definition.get());
 	}
 
 	@Override
-	public void render(
-			PoseStack matrixStackIn,
-			MultiBufferSource bufferIn,
-			int packedLightIn,
-			AbstractClientPlayer entitylivingbaseIn,
-			float limbSwing,
-			float limbSwingAmount,
-			float partialTicks,
-			float ageInTicks,
-			float netHeadYaw,
-			float headPitch) {
-		if (entitylivingbaseIn.isInvisible() || entitylivingbaseIn.isSleeping()) {
+	public void submit(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
+		if (state.isInvisible || state.hasPose(Pose.SLEEPING)) {
 			return;
 		}
-		ItemStack itemstack = entitylivingbaseIn.getItemBySlot(EquipmentSlot.CHEST);
-		if (itemstack.getItem() instanceof ElytraItem) {
+		if (state.chestEquipment.is(Items.ELYTRA)) {
 			return;
 		}
-		matrixStackIn.pushPose();
-		model.young = entitylivingbaseIn.isBaby();
-		model.setupAnim(entitylivingbaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-		VertexConsumer ivertexbuilder = ItemRenderer.getFoilBuffer(bufferIn, RenderType.entityTranslucent(TEXTURE), false, false);
-		renderer.getModel().body.translateAndRotate(matrixStackIn);
-		model.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY);
-		matrixStackIn.popPose();
+		poseStack.pushPose();
+		model.setupAnim(state);
+		renderer.getModel().body.translateAndRotate(poseStack);
+		submitNodeCollector.submitModel(model, state, poseStack, RenderTypes.entityTranslucent(TEXTURE), lightCoords, OverlayTexture.NO_OVERLAY, state.outlineColor, null);
+		poseStack.popPose();
 	}
 
 }

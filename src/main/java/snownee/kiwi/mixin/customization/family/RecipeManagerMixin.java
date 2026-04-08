@@ -1,7 +1,7 @@
 package snownee.kiwi.mixin.customization.family;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -20,18 +20,6 @@ import snownee.kiwi.customization.block.family.StonecutterRecipeMaker;
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 @Mixin(RecipeManager.class)
 public class RecipeManagerMixin {
-
-	@ModifyReturnValue(method = "getRecipesFor", at = @At(value = "RETURN"))
-	private <C extends RecipeInput, T extends Recipe<C>> List<RecipeHolder<T>> kiwi$addFakeStonecutterRecipes(
-			List<RecipeHolder<T>> recipes,
-			RecipeType<T> pRecipeType,
-			C pInventory) {
-		if (pRecipeType == RecipeType.STONECUTTING) {
-			return StonecutterRecipeMaker.appendRecipesFor(recipes, pInventory);
-		}
-		return recipes;
-	}
-
 	@ModifyReturnValue(
 			method = "getRecipeFor(Lnet/minecraft/world/item/crafting/RecipeType;Lnet/minecraft/world/item/crafting/RecipeInput;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/crafting/RecipeHolder;)Ljava/util/Optional;",
 			at = @At("RETURN"))
@@ -42,7 +30,7 @@ public class RecipeManagerMixin {
 			Level level,
 			@Nullable RecipeHolder<T> pLastRecipe) {
 		if (pRecipeType == RecipeType.STONECUTTING && original.isEmpty()) {
-			return StonecutterRecipeMaker.appendRecipesFor(List.<RecipeHolder<T>>of(), pInventory).stream().findAny();
+			return StonecutterRecipeMaker.appendRecipesFor(Stream.<RecipeHolder<T>>empty(), pInventory).findAny();
 		}
 		return original;
 	}

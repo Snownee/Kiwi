@@ -7,7 +7,6 @@
 	"refmap": "kiwi.refmap.json",
 	"mixins": [
 		"GameDataMixin",
-		"RecipeManagerMixin",
 		"customization.AbstractContainerMenuMixin",
 		"customization.BlockBehaviourMixin",
 		"customization.BlockEntityTypeMixin",
@@ -15,9 +14,11 @@
 		"customization.BlockPropertiesMixin",
 		"customization.BlockStateMixin",
 		"customization.BushBlockMixin",
+		"customization.CrossCollisionBlockAccessor",
 		"customization.HalfTransparentBlockMixin",
-		"customization.Ingredient_TagValueAccess",
+		"customization.WallBlockAccessor",
 		"customization.family.RecipeManagerMixin",
+		"customization.family.RecipeMapMixin",
 		"customization.fastsuite.AuxRecipeManagerMixin",
 		"customization.forge.IBlockStateExtensionMixin",
 		"customization.placement.BlockItemGetPlacementStateMixin",
@@ -30,9 +31,13 @@
 		"customization.sit.EntityMixin"
 	],
 	"client": [
+		"client.AvatarRendererMixin",
+		"client.AvatarRenderStateMixin",
 		"client.ClientTelemetryManagerMixin",
 		"client.CreativeModeInventoryScreenMixin",
 		"client.FogRendererMixin",
+		"client.KeyboardHandlerMixin",
+		"client.LavaFogEnvironmentMixin",
 		"client.LoadingOverlayMixin",
 		"client.NeoForgeLoadingOverlayMixin",
 		"client.OptionInstanceMixin",
@@ -46,7 +51,11 @@
 		"customization.sit.ClientPacketListenerMixin",
 		"customization.sit.LocalPlayerMixin",
 		"forge.BlockColorsAccess",
-		"forge.ItemColorsAccess"
+		"minieffects.CreativeModeInventoryScreenMixin",
+		"minieffects.EffectsInInventoryMixin",
+		"minieffects.EffectsInInventoryPositionMixin",
+		"minieffects.InventoryScreenMixin",
+		"minieffects.jei.InventoryEffectRendererGuiHandlerMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

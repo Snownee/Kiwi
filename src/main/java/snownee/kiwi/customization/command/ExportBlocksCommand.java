@@ -5,14 +5,13 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
@@ -25,8 +24,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.language.LanguageManager;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -34,7 +31,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.CsvOutput;
 import net.minecraft.world.level.block.Block;
@@ -53,7 +50,6 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiClientConfig;
-import snownee.kiwi.RenderLayerEnum;
 import snownee.kiwi.customization.CustomizationHooks;
 import snownee.kiwi.customization.CustomizationRegistries;
 import snownee.kiwi.customization.block.KBlockSettings;
@@ -118,7 +114,6 @@ public class ExportBlocksCommand {
 			}
 			row.put("Name:" + languageCode, "");
 			row.put("Template", "");
-			row.put("RenderType", "");
 			row.put("LightEmission", "");
 			row.put("GlassType", "");
 			row.put("SustainsPlant", "");
@@ -147,13 +142,13 @@ public class ExportBlocksCommand {
 					(builder1, builder2) -> {
 						throw new UnsupportedOperationException();
 					}).build(writer);
-			for (Block block : GameObjectLookup.all(Registries.BLOCK, modId).toList()) {
+			for (Block block : GameObjectLookup.all(source.registryAccess(), Registries.BLOCK, modId).toList()) {
 				String template = TEMPLATE_MAPPING.get().getOrDefault(block.getClass(), "block");
 				if ("ignore".equals(template)) {
 					continue;
 				}
 				if ("door".equals(template) || "trapdoor".equals(template)) {
-					Codec<Block> codec = BlockCodecs.get(ResourceLocation.parse(template)).codec();
+					Codec<Block> codec = BlockCodecs.get(Identifier.parse(template)).codec();
 					template += toYaml(codec, block, json -> {
 						json.getAsJsonObject().remove(BlockCodecs.BLOCK_PROPERTIES_KEY);
 						return json;
@@ -169,16 +164,6 @@ public class ExportBlocksCommand {
 						row.put("Name:" + languageCode, "");
 					}
 				}
-				RenderLayerEnum layer = null;
-				RenderType renderType = ItemBlockRenderTypes.getChunkRenderType(block.defaultBlockState());
-				if (renderType == RenderType.cutout()) {
-					layer = RenderLayerEnum.CUTOUT;
-				} else if (renderType == RenderType.cutoutMipped()) {
-					layer = RenderLayerEnum.CUTOUT_MIPPED;
-				} else if (renderType == RenderType.translucent()) {
-					layer = RenderLayerEnum.TRANSLUCENT;
-				}
-				row.put("RenderType", layer == null ? "solid" : layer.name().toLowerCase(Locale.ENGLISH));
 				int lightEmission = -1;
 				for (BlockState blockState : block.getStateDefinition().getPossibleStates()) {
 					if (lightEmission == -1) {

@@ -8,7 +8,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.component.TypedDataComponent;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import snownee.kiwi.customization.item.KItemSettings;
 
@@ -18,8 +18,8 @@ public record KItemDefinition(ConfiguredItemTemplate template, ItemDefinitionPro
 		this.properties = template.template().properties().map(properties::merge).orElse(properties);
 	}
 
-	public static Codec<KItemDefinition> codec(Map<ResourceLocation, KItemTemplate> templates) {
-		KItemTemplate defaultTemplate = templates.get(ResourceLocation.withDefaultNamespace("item"));
+	public static Codec<KItemDefinition> codec(Map<Identifier, KItemTemplate> templates) {
+		KItemTemplate defaultTemplate = templates.get(Identifier.withDefaultNamespace("item"));
 		Preconditions.checkNotNull(defaultTemplate);
 		ConfiguredItemTemplate defaultConfiguredTemplate = new ConfiguredItemTemplate(defaultTemplate);
 		return RecordCodecBuilder.create(instance -> instance.group(
@@ -31,13 +31,13 @@ public record KItemDefinition(ConfiguredItemTemplate template, ItemDefinitionPro
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	public KItemSettings.Builder createSettings(ResourceLocation id) {
+	public KItemSettings.Builder createSettings(Identifier id) {
 		KItemSettings.Builder builder = KItemSettings.builder();
 		ItemDefinitionProperties.PartialVanillaProperties vanilla = properties.vanillaProperties();
 		builder.configure($ -> {
 			vanilla.maxStackSize().ifPresent($::stacksTo);
 			vanilla.maxDamage().ifPresent($::durability);
-			vanilla.craftingRemainingItem().map(BuiltInRegistries.ITEM::get).ifPresent($::craftRemainder);
+			vanilla.craftingRemainingItem().map(BuiltInRegistries.ITEM::getValue).ifPresent($::craftRemainder);
 			vanilla.components().ifPresent(componentMap -> {
 				for (TypedDataComponent component : componentMap) {
 					$.component(component.type(), component.value());
@@ -47,7 +47,7 @@ public record KItemDefinition(ConfiguredItemTemplate template, ItemDefinitionPro
 		return builder;
 	}
 
-	public Item createItem(ResourceLocation id) {
+	public Item createItem(Identifier id) {
 		KItemSettings.Builder builder = createSettings(id);
 		return template.template().createItem(id, builder.get(), template.json());
 	}

@@ -1,12 +1,12 @@
 package snownee.kiwi.recipe;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.mojang.serialization.MapCodec;
 
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.crafting.Ingredient;
 
 /**
@@ -30,14 +30,14 @@ public interface CustomIngredientSerializer<T extends CustomIngredient> {
 	 * {@return the custom ingredient serializer registered with the given identifier, or {@code null} if there is no such serializer}.
 	 */
 	@Nullable
-	static CustomIngredientSerializer<?> get(ResourceLocation identifier) {
+	static CustomIngredientSerializer<?> get(Identifier identifier) {
 		return CustomIngredientImpl.getSerializer(identifier);
 	}
 
 	/**
 	 * {@return the identifier of this serializer}.
 	 */
-	ResourceLocation getIdentifier();
+	Identifier getIdentifier();
 
 	/**
 	 * {@return the codec}.

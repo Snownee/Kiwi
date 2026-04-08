@@ -1,11 +1,14 @@
 package snownee.kiwi.util.codec;
 
-import java.util.List;
-
-import com.mojang.serialization.Codec;
+import java.util.function.Function;
 
 public final class KCodecs {
-	public static <T> Codec<List<T>> compactList(Codec<T> elementCodec) {
-		return Codec.withAlternative(elementCodec.listOf(), elementCodec, List::of);
+	private KCodecs() {
+	}
+
+	public static <A, B> Function<A, B> unsupportedGetter() {
+		return $ -> {
+			throw new UnsupportedOperationException();
+		};
 	}
 }

@@ -15,7 +15,7 @@ import snownee.kiwi.customization.block.KBlockSettings;
 public abstract class BlockMixin {
 	// This method was in Block, thus the class name.
 	@Inject(method = "propagatesSkylightDown", at = @At("HEAD"), cancellable = true)
-	private void kiwi$propagatesSkylightDown(BlockState pState, BlockGetter pLevel, BlockPos pPos, CallbackInfoReturnable<Boolean> cir) {
+	private void kiwi$propagatesSkylightDown(BlockState state, CallbackInfoReturnable<Boolean> cir) {
 		KBlockSettings settings = KBlockSettings.of(this);
 		if (settings != null && settings.glassType != null) {
 			cir.setReturnValue(true);

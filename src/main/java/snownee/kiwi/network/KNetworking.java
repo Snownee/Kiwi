@@ -39,6 +39,10 @@ public final class KNetworking {
 		});
 	}
 
+	public static void processClass(KiwiAnnotationData annotationData, IEventBus modEventBus) {
+		new KNetworking(modEventBus).processClass(annotationData);
+	}
+
 	public void processClass(KiwiAnnotationData annotationData) {
 		try {
 			String packetClassName = annotationData.getTarget();

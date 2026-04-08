@@ -1,5 +1,8 @@
 package snownee.kiwi.test;
 
+import org.jspecify.annotations.Nullable;
+
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.effect.InstantenousMobEffect;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
@@ -23,11 +26,11 @@ public class TestModule extends AbstractModule {
 
 	// Register a simple item
 	@Category(value = Categories.FOOD_AND_DRINKS, after = "apple")
-	public static final KiwiGO<TestItem> FIRST_ITEM = go(() -> new TestItem(itemProp().rarity(Rarity.EPIC)));
-	public static final KiwiGO<TestItem> ITEM2 = go(() -> new TestItem(itemProp()));
+	public static final KiwiGO<TestItem> FIRST_ITEM = go(Registries.ITEM, key -> new TestItem(itemProp().setId(key)));
+	public static final KiwiGO<TestItem> ITEM2 = go(Registries.ITEM, key -> new TestItem(itemProp().setId(key)));
 	@Category(value = Categories.FOOD_AND_DRINKS, after = "kiwi:item2")
-	public static final KiwiGO<TestItem> ITEM3 = go(() -> new TestItem(itemProp()));
-	public static final KiwiGO<TestItem> ITEM4 = go(() -> new TestItem(itemProp()));
+	public static final KiwiGO<TestItem> ITEM3 = go(Registries.ITEM, key -> new TestItem(itemProp().setId(key)));
+	public static final KiwiGO<TestItem> ITEM4 = go(Registries.ITEM, key -> new TestItem(itemProp().setId(key)));
 
 	// The next block will use this builder to build its BlockItem. After that this field will be null
 	public static Item.Properties FIRST_BLOCK_ITEM_BUILDER = itemProp().rarity(Rarity.RARE);
@@ -40,16 +43,16 @@ public class TestModule extends AbstractModule {
 	public static final KiwiGO<MobEffect> FIRST_EFFECT = go(() -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0xFF0000));
 
 	// And its potion
-	public static final KiwiGO<Potion> FIRST_POTION = go(() -> new Potion(new MobEffectInstance(
-			FIRST_EFFECT.holder().orElseThrow(),
-			1800)));
+	public static final KiwiGO<Potion> FIRST_POTION = go(() -> new Potion(
+			"kiwi.test.first_potion",
+			new MobEffectInstance(FIRST_EFFECT.holder().orElseThrow(), 1800)));
 
 //	public static final KiwiGO<BlockEntityType<TestBlockEntity>> FIRST_TILE = blockEntity(TestBlockEntity::new, null, FIRST_BLOCK);
 
 //	public static final KiwiGO<TestBlock> TEX_BLOCK = go(() -> new TestBlock(blockProp()));
 //	public static final KiwiGO<BlockEntityType<TexBlockEntity>> TEX_TILE = blockEntity(TexBlockEntity::new, null, TEX_BLOCK);
 
-	public static TestModule INSTANCE;
+	public static @Nullable TestModule INSTANCE;
 
 	public static final KiwiGO<RecipeType<?>> RECIPE_TYPE = go(() -> {
 		return new RecipeType<>() {

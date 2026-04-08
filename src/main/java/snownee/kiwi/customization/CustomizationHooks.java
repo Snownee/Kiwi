@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -19,7 +19,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
@@ -95,8 +95,8 @@ public final class CustomizationHooks {
 
 	// a custom implementation of the Block.shouldRenderFace
 	private static final int CACHE_SIZE = 512;
-	private static final ThreadLocal<Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey>> OCCLUSION_CACHE = ThreadLocal.withInitial(() -> {
-		Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey> object2bytelinkedopenhashmap = new Object2ByteLinkedOpenHashMap<>(
+	private static final ThreadLocal<Object2ByteLinkedOpenHashMap<BlockStatePairKey>> OCCLUSION_CACHE = ThreadLocal.withInitial(() -> {
+		Object2ByteLinkedOpenHashMap<BlockStatePairKey> object2bytelinkedopenhashmap = new Object2ByteLinkedOpenHashMap<>(
 				CACHE_SIZE,
 				0.25F) {
 			@Override
@@ -122,8 +122,8 @@ public final class CustomizationHooks {
 		if (!pState.is(pAdjacentBlockState.getBlock()) && glassType != getGlassType(pAdjacentBlockState)) {
 			return false;
 		}
-		Block.BlockStatePairKey key = new Block.BlockStatePairKey(pState, pAdjacentBlockState, pDirection);
-		Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey> map = OCCLUSION_CACHE.get();
+		BlockStatePairKey key = new BlockStatePairKey(pState, pAdjacentBlockState, pDirection);
+		Object2ByteLinkedOpenHashMap<BlockStatePairKey> map = OCCLUSION_CACHE.get();
 		byte b0 = map.getAndMoveToFirst(key);
 		if (b0 != 127) {
 			return b0 == 0;
@@ -204,7 +204,7 @@ public final class CustomizationHooks {
 		});
 		forgeEventBus.addListener((PlayerInteractEvent.RightClickBlock event) -> {
 			if (event.getHand() == InteractionHand.MAIN_HAND && SitManager.sit(event.getEntity(), event.getHitVec())) {
-				event.setCancellationResult(InteractionResult.sidedSuccess(event.getLevel().isClientSide));
+				event.setCancellationResult(event.getLevel().isClientSide() ? InteractionResult.SUCCESS : InteractionResult.CONSUME);
 				event.setCanceled(true);
 			}
 		});
@@ -232,15 +232,15 @@ public final class CustomizationHooks {
 				context));
 
 		BlockFundamentals blockFundamentals = BlockFundamentals.reload(resourceManager, context, true);
-		clearGlassType = blockFundamentals.glassTypes().get(ResourceLocation.withDefaultNamespace("clear"));
+		clearGlassType = blockFundamentals.glassTypes().get(Identifier.withDefaultNamespace("clear"));
 		Preconditions.checkNotNull(clearGlassType, "Missing 'clear' glass type");
 		blockNamespaces.clear();
-		blockFundamentals.blocks().keySet().stream().map(ResourceLocation::getNamespace).forEach(blockNamespaces::add);
+		blockFundamentals.blocks().keySet().stream().map(Identifier::getNamespace).forEach(blockNamespaces::add);
 		lenientBETypeNamespaces.clear();
-		lenientBETypeNamespaces.add(ResourceLocation.DEFAULT_NAMESPACE);
+		lenientBETypeNamespaces.add(Identifier.DEFAULT_NAMESPACE);
 		lenientBETypeNamespaces.addAll(blockNamespaces);
 		metadataMap.values().forEach(metadata -> lenientBETypeNamespaces.addAll(metadata.lenientBETypeNamespaces()));
-		List<ResourceLocation> blockIds = Lists.newArrayList();
+		List<Identifier> blockIds = Lists.newArrayList();
 		CustomizationMetadata.sortedForEach(
 				metadataMap, "block", blockFundamentals.blocks(), (id, definition) -> {
 					try {
@@ -262,12 +262,12 @@ public final class CustomizationHooks {
 				context));
 
 		ItemFundamentals itemFundamentals = ItemFundamentals.reload(resourceManager, context, true);
-		for (ResourceLocation blockId : blockIds) {
+		for (Identifier blockId : blockIds) {
 			if (!itemFundamentals.items().containsKey(blockId)) {
 				itemFundamentals.addDefaultBlockItem(blockId);
 			}
 		}
-		KItemTemplate none = itemFundamentals.templates().get(ResourceLocation.withDefaultNamespace("none"));
+		KItemTemplate none = itemFundamentals.templates().get(Identifier.withDefaultNamespace("none"));
 		Preconditions.checkNotNull(none, "Missing 'none' item definition");
 		CustomizationMetadata.sortedForEach(
 				metadataMap, List.of("item", "block"), itemFundamentals.items(), (id, definition) -> {
@@ -291,7 +291,7 @@ public final class CustomizationHooks {
 					new ClientProxy.Context(ClientModLoader.isLoading(), modEventBus));
 		}
 		var tabs = OneTimeLoader.load(resourceManager, "kiwi/creative_tab", KCreativeTab.CODEC, context);
-		List<Map.Entry<ResourceLocation, KCreativeTab>> newTabs = tabs.entrySet().stream().sorted(Comparator.comparingInt($ -> $.getValue()
+		List<Map.Entry<Identifier, KCreativeTab>> newTabs = tabs.entrySet().stream().sorted(Comparator.comparingInt($ -> $.getValue()
 				.order())).filter(entry -> {
 			KCreativeTab value = entry.getValue();
 			if (value.insert().isPresent()) {
@@ -301,8 +301,8 @@ public final class CustomizationHooks {
 			return true;
 		}).toList();
 		for (int i = 0; i < newTabs.size(); i++) {
-			Map.Entry<ResourceLocation, KCreativeTab> entry = newTabs.get(i);
-			ResourceLocation key = entry.getKey();
+			Map.Entry<Identifier, KCreativeTab> entry = newTabs.get(i);
+			Identifier key = entry.getKey();
 			KCreativeTab value = entry.getValue();
 			CreativeModeTab.Builder tab = AbstractModule.itemCategory(
 							key,
@@ -310,15 +310,15 @@ public final class CustomizationHooks {
 					.displayItems((params, output) -> {
 						output.acceptAll(value.contents()
 								.stream()
-								.map(BuiltInRegistries.ITEM::get)
+								.map(BuiltInRegistries.ITEM::getValue)
 								.filter(Objects::nonNull)
 								.map(Item::getDefaultInstance)
 								.toList());
 					});
 			if (i > 0) {
-				tab.withTabsBefore(CreativeModeTabs.SPAWN_EGGS.location(), newTabs.get(i - 1).getKey());
+				tab.withTabsBefore(newTabs.get(i - 1).getKey(), CreativeModeTabs.SPAWN_EGGS.identifier());
 			} else {
-				tab.withTabsBefore(CreativeModeTabs.SPAWN_EGGS.location());
+				tab.withTabsBefore(CreativeModeTabs.SPAWN_EGGS);
 			}
 			if (i < newTabs.size() - 1) {
 				tab.withTabsAfter(newTabs.get(i + 1).getKey());
@@ -332,6 +332,9 @@ public final class CustomizationHooks {
 		}
 	}
 
+	private record BlockStatePairKey(BlockState pState, BlockState pAdjacentBlockState, Direction pDirection) {
+	}
+
 	private static void insertToTab(IEventBus modEventBus, KCreativeTab kCreativeTab) {
 		if (!Platform.isPhysicalClient()) {
 			return;
@@ -341,7 +344,7 @@ public final class CustomizationHooks {
 				return;
 			}
 			for (ResourceKey<Item> content : kCreativeTab.contents()) {
-				Item item = BuiltInRegistries.ITEM.get(content);
+				Item item = BuiltInRegistries.ITEM.getValue(content);
 				if (item == null) {
 					return;
 				}

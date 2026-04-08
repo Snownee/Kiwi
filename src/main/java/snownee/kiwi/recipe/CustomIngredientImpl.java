@@ -5,29 +5,27 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.Maps;
 import com.mojang.serialization.MapCodec;
 
+import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.crafting.ICustomIngredient;
 import net.neoforged.neoforge.common.crafting.IngredientType;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.neoforged.neoforge.registries.RegisterEvent;
 
-@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD)
 public record CustomIngredientImpl<T extends CustomIngredient>(T ingredient) implements ICustomIngredient {
-	static final Map<ResourceLocation, CustomIngredientSerializer<?>> REGISTERED_SERIALIZERS = new ConcurrentHashMap<>();
+	static final Map<Identifier, CustomIngredientSerializer<?>> REGISTERED_SERIALIZERS = new ConcurrentHashMap<>();
 	private static final Map<CustomIngredientSerializer<?>, IngredientType<?>> INGREDIENT_TYPES = Maps.newIdentityHashMap();
 
-	@SubscribeEvent
-	private static void onRegister(RegisterEvent event) {
+	public static void onRegister(RegisterEvent event) {
 		event.register(
 				NeoForgeRegistries.INGREDIENT_TYPES.key(), helper -> {
 					INGREDIENT_TYPES.forEach((serializer, type) -> helper.register(serializer.getIdentifier(), type));
@@ -56,7 +54,7 @@ public record CustomIngredientImpl<T extends CustomIngredient>(T ingredient) imp
 	}
 
 	@Nullable
-	public static CustomIngredientSerializer<?> getSerializer(ResourceLocation identifier) {
+	public static CustomIngredientSerializer<?> getSerializer(Identifier identifier) {
 		Objects.requireNonNull(identifier, "Identifier may not be null.");
 
 		return REGISTERED_SERIALIZERS.get(identifier);
@@ -67,9 +65,13 @@ public record CustomIngredientImpl<T extends CustomIngredient>(T ingredient) imp
 		return ingredient.test(itemStack);
 	}
 
-	@Override
 	public Stream<ItemStack> getItems() {
 		return this.ingredient.getMatchingStacks().stream();
+	}
+
+	@Override
+	public Stream<Holder<Item>> items() {
+		return getItems().map(ItemStack::getItem).map(item -> (Holder<Item>) item.builtInRegistryHolder()).distinct();
 	}
 
 	@Override

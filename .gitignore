@@ -27,3 +27,8 @@ forge*changelog.txt
 /CHANGELOG.md
 /lowcode/*.jar
 /runs
+
+kiwi-src/
+
+context/
+.compare/

@@ -8,14 +8,14 @@ import dev.emi.emi.api.recipe.EmiRecipeCategory;
 import dev.emi.emi.api.recipe.EmiResolutionRecipe;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import snownee.kiwi.customization.block.family.BlockFamily;
 import snownee.kiwi.util.KHolder;
 
 public class KSwitchGroupRecipe extends EmiIngredientRecipe {
 	private final EmiIngredient ingredient;
 	private final List<EmiStack> stacks;
-	private final ResourceLocation id;
+	private final Identifier id;
 
 	public KSwitchGroupRecipe(KHolder<BlockFamily> family) {
 		ingredient = EmiIngredient.of(family.value().ingredientInViewer());
@@ -44,7 +44,7 @@ public class KSwitchGroupRecipe extends EmiIngredientRecipe {
 	}
 
 	@Override
-	public ResourceLocation getId() {
+	public Identifier getId() {
 		return id;
 	}
 }

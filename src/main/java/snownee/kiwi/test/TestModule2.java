@@ -1,7 +1,7 @@
 package snownee.kiwi.test;
 
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.CreativeModeTab;
@@ -22,18 +22,19 @@ import snownee.kiwi.util.VanillaActions;
 @KiwiModule.Optional(defaultEnabled = false)
 public class TestModule2 extends AbstractModule {
 	public static final KiwiGO<CreativeModeTab> TAB = go(() -> itemCategory(
-			ResourceLocation.fromNamespaceAndPath("my_mod", "items"),
+			Identifier.fromNamespaceAndPath("my_mod", "items"),
 			() -> new ItemStack(Items.DANDELION)).build());
 
 	public static final TagKey<EntityType<?>> BAT = entityTag("bat");
 
 	@Name("kiwi:test_item")
-	public static final KiwiGO<TestItem> FIRST_ITEM = go(() -> new TestItem(itemProp().rarity(Rarity.EPIC)) {
-		@Override
-		public boolean isFoil(ItemStack stack) {
-			return true;
-		}
-	});
+	public static final KiwiGO<TestItem> FIRST_ITEM = go(
+			Registries.ITEM, key -> new TestItem(itemProp().rarity(Rarity.EPIC).setId(key)) {
+				@Override
+				public boolean isFoil(ItemStack stack) {
+					return true;
+				}
+			});
 
 	@Name("minecraft:dandelion")
 	public static final KiwiGO<Item> DANDELION = ref(Registries.ITEM);

@@ -2,6 +2,8 @@ package snownee.kiwi.customization.compat.jei;
 
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import com.google.common.collect.Lists;
 
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
@@ -14,14 +16,14 @@ import mezz.jei.api.gui.widgets.IScrollGridWidget;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
-import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.AbstractRecipeCategory;
+import mezz.jei.api.recipe.types.IRecipeType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 
@@ -29,7 +31,7 @@ public class KSwitchGroupRecipeCategory extends AbstractRecipeCategory<KSwitchGr
 	private static final int WIDTH = 142;
 	private static final int HEIGHT = 110;
 
-	public KSwitchGroupRecipeCategory(IGuiHelper guiHelper, RecipeType<KSwitchGroupRecipe> recipeType) {
+	public KSwitchGroupRecipeCategory(IGuiHelper guiHelper, IRecipeType<KSwitchGroupRecipe> recipeType) {
 		super(
 				recipeType,
 				Component.translatable("emi.category.kiwi.kswitch"),
@@ -42,17 +44,17 @@ public class KSwitchGroupRecipeCategory extends AbstractRecipeCategory<KSwitchGr
 	@Override
 	public void setRecipe(IRecipeLayoutBuilder builder, KSwitchGroupRecipe recipe, IFocusGroup focuses) {
 		builder.addInputSlot()
-				.addIngredients(recipe.family().value().ingredient())
+				.add(recipe.family().value().ingredient())
 				.setStandardSlotBackground();
 
 		for (Holder.Reference<Item> item : recipe.family().value().itemHolders()) {
-			builder.addOutputSlot().addItemStack(item.value().getDefaultInstance());
+			builder.addOutputSlot().add(item.value().getDefaultInstance());
 		}
 	}
 
 	@Override
 	public void createRecipeExtras(IRecipeExtrasBuilder builder, KSwitchGroupRecipe recipe, IFocusGroup focuses) {
-		ResourceLocation key = recipe.family().key();
+		Identifier key = recipe.family().key();
 		List<FormattedText> text = Lists.newArrayList();
 		String langKey = "kiwi.family.%s".formatted(key.toLanguageKey());
 		if (I18n.exists(langKey)) {
@@ -77,7 +79,7 @@ public class KSwitchGroupRecipeCategory extends AbstractRecipeCategory<KSwitchGr
 	}
 
 	@Override
-	public ResourceLocation getRegistryName(KSwitchGroupRecipe recipe) {
+	public @Nullable Identifier getIdentifier(KSwitchGroupRecipe recipe) {
 		return recipe.family().key();
 	}
 }

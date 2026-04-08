@@ -2,12 +2,11 @@ package snownee.kiwi.customization.block.family;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -15,10 +14,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -36,8 +37,21 @@ public class StonecutterRecipeMaker {
 					1,
 					ChronoUnit.MINUTES)).build();
 
-	public static <C extends RecipeInput, T extends Recipe<C>> List<RecipeHolder<T>> appendRecipesFor(
-			List<RecipeHolder<T>> recipes,
+	public static List<RecipeHolder<StonecutterRecipe>> makeRecipes() {
+		List<RecipeHolder<StonecutterRecipe>> recipes = Lists.newArrayList();
+		for (KHolder<BlockFamily> family : BlockFamilies.all()) {
+			if (family.value().stonecutterExchange()) {
+				recipes.addAll(makeRecipes("exchange", family));
+			}
+			if (family.value().stonecutterSource().isPresent()) {
+				recipes.addAll(makeRecipes("to", family));
+			}
+		}
+		return recipes;
+	}
+
+	public static <C extends RecipeInput, T extends Recipe<C>> Stream<RecipeHolder<T>> appendRecipesFor(
+			Stream<RecipeHolder<T>> recipes,
 			C input) {
 		ItemStack itemStack = input.getItem(0);
 		if (itemStack.isEmpty()) {
@@ -88,9 +102,8 @@ public class StonecutterRecipeMaker {
 			return recipes;
 		}
 		//noinspection unchecked
-		return Streams.concat(recipes.stream(), exchangeRecipes.stream(), sourceRecipes.stream())
-				.map(r -> (RecipeHolder<T>) r)
-				.collect(Collectors.toCollection(ArrayList::new));
+		return Streams.concat(recipes, exchangeRecipes.stream(), sourceRecipes.stream())
+				.map(r -> (RecipeHolder<T>) r);
 	}
 
 	public static List<RecipeHolder<StonecutterRecipe>> makeRecipes(String type, KHolder<BlockFamily> family) {
@@ -101,7 +114,7 @@ public class StonecutterRecipeMaker {
 			default -> throw new IllegalArgumentException();
 		};
 		boolean exchangeInViewer = "exchange_in_viewer".equals(type);
-		ResourceLocation prefix = family.key().withPath("/stonecutter/%s/%s".formatted(
+		Identifier prefix = family.key().withPath("/stonecutter/%s/%s".formatted(
 				family.key().getPath(),
 				exchangeInViewer ? "exchange" : type));
 		return family.value().items().map(item -> {
@@ -109,7 +122,11 @@ public class StonecutterRecipeMaker {
 			if ("to".equals(type)) {
 				count = family.value().stonecutterSourceMultiplier();
 			} else {
-				count = Mth.floor(1 / BlockFamilies.getConvertRatio(item));
+				long matValue = BlockFamilies.getMatValue(item);
+				if (matValue < BlockFamilies.BASE_MAT_VALUE) {
+					return null;
+				}
+				count = Math.min((int) (BlockFamilies.BASE_MAT_VALUE / matValue), 99);
 				if (count < 1) {
 					return null;
 				}
@@ -120,10 +137,11 @@ public class StonecutterRecipeMaker {
 					family.value().ingredientInViewer().test(itemStack)) {
 				return null;
 			}
-			ResourceLocation itemKey = BuiltInRegistries.ITEM.getKey(item);
+			ItemStackTemplate result = new ItemStackTemplate(item, count);
+			Identifier itemKey = BuiltInRegistries.ITEM.getKey(item);
 			var recipeId = prefix.withSuffix("/%s/%s".formatted(itemKey.getNamespace(), itemKey.getPath()));
-			var recipe = new StonecutterRecipe(prefix.toString(), input, itemStack);
-			return new RecipeHolder<>(recipeId, recipe);
+			var recipe = new StonecutterRecipe(new Recipe.CommonInfo(true), input, result);
+			return new RecipeHolder<>(ResourceKey.create(Registries.RECIPE, recipeId), recipe);
 		}).filter(Objects::nonNull).toList();
 	}
 

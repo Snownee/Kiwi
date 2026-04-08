@@ -18,17 +18,17 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
-import snownee.kiwi.util.codec.KCodecs;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class BlockFamily {
-	public static final Codec<BlockFamily> CODEC = ResourceLocation.CODEC.flatXmap(
+	public static final Codec<BlockFamily> CODEC = Identifier.CODEC.flatXmap(
 			$ -> {
 				BlockFamily family = BlockFamilies.get($);
 				if (family == null) {
@@ -37,7 +37,7 @@ public class BlockFamily {
 				return DataResult.success(family);
 			},
 			family -> {
-				ResourceLocation id = BlockFamilies.getKey(family);
+				Identifier id = BlockFamilies.getKey(family);
 				if (id == null) {
 					return DataResult.error(() -> "Block family " + family + " not registered");
 				}
@@ -53,14 +53,14 @@ public class BlockFamily {
 			ResourceKey.codec(Registries.ITEM).listOf()
 					.optionalFieldOf("items", List.of())
 					.forGetter($ -> $.itemHolders().stream().map(Holder.Reference::key).toList()),
-			KCodecs.compactList(ResourceKey.codec(Registries.ITEM))
+			ExtraCodecs.compactListCodec(ResourceKey.codec(Registries.ITEM))
 					.optionalFieldOf("exchange_inputs_in_viewer", List.of())
 					.forGetter($ -> $.exchangeInputsInViewer().stream().map(Holder.Reference::key).toList()),
 			Codec.BOOL.optionalFieldOf("stonecutter_exchange", false).forGetter(BlockFamily::stonecutterExchange),
 			ResourceKey.codec(Registries.ITEM)
 					.optionalFieldOf("stonecutter_from")
 					.forGetter($ -> $.stonecutterSource().map(Holder.Reference::key)),
-			Codec.intRange(1, 64).optionalFieldOf("stonecutter_from_multiplier", 1).forGetter(BlockFamily::stonecutterSourceMultiplier),
+			Codec.intRange(1, 99).optionalFieldOf("stonecutter_from_multiplier", 1).forGetter(BlockFamily::stonecutterSourceMultiplier),
 			SwitchAttrs.CODEC.optionalFieldOf("switch", SwitchAttrs.DISABLED).forGetter(BlockFamily::switchAttrs)
 	).apply(instance, BlockFamily::new));
 
@@ -84,7 +84,7 @@ public class BlockFamily {
 			int stonecutterFromMultiplier,
 			SwitchAttrs switchAttrs) {
 		this.blocks = blocks.stream().map($ -> {
-			Optional<Holder.Reference<Block>> holder = BuiltInRegistries.BLOCK.getHolder($);
+			Optional<Holder.Reference<Block>> holder = BuiltInRegistries.BLOCK.get($);
 			if (strict) {
 				Preconditions.checkArgument(holder.isPresent(), "Block %s not found", $);
 			}
@@ -97,16 +97,16 @@ public class BlockFamily {
 						.filter(Predicate.not(Items.AIR::equals))
 						.mapToInt(BuiltInRegistries.ITEM::getId)
 						.distinct()
-						.mapToObj(BuiltInRegistries.ITEM::getHolder)
+						.mapToObj(BuiltInRegistries.ITEM::get)
 						.map(Optional::orElseThrow), items.stream().map($ -> {
-					Optional<Holder.Reference<Item>> holder = BuiltInRegistries.ITEM.getHolder($);
+					Optional<Holder.Reference<Item>> holder = BuiltInRegistries.ITEM.get($);
 					if (strict) {
 						Preconditions.checkArgument(holder.isPresent(), "Item %s not found", $);
 					}
 					return holder;
 				}).filter(Optional::isPresent).map(Optional::get)).toList();
 		this.exchangeInputsInViewer = exchangeInputsInViewer.stream().map($ -> {
-			Optional<Holder.Reference<Item>> holder = BuiltInRegistries.ITEM.getHolder($);
+			Optional<Holder.Reference<Item>> holder = BuiltInRegistries.ITEM.get($);
 			if (strict) {
 				Preconditions.checkArgument(holder.isPresent(), "Item %s not found", $);
 			}
@@ -114,7 +114,7 @@ public class BlockFamily {
 		}).filter(Optional::isPresent).map(Optional::get).toList();
 		this.stonecutterExchange = stonecutterExchange;
 		this.stonecutterFrom = stonecutterFrom.map($ -> {
-			Optional<Holder.Reference<Item>> holder = BuiltInRegistries.ITEM.getHolder($);
+			Optional<Holder.Reference<Item>> holder = BuiltInRegistries.ITEM.get($);
 			if (strict) {
 				Preconditions.checkArgument(holder.isPresent(), "Item %s not found", $);
 			}
@@ -176,7 +176,7 @@ public class BlockFamily {
 	}
 
 	public Ingredient stonecutterSourceIngredient() {
-		return stonecutterFrom.map(holder -> Ingredient.of(holder.value())).orElse(Ingredient.EMPTY);
+		return stonecutterFrom.map(holder -> Ingredient.of(holder.value())).orElse(Ingredient.of());
 	}
 
 	public SwitchAttrs switchAttrs() {
@@ -185,7 +185,7 @@ public class BlockFamily {
 
 	protected Ingredient toIngredient(List<? extends Holder<Item>> items) {
 		return Ingredient.of(items.stream().map(Holder::value).filter(item -> {
-			return BlockFamilies.getConvertRatio(item) >= 1;
+			return BlockFamilies.getMatValue(item) >= BlockFamilies.BASE_MAT_VALUE;
 		}).toArray(ItemLike[]::new));
 	}
 

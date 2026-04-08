@@ -3,11 +3,9 @@ plugins {
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
-    id "me.shedaniel.unified-publishing" version "0.1.+"
-    id 'net.neoforged.gradle.userdev' version '7.0.192'
-    //id 'net.neoforged.gradle.mixin' version '7.0.145'
-    //id "com.github.johnrengelman.shadow" version "8.1.1"
-    id 'com.gradleup.shadow' version '8.3.0' // https://github.com/GradleUp/shadow/pull/876
+    id "me.modmuss50.mod-publish-plugin" version "1.1.0"
+    id 'net.neoforged.moddev' version '2.0.141'
+    id 'com.gradleup.shadow' version '9.4.1' // https://github.com/GradleUp/shadow/pull/876
 }
 
 tasks.named('wrapper', Wrapper).configure {
@@ -29,7 +27,7 @@ version = "${minecraft_version}-NeoForge-${mod_version}"
 group = "snownee.kiwi" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 var realVersion = project.mod_version + '+neoforge'
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 
 if (System.getenv().BUILD_NUMBER != null) {
@@ -37,56 +35,73 @@ if (System.getenv().BUILD_NUMBER != null) {
     version += ".${System.getenv().BUILD_NUMBER}"
 }
 
-minecraft.accessTransformers.file rootProject.file('src/main/resources/META-INF/accesstransformer.cfg')
+neoForge {
+    // We currently only support NeoForge versions later than 21.0.x
+    // See https://projects.neoforged.net/neoforged/neoforge for the latest updates
+    version = neo_version
 
-// Default run configurations.
-// These can be tweaked, removed, or duplicated as needed.
-runs {
-    // applies to all the run configs below
-    configureEach {
-        // Recommended logging data for a userdev environment
-        // The markers can be added/remove as needed separated by commas.
-        // "SCAN": For mods scan.
-        // "REGISTRIES": For firing of registry events.
-        // "REGISTRYDUMP": For getting the contents of all registries.
-        systemProperty 'forge.logging.markers', 'REGISTRIES'
+    // Validate AT files and raise errors when they have invalid targets
+    // This option is false by default, but turning it on is recommended
+    validateAccessTransformers = true
 
-        // Recommended logging level for the console
-        // You can set various levels here.
-        // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
-        systemProperty 'forge.logging.console.level', 'debug'
+    accessTransformers = ["src/main/resources/META-INF/accesstransformer.cfg"]
 
-        modSource project.sourceSets.main
-
-        dependencies {
-            runtime "org.yaml:snakeyaml:${project.snakeyaml_version}"
-            runtime "com.ezylang:EvalEx:${project.evalex_version}"
+    runs {
+        client {
+            client()
+        }
+        data {
+            data()
+        }
+        server {
+            server()
         }
     }
 
-    client {
-        // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
-        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
     }
 
-    server {
-        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
-        programArgument '--nogui'
-    }
+    runs {
+        // applies to all the run configs below
+        configureEach {
+            // Recommended logging data for a userdev environment
+            // The markers can be added/remove as needed separated by commas.
+            // "SCAN": For mods scan.
+            // "REGISTRIES": For firing of registry events.
+            // "REGISTRYDUMP": For getting the contents of all registries.
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
 
-    // This run config launches GameTestServer and runs all registered gametests, then exits.
-    // By default, the server will crash when no gametests are provided.
-    // The gametest system is also enabled by default for other run configs under the /test command.
-    gameTestServer {
-        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
-    }
+            // Recommended logging level for the console
+            // You can set various levels here.
+            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
+            systemProperty 'forge.logging.console.level', 'debug'
+        }
 
-    data {
-        // example of overriding the workingDirectory set in configureEach above, uncomment if you want to use it
-        // workingDirectory project.file('run-data')
+        client {
+            client()
+            ideName = "Run ${project.mod_id} - Client"
+            systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+            programArguments = ['--username', 'Dev']
+        }
+        data {
+            clientData()
+            ideName = "Run ${project.mod_id} - Data"
+        }
+        server {
+            server()
+            ideName = "Run ${project.mod_id} - Server"
+            systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+            programArgument '--nogui'
+        }
 
-        // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
-        programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+        gameTestServer {
+            type = "gameTestServer"
+            gameDirectory = project.file('runs/client')
+            systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+        }
     }
 }
 
@@ -135,12 +150,12 @@ sourceSets {
 
 tasks.withType(JavaCompile).configureEach {
     it.options.encoding = "UTF-8"
-    it.options.release = 21
+    it.options.release = 25
     it.options.compilerArgs.add("-Akiwi.clientOnlyMod")
 }
 
 shadowJar {
-    from(tasks.jarJar.archiveFile)
+//    from(tasks.jarJar)
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     exclude(excludes)
     manifest { attributes(b) }
@@ -150,26 +165,19 @@ shadowJar {
     archiveClassifier.set('')
 }
 
-task APJar(type: Jar) {
+tasks.register('APJar', Jar) {
     //include "/snownee/kiwi/build"
     //exclude(excludes)
     from(sourceSets.processor.output)
-    archiveFileName = "${archivesBaseName}-${archiveVersion}-processor.${archiveExtension}"
+    archiveFileName = "${archiveBaseName}-${archiveVersion}-processor.${archiveExtension}"
 }
 
-task sourcesJar(type: Jar) {
+tasks.register('sourcesJar', Jar) {
     //exclude(excludes)
     manifest { attributes(b) }
     from(sourceSets.main.allJava)
-    //archiveFileName = "${archivesBaseName}-${archiveVersion}-source.${archiveExtension}"
+    //archiveFileName = "${archiveBaseName}-${archiveVersion}-source.${archiveExtension}"
     archiveClassifier = 'sources'
-}
-
-task deobfJar(type: Jar) {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    //exclude(excludes)
-    manifest { attributes(b) }
-    archiveFileName = "${archivesBaseName}-${archiveVersion}-deobf.${archiveExtension}"
 }
 
 jar {
@@ -185,7 +193,17 @@ artifacts {
 allprojects {
     repositories {
         mavenCentral()
-        maven { url "https://api.modrinth.com/maven" }
+        exclusiveContent {
+            forRepository {
+                maven {
+                    name = "Modrinth"
+                    url = "https://api.modrinth.com/maven"
+                }
+            }
+            filter {
+                includeGroup "maven.modrinth"
+            }
+        }
         maven { url "https://maven.su5ed.dev/releases" }
         maven {
             url = "https://cursemaven.com"
@@ -212,10 +230,6 @@ allprojects {
 }
 
 dependencies {
-    // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
-    // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
-    // The userdev artifact is a special name and will get all sorts of transformations applied to it.
-    implementation "net.neoforged:neoforge:${neo_version}"
     compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.3.2"))
 
     implementation project(':annotation')
@@ -225,14 +239,14 @@ dependencies {
     shadowCommon("org.yaml:snakeyaml:${project.snakeyaml_version}")
     shadowCommon("com.ezylang:EvalEx:${project.evalex_version}")
 
-    jarJar(implementation("org.sinytra.forgified-fabric-api:fabric-api-base:0.4.42+d1308ded19"))
-    implementation "org.sinytra.forgified-fabric-api:forgified-fabric-api:0.107.0+2.0.25+1.21.1"
+//    jarJar(implementation("org.sinytra.forgified-fabric-api:fabric-api-base:0.4.42+d1308ded19"))
+//    implementation "org.sinytra.forgified-fabric-api:forgified-fabric-api:0.107.0+2.0.25+1.21.1"
 
-    implementation "dev.architectury:architectury-neoforge:${project.architectury_version}"
-    implementation "me.shedaniel:RoughlyEnoughItems-neoforge:${project.rei_version}"
+    compileOnly "dev.architectury:architectury-neoforge:${project.architectury_version}"
+    compileOnly "me.shedaniel:RoughlyEnoughItems-neoforge:${project.rei_version}"
     compileOnly "me.shedaniel:REIPluginCompatibilities-forge-annotations:12.+"
 
-    implementation "maven.modrinth:jade:15.9.1+neoforge"
+    implementation "maven.modrinth:jade:26.0.6+neoforge"
 
     // compile against the JEI API but do not include it at runtime
     compileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
@@ -241,7 +255,7 @@ dependencies {
     implementation("mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}")
 
     compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
-    runtimeOnly "dev.emi:emi-neoforge:${emi_version}"
+    compileOnly "dev.emi:emi-neoforge:${emi_version}"
 }
 
 processResources {
@@ -271,38 +285,26 @@ idea {
     }
 }
 
-unifiedPublishing {
-    project {
-        displayName = "[NeoForge $project.supported_version] $project.mod_version"
-        version = realVersion // Optional, Inferred from project by default
-        changelog = file("CHANGELOG.md").exists() ? file("CHANGELOG.md").text : "" // Optional, in markdown format
-        releaseType = project.release_type // Optional, use "release", "beta" or "alpha"
-        gameVersions = [project.minecraft_version]
-        gameLoaders = ["neoforge"]
+publishMods {
+    file = shadowJar.archiveFile
+    additionalFiles.from(sourcesJar.archiveFile)
+    changelog = file('CHANGELOG.md').exists() ? file('CHANGELOG.md').text : ''
+    type = ['release': STABLE, 'beta': BETA, 'alpha': ALPHA][release_type]
+    modLoaders.add("neoforge")
+    displayName = "[NeoForge ${supported_version}] ${mod_version}"
+    version = realVersion
 
-        mainPublication tasks.shadowJar // Declares the publicated jar
-
-        if (System.getenv("CURSE_TOKEN") != null) {
-            curseforge {
-                token = System.getenv("CURSE_TOKEN")
-                id = "303657" // Required, must be a string, ID of CurseForge project
-
-                relations { // Optional, Inferred from the relations above by default
-                    optional "cloth-config"
-                }
-            }
-        }
-
-        if (System.getenv("MODRINTH_TOKEN") != null) {
-            modrinth {
-                token = System.getenv("MODRINTH_TOKEN")
-                id = "ufdDoWPd" // Required, must be a string, ID of Modrinth project
-
-                relations { // Optional, Inferred from the relations above by default
-                    optional "cloth-config"
-                }
-            }
-        }
+    curseforge {
+        projectId = "549404"
+        accessToken = providers.environmentVariable("CURSE_TOKEN")
+        minecraftVersions.add(minecraft_version)
+        optional("cloth-config")
+    }
+    modrinth {
+        projectId = "ufdDoWPd"
+        accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+        minecraftVersions.add(minecraft_version)
+        optional("cloth-config")
     }
 }
 

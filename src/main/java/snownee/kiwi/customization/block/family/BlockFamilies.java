@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
@@ -17,22 +17,23 @@ import com.google.common.collect.Maps;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
+import net.neoforged.neoforge.common.Tags;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.customization.CustomizationHooks;
 import snownee.kiwi.util.KHolder;
 import snownee.kiwi.util.resource.OneTimeLoader;
 
 public class BlockFamilies {
+	public static final long BASE_MAT_VALUE = 81000;
 	private static ImmutableListMultimap<Item, KHolder<BlockFamily>> byItem = ImmutableListMultimap.of();
 	private static ImmutableList<KHolder<BlockFamily>> fromResources = ImmutableList.of();
-	private static ImmutableMap<ResourceLocation, KHolder<BlockFamily>> byId = ImmutableMap.of();
+	private static ImmutableMap<Identifier, KHolder<BlockFamily>> byId = ImmutableMap.of();
 	private static ImmutableListMultimap<Item, KHolder<BlockFamily>> byStonecutterSource = ImmutableListMultimap.of();
 
 	public static Collection<KHolder<BlockFamily>> find(Item item) {
@@ -42,9 +43,9 @@ public class BlockFamilies {
 		return byItem.get(item);
 	}
 
-	public static List<KHolder<BlockFamily>> findQuickSwitch(Item item, boolean creative) {
+	public static List<KHolder<BlockFamily>> findQuickSwitch(Item item, boolean hasInfiniteMaterials) {
 		Stream<KHolder<BlockFamily>> stream = find(item).stream();
-		if (creative) {
+		if (hasInfiniteMaterials) {
 			stream = stream.filter(f -> f.value().switchAttrs().enabled());
 		} else {
 			stream = stream.filter(f -> f.value().switchAttrs().enabled() && !f.value().switchAttrs().creativeOnly());
@@ -57,7 +58,7 @@ public class BlockFamilies {
 	}
 
 	public static void reloadResources(ResourceManager resourceManager, OneTimeLoader.Context context) {
-		Map<ResourceLocation, BlockFamily> families = OneTimeLoader.load(resourceManager, "kiwi/family", BlockFamily.DIRECT_CODEC, context);
+		Map<Identifier, BlockFamily> families = OneTimeLoader.load(resourceManager, "kiwi/family", BlockFamily.DIRECT_CODEC, context);
 		fromResources = families.entrySet()
 				.stream()
 				.map(e -> new KHolder<>(e.getKey(), e.getValue()))
@@ -79,7 +80,7 @@ public class BlockFamilies {
 		byItem = ImmutableListMultimap.of();
 		byStonecutterSource = ImmutableListMultimap.of();
 		Collection<KHolder<BlockFamily>> additional = additionalSupplier.get();
-		Map<ResourceLocation, KHolder<BlockFamily>> byIdBuilder = Maps.newHashMapWithExpectedSize(fromResources.size() + additional.size());
+		Map<Identifier, KHolder<BlockFamily>> byIdBuilder = Maps.newHashMapWithExpectedSize(fromResources.size() + additional.size());
 		ImmutableListMultimap.Builder<Item, KHolder<BlockFamily>> byItemBuilder = ImmutableListMultimap.builder();
 		ImmutableListMultimap.Builder<Item, KHolder<BlockFamily>> byStonecutterBuilder = ImmutableListMultimap.builder();
 		for (var family : Iterables.concat(fromResources, additional)) {
@@ -104,7 +105,7 @@ public class BlockFamilies {
 	}
 
 	@Nullable
-	public static BlockFamily get(ResourceLocation id) {
+	public static BlockFamily get(Identifier id) {
 		KHolder<BlockFamily> holder = byId.get(id);
 		return holder == null ? null : holder.value();
 	}
@@ -113,32 +114,41 @@ public class BlockFamilies {
 		return byId.values();
 	}
 
-	public static float getConvertRatio(Item item) {
-		Block block = Block.byItem(item);
-		if (block == Blocks.AIR) {
-			return 1;
+	public static long getMatValue(ItemStack stack) {
+		return getMatValue(stack.getItem()) * stack.getCount();
+	}
+
+	public static long getMatValue(Item item) {
+		return getMatValue(BuiltInRegistries.ITEM.wrapAsHolder(item));
+	}
+
+	private static long getMatValue(Holder<Item> holder) {
+		if (holder.is(Tags.Items.STORAGE_BLOCKS)) {
+			return BASE_MAT_VALUE * 9;
 		}
-		Holder<Block> holder = BuiltInRegistries.BLOCK.wrapAsHolder(block);
-		if (holder.is(BlockTags.SLABS)) {
-			return 0.5f;
+		if (holder.is(ItemTags.SLABS)) {
+			return BASE_MAT_VALUE / 2;
 		}
-		if (holder.is(BlockTags.DOORS)) {
-			return 2;
+		if (holder.is(ItemTags.DOORS)) {
+			return BASE_MAT_VALUE * 2;
 		}
-		if (holder.is(BlockTags.TRAPDOORS)) {
-			return 3;
+		if (holder.is(ItemTags.TRAPDOORS)) {
+			return BASE_MAT_VALUE * 3;
 		}
-		if (holder.is(BlockTags.FENCE_GATES)) {
-			return 4;
+		if (holder.is(ItemTags.FENCE_GATES)) {
+			return BASE_MAT_VALUE * 4;
 		}
-		if (holder.is(BlockTags.PRESSURE_PLATES)) {
-			return 2;
+		if (holder.is(ItemTags.WOODEN_PRESSURE_PLATES)) {
+			return BASE_MAT_VALUE * 2;
 		}
-		return 1;
+		if (holder.is(ItemTags.BARS)) {
+			return BASE_MAT_VALUE / 24;
+		}
+		return BASE_MAT_VALUE;
 	}
 
 	@Nullable
-	public static ResourceLocation getKey(BlockFamily family) {
+	public static Identifier getKey(BlockFamily family) {
 		for (KHolder<BlockFamily> holder : all()) {
 			if (holder.value() == family) {
 				return holder.key();

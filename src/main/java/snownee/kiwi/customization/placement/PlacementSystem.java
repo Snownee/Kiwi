@@ -8,7 +8,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -121,7 +121,7 @@ public class PlacementSystem {
 			}
 		}
 		if (results.isEmpty()) {
-			if (debug && !level.isClientSide) {
+			if (debug && !level.isClientSide()) {
 				Kiwi.LOGGER.info("No match");
 				level.setBlockAndUpdate(mutable.move(Direction.UP), Blocks.BEDROCK.defaultBlockState());
 			}
@@ -145,7 +145,7 @@ public class PlacementSystem {
 		if (result == null) {
 			return blockState;
 		}
-		if (debug && maxInterest > 0 && !level.isClientSide) {
+		if (debug && maxInterest > 0 && !level.isClientSide()) {
 			mutable.setWithOffset(pos, Direction.UP);
 			Kiwi.LOGGER.info("Interest: %d".formatted(result.interest()));
 			results.forEach($ -> {
@@ -188,7 +188,7 @@ public class PlacementSystem {
 					offsets = Lists.newArrayListWithExpectedSize(theirSlotsMap.size());
 				}
 				results.add(result);
-				offsets.add(side.getNormal());
+				offsets.add(BlockPos.ZERO.relative(side));
 			}
 		}
 		if (interest < 0) {

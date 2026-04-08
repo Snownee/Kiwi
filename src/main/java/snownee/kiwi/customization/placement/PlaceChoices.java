@@ -9,7 +9,7 @@ import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
@@ -18,11 +18,11 @@ import com.google.common.collect.Maps;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.minecraft.advancements.critereon.BlockPredicate;
+import net.minecraft.advancements.criterion.BlockPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -32,7 +32,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.customization.block.KBlockSettings;
@@ -46,7 +46,6 @@ import snownee.kiwi.util.BlockPredicateHelper;
 import snownee.kiwi.util.KHolder;
 import snownee.kiwi.util.KUtil;
 import snownee.kiwi.util.codec.CustomizationCodecs;
-import snownee.kiwi.util.codec.KCodecs;
 
 public record PlaceChoices(
 		List<PlaceTarget> target,
@@ -69,25 +68,25 @@ public record PlaceChoices(
 	}
 
 	public static final Codec<PlaceChoices> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-			KCodecs.compactList(PlaceTarget.CODEC).fieldOf("target").forGetter(PlaceChoices::target),
+			ExtraCodecs.compactListCodec(PlaceTarget.CODEC).fieldOf("target").forGetter(PlaceChoices::target),
 			Codec.STRING.optionalFieldOf("transform_with").forGetter(PlaceChoices::transformWith),
-			KCodecs.compactList(Flow.CODEC).optionalFieldOf("flow", List.of()).forGetter(PlaceChoices::flow),
-			KCodecs.compactList(Alter.CODEC).optionalFieldOf("alter", List.of()).forGetter(PlaceChoices::alter),
-			KCodecs.compactList(Limit.CODEC).optionalFieldOf("limit", List.of()).forGetter(PlaceChoices::limit),
-			KCodecs.compactList(Interests.CODEC).optionalFieldOf("interests", List.of()).forGetter(PlaceChoices::interests),
+			ExtraCodecs.compactListCodec(Flow.CODEC).optionalFieldOf("flow", List.of()).forGetter(PlaceChoices::flow),
+			ExtraCodecs.compactListCodec(Alter.CODEC).optionalFieldOf("alter", List.of()).forGetter(PlaceChoices::alter),
+			ExtraCodecs.compactListCodec(Limit.CODEC).optionalFieldOf("limit", List.of()).forGetter(PlaceChoices::limit),
+			ExtraCodecs.compactListCodec(Interests.CODEC).optionalFieldOf("interests", List.of()).forGetter(PlaceChoices::interests),
 			Codec.BOOL.optionalFieldOf("skippable", true).forGetter(PlaceChoices::skippable)
 	).apply(instance, PlaceChoices::new));
 
 	public record Preparation(
-			Map<ResourceLocation, PlaceChoices> choices,
+			Map<Identifier, PlaceChoices> choices,
 			Map<KBlockTemplate, KHolder<PlaceChoices>> byTemplate,
-			Map<ResourceLocation, KHolder<PlaceChoices>> byBlock) {
+			Map<Identifier, KHolder<PlaceChoices>> byBlock) {
 		public static Preparation of(
-				Supplier<Map<ResourceLocation, PlaceChoices>> choicesSupplier,
-				Map<ResourceLocation, KBlockTemplate> templates) {
-			Map<ResourceLocation, PlaceChoices> choices = Platform.isDataGen() ? Map.of() : choicesSupplier.get();
+				Supplier<Map<Identifier, PlaceChoices>> choicesSupplier,
+				Map<Identifier, KBlockTemplate> templates) {
+			Map<Identifier, PlaceChoices> choices = Platform.isDataGen() ? Map.of() : choicesSupplier.get();
 			Map<KBlockTemplate, KHolder<PlaceChoices>> byTemplate = Maps.newHashMap();
-			Map<ResourceLocation, KHolder<PlaceChoices>> byBlock = Maps.newHashMap();
+			Map<Identifier, KHolder<PlaceChoices>> byBlock = Maps.newHashMap();
 			for (var entry : choices.entrySet()) {
 				KHolder<PlaceChoices> holder = new KHolder<>(entry.getKey(), entry.getValue());
 				for (PlaceTarget target : holder.value().target) {
@@ -124,7 +123,7 @@ public record PlaceChoices(
 		public int attachChoicesB() {
 			AtomicInteger counter = new AtomicInteger();
 			byBlock.forEach((blockId, choices) -> {
-				Block block = BuiltInRegistries.BLOCK.get(blockId);
+				Block block = BuiltInRegistries.BLOCK.getValue(blockId);
 				if (block == Blocks.AIR) {
 					Kiwi.LOGGER.error("Block %s not found for place choices %s".formatted(blockId, choices));
 					return;
@@ -169,10 +168,10 @@ public record PlaceChoices(
 		String transformWith = this.transformWith.orElse("none");
 		if (!transformWith.equals("none")) {
 			Property<?> property = KBlockUtils.getProperty(original, transformWith);
-			if (!(property instanceof DirectionProperty directionProperty)) {
+			if (!(property instanceof EnumProperty<?> enumProperty) || enumProperty.getValueClass() != Direction.class) {
 				throw new IllegalArgumentException("Invalid transform_with property: " + transformWith);
 			}
-			Direction direction = original.getValue(directionProperty);
+			Direction direction = (Direction) original.getValue(enumProperty);
 			for (Rotation r : Rotation.values()) {
 				if (r.rotate(Direction.NORTH) == direction) {
 					rotation.setValue(r);
@@ -213,7 +212,7 @@ public record PlaceChoices(
 	public record Limit(String type, List<ParsedProtoTag> tags) {
 		public static final Codec<Limit> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.STRING.fieldOf("type").forGetter(Limit::type),
-				KCodecs.compactList(ParsedProtoTag.CODEC).fieldOf("tags").forGetter(Limit::tags)
+				ExtraCodecs.compactListCodec(ParsedProtoTag.CODEC).fieldOf("tags").forGetter(Limit::tags)
 		).apply(instance, Limit::new));
 
 		public boolean test(BlockState baseState, BlockState targetState) {
@@ -275,7 +274,7 @@ public record PlaceChoices(
 	//TODO check if `use` exists when attaching choices
 	public record Alter(List<AlterCondition> when, String use) {
 		public static final Codec<Alter> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				ExtraCodecs.nonEmptyList(KCodecs.compactList(AlterCondition.CODEC)).fieldOf("when").forGetter(Alter::when),
+				ExtraCodecs.nonEmptyList(ExtraCodecs.compactListCodec(AlterCondition.CODEC)).fieldOf("when").forGetter(Alter::when),
 				Codec.STRING.fieldOf("use").forGetter(Alter::use)
 		).apply(instance, Alter::new));
 
@@ -314,7 +313,7 @@ public record PlaceChoices(
 						.optionalFieldOf("faces", BlockFaceType.ANY)
 						.forGetter(AlterCondition::faces),
 				CustomizationCodecs.BLOCK_PREDICATE.optionalFieldOf("block", BlockPredicateHelper.ANY).forGetter(AlterCondition::block),
-				KCodecs.compactList(ParsedProtoTag.CODEC).optionalFieldOf("tags", List.of()).forGetter(AlterCondition::tags)
+				ExtraCodecs.compactListCodec(ParsedProtoTag.CODEC).optionalFieldOf("tags", List.of()).forGetter(AlterCondition::tags)
 		).apply(instance, AlterCondition::new));
 
 		public boolean test(BlockPlaceContext context) {

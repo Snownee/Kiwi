@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang3.ClassUtils;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -18,7 +19,7 @@ public class RegistryLookup {
 	public final Map<Class<?>, ResourceKey<? extends Registry<?>>> registries = Maps.newConcurrentMap();
 	public final Cache<Class<?>, Optional<ResourceKey<? extends Registry<?>>>> cache = CacheBuilder.newBuilder().build();
 
-	public ResourceKey<? extends Registry<?>> findRegistry(Object o) {
+	public @Nullable ResourceKey<? extends Registry<?>> findRegistry(Object o) {
 		try {
 			return cache.get(o.getClass(), () -> {
 				{

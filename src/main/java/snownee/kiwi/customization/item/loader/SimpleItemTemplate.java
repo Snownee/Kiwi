@@ -8,7 +8,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import snownee.kiwi.util.resource.OneTimeLoader;
 
@@ -35,7 +35,7 @@ public final class SimpleItemTemplate extends KItemTemplate {
 	}
 
 	@Override
-	public void resolve(ResourceLocation key, OneTimeLoader.Context context) {
+	public void resolve(Identifier key, OneTimeLoader.Context context) {
 		if (clazz.isEmpty()) {
 			constructor = ItemCodecs.SIMPLE_ITEM_FACTORY;
 			return;
@@ -55,7 +55,7 @@ public final class SimpleItemTemplate extends KItemTemplate {
 	}
 
 	@Override
-	public Item createItem(ResourceLocation id, Item.Properties settings, JsonObject input) {
+	public Item createItem(Identifier id, Item.Properties settings, JsonObject input) {
 		return this.constructor.apply(settings);
 	}
 

@@ -9,16 +9,16 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 
-import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.advancements.criterion.MinMaxBounds;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 import snownee.kiwi.customization.block.KBlockUtils;
-import snownee.kiwi.util.codec.KCodecs;
 
 public record StatePropertiesPredicate(List<PropertyMatcher> properties) implements Predicate<BlockState> {
 
 	public static final Codec<StatePropertiesPredicate> CODEC = Codec.compoundList(Codec.STRING, Codec.either(
-			KCodecs.compactList(Codec.STRING),
+			ExtraCodecs.compactListCodec(Codec.STRING),
 			MinMaxBounds.Ints.CODEC)
 	).xmap($ -> new StatePropertiesPredicate($.stream().map(pair -> {
 		Optional<List<String>> strValues = pair.getSecond().left();

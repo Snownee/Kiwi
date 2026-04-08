@@ -4,8 +4,8 @@ import java.util.function.BooleanSupplier;
 
 import com.mojang.blaze3d.platform.InputConstants;
 
-import net.minecraft.Util;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.util.Util;
 
 public class SmartKey extends KeyMapping {
 	//	private static final Logger LOGGER = LogUtils.getLogger();
@@ -114,13 +114,28 @@ public class SmartKey extends KeyMapping {
 		return false;
 	}
 
+	public static boolean hasShiftDown() {
+		var window = net.minecraft.client.Minecraft.getInstance().getWindow();
+		return InputConstants.isKeyDown(window, InputConstants.KEY_LSHIFT) || InputConstants.isKeyDown(window, InputConstants.KEY_RSHIFT);
+	}
+
+	public static boolean hasControlDown() {
+		var window = net.minecraft.client.Minecraft.getInstance().getWindow();
+		return InputConstants.isKeyDown(window, InputConstants.KEY_LCONTROL) || InputConstants.isKeyDown(window, InputConstants.KEY_RCONTROL);
+	}
+
+	public static boolean hasAltDown() {
+		var window = net.minecraft.client.Minecraft.getInstance().getWindow();
+		return InputConstants.isKeyDown(window, InputConstants.KEY_LALT) || InputConstants.isKeyDown(window, InputConstants.KEY_RALT);
+	}
+
 	public enum State {
 		Idle, ShortPress, WaitingForDoublePress, LongPress
 	}
 
 	public static class Builder {
 		private final String name;
-		private final String category;
+		private final KeyMapping.Category category;
 		private InputConstants.Type type = InputConstants.Type.KEYSYM;
 		private int keyCode = -1; // unbound
 		private BooleanSupplier onShortPress;
@@ -129,7 +144,7 @@ public class SmartKey extends KeyMapping {
 		private BooleanSupplier hasDoublePress;
 		private long longPressMinMs = LONG_PRESS_MIN_MS;
 
-		public Builder(String name, String category) {
+		public Builder(String name, KeyMapping.Category category) {
 			this.name = name;
 			this.category = category;
 		}

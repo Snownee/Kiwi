@@ -1,22 +1,22 @@
 package snownee.kiwi;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.Lists;
 
 import it.unimi.dsi.fastutil.objects.ObjectSortedSet;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -26,7 +26,6 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import snownee.kiwi.KiwiModule.Category;
 import snownee.kiwi.item.ItemCategoryFiller;
-import snownee.kiwi.util.KUtil;
 
 public class GroupSetting {
 
@@ -48,15 +47,7 @@ public class GroupSetting {
 
 	public GroupSetting(String[] groups, String @Nullable [] after) {
 		this.groups = groups;
-		this.after = after == null || after.length == 0 ? null : after;
-	}
-
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this)
-				.append("groups", Arrays.toString(groups))
-				.append("after", Arrays.toString(after))
-				.toString();
+		this.after = after;
 	}
 
 	public void apply(ItemCategoryFiller filler) {
@@ -70,7 +61,7 @@ public class GroupSetting {
 					if (tab != null) {
 						return tab;
 					}
-					return ResourceKey.create(Registries.CREATIVE_MODE_TAB, ResourceLocation.parse($));
+					return ResourceKey.create(Registries.CREATIVE_MODE_TAB, Identifier.parse($));
 				})
 				.toList();
 		IEventBus eventBus = Objects.requireNonNull(ModContext.get(Kiwi.ID).modContainer.getEventBus());
@@ -79,21 +70,22 @@ public class GroupSetting {
 				if (!event.getTabKey().equals(tabKey)) {
 					return;
 				}
-				List<Item> afterItems = after == null ? List.of() : Stream.of(after)
-						.map(KUtil::RL)
-						.filter(Objects::nonNull)
-						.map(BuiltInRegistries.ITEM::get)
-						.filter(Predicate.not(Items.AIR::equals))
-						.toList();
 				List<ItemStack> items = Lists.newArrayList();
 				for (ItemCategoryFiller filler : fillers) {
-					CreativeModeTab tab = BuiltInRegistries.CREATIVE_MODE_TAB.get(tabKey);
-					if (tab != null) {
-						filler.fillItemCategory(tab, event.getFlags(), event.hasPermissions(), items);
-					}
+					CreativeModeTab tab = Objects.requireNonNull(BuiltInRegistries.CREATIVE_MODE_TAB.getValue(tabKey));
+					filler.fillItemCategory(tab, event.getFlags(), event.hasPermissions(), items);
 				}
 				items = getEnabledStacks(items, event.getFlags());
-				addAfter(items, event, afterItems);
+
+				if (after != null) {
+					Set<Item> afterItems = Stream.of(after)
+							.map(Identifier::tryParse)
+							.filter(Objects::nonNull)
+							.map(BuiltInRegistries.ITEM::getValue)
+							.filter(Predicate.not(Items.AIR::equals))
+							.collect(Collectors.toSet());
+					addAfter(items, event, afterItems);
+				}
 			});
 		}
 	}

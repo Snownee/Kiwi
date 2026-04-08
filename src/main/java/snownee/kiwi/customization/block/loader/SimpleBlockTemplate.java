@@ -8,7 +8,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import snownee.kiwi.customization.block.BlockFundamentals;
@@ -37,7 +37,7 @@ public final class SimpleBlockTemplate extends KBlockTemplate {
 	}
 
 	@Override
-	public void resolve(ResourceLocation key, OneTimeLoader.Context context) {
+	public void resolve(Identifier key, OneTimeLoader.Context context) {
 		if (clazz.isEmpty()) {
 			constructor = BlockCodecs.SIMPLE_BLOCK_FACTORY;
 			return;
@@ -57,7 +57,7 @@ public final class SimpleBlockTemplate extends KBlockTemplate {
 	}
 
 	@Override
-	public Block createBlock(ResourceLocation id, BlockBehaviour.Properties settings, JsonObject input) {
+	public Block createBlock(Identifier id, BlockBehaviour.Properties settings, JsonObject input) {
 		return this.constructor.apply(settings);
 	}
 

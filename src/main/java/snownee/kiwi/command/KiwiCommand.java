@@ -1,5 +1,6 @@
 package snownee.kiwi.command;
 
+import java.net.URI;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Objects;
@@ -14,6 +15,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import snownee.kiwi.Kiwi;
@@ -31,12 +33,12 @@ public class KiwiCommand {
 		builder.then(Commands
 				.literal("dev_env_rules")
 				.then(Commands.literal("do_not_run_this_if_you_do_not_know_what_it_does")
-						.requires(ctx -> ctx.hasPermission(2))
+						.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 						.executes(ctx -> debugRules(ctx.getSource()))));
 
 		builder.then(Commands
 				.literal("reload")
-				.requires(ctx -> ctx.hasPermission(2))
+				.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 				.then(Commands.argument("fileName", StringArgumentType.greedyString())
 						.executes(ctx -> {
 							String fileName = StringArgumentType.getString(ctx, "fileName");
@@ -53,7 +55,7 @@ public class KiwiCommand {
 
 		builder.then(Commands
 				.literal("eval")
-				.requires(ctx -> ctx.hasPermission(2))
+				.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 				.executes(ctx -> evalHelp(ctx.getSource(), CommandSourceStack::sendFailure))
 				.then(Commands.argument("expression", StringArgumentType.greedyString())
 						.executes(ctx -> eval(
@@ -72,18 +74,18 @@ public class KiwiCommand {
 	private static int debugRules(CommandSourceStack commandSourceStack) {
 		Commands commands = commandSourceStack.getServer().getCommands();
 		List<String> rules = List.of(
-				"gamerule doDaylightCycle false",
-				"gamerule doWeatherCycle false",
-				"gamerule doMobLoot false",
-				"gamerule doMobSpawning false",
-				"gamerule keepInventory true",
-				"gamerule doTraderSpawning false",
-				"gamerule doInsomnia false",
+				"gamerule %s false".formatted(GameRules.ADVANCE_TIME.id()),
+				"gamerule %s false".formatted(GameRules.ADVANCE_WEATHER.id()),
+				"gamerule %s false".formatted(GameRules.MOB_DROPS.id()),
+				"gamerule %s false".formatted(GameRules.SPAWN_MOBS.id()),
+				"gamerule %s true".formatted(GameRules.KEEP_INVENTORY.id()),
+				"gamerule %s false".formatted(GameRules.SPAWN_WANDERING_TRADERS.id()),
+				"gamerule %s false".formatted(GameRules.SPAWN_PHANTOMS.id()),
 				"difficulty peaceful",
-				"kill @e[type=!minecraft:player]",
+				"kill @e[type=!player]",
 				"time set day",
 				"weather clear",
-				"gamerule doMobLoot true"
+				"gamerule %s true".formatted(GameRules.MOB_DROPS.id())
 		);
 		for (String rule : rules) {
 			commands.performPrefixedCommand(commandSourceStack, rule);
@@ -93,9 +95,10 @@ public class KiwiCommand {
 
 	public static <T> int evalHelp(T ctx, BiConsumer<T, Component> send) {
 		String url = "https://github.com/Snownee/Kiwi/wiki/Eval-Guide";
-		send.accept(ctx,
+		send.accept(
+				ctx,
 				Component.literal(url)
-						.withStyle(s -> s.withUnderlined(true).withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url))));
+						.withStyle(s -> s.withUnderlined(true).withClickEvent(new ClickEvent.OpenUrl(URI.create(url)))));
 		return 0;
 	}
 

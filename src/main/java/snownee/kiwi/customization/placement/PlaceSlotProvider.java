@@ -28,14 +28,14 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.customization.block.KBlockUtils;
@@ -44,7 +44,6 @@ import snownee.kiwi.customization.block.loader.KBlockTemplate;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.KHolder;
 import snownee.kiwi.util.KUtil;
-import snownee.kiwi.util.codec.KCodecs;
 
 public record PlaceSlotProvider(
 		List<PlaceTarget> target,
@@ -60,7 +59,7 @@ public record PlaceSlotProvider(
 		}
 	});
 	public static final Codec<PlaceSlotProvider> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-			KCodecs.compactList(PlaceTarget.CODEC).fieldOf("target").forGetter(PlaceSlotProvider::target),
+			ExtraCodecs.compactListCodec(PlaceTarget.CODEC).fieldOf("target").forGetter(PlaceSlotProvider::target),
 			Codec.STRING.optionalFieldOf("transform_with").forGetter(PlaceSlotProvider::transformWith),
 			TAG_CODEC.listOf().optionalFieldOf("tag", List.of()).forGetter(PlaceSlotProvider::tag),
 			Slot.CODEC.listOf().fieldOf("slots").forGetter(PlaceSlotProvider::slots)
@@ -72,7 +71,7 @@ public record PlaceSlotProvider(
 			List<String> tag,
 			Map<Direction, Side> sides) {
 		public static final Codec<Slot> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				ExtraCodecs.nonEmptyList(KCodecs.compactList(StatePropertiesPredicate.CODEC))
+				ExtraCodecs.nonEmptyList(ExtraCodecs.compactListCodec(StatePropertiesPredicate.CODEC))
 						.optionalFieldOf("when", List.of())
 						.forGetter(Slot::when),
 				Codec.STRING.optionalFieldOf("transform_with").forGetter(Slot::transformWith),
@@ -91,19 +90,19 @@ public record PlaceSlotProvider(
 	}
 
 	public record Preparation(
-			Map<ResourceLocation, PlaceSlotProvider> providers,
+			Map<Identifier, PlaceSlotProvider> providers,
 			ListMultimap<KBlockTemplate, KHolder<PlaceSlotProvider>> byTemplate,
-			ListMultimap<ResourceLocation, KHolder<PlaceSlotProvider>> byBlock,
+			ListMultimap<Identifier, KHolder<PlaceSlotProvider>> byBlock,
 			ListMultimap<Pair<BlockState, Direction>, PlaceSlot> slots,
 			Interner<PlaceSlot> slotInterner,
 			Set<Block> accessedBlocks,
 			Set<String> knownPrimaryTags) {
 		public static Preparation of(
-				Supplier<Map<ResourceLocation, PlaceSlotProvider>> providersSupplier,
-				Map<ResourceLocation, KBlockTemplate> templates) {
-			Map<ResourceLocation, PlaceSlotProvider> providers = Platform.isDataGen() ? Map.of() : providersSupplier.get();
+				Supplier<Map<Identifier, PlaceSlotProvider>> providersSupplier,
+				Map<Identifier, KBlockTemplate> templates) {
+			Map<Identifier, PlaceSlotProvider> providers = Platform.isDataGen() ? Map.of() : providersSupplier.get();
 			ListMultimap<KBlockTemplate, KHolder<PlaceSlotProvider>> byTemplate = ArrayListMultimap.create();
-			ListMultimap<ResourceLocation, KHolder<PlaceSlotProvider>> byBlock = ArrayListMultimap.create();
+			ListMultimap<Identifier, KHolder<PlaceSlotProvider>> byBlock = ArrayListMultimap.create();
 			for (var entry : providers.entrySet()) {
 				KHolder<PlaceSlotProvider> holder = new KHolder<>(entry.getKey(), entry.getValue());
 				for (PlaceTarget target : holder.value().target) {
@@ -146,7 +145,7 @@ public record PlaceSlotProvider(
 
 		public void attachSlotsB() {
 			byBlock.asMap().forEach((blockId, holders) -> {
-				Block block = BuiltInRegistries.BLOCK.get(blockId);
+				Block block = BuiltInRegistries.BLOCK.getValue(blockId);
 				if (block == Blocks.AIR) {
 					Kiwi.LOGGER.error("Block %s not found for slot providers %s".formatted(blockId, holders));
 					return;
@@ -201,16 +200,18 @@ public record PlaceSlotProvider(
 				String transformWith = (slot.transformWith.isPresent() ? slot.transformWith : this.transformWith).orElse("none");
 				if (!"none".equals(transformWith)) {
 					Property<?> property = KBlockUtils.getProperty(blockState, transformWith);
-					if (!(property instanceof DirectionProperty directionProperty)) {
+					if (!(property instanceof EnumProperty<?> enumProperty) || enumProperty.getValueClass() != Direction.class) {
 						throw new IllegalArgumentException("Invalid transform_with property: " + transformWith);
 					}
+					@SuppressWarnings("unchecked")
+					EnumProperty<Direction> directionProperty = (EnumProperty<Direction>) enumProperty;
 					attachSlotWithTransformation(preparation, slot, blockState, directionProperty);
 				}
 			}
 		}
 	}
 
-	private void attachSlotWithTransformation(Preparation preparation, Slot slot, BlockState blockState, DirectionProperty property) {
+	private void attachSlotWithTransformation(Preparation preparation, Slot slot, BlockState blockState, EnumProperty<Direction> property) {
 		Direction baseDirection = blockState.getValue(property);
 		BlockState rotatedState = blockState;
 		while ((rotatedState = rotatedState.cycle(property)) != blockState) {

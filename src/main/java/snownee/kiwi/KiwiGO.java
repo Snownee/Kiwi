@@ -3,16 +3,17 @@ package snownee.kiwi;
 import java.lang.reflect.Field;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -47,6 +48,17 @@ public class KiwiGO<T> implements Supplier<T> {
 			value = Objects.requireNonNull(factory.get());
 			factory = null;
 		}
+		return get();
+	}
+
+	@Nullable
+	public T preRegister(Identifier id) {
+		getOrCreate();
+		ResourceKey<? extends Registry<?>> registryKey = findRegistry();
+		//noinspection unchecked,rawtypes
+		ResourceKey resourceKey = ResourceKey.create((ResourceKey) registryKey, id);
+		//noinspection unchecked
+		setKey(resourceKey);
 		return get();
 	}
 
@@ -95,8 +107,8 @@ public class KiwiGO<T> implements Supplier<T> {
 		return stack;
 	}
 
-	public ResourceLocation key() {
-		return resourceKey().location();
+	public Identifier key() {
+		return resourceKey().identifier();
 	}
 
 	public ResourceKey<T> resourceKey() {
@@ -115,7 +127,7 @@ public class KiwiGO<T> implements Supplier<T> {
 
 	void register() {
 		//noinspection unchecked
-		Registry<T> registry = (Registry<T>) Objects.requireNonNull(BuiltInRegistries.REGISTRY.get(resourceKey().registry()));
+		Registry<T> registry = (Registry<T>) Objects.requireNonNull(BuiltInRegistries.REGISTRY.getValue(resourceKey().registry()));
 		Registry.register(registry, key(), get());
 	}
 
@@ -129,11 +141,11 @@ public class KiwiGO<T> implements Supplier<T> {
 			return Optional.empty();
 		}
 		//noinspection unchecked
-		Registry<T> registry = (Registry<T>) BuiltInRegistries.REGISTRY.get(key.registry());
+		Registry<T> registry = (Registry<T>) BuiltInRegistries.REGISTRY.getValue(key.registry());
 		if (registry == null) {
 			return Optional.empty();
 		}
-		return registry.getHolder(key);
+		return registry.get(key);
 	}
 
 	@Override
@@ -163,7 +175,7 @@ public class KiwiGO<T> implements Supplier<T> {
 	public static class Direct<T> extends KiwiGO<T> {
 		public Direct(T value) {
 			super(null);
-			this.value = value;
+			this.value = Objects.requireNonNull(value);
 		}
 	}
 
@@ -176,6 +188,14 @@ public class KiwiGO<T> implements Supplier<T> {
 		}
 
 		@Override
+		@Nullable
+		public T preRegister(Identifier id) {
+			//noinspection unchecked
+			setKey(ResourceKey.create((ResourceKey<? extends Registry<T>>) registryKey, id));
+			return null;
+		}
+
+		@Override
 		public ResourceKey<? extends Registry<?>> findRegistry() {
 			return registryKey;
 		}
@@ -184,8 +204,8 @@ public class KiwiGO<T> implements Supplier<T> {
 		public T get() {
 			if (value == null) {
 				//noinspection unchecked
-				Registry<T> registry = (Registry<T>) Objects.requireNonNull(BuiltInRegistries.REGISTRY.get(resourceKey().registry()));
-				value = registry.getOrThrow(resourceKey());
+				Registry<T> registry = (Registry<T>) Objects.requireNonNull(BuiltInRegistries.REGISTRY.getValue(resourceKey().registry()));
+				value = registry.getValueOrThrow(resourceKey());
 			}
 			return value;
 		}
@@ -196,4 +216,37 @@ public class KiwiGO<T> implements Supplier<T> {
 		}
 	}
 
+	public static class Keyed<T, U> extends KiwiGO<T> {
+		private final ResourceKey<Registry<U>> registryKey;
+		private @Nullable Function<ResourceKey<U>, T> factory;
+
+		public Keyed(ResourceKey<Registry<U>> registryKey, Function<ResourceKey<U>, T> factory) {
+			super(null);
+			this.registryKey = registryKey;
+			this.factory = factory;
+		}
+
+		@Override
+		public T preRegister(Identifier id) {
+			//noinspection unchecked
+			setKey((ResourceKey<T>) ResourceKey.create(registryKey, id));
+			return getOrCreate();
+		}
+
+		@Override
+		public T getOrCreate() {
+			if (value == null) {
+				Objects.requireNonNull(factory);
+				//noinspection unchecked
+				value = Objects.requireNonNull(factory.apply((ResourceKey<U>) resourceKey()));
+				factory = null;
+			}
+			return get();
+		}
+
+		@Override
+		public @Nullable ResourceKey<? extends Registry<?>> findRegistry() {
+			return registryKey;
+		}
+	}
 }

@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.ezylang.evalex.Expression;
 import com.google.common.collect.Maps;
@@ -13,13 +13,14 @@ import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.google.gson.Strictness;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JavaOps;
 import com.mojang.serialization.JsonOps;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import snownee.kiwi.Kiwi;
@@ -27,13 +28,20 @@ import snownee.kiwi.util.KEval;
 import snownee.kiwi.util.KUtil;
 
 public class OneTimeLoader {
-	private static final Gson GSON = new GsonBuilder().setLenient().create();
+	private static final Gson GSON = new GsonBuilder().setStrictness(Strictness.LENIENT).create();
 
-	public static <T> Map<ResourceLocation, T> load(ResourceManager resourceManager, String directory, Codec<T> codec, Context context) {
-		var fileToIdConverter = AlternativesFileToIdConverter.yamlOrJson(directory);
-		Map<ResourceLocation, T> results = Maps.newHashMap();
-		for (Map.Entry<ResourceLocation, Resource> entry : fileToIdConverter.listMatchingResources(resourceManager).entrySet()) {
-			ResourceLocation key = entry.getKey();
+	public static <T> Map<Identifier, T> load(ResourceManager resourceManager, String directory, Codec<T> codec, Context context) {
+		return load(resourceManager, AlternativesFileToIdConverter.yamlOrJson(directory), codec, context);
+	}
+
+	public static <T> Map<Identifier, T> load(
+			ResourceManager resourceManager,
+			AlternativesFileToIdConverter lister,
+			Codec<T> codec,
+			Context context) {
+		Map<Identifier, T> results = Maps.newHashMap();
+		for (Map.Entry<Identifier, Resource> entry : lister.listMatchingResources(resourceManager).entrySet()) {
+			Identifier key = entry.getKey();
 			if (context.isNamespaceDisabled(key.getNamespace())) {
 				continue;
 			}
@@ -45,7 +53,7 @@ public class OneTimeLoader {
 				Kiwi.LOGGER.error("Failed to parse " + key + ": " + result.error().get());
 				continue;
 			}
-			ResourceLocation id = fileToIdConverter.fileToId(key);
+			Identifier id = lister.fileToId(key);
 			results.put(id, result.result().orElseThrow());
 		}
 		return results;
@@ -54,11 +62,11 @@ public class OneTimeLoader {
 	public static <T> @Nullable T loadFile(
 			ResourceManager resourceManager,
 			String directory,
-			ResourceLocation id,
+			Identifier id,
 			Codec<T> codec,
 			@Nullable Context context) {
 		var fileToIdConverter = AlternativesFileToIdConverter.yamlOrJson(directory);
-		ResourceLocation file = fileToIdConverter.idToFile(id);
+		Identifier file = fileToIdConverter.idToFile(id);
 		Optional<Resource> resource = resourceManager.getResource(file);
 		if (resource.isEmpty()) {
 			return null;
@@ -75,7 +83,7 @@ public class OneTimeLoader {
 	}
 
 	public static <T> @Nullable DataResult<T> parseFile(
-			ResourceLocation file,
+			Identifier file,
 			Resource resource,
 			Codec<T> codec,
 			@Nullable Context context) {
@@ -111,8 +119,8 @@ public class OneTimeLoader {
 	}
 
 	public static class Context {
-		private Map<String, Expression> cachedExpressions;
-		private Set<String> disabledNamespaces;
+		private @Nullable Map<String, Expression> cachedExpressions;
+		private @Nullable Set<String> disabledNamespaces;
 
 		public Expression getExpression(String expression) {
 			if (cachedExpressions == null) {

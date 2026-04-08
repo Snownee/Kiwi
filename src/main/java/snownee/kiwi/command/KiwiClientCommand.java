@@ -68,9 +68,7 @@ public class KiwiClientCommand {
 					context.sendSuccess(ctx.getSource(), Component.translatable("commands.kiwi.configure.failed"));
 					return 0;
 				}
-				Minecraft.getInstance().tell(() -> {
-					Minecraft.getInstance().setScreen(screen);
-				});
+				Minecraft.getInstance().execute(() -> Minecraft.getInstance().setScreen(screen));
 				return 1;
 			}));
 		}
@@ -78,9 +76,8 @@ public class KiwiClientCommand {
 
 	private static int quiet() {
 		Minecraft mc = Minecraft.getInstance();
-		mc.gui.getChat().trimmedMessages.clear();
-		mc.gui.clear();
-		mc.getToasts().clear();
+		mc.gui.getChat().clearMessages(true);
+		mc.getToastManager().clear();
 		mc.getSoundManager().stop();
 		return 0;
 	}

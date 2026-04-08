@@ -3,29 +3,42 @@ package snownee.kiwi.recipe;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import org.jetbrains.annotations.Nullable;
-
 import com.google.common.base.Preconditions;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.context.ContextMap;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.display.DisplayContentsFactory;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.minecraft.world.level.ItemLike;
+import snownee.kiwi.data.DataModule;
 
 public final class SizedIngredient {
-	public static final SizedIngredient EMPTY = new SizedIngredient(Ingredient.EMPTY, 1);
-
-	public static final Codec<SizedIngredient> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-					Ingredient.MAP_CODEC_NONEMPTY.forGetter(SizedIngredient::ingredient),
+	public static final Codec<SizedIngredient> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
+					Ingredient.CODEC.fieldOf("ingredient").forGetter(SizedIngredient::ingredient),
 					ExtraCodecs.POSITIVE_INT.optionalFieldOf("count", 1).forGetter(SizedIngredient::count))
 			.apply(instance, SizedIngredient::new));
+
+	public static final Codec<SizedIngredient> CODEC = Codec.withAlternative(
+			DIRECT_CODEC,
+			Ingredient.CODEC.flatXmap(
+					$ -> DataResult.success(new SizedIngredient($, 1)),
+					$ -> $.count() == 1 ?
+							DataResult.success($.ingredient()) :
+							DataResult.error(() -> "SizedIngredient's count must be 1 to use this shorthand codec")));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, SizedIngredient> STREAM_CODEC = StreamCodec.composite(
 			Ingredient.CONTENTS_STREAM_CODEC,
@@ -39,13 +52,15 @@ public final class SizedIngredient {
 	}
 
 	public static SizedIngredient of(TagKey<Item> tag, int count) {
-		return new SizedIngredient(Ingredient.of(tag), count);
+		return of(BuiltInRegistries.ITEM, tag, count);
+	}
+
+	public static SizedIngredient of(HolderGetter<Item> lookup, TagKey<Item> tag, int count) {
+		return new SizedIngredient(RecipeUtil.tagIngredient(lookup, tag), count);
 	}
 
 	private final Ingredient ingredient;
 	private final int count;
-	@Nullable
-	private ItemStack[] cachedStacks;
 
 	public SizedIngredient(Ingredient ingredient, int count) {
 		Preconditions.checkArgument(count > 0, "Count must be positive");
@@ -65,11 +80,11 @@ public final class SizedIngredient {
 		return ingredient.test(stack) && (stack.isEmpty() || stack.getCount() >= count);
 	}
 
-	public ItemStack[] getItems() {
-		if (cachedStacks == null) {
-			cachedStacks = Stream.of(ingredient.getItems()).map(s -> s.copyWithCount(count)).toArray(ItemStack[]::new);
+	public SlotDisplay display() {
+		if (count == 1) {
+			return ingredient.display();
 		}
-		return cachedStacks;
+		return new SizedSlotDisplay(ingredient.display(), count);
 	}
 
 	@Override
@@ -91,5 +106,46 @@ public final class SizedIngredient {
 	@Override
 	public String toString() {
 		return count + "x " + ingredient;
+	}
+
+	public record SizedSlotDisplay(SlotDisplay display, int count) implements SlotDisplay {
+		public static final MapCodec<SizedSlotDisplay> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+					SlotDisplay.CODEC.fieldOf("display").forGetter(SizedSlotDisplay::display),
+					ExtraCodecs.POSITIVE_INT.fieldOf("count").forGetter(SizedSlotDisplay::count)).apply(i, SizedSlotDisplay::new));
+		public static final StreamCodec<RegistryFriendlyByteBuf, SizedSlotDisplay> STREAM_CODEC = StreamCodec.composite(
+				SlotDisplay.STREAM_CODEC,
+				SizedSlotDisplay::display,
+				ByteBufCodecs.VAR_INT,
+				SizedSlotDisplay::count,
+				SizedSlotDisplay::new);
+
+		@Override
+		public String toString() {
+			return count + "x " + display;
+		}
+
+		@Override
+		public <T> Stream<T> resolve(ContextMap context, DisplayContentsFactory<T> output) {
+			return display.resolve(context, output).peek($ -> {
+				if ($ instanceof ItemStack itemStack) {
+					itemStack.setCount(count);
+				}
+			});
+		}
+
+		@Override
+		public ItemStack resolveForFirstStack(ContextMap context) {
+			return display.resolveForFirstStack(context).copyWithCount(count);
+		}
+
+		@Override
+		public boolean isEnabled(FeatureFlagSet enabledFeatures) {
+			return display.isEnabled(enabledFeatures);
+		}
+
+		@Override
+		public Type<? extends SlotDisplay> type() {
+			return DataModule.SIZED.getOrCreate();
+		}
 	}
 }

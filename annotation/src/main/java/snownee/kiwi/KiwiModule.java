@@ -91,12 +91,6 @@ public @interface KiwiModule {
 	@interface NoItem {
 	}
 
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ElementType.TYPE, ElementType.FIELD})
-	@interface RenderLayer {
-		RenderLayerEnum value();
-	}
-
 	/**
 	 * Prevent this field being cached by Kiwi
 	 *

@@ -12,7 +12,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ColorRGBA;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -35,7 +35,7 @@ import snownee.kiwi.customization.duck.KBlockProperties;
 import snownee.kiwi.util.codec.CustomizationCodecs;
 
 public class BlockCodecs {
-	private static final Map<ResourceLocation, MapCodec<Block>> CODECS = Maps.newHashMap();
+	private static final Map<Identifier, MapCodec<Block>> CODECS = Maps.newHashMap();
 
 	public static final String BLOCK_PROPERTIES_KEY = "properties";
 
@@ -97,21 +97,21 @@ public class BlockCodecs {
 	}
 
 	public static void register(String key, MapCodec<? extends Block> codec) {
-		register(ResourceLocation.withDefaultNamespace(key), codec);
+		register(Identifier.withDefaultNamespace(key), codec);
 	}
 
-	public static void register(ResourceLocation key, MapCodec<? extends Block> codec) {
+	public static void register(Identifier key, MapCodec<? extends Block> codec) {
 		//noinspection unchecked
 		CODECS.put(key, (MapCodec<Block>) codec);
 	}
 
-	public static MapCodec<Block> get(ResourceLocation key) {
+	public static MapCodec<Block> get(Identifier key) {
 		MapCodec<Block> codec = CODECS.get(key);
 		if (codec != null) {
 			return codec;
 		}
 		//noinspection unchecked
-		return (MapCodec<Block>) BuiltInRegistries.BLOCK_TYPE.get(key);
+		return (MapCodec<Block>) BuiltInRegistries.BLOCK_TYPE.getValue(key);
 	}
 
 	public static <O, A> A notImplemented(O block) {

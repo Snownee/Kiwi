@@ -1,0 +1,6 @@
+switch:
+  enabled: true
+  cascading: true
+blocks:
+  - gold_block
+  - light_weighted_pressure_plate

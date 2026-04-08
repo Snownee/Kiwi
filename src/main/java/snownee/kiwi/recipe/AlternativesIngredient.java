@@ -1,9 +1,9 @@
 package snownee.kiwi.recipe;
 
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
@@ -11,16 +11,19 @@ import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import snownee.kiwi.Kiwi;
 
 public class AlternativesIngredient implements CustomIngredient {
-	public static final ResourceLocation ID = Kiwi.id("alternatives");
+	public static final Identifier ID = Kiwi.id("alternatives");
 	public static final Serializer SERIALIZER = new Serializer();
 	@Nullable
 	private final List<JsonElement> options;
@@ -32,12 +35,14 @@ public class AlternativesIngredient implements CustomIngredient {
 
 	@Override
 	public boolean test(ItemStack stack) {
-		return internal().test(stack);
+		internal();
+		return cached != null && cached.test(stack);
 	}
 
 	@Override
 	public List<ItemStack> getMatchingStacks() {
-		return List.of(internal().getItems());
+		internal();
+		return cached != null ? cached.items().map(Holder::value).map(Item::getDefaultInstance).toList() : List.of();
 	}
 
 	@Override
@@ -50,10 +55,8 @@ public class AlternativesIngredient implements CustomIngredient {
 		return SERIALIZER;
 	}
 
-	public Ingredient internal() {
-		if (cached == null) {
-			Objects.requireNonNull(options);
-			cached = Ingredient.EMPTY;
+	public Optional<Ingredient> internal() {
+		if (cached == null && options != null) {
 			for (JsonElement option : options) {
 				Ingredient ingredient;
 				try {
@@ -61,14 +64,14 @@ public class AlternativesIngredient implements CustomIngredient {
 				} catch (Exception e) {
 					continue;
 				}
-				if (ingredient.getItems().length == 0) {
+				if (ingredient.isEmpty()) {
 					continue;
 				}
 				cached = ingredient;
 				break;
 			}
 		}
-		return cached;
+		return Optional.ofNullable(cached);
 	}
 
 	public static final class Serializer implements CustomIngredientSerializer<AlternativesIngredient> {
@@ -76,23 +79,26 @@ public class AlternativesIngredient implements CustomIngredient {
 				Codec.list(ExtraCodecs.JSON).fieldOf("options").forGetter(o -> o.options)
 		).apply(i, AlternativesIngredient::new));
 
+		public static final StreamCodec<RegistryFriendlyByteBuf, Optional<Ingredient>> INGREDIENT_STREAM_CODEC =
+				Ingredient.CONTENTS_STREAM_CODEC.apply(ByteBufCodecs::optional);
+
 		public static final StreamCodec<RegistryFriendlyByteBuf, AlternativesIngredient> STREAM_CODEC = StreamCodec.of(
 				Serializer::write,
 				Serializer::read);
 
 		public static AlternativesIngredient read(RegistryFriendlyByteBuf buf) {
-			Ingredient internal = Ingredient.CONTENTS_STREAM_CODEC.decode(buf);
+			Optional<Ingredient> internal = INGREDIENT_STREAM_CODEC.decode(buf);
 			AlternativesIngredient ingredient = new AlternativesIngredient(null);
-			ingredient.cached = internal;
+			ingredient.cached = internal.orElse(null);
 			return ingredient;
 		}
 
 		public static void write(RegistryFriendlyByteBuf buf, AlternativesIngredient ingredient) {
-			Ingredient.CONTENTS_STREAM_CODEC.encode(buf, ingredient.internal());
+			INGREDIENT_STREAM_CODEC.encode(buf, ingredient.internal());
 		}
 
 		@Override
-		public ResourceLocation getIdentifier() {
+		public Identifier getIdentifier() {
 			return ID;
 		}
 

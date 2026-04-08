@@ -11,7 +11,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import snownee.kiwi.Kiwi;
@@ -39,9 +39,9 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 	}
 
 	public static Codec<KBlockDefinition> codec(
-			Map<ResourceLocation, KBlockTemplate> templates,
+			Map<Identifier, KBlockTemplate> templates,
 			BlockFundamentals.CodecCreationContext context) {
-		KBlockTemplate defaultTemplate = templates.get(ResourceLocation.withDefaultNamespace("block"));
+		KBlockTemplate defaultTemplate = templates.get(Identifier.withDefaultNamespace("block"));
 		Preconditions.checkNotNull(defaultTemplate);
 		ConfiguredBlockTemplate defaultConfiguredTemplate = new ConfiguredBlockTemplate(defaultTemplate);
 		return RecordCodecBuilder.create(instance -> instance.group(
@@ -52,20 +52,20 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 		).apply(instance, KBlockDefinition::new));
 	}
 
-	public KBlockSettings.Builder createSettings(ResourceLocation id, ShapeStorage shapes) {
+	public KBlockSettings.Builder createSettings(Identifier id, ShapeStorage shapes) {
 		BlockDefinitionProperties.PartialVanillaProperties vanilla = properties.vanillaProperties();
 		KBlockSettings.Builder builder;
 		if (vanilla.copy().isEmpty()) {
 			builder = KBlockSettings.builder();
 		} else {
-			builder = KBlockSettings.copyProperties(BuiltInRegistries.BLOCK.getOrThrow(vanilla.copy().get()));
+			builder = KBlockSettings.copyProperties(BuiltInRegistries.BLOCK.getValue(vanilla.copy().get()));
 		}
 		properties.glassType().ifPresent(builder::glassType);
 		builder.configure($ -> {
 			vanilla.lightEmission().ifPresent(i -> $.lightLevel($$ -> i));
 			vanilla.pushReaction().ifPresent($::pushReaction);
 			vanilla.emissiveRendering().ifPresent($::emissiveRendering);
-			vanilla.hasPostProcess().ifPresent($::hasPostProcess);
+			vanilla.postProcess().ifPresent($::postProcess);
 			vanilla.isRedstoneConductor().ifPresent($::isRedstoneConductor);
 			vanilla.isSuffocating().ifPresent($::isSuffocating);
 			vanilla.isViewBlocking().ifPresent($::isViewBlocking);
@@ -80,7 +80,7 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 				}
 			});
 			if (vanilla.noCollision().orElse(false)) {
-				$.noCollission();
+				$.noCollision();
 			}
 			if (vanilla.noOcclusion().orElse(properties.glassType().isPresent())) {
 				$.noOcclusion();
@@ -122,7 +122,7 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 				if (remove) {
 					s = s.substring(1);
 				}
-				KBlockComponent.Type<?> type = CustomizationRegistries.BLOCK_COMPONENT.get(ResourceLocation.parse(s));
+				KBlockComponent.Type<?> type = CustomizationRegistries.BLOCK_COMPONENT.getValue(Identifier.parse(s));
 				Preconditions.checkNotNull(type, "Unknown component type %s", s);
 				if (remove) {
 					builder.removeComponent(type);
@@ -139,7 +139,7 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 		return builder;
 	}
 
-	public Block createBlock(ResourceLocation id, ShapeStorage shapes) {
+	public Block createBlock(Identifier id, ShapeStorage shapes) {
 		KBlockSettings.Builder builder = createSettings(id, shapes);
 		Block block = template.template().createBlock(id, builder.get(), template.json());
 		setConfiguringShape(block, shapes);
@@ -174,7 +174,7 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 			ShapeStorage shapes,
 			KBlockSettings.Builder builder,
 			BlockShapeType type,
-			Optional<ResourceLocation> shapeId) {
+			Optional<Identifier> shapeId) {
 		if (shapeId.isEmpty()) {
 			return;
 		}

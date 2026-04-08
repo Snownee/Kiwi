@@ -2,47 +2,30 @@ package snownee.kiwi.handler;
 
 import java.util.function.Supplier;
 
-import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.DelegatingResourceHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 /**
  * @since 2.7.0
  */
-public class ExtractOnlyItemHandler<T extends IItemHandler> implements IItemHandler, Supplier<T> {
+public class ExtractOnlyItemHandler<T extends ResourceHandler<ItemResource>> extends DelegatingResourceHandler<ItemResource> implements Supplier<T> {
 
 	private final T handler;
 
 	public ExtractOnlyItemHandler(T handler) {
+		super(handler);
 		this.handler = handler;
 	}
 
 	@Override
-	public int getSlots() {
-		return handler.getSlots();
+	public int insert(int index, ItemResource resource, int amount, TransactionContext transaction) {
+		return amount;
 	}
 
 	@Override
-	public ItemStack getStackInSlot(int slot) {
-		return handler.getStackInSlot(slot);
-	}
-
-	@Override
-	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-		return stack;
-	}
-
-	@Override
-	public ItemStack extractItem(int slot, int amount, boolean simulate) {
-		return handler.extractItem(slot, amount, simulate);
-	}
-
-	@Override
-	public int getSlotLimit(int slot) {
-		return handler.getSlotLimit(slot);
-	}
-
-	@Override
-	public boolean isItemValid(int slot, ItemStack stack) {
+	public boolean isValid(int index, ItemResource resource) {
 		return false;
 	}
 

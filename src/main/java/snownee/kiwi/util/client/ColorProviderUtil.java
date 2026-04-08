@@ -1,83 +1,57 @@
 package snownee.kiwi.util.client;
 
-import java.util.Objects;
-import java.util.function.Supplier;
-
-import org.jetbrains.annotations.Nullable;
+import java.util.List;
+import java.util.Set;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.color.block.BlockColor;
-import net.minecraft.client.color.item.ItemColor;
+import net.minecraft.client.color.block.BlockTintSource;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 import snownee.kiwi.mixin.forge.BlockColorsAccess;
-import snownee.kiwi.mixin.forge.ItemColorsAccess;
-import snownee.kiwi.util.CachedSupplier;
 
 public class ColorProviderUtil {
-	public static BlockColor delegate(Block block) {
-		return new BlockDelegate(() -> {
+	public static BlockTintSource delegateBlock(Block block) {
+		return new BlockTintSourceDelegate(block);
+	}
+
+	private static class BlockTintSourceDelegate implements BlockTintSource {
+		private final Block provider;
+
+		BlockTintSourceDelegate(Block provider) {
+			this.provider = provider;
+		}
+
+		private List<BlockTintSource> sources() {
 			BlockColorsAccess blockColors = (BlockColorsAccess) Minecraft.getInstance().getBlockColors();
-			return blockColors.getBlockColors().get(block);
-		});
-	}
-
-	public static ItemColor delegate(Item item) {
-		return new ItemDelegate(() -> {
-			ItemColorsAccess itemColors = (ItemColorsAccess) Minecraft.getInstance().getItemColors();
-			return itemColors.getItemColors().get(item);
-		});
-	}
-
-	public static ItemColor delegateItemFallback(Block block) {
-		return new ItemDelegate(() -> {
-			BlockColorsAccess blockColors = (BlockColorsAccess) Minecraft.getInstance().getBlockColors();
-			BlockColor blockColor = blockColors.getBlockColors().get(block);
-			if (blockColor == null) {
-				return null;
-			} else {
-				return (stack, i) -> blockColor.getColor(block.defaultBlockState(), null, null, i);
-			}
-		});
-	}
-
-	public static class Dummy implements ItemColor, BlockColor {
-		public static final Dummy INSTANCE = new Dummy();
-
-		@Override
-		public int getColor(BlockState blockState, @Nullable BlockAndTintGetter blockAndTintGetter, @Nullable BlockPos blockPos, int i) {
-			return -1;
+			List<BlockTintSource> list = blockColors.getBlockColors().get(provider);
+			return list != null ? list : List.of();
 		}
 
 		@Override
-		public int getColor(ItemStack itemStack, int i) {
-			return -1;
-		}
-	}
-
-	private static class BlockDelegate extends CachedSupplier<BlockColor> implements BlockColor {
-		public BlockDelegate(Supplier<BlockColor> getter) {
-			super(getter, Dummy.INSTANCE);
+		public int color(BlockState state) {
+			List<BlockTintSource> srcs = sources();
+			return srcs.isEmpty() ? -1 : srcs.get(0).color(state);
 		}
 
 		@Override
-		public int getColor(BlockState blockState, @Nullable BlockAndTintGetter blockAndTintGetter, @Nullable BlockPos blockPos, int i) {
-			return Objects.requireNonNull(this.get()).getColor(blockState, blockAndTintGetter, blockPos, i);
-		}
-	}
-
-	private static class ItemDelegate extends CachedSupplier<ItemColor> implements ItemColor {
-		public ItemDelegate(Supplier<ItemColor> getter) {
-			super(getter, Dummy.INSTANCE);
+		public int colorInWorld(BlockState state, BlockAndTintGetter level, BlockPos pos) {
+			List<BlockTintSource> srcs = sources();
+			return srcs.isEmpty() ? -1 : srcs.get(0).colorInWorld(state, level, pos);
 		}
 
 		@Override
-		public int getColor(ItemStack itemStack, int i) {
-			return Objects.requireNonNull(this.get()).getColor(itemStack, i);
+		public int colorAsTerrainParticle(BlockState state, BlockAndTintGetter level, BlockPos pos) {
+			List<BlockTintSource> srcs = sources();
+			return srcs.isEmpty() ? -1 : srcs.get(0).colorAsTerrainParticle(state, level, pos);
+		}
+
+		@Override
+		public Set<Property<?>> relevantProperties() {
+			List<BlockTintSource> srcs = sources();
+			return srcs.isEmpty() ? Set.of() : srcs.get(0).relevantProperties();
 		}
 	}
 }

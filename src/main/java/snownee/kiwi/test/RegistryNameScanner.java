@@ -1,0 +1,124 @@
+package snownee.kiwi.test;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.jspecify.annotations.Nullable;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.FieldNode;
+
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import snownee.kiwi.Kiwi;
+
+public class RegistryNameScanner {
+	public static void run() throws Exception {
+		StringBuilder sb = new StringBuilder();
+		List<Class<?>> registryClasses = scanStaticFields(BuiltInRegistries.class, Registry.class).stream()
+				.map(matchGeneric(Pattern.compile("<L([^<;]+?)[<;]")))
+				.filter(Objects::nonNull)
+				.toList();
+		List<FieldNode> fields = scanStaticFields(Registries.class, ResourceKey.class);
+
+		Function<FieldNode, Class<?>> func = matchGeneric(Pattern.compile("Lnet/minecraft/core/Registry<L([^<;]+?)[<;]"));
+		Map<Class<?>, List<String>> lines = Maps.newLinkedHashMapWithExpectedSize(fields.size());
+		Set<Class<?>> ambiguousKeys = Sets.newLinkedHashSet();
+		for (FieldNode field : fields) {
+			Class<?> registryClass = func.apply(field);
+			if (!registryClasses.contains(registryClass)) {
+				continue;
+			}
+			if (registryClass == Identifier.class) {
+				continue;
+			}
+			String name = registryClass.getName();
+			name = name.substring(name.lastIndexOf('.') + 1).replace("$", ".");
+			if (lines.containsKey(registryClass)) {
+				ambiguousKeys.add(registryClass);
+			} else {
+				lines.put(registryClass, List.of(field.name, name));
+			}
+		}
+		for (Class<?> key : ambiguousKeys) {
+			Kiwi.LOGGER.info("Ambiguous registry key: {}", key.getName());
+			lines.remove(key);
+		}
+		for (List<String> line : lines.values()) {
+			sb.append("registerRegistry(Registries.%s, %s.class);\n".formatted(line.toArray()));
+		}
+		Kiwi.LOGGER.info(sb.toString());
+	}
+
+	private static Function<FieldNode, @Nullable Class<?>> matchGeneric(Pattern pattern) {
+		return fieldNode -> {
+			Matcher matcher = pattern.matcher(fieldNode.signature);
+			if (!matcher.find()) {
+				return null;
+			}
+			String className = matcher.group(1).replace('/', '.');
+			try {
+				return Class.forName(className);
+			} catch (ClassNotFoundException e) {
+				throw new RuntimeException("Failed to load class: " + className, e);
+			}
+		};
+	}
+
+	private static List<FieldNode> scanStaticFields(Class<?> clazz, Class<?> fieldType) {
+		List<FieldNode> result = new ArrayList<>();
+		String classPath = clazz.getName().replace('.', '/') + ".class";
+		ClassLoader classLoader = clazz.getClassLoader();
+		try (InputStream is = classLoader.getResourceAsStream(classPath)) {
+			ClassReader classReader = new ClassReader(Objects.requireNonNull(is));
+			ClassNode classNode = new ClassNode();
+			classReader.accept(classNode, 0);
+			for (FieldNode fieldNode : classNode.fields) {
+				if (!isPublicStatic(fieldNode)) {
+					continue;
+				}
+				Class<?> fieldClass = getFieldClass(fieldNode, classLoader);
+				if (fieldType.isAssignableFrom(fieldClass)) {
+					result.add(fieldNode);
+				}
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to scan class: " + clazz.getName(), e);
+		}
+		return result;
+	}
+
+	private static boolean isPublicStatic(FieldNode fieldNode) {
+		return (fieldNode.access & Opcodes.ACC_PUBLIC) != 0 &&
+				(fieldNode.access & Opcodes.ACC_STATIC) != 0;
+	}
+
+	private static boolean isPrimitive(Type type) {
+		int sort = type.getSort();
+		return sort >= Type.BOOLEAN && sort <= Type.DOUBLE;
+	}
+
+	private static Class<?> getFieldClass(FieldNode fieldNode, ClassLoader loader) throws ClassNotFoundException {
+		Type type = Type.getType(fieldNode.desc);
+		if (isPrimitive(type)) {
+			throw new IllegalArgumentException("Field is of primitive type: " + fieldNode.name);
+		}
+		String className = type.getClassName();
+		return Class.forName(className, false, loader);
+	}
+}

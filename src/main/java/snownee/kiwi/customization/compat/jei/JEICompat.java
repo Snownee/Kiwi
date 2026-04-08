@@ -4,14 +4,13 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
-import me.shedaniel.rei.plugincompatibilities.api.REIPluginCompatIgnore;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
-import mezz.jei.api.recipe.RecipeType;
+import mezz.jei.api.recipe.types.IRecipeType;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
 import snownee.kiwi.Kiwi;
@@ -22,13 +21,12 @@ import snownee.kiwi.customization.block.family.StonecutterRecipeMaker;
 import snownee.kiwi.util.KHolder;
 
 @JeiPlugin
-@REIPluginCompatIgnore
 public class JEICompat implements IModPlugin {
-	public static final ResourceLocation ID = Kiwi.id("customization");
-	public static final RecipeType<KSwitchGroupRecipe> KSWITCH = RecipeType.create(Kiwi.ID, "kswitch", KSwitchGroupRecipe.class);
+	public static final Identifier ID = Kiwi.id("customization");
+	public static final IRecipeType<KSwitchGroupRecipe> KSWITCH = IRecipeType.create(Kiwi.ID, "kswitch", KSwitchGroupRecipe.class);
 
 	@Override
-	public ResourceLocation getPluginUid() {
+	public Identifier getPluginUid() {
 		return ID;
 	}
 

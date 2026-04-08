@@ -1,71 +1,92 @@
 package snownee.kiwi.handler;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.util.Mth;
-import net.neoforged.neoforge.energy.EnergyStorage;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.neoforged.neoforge.common.util.ValueIOSerializable;
+import net.neoforged.neoforge.transfer.energy.EnergyHandler;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
-public class KEnergyStorage extends EnergyStorage {
+public class KEnergyStorage implements EnergyHandler, ValueIOSerializable {
+	protected int energy;
+	protected int capacity;
+	protected int maxReceive;
+	protected int maxExtract;
 
 	public KEnergyStorage(int capacity) {
-		super(capacity);
+		this(capacity, capacity, capacity, 0);
 	}
 
 	public KEnergyStorage(int capacity, int maxTransfer) {
-		super(capacity, maxTransfer, maxTransfer, 0);
+		this(capacity, maxTransfer, maxTransfer, 0);
 	}
 
 	public KEnergyStorage(int capacity, int maxReceive, int maxExtract) {
-		super(capacity, maxReceive, maxExtract, 0);
+		this(capacity, maxReceive, maxExtract, 0);
 	}
 
 	public KEnergyStorage(int capacity, int maxReceive, int maxExtract, int energy) {
-		super(capacity, maxReceive, maxExtract, energy);
-	}
-
-	public KEnergyStorage readFromNBT(CompoundTag nbt) {
-		if (nbt.contains("Energy", Tag.TAG_INT)) {
-			energy = nbt.getInt("Energy");
-		} else {
-			energy = 0;
-		}
-		return this;
-	}
-
-	public CompoundTag writeToNBT(CompoundTag nbt) {
-		if (energy > 0) {
-			nbt.putInt("Energy", energy);
-		}
-		return nbt;
+		this.capacity = capacity;
+		this.maxReceive = maxReceive;
+		this.maxExtract = maxExtract;
+		this.energy = Mth.clamp(energy, 0, capacity);
 	}
 
 	public void setEnergy(int energy) {
 		int old = this.energy;
-		this.energy = Mth.clamp(energy, 0, getMaxEnergyStored());
+		this.energy = Mth.clamp(energy, 0, getCapacityAsInt());
 		if (old != this.energy) {
 			onEnergyChanged();
 		}
 	}
 
-	@Override
-	public int extractEnergy(int maxExtract, boolean simulate) {
-		int amount = super.extractEnergy(maxExtract, simulate);
-		if (!simulate && amount > 0) {
-			onEnergyChanged();
-		}
-		return amount;
-	}
-
-	@Override
-	public int receiveEnergy(int maxReceive, boolean simulate) {
-		int amount = super.receiveEnergy(maxReceive, simulate);
-		if (!simulate && amount > 0) {
-			onEnergyChanged();
-		}
-		return amount;
-	}
-
 	protected void onEnergyChanged() {
 	}
 
+	@Override
+	public long getAmountAsLong() {
+		return energy;
+	}
+
+	@Override
+	public long getCapacityAsLong() {
+		return capacity;
+	}
+
+	@Override
+	public int insert(int amount, TransactionContext transaction) {
+		if (maxExtract <= 0) {
+			return 0;
+		}
+
+		int inserted = Mth.clamp(amount, 0, this.maxReceive);
+		if (inserted > 0) {
+			energy += inserted;
+			onEnergyChanged();
+		}
+		return inserted;
+	}
+
+	@Override
+	public int extract(int amount, TransactionContext transaction) {
+		if (maxReceive <= 0) {
+			return 0;
+		}
+		int extracted = Mth.clamp(amount, 0, this.maxExtract);
+		if (extracted > 0) {
+			energy -= extracted;
+			onEnergyChanged();
+		}
+		return extracted;
+	}
+
+	@Override
+	public void serialize(ValueOutput output) {
+		output.putInt("energy", getAmountAsInt());
+	}
+
+	@Override
+	public void deserialize(ValueInput input) {
+		setEnergy(input.getIntOr("energy", 0));
+	}
 }
