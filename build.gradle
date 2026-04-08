@@ -298,12 +298,14 @@ publishMods {
         projectId = "549404"
         accessToken = providers.environmentVariable("CURSE_TOKEN")
         minecraftVersions.add(minecraft_version)
+        minecraftVersions.add("26.1")
         optional("cloth-config")
     }
     modrinth {
         projectId = "ufdDoWPd"
         accessToken = providers.environmentVariable("MODRINTH_TOKEN")
         minecraftVersions.add(minecraft_version)
+        minecraftVersions.add("26.1")
         optional("cloth-config")
     }
 }
