@@ -1,6 +1,7 @@
 package snownee.kiwi.contributor;
 
 import java.util.Objects;
+import java.util.UUID;
 
 import com.mojang.blaze3d.platform.InputConstants;
 
@@ -102,7 +103,7 @@ public class ContributorsClient extends AbstractModule {
 			id = null;
 		}
 		Identifier cosmetic = id;
-		Contributors.canPlayerUseCosmetic(getPlayerName(), cosmetic).thenAccept(bl -> {
+		Contributors.canPlayerUseCosmetic(getSelfName(), cosmetic).thenAccept(bl -> {
 			if (!bl) {
 				ConfigHandler cfg = KiwiConfigManager.getHandler(KiwiClientConfig.class);
 				KiwiClientConfig.contributorCosmetic = "";
@@ -111,12 +112,12 @@ public class ContributorsClient extends AbstractModule {
 			}
 			KPacketSender.sendToServer(new CSetCosmeticPacket(cosmetic));
 			if (cosmetic == null) {
-				Contributors.PLAYER_COSMETICS.remove(getPlayerName());
+				Contributors.PLAYER_COSMETICS.remove(getSelfName());
 			} else {
-				Contributors.PLAYER_COSMETICS.put(getPlayerName(), cosmetic);
+				Contributors.PLAYER_COSMETICS.put(getSelfName(), cosmetic);
 				Kiwi.LOGGER.info("Enabled contributor effect: {}", cosmetic);
 			}
-			CosmeticLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidate(getPlayerName()));
+			CosmeticLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidate(getSelfName()));
 		});
 	}
 
@@ -140,7 +141,11 @@ public class ContributorsClient extends AbstractModule {
 		CosmeticLayer.ALL_LAYERS.forEach(l -> l.getCache().invalidateAll());
 	}
 
-	private static String getPlayerName() {
+	public static UUID getSelfUUID() {
+		return Minecraft.getInstance().getUser().getProfileId();
+	}
+
+	public static String getSelfName() {
 		return Minecraft.getInstance().getUser().getName();
 	}
 

@@ -5,16 +5,17 @@ import java.util.Objects;
 import org.jspecify.annotations.Nullable;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.Util;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.Util;
 import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfigManager;
@@ -23,26 +24,21 @@ import snownee.kiwi.contributor.ContributorsClient;
 
 public class CosmeticScreen extends Screen {
 
-	private List list;
-	@Nullable
-	private Identifier currentCosmetic;
-	private Entry selectedEntry;
+	private @Nullable List list;
+	private @Nullable Identifier currentCosmetic;
+	private @Nullable Entry selectedEntry;
 
 	public CosmeticScreen() {
 		super(Component.translatable("gui.kiwi.cosmetic"));
 	}
 
-	private static String getPlayerName() {
-		return Minecraft.getInstance().getUser().getName();
-	}
-
 	@Override
 	protected void init() {
-		currentCosmetic = Contributors.PLAYER_COSMETICS.get(getPlayerName());
-		list = new List(getMinecraft(), 150, height, 0, 20);
+		currentCosmetic = Contributors.PLAYER_COSMETICS.get(ContributorsClient.getSelfUUID());
+		list = new List(minecraft, 150, height, 0, 20);
 		list.setX(20);
 		list.addEntry(selectedEntry = new Entry(this, null));
-		String playerName = getPlayerName();
+		String playerName = ContributorsClient.getSelfName();
 		boolean added = false;
 		for (Identifier tier : Contributors.getRenderableTiers()) {
 			if (Contributors.isContributor(tier.getNamespace(), playerName, tier.getPath())) {
@@ -55,8 +51,12 @@ public class CosmeticScreen extends Screen {
 			}
 		}
 		if (!added) {
-			getMinecraft().setScreen(null);
+			minecraft.setScreen(null);
 		}
+		StringWidget stringWidget = new StringWidget(title, minecraft.font);
+		stringWidget.setPosition(180, 10);
+		addRenderableWidget(stringWidget);
+		addRenderableWidget(list);
 		addRenderableWidget(Button.builder(
 				Component.translatable(KiwiClientConfig.cosmeticScreenKeybind ? "gui.kiwi.cosmetic.enabled" : "gui.kiwi.cosmetic.disabled"),
 				b -> {
@@ -66,14 +66,6 @@ public class CosmeticScreen extends Screen {
 							"gui.kiwi.cosmetic.enabled" :
 							"gui.kiwi.cosmetic.disabled"));
 				}).pos(180, 30).build());
-	}
-
-	@Override
-	public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float pTicks) {
-		extractBackground(guiGraphics, mouseX, mouseY, pTicks);
-		super.extractRenderState(guiGraphics, mouseX, mouseY, pTicks);
-		list.extractRenderState(guiGraphics, mouseX, mouseY, pTicks);
-		guiGraphics.text(getMinecraft().font, title, 180, 10, 0xFFFFFF);
 	}
 
 	@Override
@@ -150,7 +142,7 @@ public class CosmeticScreen extends Screen {
 
 		@Override
 		public void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovered, float a) {
-			int color = hovered ? 0xFFFFFFAA : 0xFFFFFF;
+			int color = hovered ? 0xFFFFFFAA : 0xFFFFFFFF;
 			if (this == parent.selectedEntry) {
 				color = 0xFFFFFF77;
 			}
@@ -167,7 +159,6 @@ public class CosmeticScreen extends Screen {
 		public Component getNarration() {
 			return Component.translatable(name);
 		}
-
 	}
 
 }

@@ -1,3 +1,5 @@
 template:
   kiwi:type: test:tier_test
   tier: test:tier_test
+  attack_damage: 1
+  attack_speed: 1

@@ -13,7 +13,7 @@
 		"customization.BlockMixin",
 		"customization.BlockPropertiesMixin",
 		"customization.BlockStateMixin",
-		"customization.BushBlockMixin",
+		"customization.VegetationBlockMixin",
 		"customization.CrossCollisionBlockAccessor",
 		"customization.HalfTransparentBlockMixin",
 		"customization.WallBlockAccessor",
