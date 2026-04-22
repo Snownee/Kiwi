@@ -49,10 +49,10 @@ dependencies {
     implementation "net.fabricmc:fabric-loader:${project.loader_version}"
     implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
-//    api("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}") {
-//        exclude(group: "net.fabricmc.fabric-api")
-//    }
-    compileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
+    api("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}") {
+        exclude(group: "net.fabricmc.fabric-api")
+    }
+    implementation "com.terraformersmc:modmenu:${project.modmenu_version}"
 
     compileOnly("com.google.errorprone:error_prone_annotations:2.18.0")
 
@@ -76,7 +76,7 @@ dependencies {
 
 //    compileOnlyApi "mezz.jei:jei-${minecraft_version}-fabric-api:${jei_version}"
 //    implementation "mezz.jei:jei-${minecraft_version}-fabric:${jei_version}"
-    compileOnly "mezz.jei:jei-26.1-pre-3-fabric:${jei_version}"
+    compileOnly "mezz.jei:jei-26.1.2-fabric:${jei_version}"
 
 //    modCompileOnly "dev.emi:emi-fabric:${emi_version}:api"
 //    modRuntimeOnly "dev.emi:emi-fabric:${emi_version}"
@@ -177,6 +177,8 @@ publishMods {
         projectId = "549404"
         accessToken = providers.environmentVariable("CURSE_TOKEN")
         minecraftVersions.add(minecraft_version)
+        minecraftVersions.add("26.1")
+        minecraftVersions.add("26.1.1")
         requires("fabric-api")
         optional("cloth-config")
     }
@@ -184,6 +186,8 @@ publishMods {
         projectId = "ufdDoWPd"
         accessToken = providers.environmentVariable("MODRINTH_TOKEN")
         minecraftVersions.add(minecraft_version)
+        minecraftVersions.add("26.1")
+        minecraftVersions.add("26.1.1")
         requires("fabric-api")
         optional("cloth-config")
     }
