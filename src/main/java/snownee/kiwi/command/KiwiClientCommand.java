@@ -68,7 +68,9 @@ public class KiwiClientCommand {
 					context.sendSuccess(ctx.getSource(), Component.translatable("commands.kiwi.configure.failed"));
 					return 0;
 				}
-				Minecraft.getInstance().execute(() -> Minecraft.getInstance().setScreen(screen));
+				Minecraft.getInstance().schedule(() -> {
+					Minecraft.getInstance().setScreen(screen);
+				});
 				return 1;
 			}));
 		}
