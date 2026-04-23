@@ -1,11 +1,13 @@
 package snownee.kiwi.customization.block.family;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Interner;
@@ -17,8 +19,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -54,31 +56,32 @@ public class BlockFamily {
 					.optionalFieldOf("items", List.of())
 					.forGetter($ -> $.itemHolders().stream().map(Holder.Reference::key).toList()),
 			ExtraCodecs.compactListCodec(ResourceKey.codec(Registries.ITEM))
-					.optionalFieldOf("exchange_inputs_in_viewer", List.of())
-					.forGetter($ -> $.exchangeInputsInViewer().stream().map(Holder.Reference::key).toList()),
+					.optionalFieldOf("exchange_inputs_in_viewer")
+					.forGetter($ -> $.exchangeInputsInViewer().map(list -> list.stream().map(Holder.Reference::key).toList())),
 			Codec.BOOL.optionalFieldOf("stonecutter_exchange", false).forGetter(BlockFamily::stonecutterExchange),
 			ResourceKey.codec(Registries.ITEM)
 					.optionalFieldOf("stonecutter_from")
-					.forGetter($ -> $.stonecutterSource().map(Holder.Reference::key)),
-			Codec.intRange(1, 99).optionalFieldOf("stonecutter_from_multiplier", 1).forGetter(BlockFamily::stonecutterSourceMultiplier),
+					.forGetter($ -> $.stonecutterFrom().map(Holder.Reference::key)),
+			Codec.intRange(1, 99).optionalFieldOf("stonecutter_from_multiplier", 1).forGetter(BlockFamily::stonecutterFromMultiplier),
 			SwitchAttrs.CODEC.optionalFieldOf("switch", SwitchAttrs.DISABLED).forGetter(BlockFamily::switchAttrs)
 	).apply(instance, BlockFamily::new));
 
 	private final List<Holder.Reference<Block>> blocks;
 	private final List<Holder.Reference<Item>> items;
-	private final List<Holder.Reference<Item>> exchangeInputsInViewer;
+	private final Optional<List<Holder.Reference<Item>>> exchangeInputsInViewer;
 	private final boolean stonecutterExchange;
 	private final Optional<Holder.Reference<Item>> stonecutterFrom;
 	private final int stonecutterFromMultiplier;
 	private final SwitchAttrs switchAttrs;
-	private Ingredient ingredient;
-	private Ingredient ingredientInViewer;
+	private @Nullable Ingredient ingredient;
+	private @Nullable Ingredient exchangeIngredient;
+	private @Nullable Ingredient exchangeIngredientInViewer;
 
 	public BlockFamily(
 			boolean strict,
 			List<ResourceKey<Block>> blocks,
 			List<ResourceKey<Item>> items,
-			List<ResourceKey<Item>> exchangeInputsInViewer,
+			Optional<List<ResourceKey<Item>>> exchangeInputsInViewer,
 			boolean stonecutterExchange,
 			Optional<ResourceKey<Item>> stonecutterFrom,
 			int stonecutterFromMultiplier,
@@ -105,13 +108,13 @@ public class BlockFamily {
 					}
 					return holder;
 				}).filter(Optional::isPresent).map(Optional::get)).toList();
-		this.exchangeInputsInViewer = exchangeInputsInViewer.stream().map($ -> {
+		this.exchangeInputsInViewer = exchangeInputsInViewer.map(list -> list.stream().map($ -> {
 			Optional<Holder.Reference<Item>> holder = BuiltInRegistries.ITEM.get($);
 			if (strict) {
 				Preconditions.checkArgument(holder.isPresent(), "Item %s not found", $);
 			}
 			return holder;
-		}).filter(Optional::isPresent).map(Optional::get).toList();
+		}).filter(Optional::isPresent).map(Optional::get).toList());
 		this.stonecutterExchange = stonecutterExchange;
 		this.stonecutterFrom = stonecutterFrom.map($ -> {
 			Optional<Holder.Reference<Item>> holder = BuiltInRegistries.ITEM.get($);
@@ -141,7 +144,7 @@ public class BlockFamily {
 		return items;
 	}
 
-	public List<Holder.Reference<Item>> exchangeInputsInViewer() {
+	public Optional<List<Holder.Reference<Item>>> exchangeInputsInViewer() {
 		return exchangeInputsInViewer;
 	}
 
@@ -167,44 +170,58 @@ public class BlockFamily {
 		return stonecutterExchange;
 	}
 
-	public Optional<Holder.Reference<Item>> stonecutterSource() {
+	public Optional<Holder.Reference<Item>> stonecutterFrom() {
 		return stonecutterFrom;
 	}
 
-	public int stonecutterSourceMultiplier() {
+	public int stonecutterFromMultiplier() {
 		return stonecutterFromMultiplier;
 	}
 
-	public Ingredient stonecutterSourceIngredient() {
-		return stonecutterFrom.map(holder -> Ingredient.of(holder.value())).orElse(Ingredient.of());
+	@Nullable
+	public Ingredient stonecutterFromIngredient() {
+		return stonecutterFrom.map(holder -> Ingredient.of(holder.value())).orElse(null);
 	}
 
 	public SwitchAttrs switchAttrs() {
 		return switchAttrs;
 	}
 
-	protected Ingredient toIngredient(List<? extends Holder<Item>> items) {
-		return Ingredient.of(items.stream().map(Holder::value).filter(item -> {
+	protected Ingredient toIngredient(Stream<? extends Holder<Item>> items) {
+		return Ingredient.of(items.map(Holder::value).filter(item -> {
 			return BlockFamilies.getMatValue(item) >= BlockFamilies.BASE_MAT_VALUE;
-		}).toArray(ItemLike[]::new));
+		}));
 	}
 
 	public Ingredient ingredient() {
 		if (ingredient == null) {
-			ingredient = toIngredient(items);
+			ingredient = toIngredient(items.stream());
 		}
 		return ingredient;
 	}
 
-	public Ingredient ingredientInViewer() {
-		if (ingredientInViewer == null) {
-			if (exchangeInputsInViewer.isEmpty()) {
-				ingredientInViewer = ingredient();
+	public Ingredient exchangeIngredient() {
+		if (exchangeIngredient == null) {
+			if (stonecutterFrom().isEmpty() || stonecutterFromMultiplier() != 1) {
+				exchangeIngredient = ingredient();
 			} else {
-				ingredientInViewer = toIngredient(exchangeInputsInViewer);
+				exchangeIngredient = toIngredient(Stream.concat(Stream.of(stonecutterFrom().get()), items.stream()));
 			}
 		}
-		return ingredientInViewer;
+		return exchangeIngredient;
+	}
+
+	public Ingredient exchangeIngredientInViewer() {
+		if (exchangeIngredientInViewer == null) {
+			if (exchangeInputsInViewer.isEmpty()) {
+				exchangeIngredientInViewer = stonecutterFrom().isPresent() ?
+						Objects.requireNonNull(stonecutterFromIngredient()) :
+						exchangeIngredient();
+			} else {
+				exchangeIngredientInViewer = toIngredient(exchangeInputsInViewer.get().stream());
+			}
+		}
+		return exchangeIngredientInViewer;
 	}
 
 	public boolean contains(Item item) {

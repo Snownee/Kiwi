@@ -27,19 +27,20 @@ public interface CanSurviveHandler {
 	}
 
 	static CanSurviveHandler checkFace(EnumProperty<Direction> property) {
-		return Impls.CHECK_FACE.computeIfAbsent(property, key -> new CanSurviveHandler() {
-			@Override
-			public boolean isSensitiveSide(BlockState state, Direction side) {
-				return side == state.getValue(key).getOpposite();
-			}
+		return Impls.CHECK_FACE.computeIfAbsent(
+				property, key -> new CanSurviveHandler() {
+					@Override
+					public boolean isSensitiveSide(BlockState state, Direction side) {
+						return side == state.getValue(key).getOpposite();
+					}
 
-			@Override
-			public boolean canSurvive(BlockState state, LevelReader world, BlockPos pos) {
-				Direction direction = state.getValue(key);
-				BlockPos neighbor = pos.relative(direction);
-				return world.getBlockState(neighbor).isFaceSturdy(world, neighbor, direction.getOpposite(), SupportType.RIGID);
-			}
-		});
+					@Override
+					public boolean canSurvive(BlockState state, LevelReader world, BlockPos pos) {
+						Direction direction = state.getValue(key);
+						BlockPos neighbor = pos.relative(direction);
+						return world.getBlockState(neighbor).isFaceSturdy(world, neighbor, direction.getOpposite(), SupportType.RIGID);
+					}
+				});
 	}
 
 	static Compound any(List<CanSurviveHandler> handlers) {

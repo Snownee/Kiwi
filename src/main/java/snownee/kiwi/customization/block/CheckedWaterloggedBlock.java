@@ -1,6 +1,7 @@
 package snownee.kiwi.customization.block;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -14,9 +15,9 @@ import net.minecraft.world.level.material.FluidState;
 
 public interface CheckedWaterloggedBlock extends SimpleWaterloggedBlock {
 	@Override
-	default boolean canPlaceLiquid(@Nullable LivingEntity player, BlockGetter pLevel, BlockPos pPos, BlockState pState, Fluid pFluid) {
+	default boolean canPlaceLiquid(@Nullable LivingEntity entity, BlockGetter pLevel, BlockPos pPos, BlockState pState, Fluid pFluid) {
 		return pState.hasProperty(BlockStateProperties.WATERLOGGED) && SimpleWaterloggedBlock.super.canPlaceLiquid(
-				player,
+				entity,
 				pLevel,
 				pPos,
 				pState,
@@ -33,10 +34,10 @@ public interface CheckedWaterloggedBlock extends SimpleWaterloggedBlock {
 	}
 
 	@Override
-	default ItemStack pickupBlock(@Nullable LivingEntity player, LevelAccessor pLevel, BlockPos pPos, BlockState pState) {
+	default ItemStack pickupBlock(@Nullable LivingEntity entity, LevelAccessor pLevel, BlockPos pPos, BlockState pState) {
 		if (!pState.hasProperty(BlockStateProperties.WATERLOGGED)) {
 			return ItemStack.EMPTY;
 		}
-		return SimpleWaterloggedBlock.super.pickupBlock(player, pLevel, pPos, pState);
+		return SimpleWaterloggedBlock.super.pickupBlock(entity, pLevel, pPos, pState);
 	}
 }

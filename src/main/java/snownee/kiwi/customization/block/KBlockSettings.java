@@ -4,8 +4,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.ToIntFunction;
 
-import net.minecraft.world.level.LevelReader;
-
 import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.Preconditions;
@@ -14,10 +12,12 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.EmptyBlockGetter;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
@@ -49,8 +49,7 @@ public class KBlockSettings {
 	@Nullable
 	public final ToIntFunction<BlockState> analogOutputSignal;
 	public final Map<KBlockComponent.Type<?>, KBlockComponent> components;
-	@Nullable
-	private ShapeGenerator[] shapes;
+	private @Nullable ShapeGenerator @Nullable [] shapes;
 	@Nullable
 	public PlaceChoices placeChoices;
 
@@ -70,20 +69,20 @@ public class KBlockSettings {
 //		}
 	}
 
-	public static KBlockSettings empty() {
-		return new KBlockSettings(builder());
+	public static KBlockSettings defaulted(Block block) {
+		return new KBlockSettings(builder(BuiltInRegistries.BLOCK.getResourceKey(block).orElseThrow()));
 	}
 
-	public static KBlockSettings.Builder builder() {
-		return new Builder(BlockBehaviour.Properties.of());
+	public static KBlockSettings.Builder builder(ResourceKey<Block> key) {
+		return new Builder(BlockBehaviour.Properties.of().setId(key));
 	}
 
-	public static KBlockSettings.Builder copyProperties(Block block) {
-		return new Builder(BlockBehaviour.Properties.ofFullCopy(block));
+	public static KBlockSettings.Builder copyProperties(ResourceKey<Block> key, Block block) {
+		return new Builder(BlockBehaviour.Properties.ofFullCopy(block).setId(key));
 	}
 
-	public static KBlockSettings.Builder copyProperties(Block block, MapColor mapColor) {
-		return new Builder(BlockBehaviour.Properties.ofFullCopy(block).mapColor(mapColor));
+	public static KBlockSettings.Builder copyProperties(ResourceKey<Block> key, Block block, MapColor mapColor) {
+		return new Builder(BlockBehaviour.Properties.ofFullCopy(block).setId(key).mapColor(mapColor));
 	}
 
 	@Nullable
@@ -221,7 +220,7 @@ public class KBlockSettings {
 		private boolean customPlacement;
 		@Nullable
 		private GlassType glassType;
-		private final ShapeGenerator[] shapes = new ShapeGenerator[BlockShapeType.VALUES.size()];
+		private final @Nullable ShapeGenerator[] shapes = new ShapeGenerator[BlockShapeType.VALUES.size()];
 		@Nullable
 		private CanSurviveHandler canSurviveHandler;
 		private final Map<KBlockComponent.Type<?>, KBlockComponent> components = Maps.newLinkedHashMap();

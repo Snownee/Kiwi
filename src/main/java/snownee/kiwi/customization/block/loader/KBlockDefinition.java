@@ -12,6 +12,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import snownee.kiwi.Kiwi;
@@ -29,7 +30,6 @@ import snownee.kiwi.customization.shape.MouldingShape;
 import snownee.kiwi.customization.shape.ShapeGenerator;
 import snownee.kiwi.customization.shape.ShapeStorage;
 import snownee.kiwi.loader.Platform;
-import snownee.kiwi.util.VanillaActions;
 import snownee.kiwi.util.VoxelUtil;
 
 public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinitionProperties properties) {
@@ -52,13 +52,13 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 		).apply(instance, KBlockDefinition::new));
 	}
 
-	public KBlockSettings.Builder createSettings(Identifier id, ShapeStorage shapes) {
+	public KBlockSettings.Builder createSettings(ResourceKey<Block> key, ShapeStorage shapes) {
 		BlockDefinitionProperties.PartialVanillaProperties vanilla = properties.vanillaProperties();
 		KBlockSettings.Builder builder;
 		if (vanilla.copy().isEmpty()) {
-			builder = KBlockSettings.builder();
+			builder = KBlockSettings.builder(key);
 		} else {
-			builder = KBlockSettings.copyProperties(BuiltInRegistries.BLOCK.getValue(vanilla.copy().get()));
+			builder = KBlockSettings.copyProperties(key, BuiltInRegistries.BLOCK.getValue(vanilla.copy().get()));
 		}
 		properties.glassType().ifPresent(builder::glassType);
 		builder.configure($ -> {
@@ -139,13 +139,11 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 		return builder;
 	}
 
-	public Block createBlock(Identifier id, ShapeStorage shapes) {
-		KBlockSettings.Builder builder = createSettings(id, shapes);
-		Block block = template.template().createBlock(id, builder.get(), template.json());
+	public Block createBlock(ResourceKey<Block> key, ShapeStorage shapes) {
+		KBlockSettings.Builder builder = createSettings(key, shapes);
+		Block block = template.template().createBlock(key, builder.get(), template.json());
 		setConfiguringShape(block, shapes);
-		properties.material().ifPresent(mat -> {
-			VanillaActions.setFireInfo(block, mat.igniteOdds(), mat.burnOdds());
-		});
+		properties.material().ifPresent(mat -> Platform.setFireInfo(block, mat.igniteOdds(), mat.burnOdds()));
 		KBlockSettings settings = Objects.requireNonNull(KBlockSettings.of(block));
 		BlockBehaviorRegistry behaviorRegistry = BlockBehaviorRegistry.getInstance();
 		for (KBlockComponent component : settings.components.values()) {

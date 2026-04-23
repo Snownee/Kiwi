@@ -10,8 +10,9 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -27,7 +28,6 @@ public record BlockDefinitionProperties(
 		List<Either<KBlockComponent, String>> components,
 		Optional<KMaterial> material,
 		Optional<GlassType> glassType,
-
 		Optional<List<Identifier>> colorProvider,
 		Optional<Identifier> shape,
 		Optional<Identifier> collisionShape,
@@ -42,8 +42,9 @@ public record BlockDefinitionProperties(
 						.forGetter(BlockDefinitionProperties::components),
 				context.materialCodec().forGetter(BlockDefinitionProperties::material),
 				context.glassTypeCodec().forGetter(BlockDefinitionProperties::glassType),
-
-				Identifier.CODEC.listOf().optionalFieldOf("color_provider").forGetter(BlockDefinitionProperties::colorProvider),
+				ExtraCodecs.compactListCodec(Identifier.CODEC)
+						.optionalFieldOf("color_provider")
+						.forGetter(BlockDefinitionProperties::colorProvider),
 				Identifier.CODEC.optionalFieldOf("shape").forGetter(BlockDefinitionProperties::shape),
 				Identifier.CODEC.optionalFieldOf("collision_shape").forGetter(BlockDefinitionProperties::collisionShape),
 				Identifier.CODEC.optionalFieldOf("interaction_shape").forGetter(BlockDefinitionProperties::interactionShape),
@@ -140,7 +141,7 @@ public record BlockDefinitionProperties(
 					or(this.isRedstoneConductor, templateProps.isRedstoneConductor),
 					or(this.isSuffocating, templateProps.isSuffocating),
 					or(this.isViewBlocking, templateProps.isViewBlocking),
-						or(this.postProcess, templateProps.postProcess),
+					or(this.postProcess, templateProps.postProcess),
 					or(this.emissiveRendering, templateProps.emissiveRendering));
 		}
 	}

@@ -21,7 +21,7 @@ public final class BlockBehaviorRegistry {
 		return INSTANCE;
 	}
 
-	private Block context;
+	private @Nullable Block context;
 	private final Map<Block, UseHandler> useHandlers = Maps.newIdentityHashMap();
 
 	private BlockBehaviorRegistry() {
