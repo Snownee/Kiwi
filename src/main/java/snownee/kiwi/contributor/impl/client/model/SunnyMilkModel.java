@@ -1,30 +1,37 @@
 package snownee.kiwi.contributor.impl.client.model;
 
-import net.minecraft.client.model.Model;
+import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.client.renderer.entity.state.AvatarRenderState;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.util.Mth;
 
-public class SunnyMilkModel extends Model<AvatarRenderState> {
+public class SunnyMilkModel<T extends HumanoidRenderState> extends HumanoidModel<T> {
 
 	private final ModelPart wingRight;
 	private final ModelPart wingLeft;
 
-	public SunnyMilkModel(LayerDefinition definition) {
-		super(definition.bakeRoot(), RenderTypes::entityTranslucent);
-		wingLeft = this.root().getChild("wingLeft");
-		wingRight = this.root().getChild("wingRight");
+	public SunnyMilkModel(ModelPart root) {
+		super(root);
+		wingLeft = root.getChild("wingLeft");
+		wingRight = root.getChild("wingRight");
 	}
 
 	public static LayerDefinition create() {
-		MeshDefinition meshdefinition = new MeshDefinition();
+		MeshDefinition meshdefinition = HumanoidModel.createMesh(CubeDeformation.NONE, 0.0F);
 		PartDefinition root = meshdefinition.getRoot();
+		root.clearChild("body");
+		PartDefinition head = root.clearChild("head");
+		head.clearChild("hat");
+		root.clearChild("left_arm");
+		root.clearChild("right_arm");
+		root.clearChild("left_leg");
+		root.clearChild("right_leg");
 
 		CubeListBuilder wingLeft = CubeListBuilder.create();
 		wingLeft.texOffs(0, 12).addBox(0.5F, -5.5F, 0.0F, 0.0F, 12.0F, 20.0F);
@@ -41,9 +48,9 @@ public class SunnyMilkModel extends Model<AvatarRenderState> {
 	}
 
 	@Override
-	public void setupAnim(AvatarRenderState state) {
-		float ticks = state.ageInTicks * 0.5f;
-		wingLeft.yRot = -1.0472F + Mth.sin(ticks) * 0.25f;
+	public void setupAnim(T renderState) {
+		super.setupAnim(renderState);
+		wingLeft.yRot = -1.0472F + Mth.sin(renderState.ageInTicks * 0.5f) * 0.25f;
 		wingRight.yRot = -wingLeft.yRot;
 	}
 
