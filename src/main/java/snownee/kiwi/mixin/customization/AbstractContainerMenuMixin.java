@@ -5,12 +5,8 @@ import org.spongepowered.asm.mixin.injection.At;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.llamalad7.mixinextras.sugar.Local;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import snownee.kiwi.customization.CustomizationHooks;
 
@@ -18,15 +14,11 @@ import snownee.kiwi.customization.CustomizationHooks;
 public class AbstractContainerMenuMixin {
 	@WrapOperation(
 			method = "lambda$stillValid$0",
-			remap = false,
 			at = @At(
 					value = "INVOKE",
-					target = "Lnet/minecraft/world/level/block/state/BlockState;is(Ljava/lang/Object;)Z",
-					remap = true))
-	private static boolean is(
-			BlockState instance,
-			Object block,
-			Operation<Boolean> original) {
+					target = "Lnet/minecraft/world/level/block/state/BlockState;is(Ljava/lang/Object;)Z"
+			))
+	private static boolean kiwi$is(BlockState instance, Object block, Operation<Boolean> original) {
 		boolean result = original.call(instance, block);
 		if (result || !CustomizationHooks.isEnabled()) {
 			return result;

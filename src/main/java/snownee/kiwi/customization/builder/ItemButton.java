@@ -10,6 +10,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 
@@ -21,13 +22,22 @@ public class ItemButton extends Button {
 	public @Nullable Consumer<ItemButton> onPress;
 	public @Nullable Consumer<ItemButton> onRelease;
 
-	protected ItemButton(Builder builder) {
-		super(builder);
-		itemStack = builder.itemStack;
-		inContainer = builder.inContainer;
+	protected ItemButton(
+			int x,
+			int y,
+			int width,
+			int height,
+			Component component,
+			OnPress onPress,
+			CreateNarration createNarration,
+			ItemStack itemStack,
+			boolean inContainer) {
+		super(x, y, width, height, component, onPress, createNarration);
+		this.itemStack = itemStack;
+		this.inContainer = inContainer;
 	}
 
-	public static Builder builder(ItemStack itemStack, boolean inContainer, Button.OnPress pOnPress) {
+	public static Builder builder(ItemStack itemStack, boolean inContainer, OnPress pOnPress) {
 		return new Builder(itemStack, inContainer, pOnPress);
 	}
 
@@ -118,7 +128,17 @@ public class ItemButton extends Button {
 
 		@Override
 		public ItemButton build() {
-			return new ItemButton(this);
+			var button = super.build();
+			return new ItemButton(
+					button.getX(),
+					button.getY(),
+					button.getWidth(),
+					button.getHeight(),
+					button.getMessage(),
+					button.onPress,
+					button.createNarration,
+					itemStack,
+					inContainer);
 		}
 	}
 }

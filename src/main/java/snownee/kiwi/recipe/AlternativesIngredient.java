@@ -24,10 +24,9 @@ import snownee.kiwi.Kiwi;
 
 public class AlternativesIngredient implements CustomIngredient {
 	public static final Identifier ID = Kiwi.id("alternatives");
-	public static final Serializer SERIALIZER = new Serializer();
-	@Nullable
-	private final List<JsonElement> options;
-	private Ingredient cached;
+
+	private final @Nullable List<JsonElement> options;
+	private @Nullable Ingredient cached;
 
 	public AlternativesIngredient(@Nullable List<JsonElement> options) {
 		this.options = options;
@@ -50,11 +49,6 @@ public class AlternativesIngredient implements CustomIngredient {
 		return true;
 	}
 
-	@Override
-	public CustomIngredientSerializer<?> getSerializer() {
-		return SERIALIZER;
-	}
-
 	public Optional<Ingredient> internal() {
 		if (cached == null && options != null) {
 			for (JsonElement option : options) {
@@ -74,7 +68,14 @@ public class AlternativesIngredient implements CustomIngredient {
 		return Optional.ofNullable(cached);
 	}
 
-	public static final class Serializer implements CustomIngredientSerializer<AlternativesIngredient> {
+	@Override
+	public CustomIngredientSerializer<?> getSerializer() {
+		return Serializer.INSTANCE;
+	}
+
+	public enum Serializer implements CustomIngredientSerializer<AlternativesIngredient> {
+		INSTANCE;
+
 		public static final MapCodec<AlternativesIngredient> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
 				Codec.list(ExtraCodecs.JSON).fieldOf("options").forGetter(o -> o.options)
 		).apply(i, AlternativesIngredient::new));
@@ -82,9 +83,18 @@ public class AlternativesIngredient implements CustomIngredient {
 		public static final StreamCodec<RegistryFriendlyByteBuf, Optional<Ingredient>> INGREDIENT_STREAM_CODEC =
 				Ingredient.CONTENTS_STREAM_CODEC.apply(ByteBufCodecs::optional);
 
-		public static final StreamCodec<RegistryFriendlyByteBuf, AlternativesIngredient> STREAM_CODEC = StreamCodec.of(
-				Serializer::write,
-				Serializer::read);
+		public static final StreamCodec<RegistryFriendlyByteBuf, AlternativesIngredient> STREAM_CODEC =
+				StreamCodec.of(Serializer::write, Serializer::read);
+
+		@Override
+		public Identifier getIdentifier() {
+			return ID;
+		}
+
+		@Override
+		public MapCodec<AlternativesIngredient> getCodec(boolean allowEmpty) {
+			return CODEC;
+		}
 
 		public static AlternativesIngredient read(RegistryFriendlyByteBuf buf) {
 			Optional<Ingredient> internal = INGREDIENT_STREAM_CODEC.decode(buf);
@@ -95,16 +105,6 @@ public class AlternativesIngredient implements CustomIngredient {
 
 		public static void write(RegistryFriendlyByteBuf buf, AlternativesIngredient ingredient) {
 			INGREDIENT_STREAM_CODEC.encode(buf, ingredient.internal());
-		}
-
-		@Override
-		public Identifier getIdentifier() {
-			return ID;
-		}
-
-		@Override
-		public MapCodec<AlternativesIngredient> getCodec(boolean allowEmpty) {
-			return CODEC;
 		}
 
 		@Override

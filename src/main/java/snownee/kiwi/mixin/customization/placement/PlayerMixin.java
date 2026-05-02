@@ -9,15 +9,15 @@ import snownee.kiwi.customization.duck.KPlayer;
 @Mixin(Player.class)
 public class PlayerMixin implements KPlayer {
 	@Unique
-	private int kiwi$placeCount;
+	private int placeCount;
 
 	@Override
 	public void kiwi$setPlaceCount(int i) {
-		this.kiwi$placeCount = i;
+		this.placeCount = i;
 	}
 
 	@Override
 	public int kiwi$getPlaceCount() {
-		return kiwi$placeCount;
+		return placeCount;
 	}
 }

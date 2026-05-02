@@ -20,11 +20,8 @@ import snownee.kiwi.customization.block.behavior.SitManager;
 
 @Mixin(ClientPacketListener.class)
 public abstract class ClientPacketListenerMixin extends ClientCommonPacketListenerImpl {
-	protected ClientPacketListenerMixin(
-			Minecraft p_295454_,
-			Connection p_294773_,
-			CommonListenerCookie p_294647_) {
-		super(p_295454_, p_294773_, p_294647_);
+	protected ClientPacketListenerMixin(Minecraft minecraft, Connection connection, CommonListenerCookie cookie) {
+		super(minecraft, connection, cookie);
 	}
 
 	@Inject(
@@ -32,7 +29,7 @@ public abstract class ClientPacketListenerMixin extends ClientCommonPacketListen
 			at = @At(
 					value = "INVOKE",
 					target = "Lnet/minecraft/client/gui/Gui;setOverlayMessage(Lnet/minecraft/network/chat/Component;Z)V"))
-	private void kiwi$setPlayerYRotOnSeat(ClientboundSetPassengersPacket pPacket, CallbackInfo ci, @Local(ordinal = 0) Entity vehicle) {
+	private void kiwi$setPlayerYRotOnSeat(ClientboundSetPassengersPacket packet, CallbackInfo ci, @Local(name = "vehicle") Entity vehicle) {
 		if (SitManager.isSeatEntity(vehicle)) {
 			Objects.requireNonNull(minecraft.player);
 			minecraft.player.yRotO = vehicle.getYRot();

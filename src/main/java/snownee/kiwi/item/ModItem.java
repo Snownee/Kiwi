@@ -16,6 +16,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.loader.Platform;
+import snownee.kiwi.util.client.SmartKey;
 
 public class ModItem extends Item {
 	public ModItem(Properties builder) {
@@ -43,14 +44,15 @@ public class ModItem extends Item {
 			return;
 		}
 		String key;
-		boolean shift = flagIn.hasShiftDown();
-		boolean ctrl = flagIn.hasControlDown();
+		boolean shift = SmartKey.hasShiftDown();
+		boolean ctrl = SmartKey.hasControlDown();
+		String descriptionId = stack.getItem().getDescriptionId();
 		if (shift == ctrl) {
-			key = stack.getItem().getDescriptionId() + ".tip";
+			key = descriptionId + ".tip";
 		} else if (shift) {
-			key = stack.getItem().getDescriptionId() + ".tip.shift";
+			key = descriptionId + ".tip.shift";
 		} else { // ctrl
-			key = stack.getItem().getDescriptionId() + ".tip.ctrl";
+			key = descriptionId + ".tip.ctrl";
 		}
 		boolean hasKey = I18n.exists(key);
 		if (!hasKey && (shift != ctrl)) {

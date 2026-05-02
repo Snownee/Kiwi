@@ -8,6 +8,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
 import snownee.kiwi.customization.CustomizationRegistries;
 import snownee.kiwi.util.resource.OneTimeLoader;
@@ -32,7 +33,7 @@ public abstract class KItemTemplate {
 
 	public abstract void resolve(Identifier key, OneTimeLoader.Context context);
 
-	abstract Item createItem(Identifier id, Item.Properties properties, JsonObject input);
+	abstract Item createItem(ResourceKey<Item> key, Item.Properties properties, JsonObject input);
 
 	public final Optional<ItemDefinitionProperties> properties() {
 		return properties;

@@ -1,7 +1,10 @@
 package snownee.kiwi.customization.item.loader;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+
+import org.jspecify.annotations.Nullable;
 
 import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
@@ -9,13 +12,14 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
 import snownee.kiwi.util.resource.OneTimeLoader;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public final class SimpleItemTemplate extends KItemTemplate {
 	private final String clazz;
-	private Function<Item.Properties, Item> constructor;
+	private @Nullable Function<Item.Properties, Item> constructor;
 
 	public SimpleItemTemplate(Optional<ItemDefinitionProperties> properties, String clazz) {
 		super(properties);
@@ -42,7 +46,7 @@ public final class SimpleItemTemplate extends KItemTemplate {
 		}
 		try {
 			Class<?> clazz = Class.forName(this.clazz);
-			this.constructor = $ -> {
+			constructor = $ -> {
 				try {
 					return (Item) clazz.getConstructor(Item.Properties.class).newInstance($);
 				} catch (Throwable e) {
@@ -55,8 +59,8 @@ public final class SimpleItemTemplate extends KItemTemplate {
 	}
 
 	@Override
-	public Item createItem(Identifier id, Item.Properties settings, JsonObject input) {
-		return this.constructor.apply(settings);
+	public Item createItem(ResourceKey<Item> key, Item.Properties settings, JsonObject input) {
+		return Objects.requireNonNull(constructor).apply(settings);
 	}
 
 	public String clazz() {

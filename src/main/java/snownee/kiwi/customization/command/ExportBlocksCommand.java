@@ -114,6 +114,7 @@ public class ExportBlocksCommand {
 			}
 			row.put("Name:" + languageCode, "");
 			row.put("Template", "");
+			row.put("RenderType", "");
 			row.put("LightEmission", "");
 			row.put("GlassType", "");
 			row.put("SustainsPlant", "");
@@ -149,10 +150,11 @@ public class ExportBlocksCommand {
 				}
 				if ("door".equals(template) || "trapdoor".equals(template)) {
 					Codec<Block> codec = BlockCodecs.get(Identifier.parse(template)).codec();
-					template += toYaml(codec, block, json -> {
-						json.getAsJsonObject().remove(BlockCodecs.BLOCK_PROPERTIES_KEY);
-						return json;
-					});
+					template += toYaml(
+							codec, block, json -> {
+								json.getAsJsonObject().remove(BlockCodecs.BLOCK_PROPERTIES_KEY);
+								return json;
+							});
 				}
 				row.put("Template", template);
 				row.put("ID", BuiltInRegistries.BLOCK.getKey(block).getPath());
@@ -179,7 +181,7 @@ public class ExportBlocksCommand {
 				}
 				KBlockSettings settings = KBlockSettings.of(block);
 				if (settings == null) {
-					settings = KBlockSettings.empty();
+					settings = KBlockSettings.defaulted(block);
 				}
 				if (settings.glassType == null) {
 					row.put("GlassType", "");
@@ -234,7 +236,7 @@ public class ExportBlocksCommand {
 		if (decorator != null) {
 			json = decorator.apply(json);
 		}
-		if (json.isJsonObject() && json.getAsJsonObject().size() == 0) {
+		if (json.isJsonObject() && json.getAsJsonObject().isEmpty()) {
 			return "";
 		}
 		Yaml yaml = YAML.get();

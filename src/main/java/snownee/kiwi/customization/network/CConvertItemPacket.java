@@ -133,7 +133,7 @@ public record CConvertItemPacket(
 					convertFamily(player, to, slotIndex);
 					return;
 				}
-				int consumedCount = action == Action.CONVERT_ONE ? 1 : sourceItem.getCount();
+				int consumedCount = action == Action.CONVERT_ONE ? 1 : sourceItem.count();
 				long matValue = BlockFamilies.getMatValue(from) * consumedCount;
 				int newCount = player.hasInfiniteMaterials() ? consumedCount : (int) (matValue / BlockFamilies.getMatValue(to));
 				if (newCount < 1) {
@@ -161,11 +161,15 @@ public record CConvertItemPacket(
 			}
 		}
 
-		public static void convertFamily(ServerPlayer player, Item to, int slotIndex) {
+		@Override
+		public StreamCodec<RegistryFriendlyByteBuf, CConvertItemPacket> streamCodec() {
+			return STREAM_CODEC;
+		}
+
+		private static void convertFamily(ServerPlayer player, Item to, int slotIndex) {
 			Set<Item> set = BlockFamilies.findQuickSwitch(to, player.hasInfiniteMaterials()).stream()
 					.map(KHolder::value)
 					.flatMap(BlockFamily::items)
-					.filter(item -> !item.equals(to))
 					.collect(Collectors.toSet());
 			Inventory inventory = player.getInventory();
 			long matValue = 0;
@@ -191,43 +195,44 @@ public record CConvertItemPacket(
 			broadcastChanges(player);
 		}
 
-		@Override
-		public StreamCodec<RegistryFriendlyByteBuf, CConvertItemPacket> streamCodec() {
-			return STREAM_CODEC;
-		}
-
-		private static void addToPlayer(ServerPlayer player, ItemStack itemStack, int count, boolean nextToSelected) {
+		private static void addToPlayer(ServerPlayer player, ItemStack template, int count, boolean nextToSelected) {
 			if (count == 0) {
 				return;
 			}
 			Inventory inventory = player.getInventory();
+
 			IntStream intStream = IntStream.range(0, 9);
 			if (nextToSelected) {
-				int selectedSlot = inventory.getSelectedSlot();
-				IntStream leftAndRight = IntStream.of(selectedSlot, selectedSlot + 1, selectedSlot - 1);
+				IntStream leftAndRight = IntStream.of(
+						inventory.getSelectedSlot(),
+						inventory.getSelectedSlot() + 1,
+						inventory.getSelectedSlot() - 1);
 				intStream = IntStream.concat(leftAndRight, intStream);
 			}
 			int[] slots = intStream.filter(Inventory::isHotbarSlot).toArray();
+
 			while (count > 0) {
-				int slot = -1;
-				int singleCount = Math.min(count, itemStack.getMaxStackSize());
-				for (int hotbarSlot : slots) {
-					ItemStack stack = inventory.getItem(hotbarSlot);
-					if (stack.isEmpty()) {
-						slot = hotbarSlot;
+				int selectedSlot = -1;
+				int singleCount = Math.min(count, template.getMaxStackSize());
+				for (int slot : slots) {
+					ItemStack itemInSlot = inventory.getItem(slot);
+					if (itemInSlot.isEmpty()) {
+						selectedSlot = slot;
 						break;
 					}
-					if (stack.getMaxStackSize() > stack.getCount() && ItemStack.isSameItemSameComponents(stack, itemStack)) {
-						slot = hotbarSlot;
-						singleCount = Math.min(singleCount, stack.getMaxStackSize() - stack.getCount());
+					if (itemInSlot.getMaxStackSize() > itemInSlot.count() && ItemStack.isSameItemSameComponents(itemInSlot, template)) {
+						selectedSlot = slot;
+						singleCount = Math.min(singleCount, itemInSlot.getMaxStackSize() - itemInSlot.count());
 						break;
 					}
 				}
-				ItemStack newItem = itemStack.copyWithCount(singleCount);
-				newItem.setPopTime(Inventory.POP_TIME_DURATION);
+
+				ItemStack itemStack = template.copyWithCount(singleCount);
+				itemStack.setPopTime(Inventory.POP_TIME_DURATION);
 				count -= singleCount;
-				if (!inventory.add(slot, newItem) && !inventory.add(newItem)) {
-					player.drop(newItem, true);
+
+				if (!inventory.add(selectedSlot, itemStack) && !inventory.add(itemStack)) {
+					player.drop(itemStack, true);
 				}
 			}
 		}
@@ -245,7 +250,7 @@ public record CConvertItemPacket(
 		}
 	}
 
-	public record Group(List<CConvertItemPacket.Entry> entries) {
+	public record Group(List<Entry> entries) {
 		public Group() {
 			this(Lists.newArrayList());
 		}
@@ -258,7 +263,8 @@ public record CConvertItemPacket(
 				Pair::of);
 
 		public static final StreamCodec<RegistryFriendlyByteBuf, Entry> STREAM_CODEC = StreamCodec.composite(
-				ByteBufCodecs.collection(ArrayList::new, ENTRY_PAIR_STREAM_CODEC), Entry::steps,
+				ByteBufCodecs.collection(ArrayList::new, ENTRY_PAIR_STREAM_CODEC),
+				Entry::steps,
 				Entry::new
 		);
 

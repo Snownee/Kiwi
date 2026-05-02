@@ -26,7 +26,7 @@ import snownee.kiwi.customization.block.family.BlockFamily;
 
 public record ReplaceInHandRule(Map<BlockFamily, Object> families, BlockSpread spread) implements BuilderRule {
 	public static final MapCodec<ReplaceInHandRule> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-						ExtraCodecs.compactListCodec(BlockFamily.CODEC).fieldOf("family").forGetter($ -> List.copyOf($.families().keySet())),
+					ExtraCodecs.compactListCodec(BlockFamily.CODEC).fieldOf("family").forGetter($ -> List.copyOf($.families().keySet())),
 					BlockSpread.CODEC.fieldOf("spread").forGetter(ReplaceInHandRule::spread))
 			.apply(instance, ReplaceInHandRule::new));
 

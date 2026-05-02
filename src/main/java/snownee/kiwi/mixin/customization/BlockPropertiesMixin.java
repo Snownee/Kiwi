@@ -38,8 +38,8 @@ public class BlockPropertiesMixin implements KBlockProperties {
 					value = "INVOKE",
 					target = "Lcom/mojang/serialization/MapCodec;unitCodec(Ljava/util/function/Supplier;)Lcom/mojang/serialization/Codec;"))
 	private static Codec<BlockBehaviour.Properties> kiwi$injectCodec(
-			Supplier<BlockBehaviour.Properties> defaultValue,
+			Supplier<BlockBehaviour.Properties> value,
 			Operation<Codec<BlockBehaviour.Properties>> original) {
-		return new InjectedCodec<>(original.call(defaultValue), BuiltInBlockTemplate.PROPERTIES_INJECTOR);
+		return new InjectedCodec<>(original.call(value), BuiltInBlockTemplate.PROPERTIES_INJECTOR);
 	}
 }

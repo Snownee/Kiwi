@@ -40,7 +40,7 @@ public class ClientProxy {
 
 	@Nullable
 	public static Slot getSlotUnderMouse(AbstractContainerScreen<?> containerScreen) {
-		return containerScreen.getSlotUnderMouse();
+		return containerScreen.getHoveredSlot();
 	}
 
 	public static void afterRegisterSmartKey(SmartKey smartKey) {

@@ -392,7 +392,7 @@ public class Kiwi {
 			}
 		}
 
-		KiwiConfigManager.init();
+		KiwiConfigManager.init(defaultOptions);
 		if (Platform.isPhysicalClient() && Platform.isModLoaded("cloth_config")) {
 			NeoClothConfigIntegration.init();
 		}

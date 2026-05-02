@@ -1,6 +1,5 @@
 package snownee.kiwi.mixin.customization.client;
 
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -20,30 +19,29 @@ public class MultiPlayerGameModeMixin {
 	@Inject(
 			method = "startDestroyBlock",
 			at = @At(
-					value = "FIELD",
-					target = "Lnet/minecraft/world/entity/player/Abilities;instabuild:Z",
-					opcode = Opcodes.GETFIELD),
+					value = "INVOKE",
+					target = "Lnet/minecraft/client/player/LocalPlayer;getAbilities()Lnet/minecraft/world/entity/player/Abilities;"),
 			cancellable = true)
-	private void kiwi$startDestroyBlock(BlockPos pos, Direction pFace, CallbackInfoReturnable<Boolean> cir) {
-		if (BuildersButton.startDestroyBlock(pos, pFace)) {
+	private void kiwi$startDestroyBlock(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
+		if (BuildersButton.startDestroyBlock(pos, direction)) {
 			cir.setReturnValue(true);
 		}
 	}
 
 	@Inject(method = "continueDestroyBlock", at = @At("HEAD"), cancellable = true)
-	private void kiwi$continueDestroyBlock(BlockPos pPosBlock, Direction pDirectionFacing, CallbackInfoReturnable<Boolean> cir) {
-		if (BuildersButton.startDestroyBlock(pPosBlock, pDirectionFacing)) {
+	private void kiwi$continueDestroyBlock(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
+		if (BuildersButton.startDestroyBlock(pos, direction)) {
 			cir.setReturnValue(true);
 		}
 	}
 
 	@Inject(method = "useItemOn", at = @At(value = "HEAD"), cancellable = true)
 	private void kiwi$useItemOn(
-			LocalPlayer pPlayer,
-			InteractionHand pHand,
-			BlockHitResult pResult,
+			LocalPlayer player,
+			InteractionHand hand,
+			BlockHitResult blockHit,
 			CallbackInfoReturnable<InteractionResult> cir) {
-		if (BuildersButton.performUseItemOn(pHand, pResult)) {
+		if (BuildersButton.performUseItemOn(hand, blockHit)) {
 			cir.setReturnValue(InteractionResult.CONSUME);
 		}
 	}

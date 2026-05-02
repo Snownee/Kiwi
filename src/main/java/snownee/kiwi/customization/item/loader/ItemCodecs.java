@@ -17,8 +17,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ShovelItem;
 import net.minecraft.world.item.ToolMaterial;
 import snownee.kiwi.customization.block.loader.InjectedCodec;
-import snownee.kiwi.customization.block.tier.KiwiTiers;
 import snownee.kiwi.customization.item.MultipleBlockItem;
+import snownee.kiwi.customization.item.toolmaterial.ToolMaterials;
 import snownee.kiwi.util.codec.KCodecs;
 
 public class ItemCodecs {
@@ -39,7 +39,7 @@ public class ItemCodecs {
 
 	public static <I extends Item> MapCodec<I> toolCodec(Function4<ToolMaterial, Float, Float, Item.Properties, I> function) {
 		return RecordCodecBuilder.mapCodec(instance -> instance.group(
-				KiwiTiers.CODEC.fieldOf("tier").forGetter(KCodecs.unsupportedGetter()),
+				ToolMaterials.CODEC.fieldOf("tier").forGetter(KCodecs.unsupportedGetter()),
 				Codec.FLOAT.fieldOf("attack_damage").forGetter(KCodecs.unsupportedGetter()),
 				Codec.FLOAT.fieldOf("attack_speed").forGetter(KCodecs.unsupportedGetter()),
 				propertiesCodec()

@@ -5,11 +5,11 @@ import com.mojang.serialization.Codec;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 
-public record PlaceTarget(PlaceTarget.Type type, Identifier id) {
+public record PlaceTarget(Type type, Identifier id) {
 	public static final Codec<PlaceTarget> CODEC = ExtraCodecs.NON_EMPTY_STRING.xmap(PlaceTarget::of, PlaceTarget::toString);
 
 	public static PlaceTarget of(String s) {
-		PlaceTarget.Type type = s.startsWith("@") ? PlaceTarget.Type.TEMPLATE : PlaceTarget.Type.BLOCK;
+		Type type = s.startsWith("@") ? Type.TEMPLATE : Type.BLOCK;
 		Identifier id = Identifier.parse(s.substring(type.prefix.length()));
 		return new PlaceTarget(type, id);
 	}

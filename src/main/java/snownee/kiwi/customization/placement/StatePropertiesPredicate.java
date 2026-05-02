@@ -17,14 +17,16 @@ import snownee.kiwi.customization.block.KBlockUtils;
 
 public record StatePropertiesPredicate(List<PropertyMatcher> properties) implements Predicate<BlockState> {
 
-	public static final Codec<StatePropertiesPredicate> CODEC = Codec.compoundList(Codec.STRING, Codec.either(
-			ExtraCodecs.compactListCodec(Codec.STRING),
-			MinMaxBounds.Ints.CODEC)
-	).xmap($ -> new StatePropertiesPredicate($.stream().map(pair -> {
-		Optional<List<String>> strValues = pair.getSecond().left();
-		return strValues.map(strings -> new PropertyMatcher(pair.getFirst(), Either.left(Set.copyOf(strings))))
-				.orElseGet(() -> new PropertyMatcher(pair.getFirst(), Either.right(pair.getSecond().right().orElseThrow())));
-	}).toList()), $ -> $.properties.stream().map(matcher -> Pair.of(matcher.key, matcher.value.mapLeft(List::copyOf))).toList());
+	public static final Codec<StatePropertiesPredicate> CODEC = Codec.compoundList(
+			Codec.STRING, Codec.either(
+					ExtraCodecs.compactListCodec(Codec.STRING),
+					MinMaxBounds.Ints.CODEC)
+	).xmap(
+			$ -> new StatePropertiesPredicate($.stream().map(pair -> {
+				Optional<List<String>> strValues = pair.getSecond().left();
+				return strValues.map(strings -> new PropertyMatcher(pair.getFirst(), Either.left(Set.copyOf(strings))))
+						.orElseGet(() -> new PropertyMatcher(pair.getFirst(), Either.right(pair.getSecond().right().orElseThrow())));
+			}).toList()), $ -> $.properties.stream().map(matcher -> Pair.of(matcher.key, matcher.value.mapLeft(List::copyOf))).toList());
 
 	@Override
 	public boolean test(BlockState blockState) {

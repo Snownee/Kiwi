@@ -16,7 +16,7 @@ public class BlockMixin {
 	private BlockState defaultBlockState;
 
 	@Inject(method = "registerDefaultState", at = @At("RETURN"))
-	private void kiwi$registerDefaultState(BlockState pState, CallbackInfo ci) {
+	private void kiwi$registerDefaultState(BlockState state, CallbackInfo ci) {
 		KBlockSettings settings = KBlockSettings.of(this);
 		if (settings != null) {
 			defaultBlockState = settings.registerDefaultState(defaultBlockState);

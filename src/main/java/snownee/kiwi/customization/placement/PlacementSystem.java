@@ -220,7 +220,7 @@ public class PlacementSystem {
 		}
 	}
 
-	public static void onBlockRemoved(Level level, BlockPos pos, BlockState oldState, BlockState newState) {
+	public static void onBlockRemoved(Level level, BlockPos pos, BlockState oldState) {
 		if (PlaceSlot.hasNoSlots(oldState.getBlock())) {
 			return;
 		}

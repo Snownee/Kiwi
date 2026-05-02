@@ -38,14 +38,14 @@ import snownee.kiwi.util.KHolder;
 
 public class BuilderModePreview implements DebugRenderer.SimpleDebugRenderer {
 	public @Nullable KHolder<BuilderRule> rule;
-	public BlockPos pos;
+	public @Nullable BlockPos pos;
 	private BlockState blockState = Blocks.AIR.defaultBlockState();
 	public List<BlockPos> positions = List.of();
 	private final ListMultimap<Direction, AABB> faces = ArrayListMultimap.create(6, 32);
 	private long lastUpdateTime;
 
 	@Override
-	public void emitGizmos(double pCamX, double pCamY, double pCamZ, DebugValueAccess debugValues, Frustum frustum, float partialTicks) {
+	public void emitGizmos(double camX, double camY, double camZ, DebugValueAccess debugValues, Frustum frustum, float partialTicks) {
 		Minecraft mc = Minecraft.getInstance();
 		if (!BuildersButton.isBuilderModeOn() || !(mc.hitResult instanceof BlockHitResult hitResult) ||
 				mc.hitResult.getType() == HitResult.Type.MISS) {

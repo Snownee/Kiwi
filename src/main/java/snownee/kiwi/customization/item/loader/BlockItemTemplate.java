@@ -1,7 +1,10 @@
 package snownee.kiwi.customization.item.loader;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
+
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonObject;
@@ -11,6 +14,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.BedItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DoubleHighBlockItem;
@@ -28,7 +32,7 @@ import snownee.kiwi.util.resource.OneTimeLoader;
 public final class BlockItemTemplate extends KItemTemplate {
 	private final Optional<Identifier> block;
 	private final String clazz;
-	private BiFunction<Block, Item.Properties, Item> constructor;
+	private @Nullable BiFunction<Block, Item.Properties, Item> constructor;
 
 	public BlockItemTemplate(
 			Optional<ItemDefinitionProperties> properties,
@@ -82,10 +86,10 @@ public final class BlockItemTemplate extends KItemTemplate {
 	}
 
 	@Override
-	public Item createItem(Identifier id, Item.Properties properties, JsonObject json) {
-		Block block = BuiltInRegistries.BLOCK.getValue(this.block.orElse(id));
+	public Item createItem(ResourceKey<Item> key, Item.Properties properties, JsonObject json) {
+		Block block = BuiltInRegistries.BLOCK.getValue(this.block.orElse(key.identifier()));
 		Preconditions.checkState(block != Blocks.AIR, "Block %s not found", this.block);
-		return constructor.apply(block, properties);
+		return Objects.requireNonNull(constructor).apply(block, properties);
 	}
 
 	public Optional<Identifier> block() {

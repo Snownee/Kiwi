@@ -31,6 +31,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -138,7 +139,7 @@ public record PlaceChoices(
 	public static void setTo(Block block, @Nullable KHolder<PlaceChoices> holder) {
 		KBlockSettings settings = KBlockSettings.of(block);
 		if (settings == null && holder != null) {
-			((KBlockProperties) block.properties()).kiwi$setSettings(settings = KBlockSettings.empty());
+			((KBlockProperties) block.properties()).kiwi$setSettings(settings = KBlockSettings.defaulted(block));
 		}
 		if (settings != null) {
 			settings.placeChoices = holder == null ? null : holder.value();
@@ -184,7 +185,7 @@ public record PlaceChoices(
 		flow:
 		for (Flow f : flow) {
 			for (Map.Entry<Direction, Limit> entry : f.when.entrySet()) {
-				Direction direction = rotation.getValue().rotate(entry.getKey());
+				Direction direction = rotation.get().rotate(entry.getKey());
 				try {
 					if (!entry.getValue().testFace(level.getBlockState(mutable.setWithOffset(pos, direction)), direction.getOpposite())) {
 						continue flow;
@@ -324,13 +325,15 @@ public record PlaceChoices(
 			};
 			BlockPos pos = context.getClickedPos();
 			BlockPos.MutableBlockPos mutable = pos.mutable();
+			Supplier<@Nullable BlockEntity> blockEntitySupplier = () -> context.getLevel().getBlockEntity(mutable);
 			directions:
 			for (Direction direction : directions) {
 				if (!faces.test(context, direction)) {
 					continue;
 				}
-				BlockState neighbor = context.getLevel().getBlockState(mutable.setWithOffset(pos, direction));
-				if (!BlockPredicateHelper.fastMatch(block, neighbor)) {
+				mutable.setWithOffset(pos, direction);
+				BlockState neighbor = context.getLevel().getBlockState(mutable);
+				if (!BlockPredicateHelper.fastMatch(block, neighbor, blockEntitySupplier)) {
 					continue;
 				}
 				for (ParsedProtoTag tag : tags) {

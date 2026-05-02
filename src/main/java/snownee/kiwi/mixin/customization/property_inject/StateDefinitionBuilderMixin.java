@@ -16,11 +16,11 @@ import snownee.kiwi.customization.block.KBlockSettings;
 @Mixin(StateDefinition.Builder.class)
 public abstract class StateDefinitionBuilderMixin<O, S extends StateHolder<O, S>> {
 	@Shadow
-	public abstract StateDefinition.Builder<O, S> add(Property<?>... pProperties);
+	public abstract StateDefinition.Builder<O, S> add(Property<?>... properties);
 
 	@Inject(method = "<init>", at = @At("RETURN"))
-	private void kiwi$init(O pOwner, CallbackInfo ci) {
-		if (!(pOwner instanceof Block block)) {
+	private void kiwi$init(O owner, CallbackInfo ci) {
+		if (!(owner instanceof Block block)) {
 			return;
 		}
 		KBlockSettings settings = KBlockSettings.of(block);

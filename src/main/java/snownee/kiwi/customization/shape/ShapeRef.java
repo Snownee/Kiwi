@@ -1,12 +1,15 @@
 package snownee.kiwi.customization.shape;
 
+import java.util.Objects;
 import java.util.stream.Stream;
+
+import org.jspecify.annotations.Nullable;
 
 import net.minecraft.resources.Identifier;
 
 public class ShapeRef implements UnbakedShape {
 	private final Identifier id;
-	private ShapeGenerator baked;
+	private @Nullable ShapeGenerator baked;
 
 	public ShapeRef(Identifier id) {
 		this.id = id;
@@ -18,7 +21,7 @@ public class ShapeRef implements UnbakedShape {
 
 	@Override
 	public ShapeGenerator bake(BakingContext context) {
-		return baked;
+		return Objects.requireNonNull(baked);
 	}
 
 	@Override
@@ -32,7 +35,7 @@ public class ShapeRef implements UnbakedShape {
 
 	public boolean bindValue(BakingContext context) {
 		baked = context.getShape(id);
-		return baked != null;
+		return true;
 	}
 
 //	@Override
