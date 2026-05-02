@@ -148,6 +148,11 @@ public class Kiwi {
 		return Identifier.fromNamespaceAndPath(ID, path);
 	}
 
+	private static boolean shouldLoad(KiwiAnnotationData annotationData) {
+		String target = annotationData.getTarget();
+		return !Platform.isProduction() || !target.startsWith("snownee.kiwi.test.");
+	}
+
 	public static void registerRegistry(ResourceKey<? extends Registry<?>> registry, Class<?> baseClass) {
 		Objects.requireNonNull(registryLookup);
 		registryLookup.registries.put(baseClass, registry);
@@ -289,15 +294,24 @@ public class Kiwi {
 				enableDataModule();
 			}
 			for (KiwiAnnotationData module : metadata.get("modules")) {
-				moduleData.put(mod, module);
+				if (shouldLoad(module)) {
+					moduleData.put(mod, module);
+				}
 			}
 			for (KiwiAnnotationData optional : metadata.get("optionals")) {
-				classOptionalMap.put(optional.getTarget(), optional);
+				if (shouldLoad(optional)) {
+					classOptionalMap.put(optional.getTarget(), optional);
+				}
 			}
 			for (KiwiAnnotationData condition : metadata.get("conditions")) {
-				conditions.put(condition, mod);
+				if (shouldLoad(condition)) {
+					conditions.put(condition, mod);
+				}
 			}
 			for (KiwiAnnotationData config : metadata.get("configs")) {
+				if (!shouldLoad(config)) {
+					continue;
+				}
 				ConfigType type = null;
 				try {
 					type = ConfigType.valueOf((String) config.getData().get("type"));
@@ -319,7 +333,9 @@ public class Kiwi {
 				}
 			}
 			for (KiwiAnnotationData packet : metadata.get("packets")) {
-				KNetworking.processClass(packet, modEventBus);
+				if (shouldLoad(packet)) {
+					KNetworking.processClass(packet, modEventBus);
+				}
 			}
 		}
 
