@@ -3,11 +3,14 @@ package snownee.kiwi.loader;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.jspecify.annotations.Nullable;
 
-import net.minecraft.SharedConstants;
+import com.mojang.datafixers.util.Pair;
+
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -23,6 +26,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
@@ -34,6 +41,7 @@ import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.data.loading.DatagenModLoader;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import snownee.kiwi.util.VanillaActions;
 
 public class Platform {
 
@@ -54,7 +62,10 @@ public class Platform {
 	}
 
 	public static Optional<Path> findResource(String id, String path) {
-		return ModList.get().getModContainerById(id).flatMap($ -> Optional.ofNullable(Platform.class.getClassLoader().getResource(path))).map(url -> Path.of(url.getPath()));
+		return ModList.get()
+				.getModContainerById(id)
+				.flatMap($ -> $.getModInfo().getOwningFile().getFile().getContents().findFile(path))
+				.map(it -> Path.of(it));
 	}
 
 	public static boolean isPhysicalClient() {
@@ -67,11 +78,17 @@ public class Platform {
 	}
 
 	public static boolean isProduction() {
-		return !SharedConstants.IS_RUNNING_IN_IDE;
+		return FMLEnvironment.isProduction();
 	}
 
 	public static boolean isDataGen() {
 		return DatagenModLoader.isRunningDataGen();
+	}
+
+	public static int[] getVersionNumber(String id) {
+		ModContainer container = ModList.get().getModContainerById(id).orElseThrow();
+		ArtifactVersion version = container.getModInfo().getVersion();
+		return new int[]{version.getMajorVersion(), version.getMinorVersion(), version.getIncrementalVersion()};
 	}
 
 	public static Path getGameDir() {
@@ -122,18 +139,40 @@ public class Platform {
 		return Tags.getTagTranslationKey(tagKey);
 	}
 
-	public static int[] getVersionNumber(String id) {
-		ModContainer container = ModList.get().getModContainerById(id).orElseThrow();
-		ArtifactVersion version = container.getModInfo().getVersion();
-		return new int[]{version.getMajorVersion(), version.getMinorVersion(), version.getIncrementalVersion()};
-	}
-
 	public static Platform.Type getPlatform() {
 		return Type.NeoForge;
 	}
 
 	public static Platform.Type getPlatformSeries() {
 		return Type.NeoForge;
+	}
+
+	public static void setFireInfo(Block blockIn, int spread, int burn) {
+		VanillaActions.setFireInfo(blockIn, spread, burn);
+	}
+
+	public static void registerHoeConversion(Block k, Pair<Predicate<UseOnContext>, Consumer<UseOnContext>> v) {
+		VanillaActions.registerHoeConversion(k, v);
+	}
+
+	public static void registerAxeConversion(Block k, Block v) {
+		VanillaActions.registerAxeConversion(k, v);
+	}
+
+	public static void registerShovelConversion(Block k, BlockState v) {
+		VanillaActions.registerShovelConversion(k, v);
+	}
+
+	public static void registerCompostable(float chance, ItemLike itemIn) {
+		VanillaActions.registerCompostable(chance, itemIn);
+	}
+
+	public static void registerVillagerCompostable(ItemLike item) {
+		VanillaActions.registerVillagerCompostable(item);
+	}
+
+	public static void registerVillagerFood(ItemLike item, int value) {
+		VanillaActions.registerVillagerFood(item, value);
 	}
 
 	public enum Type {

@@ -21,7 +21,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.common.Tags;
 import snownee.kiwi.Kiwi;
@@ -92,7 +92,7 @@ public class BlockFamilies {
 			for (var item : family.value().itemHolders()) {
 				byItemBuilder.put(item.value(), family);
 			}
-			Optional<Holder.Reference<Item>> stonecutterSource = family.value().stonecutterSource();
+			Optional<Holder.Reference<Item>> stonecutterSource = family.value().stonecutterFrom();
 			//noinspection OptionalIsPresent
 			if (stonecutterSource.isPresent()) {
 				byStonecutterBuilder.put(stonecutterSource.get().value(), family);
@@ -101,7 +101,6 @@ public class BlockFamilies {
 		byId = ImmutableMap.copyOf(byIdBuilder);
 		byItem = byItemBuilder.build();
 		byStonecutterSource = byStonecutterBuilder.build();
-		StonecutterRecipeMaker.invalidateCache();
 	}
 
 	@Nullable
@@ -114,8 +113,8 @@ public class BlockFamilies {
 		return byId.values();
 	}
 
-	public static long getMatValue(ItemStack stack) {
-		return getMatValue(stack.getItem()) * stack.getCount();
+	public static long getMatValue(ItemInstance item) {
+		return getMatValue(item.typeHolder()) * item.count();
 	}
 
 	public static long getMatValue(Item item) {

@@ -7,6 +7,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -33,15 +34,21 @@ import snownee.kiwi.network.KPacketSender;
 public class Contributors extends AbstractModule {
 
 	public static final Map<String, ITierProvider> REWARD_PROVIDERS = Maps.newConcurrentMap();
-	public static final Map<String, Identifier> PLAYER_COSMETICS = Maps.newConcurrentMap();
-	private static final Set<Identifier> RENDERABLES = Sets.newLinkedHashSet();
+	public static final Map<UUID, Identifier> PLAYER_COSMETICS = Maps.newConcurrentMap();
+	private static final Set<Identifier> COSMETIC_IDS = Sets.newLinkedHashSet();
 	private static int DAY = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
 
 	public static boolean isContributor(String author, String playerName) {
+		if (!Platform.isProduction()) {
+			return true;
+		}
 		return REWARD_PROVIDERS.getOrDefault(author.toLowerCase(Locale.ENGLISH), ITierProvider.Empty.INSTANCE).isContributor(playerName);
 	}
 
 	public static boolean isContributor(String author, String playerName, String tier) {
+		if (!Platform.isProduction()) {
+			return true;
+		}
 		return REWARD_PROVIDERS.getOrDefault(author.toLowerCase(Locale.ENGLISH), ITierProvider.Empty.INSTANCE).isContributor(
 				playerName,
 				tier);
@@ -77,21 +84,21 @@ public class Contributors extends AbstractModule {
 		String namespace = rewardProvider.getAuthor().toLowerCase(Locale.ENGLISH);
 		REWARD_PROVIDERS.put(namespace, rewardProvider);
 		for (String tier : rewardProvider.getRenderableTiers()) {
-			RENDERABLES.add(Identifier.fromNamespaceAndPath(namespace, tier));
+			COSMETIC_IDS.add(Identifier.fromNamespaceAndPath(namespace, tier));
 		}
 	}
 
 	public static void changeCosmetic(ServerPlayer player, @Nullable Identifier cosmetic) {
-		String playerName = player.getGameProfile().name();
-		canPlayerUseCosmetic(playerName, cosmetic).thenAccept(bl -> {
+		canPlayerUseCosmetic(player.getGameProfile().name(), cosmetic).thenAccept(bl -> {
 			if (bl) {
+				UUID uuid = player.getUUID();
 				SSyncCosmeticPacket packet;
 				if (cosmetic == null) {
-					PLAYER_COSMETICS.remove(playerName);
-					packet = new SSyncCosmeticPacket(Map.of(), List.of(playerName));
+					PLAYER_COSMETICS.remove(uuid);
+					packet = new SSyncCosmeticPacket(Map.of(), List.of(uuid));
 				} else {
-					PLAYER_COSMETICS.put(playerName, cosmetic);
-					packet = new SSyncCosmeticPacket(Map.of(playerName, cosmetic), List.of());
+					PLAYER_COSMETICS.put(uuid, cosmetic);
+					packet = new SSyncCosmeticPacket(Map.of(uuid, cosmetic), List.of());
 				}
 				KPacketSender.sendToAll(packet, player.level().getServer());
 			}
@@ -100,23 +107,23 @@ public class Contributors extends AbstractModule {
 
 	public static boolean isRenderable(Identifier id) {
 		refreshRenderables();
-		return RENDERABLES.contains(id);
+		return COSMETIC_IDS.contains(id);
 	}
 
 	public static Set<Identifier> getRenderableTiers() {
 		refreshRenderables();
-		return Collections.unmodifiableSet(RENDERABLES);
+		return Collections.unmodifiableSet(COSMETIC_IDS);
 	}
 
 	private static void refreshRenderables() {
 		int current = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
 		if (current != DAY) {
 			DAY = current;
-			RENDERABLES.clear();
+			COSMETIC_IDS.clear();
 			for (Entry<String, ITierProvider> entry : REWARD_PROVIDERS.entrySet()) {
 				String namespace = entry.getKey();
 				for (String tier : entry.getValue().getRenderableTiers()) {
-					RENDERABLES.add(Identifier.fromNamespaceAndPath(namespace, tier));
+					COSMETIC_IDS.add(Identifier.fromNamespaceAndPath(namespace, tier));
 				}
 			}
 		}
@@ -132,9 +139,9 @@ public class Contributors extends AbstractModule {
 		ITierProvider provider = REWARD_PROVIDERS.getOrDefault(
 				cosmetic.getNamespace().toLowerCase(Locale.ENGLISH),
 				ITierProvider.Empty.INSTANCE);
-		if (!provider.isContributor(playerName, cosmetic.getPath())) {
+		if (!isContributor(playerName, cosmetic.getPath())) {
 			if (!Platform.isPhysicalClient()) {
-				return provider.refresh().thenApply($ -> provider.isContributor(playerName, cosmetic.getPath()));
+				return provider.refresh().thenApply($ -> isContributor(playerName, cosmetic.getPath()));
 			} else {
 				return CompletableFuture.completedFuture(Boolean.FALSE);
 			}
@@ -157,5 +164,4 @@ public class Contributors extends AbstractModule {
 			});
 		}
 	}
-
 }

@@ -37,7 +37,7 @@ public final class DataModule extends AbstractModule {
 			SizedIngredient.SizedSlotDisplay.STREAM_CODEC));
 
 	public DataModule() {
-		CustomIngredientSerializer.register(AlternativesIngredient.SERIALIZER);
+		CustomIngredientSerializer.register(AlternativesIngredient.Serializer.INSTANCE);
 	}
 
 	@KiwiModule.LoadingCondition("data")

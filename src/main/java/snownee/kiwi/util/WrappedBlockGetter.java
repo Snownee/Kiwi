@@ -59,5 +59,4 @@ public abstract class WrappedBlockGetter implements BlockAndTintGetter {
 	public int getMinY() {
 		return delegate.getMinY();
 	}
-
 }

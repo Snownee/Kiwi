@@ -59,7 +59,7 @@ public record SimplePropertiesComponent(
 				if (values == null) {
 					return DataResult.error(() -> "Missing default value for property");
 				} else {
-					defaultValue = values.get(0);
+					defaultValue = values.getFirst();
 				}
 			}
 			Property<?> property;
@@ -70,12 +70,12 @@ public record SimplePropertiesComponent(
 					return DataResult.error(() -> "Unknown common property: " + s);
 				}
 			} else {
-				String name = ops.getStringValue(map.get("name")).getOrThrow($ -> new IllegalStateException("Missing name for property"));
+				String name = ops.getStringValue(map.get("name")).getOrThrow(_ -> new IllegalStateException("Missing name for property"));
 
 				if (defaultValue instanceof Integer) {
-					int min = ops.getNumberValue(map.get("min")).getOrThrow($ -> new IllegalStateException(
+					int min = ops.getNumberValue(map.get("min")).getOrThrow(_ -> new IllegalStateException(
 							"Missing min for integer property")).intValue();
-					int max = ops.getNumberValue(map.get("max")).getOrThrow($ -> new IllegalStateException(
+					int max = ops.getNumberValue(map.get("max")).getOrThrow(_ -> new IllegalStateException(
 							"Missing max for integer property")).intValue();
 					property = IntegerProperty.create(name, min, max);
 				} else if (defaultValue instanceof Boolean) { // will the NbtOps break this?
@@ -88,7 +88,7 @@ public record SimplePropertiesComponent(
 							property = EnumProperty.create(
 									name,
 									Direction.class,
-									values.stream().map(DIRECTION_STRINGS::get).toList());
+									values.stream().map(DIRECTION_STRINGS::get).toArray(Direction[]::new));
 						}
 					} else {
 						property = new StringProperty(name, values);
@@ -117,14 +117,15 @@ public record SimplePropertiesComponent(
 			List<String> values = List.of();
 			if (s == null) {
 				mapBuilder.add("name", ops.createString(property.getName()));
-				if (property instanceof IntegerProperty integerProperty) {
-					mapBuilder.add("min", ops.createInt(integerProperty.min));
-					mapBuilder.add("max", ops.createInt(integerProperty.max));
-				} else if (property instanceof EnumProperty<?> || property instanceof StringProperty) {
+				EnumProperty<Direction> directionProperty = KBlockUtils.toDirectionProperty(property);
+				if (directionProperty != null) {
 					values = property.getPossibleValues()
 							.stream()
 							.map($ -> KBlockUtils.getNameByValue(property, $))
 							.collect(Collectors.toCollection(ArrayList::new));
+				} else if (property instanceof IntegerProperty integerProperty) {
+					mapBuilder.add("min", ops.createInt(integerProperty.min));
+					mapBuilder.add("max", ops.createInt(integerProperty.max));
 				} else if (!(property instanceof BooleanProperty)) {
 					return DataResult.error(() -> "Unsupported property type: " + property);
 				}
@@ -144,7 +145,7 @@ public record SimplePropertiesComponent(
 			}
 			if (!values.isEmpty()) {
 				values.remove(input.getSecond());
-				values.add(0, input.getSecond());
+				values.addFirst(input.getSecond());
 				mapBuilder.add("values", ops.createList(values.stream().map(ops::createString)));
 			} else {
 				mapBuilder.add("default", defaultValue);
@@ -155,7 +156,7 @@ public record SimplePropertiesComponent(
 	public static final MapCodec<SimplePropertiesComponent> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			Codec.BOOL.optionalFieldOf("shape_for_light_occlusion", false)
 					.forGetter(SimplePropertiesComponent::useShapeForLightOcclusion),
-				ExtraCodecs.nonEmptyList(ExtraCodecs.compactListCodec(SINGLE_CODEC))
+			ExtraCodecs.nonEmptyList(ExtraCodecs.compactListCodec(SINGLE_CODEC))
 					.fieldOf("properties")
 					.forGetter(SimplePropertiesComponent::properties)
 	).apply(instance, ($1, $2) -> INTERNER.intern(new SimplePropertiesComponent($1, $2))));

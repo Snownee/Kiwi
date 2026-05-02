@@ -89,6 +89,7 @@ neoForge {
         data {
             clientData()
             ideName = "Run ${project.mod_id} - Data"
+            programArguments = ['--mod', project.mod_id, '--all', '--output', project.file('src/generated/resources').absolutePath]
         }
         server {
             server()
@@ -230,8 +231,6 @@ allprojects {
 }
 
 dependencies {
-    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.3.2"))
-
     implementation project(':annotation')
     annotationProcessor project(':annotation-processor')
 

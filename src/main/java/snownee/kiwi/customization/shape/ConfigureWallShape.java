@@ -1,6 +1,5 @@
 package snownee.kiwi.customization.shape;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
@@ -8,30 +7,32 @@ import java.util.function.UnaryOperator;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.WallSide;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import snownee.kiwi.mixin.customization.WallBlockAccessor;
 
 public record ConfigureWallShape(
-		float width,
-		float depth,
-		float wallPostHeight,
-		float wallMinY,
-		float wallLowHeight,
-		float wallTallHeight) implements ConfiguringShape {
+		float postWidth,
+		float sideWidth,
+		float postMaxY,
+		float sideMinY,
+		float lowSideMaxY,
+		float tallSideMaxY) implements ConfiguringShape {
 	public static Codec<ConfigureWallShape> codec() {
 		return RecordCodecBuilder.create(instance -> instance.group(
-						Codec.FLOAT.fieldOf("post_width").forGetter(ConfigureWallShape::width),
-						Codec.FLOAT.fieldOf("side_width").forGetter(ConfigureWallShape::depth),
-						Codec.FLOAT.fieldOf("post_max_y").forGetter(ConfigureWallShape::wallPostHeight),
-						Codec.FLOAT.fieldOf("side_min_y").forGetter(ConfigureWallShape::wallMinY),
-						Codec.FLOAT.fieldOf("low_side_max_y").forGetter(ConfigureWallShape::wallLowHeight),
-						Codec.FLOAT.fieldOf("tall_side_max_y").forGetter(ConfigureWallShape::wallTallHeight))
-				.apply(instance, ConfigureWallShape::new));
+				Codec.FLOAT.fieldOf("post_width").forGetter(ConfigureWallShape::postWidth),
+				Codec.FLOAT.fieldOf("side_width").forGetter(ConfigureWallShape::sideWidth),
+				Codec.FLOAT.fieldOf("post_max_y").forGetter(ConfigureWallShape::postMaxY),
+				Codec.FLOAT.fieldOf("side_min_y").forGetter(ConfigureWallShape::sideMinY),
+				Codec.FLOAT.fieldOf("low_side_max_y").forGetter(ConfigureWallShape::lowSideMaxY),
+				Codec.FLOAT.fieldOf("tall_side_max_y").forGetter(ConfigureWallShape::tallSideMaxY)
+		).apply(instance, ConfigureWallShape::new));
 	}
 
 	@Override
@@ -39,59 +40,47 @@ public record ConfigureWallShape(
 		if (!(block instanceof WallBlock wallBlock)) {
 			throw new IllegalArgumentException("Block %s is not a WallBlock".formatted(block));
 		}
-		Function<BlockState, VoxelShape> shapes = makeShapes(wallBlock, width, depth, wallPostHeight, wallMinY, wallLowHeight, wallTallHeight);
-		WallBlockAccessor accessor = (WallBlockAccessor) wallBlock;
+		Function<BlockState, VoxelShape> shapes = makeShapes(
+				wallBlock,
+				postWidth,
+				sideWidth,
+				postMaxY,
+				sideMinY,
+				lowSideMaxY,
+				tallSideMaxY);
 		switch (type) {
-			case MAIN -> accessor.kiwi$setShapes(shapes);
-			case COLLISION -> accessor.kiwi$setCollisionShapes(shapes);
+			case MAIN -> wallBlock.shapes = shapes;
+			case COLLISION -> wallBlock.collisionShapes = shapes;
 			case INTERACTION -> throw new UnsupportedOperationException();
 		}
 	}
 
-	private static VoxelShape applyWallShape(VoxelShape shape, WallSide side, VoxelShape lowSide, VoxelShape tallSide) {
-		return switch (side) {
-			case TALL -> Shapes.or(shape, tallSide);
-			case LOW -> Shapes.or(shape, lowSide);
-			case NONE -> shape;
-		};
-	}
-
-	private static Function<BlockState, VoxelShape> makeShapes(
-			WallBlock wallBlock,
+	public Function<BlockState, VoxelShape> makeShapes(
+			WallBlock block,
 			float postWidth,
 			float sideWidth,
 			float postMaxY,
 			float sideMinY,
 			float lowSideMaxY,
 			float tallSideMaxY) {
-		float halfPostWidth = postWidth / 2;
-		float halfSideWidth = sideWidth / 2;
-		float postMin = 8.0F - halfPostWidth;
-		float postMax = 8.0F + halfPostWidth;
-		float sideMin = 8.0F - halfSideWidth;
-		float sideMax = 8.0F + halfSideWidth;
-		VoxelShape post = Block.box(postMin, 0.0, postMin, postMax, postMaxY, postMax);
-		VoxelShape northLow = Block.box(sideMin, sideMinY, 0.0, sideMax, lowSideMaxY, sideMax);
-		VoxelShape southLow = Block.box(sideMin, sideMinY, sideMin, sideMax, lowSideMaxY, 16.0);
-		VoxelShape westLow = Block.box(0.0, sideMinY, sideMin, sideMax, lowSideMaxY, sideMax);
-		VoxelShape eastLow = Block.box(sideMin, sideMinY, sideMin, 16.0, lowSideMaxY, sideMax);
-		VoxelShape northTall = Block.box(sideMin, sideMinY, 0.0, sideMax, tallSideMaxY, sideMax);
-		VoxelShape southTall = Block.box(sideMin, sideMinY, sideMin, sideMax, tallSideMaxY, 16.0);
-		VoxelShape westTall = Block.box(0.0, sideMinY, sideMin, sideMax, tallSideMaxY, sideMax);
-		VoxelShape eastTall = Block.box(sideMin, sideMinY, sideMin, 16.0, tallSideMaxY, sideMax);
-		Map<BlockState, VoxelShape> shapes = new HashMap<>();
-		for (BlockState state : wallBlock.getStateDefinition().getPossibleStates()) {
-			VoxelShape shape = Shapes.empty();
-			shape = applyWallShape(shape, state.getValue(WallBlock.EAST), eastLow, eastTall);
-			shape = applyWallShape(shape, state.getValue(WallBlock.WEST), westLow, westTall);
-			shape = applyWallShape(shape, state.getValue(WallBlock.NORTH), northLow, northTall);
-			shape = applyWallShape(shape, state.getValue(WallBlock.SOUTH), southLow, southTall);
-			if (state.getValue(WallBlock.UP)) {
-				shape = Shapes.or(shape, post);
-			}
-			shapes.put(state, shape);
-		}
-		return state -> shapes.getOrDefault(state, Shapes.empty());
+		VoxelShape voxelshape = Block.column(postWidth, 0.0, postMaxY);
+		Map<Direction, VoxelShape> map = Shapes.rotateHorizontal(Block.boxZ(sideWidth, sideMinY, lowSideMaxY, 0.0, 11.0));
+		Map<Direction, VoxelShape> map1 = Shapes.rotateHorizontal(Block.boxZ(sideWidth, sideMinY, tallSideMaxY, 0.0, 11.0));
+		return block.getShapeForEachState(
+				blockState -> {
+					VoxelShape voxelshape1 = blockState.getValue(WallBlock.UP) ? voxelshape : Shapes.empty();
+
+					for (Map.Entry<Direction, EnumProperty<WallSide>> entry : WallBlock.PROPERTY_BY_DIRECTION.entrySet()) {
+						voxelshape1 = Shapes.or(
+								voxelshape1, switch (blockState.getValue(entry.getValue())) {
+									case NONE -> Shapes.empty();
+									case LOW -> map.get(entry.getKey());
+									case TALL -> map1.get(entry.getKey());
+								});
+					}
+
+					return voxelshape1;
+				}, WallBlock.WATERLOGGED);
 	}
 
 	@Override

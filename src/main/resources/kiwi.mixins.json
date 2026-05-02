@@ -5,6 +5,9 @@
 	"plugin": "snownee.kiwi.mixin.MixinPlugin",
 	"compatibilityLevel": "JAVA_21",
 	"refmap": "kiwi.refmap.json",
+	"mixinextras": {
+		"minVersion": "0.5.0"
+	},
 	"mixins": [
 		"GameDataMixin",
 		"customization.AbstractContainerMenuMixin",
@@ -13,13 +16,11 @@
 		"customization.BlockMixin",
 		"customization.BlockPropertiesMixin",
 		"customization.BlockStateMixin",
-		"customization.VegetationBlockMixin",
 		"customization.CrossCollisionBlockAccessor",
 		"customization.HalfTransparentBlockMixin",
+		"customization.VegetationBlockMixin",
 		"customization.WallBlockAccessor",
 		"customization.family.RecipeManagerMixin",
-		"customization.family.RecipeMapMixin",
-		"customization.fastsuite.AuxRecipeManagerMixin",
 		"customization.forge.IBlockStateExtensionMixin",
 		"customization.placement.BlockItemGetPlacementStateMixin",
 		"customization.placement.BlockItemPlaceBlockMixin",
@@ -31,14 +32,15 @@
 		"customization.sit.EntityMixin"
 	],
 	"client": [
-		"client.AvatarRendererMixin",
 		"client.AvatarRenderStateMixin",
 		"client.ClientTelemetryManagerMixin",
 		"client.CreativeModeInventoryScreenMixin",
+		"client.EntityRendererMixin",
 		"client.KeyboardHandlerMixin",
 		"client.LoadingOverlayMixin",
 		"client.NeoForgeLoadingOverlayMixin",
 		"client.OptionInstanceMixin",
+		"client.RenderLayerAccess",
 		"client.ScreenEffectRendererMixin",
 		"client.ScreenMixin",
 		"client.TitleScreenMixin",

@@ -2,6 +2,7 @@ package snownee.kiwi.mixin.customization;
 
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -12,7 +13,6 @@ import com.google.common.collect.Sets;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 
-import javax.annotation.Nullable;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
@@ -28,16 +28,14 @@ public abstract class BlockEntityTypeMixin {
 	@Unique
 	private @Nullable Boolean kiwi$lenient;
 	@Unique
-	private @Nullable
-	volatile Set<Block> kiwi$lenientValidBlocks;
+	private volatile @Nullable Set<Block> kiwi$lenientValidBlocks;
 
 	@Shadow
-	@Nullable
-	public abstract Holder.Reference<BlockEntityType<?>> builtInRegistryHolder();
+	public abstract Holder.@Nullable Reference<BlockEntityType<?>> builtInRegistryHolder();
 
 	@SuppressWarnings("SuspiciousMethodCalls")
 	@WrapOperation(method = "isValid", at = @At(value = "INVOKE", target = "Ljava/util/Set;contains(Ljava/lang/Object;)Z"))
-	public boolean isValid(Set<Block> instance, Object object, Operation<Boolean> original) {
+	public boolean isValid(Set<Block> instance, @Nullable Object object, Operation<Boolean> original) {
 		if (!CustomizationHooks.isEnabled()) {
 			return original.call(instance, object);
 		}
@@ -58,7 +56,7 @@ public abstract class BlockEntityTypeMixin {
 			Identifier key = reference.key().identifier();
 			kiwi$lenient = CustomizationHooks.getLenientBETypeNamespaces().contains(key.getNamespace());
 		}
-		if (kiwi$lenient == Boolean.FALSE) {
+		if (!kiwi$lenient) {
 			return false;
 		}
 		for (Block validBlock : validBlocks) {
@@ -66,9 +64,7 @@ public abstract class BlockEntityTypeMixin {
 				if (kiwi$lenientValidBlocks == null) {
 					//noinspection SynchronizeOnNonFinalField
 					synchronized (validBlocks) {
-						if (kiwi$lenientValidBlocks == null) {
-							kiwi$lenientValidBlocks = Sets.newHashSet(validBlocks);
-						}
+						kiwi$lenientValidBlocks = Sets.newHashSet(validBlocks);
 					}
 				}
 				kiwi$lenientValidBlocks.add((Block) object);

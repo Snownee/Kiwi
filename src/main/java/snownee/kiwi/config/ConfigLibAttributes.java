@@ -11,5 +11,4 @@ public record ConfigLibAttributes(
 		Function<@Nullable String, @Nullable Screen> screenFactory,
 		boolean supportsList,
 		boolean supportsMap,
-		boolean supportsOnlyString) {
-}
+		boolean supportsOnlyString) {}

@@ -1,19 +1,12 @@
 package snownee.kiwi.util;
 
-import java.lang.reflect.Method;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
 
-import net.minecraft.world.entity.ai.behavior.WorkAtComposter;
-import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.context.UseOnContext;
@@ -31,20 +24,15 @@ public final class VanillaActions {
 	}
 
 	public static void setFireInfo(Block blockIn, int spread, int burn) {
-		try {
-			Method method = FireBlock.class.getDeclaredMethod("setFlammable", Block.class, int.class, int.class);
-			method.setAccessible(true);
-			method.invoke(Blocks.FIRE, blockIn, spread, burn);
-		} catch (ReflectiveOperationException e) {
-			throw new RuntimeException("Failed to set fire info for " + blockIn, e);
-		}
+		((FireBlock) Blocks.FIRE).setFlammable(blockIn, spread, burn);
 	}
 
+	@SuppressWarnings("deprecation")
 	public static void registerHoeConversion(Block k, Pair<Predicate<UseOnContext>, Consumer<UseOnContext>> v) {
-		//noinspection deprecation
 		HoeItem.TILLABLES.put(k, v);
 	}
 
+	@SuppressWarnings("deprecation")
 	public static void registerAxeConversion(Block k, Block v) {
 		if (AxeItem.STRIPPABLES instanceof ImmutableMap) {
 			AxeItem.STRIPPABLES = Maps.newHashMap(AxeItem.STRIPPABLES);
@@ -52,6 +40,7 @@ public final class VanillaActions {
 		AxeItem.STRIPPABLES.put(k, v);
 	}
 
+	@SuppressWarnings("deprecation")
 	public static void registerShovelConversion(Block k, BlockState v) {
 		if (AxeItem.STRIPPABLES instanceof ImmutableMap) {
 			AxeItem.STRIPPABLES = Maps.newHashMap(AxeItem.STRIPPABLES);

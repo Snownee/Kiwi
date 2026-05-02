@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -39,10 +40,10 @@ public abstract class BlockStateMixin {
 	protected abstract BlockState asState();
 
 	@Inject(method = "canSurvive", at = @At("HEAD"), cancellable = true)
-	private void kiwi$canSurvive(LevelReader pLevel, BlockPos pPos, CallbackInfoReturnable<Boolean> cir) {
+	private void kiwi$canSurvive(LevelReader level, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
 		KBlockSettings settings = KBlockSettings.of(getBlock());
 		if (settings != null && settings.canSurviveHandler != null) {
-			cir.setReturnValue(settings.canSurviveHandler.canSurvive(asState(), pLevel, pPos));
+			cir.setReturnValue(settings.canSurviveHandler.canSurvive(asState(), level, pos));
 		}
 	}
 
@@ -57,8 +58,7 @@ public abstract class BlockStateMixin {
 			RandomSource random,
 			CallbackInfoReturnable<BlockState> cir) {
 		KBlockSettings settings = KBlockSettings.of(getBlock());
-		if (settings != null && settings.canSurviveHandler != null && settings.canSurviveHandler.isSensitiveSide(
-				asState(),
+		if (settings != null && settings.canSurviveHandler != null && settings.canSurviveHandler.isSensitiveSide(asState(),
 				directionToNeighbour) &&
 				!settings.canSurviveHandler.canSurvive(asState(), level, pos)) {
 			cir.setReturnValue(Blocks.AIR.defaultBlockState());
@@ -92,34 +92,23 @@ public abstract class BlockStateMixin {
 	}
 
 	@Inject(method = "canBeReplaced(Lnet/minecraft/world/item/context/BlockPlaceContext;)Z", at = @At("HEAD"), cancellable = true)
-	private void kiwi$canBeReplaced(BlockPlaceContext pUseContext, CallbackInfoReturnable<Boolean> cir) {
+	private void kiwi$canBeReplaced(BlockPlaceContext context, CallbackInfoReturnable<Boolean> cir) {
 		KBlockSettings settings = KBlockSettings.of(getBlock());
 		if (settings == null) {
 			return;
 		}
-		Boolean triState = settings.canBeReplaced(asState(), pUseContext);
+		Boolean triState = settings.canBeReplaced(asState(), context);
 		if (triState != null) {
 			cir.setReturnValue(triState);
 		}
 	}
 
-	@WrapOperation(
-			method = "affectNeighborsAfterRemoval",
-			at = @At(
-					value = "INVOKE",
-					target = "Lnet/minecraft/world/level/block/Block;affectNeighborsAfterRemoval(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Z)V"))
-	private void kiwi$onRemove(
-			Block block,
-			BlockState blockState,
-			ServerLevel serverLevel,
-			BlockPos blockPos,
-			boolean movedByPiston,
-			Operation<Void> original) {
-		original.call(block, blockState, serverLevel, blockPos, movedByPiston);
+	@Inject(method = "affectNeighborsAfterRemoval", at = @At("RETURN"))
+	private void kiwi$onRemove(ServerLevel level, BlockPos pos, boolean movedByPiston, CallbackInfo ci) {
 		try {
-			PlacementSystem.onBlockRemoved(serverLevel, blockPos, blockState, serverLevel.getBlockState(blockPos));
+			PlacementSystem.onBlockRemoved(level, pos, asState());
 		} catch (Throwable t) {
-			Kiwi.LOGGER.error("Failed to handle placement for %s".formatted(blockState), t);
+			Kiwi.LOGGER.error("Failed to handle placement for %s".formatted(asState()), t);
 		}
 	}
 

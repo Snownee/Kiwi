@@ -28,10 +28,9 @@ import snownee.kiwi.data.DataModule;
 
 public final class SizedIngredient {
 	public static final Codec<SizedIngredient> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-					Ingredient.CODEC.fieldOf("ingredient").forGetter(SizedIngredient::ingredient),
-					ExtraCodecs.POSITIVE_INT.optionalFieldOf("count", 1).forGetter(SizedIngredient::count))
-			.apply(instance, SizedIngredient::new));
-
+			Ingredient.CODEC.fieldOf("ingredient").forGetter(SizedIngredient::ingredient),
+			ExtraCodecs.POSITIVE_INT.optionalFieldOf("count", 1).forGetter(SizedIngredient::count)
+	).apply(instance, SizedIngredient::new));
 	public static final Codec<SizedIngredient> CODEC = Codec.withAlternative(
 			DIRECT_CODEC,
 			Ingredient.CODEC.flatXmap(
@@ -77,7 +76,7 @@ public final class SizedIngredient {
 	}
 
 	public boolean test(ItemStack stack) {
-		return ingredient.test(stack) && (stack.isEmpty() || stack.getCount() >= count);
+		return ingredient.test(stack) && (stack.isEmpty() || stack.count() >= count);
 	}
 
 	public SlotDisplay display() {
@@ -110,8 +109,9 @@ public final class SizedIngredient {
 
 	public record SizedSlotDisplay(SlotDisplay display, int count) implements SlotDisplay {
 		public static final MapCodec<SizedSlotDisplay> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-					SlotDisplay.CODEC.fieldOf("display").forGetter(SizedSlotDisplay::display),
-					ExtraCodecs.POSITIVE_INT.fieldOf("count").forGetter(SizedSlotDisplay::count)).apply(i, SizedSlotDisplay::new));
+				SlotDisplay.CODEC.fieldOf(
+						"display").forGetter(SizedSlotDisplay::display),
+				ExtraCodecs.POSITIVE_INT.fieldOf("count").forGetter(SizedSlotDisplay::count)).apply(i, SizedSlotDisplay::new));
 		public static final StreamCodec<RegistryFriendlyByteBuf, SizedSlotDisplay> STREAM_CODEC = StreamCodec.composite(
 				SlotDisplay.STREAM_CODEC,
 				SizedSlotDisplay::display,

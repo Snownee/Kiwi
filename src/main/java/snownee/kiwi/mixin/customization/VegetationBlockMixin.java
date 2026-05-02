@@ -16,8 +16,8 @@ import snownee.kiwi.customization.CustomFeatureTags;
 @Mixin(VegetationBlock.class)
 public abstract class VegetationBlockMixin {
 	@Inject(method = "mayPlaceOn", at = @At("HEAD"), cancellable = true)
-	private void kiwi$mayPlaceOn(BlockState pState, BlockGetter pLevel, BlockPos pPos, CallbackInfoReturnable<Boolean> cir) {
-		if (pState.isFaceSturdy(pLevel, pPos, Direction.UP, SupportType.CENTER) && pState.is(CustomFeatureTags.SUSTAIN_PLANT)) {
+	private void kiwi$mayPlaceOn(BlockState state, BlockGetter level, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+		if (state.isFaceSturdy(level, pos, Direction.UP, SupportType.CENTER) && state.is(CustomFeatureTags.SUSTAIN_PLANT)) {
 			cir.setReturnValue(true);
 		}
 	}

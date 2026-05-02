@@ -55,7 +55,8 @@ public record SixWayShape(VoxelShape[] shapes, VoxelShape base, VoxelShape trueD
 								Direction.from3DDataValue(i));
 						shape = Shapes.joinUnoptimized(shape, sideShape, BooleanOp.OR);
 					}
-					shapes[index] = shape = shape.optimize();
+					shape = shape.optimize();
+					shapes[index] = shape;
 				}
 			}
 		}

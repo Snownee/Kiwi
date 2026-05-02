@@ -34,7 +34,7 @@ public record ChoicesShape(List<String> keys, Map<String, ShapeGenerator> valueM
 	public VoxelShape getShape(BlockState blockState, CollisionContext context) {
 		String key;
 		if (keys.size() == 1) {
-			key = KBlockUtils.getValueString(blockState, keys.get(0));
+			key = KBlockUtils.getValueString(blockState, keys.getFirst());
 		} else {
 			key = String.join(",", keys.stream().map(k -> KBlockUtils.getValueString(blockState, k)).toArray(String[]::new));
 		}

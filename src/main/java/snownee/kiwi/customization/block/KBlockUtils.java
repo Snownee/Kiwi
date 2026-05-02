@@ -14,6 +14,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 
 public interface KBlockUtils {
@@ -160,6 +161,18 @@ public interface KBlockUtils {
 	static <T extends Comparable<T>> String getNameByValue(Property<T> property, Object value) {
 		//noinspection unchecked
 		return property.getName((T) value);
+	}
+
+	static @Nullable EnumProperty<Direction> toDirectionProperty(Property<?> property) {
+		if (property == BlockStateProperties.FACING || property == BlockStateProperties.HORIZONTAL_FACING) {
+			//noinspection unchecked
+			return (EnumProperty<Direction>) property;
+		}
+		if (property instanceof EnumProperty<?> enumProperty && enumProperty.getValueClass() == Direction.class) {
+			//noinspection unchecked
+			return (EnumProperty<Direction>) enumProperty;
+		}
+		return null;
 	}
 
 	default @Nullable BlockState componentsUpdateShape(

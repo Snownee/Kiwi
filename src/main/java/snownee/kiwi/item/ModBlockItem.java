@@ -11,6 +11,7 @@ import com.google.common.collect.Sets;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.BlockItem;
@@ -24,6 +25,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.TagValueInput;
+import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.block.IKiwiBlock;
 import snownee.kiwi.loader.Platform;
@@ -36,18 +39,28 @@ public class ModBlockItem extends BlockItem implements ItemCategoryFiller {
 	}
 
 	@Override
-	protected boolean updateCustomBlockEntityTag(BlockPos pos, Level worldIn, @Nullable Player player, ItemStack stack, BlockState state) {
+	protected boolean updateCustomBlockEntityTag(
+			BlockPos pos,
+			Level worldIn,
+			@Nullable Player player,
+			ItemStack itemStack,
+			BlockState state) {
 		if (worldIn.isClientSide()) {
-			BlockEntity tile = worldIn.getBlockEntity(pos);
-			if (tile != null && INSTANT_UPDATE_TILES.contains(tile.getType())) {
-				TypedEntityData<BlockEntityType<?>> data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
-				if (data != null && data.type() == tile.getType()) {
-					data.loadInto(tile, worldIn.registryAccess());
-					tile.setChanged();
+			BlockEntity be = worldIn.getBlockEntity(pos);
+			if (be != null && INSTANT_UPDATE_TILES.contains(be.getType())) {
+				TypedEntityData<BlockEntityType<?>> data = itemStack.get(DataComponents.BLOCK_ENTITY_DATA);
+				if (data != null) {
+					try (
+							ProblemReporter.ScopedCollector scopedCollector = new ProblemReporter.ScopedCollector(
+									be.problemPath(),
+									Kiwi.LOGGER)) {
+						be.loadWithComponents(TagValueInput.create(scopedCollector, worldIn.registryAccess(), data.copyTagWithoutId()));
+						be.setChanged();
+					}
 				}
 			}
 		}
-		return super.updateCustomBlockEntityTag(pos, worldIn, player, stack, state);
+		return super.updateCustomBlockEntityTag(pos, worldIn, player, itemStack, state);
 	}
 
 	@Override

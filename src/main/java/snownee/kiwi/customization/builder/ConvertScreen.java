@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import org.jspecify.annotations.Nullable;
 import org.joml.Matrix3x2fStack;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
+import org.jspecify.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import com.google.common.collect.Sets;
@@ -20,7 +20,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
@@ -29,8 +28,10 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.tooltip.BelowOrAboveWidgetTooltipPositioner;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.Rect2i;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -56,7 +57,7 @@ public class ConvertScreen extends Screen {
 	private final int slotIndex;
 	private final Collection<CConvertItemPacket.Group> groups;
 	private final LerpedFloat openProgress = LerpedFloat.linear();
-	private PanelLayout layout;
+	private @Nullable PanelLayout layout;
 	private final Vector2i originalMousePos;
 	private final ItemStack sourceItem;
 	private ClientTooltipPositioner forcedTooltipPositioner; //FIXME
@@ -104,14 +105,19 @@ public class ConvertScreen extends Screen {
 		int yStart = 0;
 		int curX = xStart;
 		int curY = yStart;
-		Set<CConvertItemPacket.Entry> accepted = Sets.newTreeSet(
-				Comparator.comparing($ -> $.item().getDefaultInstance().getHoverName().getString()));
-		LocalPlayer player = Objects.requireNonNull(getMinecraft().player);
+		Set<CConvertItemPacket.Entry> accepted = Sets.newTreeSet(Comparator.comparing($ -> $.item()
+				.getDefaultInstance()
+				.getHoverName()
+				.getString()));
+		LocalPlayer player = Objects.requireNonNull(minecraft.player);
 		for (CConvertItemPacket.Group group : groups) {
 			accepted.addAll(group.entries());
 		}
 		int itemsPerLine = accepted.size() > 30 ? 11 : 4;
 		for (CConvertItemPacket.Entry entry : accepted) {
+			if (!accepted.contains(entry)) {
+				continue;
+			}
 			ItemStack itemStack = new ItemStack(entry.item());
 			ItemButton button = (ItemButton) ItemButton
 					.builder(itemStack, inContainer, btn -> shortPress((ItemButton) btn, entry))
@@ -123,7 +129,7 @@ public class ConvertScreen extends Screen {
 					longPress(btn, entry);
 				}
 			};
-			button.onRelease = btn -> {
+			button.onRelease = _ -> {
 				if (!SmartKey.hasControlDown()) {
 					onClose();
 				}
@@ -150,6 +156,7 @@ public class ConvertScreen extends Screen {
 				curY += step;
 			}
 		}
+
 		int x;
 		int y;
 		Vector2f anchor;
@@ -182,7 +189,7 @@ public class ConvertScreen extends Screen {
 
 	private void moveMouseOn(AbstractWidget button) {
 		setFocused(button);
-		Window window = Objects.requireNonNull(getMinecraft().getWindow());
+		Window window = Objects.requireNonNull(minecraft.getWindow());
 		double scale = window.getGuiScale();
 		GLFW.glfwSetCursorPos(window.handle(), (button.getX() + 15) * scale, (button.getY() + 15) * scale);
 	}
@@ -191,7 +198,7 @@ public class ConvertScreen extends Screen {
 		boolean convertOne = SmartKey.hasControlDown();
 		if (convertOne) {
 			shortPress(button, entry);
-		} else if ((!inContainer || Objects.requireNonNull(getMinecraft().player).containerMenu instanceof InventoryMenu) &&
+		} else if ((!inContainer || Objects.requireNonNull(minecraft.player).containerMenu instanceof InventoryMenu) &&
 				button.pressTime() >= 15) {
 			Item from = getSourceItem().getItem();
 			KPacketSender.sendToServer(new CConvertItemPacket(
@@ -205,12 +212,12 @@ public class ConvertScreen extends Screen {
 	}
 
 	private void shortPress(ItemButton button, CConvertItemPacket.Entry entry) {
-		LocalPlayer player = Objects.requireNonNull(getMinecraft().player);
+		LocalPlayer player = Objects.requireNonNull(minecraft.player);
 		boolean hasInfiniteMaterials = player.hasInfiniteMaterials();
 		ItemStack sourceItem = getSourceItem();
 		boolean convertOne = SmartKey.hasControlDown();
 		if (convertOne) {
-			if (!hasInfiniteMaterials && sourceItem.getCount() <= 1) {
+			if (!hasInfiniteMaterials && sourceItem.count() <= 1) {
 				onClose();
 			}
 		}
@@ -230,13 +237,13 @@ public class ConvertScreen extends Screen {
 		} else if (inCreativeContainer) {
 			Objects.requireNonNull(slot);
 			ItemStack newItem = to.getDefaultInstance();
-			newItem.setCount(slot.getItem().getCount());
+			newItem.setCount(slot.getItem().count());
 			newItem.setPopTime(Inventory.POP_TIME_DURATION);
 			slot.setByPlayer(newItem);
 			NonNullList<Slot> slots = player.inventoryMenu.slots;
 			for (int i = 0; i < slots.size(); i++) {
 				if (slots.get(i).getItem() == newItem) {
-					Objects.requireNonNull(getMinecraft().gameMode).handleCreativeModeItemAdd(newItem, i);
+					Objects.requireNonNull(minecraft.gameMode).handleCreativeModeItemAdd(newItem, i);
 					CConvertItemPacket.Handler.playPickupSound(player);
 					break;
 				}
@@ -268,7 +275,7 @@ public class ConvertScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
 		if (super.mouseClicked(event, doubleClick)) {
 			return true;
 		}
@@ -311,19 +318,19 @@ public class ConvertScreen extends Screen {
 	}
 
 	@Override
-	public void extractRenderState(GuiGraphicsExtractor pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
+	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
 		Objects.requireNonNull(minecraft);
-		Matrix3x2fStack pose = pGuiGraphics.pose();
+		Matrix3x2fStack pose = graphics.pose();
 		layout().update();
 		Vector2i pos = layout().getAnchoredPos();
-		float openValue = openProgress.getValue(pPartialTick);
+		float openValue = openProgress.getValue(partialTick);
 		pose.pushMatrix();
 		pose.translate(pos.x, pos.y);
 		pose.scale(openValue);
 		pose.translate(-pos.x, -pos.y);
 		if (inContainer) {
 			Rect2i bounds = layout().bounds();
-			pGuiGraphics.blitSprite(
+			graphics.blitSprite(
 					RenderPipelines.GUI_TEXTURED,
 					Identifier.withDefaultNamespace("recipe_book/overlay_recipe"),
 					bounds.getX() - 2,
@@ -331,18 +338,21 @@ public class ConvertScreen extends Screen {
 					bounds.getWidth() + 3,
 					bounds.getHeight() + 3);
 		}
-		super.extractRenderState(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
+		super.extractRenderState(graphics, mouseX, mouseY, partialTick);
 		pose.popMatrix();
 	}
 
 	@Override
-	public void extractBackground(GuiGraphicsExtractor p_283688_, int p_296369_, int p_296477_, float p_294317_) {
-		// NO-OP
+	public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 	}
 
-//	@Override
+	//	@Override
 //	public void setTooltipForNextRenderPass(List<FormattedCharSequence> list, ClientTooltipPositioner tooltipPositioner, boolean force) {
-//		super.setTooltipForNextRenderPass(list, forcedTooltipPositioner, force);
+//		float openValue = openProgress.getValue(Objects.requireNonNull(minecraft)./*getPartialTick()*/ getTimer()
+//				.getGameTimeDeltaPartialTick(true));
+//		if (openValue > 0.95f) {
+//			super.setTooltipForNextRenderPass(list, forcedTooltipPositioner, force);
+//		}
 //	}
 
 	@Override
@@ -351,7 +361,7 @@ public class ConvertScreen extends Screen {
 		lingeringScreen = this;
 		super.onClose();
 		if (inContainer) {
-			GLFW.glfwSetCursorPos(getMinecraft().getWindow().handle(), originalMousePos.x, originalMousePos.y);
+			GLFW.glfwSetCursorPos(minecraft.getWindow().handle(), originalMousePos.x, originalMousePos.y);
 		}
 	}
 
@@ -364,7 +374,7 @@ public class ConvertScreen extends Screen {
 		return false;
 	}
 
-	public static void extractLingering(GuiGraphicsExtractor pGuiGraphics) {
+	public static void extractLingering(GuiGraphicsExtractor graphics) {
 		if (lingeringScreen == null) {
 			return;
 		}
@@ -374,7 +384,7 @@ public class ConvertScreen extends Screen {
 			return;
 		}
 		lingeringScreen.extractRenderState(
-				pGuiGraphics,
+				graphics,
 				Integer.MAX_VALUE,
 				Integer.MAX_VALUE,
 				mc.getDeltaTracker().getGameTimeDeltaPartialTick(true));

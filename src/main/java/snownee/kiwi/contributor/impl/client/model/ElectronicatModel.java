@@ -9,10 +9,7 @@
 //import net.minecraft.client.model.geom.ModelPart;
 //import net.minecraft.client.player.AbstractClientPlayer;
 //import net.minecraft.world.entity.LivingEntity;
-//import net.neoforged.neoforge.api.distmarker.Dist;
-//import net.neoforged.neoforge.api.distmarker.OnlyIn;
 //
-//@OnlyIn(Dist.CLIENT)
 //public class ElectronicatModel<T extends LivingEntity> extends AgeableListModel<T> {
 //
 //	private static final Random RANDOM = new Random();

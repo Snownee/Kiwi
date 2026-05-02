@@ -41,7 +41,8 @@ public record DirectionalShape(VoxelShape[] shapes, String property) implements 
 			synchronized (shapes) {
 				shape = shapes[index];
 				if (shape == null) {
-					shapes[index] = shape = VoxelUtil.rotate(shapes[Direction.DOWN.get3DDataValue()], direction);
+					shape = VoxelUtil.rotate(shapes[Direction.DOWN.get3DDataValue()], direction);
+					shapes[index] = shape;
 				}
 			}
 		}

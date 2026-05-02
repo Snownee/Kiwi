@@ -7,6 +7,8 @@ import java.util.Optional;
 import java.util.function.IntConsumer;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.Nullable;
+
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.serialization.Codec;
@@ -15,7 +17,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.util.Util;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -25,7 +26,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.ClickEvent.Action;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
@@ -33,6 +33,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.Util;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
@@ -47,6 +48,7 @@ import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.item.ModItem;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.KUtil;
+import snownee.kiwi.util.client.SmartKey;
 
 public final class TooltipEvents {
 	public static final Identifier DISABLE_DEBUG_TOOLTIP = Kiwi.id("disable_debug_tooltip");
@@ -131,6 +133,7 @@ public final class TooltipEvents {
 									hoverText.getString()));
 				}
 			}
+			mc.debugEntries.toggleDebugOverlay();
 		}
 
 		if (KiwiClientConfig.hideDataComponentsTooltip) {
@@ -139,13 +142,13 @@ public final class TooltipEvents {
 		}
 		if (KiwiClientConfig.tagsTooltip) {
 			cache.maybeUpdateTags(itemStack);
-			boolean alt = snownee.kiwi.util.client.SmartKey.hasAltDown();
+			boolean alt = SmartKey.hasAltDown();
 			if (!holdAlt && alt) {
 				holdAltStart = millis;
 				showTagsBeforeAlt = cache.showTags;
 			} else if (holdAlt && !alt) {
 				if (cache.showTags && millis - holdAltStart < 500) {
-					cache.pageNow += snownee.kiwi.util.client.SmartKey.hasControlDown() ? -1 : 1;
+					cache.pageNow += SmartKey.hasControlDown() ? -1 : 1;
 					cache.needUpdatePreferredType = true;
 				}
 			}
@@ -168,7 +171,8 @@ public final class TooltipEvents {
 			if (KiwiClientConfig.debugTooltipMsg) {
 				MutableComponent clickHere = Component.translatable("tip.kiwi.click_here")
 						.withStyle($ -> $.withClickEvent(new ClickEvent.Custom(DISABLE_DEBUG_TOOLTIP, Optional.empty())));
-				mc.player.sendSystemMessage(Component.translatable("tip.kiwi.debug_tooltip", clickHere.withStyle(ChatFormatting.AQUA)));
+				mc.player.sendSystemMessage(
+						Component.translatable("tip.kiwi.debug_tooltip", clickHere.withStyle(ChatFormatting.AQUA)));
 				KiwiClientConfig.debugTooltipMsg = false;
 				KiwiConfigManager.getHandler(KiwiClientConfig.class).save();
 			}
@@ -183,7 +187,7 @@ public final class TooltipEvents {
 		private ItemStack itemStack = ItemStack.EMPTY;
 		private boolean showTags;
 		private long lastShowTags;
-		private String preferredType;
+		private @Nullable String preferredType;
 		public boolean needUpdatePreferredType;
 
 		public void maybeUpdateTags(ItemStack itemStack) {
@@ -196,7 +200,7 @@ public final class TooltipEvents {
 			pageTypes.clear();
 			pageNow = 0;
 			try {
-				addPages("item", itemStack.typeHolder().tags());
+				addPages("item", itemStack.tags());
 				Item item = itemStack.getItem();
 				Block block = Block.byItem(item);
 				if (block != Blocks.AIR) {
@@ -222,7 +226,7 @@ public final class TooltipEvents {
 		}
 
 		private static <T> Stream<TagKey<T>> getTags(Registry<T> registry, T object) {
-			return registry.wrapAsHolder(object).tags();
+			return registry.getResourceKey(object).flatMap(registry::get).stream().flatMap(Holder::tags);
 		}
 
 		public void addPages(String type, Stream<? extends TagKey<?>> stream) {
@@ -277,7 +281,7 @@ public final class TooltipEvents {
 				needUpdatePreferredType = false;
 				preferredType = pageTypes.get(pageNow);
 			}
-			boolean showTranslatedTags = KiwiClientConfig.showTranslatedTagsByDefault ^ snownee.kiwi.util.client.SmartKey.hasControlDown();
+			boolean showTranslatedTags = KiwiClientConfig.showTranslatedTagsByDefault ^ SmartKey.hasControlDown();
 			List<String> page = showTranslatedTags ? translatedPages.get(pageNow) : pages.get(pageNow);
 			for (String tag : page) {
 				sub.add(Component.literal(tag).withStyle(ChatFormatting.DARK_GRAY));

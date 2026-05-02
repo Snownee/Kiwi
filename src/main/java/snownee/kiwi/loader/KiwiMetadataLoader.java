@@ -6,6 +6,7 @@ import java.util.function.Function;
 
 import org.jspecify.annotations.Nullable;
 
+import net.neoforged.fml.ModList;
 import snownee.kiwi.build.KiwiMetadata;
 import snownee.kiwi.build.KiwiMetadataParser;
 
@@ -14,7 +15,7 @@ public record KiwiMetadataLoader(String modId) implements Function<KiwiMetadataP
 	@Override
 	public @Nullable KiwiMetadata apply(KiwiMetadataParser parser) {
 		String name = "/%s.kiwi.yaml".formatted(modId);
-		try (InputStream is = KiwiMetadataLoader.class.getResourceAsStream(name)) {
+		try (InputStream is = ModList.get().getModFileById(modId).getFile().getContents().openFile(name)) {
 			if (is == null) {
 				return null;
 			}

@@ -14,12 +14,12 @@ import snownee.kiwi.customization.placement.PlacementSystem;
 @Mixin(BlockItem.class)
 public class BlockItemPlaceBlockMixin {
 	@Inject(method = "placeBlock", at = @At("TAIL"))
-	private void kiwi$placeBlock(BlockPlaceContext pContext, BlockState pState, CallbackInfoReturnable<Boolean> cir) {
+	private void kiwi$placeBlock(BlockPlaceContext context, BlockState placementState, CallbackInfoReturnable<Boolean> cir) {
 		if (cir.getReturnValueZ()) {
 			try {
-				PlacementSystem.onBlockPlaced(pContext);
+				PlacementSystem.onBlockPlaced(context);
 			} catch (Throwable t) {
-				Kiwi.LOGGER.error("Failed to handle placement for %s".formatted(pState), t);
+				Kiwi.LOGGER.error("Failed to handle placement for %s".formatted(placementState), t);
 			}
 		}
 	}

@@ -3,6 +3,7 @@ package snownee.kiwi.config;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -45,13 +46,14 @@ public class ClothConfigIntegration {
 
 	private static final ConfigLibAttributes ATTRIBUTES = new ConfigLibAttributes(
 			"cloth-config",
-			namespace -> create(Minecraft.getInstance().screen, namespace),
+			namespace -> create(Objects.requireNonNull(Minecraft.getInstance().screen), namespace),
 			true,
 			false,
 			true);
 
+	@SuppressWarnings("unchecked")
 	@Nullable
-	public static Screen create(@Nullable Screen parent, String namespace) {
+	public static Screen create(Screen parent, String namespace) {
 		ConfigBuilder builder = ConfigBuilder.create();
 		ConfigEntryBuilder entryBuilder = builder.entryBuilder();
 		builder.setParentScreen(parent);

@@ -14,7 +14,6 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-
 import snownee.kiwi.customization.block.KBlockSettings;
 import snownee.kiwi.customization.block.loader.KBlockComponents;
 

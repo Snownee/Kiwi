@@ -1,4 +1,4 @@
 @NullMarked
-package snownee.kiwi.mixin.customization.fastsuite;
+package snownee.kiwi.customization.block.soundtype;
 
 import org.jspecify.annotations.NullMarked;

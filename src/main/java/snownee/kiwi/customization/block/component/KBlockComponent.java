@@ -1,7 +1,5 @@
 package snownee.kiwi.customization.block.component;
 
-import net.minecraft.world.level.LevelReader;
-
 import org.jspecify.annotations.Nullable;
 
 import com.mojang.serialization.Codec;
@@ -10,6 +8,7 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;

@@ -18,8 +18,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
@@ -69,13 +69,12 @@ import snownee.kiwi.customization.block.family.BlockFamilies;
 import snownee.kiwi.customization.block.loader.KBlockTemplate;
 import snownee.kiwi.customization.block.soundtype.DeferredSoundType;
 import snownee.kiwi.customization.block.soundtype.SoundTypes;
-import snownee.kiwi.customization.block.tier.KiwiTiers;
-import snownee.kiwi.customization.block.tier.SimpleTier;
 import snownee.kiwi.customization.builder.BuilderRule;
 import snownee.kiwi.customization.builder.BuilderRules;
 import snownee.kiwi.customization.item.ItemFundamentals;
 import snownee.kiwi.customization.item.loader.KCreativeTab;
 import snownee.kiwi.customization.item.loader.KItemTemplate;
+import snownee.kiwi.customization.item.toolmaterial.ToolMaterials;
 import snownee.kiwi.customization.placement.PlacementSystem;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.ClientProxy;
@@ -244,8 +243,9 @@ public final class CustomizationHooks {
 		CustomizationMetadata.sortedForEach(
 				metadataMap, "block", blockFundamentals.blocks(), (id, definition) -> {
 					try {
-						Block block = definition.createBlock(id, blockFundamentals.shapes());
-						Registry.register(BuiltInRegistries.BLOCK, id, block);
+						ResourceKey<Block> key = ResourceKey.create(Registries.BLOCK, id);
+						Block block = definition.createBlock(key, blockFundamentals.shapes());
+						Registry.register(BuiltInRegistries.BLOCK, key, block);
 						blockFundamentals.slotProviders().attachSlotsA(block, definition);
 						blockFundamentals.placeChoices().attachChoicesA(block, definition);
 						blockIds.add(id);
@@ -254,11 +254,10 @@ public final class CustomizationHooks {
 					}
 				});
 
-
-		KiwiTiers.refreshWithValues(OneTimeLoader.load(
+		ToolMaterials.refreshWithValues(OneTimeLoader.load(
 				resourceManager,
 				"kiwi/tier",
-				SimpleTier.DIRECT_CODEC.codec(),
+				ToolMaterials.DIRECT_CODEC.codec(),
 				context));
 
 		ItemFundamentals itemFundamentals = ItemFundamentals.reload(resourceManager, context, true);
@@ -275,8 +274,9 @@ public final class CustomizationHooks {
 						if (definition.template().template() == none) {
 							return;
 						}
-						Item item = definition.createItem(id);
-						Registry.register(BuiltInRegistries.ITEM, id, item);
+						ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, id);
+						Item item = definition.createItem(key);
+						Registry.register(BuiltInRegistries.ITEM, key, item);
 					} catch (Exception e) {
 						Kiwi.LOGGER.error("Failed to create item %s".formatted(id), e);
 					}
@@ -360,7 +360,7 @@ public final class CustomizationHooks {
 				CustomizationServiceFinder.PACK_DIRECTORY,
 				PackType.CLIENT_RESOURCES,
 				PackSource.BUILT_IN,
-				new DirectoryValidator($ -> true));
+				new DirectoryValidator(_ -> true));
 		PackRepository packRepository = new PackRepository(folderRepositorySource);
 		Map<IModFile, Pack.ResourcesSupplier> kiwiPacks = new HashMap<>();
 		for (var modFileInfo : ModList.get().getModFiles()) {

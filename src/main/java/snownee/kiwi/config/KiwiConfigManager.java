@@ -11,7 +11,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import net.minecraft.resources.Identifier;
-import snownee.kiwi.Kiwi;
 import snownee.kiwi.config.ConfigHandler.Value;
 import snownee.kiwi.config.KiwiConfig.ConfigType;
 
@@ -23,10 +22,13 @@ public class KiwiConfigManager {
 
 	public static synchronized void register(ConfigHandler configHandler) {
 		allConfigs.add(configHandler);
-		clazz2Configs.put(configHandler.getClazz(), configHandler);
+		Class<?> clazz = configHandler.getClazz();
+		if (clazz != null) {
+			clazz2Configs.put(clazz, configHandler);
+		}
 	}
 
-	public static void init() {
+	public static void init(Map<Identifier, Boolean> moduleOptions) {
 		allConfigs.sort(Comparator.comparing(ConfigHandler::getFileName));
 		Set<String> settledMods = Sets.newHashSet();
 		for (ConfigHandler config : allConfigs) {
@@ -39,21 +41,21 @@ public class KiwiConfigManager {
 			//				settledMods.add(config.getModId());
 			//				config.setHasModules(true);
 			//			}
-			config.init();
+			config.init(moduleOptions);
 		}
-		for (Identifier rl : Kiwi.getDefaultOptions().keySet()) {
+		for (Identifier rl : moduleOptions.keySet()) {
 			if (settledMods.contains(rl.getNamespace())) {
 				continue;
 			}
 			settledMods.add(rl.getNamespace());
 			ConfigHandler config = new ConfigHandler(rl.getNamespace(), rl.getNamespace() + "-modules", ConfigType.COMMON, null, true);
-			config.init();
+			config.init(moduleOptions);
 		}
 	}
 
-	public static void defineModules(String modId, ConfigHandler builder, boolean subcategory) {
+	public static void defineModules(String modId, ConfigHandler builder, Map<Identifier, Boolean> moduleOptions, boolean subcategory) {
 		String prefix = subcategory ? "modules." : "";
-		for (Entry<Identifier, Boolean> entry : Kiwi.getDefaultOptions().entrySet()) {
+		for (Entry<Identifier, Boolean> entry : moduleOptions.entrySet()) {
 			Identifier rl = entry.getKey();
 			if (rl.getNamespace().equals(modId)) {
 				Value<Boolean> value = builder.define(

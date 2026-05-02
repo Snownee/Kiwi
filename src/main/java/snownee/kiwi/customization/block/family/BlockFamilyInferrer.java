@@ -12,8 +12,8 @@ import com.google.common.collect.Sets;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.DyeColor;
@@ -113,7 +113,7 @@ public class BlockFamilyInferrer {
 				capturedBlocks.add(block);
 				continue;
 			}
-//			Kiwi.LOGGER.info(holder.unwrapKey().orElseThrow().location().toString());
+//			Kiwi.LOGGER.info(holder.unwrapKey().orElseThrow().identifier().toString());
 			Identifier key = holder.unwrapKey().orElseThrow().identifier();
 			String path = key.getPath();
 			boolean captured = false;
@@ -228,7 +228,7 @@ public class BlockFamilyInferrer {
 				false,
 				blockKeys,
 				List.of(),
-				List.of(),
+				Optional.empty(),
 				false,
 				Optional.empty(),
 				1,

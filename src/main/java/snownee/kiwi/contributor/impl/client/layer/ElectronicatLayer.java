@@ -1,4 +1,4 @@
-package snownee.kiwi.contributor.impl.client.layer;//package snownee.kiwi.contributor.impl.client.layer;
+//package snownee.kiwi.contributor.impl.client.layer;
 //
 //import com.mojang.blaze3d.vertex.PoseStack;
 //import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -14,13 +14,10 @@ package snownee.kiwi.contributor.impl.client.layer;//package snownee.kiwi.contri
 //import net.minecraft.util.Mth;
 //import net.minecraft.world.entity.EquipmentSlot;
 //import net.minecraft.world.item.ItemStack;
-//import net.minecraftforge.api.distmarker.Dist;
-//import net.minecraftforge.api.distmarker.OnlyIn;
 //import snownee.kiwi.Kiwi;
 //import snownee.kiwi.contributor.client.RewardLayer;
 //import snownee.kiwi.contributor.impl.client.model.ElectronicatModel;
 //
-//@Environment(EnvType.CLIENT)
 //public class ElectronicatLayer extends CosmeticLayer {
 //	private static final Identifier TEXTURE = new Identifier(Kiwi.MODID, "textures/reward/electronicat.png");
 //	private final ElectronicatModel<AbstractClientPlayer> model;

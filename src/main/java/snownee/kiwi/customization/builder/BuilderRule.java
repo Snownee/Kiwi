@@ -18,7 +18,7 @@ import snownee.kiwi.customization.CustomizationRegistries;
 
 public interface BuilderRule {
 	Codec<BuilderRule> CODEC = Codec.lazyInitialized(() -> CustomizationRegistries.BUILDER_RULE.byNameCodec()
-			.dispatch(BuilderRule::type, BuilderRule.Type::codec));
+			.dispatch(BuilderRule::type, Type::codec));
 
 	Type<?> type();
 

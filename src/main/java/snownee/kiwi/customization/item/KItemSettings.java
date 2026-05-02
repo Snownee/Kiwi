@@ -2,6 +2,8 @@ package snownee.kiwi.customization.item;
 
 import java.util.function.Consumer;
 
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
 
 public class KItemSettings {
@@ -9,12 +11,12 @@ public class KItemSettings {
 	private KItemSettings(Builder builder) {
 	}
 
-	public static KItemSettings empty() {
-		return new KItemSettings(builder());
+	public static KItemSettings defaulted(Item item) {
+		return new KItemSettings(builder(BuiltInRegistries.ITEM.getResourceKey(item).orElseThrow()));
 	}
 
-	public static Builder builder() {
-		return new Builder(new Item.Properties());
+	public static Builder builder(ResourceKey<Item> key) {
+		return new Builder(new Item.Properties().setId(key));
 	}
 
 	public static class Builder {

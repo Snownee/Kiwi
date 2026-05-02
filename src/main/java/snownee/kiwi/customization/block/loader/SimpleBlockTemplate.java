@@ -1,7 +1,10 @@
 package snownee.kiwi.customization.block.loader;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+
+import org.jspecify.annotations.Nullable;
 
 import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
@@ -9,6 +12,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import snownee.kiwi.customization.block.BlockFundamentals;
@@ -17,7 +21,7 @@ import snownee.kiwi.util.resource.OneTimeLoader;
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public final class SimpleBlockTemplate extends KBlockTemplate {
 	private final String clazz;
-	private Function<BlockBehaviour.Properties, Block> constructor;
+	private @Nullable Function<BlockBehaviour.Properties, Block> constructor;
 
 	public SimpleBlockTemplate(Optional<BlockDefinitionProperties> properties, String clazz) {
 		super(properties);
@@ -57,8 +61,8 @@ public final class SimpleBlockTemplate extends KBlockTemplate {
 	}
 
 	@Override
-	public Block createBlock(Identifier id, BlockBehaviour.Properties settings, JsonObject input) {
-		return this.constructor.apply(settings);
+	public Block createBlock(ResourceKey<Block> key, BlockBehaviour.Properties settings, JsonObject input) {
+		return Objects.requireNonNull(this.constructor).apply(settings);
 	}
 
 	public String clazz() {

@@ -7,8 +7,8 @@ import com.mojang.math.Axis;
 
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.player.PlayerModel;
-import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -20,25 +20,34 @@ import snownee.kiwi.contributor.impl.client.model.PlanetModel;
 public class PlanetLayer extends CosmeticLayer {
 	private static final Identifier TEXTURE = Kiwi.id("textures/reward/planet.png");
 	private static final Supplier<LayerDefinition> definition = Suppliers.memoize(PlanetModel::create);
-	private final PlanetModel modelPlanet;
+	private final PlanetModel<AvatarRenderState> modelPlanet;
 
 	public PlanetLayer(RenderLayerParent<AvatarRenderState, PlayerModel> entityRendererIn) {
 		super(entityRendererIn);
-		modelPlanet = new PlanetModel(definition.get());
+		modelPlanet = new PlanetModel<>(definition.get().bakeRoot());
 	}
 
 	@Override
-	public void submit(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
-		if (state.isInvisible) {
-			return;
-		}
+	public void submit(
+			PoseStack poseStack,
+			SubmitNodeCollector submitNodeCollector,
+			int lightCoords,
+			AvatarRenderState renderState,
+			float yRot,
+			float xRot) {
 		poseStack.pushPose();
-		poseStack.translate(0, -0.6, 0);
-		poseStack.mulPose(Axis.YP.rotationDegrees(-state.ageInTicks));
-		poseStack.scale(1.2f, 1.2f, 1.2f);
-		modelPlanet.setupAnim(state);
-		submitNodeCollector.submitModel(modelPlanet, state, poseStack, RenderTypes.entityTranslucent(TEXTURE), lightCoords, OverlayTexture.NO_OVERLAY, state.outlineColor, null);
+		poseStack.mulPose(Axis.YP.rotationDegrees(-renderState.ageInTicks));
+		poseStack.scale(0.7f, 0.7f, 0.7f);
+		submitNodeCollector.submitModel(
+				modelPlanet,
+				renderState,
+				poseStack,
+				RenderTypes.entityTranslucent(TEXTURE),
+				lightCoords,
+				OverlayTexture.NO_OVERLAY,
+				renderState.outlineColor,
+				null
+		);
 		poseStack.popPose();
 	}
-
 }
