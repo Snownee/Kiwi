@@ -1,6 +1,5 @@
 package snownee.kiwi;
 
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
@@ -13,11 +12,6 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.jspecify.annotations.Nullable;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.AnnotationNode;
-import org.objectweb.asm.tree.ClassNode;
 import org.slf4j.Logger;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
@@ -101,7 +95,6 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProc
 import net.minecraft.world.level.levelgen.structure.templatesystem.rule.blockentity.RuleBlockEntityModifierType;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.saveddata.maps.MapDecorationType;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.ModLoader;
@@ -153,34 +146,6 @@ public class Kiwi {
 
 	public static Identifier id(String path) {
 		return Identifier.fromNamespaceAndPath(ID, path);
-	}
-
-	private static boolean shouldLoad(KiwiAnnotationData annotationData, String dist) {
-		try {
-			String target = annotationData.getTarget();
-			if (Platform.isProduction() && target.startsWith("snownee.kiwi.test.")) {
-				return false;
-			}
-			ClassNode clazz = new ClassNode(Opcodes.ASM7);
-			InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(
-					target.replace('.', '/') + ".class");
-			final ClassReader classReader = new ClassReader(is);
-			classReader.accept(clazz, 0);
-			if (clazz.visibleAnnotations != null) {
-				final String ONLYIN = Type.getDescriptor(OnlyIn.class);
-				for (AnnotationNode node : clazz.visibleAnnotations) {
-					if (node.values != null && ONLYIN.equals(node.desc)) {
-						int i = node.values.indexOf("value");
-						if (i != -1 && !node.values.get(i + 1).equals(dist)) {
-							return false;
-						}
-					}
-				}
-			}
-			return true;
-		} catch (Throwable e) {
-			return false;
-		}
 	}
 
 	public static void registerRegistry(ResourceKey<? extends Registry<?>> registry, Class<?> baseClass) {
@@ -324,24 +289,15 @@ public class Kiwi {
 				enableDataModule();
 			}
 			for (KiwiAnnotationData module : metadata.get("modules")) {
-				if (shouldLoad(module, dist)) {
-					moduleData.put(mod, module);
-				}
+				moduleData.put(mod, module);
 			}
 			for (KiwiAnnotationData optional : metadata.get("optionals")) {
-				if (shouldLoad(optional, dist)) {
-					classOptionalMap.put(optional.getTarget(), optional);
-				}
+				classOptionalMap.put(optional.getTarget(), optional);
 			}
 			for (KiwiAnnotationData condition : metadata.get("conditions")) {
-				if (shouldLoad(condition, dist)) {
-					conditions.put(condition, mod);
-				}
+				conditions.put(condition, mod);
 			}
 			for (KiwiAnnotationData config : metadata.get("configs")) {
-				if (!shouldLoad(config, dist)) {
-					continue;
-				}
 				ConfigType type = null;
 				try {
 					type = ConfigType.valueOf((String) config.getData().get("type"));
@@ -363,13 +319,11 @@ public class Kiwi {
 				}
 			}
 			for (KiwiAnnotationData packet : metadata.get("packets")) {
-				if (shouldLoad(packet, dist)) {
-					KNetworking.processClass(packet, modEventBus);
-				}
+				KNetworking.processClass(packet, modEventBus);
 			}
 		}
 
-		LOGGER.info(MARKER, "Processing " + moduleData.size() + " KiwiModule annotations");
+		LOGGER.info(MARKER, "Processing {} KiwiModule annotations", moduleData.size());
 
 		for (Entry<String, KiwiAnnotationData> entry : moduleData.entries()) {
 			KiwiAnnotationData optional = classOptionalMap.get(entry.getValue().getTarget());

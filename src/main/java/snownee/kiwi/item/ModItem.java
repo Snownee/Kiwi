@@ -12,8 +12,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.client.SmartKey;
@@ -38,7 +36,6 @@ public class ModItem extends Item {
 		}
 	}
 
-	@OnlyIn(Dist.CLIENT)
 	public static void addTip(ItemStack stack, List<Component> tooltip, TooltipFlag flagIn) {
 		if (tooltip.isEmpty()) {
 			return;
