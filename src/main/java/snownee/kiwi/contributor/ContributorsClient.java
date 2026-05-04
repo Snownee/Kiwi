@@ -1,6 +1,5 @@
 package snownee.kiwi.contributor;
 
-import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -11,16 +10,9 @@ import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.entity.player.PlayerModelType;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
-import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.client.event.InputEvent;
-import net.neoforged.neoforge.common.NeoForge;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiClientConfig;
-import snownee.kiwi.ModContext;
 import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.contributor.client.CosmeticLayer;
@@ -31,6 +23,7 @@ import snownee.kiwi.contributor.impl.client.layer.SantaHatLayer;
 import snownee.kiwi.contributor.impl.client.layer.SunnyMilkLayer;
 import snownee.kiwi.contributor.network.CSetCosmeticPacket;
 import snownee.kiwi.contributor.network.SSyncCosmeticPacket;
+import snownee.kiwi.loader.ClientPlatform;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.network.KPacketSender;
 import snownee.kiwi.util.KUtil;
@@ -45,23 +38,7 @@ public class ContributorsClient extends AbstractModule {
 		registerRenderer("xmas", SantaHatLayer::new);
 		registerRenderer("sunny_milk", SunnyMilkLayer::new);
 
-		event.enqueueWork(() -> {
-			IEventBus eventBus = Objects.requireNonNull(ModContext.get(Kiwi.ID).modContainer.getEventBus());
-			eventBus.addListener((EntityRenderersEvent.AddLayers e) -> {
-				for (PlayerModelType skin : e.getSkins()) {
-					var renderer = e.getPlayerRenderer(skin);
-					if (renderer == null) continue;
-					var layer = new CosmeticLayer(renderer);
-					CosmeticLayer.ALL_LAYERS.put(skin, layer);
-					renderer.addLayer(layer);
-				}
-			});
-			NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingIn e) -> {
-				ContributorsClient.changeCosmetic();
-			});
-			NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingOut e) -> clear());
-			NeoForge.EVENT_BUS.addListener((InputEvent.Key e) -> onKeyInput(Minecraft.getInstance()));
-		});
+		ClientPlatform.registerContributorsListeners(event);
 	}
 
 	private static void registerRenderer(String id, Function<RenderLayerParent<AvatarRenderState, PlayerModel>, CosmeticLayer> creator) {
