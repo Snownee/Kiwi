@@ -318,12 +318,12 @@ public class ConvertScreen extends Screen {
 	}
 
 	@Override
-	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float deltaTick) {
 		Objects.requireNonNull(minecraft);
 		Matrix3x2fStack pose = graphics.pose();
 		layout().update();
 		Vector2i pos = layout().getAnchoredPos();
-		float openValue = openProgress.getValue(partialTick);
+		float openValue = openProgress.getValue(minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(true));
 		pose.pushMatrix();
 		pose.translate(pos.x, pos.y);
 		pose.scale(openValue);
@@ -338,7 +338,7 @@ public class ConvertScreen extends Screen {
 					bounds.getWidth() + 3,
 					bounds.getHeight() + 3);
 		}
-		super.extractRenderState(graphics, mouseX, mouseY, partialTick);
+		super.extractRenderState(graphics, mouseX, mouseY, deltaTick);
 		pose.popMatrix();
 	}
 

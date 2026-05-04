@@ -23,6 +23,7 @@ import snownee.kiwi.contributor.impl.client.layer.SantaHatLayer;
 import snownee.kiwi.contributor.impl.client.layer.SunnyMilkLayer;
 import snownee.kiwi.contributor.network.CSetCosmeticPacket;
 import snownee.kiwi.contributor.network.SSyncCosmeticPacket;
+import snownee.kiwi.loader.ClientPlatform;
 import snownee.kiwi.loader.event.InitEvent;
 import snownee.kiwi.network.KPacketSender;
 import snownee.kiwi.util.KUtil;
@@ -36,6 +37,8 @@ public class ContributorsClient extends AbstractModule {
 		registerRenderer("2020q4", FoxTailLayer::new);
 		registerRenderer("xmas", SantaHatLayer::new);
 		registerRenderer("sunny_milk", SunnyMilkLayer::new);
+
+		ClientPlatform.registerContributorsListeners(event);
 	}
 
 	private static void registerRenderer(String id, Function<RenderLayerParent<AvatarRenderState, PlayerModel>, CosmeticLayer> creator) {
