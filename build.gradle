@@ -293,7 +293,7 @@ publishMods {
     version = realVersion
 
     curseforge {
-        projectId = "549404"
+        projectId = "303657"
         accessToken = providers.environmentVariable("CURSE_TOKEN")
         minecraftVersions.add(minecraft_version)
         minecraftVersions.add("26.1.1")
