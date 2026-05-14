@@ -150,7 +150,15 @@ public class Kiwi {
 
 	private static boolean shouldLoad(KiwiAnnotationData annotationData) {
 		String target = annotationData.getTarget();
-		return !Platform.isProduction() || !target.startsWith("snownee.kiwi.test.");
+		boolean isTestTarget = target.startsWith("snownee.kiwi.test.");
+		if (isTestTarget) {
+			try {
+				Class.forName(annotationData.getTarget());
+			} catch (Throwable t) {
+				return false;
+			}
+		}
+		return !Platform.isProduction() || !isTestTarget;
 	}
 
 	public static void registerRegistry(ResourceKey<? extends Registry<?>> registry, Class<?> baseClass) {
@@ -419,8 +427,7 @@ public class Kiwi {
 						throw e;
 					}
 				}
-			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException |
-					 ClassNotFoundException e) {
+			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | ClassNotFoundException e) {
 				LOGGER.error(MARKER, "Failed to access to LoadingCondition: %s".formatted(k), e);
 			}
 		});
