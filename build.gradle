@@ -23,7 +23,7 @@ configurations {
     runtimeClasspath.extendsFrom shadowCommon
 }
 
-version = "${minecraft_version}-NeoForge-${mod_version}"
+version = "mc${minecraft_version}-NeoForge-${mod_version}"
 group = "snownee.kiwi" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 var realVersion = project.mod_version + '+neoforge'
 
@@ -113,7 +113,6 @@ def excludes = [
         "/assets/kaleidos",
         "/assets/kswitch",
         "/assets/test",
-        "/snownee/${project.mod_id}/datagen/KiwiDataGen.class",
         "/snownee/${project.mod_id}/test",
         "/data",
         "/.cache",
