@@ -18,6 +18,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BedBlock;
@@ -100,10 +101,6 @@ public class SitManager {
 			return false;
 		}
 		if (!level.isClientSide) {
-			Display.BlockDisplay display = new Display.BlockDisplay(EntityType.BLOCK_DISPLAY, level);
-			display.setCustomName(ENTITY_NAME);
-//			display.setInvisible(true);
-			display.setBlockState(blockState);
 			VoxelShape shape = blockState.getShape(level, pos, CollisionContext.of(player));
 			Vec3 seatPos = null;
 			Direction facing = guessBlockFacing(blockState, player);
@@ -123,6 +120,27 @@ public class SitManager {
 					seatPos = hit.getLocation();
 				}
 			}
+			if (seatPos == null) {
+				seatPos = Vec3.atCenterOf(pos);
+			}
+			double clampedY = Mth.clamp(seatPos.y, pos.getY(), pos.getY() + 0.999);
+			seatPos = new Vec3(seatPos.x, clampedY - VERTICAL_OFFSET, seatPos.z);
+			AABB safeAabb = player.getDimensions(Pose.SITTING).makeBoundingBox(seatPos);
+			safeAabb = new AABB(
+					safeAabb.minX,
+					safeAabb.minY + safeAabb.getYsize() * 0.5,
+					safeAabb.minZ,
+					safeAabb.maxX,
+					safeAabb.maxY,
+					safeAabb.maxZ);
+			if (!level.noCollision(safeAabb)) {
+				return false;
+			}
+
+			Display.BlockDisplay display = new Display.BlockDisplay(EntityType.BLOCK_DISPLAY, level);
+			display.setCustomName(ENTITY_NAME);
+//			display.setInvisible(true);
+			display.setBlockState(blockState);
 			if (facing == null) {
 				display.setYRot(player.getYRot());
 			} else {
@@ -130,11 +148,8 @@ public class SitManager {
 				display.setYRot(yRot);
 				display.setNoGravity(true); //hacky way to tell the client that this block has facing
 			}
-			if (seatPos == null) {
-				seatPos = Vec3.atCenterOf(pos);
-			}
-			double clampedY = Mth.clamp(seatPos.y, pos.getY(), pos.getY() + 0.999);
-			display.setPos(seatPos.x, clampedY - VERTICAL_OFFSET, seatPos.z);
+			display.setPos(seatPos);
+
 			Entity rider = player;
 			if (KSitCommonConfig.makeLeashedMobSit) {
 				List<Mob> list = leashableInArea(
