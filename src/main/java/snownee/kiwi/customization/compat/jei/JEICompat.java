@@ -8,7 +8,7 @@ import me.shedaniel.rei.plugincompatibilities.api.REIPluginCompatIgnore;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
-import mezz.jei.api.recipe.RecipeType;
+import mezz.jei.api.recipe.types.IRecipeType;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.resources.Identifier;
@@ -25,7 +25,7 @@ import snownee.kiwi.util.KHolder;
 @REIPluginCompatIgnore
 public class JEICompat implements IModPlugin {
 	public static final Identifier ID = Kiwi.id("customization");
-	public static final RecipeType<KSwitchGroupRecipe> KSWITCH = RecipeType.create(Kiwi.ID, "kswitch", KSwitchGroupRecipe.class);
+	public static final IRecipeType<KSwitchGroupRecipe> KSWITCH = IRecipeType.create(Kiwi.id("kswitch"), KSwitchGroupRecipe.class);
 
 	@Override
 	public Identifier getPluginUid() {
