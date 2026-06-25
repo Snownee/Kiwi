@@ -216,6 +216,9 @@ public final class KiwiModuleContainer {
 				if (builder == null) {
 					builder = new Item.Properties();
 				}
+				if (builder.id == null) {
+					builder.setId(ResourceKey.create(Registries.ITEM, e.key()));
+				}
 				BlockItem item;
 				if (e.get() instanceof IKiwiBlock kiwiBlock) {
 					item = kiwiBlock.createItem(builder);
