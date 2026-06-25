@@ -15,5 +15,19 @@ credits = "3TUSK, SettingDust"
 [[mixins]]
 config = "kiwi.mixins.json"
 
+[[dependencies.kiwi]]
+modId = "neoforge"
+type = "required"
+versionRange = "[26.1.2.71,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.kiwi]]
+modId = "minecraft"
+type = "required"
+versionRange = "[26.1.2,26.2)"
+ordering = "NONE"
+side = "BOTH"
+
 [modproperties.kiwi]
 catalogueItemIcon = "minecraft:bookshelf" #Support for Catalogue mod
