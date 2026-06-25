@@ -42,14 +42,13 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.neoforge.client.loading.ClientModLoader;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.event.AddPackFindersEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.level.block.BreakBlockEvent;
 import net.neoforged.neoforge.registries.NewRegistryEvent;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import net.neoforged.neoforge.registries.RegistryBuilder;
@@ -88,9 +87,6 @@ public final class CustomizationHooks {
 	private static boolean enabled = true;
 	public static boolean kswitch = Platform.isModLoaded("kswitch") || !Platform.isProduction();
 	private static @Nullable GlassType clearGlassType;
-
-	private CustomizationHooks() {
-	}
 
 	// a custom implementation of the Block.shouldRenderFace
 	private static final int CACHE_SIZE = 512;
@@ -176,16 +172,14 @@ public final class CustomizationHooks {
 			CustomizationRegistries.BUILDER_RULE = event.create(new RegistryBuilder<>(CustomizationRegistries.BUILDER_RULE_KEY));
 			Kiwi.registerRegistry(CustomizationRegistries.BUILDER_RULE_KEY, BuilderRule.Type.class);
 		});
-		modEventBus.addListener((AddPackFindersEvent event) -> {
-			event.addRepositorySource(new RequiredFolderRepositorySource(
+		modEventBus.addListener((AddPackFindersEvent event) -> event.addRepositorySource(new RequiredFolderRepositorySource(
 					CustomizationServiceFinder.PACK_DIRECTORY,
 					event.getPackType(),
 					PackSource.BUILT_IN,
 					new DirectoryValidator($ -> true)
 					// For Snownee: this validates content path. For now, it accepts everything, but you can do something with it later.
-			));
-		});
-		forgeEventBus.addListener((BlockEvent.BreakEvent event) -> {
+			)));
+		forgeEventBus.addListener((BreakBlockEvent event) -> {
 			if (PlacementSystem.isDebugEnabled(event.getPlayer())) {
 				PlacementSystem.removeDebugBlocks(event.getPlayer().level(), event.getPos());
 			}
@@ -207,12 +201,11 @@ public final class CustomizationHooks {
 				event.setCanceled(true);
 			}
 		});
-		forgeEventBus.addListener((TagsUpdatedEvent event) -> {
-			if (event.getUpdateCause() == TagsUpdatedEvent.UpdateCause.SERVER_DATA_LOAD && Platform.isPhysicalClient()) {
-				return;
-			}
-			BlockFamilies.reloadTags();
-		});
+		if (Platform.isPhysicalClient()) {
+			forgeEventBus.addListener((TagsUpdatedEvent.ClientPacketReceived event) -> BlockFamilies.reloadTags());
+		} else {
+			forgeEventBus.addListener((TagsUpdatedEvent.ServerDataLoad event) -> BlockFamilies.reloadTags());
+		}
 
 		if (Platform.isPhysicalClient()) {
 			CustomizationClient.init(modEventBus);
@@ -288,7 +281,7 @@ public final class CustomizationHooks {
 			CustomizationClient.afterRegister(
 					itemFundamentals.items(),
 					blockFundamentals.blocks(),
-					new ClientProxy.Context(ClientModLoader.isLoading(), modEventBus));
+					new ClientProxy.Context(true, modEventBus));
 		}
 		var tabs = OneTimeLoader.load(resourceManager, "kiwi/creative_tab", KCreativeTab.CODEC, context);
 		List<Map.Entry<Identifier, KCreativeTab>> newTabs = tabs.entrySet().stream().sorted(Comparator.comparingInt($ -> $.getValue()

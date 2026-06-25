@@ -30,6 +30,12 @@ var realVersion = project.mod_version + '+neoforge'
 java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 
+tasks.withType(JavaExec).configureEach {
+    executable = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.get().executablePath.asFile.absolutePath
+}
+
 if (System.getenv().BUILD_NUMBER != null) {
     // Maven version scheme uses dot to separate things
     version += ".${System.getenv().BUILD_NUMBER}"
