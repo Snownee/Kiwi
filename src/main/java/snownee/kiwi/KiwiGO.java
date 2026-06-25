@@ -27,10 +27,8 @@ public class KiwiGO<T> implements Supplier<T> {
 	protected ResourceKey<T> key;
 	@Nullable
 	protected T value;
-	@Nullable
-	Field field;
-	@Nullable
-	GroupSetting groupSetting;
+	@Nullable Field field;
+	@Nullable GroupSetting groupSetting;
 
 	public KiwiGO(@Nullable Supplier<T> factory) {
 		this.factory = factory;
@@ -148,14 +146,15 @@ public class KiwiGO<T> implements Supplier<T> {
 		return registry.get(key);
 	}
 
+	public Holder<T> holderOrThrow() {
+		return holder().orElseThrow(() -> new IllegalStateException("Cannot find holder for " + this));
+	}
+
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this)
-				.append("key", key)
-				.append("value", value)
-				.append("field", field)
-				.append("groupSetting", groupSetting)
-				.toString();
+		return new ToStringBuilder(this).append("key", key).append("value", value).append("field", field).append(
+				"groupSetting",
+				groupSetting).toString();
 	}
 
 	public static class RegistrySpecified<T> extends KiwiGO<T> {
