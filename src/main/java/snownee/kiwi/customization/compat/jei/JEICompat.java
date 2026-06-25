@@ -25,7 +25,7 @@ import snownee.kiwi.util.KHolder;
 @REIPluginCompatIgnore
 public class JEICompat implements IModPlugin {
 	public static final Identifier ID = Kiwi.id("customization");
-	public static final IRecipeType<KSwitchGroupRecipe> KSWITCH = IRecipeType.create(Kiwi.ID, "kswitch", KSwitchGroupRecipe.class);
+	public static final IRecipeType<KSwitchGroupRecipe> KSWITCH = IRecipeType.create(Kiwi.id("kswitch"), KSwitchGroupRecipe.class);
 
 	@Override
 	public Identifier getPluginUid() {
