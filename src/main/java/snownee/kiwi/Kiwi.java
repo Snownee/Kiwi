@@ -166,8 +166,15 @@ public class Kiwi {
 		registryLookup.registries.put(baseClass, registry);
 	}
 
+	public static void registerInstantRegistry(ResourceKey<? extends Registry<?>> registry) {
+		Objects.requireNonNull(registryLookup);
+		registryLookup.instantRegistries.add(registry);
+	}
+
 	//	@SuppressWarnings("rawtypes")
 	private static void registerRegistries() {
+		registerInstantRegistry(Registries.MOB_EFFECT);
+
 		registerRegistry(Registries.ACTIVITY, Activity.class);
 		registerRegistry(Registries.ATTRIBUTE, Attribute.class);
 		registerRegistry(Registries.BLOCK_ENTITY_TYPE, BlockEntityType.class);
