@@ -22,6 +22,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
+import snownee.kiwi.KiwiCommonConfig;
 import snownee.kiwi.util.KHolder;
 
 public class StonecutterRecipeMaker {
@@ -86,6 +87,12 @@ public class StonecutterRecipeMaker {
 	}
 
 	public static List<StonecutterRecipe> makeRecipes(String type, KHolder<BlockFamily> family) {
+		List<String> denylist = KiwiCommonConfig.disableStonecuttingNamespaces;
+		if (!denylist.isEmpty()) {
+			if (denylist.contains("*") || denylist.contains(family.key().getNamespace())) {
+				return List.of();
+			}
+		}
 		Ingredient input = switch (type) {
 			case "exchange" -> family.value().ingredient();
 			case "exchange_in_viewer" -> family.value().ingredientInViewer();
