@@ -2,13 +2,16 @@ package snownee.kiwi;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang3.ClassUtils;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -17,8 +20,9 @@ public class RegistryLookup {
 
 	public final Map<Class<?>, ResourceKey<? extends Registry<?>>> registries = Maps.newConcurrentMap();
 	public final Cache<Class<?>, Optional<ResourceKey<? extends Registry<?>>>> cache = CacheBuilder.newBuilder().build();
+	public final Set<ResourceKey<? extends Registry<?>>> instantRegistries = Sets.newConcurrentHashSet();
 
-	public ResourceKey<? extends Registry<?>> findRegistry(Object o) {
+	public @Nullable ResourceKey<? extends Registry<?>> findRegistry(Object o) {
 		try {
 			return cache.get(o.getClass(), () -> {
 				{
