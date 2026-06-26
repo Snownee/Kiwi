@@ -17,10 +17,11 @@ import snownee.kiwi.util.resource.OneTimeLoader;
 public abstract class KItemTemplate {
 
 	public static Codec<KItemTemplate> codec() {
-		return CustomizationRegistries.ITEM_TEMPLATE.byNameCodec().dispatch(
-				"type",
-				KItemTemplate::type,
-				type -> type.codec().get());
+		return CustomizationRegistries.ITEM_TEMPLATE.byNameCodec()
+				.optionalFieldOf("type", KItemTemplates.BUILT_IN.getOrCreate())
+				.dispatch(
+						KItemTemplate::type,
+						type -> type.codec().get());
 	}
 
 	protected final Optional<ItemDefinitionProperties> properties;

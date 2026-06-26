@@ -1,4 +1,2 @@
-type: simple
-class: net.minecraft.world.level.block.FenceBlock
 properties:
   copy: oak_fence

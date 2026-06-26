@@ -19,10 +19,11 @@ import snownee.kiwi.util.resource.OneTimeLoader;
 public abstract class KBlockTemplate {
 
 	public static Codec<KBlockTemplate> codec(BlockFundamentals.CodecCreationContext context) {
-		return CustomizationRegistries.BLOCK_TEMPLATE.byNameCodec().dispatch(
-				"type",
-				KBlockTemplate::type,
-				type -> type.codec().apply(context));
+		return CustomizationRegistries.BLOCK_TEMPLATE.byNameCodec()
+				.optionalFieldOf("type", KBlockTemplates.BUILT_IN.getOrCreate())
+				.dispatch(
+						KBlockTemplate::type,
+						type -> type.codec().apply(context));
 	}
 
 	protected final Optional<BlockDefinitionProperties> properties;
