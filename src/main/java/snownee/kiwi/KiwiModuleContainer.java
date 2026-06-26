@@ -219,6 +219,7 @@ public final class KiwiModuleContainer {
 				if (builder.id == null) {
 					builder.setId(ResourceKey.create(Registries.ITEM, e.key()));
 				}
+				builder.useBlockDescriptionPrefix();
 				BlockItem item;
 				if (e.get() instanceof IKiwiBlock kiwiBlock) {
 					item = kiwiBlock.createItem(builder);
