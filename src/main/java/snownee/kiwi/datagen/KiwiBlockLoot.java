@@ -15,14 +15,17 @@ import com.google.common.collect.Sets;
 import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootSubProvider;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootTable;
 import snownee.kiwi.KiwiModuleContainer;
 import snownee.kiwi.KiwiModules;
+import snownee.kiwi.util.GameObjectLookup;
 
 public abstract class KiwiBlockLoot extends FabricBlockLootSubProvider {
+	protected final FabricPackOutput output;
 	protected final Identifier moduleId;
 	private final List<Block> knownBlocks;
 	private final Map<Class<?>, Function<Block, LootTable.Builder>> handlers = Maps.newIdentityHashMap();
@@ -31,9 +34,10 @@ public abstract class KiwiBlockLoot extends FabricBlockLootSubProvider {
 
 	protected KiwiBlockLoot(
 			Identifier moduleId,
-			FabricPackOutput dataOutput,
+			FabricPackOutput output,
 			CompletableFuture<HolderLookup.Provider> registryLookup) {
-		super(dataOutput, registryLookup);
+		super(output, registryLookup);
+		this.output = output;
 		this.moduleId = moduleId;
 		KiwiModuleContainer container = Objects.requireNonNull(KiwiModules.get(moduleId));
 		knownBlocks = container.getRegistries(Registries.BLOCK);
@@ -50,6 +54,14 @@ public abstract class KiwiBlockLoot extends FabricBlockLootSubProvider {
 
 	@Override
 	public void generate() {
+		if (output.isStrictValidationEnabled()) {
+			Set<Block> blocks = Set.copyOf(knownBlocks);
+			GameObjectLookup.all(BuiltInRegistries.BLOCK, output.getModId()).forEach(block -> {
+				if (!blocks.contains(block)) {
+					excludeFromStrictValidation(block);
+				}
+			});
+		}
 		addTables();
 		for (Block block : knownBlocks) {
 			if (added.contains(block)) {
