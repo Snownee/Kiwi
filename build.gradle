@@ -330,16 +330,16 @@ unifiedPublishing {
 
         mainPublication tasks.shadowJar // Declares the publicated jar
 
-        if (System.getenv("CURSE_TOKEN") != null) {
-            curseforge {
-                token = System.getenv("CURSE_TOKEN")
-                id = "303657" // Required, must be a string, ID of CurseForge project
-
-                relations { // Optional, Inferred from the relations above by default
-                    optional "cloth-config"
-                }
-            }
-        }
+//        if (System.getenv("CURSE_TOKEN") != null) {
+//            curseforge {
+//                token = System.getenv("CURSE_TOKEN")
+//                id = "303657" // Required, must be a string, ID of CurseForge project
+//
+//                relations { // Optional, Inferred from the relations above by default
+//                    optional "cloth-config"
+//                }
+//            }
+//        }
 
         if (System.getenv("MODRINTH_TOKEN") != null) {
             modrinth {
