@@ -11,6 +11,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ColorRGBA;
@@ -23,6 +24,8 @@ import net.minecraft.world.level.block.FenceGateBlock;
 import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.StandingSignBlock;
+import net.minecraft.world.level.block.TintedParticleLeavesBlock;
+import net.minecraft.world.level.block.UntintedParticleLeavesBlock;
 import net.minecraft.world.level.block.WallHangingSignBlock;
 import net.minecraft.world.level.block.WallSignBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -85,6 +88,17 @@ public class BlockCodecs {
 		register("wall_hanging_sign", woodTyped(WallHangingSignBlock::new));
 		register("ceiling_hanging_sign", woodTyped(CeilingHangingSignBlock::new));
 		register("sapling", SAPLING);
+		register(
+				"tinted_particle_leaves", RecordCodecBuilder.<TintedParticleLeavesBlock>mapCodec(instance -> instance.group(
+						Codec.FLOAT.optionalFieldOf("leaf_particle_chance", 0.01F).forGetter(BlockCodecs::notImplemented),
+						Block.propertiesCodec()
+				).apply(instance, TintedParticleLeavesBlock::new)));
+		register(
+				"untinted_particle_leaves", RecordCodecBuilder.<UntintedParticleLeavesBlock>mapCodec(instance -> instance.group(
+						Codec.FLOAT.optionalFieldOf("leaf_particle_chance", 0.01F).forGetter(BlockCodecs::notImplemented),
+						ParticleTypes.CODEC.fieldOf("leaf_particle").forGetter(BlockCodecs::notImplemented),
+						Block.propertiesCodec()
+				).apply(instance, UntintedParticleLeavesBlock::new)));
 	}
 
 	public static void register(String key, MapCodec<? extends Block> codec) {

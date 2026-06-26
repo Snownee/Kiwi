@@ -7,8 +7,8 @@ import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
 import snownee.kiwi.customization.CustomizationRegistries;
 import snownee.kiwi.util.resource.OneTimeLoader;
@@ -17,10 +17,11 @@ import snownee.kiwi.util.resource.OneTimeLoader;
 public abstract class KItemTemplate {
 
 	public static Codec<KItemTemplate> codec() {
-		return CustomizationRegistries.ITEM_TEMPLATE.byNameCodec().dispatch(
-				"type",
-				KItemTemplate::type,
-				type -> type.codec().get());
+		return CustomizationRegistries.ITEM_TEMPLATE.byNameCodec()
+				.optionalFieldOf("type", KItemTemplates.BUILT_IN.getOrCreate())
+				.dispatch(
+						KItemTemplate::type,
+						type -> type.codec().get());
 	}
 
 	protected final Optional<ItemDefinitionProperties> properties;
