@@ -13,10 +13,14 @@ conditions:
       value: [test]
     target: snownee.kiwi.test.TestCondition
 configs:
+  - data: {value: ksit-common}
+    target: snownee.kiwi.customization.block.behavior.KSitCommonConfig
   - data: {type: CLIENT}
     target: snownee.kiwi.KiwiClientConfig
   - data: {}
     target: snownee.kiwi.KiwiCommonConfig
+  - data: {type: CLIENT, value: minieffects}
+    target: snownee.kiwi.minieffects.MiniEffectsConfig
   - data: {type: COMMON, value: test}
     target: snownee.kiwi.test.TestConfig
 modules:

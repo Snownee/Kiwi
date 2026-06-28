@@ -2,7 +2,7 @@ package snownee.kiwi.minieffects;
 
 import snownee.kiwi.config.KiwiConfig;
 
-@KiwiConfig(type = KiwiConfig.ConfigType.CLIENT)
+@KiwiConfig(value = "minieffects", type = KiwiConfig.ConfigType.CLIENT)
 public class MiniEffectsConfig {
 	public static boolean effectsOnLeft;
 	public static boolean holdTabToShow;
