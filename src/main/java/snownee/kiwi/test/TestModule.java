@@ -44,13 +44,8 @@ public class TestModule extends AbstractModule {
 
 	// And its potion
 	public static final KiwiGO<Potion> FIRST_POTION = go(() -> new Potion(
-<<<<<<< HEAD
-			"kiwi.test.first_potion",
-			new MobEffectInstance(FIRST_EFFECT.holder().orElseThrow(), 1800)));
-=======
 			"kiwi:first_potion",
 			new MobEffectInstance(FIRST_EFFECT.holderOrThrow(), 1800)));
->>>>>>> 1c066ef1 (.)
 
 //	public static final KiwiGO<BlockEntityType<TestBlockEntity>> FIRST_TILE = blockEntity(TestBlockEntity::new, null, FIRST_BLOCK);
 
