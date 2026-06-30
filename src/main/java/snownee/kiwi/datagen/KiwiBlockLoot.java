@@ -7,36 +7,45 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
+
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
+import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootSubProvider;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.loot.BlockLootSubProvider;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootTable;
 import snownee.kiwi.KiwiModuleContainer;
 import snownee.kiwi.KiwiModules;
+import snownee.kiwi.util.GameObjectLookup;
 
-public abstract class KiwiBlockLoot extends BlockLootSubProvider {
+public abstract class KiwiBlockLoot extends FabricBlockLootSubProvider {
+	protected final FabricPackOutput output;
 	protected final Identifier moduleId;
 	private final List<Block> knownBlocks;
 	private final Map<Class<?>, Function<Block, LootTable.Builder>> handlers = Maps.newIdentityHashMap();
 	private final Set<Block> added = Sets.newHashSet();
-	private Function<Block, LootTable.Builder> defaultHandler;
+	private @Nullable Function<Block, LootTable.Builder> defaultHandler;
 
-	protected KiwiBlockLoot(Identifier moduleId, CompletableFuture<HolderLookup.Provider> registryLookup) {
-		super(Set.of(), FeatureFlags.REGISTRY.allFlags(), registryLookup.join());
+	protected KiwiBlockLoot(
+			Identifier moduleId,
+			FabricPackOutput output,
+			CompletableFuture<HolderLookup.Provider> registryLookup) {
+		super(output, registryLookup);
+		this.output = output;
 		this.moduleId = moduleId;
 		KiwiModuleContainer container = Objects.requireNonNull(KiwiModules.get(moduleId));
 		knownBlocks = container.getRegistries(Registries.BLOCK);
 	}
 
-	@SuppressWarnings("unchecked")
-	protected <T extends Block> void handle(Class<T> clazz, Function<T, LootTable.Builder> handler) {
-		handlers.put(clazz, (Function<Block, LootTable.Builder>) handler);
+	protected <T extends Block> void handle(Class<T> clazz, Function<T, LootTable.@Nullable Builder> handler) {
+		//noinspection unchecked
+		handlers.put(clazz, (Function<Block, LootTable.@Nullable Builder>) handler);
 	}
 
 	protected void handleDefault(Function<Block, LootTable.Builder> handler) {
@@ -44,14 +53,22 @@ public abstract class KiwiBlockLoot extends BlockLootSubProvider {
 	}
 
 	@Override
-	protected void generate() {
+	public void generate() {
+		if (output.isStrictValidationEnabled()) {
+			Set<Block> blocks = Set.copyOf(knownBlocks);
+			GameObjectLookup.all(BuiltInRegistries.BLOCK, output.getModId()).forEach(block -> {
+				if (!blocks.contains(block)) {
+					excludeFromStrictValidation(block);
+				}
+			});
+		}
 		addTables();
 		for (Block block : knownBlocks) {
 			if (added.contains(block)) {
 				continue;
 			}
 			added.add(block);
-			Function<Block, LootTable.Builder> handler = handlers.get(block.getClass());
+			Function<Block, LootTable.@Nullable Builder> handler = handlers.get(block.getClass());
 			if (handler == null) {
 				handler = defaultHandler;
 			}
@@ -67,13 +84,17 @@ public abstract class KiwiBlockLoot extends BlockLootSubProvider {
 	protected abstract void addTables();
 
 	@Override
-	protected void add(Block block, LootTable.Builder builder) {
+	public void add(Block block, LootTable.Builder builder) {
 		super.add(block, builder);
 		added.add(block);
 	}
 
-	@Override
-	protected Iterable<Block> getKnownBlocks() {
+	public List<Block> getKnownBlocks() {
 		return knownBlocks;
+	}
+
+	@Override
+	public String getName() {
+		return super.getName() + " - " + moduleId;
 	}
 }

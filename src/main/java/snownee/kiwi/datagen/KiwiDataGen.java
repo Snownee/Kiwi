@@ -1,12 +1,12 @@
 package snownee.kiwi.datagen;
 
-import net.neoforged.neoforge.data.event.GatherDataEvent;
-import snownee.kiwi.Kiwi;
+import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 
-public class KiwiDataGen {
-	public static void on(GatherDataEvent.Client event) {
-		event.getGenerator().addProvider(
-				true,
-				new KiwiLanguageProvider(event.getGenerator().getPackOutput(), Kiwi.ID, event.getLookupProvider()));
+public class KiwiDataGen implements DataGeneratorEntrypoint {
+	@Override
+	public void onInitializeDataGenerator(FabricDataGenerator fabricDataGenerator) {
+		FabricDataGenerator.Pack pack = fabricDataGenerator.createPack();
+		pack.addProvider(KiwiLanguageProvider::new);
 	}
 }

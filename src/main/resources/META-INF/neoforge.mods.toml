@@ -31,3 +31,6 @@ side = "BOTH"
 
 [modproperties.kiwi]
 catalogueItemIcon = "minecraft:bookshelf" #Support for Catalogue mod
+
+[modproperties.kiwi."fabric:entrypoints"]
+fabric-datagen = ["snownee.kiwi.datagen.KiwiDataGen"]

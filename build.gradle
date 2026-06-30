@@ -120,6 +120,7 @@ def excludes = [
         "/assets/kswitch",
         "/assets/test",
         "/snownee/${project.mod_id}/test",
+        "/snownee/${project.mod_id}/datagen/ForgeKiwiDataGen.java",
         "/data",
         "/.cache",
         "/third_party"
@@ -210,13 +211,10 @@ allprojects {
                 includeGroup "maven.modrinth"
             }
         }
-        maven { url "https://maven.su5ed.dev/releases" }
         maven {
-            url = "https://cursemaven.com"
-            content {
-                includeGroup "curse.maven"
-            }
+            url "https://maven.sinytra.org"
         }
+        maven { url "https://maven.su5ed.dev/releases" }
         maven { url "https://maven.shedaniel.me/" }
         maven {
             // location of the maven that hosts JEI files
@@ -244,13 +242,14 @@ dependencies {
     shadowCommon("com.ezylang:EvalEx:${project.evalex_version}")
 
 //    jarJar(implementation("org.sinytra.forgified-fabric-api:fabric-api-base:0.4.42+d1308ded19"))
-//    implementation "org.sinytra.forgified-fabric-api:forgified-fabric-api:0.107.0+2.0.25+1.21.1"
+    implementation "org.sinytra.forgified-fabric-api:forgified-fabric-api:0.152.1+3.0.7+26.1.2"
+    compileOnly "org.sinytra:forgified-fabric-loader:2.5.75+0.18.4+26.1"
 
     compileOnly "dev.architectury:architectury-neoforge:${project.architectury_version}"
     compileOnly "me.shedaniel:RoughlyEnoughItems-neoforge:${project.rei_version}"
     compileOnly "me.shedaniel:REIPluginCompatibilities-forge-annotations:12.+"
 
-    implementation "maven.modrinth:jade:26.0.6+neoforge"
+    implementation "maven.modrinth:jade:26.1.8+neoforge"
 
     // compile against the JEI API but do not include it at runtime
     compileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")

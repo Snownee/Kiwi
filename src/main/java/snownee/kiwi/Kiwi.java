@@ -120,7 +120,6 @@ import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfig.ConfigType;
 import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.config.NeoClothConfigIntegration;
-import snownee.kiwi.datagen.KiwiDataGen;
 import snownee.kiwi.loader.ClientInitializer;
 import snownee.kiwi.loader.KiwiMetadataLoader;
 import snownee.kiwi.loader.Platform;
@@ -384,7 +383,6 @@ public class Kiwi {
 		modEventBus.addListener(this::init);
 		modEventBus.addListener(this::postInit);
 		modEventBus.addListener(this::loadComplete);
-		modEventBus.addListener(KiwiDataGen::on);
 		modEventBus.addListener((net.neoforged.neoforge.registries.RegisterEvent event) -> CustomIngredientImpl.onRegister(event));
 //		if (Platform.isModLoaded("fabric_api")) {
 //			modEventBus.addListener(this::gatherData);
