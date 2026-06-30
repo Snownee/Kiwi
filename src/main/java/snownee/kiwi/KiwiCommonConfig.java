@@ -1,7 +1,9 @@
 package snownee.kiwi;
 
+import java.util.List;
 import java.util.Map;
 
+import snownee.kiwi.config.ConfigUI;
 import snownee.kiwi.config.KiwiConfig;
 
 @KiwiConfig
@@ -18,4 +20,8 @@ public final class KiwiCommonConfig {
 
 	@KiwiConfig.Path("kSwitch.creativeOnly")
 	public static boolean kSwitchCreativeOnly;
+
+	@ConfigUI.Typed(String.class)
+	@KiwiConfig.Path("customization.disableStonecuttingNamespaces")
+	public static List<String> disableStonecuttingNamespaces = List.of();
 }
