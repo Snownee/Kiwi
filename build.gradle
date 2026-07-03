@@ -120,7 +120,7 @@ def excludes = [
         "/assets/kswitch",
         "/assets/test",
         "/snownee/${project.mod_id}/test",
-        "/snownee/${project.mod_id}/datagen/ForgeKiwiDataGen.java",
+        "/snownee/${project.mod_id}/datagen/ForgeKiwiDataGen.class",
         "/data",
         "/.cache",
         "/third_party"
