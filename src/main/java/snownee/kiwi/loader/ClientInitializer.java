@@ -19,7 +19,7 @@ public class ClientInitializer {
 
 	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public static void debugTooltip(ItemTooltipEvent event) {
-		TooltipEvents.debugTooltip(event.getItemStack(), event.getToolTip(), event.getFlags());
+		TooltipEvents.debugTooltip(event.getItemStack(), event.getContext(), event.getFlags(), event.getToolTip());
 	}
 
 	@SubscribeEvent
