@@ -17,7 +17,7 @@ public class ClientInitializer implements ClientModInitializer {
 		ItemTooltipCallback.EVENT.addPhaseOrdering(HIGH, Event.DEFAULT_PHASE);
 		ItemTooltipCallback.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, LOW);
 		ItemTooltipCallback.EVENT.register(HIGH, (stack, context, type, lines) -> TooltipEvents.globalTooltip(stack, lines, type));
-		ItemTooltipCallback.EVENT.register(LOW, (stack, context, type, lines) -> TooltipEvents.debugTooltip(stack, lines, type));
+		ItemTooltipCallback.EVENT.register(LOW, TooltipEvents::debugTooltip);
 	}
 
 }
