@@ -4,12 +4,14 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.IntConsumer;
 import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.serialization.Codec;
 
@@ -45,6 +47,7 @@ import net.minecraft.world.level.block.Blocks;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.config.KiwiConfigManager;
+import snownee.kiwi.item.ModBlockItem;
 import snownee.kiwi.item.ModItem;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.KUtil;
@@ -52,6 +55,7 @@ import snownee.kiwi.util.client.SmartKey;
 
 public final class TooltipEvents {
 	public static final Identifier DISABLE_DEBUG_TOOLTIP = Kiwi.id("disable_debug_tooltip");
+	public static final Set<Item> CUSTOM_TOOLTIP_ITEMS = Sets.newConcurrentHashSet();
 	private static final DebugTooltipCache cache = new DebugTooltipCache();
 	private static boolean firstSeenDebugTooltip = true;
 	private static long latestPressF3;
@@ -63,7 +67,10 @@ public final class TooltipEvents {
 	}
 
 	public static void globalTooltip(ItemStack stack, List<Component> tooltip, TooltipFlag flag) {
-		if (KiwiClientConfig.globalTooltip) {
+		Item item = stack.getItem();
+		//TODO improve it in future versions
+		if (KiwiClientConfig.globalTooltip || item instanceof ModItem || item instanceof ModBlockItem ||
+				CUSTOM_TOOLTIP_ITEMS.contains(item)) {
 			ModItem.addTip(stack, tooltip, flag);
 		}
 	}
