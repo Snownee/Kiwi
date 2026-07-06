@@ -1,6 +1,7 @@
 classTweaker v1 official
 transitive-accessible class net/minecraft/world/level/block/entity/BlockEntityType$BlockEntitySupplier
 transitive-accessible method net/minecraft/world/level/block/entity/BlockEntityType <init> (Lnet/minecraft/world/level/block/entity/BlockEntityType$BlockEntitySupplier;Ljava/util/Set;)V
+transitive-inject-interface net/minecraft/world/item/crafting/NormalCraftingRecipe snownee/kiwi/recipe/KiwiRecipe
 
 accessible field net/minecraft/world/item/CreativeModeTabs BUILDING_BLOCKS Lnet/minecraft/resources/ResourceKey;
 accessible field net/minecraft/world/item/CreativeModeTabs COLORED_BLOCKS Lnet/minecraft/resources/ResourceKey;
@@ -70,3 +71,5 @@ accessible field net/minecraft/data/tags/TagsProvider lookupProvider Ljava/util/
 accessible field net/minecraft/data/tags/TagsProvider builders Ljava/util/Map;
 
 accessible field net/minecraft/world/item/Item$Properties id Lnet/minecraft/resources/ResourceKey;
+
+accessible field net/minecraft/world/item/crafting/Ingredient values Lnet/minecraft/core/HolderSet;

@@ -9,16 +9,15 @@ import snownee.kiwi.KiwiCommonConfig;
 import snownee.kiwi.KiwiGO;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.LoadingContext;
+import snownee.kiwi.loader.Platform;
 import snownee.kiwi.recipe.AlternativesIngredient;
+import snownee.kiwi.recipe.AlternativesIngredientBuilder;
 import snownee.kiwi.recipe.EvalCondition;
 import snownee.kiwi.recipe.ModuleLoadedCondition;
 import snownee.kiwi.recipe.SizedIngredient;
 
 @KiwiModule("data")
 public final class DataModule extends AbstractModule {
-
-//	public static final KiwiGO<RecipeSerializer<NoContainersShapedRecipe>> SHAPED_NO_CONTAINERS = go(NoContainersShapedRecipe.Serializer::new);
-//	public static final KiwiGO<RecipeSerializer<KiwiShapelessRecipe>> SHAPELESS = go(KiwiShapelessRecipe.Serializer::new);
 
 	public static final KiwiGO<SlotDisplay.Type<?>> SIZED = go(() -> new SlotDisplay.Type<>(
 			SizedIngredient.SizedSlotDisplay.MAP_CODEC,
@@ -28,7 +27,11 @@ public final class DataModule extends AbstractModule {
 	protected void addEntries() {
 		ResourceConditions.register(ModuleLoadedCondition.TYPE);
 		ResourceConditions.register(EvalCondition.TYPE);
-		CustomIngredientSerializer.register(AlternativesIngredient.Serializer.INSTANCE);
+		if (Platform.isDataGen()) {
+			CustomIngredientSerializer.register(AlternativesIngredientBuilder.Serializer.INSTANCE);
+		} else {
+			CustomIngredientSerializer.register(AlternativesIngredient.Serializer.INSTANCE);
+		}
 	}
 
 	@KiwiModule.LoadingCondition("data")
