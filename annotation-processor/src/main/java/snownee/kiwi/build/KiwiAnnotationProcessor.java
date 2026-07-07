@@ -85,7 +85,7 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 				KiwiAnnotationData value = new KiwiAnnotationData();
 				value.setTarget(target);
 				value.setData(o);
-				metadata.map().computeIfAbsent(type.yamlKey, $ -> new ArrayList<>()).add(value);
+				metadata.map().computeIfAbsent(type.yamlKey, _ -> new ArrayList<>()).add(value);
 			}
 		}
 		String yaml = new KiwiMetadataParser().dump(metadata);
@@ -115,10 +115,6 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 		}
 
 		List<? extends AnnotationMirror> annotations = elem.getAnnotationMirrors();
-
-		if (annotations == null) {
-			return null;
-		}
 
 		for (AnnotationMirror annotation : annotations) {
 			Element element = annotation.getAnnotationType().asElement();

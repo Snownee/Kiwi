@@ -21,4 +21,8 @@ public class KiwiAnnotationData {
 	public Map<String, Object> getData() {
 		return data == null ? Map.of() : data;
 	}
+
+	public Map<String, Object> dump() {
+		return getData().isEmpty() ? Map.of("target", target) : Map.of("target", target, "data", data);
+	}
 }
