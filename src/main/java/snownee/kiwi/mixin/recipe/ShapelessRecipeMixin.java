@@ -8,12 +8,10 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import net.minecraft.world.item.ItemStackTemplate;
-import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.PlacementInfo;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 import snownee.kiwi.recipe.AlternativesIngredient;
 
@@ -24,15 +22,14 @@ public class ShapelessRecipeMixin {
 	@Final
 	private List<Ingredient> ingredients;
 
-	@Inject(method = "<init>", at = @At("RETURN"))
-	private void kiwi$init(
-			Recipe.CommonInfo commonInfo,
-			CraftingRecipe.CraftingBookInfo bookInfo,
-			ItemStackTemplate result,
-			List<Ingredient> ingredients,
-			CallbackInfo ci) {
+	@Inject(
+			method = {
+					"createPlacementInfo",
+					"matches(Lnet/minecraft/world/item/crafting/CraftingInput;Lnet/minecraft/world/level/Level;)Z",
+					"display"}, at = @At("HEAD"))
+	private void kiwi$trim(CallbackInfoReturnable<PlacementInfo> cir) {
 		var filtered = this.ingredients.stream()
-				.filter(ingredient -> !(ingredient.getCustomIngredient() instanceof AlternativesIngredient $ && $.wrapped == null))
+				.filter(ingredient -> !(ingredient.getCustomIngredient() instanceof AlternativesIngredient && ingredient.isEmpty()))
 				.toList();
 		if (filtered.size() != this.ingredients.size()) {
 			this.ingredients = filtered;
