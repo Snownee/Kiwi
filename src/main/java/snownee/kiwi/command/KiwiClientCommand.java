@@ -16,7 +16,7 @@ import snownee.kiwi.KiwiCommonConfig;
 import snownee.kiwi.config.ClothConfigIntegration;
 import snownee.kiwi.config.ConfigLibAttributes;
 import snownee.kiwi.config.KiwiConfigManager;
-import snownee.kiwi.loader.Platform;
+import snownee.kiwi.util.ClientProxy;
 
 public class KiwiClientCommand {
 
@@ -32,7 +32,7 @@ public class KiwiClientCommand {
 						context::sendFailure))));
 		LiteralArgumentBuilder<T> configure = context.literal("configure");
 		List<ConfigLibAttributes> list = Lists.newArrayList();
-		if (Platform.isModLoaded("cloth-config")) {
+		if (ClientProxy.clothConfig) {
 			list.add(ClothConfigIntegration.attributes());
 		}
 		if (list.isEmpty()) {
