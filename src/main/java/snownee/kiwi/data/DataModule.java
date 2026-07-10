@@ -5,13 +5,16 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
+import net.neoforged.neoforge.gametest.GameTestHooks;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiCommonConfig;
 import snownee.kiwi.KiwiGO;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.LoadingContext;
+import snownee.kiwi.loader.Platform;
 import snownee.kiwi.recipe.AlternativesIngredient;
+import snownee.kiwi.recipe.AlternativesIngredientBuilder;
 import snownee.kiwi.recipe.CustomIngredientSerializer;
 import snownee.kiwi.recipe.EvalCondition;
 import snownee.kiwi.recipe.ModuleLoadedCondition;
@@ -37,11 +40,12 @@ public final class DataModule extends AbstractModule {
 			SizedIngredient.SizedSlotDisplay.STREAM_CODEC));
 
 	public DataModule() {
-		CustomIngredientSerializer.register(AlternativesIngredient.Serializer.INSTANCE);
+		CustomIngredientSerializer.register(Platform.isDataGen() ?
+				AlternativesIngredientBuilder.Serializer.INSTANCE : AlternativesIngredient.Serializer.INSTANCE);
 	}
 
 	@KiwiModule.LoadingCondition("data")
 	public static boolean shouldLoad(LoadingContext ctx) {
-		return Kiwi.enableDataModule || KiwiCommonConfig.getBooleanVar("EnableDataModule");
+		return Kiwi.enableDataModule || GameTestHooks.isGametestEnabled() || KiwiCommonConfig.getBooleanVar("EnableDataModule");
 	}
 }

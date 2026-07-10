@@ -1,29 +1,46 @@
 package snownee.kiwi.recipe;
 
 import java.util.List;
+import java.util.stream.Stream;
+
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.google.gson.JsonElement;
-import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.MapLike;
+import com.mojang.serialization.RecordBuilder;
 
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.minecraft.world.level.ItemLike;
 import net.neoforged.neoforge.common.crafting.ICustomIngredient;
 
-public class AlternativesIngredientBuilder {
-	private final HolderGetter<Item> lookup;
-	List<Ingredient> ingredients = Lists.newArrayList();
+public class AlternativesIngredientBuilder implements CustomIngredient {
+	private final @Nullable HolderGetter<Item> lookup;
+	private final List<@Nullable Ingredient> ingredients = Lists.newArrayList();
+	private boolean allowEmpty;
 
 	public AlternativesIngredientBuilder(HolderGetter<Item> lookup) {
 		this.lookup = lookup;
+	}
+
+	private AlternativesIngredientBuilder(List<@Nullable Ingredient> ingredients) {
+		this.lookup = null;
+		this.ingredients.addAll(ingredients);
+		this.allowEmpty = ingredients.contains(null);
 	}
 
 	public static AlternativesIngredientBuilder of(HolderGetter<Item> lookup) {
@@ -31,26 +48,36 @@ public class AlternativesIngredientBuilder {
 	}
 
 	public AlternativesIngredientBuilder add(Ingredient ingredient) {
+		if (allowEmpty) {
+			throw new IllegalStateException("Cannot add options after allowEmpty() has been called");
+		}
 		ingredients.add(ingredient);
 		return this;
 	}
 
 	public AlternativesIngredientBuilder add(ItemLike itemLike) {
-		ingredients.add(Ingredient.of(itemLike));
-		return this;
+		return add(Ingredient.of(itemLike));
 	}
 
 	public AlternativesIngredientBuilder add(TagKey<Item> tag) {
-		ingredients.add(RecipeUtil.tagIngredient(lookup, tag));
-		return this;
+		if (lookup == null) {
+			throw new IllegalStateException("Tag options require a registry lookup");
+		}
+		return add(RecipeUtil.tagIngredient(lookup, tag));
 	}
 
 	public AlternativesIngredientBuilder add(ICustomIngredient ingredient) {
-		add(ingredient.toVanilla());
-		return this;
+		return add(ingredient.toVanilla());
+	}
+
+	public AlternativesIngredientBuilder add(CustomIngredient ingredient) {
+		return add(ingredient.toVanilla());
 	}
 
 	public AlternativesIngredientBuilder add(String tagOrItem) {
+		if (lookup == null) {
+			throw new IllegalStateException("String options require a registry lookup");
+		}
 		if (tagOrItem.startsWith("#")) {
 			add(TagKey.create(Registries.ITEM, Identifier.parse(tagOrItem.substring(1))));
 		} else {
@@ -61,11 +88,86 @@ public class AlternativesIngredientBuilder {
 		return this;
 	}
 
-	public AlternativesIngredient build() {
-		List<JsonElement> list = Lists.newArrayListWithExpectedSize(ingredients.size());
-		for (Ingredient ingredient : ingredients) {
-			list.add(Ingredient.CODEC.encodeStart(JsonOps.INSTANCE, ingredient).result().orElseThrow());
+	public AlternativesIngredientBuilder allowEmpty() {
+		if (allowEmpty) {
+			throw new IllegalStateException("allowEmpty() has already been called");
 		}
-		return new AlternativesIngredient(list);
+		allowEmpty = true;
+		ingredients.add(null);
+		return this;
+	}
+
+	public AlternativesIngredient build() {
+		return new AlternativesIngredient(ingredients);
+	}
+
+	@Override
+	public boolean test(ItemStack stack) {
+		return false;
+	}
+
+	@Override
+	public List<ItemStack> getMatchingStacks() {
+		return List.of();
+	}
+
+	@Override
+	public boolean requiresTesting() {
+		return false;
+	}
+
+	@Override
+	public SlotDisplay display() {
+		return SlotDisplay.Empty.INSTANCE;
+	}
+
+	@Override
+	public CustomIngredientSerializer<?> getSerializer() {
+		return Serializer.INSTANCE;
+	}
+
+	public static class Serializer extends MapCodec<AlternativesIngredientBuilder> implements CustomIngredientSerializer<AlternativesIngredientBuilder> {
+		public static final Serializer INSTANCE = new Serializer();
+
+		@Override
+		public Identifier getIdentifier() {
+			return AlternativesIngredient.ID;
+		}
+
+		@Override
+		public MapCodec<AlternativesIngredientBuilder> getCodec(boolean allowEmpty) {
+			return this;
+		}
+
+		@Override
+		public StreamCodec<RegistryFriendlyByteBuf, AlternativesIngredientBuilder> getPacketCodec() {
+			throw new UnsupportedOperationException("Builder ingredients are data-generation only");
+		}
+
+		@Override
+		public <T> Stream<T> keys(DynamicOps<T> ops) {
+			return Stream.of(ops.createString("options"));
+		}
+
+		@Override
+		public <T> DataResult<AlternativesIngredientBuilder> decode(DynamicOps<T> ops, MapLike<T> input) {
+			return AlternativesIngredient.Serializer.INSTANCE.decode(ops, input).map(ingredient -> {
+				List<@Nullable Ingredient> decoded = Lists.newArrayList();
+				RecordBuilder<T> builder = AlternativesIngredient.Serializer.INSTANCE.encode(ingredient, ops, ops.mapBuilder());
+				T map = builder.build(ops.emptyMap()).getOrThrow();
+				T options = ops.getMap(map).getOrThrow().get("options");
+				for (T option : ops.getStream(options).getOrThrow().toList()) {
+					DataResult<Ingredient> result = Ingredient.CODEC.parse(ops, option);
+					decoded.add(result.isSuccess() ? result.getOrThrow() : null);
+				}
+				return new AlternativesIngredientBuilder(decoded);
+			});
+		}
+
+		@Override
+		public <T> RecordBuilder<T> encode(AlternativesIngredientBuilder input, DynamicOps<T> ops, RecordBuilder<T> prefix) {
+			return prefix.add("options", ops.createList(input.ingredients.stream().map(ingredient -> ingredient == null ?
+					ops.emptyList() : Ingredient.CODEC.encodeStart(ops, ingredient).getOrThrow())));
+		}
 	}
 }

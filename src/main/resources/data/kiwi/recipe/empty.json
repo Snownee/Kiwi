@@ -1,23 +1,20 @@
 {
-	"type": "kiwi:shapeless",
+	"type": "minecraft:crafting_shapeless",
 	"ingredients": [
 		{
-			"type": "kiwi:alternatives",
+			"neoforge:ingredient_type": "kiwi:alternatives",
 			"options": [
 				{
-					"type": "error"
+					"neoforge:ingredient_type": "error"
 				},
-				{
-					"tag": "random_nonexistant_tag"
-				}
+				"#kiwi:random_nonexistant_tag",
+				[]
 			]
 		},
-		{
-			"item": "lava_bucket"
-		}
+		"minecraft:lava_bucket"
 	],
 	"result": {
 		"id": "minecraft:bucket"
 	},
-	"no_containers": true
+	"kiwi:no_remainders": true
 }

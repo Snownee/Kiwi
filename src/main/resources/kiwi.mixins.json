@@ -29,7 +29,11 @@
 		"customization.property_inject.StateDefinitionBuilderMixin",
 		"customization.sit.DisplayMixin",
 		"customization.sit.EntityAccess",
-		"customization.sit.EntityMixin"
+		"customization.sit.EntityMixin",
+		"recipe.CraftingRecipeMixin",
+		"recipe.NormalCraftingRecipeMixin",
+		"recipe.RecipeMixin",
+		"recipe.ShapelessRecipeMixin"
 	],
 	"client": [
 		"client.AvatarRenderStateMixin",

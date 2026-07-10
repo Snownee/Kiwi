@@ -5,6 +5,7 @@ import java.util.List;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
 
 public interface CustomIngredient {
 	/**
@@ -40,6 +41,17 @@ public interface CustomIngredient {
 	 * @see CustomIngredient#requiresTesting()
 	 */
 	boolean requiresTesting();
+
+	default SlotDisplay display() {
+		return new SlotDisplay.Composite(getMatchingStacks().stream()
+				.map(ItemStack::getItem)
+				.map(item -> Ingredient.displayForSingleItem(item.builtInRegistryHolder()))
+				.toList());
+	}
+
+	default Ingredient toVanilla() {
+		return new Ingredient(new CustomIngredientImpl<>(this));
+	}
 
 	/**
 	 * {@return the serializer for this ingredient}
