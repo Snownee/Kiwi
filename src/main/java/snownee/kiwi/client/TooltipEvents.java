@@ -21,12 +21,14 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
@@ -34,6 +36,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.EntityType;
@@ -75,7 +78,7 @@ public final class TooltipEvents {
 		}
 	}
 
-	public static void debugTooltip(ItemStack itemStack, List<Component> tooltip, TooltipFlag flag) {
+	public static void debugTooltip(ItemStack itemStack, Item.TooltipContext context, TooltipFlag flag, List<Component> tooltip) {
 		if (!flag.isAdvanced()) {
 			return;
 		}
@@ -89,56 +92,7 @@ public final class TooltipEvents {
 			mc.keyboardHandler.setClipboard(component.getString());
 			mc.player.sendSystemMessage(KUtil.clickToCopy(component));
 			if (KiwiClientConfig.printDataComponentsWhenCopy) {
-				List<DataComponentType<?>> list = itemStack.getComponents()
-						.keySet()
-						.stream()
-						.sorted(Comparator.<DataComponentType<?>, Boolean>comparing(DataComponentType::isTransient)
-								.thenComparing($ -> Objects.equals(
-										itemStack.getComponents().get($),
-										DataComponents.COMMON_ITEM_COMPONENTS.get($)))
-								.thenComparing($ -> Objects.requireNonNull(BuiltInRegistries.DATA_COMPONENT_TYPE.getKey($))))
-						.toList();
-				Font font = Minecraft.getInstance().font;
-				for (DataComponentType<?> type : list) {
-					Identifier id = Objects.requireNonNull(BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(type));
-					Component hoverText;
-					boolean isTransient = type.isTransient();
-					if (isTransient) {
-						hoverText = Component.literal("<transient>");
-					} else {
-						//noinspection unchecked
-						hoverText = NbtUtils.toPrettyComponent(((Codec<Object>) type.codecOrThrow())
-								.encodeStart(NbtOps.INSTANCE, itemStack.get(type)).getOrThrow()).copy().withStyle(ChatFormatting.WHITE);
-					}
-					ChatFormatting color;
-					if (isTransient) {
-						color = ChatFormatting.YELLOW;
-					} else if (Objects.equals(itemStack.getComponents().get(type), DataComponents.COMMON_ITEM_COMPONENTS.get(type))) {
-						color = ChatFormatting.GRAY;
-					} else {
-						color = ChatFormatting.GREEN;
-					}
-					Component value;
-					if (font.width(hoverText) > 300) {
-						FormattedText text = font.substrByWidth(hoverText, 300);
-						List<MutableComponent> parts = Lists.newArrayList();
-						text.visit(
-								(style, s) -> {
-									parts.add(Component.literal(s).setStyle(style));
-									return Optional.empty();
-								}, Style.EMPTY);
-						value = parts.stream().reduce(Component.empty(), MutableComponent::append).append(Component.literal("...")
-								.withStyle(ChatFormatting.GRAY));
-					} else {
-						value = hoverText;
-					}
-
-					mc.player.sendSystemMessage(
-							KUtil.clickToCopy(
-									Component.literal("- %s: ".formatted(id)).withStyle(color).append(value),
-									hoverText,
-									hoverText.getString()));
-				}
+				printDataComponents(itemStack, context.registries());
 			}
 			mc.debugEntries.toggleDebugOverlay();
 		}
@@ -169,6 +123,70 @@ public final class TooltipEvents {
 				trySendTipMsg(mc);
 				cache.appendTagsTooltip(tooltip);
 			}
+		}
+	}
+
+	private static void printDataComponents(ItemStack itemStack, HolderLookup.@Nullable Provider registries) {
+		if (registries == null) {
+			return;
+		}
+		List<DataComponentType<?>> list = itemStack.getComponents()
+				.keySet()
+				.stream()
+				.sorted(Comparator.<DataComponentType<?>, Boolean>comparing(DataComponentType::isTransient)
+						.thenComparing($ -> Objects.equals(
+								itemStack.getComponents().get($),
+								DataComponents.COMMON_ITEM_COMPONENTS.get($)))
+						.thenComparing($ -> Objects.requireNonNull(BuiltInRegistries.DATA_COMPONENT_TYPE.getKey($))))
+				.toList();
+		Minecraft mc = Minecraft.getInstance();
+		Font font = mc.font;
+		RegistryOps<Tag> ops = registries.createSerializationContext(NbtOps.INSTANCE);
+		for (DataComponentType<?> type : list) {
+			Identifier id = Objects.requireNonNull(BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(type));
+			Component hoverText;
+			boolean isTransient = type.isTransient();
+			if (isTransient) {
+				hoverText = Component.literal("<transient>");
+			} else {
+				try {
+					//noinspection unchecked
+					hoverText = NbtUtils.toPrettyComponent(((Codec<Object>) type.codecOrThrow())
+							.encodeStart(ops, itemStack.get(type)).getOrThrow()).copy().withStyle(ChatFormatting.WHITE);
+				} catch (Exception e) {
+					mc.player.sendSystemMessage(Component.literal("Failed to print data component %s: %s".formatted(id, e)));
+					Kiwi.LOGGER.error("Failed to print data component {}", id, e);
+					continue;
+				}
+			}
+			ChatFormatting color;
+			if (isTransient) {
+				color = ChatFormatting.YELLOW;
+			} else if (Objects.equals(itemStack.getComponents().get(type), DataComponents.COMMON_ITEM_COMPONENTS.get(type))) {
+				color = ChatFormatting.GRAY;
+			} else {
+				color = ChatFormatting.GREEN;
+			}
+			Component value;
+			if (font.width(hoverText) > 300) {
+				FormattedText text = font.substrByWidth(hoverText, 300);
+				List<MutableComponent> parts = Lists.newArrayList();
+				text.visit(
+						(style, s) -> {
+							parts.add(Component.literal(s).setStyle(style));
+							return Optional.empty();
+						}, Style.EMPTY);
+				value = parts.stream().reduce(Component.empty(), MutableComponent::append).append(Component.literal("...")
+						.withStyle(ChatFormatting.GRAY));
+			} else {
+				value = hoverText;
+			}
+
+			mc.player.sendSystemMessage(
+					KUtil.clickToCopy(
+							Component.literal("- %s: ".formatted(id)).withStyle(color).append(value),
+							hoverText,
+							hoverText.getString()));
 		}
 	}
 
