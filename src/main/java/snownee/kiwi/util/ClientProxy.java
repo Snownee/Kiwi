@@ -19,9 +19,12 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.client.SmartKey;
 
 public class ClientProxy {
+	public static final boolean clothConfig = Platform.isModLoaded("cloth_config");
+
 	public static void registerColors(Context context, List<Pair<Block, List<BlockTintSource>>> blocksToAdd) {
 		var modEventBus = context.modEventBus();
 		if (!blocksToAdd.isEmpty()) {

@@ -8,7 +8,7 @@ import net.minecraft.client.gui.screens.Screen;
 
 public record ConfigLibAttributes(
 		String name,
-		Function<@Nullable String, @Nullable Screen> screenFactory,
+		Function<String, @Nullable Screen> screenFactory,
 		boolean supportsList,
 		boolean supportsMap,
 		boolean supportsOnlyString) {}
