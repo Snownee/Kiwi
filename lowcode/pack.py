@@ -1,8 +1,9 @@
 import os
 import shutil
 import sys
-import yaml
 import tempfile
+import yaml
+
 
 def main():
     if len(sys.argv) < 2:

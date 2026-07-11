@@ -36,7 +36,6 @@ import snownee.kiwi.customization.block.loader.BlockDefinitionProperties;
 import snownee.kiwi.customization.block.loader.KBlockDefinition;
 import snownee.kiwi.customization.builder.BuildersButton;
 import snownee.kiwi.customization.builder.ConvertScreen;
-import snownee.kiwi.customization.builder.DebugEntryBuilderMode;
 import snownee.kiwi.customization.command.ExportBlocksCommand;
 import snownee.kiwi.customization.command.ExportCreativeTabsCommand;
 import snownee.kiwi.customization.command.ExportShapesCommand;

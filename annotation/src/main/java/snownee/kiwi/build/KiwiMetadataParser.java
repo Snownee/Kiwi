@@ -2,7 +2,6 @@ package snownee.kiwi.build;
 
 import java.io.InputStream;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
@@ -22,19 +21,18 @@ public class KiwiMetadataParser {
 	private final Yaml yaml;
 
 	public KiwiMetadataParser() {
-		Representer representer = new Representer(new DumperOptions());
+		DumperOptions options = new DumperOptions();
+		options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+		Representer representer = new Representer(options);
+		representer.getPropertyUtils().setSkipMissingProperties(true);
 		TypeDescription typeDescription = new TypeDescription(KiwiAnnotationData.class, Tag.MAP);
 		representer.addTypeDescription(typeDescription);
 		Constructor constructor = new Constructor(new LoaderOptions(), typeDescription);
-		yaml = new Yaml(constructor, representer);
+		yaml = new Yaml(constructor, representer, options);
 	}
 
 	public String dump(KiwiMetadata metadata) {
-		TreeMap<String, Object> map = new TreeMap<>(metadata.map());
-		if (metadata.clientOnly()) {
-			map.put("clientOnly", true);
-		}
-		return yaml.dump(map);
+		return yaml.dump(metadata.dump());
 	}
 
 	public KiwiMetadata load(InputStream is) {

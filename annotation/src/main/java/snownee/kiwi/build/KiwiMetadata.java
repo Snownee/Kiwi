@@ -30,4 +30,15 @@ public record KiwiMetadata(Map<String, List<KiwiAnnotationData>> map, boolean cl
 		return map.getOrDefault(type, List.of());
 	}
 
+	public Map<String, Object> dump() {
+		Map<String, Object> result = new TreeMap<>();
+		for (Map.Entry<String, List<KiwiAnnotationData>> entry : map.entrySet()) {
+			result.put(entry.getKey(), entry.getValue().stream().map(KiwiAnnotationData::dump).toList());
+		}
+		if (clientOnly) {
+			result.put("clientOnly", true);
+		}
+		return result;
+	}
+
 }
