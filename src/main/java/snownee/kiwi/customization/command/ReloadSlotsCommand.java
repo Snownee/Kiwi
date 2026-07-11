@@ -27,7 +27,7 @@ public class ReloadSlotsCommand {
 
 	private static int reload(CommandSourceStack source) {
 		Stopwatch stopwatch = Stopwatch.createStarted();
-		OneTimeLoader.Context context = new OneTimeLoader.Context();
+		OneTimeLoader.Context context = OneTimeLoader.Context.runtime(source.registryAccess(), source.enabledFeatures(), "reload slots command");
 		BlockFundamentals fundamentals = BlockFundamentals.reload(CustomizationHooks.collectKiwiPacks(), context, false);
 		long parseTime = stopwatch.elapsed().toMillis();
 		stopwatch.reset().start();

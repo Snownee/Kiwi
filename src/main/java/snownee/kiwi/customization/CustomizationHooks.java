@@ -15,6 +15,7 @@ import com.google.common.collect.Sets;
 
 import it.unimi.dsi.fastutil.objects.Object2ByteLinkedOpenHashMap;
 import net.minecraft.core.Direction;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -214,7 +215,7 @@ public final class CustomizationHooks {
 
 	public static void initLoader(IEventBus modEventBus) {
 		ResourceManager resourceManager = collectKiwiPacks();
-		OneTimeLoader.Context context = new OneTimeLoader.Context();
+		OneTimeLoader.Context context = OneTimeLoader.Context.unavailable(RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY), "startup");
 		Map<String, CustomizationMetadata> metadataMap = CustomizationMetadata.loadMap(resourceManager, context);
 
 		SoundTypes.refreshWithValues(OneTimeLoader.load(
@@ -444,7 +445,7 @@ public final class CustomizationHooks {
 
 	public static void frozen() {
 		ResourceManager resourceManager = collectKiwiPacks();
-		OneTimeLoader.Context context = new OneTimeLoader.Context();
+		OneTimeLoader.Context context = OneTimeLoader.Context.unavailable(RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY), "common setup");
 		BlockFamilies.reloadResources(resourceManager, context);
 		BuilderRules.reload(resourceManager, context);
 	}
