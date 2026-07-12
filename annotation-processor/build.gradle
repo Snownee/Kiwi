@@ -2,12 +2,6 @@ plugins {
 	id 'java'
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
-    implementation "org.yaml:snakeyaml:${project.snakeyaml_version}"
-
     implementation project(':annotation')
 }
