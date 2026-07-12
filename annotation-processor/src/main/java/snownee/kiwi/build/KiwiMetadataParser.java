@@ -2,6 +2,7 @@ package snownee.kiwi.build;
 
 import java.io.InputStream;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
@@ -32,7 +33,9 @@ public class KiwiMetadataParser {
 	}
 
 	public String dump(KiwiMetadata metadata) {
-		return yaml.dump(metadata.dump());
+		TreeMap<String, Object> map = new TreeMap<>(metadata.map());
+		map.put("useDataModule", metadata.useDataModule());
+		return yaml.dump(map);
 	}
 
 	public KiwiMetadata load(InputStream is) {

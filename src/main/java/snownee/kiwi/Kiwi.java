@@ -304,7 +304,7 @@ public class Kiwi {
 				continue;
 			}
 
-			if (!metadata.clientOnly()) {
+			if (metadata.useDataModule()) {
 				enableDataModule();
 			}
 			for (KiwiAnnotationData module : metadata.get("modules")) {
