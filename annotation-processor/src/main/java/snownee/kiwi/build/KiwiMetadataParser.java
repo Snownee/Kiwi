@@ -31,7 +31,7 @@ public class KiwiMetadataParser {
 
 	public String dump(KiwiMetadata metadata) {
 		TreeMap<String, Object> map = new TreeMap<>(metadata.map());
-		map.put("clientOnly", metadata.clientOnly());
+		map.put("useDataModule", metadata.useDataModule());
 		return yaml.dump(map);
 	}
 

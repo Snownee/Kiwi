@@ -133,7 +133,7 @@ tasks.withType(JavaCompile).configureEach {
     // Minecraft 1.18 (1.18-pre2) upwards uses Java 17.
     it.options.release = 21
 
-    it.options.compilerArgs.add("-Akiwi.clientOnlyMod")
+//    it.options.compilerArgs.add("-Akiwi.useDataModule")
 }
 
 java {
