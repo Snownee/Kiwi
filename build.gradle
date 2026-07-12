@@ -61,9 +61,6 @@ dependencies {
     implementation shadowCommon(project(':annotation')) {
         transitive(false)
     }
-    implementation shadowCommon(project(':annotation-processor')) {
-        transitive(false)
-    }
     annotationProcessor project(':annotation-processor')
 
     implementation "com.google.code.findbugs:jsr305:3.0.2"

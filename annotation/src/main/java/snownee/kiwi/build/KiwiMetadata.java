@@ -3,13 +3,14 @@ package snownee.kiwi.build;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import snownee.kiwi.KiwiAnnotationData;
 
 public record KiwiMetadata(Map<String, List<KiwiAnnotationData>> map, boolean clientOnly) {
 
 	public KiwiMetadata(boolean clientOnly) {
-		this(new HashMap<>(), clientOnly);
+		this(new TreeMap<>(), clientOnly);
 	}
 
 	public static KiwiMetadata of(Map<String, Object> raw) {
@@ -27,6 +28,17 @@ public record KiwiMetadata(Map<String, List<KiwiAnnotationData>> map, boolean cl
 
 	public List<KiwiAnnotationData> get(String type) {
 		return map.getOrDefault(type, List.of());
+	}
+
+	public Map<String, Object> dump() {
+		Map<String, Object> result = new TreeMap<>();
+		for (Map.Entry<String, List<KiwiAnnotationData>> entry : map.entrySet()) {
+			result.put(entry.getKey(), entry.getValue().stream().map(KiwiAnnotationData::dump).toList());
+		}
+		if (clientOnly) {
+			result.put("clientOnly", true);
+		}
+		return result;
 	}
 
 }
