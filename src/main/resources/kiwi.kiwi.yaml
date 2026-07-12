@@ -1,73 +1,72 @@
-clientOnly: true
 conditions:
-  - data:
+  - target: snownee.kiwi.customization.CustomizationHooks
+    data:
       method: shouldLoad
       value:
         - block_components
         - block_templates
         - item_templates
         - builder_rules
-    target: snownee.kiwi.customization.CustomizationHooks
-  - data:
+  - target: snownee.kiwi.data.DataModule
+    data:
       method: shouldLoad
       value:
         - data
-    target: snownee.kiwi.data.DataModule
-  - data:
+  - target: snownee.kiwi.test.TestCondition
+    data:
       method: test
       value:
         - test
-    target: snownee.kiwi.test.TestCondition
 configs:
-  - data:
+  - target: snownee.kiwi.customization.block.behavior.KSitCommonConfig
+    data:
       value: ksit-common
-    target: snownee.kiwi.customization.block.behavior.KSitCommonConfig
-  - data:
+  - target: snownee.kiwi.KiwiClientConfig
+    data:
       type: CLIENT
-    target: snownee.kiwi.KiwiClientConfig
   - target: snownee.kiwi.KiwiCommonConfig
-  - data:
+  - target: snownee.kiwi.minieffects.MiniEffectsConfig
+    data:
       type: CLIENT
       value: minieffects
-    target: snownee.kiwi.minieffects.MiniEffectsConfig
-  - data:
+  - target: snownee.kiwi.test.TestConfig
+    data:
       type: COMMON
       value: test
-    target: snownee.kiwi.test.TestConfig
 modules:
-  - data:
+  - target: snownee.kiwi.contributor.Contributors
+    data:
       value: contributors
-    target: snownee.kiwi.contributor.Contributors
-  - data:
+  - target: snownee.kiwi.customization.block.loader.KBlockComponents
+    data:
       value: block_components
-    target: snownee.kiwi.customization.block.loader.KBlockComponents
-  - data:
+  - target: snownee.kiwi.customization.block.loader.KBlockTemplates
+    data:
       value: block_templates
-    target: snownee.kiwi.customization.block.loader.KBlockTemplates
-  - data:
+  - target: snownee.kiwi.customization.builder.BuilderRuleTypes
+    data:
       value: builder_rules
-    target: snownee.kiwi.customization.builder.BuilderRuleTypes
-  - data:
+  - target: snownee.kiwi.customization.item.loader.KItemTemplates
+    data:
       value: item_templates
-    target: snownee.kiwi.customization.item.loader.KItemTemplates
-  - data:
+  - target: snownee.kiwi.data.DataModule
+    data:
       value: data
-    target: snownee.kiwi.data.DataModule
-  - data:
+  - target: snownee.kiwi.test.TestModule
+    data:
       value: test
-    target: snownee.kiwi.test.TestModule
-  - data:
+  - target: snownee.kiwi.test.TestModule2
+    data:
       dependencies: minecraft;@kiwi:test
       modId: kiwi
       value: test2
-    target: snownee.kiwi.test.TestModule2
 optionals:
-  - data:
+  - target: snownee.kiwi.test.TestModule
+    data:
       defaultEnabled: false
-    target: snownee.kiwi.test.TestModule
-  - data:
+  - target: snownee.kiwi.test.TestModule2
+    data:
       defaultEnabled: false
-    target: snownee.kiwi.test.TestModule2
 packets:
   - target: snownee.kiwi.contributor.network.CSetCosmeticPacket
   - target: snownee.kiwi.contributor.network.SSyncCosmeticPacket

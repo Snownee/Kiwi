@@ -39,7 +39,7 @@ import snownee.kiwi.KiwiAnnotationData;
 				"snownee.kiwi.Mod"})
 @SupportedOptions(
 		{
-				"kiwi.clientOnlyMod"
+				"kiwi.useDataModule"
 		})
 @SuppressWarnings({"unchecked"})
 public class KiwiAnnotationProcessor extends AbstractProcessor {
@@ -51,7 +51,7 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 		}
 		Messager messager = processingEnv.getMessager();
 		messager.printMessage(Kind.NOTE, "KiwiAnnotationProcessor is processing");
-		KiwiMetadata metadata = new KiwiMetadata(processingEnv.getOptions().containsKey("kiwi.clientOnlyMod"));
+		KiwiMetadata metadata = new KiwiMetadata(processingEnv.getOptions().containsKey("kiwi.useDataModule"));
 		String modId = null;
 		for (TypeElement annotation : annotations) {
 			String className = annotation.toString();
