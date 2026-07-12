@@ -5,7 +5,7 @@ import java.util.function.Function;
 import com.mojang.serialization.DataResult;
 
 public final class KCodecs {
-	private static final Function<Object, Object> UNSUPPORTED_GETTER = s -> {
+	private static final Function<Object, Object> UNSUPPORTED_GETTER = _ -> {
 		throw new UnsupportedOperationException("Serialization is not supported for this field");
 	};
 

@@ -11,6 +11,8 @@ import java.util.regex.Pattern;
 import org.jspecify.annotations.Nullable;
 
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Dynamic;
 
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.EnvType;
@@ -21,7 +23,10 @@ import net.fabricmc.fabric.api.registry.FlattenableBlockRegistry;
 import net.fabricmc.fabric.api.registry.StrippableBlockRegistry;
 import net.fabricmc.fabric.api.registry.TillableBlockRegistry;
 import net.fabricmc.fabric.api.registry.VillagerInteractionRegistries;
+import net.fabricmc.fabric.api.resource.conditions.v1.ResourceCondition;
+import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
+import net.fabricmc.fabric.impl.resource.conditions.ResourceConditionsImpl;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.resources.language.I18n;
@@ -30,6 +35,8 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerEntity;
 import net.minecraft.tags.TagKey;
@@ -181,6 +188,34 @@ public final class Platform implements DedicatedServerModInitializer {
 
 	public static void registerVillagerFood(ItemLike item, int value) {
 		VillagerInteractionRegistries.registerFood(item, value);
+	}
+
+	@SuppressWarnings("UnstableApiUsage")
+	public static boolean applyResourceConditions(Identifier file, Dynamic<?> dynamic, RegistryOps.@Nullable RegistryInfoLookup lookup) {
+		boolean debugLogEnabled = ResourceConditionsImpl.LOGGER.isDebugEnabled();
+
+		Optional<? extends Dynamic<?>> optionalDynamic = dynamic.get(ResourceConditions.CONDITIONS_KEY).result();
+		if (optionalDynamic.isPresent()) {
+			DataResult<ResourceCondition> conditions = ResourceCondition.CONDITION_CODEC.parse(optionalDynamic.get());
+
+			if (conditions.isSuccess()) {
+				boolean matched = conditions.getOrThrow().test(lookup);
+
+				if (debugLogEnabled) {
+					String verdict = matched ? "Allowed" : "Rejected";
+					ResourceConditionsImpl.LOGGER.debug("{} resource of file {}", verdict, file);
+				}
+
+				return !matched;
+			} else {
+				ResourceConditionsImpl.LOGGER.error(
+						"Failed to parse resource conditions for file {}, skipping: {}",
+						file,
+						conditions.error().orElseThrow().message());
+			}
+		}
+
+		return false;
 	}
 
 	@Override

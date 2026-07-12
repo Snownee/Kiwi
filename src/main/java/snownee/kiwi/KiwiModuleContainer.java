@@ -170,7 +170,7 @@ public final class KiwiModuleContainer {
 					}
 				}
 				register(go);
-				if (go.resourceKey().isFor(Registries.MOB_EFFECT)) {
+				if (Kiwi.registryLookup.instantRegistries.contains(go.resourceKey().registryKey())) {
 					BiConsumer<KiwiModuleContainer, KiwiGO<?>> decorator = module.decorators.get(go.resourceKey().registryKey());
 					if (decorator != null) {
 						decorator.accept(this, go);
@@ -195,7 +195,7 @@ public final class KiwiModuleContainer {
 	}
 
 	public void registerGameObjects(ResourceKey<? extends Registry<?>> registryKey) {
-		if (Registries.MOB_EFFECT == registryKey) {
+		if (Kiwi.registryLookup.instantRegistries.contains(registryKey)) {
 			// Potion's constructor wants a Holder<MobEffect>, early loading it
 			return;
 		}
@@ -216,6 +216,10 @@ public final class KiwiModuleContainer {
 				if (builder == null) {
 					builder = new Item.Properties();
 				}
+				if (builder.id == null) {
+					builder.setId(ResourceKey.create(Registries.ITEM, e.key()));
+				}
+				builder.useBlockDescriptionPrefix();
 				BlockItem item;
 				if (e.get() instanceof IKiwiBlock kiwiBlock) {
 					item = kiwiBlock.createItem(builder);

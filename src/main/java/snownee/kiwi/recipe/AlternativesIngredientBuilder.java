@@ -1,47 +1,69 @@
 package snownee.kiwi.recipe;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
+
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredient;
-import net.minecraft.core.HolderGetter;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 
-public class AlternativesIngredientBuilder {
-	private final HolderGetter<Item> lookup;
-	List<Ingredient> ingredients = Lists.newArrayList();
+public class AlternativesIngredientBuilder implements CustomIngredient {
+	private HolderLookup.@Nullable Provider registries;
+	private List<JsonElement> options = Lists.newArrayList();
+	private boolean allowEmpty;
 
-	public AlternativesIngredientBuilder(HolderGetter<Item> lookup) {
-		this.lookup = lookup;
+	public static AlternativesIngredientBuilder of(HolderLookup.Provider registries) {
+		return new AlternativesIngredientBuilder(registries);
 	}
 
-	public static AlternativesIngredientBuilder of(HolderGetter<Item> lookup) {
-		return new AlternativesIngredientBuilder(lookup);
+	public AlternativesIngredientBuilder(List<JsonElement> options) {
+		this.options = Lists.newArrayList(options);
+	}
+
+	public AlternativesIngredientBuilder(HolderLookup.Provider registries) {
+		this.registries = registries;
 	}
 
 	public AlternativesIngredientBuilder add(Ingredient ingredient) {
-		ingredients.add(ingredient);
+		if (allowEmpty) {
+			throw new IllegalStateException("Cannot add options after allowEmpty() has been called");
+		}
+		RegistryOps<JsonElement> ops = Objects.requireNonNull(registries).createSerializationContext(JsonOps.INSTANCE);
+		options.add(Ingredient.CODEC.encodeStart(ops, ingredient).result().orElseThrow());
 		return this;
 	}
 
 	public AlternativesIngredientBuilder add(ItemLike itemLike) {
-		ingredients.add(Ingredient.of(itemLike));
+		add(Ingredient.of(itemLike));
 		return this;
 	}
 
 	public AlternativesIngredientBuilder add(TagKey<Item> tag) {
-		ingredients.add(RecipeUtil.tagIngredient(lookup, tag));
+		add(RecipeUtil.tagIngredient(Objects.requireNonNull(registries).lookupOrThrow(Registries.ITEM), tag));
 		return this;
 	}
 
@@ -54,18 +76,65 @@ public class AlternativesIngredientBuilder {
 		if (tagOrItem.startsWith("#")) {
 			add(TagKey.create(Registries.ITEM, Identifier.parse(tagOrItem.substring(1))));
 		} else {
-			Item item = lookup.getOrThrow(ResourceKey.create(Registries.ITEM, Identifier.parse(tagOrItem))).value();
+			Item item = Objects.requireNonNull(registries)
+					.getOrThrow(ResourceKey.create(Registries.ITEM, Identifier.parse(tagOrItem)))
+					.value();
 			Preconditions.checkState(item != Items.AIR);
 			add(item);
 		}
+
 		return this;
 	}
 
-	public AlternativesIngredient build() {
-		List<JsonElement> list = Lists.newArrayListWithExpectedSize(ingredients.size());
-		for (Ingredient ingredient : ingredients) {
-			list.add(Ingredient.CODEC.encodeStart(JsonOps.INSTANCE, ingredient).result().orElseThrow());
+	public AlternativesIngredientBuilder allowEmpty() {
+		if (allowEmpty) {
+			throw new IllegalStateException("allowEmpty() has already been called");
 		}
-		return new AlternativesIngredient(list);
+		allowEmpty = true;
+		options.add(new JsonArray());
+		return this;
+	}
+
+	@Override
+	public boolean test(ItemStack stack) {
+		return false;
+	}
+
+	@Override
+	public Stream<Holder<Item>> items() {
+		return Stream.empty();
+	}
+
+	@Override
+	public boolean requiresTesting() {
+		return false;
+	}
+
+	@Override
+	public CustomIngredientSerializer<?> getSerializer() {
+		return Serializer.INSTANCE;
+	}
+
+	public enum Serializer implements CustomIngredientSerializer<AlternativesIngredientBuilder> {
+		INSTANCE;
+
+		public static final MapCodec<AlternativesIngredientBuilder> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+				Codec.list(ExtraCodecs.JSON).fieldOf("options").forGetter(o -> o.options)
+		).apply(i, AlternativesIngredientBuilder::new));
+
+		@Override
+		public Identifier getIdentifier() {
+			return AlternativesIngredient.ID;
+		}
+
+		@Override
+		public MapCodec<AlternativesIngredientBuilder> getCodec() {
+			return CODEC;
+		}
+
+		@Override
+		public StreamCodec<RegistryFriendlyByteBuf, AlternativesIngredientBuilder> getStreamCodec() {
+			throw new UnsupportedOperationException();
+		}
 	}
 }

@@ -16,9 +16,11 @@ import net.minecraft.client.color.block.BlockTintSource;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.level.block.Block;
+import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.client.SmartKey;
 
 public final class ClientProxy {
+	public static final boolean clothConfig = Platform.isModLoaded("cloth-config");
 
 	public static void registerColors(Context context, List<Pair<Block, List<BlockTintSource>>> blocksToAdd) {
 		for (var pair : blocksToAdd) {

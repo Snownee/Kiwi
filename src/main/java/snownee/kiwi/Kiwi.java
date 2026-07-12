@@ -175,11 +175,18 @@ public class Kiwi {
 		registryLookup.registries.put(baseClass, registry);
 	}
 
+	public static void registerInstantRegistry(ResourceKey<? extends Registry<?>> registry) {
+		Objects.requireNonNull(registryLookup);
+		registryLookup.instantRegistries.add(registry);
+	}
+
 	@SuppressWarnings("RedundantThrows")
 	private static void registerRegistries() throws Exception {
 //		if (!Platform.isProduction()) {
 //			RegistryNameScanner.run();
 //		}
+		registerInstantRegistry(Registries.MOB_EFFECT);
+
 		registerRegistry(Registries.ACTIVITY, Activity.class);
 		registerRegistry(Registries.ATTRIBUTE, Attribute.class);
 		registerRegistry(Registries.BLOCK_ENTITY_TYPE, BlockEntityType.class);
@@ -317,7 +324,7 @@ public class Kiwi {
 				continue;
 			}
 
-			if (!metadata.clientOnly()) {
+			if (metadata.useDataModule()) {
 				enableDataModule();
 			}
 			for (KiwiAnnotationData module : metadata.get("modules")) {
@@ -429,7 +436,7 @@ public class Kiwi {
 					}
 				}
 			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException |
-					 ClassNotFoundException e) {
+			         ClassNotFoundException e) {
 				LOGGER.error(MARKER, "Failed to access to LoadingCondition: %s".formatted(k), e);
 			}
 		});

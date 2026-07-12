@@ -99,9 +99,9 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 	public CompletableFuture<?> run(CachedOutput writer) {
 		TreeMap<String, String> translationEntries = new TreeMap<>();
 		return this.registryLookup.thenCompose(lookup -> {
-			preGenerate(translationEntries);
-			generateModNameAndDescription(translationEntries);
-			generateConfigEntries(translationEntries);
+			preGenerate(lookup, translationEntries);
+			generateModNameAndDescription(lookup, translationEntries);
+			generateConfigEntries(lookup, translationEntries);
 			generateTranslations(
 					lookup, (String key, String value) -> {
 						Objects.requireNonNull(key);
@@ -123,7 +123,7 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 			} else if (createPath("en_us.existing", "json").map(Files::exists).orElse(false)) {
 				putExistingTranslations(translationBuilder);
 			}
-			postGenerate(translationEntries);
+			postGenerate(lookup, translationEntries);
 
 			JsonObject langEntryJson = new JsonObject();
 
@@ -135,11 +135,11 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 		});
 	}
 
-	protected void postGenerate(TreeMap<String, String> translationEntries) {}
+	protected void postGenerate(HolderLookup.Provider lookup, TreeMap<String, String> translationEntries) {}
 
-	protected void preGenerate(TreeMap<String, String> translationEntries) {}
+	protected void preGenerate(HolderLookup.Provider lookup, TreeMap<String, String> translationEntries) {}
 
-	protected void generateConfigEntries(Map<String, String> translationEntries) {
+	protected void generateConfigEntries(HolderLookup.Provider lookup, TreeMap<String, String> translationEntries) {
 		for (ConfigHandler handler : KiwiConfigManager.allConfigs) {
 			if (!Objects.equals(handler.getModId(), packOutput.getModId())) {
 				continue;
@@ -177,7 +177,7 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 		}
 	}
 
-	protected void generateGameObjectsEntries(HolderLookup.Provider lookup, Map<String, String> translationEntries) {
+	protected void generateGameObjectsEntries(HolderLookup.Provider lookup, TreeMap<String, String> translationEntries) {
 		generateGameObjectEntries(translationEntries, lookup, Registries.BLOCK, Block::getDescriptionId);
 		generateGameObjectEntries(translationEntries, lookup, Registries.ITEM, Item::getDescriptionId);
 		generateGameObjectEntries(translationEntries, lookup, Registries.ENTITY_TYPE, EntityType::getDescriptionId);
@@ -194,7 +194,7 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 		generateGameObjectEntries(translationEntries, lookup, Registries.MOB_EFFECT, MobEffect::getDescriptionId);
 	}
 
-	protected void generateModNameAndDescription(Map<String, String> translationEntries) {
+	protected void generateModNameAndDescription(HolderLookup.Provider lookup, TreeMap<String, String> translationEntries) {
 		String modId = packOutput.getModId();
 		translationEntries.put("modmenu.nameTranslation.%s".formatted(modId), Platform.getModName(modId));
 		String description = Platform.getModDescription(modId);
@@ -203,7 +203,7 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 	}
 
 	protected <T> void generateGameObjectEntries(
-			Map<String, String> translationEntries,
+			TreeMap<String, String> translationEntries,
 			HolderLookup.Provider lookup,
 			ResourceKey<Registry<T>> registryKey,
 			Function<T, @Nullable String> keyMapper) {

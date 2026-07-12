@@ -4,13 +4,12 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import org.apache.commons.lang3.NotImplementedException;
-
 import com.google.common.collect.Maps;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ColorRGBA;
@@ -23,6 +22,8 @@ import net.minecraft.world.level.block.FenceGateBlock;
 import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.StandingSignBlock;
+import net.minecraft.world.level.block.TintedParticleLeavesBlock;
+import net.minecraft.world.level.block.UntintedParticleLeavesBlock;
 import net.minecraft.world.level.block.WallHangingSignBlock;
 import net.minecraft.world.level.block.WallSignBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -33,6 +34,7 @@ import snownee.kiwi.customization.block.BasicBlock;
 import snownee.kiwi.customization.block.KBlockSettings;
 import snownee.kiwi.customization.duck.KBlockProperties;
 import snownee.kiwi.util.codec.CustomizationCodecs;
+import snownee.kiwi.util.codec.KCodecs;
 
 public class BlockCodecs {
 	private static final Map<Identifier, MapCodec<Block>> CODECS = Maps.newHashMap();
@@ -60,8 +62,8 @@ public class BlockCodecs {
 	).apply(instance, ColoredFallingBlock::new));
 
 	public static final MapCodec<ButtonBlock> BUTTON = RecordCodecBuilder.mapCodec(instance -> instance.group(
-			BlockSetType.CODEC.fieldOf("block_set_type").forGetter(BlockCodecs::notImplemented),
-			Codec.intRange(1, 1024).optionalFieldOf("ticks_to_stay_pressed").forGetter(BlockCodecs::notImplemented),
+			BlockSetType.CODEC.fieldOf("block_set_type").forGetter(KCodecs.unsupportedGetter()),
+			Codec.intRange(1, 1024).optionalFieldOf("ticks_to_stay_pressed").forGetter(KCodecs.unsupportedGetter()),
 			Block.propertiesCodec()
 	).apply(
 			instance,
@@ -70,7 +72,7 @@ public class BlockCodecs {
 			}));
 
 	public static final MapCodec<SaplingBlock> SAPLING = RecordCodecBuilder.mapCodec(instance -> instance.group(
-			CustomizationCodecs.TREE_GROWER.fieldOf("tree").forGetter(BlockCodecs::notImplemented),
+			CustomizationCodecs.TREE_GROWER.fieldOf("tree").forGetter(KCodecs.unsupportedGetter()),
 			Block.propertiesCodec()
 	).apply(instance, SaplingBlock::new));
 
@@ -85,6 +87,17 @@ public class BlockCodecs {
 		register("wall_hanging_sign", woodTyped(WallHangingSignBlock::new));
 		register("ceiling_hanging_sign", woodTyped(CeilingHangingSignBlock::new));
 		register("sapling", SAPLING);
+		register(
+				"tinted_particle_leaves", RecordCodecBuilder.<TintedParticleLeavesBlock>mapCodec(instance -> instance.group(
+						Codec.FLOAT.optionalFieldOf("leaf_particle_chance", 0.01F).forGetter(KCodecs.unsupportedGetter()),
+						Block.propertiesCodec()
+				).apply(instance, TintedParticleLeavesBlock::new)));
+		register(
+				"untinted_particle_leaves", RecordCodecBuilder.<UntintedParticleLeavesBlock>mapCodec(instance -> instance.group(
+						Codec.FLOAT.optionalFieldOf("leaf_particle_chance", 0.01F).forGetter(KCodecs.unsupportedGetter()),
+						ParticleTypes.CODEC.fieldOf("leaf_particle").forGetter(KCodecs.unsupportedGetter()),
+						Block.propertiesCodec()
+				).apply(instance, UntintedParticleLeavesBlock::new)));
 	}
 
 	public static void register(String key, MapCodec<? extends Block> codec) {
@@ -103,10 +116,6 @@ public class BlockCodecs {
 		}
 		//noinspection unchecked
 		return (MapCodec<Block>) BuiltInRegistries.BLOCK_TYPE.getValue(key);
-	}
-
-	public static <O, A> A notImplemented(O block) {
-		throw new NotImplementedException();
 	}
 
 	public static <T extends Block> MapCodec<T> woodTyped(BiFunction<WoodType, Block.Properties, T> factory) {

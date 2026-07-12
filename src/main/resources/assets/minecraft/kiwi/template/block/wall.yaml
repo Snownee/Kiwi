@@ -1,4 +1,2 @@
-type: simple
-class: net.minecraft.world.level.block.WallBlock
 properties:
   copy: cobblestone_wall

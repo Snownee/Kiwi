@@ -1,5 +1,3 @@
-type: simple
-class: net.minecraft.world.level.block.LeavesBlock
+codec: tinted_particle_leaves
 properties:
-  render_type: cutout_mipped
   copy: oak_leaves

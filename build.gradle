@@ -90,7 +90,7 @@ processResources {
 tasks.withType(JavaCompile).configureEach {
     it.options.encoding = "UTF-8"
     it.options.release = 25
-    it.options.compilerArgs.add("-Akiwi.clientOnlyMod")
+//    it.options.compilerArgs.add("-Akiwi.useDataModule")
 }
 
 tasks.withType(Jar).configureEach {

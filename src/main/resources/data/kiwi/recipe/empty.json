@@ -1,11 +1,5 @@
 {
-	"type": "kiwi:shapeless",
-	"fabric:load_conditions": [
-		{
-			"condition": "kiwi:eval",
-			"ex": "has('kiwi') && EmptyLavaBucket ?? false"
-		}
-	],
+	"type": "crafting_shapeless",
 	"ingredients": [
 		{
 			"fabric:type": "kiwi:alternatives",
@@ -13,17 +7,14 @@
 				{
 					"fabric:type": "error"
 				},
-				{
-					"tag": "random_nonexistant_tag"
-				}
+				"#random_nonexistant_tag",
+				[]
 			]
 		},
-		{
-			"tag": "anvil"
-		}
+		"lava_bucket"
 	],
 	"result": {
-		"id": "minecraft:bucket"
+		"id": "bucket"
 	},
-	"no_containers": true
+	"kiwi:no_remainders": true
 }

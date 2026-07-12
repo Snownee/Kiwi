@@ -31,7 +31,7 @@ public class ModBlockItem extends BlockItem implements ItemCategoryFiller {
 	public static final Set<BlockEntityType<?>> INSTANT_UPDATE_TILES = Platform.isPhysicalClient() ? Sets.newHashSet() : null;
 
 	public ModBlockItem(Block block, Properties builder) {
-		super(block, builder);
+		super(block, builder.useBlockDescriptionPrefix());
 	}
 
 	@Override

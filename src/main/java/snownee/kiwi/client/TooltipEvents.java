@@ -4,12 +4,14 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.IntConsumer;
 import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.serialization.Codec;
 
@@ -19,12 +21,14 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
@@ -32,6 +36,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.EntityType;
@@ -45,6 +50,7 @@ import net.minecraft.world.level.block.Blocks;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiClientConfig;
 import snownee.kiwi.config.KiwiConfigManager;
+import snownee.kiwi.item.ModBlockItem;
 import snownee.kiwi.item.ModItem;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.KUtil;
@@ -52,6 +58,7 @@ import snownee.kiwi.util.client.SmartKey;
 
 public final class TooltipEvents {
 	public static final Identifier DISABLE_DEBUG_TOOLTIP = Kiwi.id("disable_debug_tooltip");
+	public static final Set<Item> CUSTOM_TOOLTIP_ITEMS = Sets.newConcurrentHashSet();
 	private static final DebugTooltipCache cache = new DebugTooltipCache();
 	private static boolean firstSeenDebugTooltip = true;
 	private static long latestPressF3;
@@ -63,12 +70,15 @@ public final class TooltipEvents {
 	}
 
 	public static void globalTooltip(ItemStack stack, List<Component> tooltip, TooltipFlag flag) {
-		if (KiwiClientConfig.globalTooltip) {
+		Item item = stack.getItem();
+		//TODO improve it in future versions
+		if (KiwiClientConfig.globalTooltip || item instanceof ModItem || item instanceof ModBlockItem ||
+				CUSTOM_TOOLTIP_ITEMS.contains(item)) {
 			ModItem.addTip(stack, tooltip, flag);
 		}
 	}
 
-	public static void debugTooltip(ItemStack itemStack, List<Component> tooltip, TooltipFlag flag) {
+	public static void debugTooltip(ItemStack itemStack, Item.TooltipContext context, TooltipFlag flag, List<Component> tooltip) {
 		if (!flag.isAdvanced()) {
 			return;
 		}
@@ -82,55 +92,11 @@ public final class TooltipEvents {
 			mc.keyboardHandler.setClipboard(component.getString());
 			mc.player.sendSystemMessage(KUtil.clickToCopy(component));
 			if (KiwiClientConfig.printDataComponentsWhenCopy) {
-				List<DataComponentType<?>> list = itemStack.getComponents()
-						.keySet()
-						.stream()
-						.sorted(Comparator.<DataComponentType<?>, Boolean>comparing(DataComponentType::isTransient)
-								.thenComparing($ -> Objects.equals(
-										itemStack.getComponents().get($),
-										DataComponents.COMMON_ITEM_COMPONENTS.get($)))
-								.thenComparing($ -> Objects.requireNonNull(BuiltInRegistries.DATA_COMPONENT_TYPE.getKey($))))
-						.toList();
-				Font font = Minecraft.getInstance().font;
-				for (DataComponentType<?> type : list) {
-					Identifier id = Objects.requireNonNull(BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(type));
-					Component hoverText;
-					boolean isTransient = type.isTransient();
-					if (isTransient) {
-						hoverText = Component.literal("<transient>");
-					} else {
-						//noinspection unchecked
-						hoverText = NbtUtils.toPrettyComponent(((Codec<Object>) type.codecOrThrow())
-								.encodeStart(NbtOps.INSTANCE, itemStack.get(type)).getOrThrow()).copy().withStyle(ChatFormatting.WHITE);
-					}
-					ChatFormatting color;
-					if (isTransient) {
-						color = ChatFormatting.YELLOW;
-					} else if (Objects.equals(itemStack.getComponents().get(type), DataComponents.COMMON_ITEM_COMPONENTS.get(type))) {
-						color = ChatFormatting.GRAY;
-					} else {
-						color = ChatFormatting.GREEN;
-					}
-					Component value;
-					if (font.width(hoverText) > 300) {
-						FormattedText text = font.substrByWidth(hoverText, 300);
-						List<MutableComponent> parts = Lists.newArrayList();
-						text.visit(
-								(style, s) -> {
-									parts.add(Component.literal(s).setStyle(style));
-									return Optional.empty();
-								}, Style.EMPTY);
-						value = parts.stream().reduce(Component.empty(), MutableComponent::append).append(Component.literal("...")
-								.withStyle(ChatFormatting.GRAY));
-					} else {
-						value = hoverText;
-					}
-
-					mc.player.sendSystemMessage(
-							KUtil.clickToCopy(
-									Component.literal("- %s: ".formatted(id)).withStyle(color).append(value),
-									hoverText,
-									hoverText.getString()));
+				try {
+					printDataComponents(itemStack, context.registries());
+				} catch (Exception e) {
+					mc.player.sendSystemMessage(Component.literal("Failed to print data components: " + e));
+					Kiwi.LOGGER.error("Failed to print data components", e);
 				}
 			}
 			mc.debugEntries.toggleDebugOverlay();
@@ -162,6 +128,63 @@ public final class TooltipEvents {
 				trySendTipMsg(mc);
 				cache.appendTagsTooltip(tooltip);
 			}
+		}
+	}
+
+	private static void printDataComponents(ItemStack itemStack, HolderLookup.@Nullable Provider registries) {
+		if (registries == null) {
+			return;
+		}
+		List<DataComponentType<?>> list = itemStack.getComponents()
+				.keySet()
+				.stream()
+				.sorted(Comparator.<DataComponentType<?>, Boolean>comparing(DataComponentType::isTransient)
+						.thenComparing($ -> Objects.equals(
+								itemStack.getComponents().get($),
+								DataComponents.COMMON_ITEM_COMPONENTS.get($)))
+						.thenComparing($ -> Objects.requireNonNull(BuiltInRegistries.DATA_COMPONENT_TYPE.getKey($))))
+				.toList();
+		Font font = Minecraft.getInstance().font;
+		RegistryOps<Tag> ops = registries.createSerializationContext(NbtOps.INSTANCE);
+		for (DataComponentType<?> type : list) {
+			Identifier id = Objects.requireNonNull(BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(type));
+			Component hoverText;
+			boolean isTransient = type.isTransient();
+			if (isTransient) {
+				hoverText = Component.literal("<transient>");
+			} else {
+				//noinspection unchecked
+				hoverText = NbtUtils.toPrettyComponent(((Codec<Object>) type.codecOrThrow())
+						.encodeStart(ops, itemStack.get(type)).getOrThrow()).copy().withStyle(ChatFormatting.WHITE);
+			}
+			ChatFormatting color;
+			if (isTransient) {
+				color = ChatFormatting.YELLOW;
+			} else if (Objects.equals(itemStack.getComponents().get(type), DataComponents.COMMON_ITEM_COMPONENTS.get(type))) {
+				color = ChatFormatting.GRAY;
+			} else {
+				color = ChatFormatting.GREEN;
+			}
+			Component value;
+			if (font.width(hoverText) > 300) {
+				FormattedText text = font.substrByWidth(hoverText, 300);
+				List<MutableComponent> parts = Lists.newArrayList();
+				text.visit(
+						(style, s) -> {
+							parts.add(Component.literal(s).setStyle(style));
+							return Optional.empty();
+						}, Style.EMPTY);
+				value = parts.stream().reduce(Component.empty(), MutableComponent::append).append(Component.literal("...")
+						.withStyle(ChatFormatting.GRAY));
+			} else {
+				value = hoverText;
+			}
+
+			Objects.requireNonNull(Minecraft.getInstance().player).sendSystemMessage(
+					KUtil.clickToCopy(
+							Component.literal("- %s: ".formatted(id)).withStyle(color).append(value),
+							hoverText,
+							hoverText.getString()));
 		}
 	}
 

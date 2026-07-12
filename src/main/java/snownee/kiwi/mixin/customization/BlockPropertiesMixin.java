@@ -14,7 +14,7 @@ import com.mojang.serialization.Codec;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import snownee.kiwi.customization.block.KBlockSettings;
 import snownee.kiwi.customization.block.loader.BuiltInBlockTemplate;
-import snownee.kiwi.customization.block.loader.InjectedCodec;
+import snownee.kiwi.customization.InjectedCodec;
 import snownee.kiwi.customization.duck.KBlockProperties;
 
 @Mixin(BlockBehaviour.Properties.class)

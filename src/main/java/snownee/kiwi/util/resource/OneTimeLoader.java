@@ -21,9 +21,11 @@ import com.mojang.serialization.JavaOps;
 import com.mojang.serialization.JsonOps;
 
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import snownee.kiwi.Kiwi;
+import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.KEval;
 import snownee.kiwi.util.KUtil;
 
@@ -50,7 +52,7 @@ public class OneTimeLoader {
 				continue;
 			}
 			if (result.error().isPresent()) {
-				Kiwi.LOGGER.error("Failed to parse " + key + ": " + result.error().get());
+				Kiwi.LOGGER.error("Failed to parse {}: {}", key, result.error().get());
 				continue;
 			}
 			Identifier id = lister.fileToId(key);
@@ -64,7 +66,7 @@ public class OneTimeLoader {
 			String directory,
 			Identifier id,
 			Codec<T> codec,
-			@Nullable Context context) {
+			Context context) {
 		var fileToIdConverter = AlternativesFileToIdConverter.yamlOrJson(directory);
 		Identifier file = fileToIdConverter.idToFile(id);
 		Optional<Resource> resource = resourceManager.getResource(file);
@@ -76,17 +78,13 @@ public class OneTimeLoader {
 			return null;
 		}
 		if (result.error().isPresent()) {
-			Kiwi.LOGGER.error("Failed to parse " + file + ": " + result.error().get());
+			Kiwi.LOGGER.error("Failed to parse {}: {}", file, result.error().get());
 			return null;
 		}
 		return result.result().orElseThrow();
 	}
 
-	public static <T> @Nullable DataResult<T> parseFile(
-			Identifier file,
-			Resource resource,
-			Codec<T> codec,
-			@Nullable Context context) {
+	public static <T> @Nullable DataResult<T> parseFile(Identifier file, Resource resource, Codec<T> codec, Context context) {
 		String ext = file.getPath().substring(file.getPath().length() - 5);
 		try (BufferedReader reader = resource.openAsReader()) {
 			Dynamic<?> dynamic;
@@ -99,17 +97,14 @@ public class OneTimeLoader {
 			} else {
 				return DataResult.error(() -> "Unknown extension: " + ext);
 			}
-			if (context != null) {
-				Optional<String> condition = dynamic.get("condition").asString().result();
-				if (condition.isPresent()) {
-					try {
-						Expression expression = context.getExpression(condition.get());
-						if (expression.evaluate().getBooleanValue() != Boolean.FALSE) {
-							return null;
-						}
-					} catch (Exception e) {
-						Kiwi.LOGGER.error("Failed to parse condition in " + file + ": " + e);
-					}
+			if (Platform.applyResourceConditions(file, dynamic, context.registryInfo)) {
+				return null;
+			}
+			Optional<String> condition = dynamic.get("kiwi:condition").asString().result();
+			if (condition.isPresent()) {
+				Expression expression = context.getExpression(condition.get());
+				if (expression.evaluate().getBooleanValue() != Boolean.FALSE) {
+					return null;
 				}
 			}
 			return codec.parse(dynamic);
@@ -119,8 +114,16 @@ public class OneTimeLoader {
 	}
 
 	public static class Context {
+		public static final Context EMPTY = new Context();
 		private @Nullable Map<String, Expression> cachedExpressions;
 		private @Nullable Set<String> disabledNamespaces;
+		private RegistryOps.@Nullable RegistryInfoLookup registryInfo;
+
+		public Context() {}
+
+		public Context(RegistryOps.@Nullable RegistryInfoLookup registryInfo) {
+			this.registryInfo = registryInfo;
+		}
 
 		public Expression getExpression(String expression) {
 			if (cachedExpressions == null) {
