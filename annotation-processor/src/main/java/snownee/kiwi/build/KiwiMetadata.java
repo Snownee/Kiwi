@@ -3,14 +3,13 @@ package snownee.kiwi.build;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import snownee.kiwi.KiwiAnnotationData;
 
-public record KiwiMetadata(Map<String, List<KiwiAnnotationData>> map, boolean clientOnly) {
+public record KiwiMetadata(Map<String, List<KiwiAnnotationData>> map, boolean useDataModule) {
 
-	public KiwiMetadata(boolean clientOnly) {
-		this(new TreeMap<>(), clientOnly);
+	public KiwiMetadata(boolean useDataModule) {
+		this(new HashMap<>(), useDataModule);
 	}
 
 	public static KiwiMetadata of(Map<String, Object> raw) {
@@ -23,7 +22,7 @@ public record KiwiMetadata(Map<String, List<KiwiAnnotationData>> map, boolean cl
 				map.put(key, (List<KiwiAnnotationData>) value);
 			}
 		}
-		return new KiwiMetadata(map, (Boolean) raw.getOrDefault("clientOnly", false));
+		return new KiwiMetadata(map, (Boolean) raw.getOrDefault("useDataModule", false));
 	}
 
 	public List<KiwiAnnotationData> get(String type) {
