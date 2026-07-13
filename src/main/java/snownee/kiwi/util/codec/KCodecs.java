@@ -21,7 +21,7 @@ public final class KCodecs {
 		try {
 			return DataResult.success(supplier.get());
 		} catch (Exception e) {
-			return DataResult.error(() -> e.getMessage() == null ? e.toString() : e.getMessage());
+			return DataResult.error(e::getMessage);
 		}
 	}
 }

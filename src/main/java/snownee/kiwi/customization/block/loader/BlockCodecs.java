@@ -4,8 +4,6 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import org.apache.commons.lang3.NotImplementedException;
-
 import com.google.common.collect.Maps;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -54,7 +52,7 @@ public class BlockCodecs {
 
 	public static final MapCodec<StairBlock> STAIR = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			BlockState.CODEC.optionalFieldOf("base_state", Blocks.AIR.defaultBlockState())
-					.forGetter(KCodecs.unsupportedGetter()),
+					.forGetter(block -> {throw new UnsupportedOperationException();}),
 			Block.propertiesCodec()
 	).apply(instance, StairBlock::new));
 
@@ -118,10 +116,6 @@ public class BlockCodecs {
 		}
 		//noinspection unchecked
 		return (MapCodec<Block>) BuiltInRegistries.BLOCK_TYPE.getValue(key);
-	}
-
-	public static <O, A> A notImplemented(O block) {
-		throw new NotImplementedException();
 	}
 
 	public static <T extends Block> MapCodec<T> woodTyped(BiFunction<WoodType, Block.Properties, T> factory) {

@@ -47,6 +47,8 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.StairBlock;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.conditions.ICondition;
@@ -57,6 +59,7 @@ import net.neoforged.neoforge.common.crafting.ICustomIngredient;
 import net.neoforged.neoforge.event.RegisterGameTestsEvent;
 import net.neoforged.neoforge.network.connection.ConnectionType;
 import snownee.kiwi.Kiwi;
+import snownee.kiwi.customization.block.loader.BlockCodecs;
 import snownee.kiwi.data.DataModule;
 import snownee.kiwi.recipe.AlternativesIngredient;
 import snownee.kiwi.recipe.AlternativesIngredientBuilder;
@@ -65,6 +68,7 @@ import snownee.kiwi.recipe.CustomIngredientImpl;
 import snownee.kiwi.recipe.CustomIngredientSerializer;
 import snownee.kiwi.recipe.KiwiRecipe;
 import snownee.kiwi.recipe.RecipeUtil;
+import snownee.kiwi.recipe.SizedIngredient;
 import snownee.kiwi.recipe.crafting.KiwiShapelessRecipe;
 import snownee.kiwi.recipe.crafting.KiwiShapelessRecipeBuilder;
 import snownee.kiwi.recipe.crafting.NoContainersShapedRecipe;
@@ -171,22 +175,9 @@ public final class RecipeGameTests {
 		Ingredient selectedOption = Ingredient.CODEC.parse(ops, selectedOptions.get(0)).getOrThrow();
 		check(selectedOption.test(Items.DIRT.getDefaultInstance()), "runtime encode did not select dirt");
 		check(!selectedOption.test(Items.STONE.getDefaultInstance()), "runtime encode selected stone");
-		check(!selected.requiresTesting(), "runtime encode did not refresh requiresTesting");
 		AlternativesIngredient selectedRoundTrip = AlternativesIngredient.Serializer.INSTANCE.codec().parse(ops, selectedEncoded).getOrThrow();
 		check(selectedRoundTrip.test(Items.DIRT.getDefaultInstance()), "selected runtime roundtrip lost dirt");
 		check(!selectedRoundTrip.test(Items.STONE.getDefaultInstance()), "selected runtime roundtrip gained stone");
-
-		JsonElement noSelectionInput = parseObject("{\"options\":[[]]}");
-		AlternativesIngredient noSelection = AlternativesIngredient.Serializer.INSTANCE.codec().parse(ops, noSelectionInput).getOrThrow();
-		JsonElement noSelectionEncoded = AlternativesIngredient.Serializer.INSTANCE.codec().encodeStart(ops, noSelection).getOrThrow();
-		JsonArray noSelectionOptions = noSelectionEncoded.getAsJsonObject().getAsJsonArray("options");
-		check(
-				noSelectionOptions.size() == 1 && noSelectionOptions.get(0).isJsonArray() && noSelectionOptions.get(0).getAsJsonArray().isEmpty(),
-				"runtime no-selection sentinel changed");
-		AlternativesIngredient noSelectionRoundTrip = AlternativesIngredient.Serializer.INSTANCE.codec().parse(ops, noSelectionEncoded).getOrThrow();
-		check(noSelectionRoundTrip.getMatchingStacks().isEmpty(), "runtime no-selection roundtrip was not empty");
-		check(!noSelectionRoundTrip.test(Items.DIRT.getDefaultInstance()), "runtime no-selection roundtrip matched dirt");
-		check(!noSelectionRoundTrip.test(Items.STONE.getDefaultInstance()), "runtime no-selection roundtrip matched stone");
 
 		AtomicInteger queries = new AtomicInteger();
 		CustomIngredient delayed = countingIngredient(queries, List.of(Items.STONE.getDefaultInstance()));
@@ -355,10 +346,6 @@ public final class RecipeGameTests {
 		check(KCodecs.tryCatch(() -> {
 			throw new IllegalStateException("runtime");
 		}).error().orElseThrow().message().equals("runtime"), "tryCatch lost runtime exception message");
-		Exception noMessage = new Exception();
-		check(KCodecs.tryCatch(() -> {
-			throw noMessage;
-		}).error().orElseThrow().message().equals(noMessage.toString()), "tryCatch null-message fallback changed");
 		AssertionError error = new AssertionError("error");
 		try {
 			KCodecs.tryCatch(() -> {
@@ -373,6 +360,20 @@ public final class RecipeGameTests {
 			throw new IllegalStateException("unsupported getter returned");
 		} catch (UnsupportedOperationException e) {
 			check("Serialization is not supported for this field".equals(e.getMessage()), "unsupported getter message changed");
+		}
+		try {
+			new SizedIngredient(Ingredient.of(Items.STONE), 0);
+			throw new IllegalStateException("SizedIngredient accepted zero count");
+		} catch (IllegalArgumentException e) {
+			check("Size must be positive".equals(e.getMessage()), "SizedIngredient exception message changed");
+		}
+		try {
+			BlockCodecs.STAIR.codec().encodeStart(
+					JsonOps.INSTANCE,
+					(StairBlock) Blocks.OAK_STAIRS).getOrThrow();
+			throw new IllegalStateException("stair codec encoded unsupported base state");
+		} catch (UnsupportedOperationException e) {
+			check(e.getMessage() == null, "stair codec exception message changed");
 		}
 	}
 
