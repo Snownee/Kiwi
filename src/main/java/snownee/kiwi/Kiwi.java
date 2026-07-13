@@ -140,8 +140,17 @@ public class Kiwi implements ClientModInitializer, DedicatedServerModInitializer
     private static Multimap<String, KiwiAnnotationData> moduleData = ArrayListMultimap.create();
     private static Map<KiwiAnnotationData, String> conditions = Maps.newHashMap();
     private static boolean tagsUpdated;
-    public static boolean enableDataModule;
-    private static boolean initialized;
+	public static boolean enableDataModule = initDataModuleWorkaround();
+	private static boolean initialized;
+
+	public static boolean initDataModuleWorkaround() {
+		for (String s : List.of("lychee", "snowrealmagic", "xkdeco", "lightingwand", "passablefoliage")) {
+			if (Platform.isModLoaded(s)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
     public static ResourceLocation id(String path) {
         return ResourceLocation.fromNamespaceAndPath(ID, path);
