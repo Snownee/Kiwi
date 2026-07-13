@@ -134,14 +134,23 @@ public class Kiwi {
 	public static final String ID = "kiwi";
 	public static final RegistryLookup registryLookup = new RegistryLookup();
 	static final Marker MARKER = MarkerFactory.getMarker("INIT");
-	private static final Map<String, ResourceKey<CreativeModeTab>> GROUPS = Maps.newHashMap();
 	public static final Logger LOGGER = LogUtils.getLogger();
 	private static @Nullable Map<Identifier, Boolean> defaultOptions = Maps.newHashMap();
 	public static @Nullable MinecraftServer currentServer;
 	private static @Nullable Multimap<String, KiwiAnnotationData> moduleData = ArrayListMultimap.create();
 	private static @Nullable Map<KiwiAnnotationData, String> conditions = Maps.newHashMap();
-	public static boolean enableDataModule;
 	private static LoadingStage stage = LoadingStage.UNINITED;
+	private static final Map<String, ResourceKey<CreativeModeTab>> GROUPS = Maps.newHashMap();
+	public static boolean enableDataModule = initDataModuleWorkaround();
+
+	public static boolean initDataModuleWorkaround() {
+		for (String s : List.of("lychee", "snowrealmagic", "xkdeco", "lightingwand", "passablefoliage")) {
+			if (Platform.isModLoaded(s)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	public static Identifier id(String path) {
 		return Identifier.fromNamespaceAndPath(ID, path);
