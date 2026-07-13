@@ -2,6 +2,8 @@ package snownee.kiwi.util.client;
 
 import java.util.function.BooleanSupplier;
 
+import org.lwjgl.glfw.GLFW;
+
 import com.mojang.blaze3d.platform.InputConstants;
 
 import net.minecraft.client.KeyMapping;
@@ -9,6 +11,7 @@ import net.minecraft.util.Util;
 
 public class SmartKey extends KeyMapping {
 	//	private static final Logger LOGGER = LogUtils.getLogger();
+	private static final boolean ON_OSX = Util.getPlatform() == Util.OS.OSX;
 	private static final long SHORT_PRESS_MAX_MS = 200;
 	private static final long DOUBLE_PRESS_INTERVAL_MS = 200;
 	private static final long LONG_PRESS_MIN_MS = 400;
@@ -121,7 +124,9 @@ public class SmartKey extends KeyMapping {
 
 	public static boolean hasControlDown() {
 		var window = net.minecraft.client.Minecraft.getInstance().getWindow();
-		return InputConstants.isKeyDown(window, InputConstants.KEY_LCONTROL) || InputConstants.isKeyDown(window, InputConstants.KEY_RCONTROL);
+		int left = ON_OSX ? GLFW.GLFW_KEY_LEFT_SUPER : InputConstants.KEY_LCONTROL;
+		int right = ON_OSX ? GLFW.GLFW_KEY_RIGHT_SUPER : InputConstants.KEY_RCONTROL;
+		return InputConstants.isKeyDown(window, left) || InputConstants.isKeyDown(window, right);
 	}
 
 	public static boolean hasAltDown() {
