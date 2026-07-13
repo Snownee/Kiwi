@@ -68,6 +68,7 @@ import snownee.kiwi.recipe.RecipeUtil;
 import snownee.kiwi.recipe.crafting.KiwiShapelessRecipe;
 import snownee.kiwi.recipe.crafting.KiwiShapelessRecipeBuilder;
 import snownee.kiwi.recipe.crafting.NoContainersShapedRecipe;
+import snownee.kiwi.util.codec.KCodecs;
 
 @EventBusSubscriber(modid = Kiwi.ID)
 public final class RecipeGameTests {
@@ -102,6 +103,7 @@ public final class RecipeGameTests {
 				case NO_REMAINDERS -> noRemainders(helper);
 				case CONDITIONAL_CODEC -> conditionalCodec(helper);
 				case LEGACY_COMPAT -> legacyCompat(helper);
+				case KCODECS -> kCodecs();
 			}
 			String id = "kiwi:alternatives/" + testCase.id;
 			Kiwi.LOGGER.info("KIWI_GAMETEST_PASS {}", id);
@@ -318,6 +320,35 @@ public final class RecipeGameTests {
 				Ingredient.of(Items.STONE), Ingredient.of(Items.COBBLESTONE)));
 	}
 
+	private static void kCodecs() {
+		check(KCodecs.tryCatch(() -> "success").getOrThrow().equals("success"), "tryCatch lost successful value");
+		check(KCodecs.tryCatch(() -> {
+			throw new Exception("checked");
+		}).error().orElseThrow().message().equals("checked"), "tryCatch lost checked exception message");
+		check(KCodecs.tryCatch(() -> {
+			throw new IllegalStateException("runtime");
+		}).error().orElseThrow().message().equals("runtime"), "tryCatch lost runtime exception message");
+		Exception noMessage = new Exception();
+		check(KCodecs.tryCatch(() -> {
+			throw noMessage;
+		}).error().orElseThrow().message().equals(noMessage.toString()), "tryCatch null-message fallback changed");
+		AssertionError error = new AssertionError("error");
+		try {
+			KCodecs.tryCatch(() -> {
+				throw error;
+			});
+			throw new IllegalStateException("tryCatch swallowed Error");
+		} catch (AssertionError actual) {
+			check(actual == error, "tryCatch changed Error");
+		}
+		try {
+			KCodecs.<Object, Object>unsupportedGetter().apply(new Object());
+			throw new IllegalStateException("unsupported getter returned");
+		} catch (UnsupportedOperationException e) {
+			check("Serialization is not supported for this field".equals(e.getMessage()), "unsupported getter message changed");
+		}
+	}
+
 	private static ShapelessRecipe shapeless(List<Ingredient> ingredients) {
 		return new ShapelessRecipe(
 				new Recipe.CommonInfo(true),
@@ -390,7 +421,8 @@ public final class RecipeGameTests {
 		SHAPELESS_STABILITY("shapeless_stability"),
 		NO_REMAINDERS("no_remainders"),
 		CONDITIONAL_CODEC("conditional_codec"),
-		LEGACY_COMPAT("legacy_compat");
+		LEGACY_COMPAT("legacy_compat"),
+		KCODECS("kcodecs");
 
 		private static final Codec<TestCase> CODEC = Codec.STRING.xmap(
 				name -> valueOf(name.toUpperCase(Locale.ROOT)),
