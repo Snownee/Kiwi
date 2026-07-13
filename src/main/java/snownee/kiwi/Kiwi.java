@@ -146,7 +146,16 @@ public class Kiwi {
 	private static Map<KiwiAnnotationData, String> conditions = Maps.newHashMap();
 	private static LoadingStage stage = LoadingStage.UNINITED;
 	private static final Map<String, ResourceKey<CreativeModeTab>> GROUPS = Maps.newHashMap();
-	public static boolean enableDataModule;
+	public static boolean enableDataModule = initDataModuleWorkaround();
+
+	public static boolean initDataModuleWorkaround() {
+		for (String s : List.of("lychee", "snowrealmagic", "xkdeco", "lightingwand", "passablefoliage")) {
+			if (Platform.isModLoaded(s)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	public static ResourceLocation id(String path) {
 		return ResourceLocation.fromNamespaceAndPath(ID, path);
