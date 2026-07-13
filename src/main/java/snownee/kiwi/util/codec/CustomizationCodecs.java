@@ -28,7 +28,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
-import snownee.kiwi.customization.block.loader.BlockCodecs;
 
 public class CustomizationCodecs {
 	public static final BiMap<String, NoteBlockInstrument> INSTRUMENTS = HashBiMap.create();
@@ -56,20 +55,20 @@ public class CustomizationCodecs {
 	public static final Codec<TreeGrower> TREE_GROWER = Codec.withAlternative(
 			TreeGrower.CODEC,
 			RecordCodecBuilder.create(instance -> instance.group(
-					Codec.STRING.fieldOf("name").forGetter(BlockCodecs::notImplemented),
-					Codec.FLOAT.optionalFieldOf("secondary_chance", 0F).forGetter(BlockCodecs::notImplemented),
-					ResourceKey.codec(Registries.CONFIGURED_FEATURE).optionalFieldOf("mega_tree").forGetter(BlockCodecs::notImplemented),
+					Codec.STRING.fieldOf("name").forGetter(KCodecs.unsupportedGetter()),
+					Codec.FLOAT.optionalFieldOf("secondary_chance", 0F).forGetter(KCodecs.unsupportedGetter()),
+					ResourceKey.codec(Registries.CONFIGURED_FEATURE).optionalFieldOf("mega_tree").forGetter(KCodecs.unsupportedGetter()),
 					ResourceKey.codec(Registries.CONFIGURED_FEATURE)
 							.optionalFieldOf("secondary_mega_tree")
-							.forGetter(BlockCodecs::notImplemented),
-					ResourceKey.codec(Registries.CONFIGURED_FEATURE).optionalFieldOf("tree").forGetter(BlockCodecs::notImplemented),
+							.forGetter(KCodecs.unsupportedGetter()),
+					ResourceKey.codec(Registries.CONFIGURED_FEATURE).optionalFieldOf("tree").forGetter(KCodecs.unsupportedGetter()),
 					ResourceKey.codec(Registries.CONFIGURED_FEATURE)
 							.optionalFieldOf("secondary_tree")
-							.forGetter(BlockCodecs::notImplemented),
-					ResourceKey.codec(Registries.CONFIGURED_FEATURE).optionalFieldOf("flowers").forGetter(BlockCodecs::notImplemented),
+							.forGetter(KCodecs.unsupportedGetter()),
+					ResourceKey.codec(Registries.CONFIGURED_FEATURE).optionalFieldOf("flowers").forGetter(KCodecs.unsupportedGetter()),
 					ResourceKey.codec(Registries.CONFIGURED_FEATURE)
 							.optionalFieldOf("secondary_flowers")
-							.forGetter(BlockCodecs::notImplemented)
+							.forGetter(KCodecs.unsupportedGetter())
 			).apply(instance, TreeGrower::new)));
 	// TODO BlockPredicate has its own Codec now.
 	//  However, to use that, you need to wrap your JsonOps into RegistryOps, which requires a HolderLookup.Provider.

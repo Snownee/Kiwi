@@ -36,6 +36,7 @@ import snownee.kiwi.customization.block.BasicBlock;
 import snownee.kiwi.customization.block.KBlockSettings;
 import snownee.kiwi.customization.duck.KBlockProperties;
 import snownee.kiwi.util.codec.CustomizationCodecs;
+import snownee.kiwi.util.codec.KCodecs;
 
 public class BlockCodecs {
 	private static final Map<Identifier, MapCodec<Block>> CODECS = Maps.newHashMap();
@@ -53,7 +54,7 @@ public class BlockCodecs {
 
 	public static final MapCodec<StairBlock> STAIR = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			BlockState.CODEC.optionalFieldOf("base_state", Blocks.AIR.defaultBlockState())
-					.forGetter(block -> {throw new UnsupportedOperationException();}),
+					.forGetter(KCodecs.unsupportedGetter()),
 			Block.propertiesCodec()
 	).apply(instance, StairBlock::new));
 
@@ -63,8 +64,8 @@ public class BlockCodecs {
 	).apply(instance, ColoredFallingBlock::new));
 
 	public static final MapCodec<ButtonBlock> BUTTON = RecordCodecBuilder.mapCodec(instance -> instance.group(
-			BlockSetType.CODEC.fieldOf("block_set_type").forGetter(BlockCodecs::notImplemented),
-			Codec.intRange(1, 1024).optionalFieldOf("ticks_to_stay_pressed").forGetter(BlockCodecs::notImplemented),
+			BlockSetType.CODEC.fieldOf("block_set_type").forGetter(KCodecs.unsupportedGetter()),
+			Codec.intRange(1, 1024).optionalFieldOf("ticks_to_stay_pressed").forGetter(KCodecs.unsupportedGetter()),
 			Block.propertiesCodec()
 	).apply(
 			instance,
@@ -73,7 +74,7 @@ public class BlockCodecs {
 			}));
 
 	public static final MapCodec<SaplingBlock> SAPLING = RecordCodecBuilder.mapCodec(instance -> instance.group(
-			CustomizationCodecs.TREE_GROWER.fieldOf("tree").forGetter(BlockCodecs::notImplemented),
+			CustomizationCodecs.TREE_GROWER.fieldOf("tree").forGetter(KCodecs.unsupportedGetter()),
 			Block.propertiesCodec()
 	).apply(instance, SaplingBlock::new));
 
@@ -90,13 +91,13 @@ public class BlockCodecs {
 		register("sapling", SAPLING);
 		register(
 				"tinted_particle_leaves", RecordCodecBuilder.<TintedParticleLeavesBlock>mapCodec(instance -> instance.group(
-						Codec.FLOAT.optionalFieldOf("leaf_particle_chance", 0.01F).forGetter(BlockCodecs::notImplemented),
+						Codec.FLOAT.optionalFieldOf("leaf_particle_chance", 0.01F).forGetter(KCodecs.unsupportedGetter()),
 						Block.propertiesCodec()
 				).apply(instance, TintedParticleLeavesBlock::new)));
 		register(
 				"untinted_particle_leaves", RecordCodecBuilder.<UntintedParticleLeavesBlock>mapCodec(instance -> instance.group(
-						Codec.FLOAT.optionalFieldOf("leaf_particle_chance", 0.01F).forGetter(BlockCodecs::notImplemented),
-						ParticleTypes.CODEC.fieldOf("leaf_particle").forGetter(BlockCodecs::notImplemented),
+						Codec.FLOAT.optionalFieldOf("leaf_particle_chance", 0.01F).forGetter(KCodecs.unsupportedGetter()),
+						ParticleTypes.CODEC.fieldOf("leaf_particle").forGetter(KCodecs.unsupportedGetter()),
 						Block.propertiesCodec()
 				).apply(instance, UntintedParticleLeavesBlock::new)));
 	}
