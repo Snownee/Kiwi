@@ -125,24 +125,24 @@ public final class RecipeGameTests {
 	private static void codecBuilder(GameTestHelper helper) {
 		RegistryOps<JsonElement> ops = ops(helper);
 		AlternativesIngredientBuilder builder = AlternativesIngredientBuilder.of(items(helper))
-				.add(Items.DIRT)
-				.add(ItemTags.PLANKS)
 				.add((ICustomIngredient) new DifferenceIngredient(Ingredient.of(Items.STONE), Ingredient.of(Items.COBBLESTONE)))
+				.add(Items.DIRT)
 				.allowEmpty();
-		JsonElement inner = AlternativesIngredientBuilder.Serializer.INSTANCE.codec().encodeStart(ops, builder).getOrThrow();
+		JsonElement input = AlternativesIngredientBuilder.Serializer.INSTANCE.codec().encodeStart(ops, builder).getOrThrow();
+		AlternativesIngredientBuilder decodedBuilder = AlternativesIngredientBuilder.Serializer.INSTANCE.codec().parse(ops, input).getOrThrow();
+		JsonElement inner = AlternativesIngredientBuilder.Serializer.INSTANCE.codec().encodeStart(ops, decodedBuilder).getOrThrow();
 		JsonArray options = inner.getAsJsonObject().getAsJsonArray("options");
-		check(options.size() == 4, "builder option count/order changed");
-		check(options.get(3).isJsonArray() && options.get(3).getAsJsonArray().isEmpty(), "allowEmpty sentinel missing");
-		JsonObject outer = inner.getAsJsonObject().deepCopy();
-		outer.addProperty("neoforge:ingredient_type", "kiwi:alternatives");
-		Ingredient decoded = Ingredient.CODEC.parse(ops, outer).getOrThrow();
-		AlternativesIngredient alternatives = unwrap(decoded);
-		JsonObject encoded = Ingredient.CODEC.encodeStart(ops, decoded).getOrThrow().getAsJsonObject();
-		check("kiwi:alternatives".equals(encoded.get("neoforge:ingredient_type").getAsString()), "NeoForge discriminator missing");
-		check(!encoded.has("fabric:type"), "Fabric discriminator leaked");
-		Ingredient roundTrip = Ingredient.CODEC.parse(ops, encoded).getOrThrow();
-		check(unwrap(roundTrip).test(Items.DIRT.getDefaultInstance()), "builder codec roundtrip changed selection");
-		check(alternatives.requiresTesting(), "nested custom candidate must require testing before selection");
+		check(options.size() == 3, "builder option count/order changed");
+		JsonObject difference = options.get(0).getAsJsonObject();
+		check(
+				"neoforge:difference".equals(difference.get("neoforge:ingredient_type").getAsString()),
+				"custom option discriminator changed");
+		Ingredient decodedDifference = Ingredient.CODEC.parse(ops, difference).getOrThrow();
+		check(decodedDifference.getCustomIngredient() instanceof DifferenceIngredient, "custom option failed to decode");
+		Ingredient dirt = Ingredient.CODEC.parse(ops, options.get(1)).getOrThrow();
+		check(dirt.test(Items.DIRT.getDefaultInstance()), "builder dirt option moved");
+		check(!dirt.test(Items.STONE.getDefaultInstance()), "builder dirt option changed");
+		check(options.get(2).isJsonArray() && options.get(2).getAsJsonArray().isEmpty(), "allowEmpty sentinel missing");
 	}
 
 	private static void codecSelection(GameTestHelper helper) {
@@ -160,6 +160,33 @@ public final class RecipeGameTests {
 		check(!alternatives.test(Items.STONE.getDefaultInstance()), "selection was not stable");
 		Ingredient roundTrip = Ingredient.CODEC.parse(ops, Ingredient.CODEC.encodeStart(ops, ingredient).getOrThrow()).getOrThrow();
 		check(roundTrip.test(Items.DIRT.getDefaultInstance()), "selection codec roundtrip failed");
+
+		AlternativesIngredient selected = new AlternativesIngredient(List.of(
+				new DifferenceIngredient(Ingredient.of(Items.STONE), Ingredient.of(Items.STONE)).toVanilla(),
+				Ingredient.of(Items.DIRT)));
+		check(selected.requiresTesting(), "custom candidate was not marked for testing before encode");
+		JsonElement selectedEncoded = AlternativesIngredient.Serializer.INSTANCE.codec().encodeStart(ops, selected).getOrThrow();
+		JsonArray selectedOptions = selectedEncoded.getAsJsonObject().getAsJsonArray("options");
+		check(selectedOptions.size() == 1, "runtime encode retained unresolved options");
+		Ingredient selectedOption = Ingredient.CODEC.parse(ops, selectedOptions.get(0)).getOrThrow();
+		check(selectedOption.test(Items.DIRT.getDefaultInstance()), "runtime encode did not select dirt");
+		check(!selectedOption.test(Items.STONE.getDefaultInstance()), "runtime encode selected stone");
+		check(!selected.requiresTesting(), "runtime encode did not refresh requiresTesting");
+		AlternativesIngredient selectedRoundTrip = AlternativesIngredient.Serializer.INSTANCE.codec().parse(ops, selectedEncoded).getOrThrow();
+		check(selectedRoundTrip.test(Items.DIRT.getDefaultInstance()), "selected runtime roundtrip lost dirt");
+		check(!selectedRoundTrip.test(Items.STONE.getDefaultInstance()), "selected runtime roundtrip gained stone");
+
+		JsonElement noSelectionInput = parseObject("{\"options\":[[]]}");
+		AlternativesIngredient noSelection = AlternativesIngredient.Serializer.INSTANCE.codec().parse(ops, noSelectionInput).getOrThrow();
+		JsonElement noSelectionEncoded = AlternativesIngredient.Serializer.INSTANCE.codec().encodeStart(ops, noSelection).getOrThrow();
+		JsonArray noSelectionOptions = noSelectionEncoded.getAsJsonObject().getAsJsonArray("options");
+		check(
+				noSelectionOptions.size() == 1 && noSelectionOptions.get(0).isJsonArray() && noSelectionOptions.get(0).getAsJsonArray().isEmpty(),
+				"runtime no-selection sentinel changed");
+		AlternativesIngredient noSelectionRoundTrip = AlternativesIngredient.Serializer.INSTANCE.codec().parse(ops, noSelectionEncoded).getOrThrow();
+		check(noSelectionRoundTrip.getMatchingStacks().isEmpty(), "runtime no-selection roundtrip was not empty");
+		check(!noSelectionRoundTrip.test(Items.DIRT.getDefaultInstance()), "runtime no-selection roundtrip matched dirt");
+		check(!noSelectionRoundTrip.test(Items.STONE.getDefaultInstance()), "runtime no-selection roundtrip matched stone");
 
 		AtomicInteger queries = new AtomicInteger();
 		CustomIngredient delayed = countingIngredient(queries, List.of(Items.STONE.getDefaultInstance()));

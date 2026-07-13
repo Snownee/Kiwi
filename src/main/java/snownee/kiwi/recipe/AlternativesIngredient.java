@@ -95,6 +95,7 @@ public class AlternativesIngredient implements CustomIngredient {
 			Kiwi.LOGGER.error("Failed to initialize AlternativesIngredient {}", options, e);
 		} finally {
 			options = List.of();
+			requiresTesting = null;
 		}
 	}
 
@@ -135,6 +136,10 @@ public class AlternativesIngredient implements CustomIngredient {
 
 		@Override
 		public <T> DataResult<AlternativesIngredient> decode(DynamicOps<T> ops, MapLike<T> input) {
+			return decodeOptions(ops, input).map(AlternativesIngredient::new);
+		}
+
+		static <T> DataResult<List<@Nullable Ingredient>> decodeOptions(DynamicOps<T> ops, MapLike<T> input) {
 			T rawOptions = input.get("options");
 			if (rawOptions == null) {
 				return DataResult.error(() -> "No valid ingredient found: missing options");
@@ -162,19 +167,14 @@ public class AlternativesIngredient implements CustomIngredient {
 			if (ingredients.isEmpty()) {
 				return DataResult.error(() -> "No valid ingredient found: " + String.join(", ", errors));
 			}
-			return DataResult.success(new AlternativesIngredient(ingredients));
+			return DataResult.success(ingredients);
 		}
 
 		@Override
 		public <T> RecordBuilder<T> encode(AlternativesIngredient input, DynamicOps<T> ops, RecordBuilder<T> prefix) {
-			Stream<T> encoded;
-			if (!input.options.isEmpty()) {
-				encoded = input.options.stream().map(option -> option == null ? ops.emptyList() :
-						Ingredient.CODEC.encodeStart(ops, option).getOrThrow());
-			} else {
-				encoded = input.wrapped == null ? Stream.of(ops.emptyList()) :
-						Stream.of(Ingredient.CODEC.encodeStart(ops, input.wrapped).getOrThrow());
-			}
+			input.init();
+			Stream<T> encoded = input.wrapped == null ? Stream.of(ops.emptyList()) :
+					Stream.of(Ingredient.CODEC.encodeStart(ops, input.wrapped).getOrThrow());
 			return prefix.add("options", ops.createList(encoded));
 		}
 	}

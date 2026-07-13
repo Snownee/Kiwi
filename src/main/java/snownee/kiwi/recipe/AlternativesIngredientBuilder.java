@@ -151,17 +151,7 @@ public class AlternativesIngredientBuilder implements CustomIngredient {
 
 		@Override
 		public <T> DataResult<AlternativesIngredientBuilder> decode(DynamicOps<T> ops, MapLike<T> input) {
-			return AlternativesIngredient.Serializer.INSTANCE.decode(ops, input).map(ingredient -> {
-				List<@Nullable Ingredient> decoded = Lists.newArrayList();
-				RecordBuilder<T> builder = AlternativesIngredient.Serializer.INSTANCE.encode(ingredient, ops, ops.mapBuilder());
-				T map = builder.build(ops.emptyMap()).getOrThrow();
-				T options = ops.getMap(map).getOrThrow().get("options");
-				for (T option : ops.getStream(options).getOrThrow().toList()) {
-					DataResult<Ingredient> result = Ingredient.CODEC.parse(ops, option);
-					decoded.add(result.isSuccess() ? result.getOrThrow() : null);
-				}
-				return new AlternativesIngredientBuilder(decoded);
-			});
+			return AlternativesIngredient.Serializer.decodeOptions(ops, input).map(AlternativesIngredientBuilder::new);
 		}
 
 		@Override
