@@ -42,8 +42,13 @@ public abstract class BlockEntityTypeMixin {
 		if (object == null) {
 			return false;
 		}
-		if (kiwi$lenientValidBlocks != null && kiwi$lenientValidBlocks.contains(object)) {
-			return true;
+		Set<Block> lenientValidBlocks;
+		//noinspection SynchronizeOnNonFinalField
+		synchronized (validBlocks) {
+			lenientValidBlocks = kiwi$lenientValidBlocks;
+			if (lenientValidBlocks != null && lenientValidBlocks.contains(object)) {
+				return true;
+			}
 		}
 		if (original.call(instance, object)) {
 			return true;
@@ -61,13 +66,14 @@ public abstract class BlockEntityTypeMixin {
 		}
 		for (Block validBlock : validBlocks) {
 			if (validBlock.getClass() == object.getClass()) {
-				if (kiwi$lenientValidBlocks == null) {
-					//noinspection SynchronizeOnNonFinalField
-					synchronized (validBlocks) {
-						kiwi$lenientValidBlocks = Sets.newHashSet(validBlocks);
+				//noinspection SynchronizeOnNonFinalField
+				synchronized (validBlocks) {
+					lenientValidBlocks = kiwi$lenientValidBlocks;
+					if (lenientValidBlocks == null) {
+						lenientValidBlocks = kiwi$lenientValidBlocks = Sets.newHashSet(validBlocks);
 					}
+					lenientValidBlocks.add((Block) object);
 				}
-				kiwi$lenientValidBlocks.add((Block) object);
 				return true;
 			}
 		}
