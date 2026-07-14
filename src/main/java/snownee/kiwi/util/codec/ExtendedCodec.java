@@ -29,10 +29,11 @@ public class ExtendedCodec<A, B> implements Codec<A> {
 		if (result.isError()) {
 			return result;
 		}
-		A value = result.getOrThrow().getFirst();
+		A a = result.getOrThrow().getFirst();
 		return extension.decode(ops, input).map(pair -> {
-			extensionSetter.accept(value, pair.getFirst());
-			return Pair.of(value, pair.getSecond());
+			B b = pair.getFirst();
+			extensionSetter.accept(a, b);
+			return Pair.of(a, pair.getSecond());
 		});
 	}
 
@@ -42,10 +43,10 @@ public class ExtendedCodec<A, B> implements Codec<A> {
 		if (result.isError()) {
 			return result;
 		}
-		B extensionValue = extensionGetter.apply(input);
-		if (extensionValue == null) {
+		B b = extensionGetter.apply(input);
+		if (b == null) {
 			return result;
 		}
-		return extension.encode(extensionValue, ops, result.getOrThrow());
+		return extension.encode(b, ops, result.getOrThrow());
 	}
 }

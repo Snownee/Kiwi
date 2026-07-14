@@ -50,7 +50,7 @@ public final class KPacketSender {
 
 	@Deprecated
 	public static void sendToAllExcept(CustomPacketPayload payload, ServerPlayer player) {
-		sendToAll(payload, player.level().getServer());
+		send(payload, player.level().getServer().getPlayerList().getPlayers().stream().filter(p -> p != player));
 	}
 
 	public static void sendToAround(

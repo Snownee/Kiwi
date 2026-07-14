@@ -7,6 +7,7 @@ import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.datafixers.util.Pair;
 
@@ -36,6 +37,7 @@ import snownee.kiwi.customization.block.loader.BlockDefinitionProperties;
 import snownee.kiwi.customization.block.loader.KBlockDefinition;
 import snownee.kiwi.customization.builder.BuildersButton;
 import snownee.kiwi.customization.builder.ConvertScreen;
+import snownee.kiwi.customization.builder.DebugEntryBuilderMode;
 import snownee.kiwi.customization.command.ExportBlocksCommand;
 import snownee.kiwi.customization.command.ExportCreativeTabsCommand;
 import snownee.kiwi.customization.command.ExportShapesCommand;
@@ -66,7 +68,7 @@ public final class CustomizationClient {
 		forgeEventBus.addListener((RegisterClientCommandsEvent event) -> {
 			LiteralArgumentBuilder<CommandSourceStack> kiwi = Commands.literal("kiwi");
 			LiteralArgumentBuilder<CommandSourceStack> customization = Commands.literal("customization")
-					.requires(source -> true);
+					.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS));
 			LiteralArgumentBuilder<CommandSourceStack> export = Commands.literal("export");
 			ExportBlocksCommand.register(export);
 			ExportShapesCommand.register(export);
@@ -91,7 +93,7 @@ public final class CustomizationClient {
 		});
 
 		Identifier debugEntryId = Kiwi.id("builder_mode");
-		// DebugScreenEntries.register is no longer public in 26.1; the profile map is updated below instead.
+		DebugScreenEntries.register(debugEntryId, new DebugEntryBuilderMode());
 		List<Map.Entry<DebugScreenProfile, Map<Identifier, DebugScreenEntryStatus>>> profiles = DebugScreenEntries.PROFILES.entrySet()
 				.stream()
 				.toList();
@@ -110,30 +112,30 @@ public final class CustomizationClient {
 			Map<Identifier, KItemDefinition> items,
 			Map<Identifier, KBlockDefinition> blocks,
 			ClientProxy.Context context) {
+		Map<Pair<Block, Integer>, BlockTintSource> blockColors = Maps.newHashMap();
 		List<Pair<Block, List<BlockTintSource>>> blocksToAdd = Lists.newArrayList();
+		blocks:
 		for (var entry : blocks.entrySet()) {
 			BlockDefinitionProperties properties = entry.getValue().properties();
-			if (properties.colorProvider().isEmpty()) {
+			if (properties.colorProvider().isEmpty() || properties.colorProvider().get().isEmpty()) {
 				continue;
 			}
 			Block block = BuiltInRegistries.BLOCK.get(entry.getKey()).map($ -> $.value()).orElse(Blocks.AIR);
-			List<Identifier> providers = properties.colorProvider().get();
-			List<BlockTintSource> sources = Lists.newArrayList();
-			for (Identifier colorProvider : providers) {
-				// grass -> short_grass since Minecraft 1.20.3
-				if (Identifier.DEFAULT_NAMESPACE.equals(colorProvider.getNamespace()) && colorProvider.getPath().equals("grass")) {
-					colorProvider = Identifier.withDefaultNamespace("short_grass");
-				}
-				Block providerBlock = BuiltInRegistries.BLOCK.get(colorProvider).map($ -> $.value()).orElse(Blocks.AIR);
+			int layer = 0;
+			List<BlockTintSource> tintSources = Lists.newArrayList();
+			for (Identifier id : properties.colorProvider().get()) {
+				Block providerBlock = BuiltInRegistries.BLOCK.get(id).map($ -> $.value()).orElse(Blocks.AIR);
 				if (providerBlock == Blocks.AIR) {
-					Kiwi.LOGGER.warn("Cannot find color provider block %s for block %s".formatted(colorProvider, entry.getKey()));
-				} else {
-					sources.add(ColorProviderUtil.delegateBlock(providerBlock));
+					Kiwi.LOGGER.warn("Cannot find color provider block %s for block %s".formatted(id, entry.getKey()));
+					continue blocks;
 				}
+
+				tintSources.add(blockColors.computeIfAbsent(
+						Pair.of(providerBlock, layer),
+						$ -> ColorProviderUtil.delegate($.getFirst(), $.getSecond())));
+				layer++;
 			}
-			if (!sources.isEmpty()) {
-				blocksToAdd.add(Pair.of(block, sources));
-			}
+			blocksToAdd.add(Pair.of(block, tintSources));
 		}
 		ClientProxy.registerColors(context, blocksToAdd);
 	}

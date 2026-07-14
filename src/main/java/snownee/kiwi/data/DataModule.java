@@ -5,7 +5,6 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
-import net.neoforged.neoforge.gametest.GameTestHooks;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiCommonConfig;
@@ -39,13 +38,14 @@ public final class DataModule extends AbstractModule {
 			SizedIngredient.SizedSlotDisplay.MAP_CODEC,
 			SizedIngredient.SizedSlotDisplay.STREAM_CODEC));
 
-	public DataModule() {
+	@Override
+	protected void addEntries() {
 		CustomIngredientSerializer.register(Platform.isDataGen() ?
 				AlternativesIngredientBuilder.Serializer.INSTANCE : AlternativesIngredient.Serializer.INSTANCE);
 	}
 
 	@KiwiModule.LoadingCondition("data")
 	public static boolean shouldLoad(LoadingContext ctx) {
-		return Kiwi.enableDataModule || GameTestHooks.isGametestEnabled() || KiwiCommonConfig.getBooleanVar("EnableDataModule");
+		return Kiwi.enableDataModule || KiwiCommonConfig.getBooleanVar("EnableDataModule");
 	}
 }

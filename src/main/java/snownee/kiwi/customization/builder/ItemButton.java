@@ -37,6 +37,7 @@ public class ItemButton extends Button {
 		this.inContainer = inContainer;
 	}
 
+
 	public static Builder builder(ItemStack itemStack, boolean inContainer, OnPress pOnPress) {
 		return new Builder(itemStack, inContainer, pOnPress);
 	}

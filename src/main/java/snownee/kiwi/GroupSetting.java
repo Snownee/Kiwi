@@ -90,16 +90,23 @@ public class GroupSetting {
 		}
 	}
 
-	//TODO test it
 	private static void addAfter(
 			List<ItemStack> toAdd,
 			BuildCreativeModeTabContentsEvent event,
 			Collection<Item> afterItems) {
-		ObjectSortedSet<ItemStack> parentEntries = event.getParentEntries();
+		addAfter(toAdd, event, afterItems, event.getParentEntries(), CreativeModeTab.TabVisibility.PARENT_TAB_ONLY);
+		addAfter(toAdd, event, afterItems, event.getSearchEntries(), CreativeModeTab.TabVisibility.SEARCH_TAB_ONLY);
+	}
+
+	private static void addAfter(
+			List<ItemStack> toAdd,
+			BuildCreativeModeTabContentsEvent event,
+			Collection<Item> afterItems,
+			ObjectSortedSet<ItemStack> entries,
+			CreativeModeTab.TabVisibility visibility) {
 		ItemStack lastFound = ItemStack.EMPTY;
-		for (Item item : afterItems) {
-			ItemStack stack = new ItemStack(item);
-			if (parentEntries.contains(stack)) {
+		for (ItemStack stack : entries) {
+			if (afterItems.contains(stack.getItem())) {
 				lastFound = stack;
 			}
 		}
@@ -108,12 +115,12 @@ public class GroupSetting {
 			ItemStack item = toAdd.get(i);
 			if (i == 0) {
 				if (lastFound.isEmpty()) {
-					event.accept(item, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+					event.accept(item, visibility);
 				} else {
-					event.insertAfter(lastFound, item, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+					event.insertAfter(lastFound, item, visibility);
 				}
 			} else {
-				event.insertAfter(prev, item, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+				event.insertAfter(prev, item, visibility);
 			}
 			prev = item;
 		}

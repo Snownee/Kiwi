@@ -40,7 +40,6 @@ public class AlternativesIngredientBuilder implements CustomIngredient {
 	private AlternativesIngredientBuilder(List<@Nullable Ingredient> ingredients) {
 		this.lookup = null;
 		this.ingredients.addAll(ingredients);
-		this.allowEmpty = ingredients.contains(null);
 	}
 
 	public static AlternativesIngredientBuilder of(HolderGetter<Item> lookup) {

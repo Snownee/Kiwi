@@ -141,16 +141,7 @@ public class Kiwi {
 	private static @Nullable Map<KiwiAnnotationData, String> conditions = Maps.newHashMap();
 	private static LoadingStage stage = LoadingStage.UNINITED;
 	private static final Map<String, ResourceKey<CreativeModeTab>> GROUPS = Maps.newHashMap();
-	public static boolean enableDataModule = initDataModuleWorkaround();
-
-	public static boolean initDataModuleWorkaround() {
-		for (String s : List.of("lychee", "snowrealmagic", "xkdeco", "lightingwand", "passablefoliage")) {
-			if (Platform.isModLoaded(s)) {
-				return true;
-			}
-		}
-		return false;
-	}
+	public static boolean enableDataModule = false;
 
 	public static Identifier id(String path) {
 		return Identifier.fromNamespaceAndPath(ID, path);
@@ -179,7 +170,6 @@ public class Kiwi {
 		registryLookup.instantRegistries.add(registry);
 	}
 
-	//	@SuppressWarnings("rawtypes")
 	private static void registerRegistries() {
 		registerInstantRegistry(Registries.MOB_EFFECT);
 
@@ -298,6 +288,9 @@ public class Kiwi {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+		if (!Platform.isProduction()) {
+			enableDataModule();
+		}
 
 		Map<String, KiwiAnnotationData> classOptionalMap = Maps.newHashMap();
 		String dist = Platform.isPhysicalClient() ? "client" : "server";
@@ -393,10 +386,6 @@ public class Kiwi {
 		modEventBus.addListener(this::postInit);
 		modEventBus.addListener(this::loadComplete);
 		modEventBus.addListener((net.neoforged.neoforge.registries.RegisterEvent event) -> CustomIngredientImpl.onRegister(event));
-//		if (Platform.isModLoaded("fabric_api")) {
-//			modEventBus.addListener(this::gatherData);
-//		}
-		//modEventBus.register(KiwiModules.class); // Cannot register without at least one event listener
 		if (Platform.isPhysicalClient()) {
 			NeoForge.EVENT_BUS.register(ClientInitializer.class);
 		}
@@ -624,7 +613,6 @@ public class Kiwi {
 	private enum LoadingStage {
 		UNINITED, CONSTRUCTING, CONSTRUCTED, INITED;
 	}
-
 
 	private record Info(Identifier id, String className, List<Identifier> moduleRules) {
 		Info(Identifier id, String className) {

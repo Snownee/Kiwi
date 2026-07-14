@@ -29,7 +29,7 @@ public class BlockBehaviourMixin {
 	public BlockBehaviour.Properties properties;
 
 	@Inject(method = "getShadeBrightness", at = @At("HEAD"), cancellable = true)
-	private void kiwi$getShadeBrightness(BlockState state, BlockGetter world, BlockPos pos, CallbackInfoReturnable<Float> cir) {
+	private void kiwi$getShadeBrightness(BlockState state, BlockGetter level, BlockPos pos, CallbackInfoReturnable<Float> cir) {
 		KBlockSettings settings = KBlockSettings.of(this);
 		if (settings != null && settings.glassType != null) {
 			cir.setReturnValue(settings.glassType.shadeBrightness());
@@ -38,22 +38,22 @@ public class BlockBehaviourMixin {
 
 	@Inject(method = "skipRendering", at = @At("HEAD"), cancellable = true)
 	private void kiwi$skipRendering(
-			BlockState pState,
-			BlockState pAdjacentState,
-			Direction pDirection,
+			BlockState state,
+			BlockState neighborState,
+			Direction direction,
 			CallbackInfoReturnable<Boolean> cir) {
 		KBlockSettings settings = KBlockSettings.of(this);
-		if (settings != null && settings.glassType != null && CustomizationHooks.skipGlassRendering(pState, pAdjacentState, pDirection)) {
+		if (settings != null && settings.glassType != null && CustomizationHooks.skipGlassRendering(state, neighborState, direction)) {
 			cir.setReturnValue(true);
 		}
 	}
 
 	@Inject(method = "getVisualShape", at = @At("HEAD"), cancellable = true)
 	private void kiwi$getVisualShape(
-			BlockState pState,
-			BlockGetter pLevel,
-			BlockPos pPos,
-			CollisionContext pContext,
+			BlockState state,
+			BlockGetter level,
+			BlockPos pos,
+			CollisionContext context,
 			CallbackInfoReturnable<VoxelShape> cir) {
 		KBlockSettings settings = KBlockSettings.of(this);
 		if (settings != null && settings.glassType != null) {
@@ -62,41 +62,41 @@ public class BlockBehaviourMixin {
 	}
 
 	@Inject(method = "getFluidState", at = @At("HEAD"), cancellable = true)
-	private void kiwi$getFluidState(BlockState pState, CallbackInfoReturnable<FluidState> cir) {
+	private void kiwi$getFluidState(BlockState state, CallbackInfoReturnable<FluidState> cir) {
 		KBlockSettings settings = KBlockSettings.of(this);
-		if (settings != null && pState.hasProperty(BlockStateProperties.WATERLOGGED)) {
-			cir.setReturnValue(pState.getValue(BlockStateProperties.WATERLOGGED) ?
+		if (settings != null && state.hasProperty(BlockStateProperties.WATERLOGGED)) {
+			cir.setReturnValue(state.getValue(BlockStateProperties.WATERLOGGED) ?
 					Fluids.WATER.getSource(false) :
 					Fluids.EMPTY.defaultFluidState());
 		}
 	}
 
 	@Inject(method = "rotate", at = @At("HEAD"), cancellable = true)
-	private void kiwi$rotate(BlockState pState, Rotation pRotation, CallbackInfoReturnable<BlockState> cir) {
+	private void kiwi$rotate(BlockState state, Rotation rotation, CallbackInfoReturnable<BlockState> cir) {
 		KBlockSettings settings = KBlockSettings.of(this);
 		if (settings != null) {
-			cir.setReturnValue(settings.rotate(pState, pRotation));
+			cir.setReturnValue(settings.rotate(state, rotation));
 		}
 	}
 
 	@Inject(method = "mirror", at = @At("HEAD"), cancellable = true)
-	private void kiwi$mirror(BlockState pState, Mirror pMirror, CallbackInfoReturnable<BlockState> cir) {
+	private void kiwi$mirror(BlockState state, Mirror mirror, CallbackInfoReturnable<BlockState> cir) {
 		KBlockSettings settings = KBlockSettings.of(this);
 		if (settings != null) {
-			cir.setReturnValue(settings.mirror(pState, pMirror));
+			cir.setReturnValue(settings.mirror(state, mirror));
 		}
 	}
 
 	@Inject(method = "useShapeForLightOcclusion", at = @At("HEAD"), cancellable = true)
-	private void kiwi$useShapeForLightOcclusion(BlockState pState, CallbackInfoReturnable<Boolean> cir) {
+	private void kiwi$useShapeForLightOcclusion(BlockState state, CallbackInfoReturnable<Boolean> cir) {
 		KBlockSettings settings = KBlockSettings.of(this);
 		if (settings != null) {
-			cir.setReturnValue(settings.useShapeForLightOcclusion(pState));
+			cir.setReturnValue(settings.useShapeForLightOcclusion(state));
 		}
 	}
 
 	@Inject(method = "hasAnalogOutputSignal", at = @At("HEAD"), cancellable = true)
-	private void kiwi$hasAnalogOutputSignal(BlockState pState, CallbackInfoReturnable<Boolean> cir) {
+	private void kiwi$hasAnalogOutputSignal(BlockState state, CallbackInfoReturnable<Boolean> cir) {
 		KBlockSettings settings = KBlockSettings.of(this);
 		if (settings != null && settings.analogOutputSignal != null) {
 			cir.setReturnValue(true);

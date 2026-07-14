@@ -1,5 +1,7 @@
 package snownee.kiwi.util;
 
+import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -26,8 +28,52 @@ import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
+import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
+import snownee.kiwi.Kiwi;
 
+@EventBusSubscriber(modid = Kiwi.ID)
 public class KiwiEntityTypeBuilder<T extends Entity> {
+	private static final Map<EntityType<?>, Supplier<AttributeSupplier.Builder>> PENDING_ATTRIBUTES = new IdentityHashMap<>();
+	private static final Map<EntityType<?>, SpawnRegistration<?>> PENDING_SPAWN_RESTRICTIONS = new IdentityHashMap<>();
+	private static boolean attributesClosed;
+	private static boolean spawnRestrictionsClosed;
+
+	@SubscribeEvent
+	public static void registerAttributes(EntityAttributeCreationEvent event) {
+		attributesClosed = true;
+		PENDING_ATTRIBUTES.forEach((type, supplier) -> event.put((EntityType<? extends LivingEntity>) type, supplier.get().build()));
+		PENDING_ATTRIBUTES.clear();
+	}
+
+	@SubscribeEvent
+	public static void registerSpawnRestrictions(RegisterSpawnPlacementsEvent event) {
+		spawnRestrictionsClosed = true;
+		PENDING_SPAWN_RESTRICTIONS.forEach((type, registration) -> registerSpawnRestriction(event, type, registration));
+		PENDING_SPAWN_RESTRICTIONS.clear();
+	}
+
+	private static <E extends Entity> void registerSpawnRestriction(
+			RegisterSpawnPlacementsEvent event,
+			EntityType<?> type,
+			SpawnRegistration<?> registration) {
+		SpawnRegistration<E> typed = (SpawnRegistration<E>) registration;
+		event.register(
+				(EntityType<E>) type,
+				typed.location,
+				typed.heightmap,
+				typed.predicate,
+				RegisterSpawnPlacementsEvent.Operation.REPLACE);
+	}
+
+	private record SpawnRegistration<E extends Entity>(
+			SpawnPlacementType location,
+			Heightmap.Types heightmap,
+			SpawnPlacements.SpawnPredicate<E> predicate) {
+	}
+
 	private final Class<?> type;
 	private EntityType.EntityFactory<T> factory;
 	private MobCategory category = MobCategory.MISC;
@@ -195,27 +241,13 @@ public class KiwiEntityTypeBuilder<T extends Entity> {
 	}
 
 	public EntityType<T> build() {
-		//		if (type == Entity.class) {
-		//			builder = FabricEntityTypeBuilder.create();
-		//		} else if (type == LivingEntity.class) {
-		//			FabricEntityTypeBuilder.Living<LivingEntity> rawBuilder = FabricEntityTypeBuilder.createLiving();
-		//			if (this.defaultAttributeBuilder != null) {
-		//				rawBuilder.defaultAttributes(this.defaultAttributeBuilder);
-		//			}
-		//			builder = (FabricEntityTypeBuilder<T>) rawBuilder;
-		//		} else if (type == Mob.class) {
-		//			FabricEntityTypeBuilder.Mob<Mob> rawBuilder = FabricEntityTypeBuilder.createMob();
-		//			if (this.defaultAttributeBuilder != null) {
-		//				rawBuilder.defaultAttributes(this.defaultAttributeBuilder);
-		//			}
-		//			if (this.spawnPredicate != null) {
-		//				rawBuilder.spawnRestriction(this.restrictionLocation, this.restrictionHeightmap, (SpawnPlacements.SpawnPredicate<Mob>) this.spawnPredicate);
-		//			}
-		//			builder = (FabricEntityTypeBuilder<T>) rawBuilder;
-		//		} else {
-		//			throw new IllegalStateException("Unknown entity type: " + type);
-		//		}
-		return new EntityType<T>(
+		final int trackingRange = clientTrackingRange;
+		final int updateRate = updateInterval;
+		final boolean trackVelocity = forceTrackedVelocityUpdates == null || forceTrackedVelocityUpdates;
+		final Supplier<AttributeSupplier.Builder> attributes = defaultAttributeBuilder;
+		final SpawnRegistration<T> spawnRegistration = spawnPredicate == null ? null :
+				new SpawnRegistration<>(restrictionLocation, restrictionHeightmap, spawnPredicate);
+		EntityType<T> entityType = new EntityType<T>(
 				factory,
 				category,
 				serialize,
@@ -225,11 +257,28 @@ public class KiwiEntityTypeBuilder<T extends Entity> {
 				immuneTo,
 				dimensions.withAttachments(attachments),
 				spawnDimensionsScale,
-				clientTrackingRange,
-				updateInterval,
+				trackingRange,
+				updateRate,
 				type.getName(),
 				Optional.empty(),
 				requiredFeatures,
-				true);
+				true,
+				_ -> trackVelocity,
+				_ -> trackingRange,
+				_ -> updateRate,
+				false);
+		if (attributes != null && (attributesClosed || PENDING_ATTRIBUTES.containsKey(entityType))) {
+			throw new IllegalStateException("Default attributes can no longer be queued for this entity type");
+		}
+		if (spawnRegistration != null && (spawnRestrictionsClosed || PENDING_SPAWN_RESTRICTIONS.containsKey(entityType))) {
+			throw new IllegalStateException("Spawn restrictions can no longer be queued for this entity type");
+		}
+		if (attributes != null) {
+			PENDING_ATTRIBUTES.put(entityType, attributes);
+		}
+		if (spawnRegistration != null) {
+			PENDING_SPAWN_RESTRICTIONS.put(entityType, spawnRegistration);
+		}
+		return entityType;
 	}
 }

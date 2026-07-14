@@ -2,7 +2,7 @@ package snownee.kiwi.config;
 
 import java.util.function.Function;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import net.minecraft.client.gui.screens.Screen;
 

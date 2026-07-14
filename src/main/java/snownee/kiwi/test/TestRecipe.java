@@ -32,6 +32,7 @@ public class TestRecipe extends DynamicShapedRecipe {
 		super(category);
 	}
 
+	// optional
 	@Override
 	public boolean matches(CraftingInput input, Level worldIn) {
 		int[] pos = search(input);
@@ -84,10 +85,12 @@ public class TestRecipe extends DynamicShapedRecipe {
 		}
 
 		public static TestRecipe fromNetwork(RegistryFriendlyByteBuf pBuffer) {
+			//TODO customize recipe
 			return DynamicShapedRecipe.Serializer.fromNetwork(TestRecipe::new, pBuffer);
 		}
 
 		public static void toNetwork(RegistryFriendlyByteBuf pBuffer, TestRecipe pRecipe) {
+			//TODO customize recipe
 			DynamicShapedRecipe.Serializer.toNetwork(pBuffer, pRecipe);
 		}
 	}

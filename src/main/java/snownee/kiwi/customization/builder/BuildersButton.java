@@ -12,8 +12,6 @@ import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
@@ -25,7 +23,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
@@ -37,7 +34,6 @@ import snownee.kiwi.customization.block.family.BlockFamily;
 import snownee.kiwi.customization.network.CApplyBuilderRulePacket;
 import snownee.kiwi.customization.network.CConvertItemPacket;
 import snownee.kiwi.network.KPacketSender;
-import snownee.kiwi.util.ClientProxy;
 import snownee.kiwi.util.KHolder;
 
 public class BuildersButton {
@@ -91,21 +87,21 @@ public class BuildersButton {
 		if (KiwiCommonConfig.kSwitchCreativeOnly && !player.hasInfiniteMaterials()) {
 			return false;
 		}
-		if (screen instanceof AbstractContainerScreen<?> containerScreen && containerScreen.getMenu().getCarried().isEmpty()) {
-			Slot slot = ClientProxy.getSlotUnderMouse(containerScreen);
-			if (slot == null || !slot.hasItem() || !slot.allowModification(player)) {
-				return false;
-			}
-			if (screen instanceof CreativeModeInventoryScreen && slot.container != player.getInventory()) {
-				return false;
-			}
-			List<CConvertItemPacket.Group> groups = findConvertGroups(player, slot.getItem());
-			if (groups.isEmpty()) {
-				return false;
-			}
-			ClientProxy.pushScreen(mc, new ConvertScreen(screen, slot, slot.index, groups));
-			return true;
-		}
+//		if (screen instanceof AbstractContainerScreen<?> containerScreen && containerScreen.getMenu().getCarried().isEmpty()) {
+//			Slot slot = ClientProxy.getSlotUnderMouse(containerScreen);
+//			if (slot == null || !slot.hasItem() || !slot.allowModification(player)) {
+//				return false;
+//			}
+//			if (screen instanceof CreativeModeInventoryScreen && slot.container != player.getInventory()) {
+//				return false;
+//			}
+//			List<CConvertItemPacket.Group> groups = findConvertGroups(player, slot.getItem());
+//			if (groups.isEmpty()) {
+//				return false;
+//			}
+//			ClientProxy.pushScreen(mc, new ConvertScreen(screen, slot, slot.index, groups));
+//			return true;
+//		}
 		if (screen != null) {
 			return false;
 		}

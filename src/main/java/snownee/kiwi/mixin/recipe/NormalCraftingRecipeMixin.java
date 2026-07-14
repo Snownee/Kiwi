@@ -12,8 +12,8 @@ public class NormalCraftingRecipeMixin implements KiwiRecipe {
 	private boolean kiwi$noRemainders;
 
 	@Override
-	public void kiwi$setNoRemainders(boolean noRemainders) {
-		kiwi$noRemainders = noRemainders;
+	public void kiwi$setNoRemainders(boolean bl) {
+		kiwi$noRemainders = bl;
 	}
 
 	@Override

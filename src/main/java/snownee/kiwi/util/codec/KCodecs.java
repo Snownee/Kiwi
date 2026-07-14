@@ -5,16 +5,13 @@ import java.util.function.Function;
 import com.mojang.serialization.DataResult;
 
 public final class KCodecs {
-	private static final Function<Object, Object> UNSUPPORTED_GETTER = $ -> {
+	private static final Function<Object, Object> UNSUPPORTED_GETTER = _ -> {
 		throw new UnsupportedOperationException("Serialization is not supported for this field");
 	};
 
-	private KCodecs() {
-	}
-
-	@SuppressWarnings("unchecked")
-	public static <A, B> Function<A, B> unsupportedGetter() {
-		return (Function<A, B>) UNSUPPORTED_GETTER;
+	public static <T, R> Function<T, R> unsupportedGetter() {
+		//noinspection unchecked
+		return (Function<T, R>) UNSUPPORTED_GETTER;
 	}
 
 	public static <T> DataResult<T> tryCatch(ThrowingSupplier<T> supplier) {

@@ -39,7 +39,7 @@ public class AlternativesIngredient implements CustomIngredient {
 
 	public AlternativesIngredient(List<@Nullable Ingredient> options) {
 		Preconditions.checkArgument(!options.isEmpty(), "Options cannot be empty");
-		this.options = new ArrayList<>(options);
+		this.options = options;
 	}
 
 	@Override
@@ -63,7 +63,7 @@ public class AlternativesIngredient implements CustomIngredient {
 	public boolean requiresTesting() {
 		if (requiresTesting == null) {
 			requiresTesting = options.isEmpty() ? wrapped != null && wrapped.getCustomIngredient() != null :
-					options.stream().anyMatch(option -> option != null && option.getCustomIngredient() != null);
+					!options.stream().allMatch(option -> option == null || option.getCustomIngredient() == null);
 		}
 		return requiresTesting;
 	}
@@ -91,7 +91,6 @@ public class AlternativesIngredient implements CustomIngredient {
 				}
 			}
 			options = List.of();
-			requiresTesting = null;
 		} catch (Exception e) {
 			Kiwi.LOGGER.error("Failed to initialize AlternativesIngredient {}", options, e);
 		}
@@ -138,32 +137,24 @@ public class AlternativesIngredient implements CustomIngredient {
 		}
 
 		static <T> DataResult<List<@Nullable Ingredient>> decodeOptions(DynamicOps<T> ops, MapLike<T> input) {
-			T rawOptions = input.get("options");
-			if (rawOptions == null) {
-				return DataResult.error(() -> "No valid ingredient found: missing options");
-			}
-			DataResult<Stream<T>> streamResult = ops.getStream(rawOptions);
-			if (streamResult.isError()) {
-				return DataResult.error(() -> "No valid ingredient found: " + streamResult.error().orElseThrow().message());
-			}
-			List<T> encodedOptions = streamResult.getOrThrow().toList();
-			ArrayList<String> errors = Lists.newArrayListWithExpectedSize(encodedOptions.size());
-			List<@Nullable Ingredient> ingredients = Lists.newArrayListWithExpectedSize(encodedOptions.size());
-			for (T option : encodedOptions) {
+			List<T> options = ops.getStream(Objects.requireNonNull(input.get("options"))).getOrThrow().toList();
+			ArrayList<String> errorMsgs = Lists.newArrayListWithExpectedSize(options.size());
+			List<@Nullable Ingredient> ingredients = Lists.newArrayListWithExpectedSize(options.size());
+			for (T option : options) {
 				DataResult<Ingredient> result = Ingredient.CODEC.parse(ops, option);
 				if (result.isSuccess()) {
 					ingredients.add(result.getOrThrow());
 					continue;
 				}
-				DataResult<Stream<T>> optionStream = ops.getStream(option);
-				if (optionStream.isSuccess() && optionStream.getOrThrow().findAny().isEmpty()) {
+				DataResult<Stream<T>> stream = ops.getStream(option);
+				if (stream.isSuccess() && stream.getOrThrow().toList().isEmpty()) {
 					ingredients.add(null);
 					continue;
 				}
-				errors.add(result.error().map(DataResult.Error::message).orElse("unknown decode error"));
+				errorMsgs.add(result.error().orElseThrow().message());
 			}
 			if (ingredients.isEmpty()) {
-				return DataResult.error(() -> "No valid ingredient found: " + String.join(", ", errors));
+				return DataResult.error(() -> "No valid ingredient found: " + String.join(", ", errorMsgs));
 			}
 			return DataResult.success(ingredients);
 		}
@@ -171,9 +162,11 @@ public class AlternativesIngredient implements CustomIngredient {
 		@Override
 		public <T> RecordBuilder<T> encode(AlternativesIngredient input, DynamicOps<T> ops, RecordBuilder<T> prefix) {
 			input.init();
-			Stream<T> encoded = input.wrapped == null ? Stream.of(ops.emptyList()) :
-					Stream.of(Ingredient.CODEC.encodeStart(ops, input.wrapped).getOrThrow());
-			return prefix.add("options", ops.createList(encoded));
+			return prefix.add(
+					"options",
+					ops.createList(input.wrapped == null ?
+							Stream.empty() :
+							Stream.of(Ingredient.CODEC.encodeStart(ops, input.wrapped).getOrThrow())));
 		}
 	}
 }

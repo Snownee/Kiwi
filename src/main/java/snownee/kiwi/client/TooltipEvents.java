@@ -92,7 +92,12 @@ public final class TooltipEvents {
 			mc.keyboardHandler.setClipboard(component.getString());
 			mc.player.sendSystemMessage(KUtil.clickToCopy(component));
 			if (KiwiClientConfig.printDataComponentsWhenCopy) {
-				printDataComponents(itemStack, context.registries());
+				try {
+					printDataComponents(itemStack, context.registries());
+				} catch (Exception e) {
+					mc.player.sendSystemMessage(Component.literal("Failed to print data components: " + e));
+					Kiwi.LOGGER.error("Failed to print data components", e);
+				}
 			}
 			mc.debugEntries.toggleDebugOverlay();
 		}
@@ -139,8 +144,7 @@ public final class TooltipEvents {
 								DataComponents.COMMON_ITEM_COMPONENTS.get($)))
 						.thenComparing($ -> Objects.requireNonNull(BuiltInRegistries.DATA_COMPONENT_TYPE.getKey($))))
 				.toList();
-		Minecraft mc = Minecraft.getInstance();
-		Font font = mc.font;
+		Font font = Minecraft.getInstance().font;
 		RegistryOps<Tag> ops = registries.createSerializationContext(NbtOps.INSTANCE);
 		for (DataComponentType<?> type : list) {
 			Identifier id = Objects.requireNonNull(BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(type));
@@ -149,15 +153,9 @@ public final class TooltipEvents {
 			if (isTransient) {
 				hoverText = Component.literal("<transient>");
 			} else {
-				try {
-					//noinspection unchecked
-					hoverText = NbtUtils.toPrettyComponent(((Codec<Object>) type.codecOrThrow())
-							.encodeStart(ops, itemStack.get(type)).getOrThrow()).copy().withStyle(ChatFormatting.WHITE);
-				} catch (Exception e) {
-					mc.player.sendSystemMessage(Component.literal("Failed to print data component %s: %s".formatted(id, e)));
-					Kiwi.LOGGER.error("Failed to print data component {}", id, e);
-					continue;
-				}
+				//noinspection unchecked
+				hoverText = NbtUtils.toPrettyComponent(((Codec<Object>) type.codecOrThrow())
+						.encodeStart(ops, itemStack.get(type)).getOrThrow()).copy().withStyle(ChatFormatting.WHITE);
 			}
 			ChatFormatting color;
 			if (isTransient) {
@@ -182,7 +180,7 @@ public final class TooltipEvents {
 				value = hoverText;
 			}
 
-			mc.player.sendSystemMessage(
+			Objects.requireNonNull(Minecraft.getInstance().player).sendSystemMessage(
 					KUtil.clickToCopy(
 							Component.literal("- %s: ".formatted(id)).withStyle(color).append(value),
 							hoverText,

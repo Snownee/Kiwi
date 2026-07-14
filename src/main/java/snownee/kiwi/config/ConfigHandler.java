@@ -95,7 +95,6 @@ public class ConfigHandler {
 	 *
 	 * @return the annotated path, or {@code null} if there is none.
 	 */
-	@Nullable
 	static List<String> getPath(AnnotatedElement annotatedElement) {
 		var path = annotatedElement.getDeclaredAnnotation(snownee.kiwi.config.KiwiConfig.Path.class);
 		if (path != null) {
@@ -344,7 +343,6 @@ public class ConfigHandler {
 	}
 
 	@SuppressWarnings("unchecked")
-	@Nullable
 	public <T> Value<T> get(String path) {
 		return (Value<T>) valueMap.get(path);
 	}
