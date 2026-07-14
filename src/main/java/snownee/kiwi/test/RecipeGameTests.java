@@ -178,14 +178,34 @@ public final class RecipeGameTests {
 		AlternativesIngredient selectedRoundTrip = AlternativesIngredient.Serializer.INSTANCE.codec().parse(ops, selectedEncoded).getOrThrow();
 		check(selectedRoundTrip.test(Items.DIRT.getDefaultInstance()), "selected runtime roundtrip lost dirt");
 		check(!selectedRoundTrip.test(Items.STONE.getDefaultInstance()), "selected runtime roundtrip gained stone");
+		check(!selected.requiresTesting(), "selected vanilla wrapper retained custom testing requirement");
+
+		ArrayList<Ingredient> mutableOptions = new ArrayList<>();
+		mutableOptions.add(Ingredient.of(Items.STONE));
+		AlternativesIngredient copied = new AlternativesIngredient(mutableOptions);
+		mutableOptions.clear();
+		check(copied.test(Items.STONE.getDefaultInstance()), "constructor did not defensively copy options");
 
 		AtomicInteger queries = new AtomicInteger();
 		CustomIngredient delayed = countingIngredient(queries, List.of(Items.STONE.getDefaultInstance()));
+		AlternativesIngredient direct = new AlternativesIngredient(delayed.toVanilla());
+		check(direct.requiresTesting(), "direct custom wrapper was not marked for testing");
+		check(queries.get() == 0, "direct requiresTesting queried matching stacks");
 		AlternativesIngredient lazy = new AlternativesIngredient(List.of(delayed.toVanilla(), Ingredient.of(Items.DIRT)));
 		check(lazy.requiresTesting(), "custom candidate was not marked for testing");
 		check(queries.get() == 0, "requiresTesting eagerly initialized a candidate");
 		check(lazy.test(Items.STONE.getDefaultInstance()), "delayed custom candidate did not select");
 		check(queries.get() == 1, "candidate initialization was not one-shot");
+		check(lazy.test(Items.STONE.getDefaultInstance()) && queries.get() == 1, "selected candidate was queried again");
+
+		AtomicInteger retries = new AtomicInteger();
+		AlternativesIngredient retrying = new AlternativesIngredient(List.of(retryingIngredient(retries).toVanilla()));
+		check(retrying.requiresTesting(), "retrying custom candidate was not marked for testing");
+		check(!retrying.test(Items.STONE.getDefaultInstance()), "transient failure unexpectedly selected a candidate");
+		check(retries.get() == 1 && retrying.requiresTesting(), "transient failure cleared unresolved state");
+		check(retrying.test(Items.STONE.getDefaultInstance()), "candidate was not retried after transient failure");
+		check(retries.get() == 2, "retry count changed after successful selection");
+		check(retrying.test(Items.STONE.getDefaultInstance()) && retries.get() == 2, "successful retry queried candidate again");
 	}
 
 	private static void codecInvalid(GameTestHelper helper) {
@@ -201,6 +221,12 @@ public final class RecipeGameTests {
 		check(malformed.isError(), "malformed alternatives decoded successfully");
 		String error = malformed.error().orElseThrow().message();
 		check(error.contains("No valid ingredient found") && error.contains(","), "candidate errors were not aggregated: " + error);
+		DataResult<Ingredient> missing = Ingredient.CODEC.parse(ops, parseObject(
+				"{\"neoforge:ingredient_type\":\"kiwi:alternatives\"}"));
+		check(missing.isError() && missing.error().orElseThrow().message().contains("missing options"), "missing options error lost context");
+		DataResult<Ingredient> nonList = Ingredient.CODEC.parse(ops, parseObject(
+				"{\"neoforge:ingredient_type\":\"kiwi:alternatives\",\"options\":17}"));
+		check(nonList.isError() && nonList.error().orElseThrow().message().contains("No valid ingredient found"), "non-list options error lost context");
 	}
 
 	private static void network(GameTestHelper helper) {
@@ -238,6 +264,11 @@ public final class RecipeGameTests {
 		Ingredient empty = Ingredient.CODEC.parse(ops(helper), parseObject(
 				"{\"neoforge:ingredient_type\":\"kiwi:alternatives\",\"options\":[[]]}" )).getOrThrow();
 		AlternativesIngredient alternatives = unwrap(empty);
+		JsonElement encoded = Ingredient.CODEC.encodeStart(ops(helper), empty).getOrThrow();
+		check(encoded.equals(parseObject(
+				"{\"neoforge:ingredient_type\":\"kiwi:alternatives\",\"options\":[[]]}")), "empty sentinel JSON shape changed: " + encoded);
+		Ingredient roundTrip = Ingredient.CODEC.parse(ops(helper), encoded).getOrThrow();
+		check(unwrap(roundTrip).getMatchingStacks().isEmpty(), "empty sentinel roundtrip exposed items");
 		check(!alternatives.test(Items.DIRT.getDefaultInstance()), "empty sentinel matched a stack");
 		check(alternatives.getMatchingStacks().isEmpty(), "empty sentinel exposed items");
 		check(alternatives.display() instanceof SlotDisplay.Empty, "empty sentinel display was not empty");
@@ -420,6 +451,33 @@ public final class RecipeGameTests {
 			public List<ItemStack> getMatchingStacks() {
 				queries.incrementAndGet();
 				return stacks;
+			}
+
+			@Override
+			public boolean requiresTesting() {
+				return true;
+			}
+
+			@Override
+			public CustomIngredientSerializer<?> getSerializer() {
+				return AlternativesIngredient.Serializer.INSTANCE;
+			}
+		};
+	}
+
+	private static CustomIngredient retryingIngredient(AtomicInteger queries) {
+		return new CustomIngredient() {
+			@Override
+			public boolean test(ItemStack stack) {
+				return stack.is(Items.STONE);
+			}
+
+			@Override
+			public List<ItemStack> getMatchingStacks() {
+				if (queries.incrementAndGet() == 1) {
+					throw new IllegalStateException("transient");
+				}
+				return List.of(Items.STONE.getDefaultInstance());
 			}
 
 			@Override

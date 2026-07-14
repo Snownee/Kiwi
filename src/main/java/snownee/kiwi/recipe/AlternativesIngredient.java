@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
@@ -37,9 +38,7 @@ public class AlternativesIngredient implements CustomIngredient {
 	}
 
 	public AlternativesIngredient(List<@Nullable Ingredient> options) {
-		if (options.isEmpty()) {
-			throw new IllegalArgumentException("Options cannot be empty");
-		}
+		Preconditions.checkArgument(!options.isEmpty(), "Options cannot be empty");
 		this.options = new ArrayList<>(options);
 	}
 
@@ -91,11 +90,10 @@ public class AlternativesIngredient implements CustomIngredient {
 					break;
 				}
 			}
-		} catch (Exception e) {
-			Kiwi.LOGGER.error("Failed to initialize AlternativesIngredient {}", options, e);
-		} finally {
 			options = List.of();
 			requiresTesting = null;
+		} catch (Exception e) {
+			Kiwi.LOGGER.error("Failed to initialize AlternativesIngredient {}", options, e);
 		}
 	}
 
