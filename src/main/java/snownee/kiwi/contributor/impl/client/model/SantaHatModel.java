@@ -40,4 +40,5 @@ public class SantaHatModel<T extends HumanoidRenderState> extends HumanoidModel<
 	public void setupAnim(T renderState) {
 		super.setupAnim(renderState);
 	}
+
 }

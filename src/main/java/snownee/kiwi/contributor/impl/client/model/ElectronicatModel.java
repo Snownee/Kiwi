@@ -9,6 +9,8 @@
 //import net.minecraft.client.model.geom.ModelPart;
 //import net.minecraft.client.player.AbstractClientPlayer;
 //import net.minecraft.world.entity.LivingEntity;
+//import net.minecraftforge.api.distmarker.Dist;
+//import net.minecraftforge.api.distmarker.OnlyIn;
 //
 //public class ElectronicatModel<T extends LivingEntity> extends AgeableListModel<T> {
 //

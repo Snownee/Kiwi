@@ -2,6 +2,8 @@ package snownee.kiwi.loader;
 
 import java.nio.file.Path;
 import java.text.MessageFormat;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -10,16 +12,22 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.jspecify.annotations.Nullable;
 
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Dynamic;
 
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerEntity;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -38,12 +46,60 @@ import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.ItemAbilities;
 import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.common.conditions.ConditionalOps;
+import net.neoforged.neoforge.common.conditions.ICondition;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.data.loading.DatagenModLoader;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import snownee.kiwi.util.VanillaActions;
 
 public class Platform {
+
+	public enum ConditionDecision {
+		ALLOW,
+		SKIP
+	}
+
+	public static ICondition.IContext conditionContext(HolderLookup.Provider provider, FeatureFlagSet enabledFeatures) {
+		return new ICondition.IContext() {
+			@Override
+			public <T> boolean isTagLoaded(TagKey<T> key) {
+				return provider.lookup(key.registry()).flatMap($ -> $.get(key)).isPresent();
+			}
+
+			@Override
+			public <T> Collection<Holder<T>> getTag(TagKey<T> key) {
+				return provider.lookup(key.registry())
+						.flatMap($ -> $.get(key))
+						.map($ -> $.stream().toList())
+						.orElseGet(List::of);
+			}
+
+			@Override
+			public FeatureFlagSet enabledFeatures() {
+				return enabledFeatures;
+			}
+		};
+	}
+
+	public static <T> DataResult<ConditionDecision> applyResourceConditions(
+			Identifier file,
+			Dynamic<T> dynamic,
+			HolderLookup.Provider provider,
+			ICondition.@Nullable IContext context,
+			String stage) {
+		Optional<Dynamic<T>> conditions = dynamic.get(ConditionalOps.DEFAULT_CONDITIONS_KEY).result();
+		if (conditions.isEmpty()) {
+			return DataResult.success(ConditionDecision.ALLOW);
+		}
+		if (context == null) {
+			return DataResult.error(() -> "Native conditions in " + file + " cannot be evaluated during " + stage);
+		}
+		ConditionalOps<T> ops = new ConditionalOps<>(net.minecraft.resources.RegistryOps.create(dynamic.getOps(), provider), context);
+		return ICondition.LIST_CODEC.parse(ops, conditions.get().getValue())
+				.map($ -> $.stream().allMatch(condition -> condition.test(context)) ? ConditionDecision.ALLOW : ConditionDecision.SKIP)
+				.mapError($ -> "Failed to parse native conditions in " + file + " during " + stage + ": " + $);
+	}
 
 	public static boolean isModLoaded(String id) {
 		ModList modList = ModList.get();

@@ -160,7 +160,7 @@ public class Contributors extends AbstractModule {
 		});
 		if (!Platform.isPhysicalClient()) {
 			NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedOutEvent e) -> {
-				PLAYER_COSMETICS.remove(e.getEntity().getGameProfile().name());
+				PLAYER_COSMETICS.remove(e.getEntity().getUUID());
 			});
 		}
 	}

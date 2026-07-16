@@ -14,6 +14,8 @@
 //import net.minecraft.util.Mth;
 //import net.minecraft.world.entity.EquipmentSlot;
 //import net.minecraft.world.item.ItemStack;
+//import net.minecraftforge.api.distmarker.Dist;
+//import net.minecraftforge.api.distmarker.OnlyIn;
 //import snownee.kiwi.Kiwi;
 //import snownee.kiwi.contributor.client.RewardLayer;
 //import snownee.kiwi.contributor.impl.client.model.ElectronicatModel;

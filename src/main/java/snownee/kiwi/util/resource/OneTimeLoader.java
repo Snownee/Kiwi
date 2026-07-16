@@ -20,10 +20,14 @@ import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JavaOps;
 import com.mojang.serialization.JsonOps;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.world.flag.FeatureFlagSet;
+import net.neoforged.neoforge.common.conditions.ICondition;
 import snownee.kiwi.Kiwi;
+import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.KEval;
 import snownee.kiwi.util.KUtil;
 
@@ -50,7 +54,7 @@ public class OneTimeLoader {
 				continue;
 			}
 			if (result.error().isPresent()) {
-				Kiwi.LOGGER.error("Failed to parse " + key + ": " + result.error().get());
+				Kiwi.LOGGER.error("Failed to parse {}: {}", key, result.error().get());
 				continue;
 			}
 			Identifier id = lister.fileToId(key);
@@ -64,7 +68,7 @@ public class OneTimeLoader {
 			String directory,
 			Identifier id,
 			Codec<T> codec,
-			@Nullable Context context) {
+			Context context) {
 		var fileToIdConverter = AlternativesFileToIdConverter.yamlOrJson(directory);
 		Identifier file = fileToIdConverter.idToFile(id);
 		Optional<Resource> resource = resourceManager.getResource(file);
@@ -76,7 +80,7 @@ public class OneTimeLoader {
 			return null;
 		}
 		if (result.error().isPresent()) {
-			Kiwi.LOGGER.error("Failed to parse " + file + ": " + result.error().get());
+			Kiwi.LOGGER.error("Failed to parse {}: {}", file, result.error().get());
 			return null;
 		}
 		return result.result().orElseThrow();
@@ -86,7 +90,7 @@ public class OneTimeLoader {
 			Identifier file,
 			Resource resource,
 			Codec<T> codec,
-			@Nullable Context context) {
+			Context context) {
 		String ext = file.getPath().substring(file.getPath().length() - 5);
 		try (BufferedReader reader = resource.openAsReader()) {
 			Dynamic<?> dynamic;
@@ -99,17 +103,21 @@ public class OneTimeLoader {
 			} else {
 				return DataResult.error(() -> "Unknown extension: " + ext);
 			}
-			if (context != null) {
-				Optional<String> condition = dynamic.get("condition").asString().result();
-				if (condition.isPresent()) {
-					try {
-						Expression expression = context.getExpression(condition.get());
-						if (expression.evaluate().getBooleanValue() != Boolean.FALSE) {
-							return null;
-						}
-					} catch (Exception e) {
-						Kiwi.LOGGER.error("Failed to parse condition in " + file + ": " + e);
-					}
+			DataResult<Platform.ConditionDecision> nativeConditions = Platform.applyResourceConditions(
+					file, dynamic, context.registryProvider, context.conditionContext, context.stage);
+			if (nativeConditions.error().isPresent()) {
+				return DataResult.error(() -> nativeConditions.error().orElseThrow().message());
+			}
+			if (nativeConditions.result().orElseThrow() == Platform.ConditionDecision.SKIP) {
+				return null;
+			}
+			Optional<? extends Dynamic<?>> conditionValue = dynamic.get("kiwi:condition").result();
+			Optional<String> condition = conditionValue.isPresent() ?
+					conditionValue.orElseThrow().asString().result() : dynamic.get("condition").asString().result();
+			if (condition.isPresent()) {
+				Expression expression = context.getExpression(condition.get());
+				if (expression.evaluate().getBooleanValue() != Boolean.FALSE) {
+					return null;
 				}
 			}
 			return codec.parse(dynamic);
@@ -119,8 +127,25 @@ public class OneTimeLoader {
 	}
 
 	public static class Context {
+		private final HolderLookup.Provider registryProvider;
+		private final ICondition.@Nullable IContext conditionContext;
+		private final String stage;
 		private @Nullable Map<String, Expression> cachedExpressions;
 		private @Nullable Set<String> disabledNamespaces;
+
+		private Context(HolderLookup.Provider registryProvider, ICondition.@Nullable IContext conditionContext, String stage) {
+			this.registryProvider = registryProvider;
+			this.conditionContext = conditionContext;
+			this.stage = stage;
+		}
+
+		public static Context unavailable(HolderLookup.Provider registryProvider, String stage) {
+			return new Context(registryProvider, null, stage);
+		}
+
+		public static Context runtime(HolderLookup.Provider registryProvider, FeatureFlagSet enabledFeatures, String stage) {
+			return new Context(registryProvider, Platform.conditionContext(registryProvider, enabledFeatures), stage);
+		}
 
 		public Expression getExpression(String expression) {
 			if (cachedExpressions == null) {

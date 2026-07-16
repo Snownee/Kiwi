@@ -22,18 +22,19 @@ public class KiwiMetadataParser {
 	private final Yaml yaml;
 
 	public KiwiMetadataParser() {
-		Representer representer = new Representer(new DumperOptions());
+		DumperOptions options = new DumperOptions();
+		options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+		Representer representer = new Representer(options);
+		representer.getPropertyUtils().setSkipMissingProperties(true);
 		TypeDescription typeDescription = new TypeDescription(KiwiAnnotationData.class, Tag.MAP);
 		representer.addTypeDescription(typeDescription);
 		Constructor constructor = new Constructor(new LoaderOptions(), typeDescription);
-		yaml = new Yaml(constructor, representer);
+		yaml = new Yaml(constructor, representer, options);
 	}
 
 	public String dump(KiwiMetadata metadata) {
 		TreeMap<String, Object> map = new TreeMap<>(metadata.map());
-		if (metadata.clientOnly()) {
-			map.put("clientOnly", true);
-		}
+		map.put("useDataModule", metadata.useDataModule());
 		return yaml.dump(map);
 	}
 

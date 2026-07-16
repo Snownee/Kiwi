@@ -1,71 +1,77 @@
 package snownee.kiwi.recipe;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
 
-import com.google.gson.JsonElement;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.JsonOps;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.mojang.serialization.MapLike;
+import com.mojang.serialization.RecordBuilder;
 
 import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
 import snownee.kiwi.Kiwi;
 
 public class AlternativesIngredient implements CustomIngredient {
 	public static final Identifier ID = Kiwi.id("alternatives");
+	private List<@Nullable Ingredient> options;
+	private @Nullable Ingredient wrapped;
+	private @Nullable Boolean requiresTesting;
 
-	private final @Nullable List<JsonElement> options;
-	private @Nullable Ingredient cached;
+	public AlternativesIngredient(@Nullable Ingredient wrapped) {
+		this.wrapped = wrapped;
+		this.options = List.of();
+	}
 
-	public AlternativesIngredient(@Nullable List<JsonElement> options) {
+	public AlternativesIngredient(List<@Nullable Ingredient> options) {
+		Preconditions.checkArgument(!options.isEmpty(), "Options cannot be empty");
 		this.options = options;
 	}
 
 	@Override
 	public boolean test(ItemStack stack) {
-		internal();
-		return cached != null && cached.test(stack);
+		init();
+		return wrapped != null && wrapped.test(stack);
 	}
 
 	@Override
 	public List<ItemStack> getMatchingStacks() {
-		internal();
-		return cached != null ? cached.items().map(Holder::value).map(Item::getDefaultInstance).toList() : List.of();
+		init();
+		if (wrapped == null) {
+			return List.of();
+		}
+		@SuppressWarnings("deprecation")
+		Stream<Holder<Item>> items = wrapped.items();
+		return items.map(Holder::value).map(Item::getDefaultInstance).toList();
 	}
 
 	@Override
 	public boolean requiresTesting() {
-		return true;
+		if (requiresTesting == null) {
+			requiresTesting = options.isEmpty() ? wrapped != null && wrapped.getCustomIngredient() != null :
+					!options.stream().allMatch(option -> option == null || option.getCustomIngredient() == null);
+		}
+		return requiresTesting;
 	}
 
-	public Optional<Ingredient> internal() {
-		if (cached == null && options != null) {
-			for (JsonElement option : options) {
-				Ingredient ingredient;
-				try {
-					ingredient = Ingredient.CODEC.parse(JsonOps.INSTANCE, option).result().orElseThrow();
-				} catch (Exception e) {
-					continue;
-				}
-				if (ingredient.isEmpty()) {
-					continue;
-				}
-				cached = ingredient;
-				break;
-			}
-		}
-		return Optional.ofNullable(cached);
+	@Override
+	public SlotDisplay display() {
+		init();
+		return wrapped != null ? wrapped.display() : SlotDisplay.Empty.INSTANCE;
 	}
 
 	@Override
@@ -73,18 +79,28 @@ public class AlternativesIngredient implements CustomIngredient {
 		return Serializer.INSTANCE;
 	}
 
-	public enum Serializer implements CustomIngredientSerializer<AlternativesIngredient> {
-		INSTANCE;
+	private void init() {
+		if (wrapped != null || options.isEmpty()) {
+			return;
+		}
+		try {
+			for (Ingredient option : options) {
+				if (option != null && !option.isEmpty()) {
+					wrapped = option;
+					break;
+				}
+			}
+			options = List.of();
+		} catch (Exception e) {
+			Kiwi.LOGGER.error("Failed to initialize AlternativesIngredient {}", options, e);
+		}
+	}
 
-		public static final MapCodec<AlternativesIngredient> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-				Codec.list(ExtraCodecs.JSON).fieldOf("options").forGetter(o -> o.options)
-		).apply(i, AlternativesIngredient::new));
-
-		public static final StreamCodec<RegistryFriendlyByteBuf, Optional<Ingredient>> INGREDIENT_STREAM_CODEC =
-				Ingredient.CONTENTS_STREAM_CODEC.apply(ByteBufCodecs::optional);
-
-		public static final StreamCodec<RegistryFriendlyByteBuf, AlternativesIngredient> STREAM_CODEC =
-				StreamCodec.of(Serializer::write, Serializer::read);
+	public static class Serializer extends MapCodec<AlternativesIngredient> implements CustomIngredientSerializer<AlternativesIngredient> {
+		public static final Serializer INSTANCE = new Serializer();
+		public static final StreamCodec<RegistryFriendlyByteBuf, AlternativesIngredient> STREAM_CODEC = StreamCodec.of(
+				Serializer::write,
+				Serializer::read);
 
 		@Override
 		public Identifier getIdentifier() {
@@ -93,23 +109,64 @@ public class AlternativesIngredient implements CustomIngredient {
 
 		@Override
 		public MapCodec<AlternativesIngredient> getCodec(boolean allowEmpty) {
-			return CODEC;
+			return this;
 		}
 
 		public static AlternativesIngredient read(RegistryFriendlyByteBuf buf) {
-			Optional<Ingredient> internal = INGREDIENT_STREAM_CODEC.decode(buf);
-			AlternativesIngredient ingredient = new AlternativesIngredient(null);
-			ingredient.cached = internal.orElse(null);
-			return ingredient;
+			return new AlternativesIngredient(Ingredient.OPTIONAL_CONTENTS_STREAM_CODEC.decode(buf).orElse(null));
 		}
 
 		public static void write(RegistryFriendlyByteBuf buf, AlternativesIngredient ingredient) {
-			INGREDIENT_STREAM_CODEC.encode(buf, ingredient.internal());
+			ingredient.init();
+			Ingredient.OPTIONAL_CONTENTS_STREAM_CODEC.encode(buf, Optional.ofNullable(ingredient.wrapped));
 		}
 
 		@Override
 		public StreamCodec<RegistryFriendlyByteBuf, AlternativesIngredient> getPacketCodec() {
 			return STREAM_CODEC;
+		}
+
+		@Override
+		public <T> Stream<T> keys(DynamicOps<T> ops) {
+			return Stream.of(ops.createString("options"));
+		}
+
+		@Override
+		public <T> DataResult<AlternativesIngredient> decode(DynamicOps<T> ops, MapLike<T> input) {
+			return decodeOptions(ops, input).map(AlternativesIngredient::new);
+		}
+
+		static <T> DataResult<List<@Nullable Ingredient>> decodeOptions(DynamicOps<T> ops, MapLike<T> input) {
+			List<T> options = ops.getStream(Objects.requireNonNull(input.get("options"))).getOrThrow().toList();
+			ArrayList<String> errorMsgs = Lists.newArrayListWithExpectedSize(options.size());
+			List<@Nullable Ingredient> ingredients = Lists.newArrayListWithExpectedSize(options.size());
+			for (T option : options) {
+				DataResult<Ingredient> result = Ingredient.CODEC.parse(ops, option);
+				if (result.isSuccess()) {
+					ingredients.add(result.getOrThrow());
+					continue;
+				}
+				DataResult<Stream<T>> stream = ops.getStream(option);
+				if (stream.isSuccess() && stream.getOrThrow().toList().isEmpty()) {
+					ingredients.add(null);
+					continue;
+				}
+				errorMsgs.add(result.error().orElseThrow().message());
+			}
+			if (ingredients.isEmpty()) {
+				return DataResult.error(() -> "No valid ingredient found: " + String.join(", ", errorMsgs));
+			}
+			return DataResult.success(ingredients);
+		}
+
+		@Override
+		public <T> RecordBuilder<T> encode(AlternativesIngredient input, DynamicOps<T> ops, RecordBuilder<T> prefix) {
+			input.init();
+			return prefix.add(
+					"options",
+					ops.createList(input.wrapped == null ?
+							Stream.empty() :
+							Stream.of(Ingredient.CODEC.encodeStart(ops, input.wrapped).getOrThrow())));
 		}
 	}
 }

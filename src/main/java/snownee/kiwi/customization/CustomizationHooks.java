@@ -16,6 +16,7 @@ import com.google.common.collect.Sets;
 import it.unimi.dsi.fastutil.objects.Object2ByteLinkedOpenHashMap;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
@@ -28,12 +29,12 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.StainedGlassBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.validation.DirectoryValidator;
+import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -42,6 +43,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.event.AddPackFindersEvent;
@@ -176,8 +178,7 @@ public final class CustomizationHooks {
 					CustomizationServiceFinder.PACK_DIRECTORY,
 					event.getPackType(),
 					PackSource.BUILT_IN,
-					new DirectoryValidator($ -> true)
-					// For Snownee: this validates content path. For now, it accepts everything, but you can do something with it later.
+					LevelStorageSource.parseValidator(FMLPaths.GAMEDIR.get().resolve("allowed_symlinks.txt"))
 			)));
 		forgeEventBus.addListener((BreakBlockEvent event) -> {
 			if (PlacementSystem.isDebugEnabled(event.getPlayer())) {
@@ -214,7 +215,7 @@ public final class CustomizationHooks {
 
 	public static void initLoader(IEventBus modEventBus) {
 		ResourceManager resourceManager = collectKiwiPacks();
-		OneTimeLoader.Context context = new OneTimeLoader.Context();
+		OneTimeLoader.Context context = OneTimeLoader.Context.unavailable(RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY), "startup");
 		Map<String, CustomizationMetadata> metadataMap = CustomizationMetadata.loadMap(resourceManager, context);
 
 		SoundTypes.refreshWithValues(OneTimeLoader.load(
@@ -225,7 +226,6 @@ public final class CustomizationHooks {
 
 		BlockFundamentals blockFundamentals = BlockFundamentals.reload(resourceManager, context, true);
 		clearGlassType = blockFundamentals.glassTypes().get(Identifier.withDefaultNamespace("clear"));
-		Preconditions.checkNotNull(clearGlassType, "Missing 'clear' glass type");
 		blockNamespaces.clear();
 		blockFundamentals.blocks().keySet().stream().map(Identifier::getNamespace).forEach(blockNamespaces::add);
 		lenientBETypeNamespaces.clear();
@@ -277,12 +277,6 @@ public final class CustomizationHooks {
 		blockFundamentals.slotProviders().attachSlotsB();
 		blockFundamentals.placeChoices().attachChoicesB();
 		blockFundamentals.slotLinks().finish();
-		if (Platform.isPhysicalClient()) {
-			CustomizationClient.afterRegister(
-					itemFundamentals.items(),
-					blockFundamentals.blocks(),
-					new ClientProxy.Context(true, modEventBus));
-		}
 		var tabs = OneTimeLoader.load(resourceManager, "kiwi/creative_tab", KCreativeTab.CODEC, context);
 		List<Map.Entry<Identifier, KCreativeTab>> newTabs = tabs.entrySet().stream().sorted(Comparator.comparingInt($ -> $.getValue()
 				.order())).filter(entry -> {
@@ -293,8 +287,7 @@ public final class CustomizationHooks {
 			}
 			return true;
 		}).toList();
-		for (int i = 0; i < newTabs.size(); i++) {
-			Map.Entry<Identifier, KCreativeTab> entry = newTabs.get(i);
+		for (Map.Entry<Identifier, KCreativeTab> entry : newTabs) {
 			Identifier key = entry.getKey();
 			KCreativeTab value = entry.getValue();
 			CreativeModeTab.Builder tab = AbstractModule.itemCategory(
@@ -308,14 +301,15 @@ public final class CustomizationHooks {
 								.map(Item::getDefaultInstance)
 								.toList());
 					});
-			if (i > 0) {
-				tab.withTabsBefore(newTabs.get(i - 1).getKey(), CreativeModeTabs.SPAWN_EGGS.identifier());
-			} else {
-				tab.withTabsBefore(CreativeModeTabs.SPAWN_EGGS);
-			}
-			if (i < newTabs.size() - 1) {
-				tab.withTabsAfter(newTabs.get(i + 1).getKey());
-			}
+			//TODO fix tab order
+//			if (i > 0) {
+//				tab.withTabsBefore(CreativeModeTabs.SPAWN_EGGS.location(), newTabs.get(i - 1).getKey());
+//			} else {
+//				tab.withTabsBefore(CreativeModeTabs.SPAWN_EGGS.location());
+//			}
+//			if (i < newTabs.size() - 1) {
+//				tab.withTabsAfter(newTabs.get(i + 1).getKey());
+//			}
 			Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, key, tab.build());
 		}
 		if (Platform.isDataGen()) {
@@ -323,9 +317,12 @@ public final class CustomizationHooks {
 		} else {
 			modEventBus.addListener(FMLCommonSetupEvent.class, $ -> frozen());
 		}
-	}
-
-	private record BlockStatePairKey(BlockState pState, BlockState pAdjacentBlockState, Direction pDirection) {
+		if (Platform.isPhysicalClient()) {
+			CustomizationClient.afterRegister(
+					itemFundamentals.items(),
+					blockFundamentals.blocks(),
+					new ClientProxy.Context(true, modEventBus));
+		}
 	}
 
 	private static void insertToTab(IEventBus modEventBus, KCreativeTab kCreativeTab) {
@@ -353,7 +350,7 @@ public final class CustomizationHooks {
 				CustomizationServiceFinder.PACK_DIRECTORY,
 				PackType.CLIENT_RESOURCES,
 				PackSource.BUILT_IN,
-				new DirectoryValidator(_ -> true));
+				LevelStorageSource.parseValidator(FMLPaths.GAMEDIR.get().resolve("allowed_symlinks.txt")));
 		PackRepository packRepository = new PackRepository(folderRepositorySource);
 		Map<IModFile, Pack.ResourcesSupplier> kiwiPacks = new HashMap<>();
 		for (var modFileInfo : ModList.get().getModFiles()) {
@@ -368,58 +365,9 @@ public final class CustomizationHooks {
 		packRepository.addPackFinder(ResourcePackLoader.buildPackFinder(kiwiPacks, PackType.SERVER_DATA));
 		packRepository.reload();
 		List<String> selected = Lists.newArrayList(packRepository.getAvailableIds());
-		//selected.remove("mod_resources"); // As in 1.20-fabric
-		//selected.add(0, "mod_resources"); // As in 1.20-fabric
 		packRepository.setSelected(selected);
 		return new KiwiPackResourceManager(packRepository.openAllSelected());
 	}
-
-	// As in 1.20-fabric
-/*	private static RepositorySource buildPackFinder(Map<IModFile, ? extends PathPackResources> modResourcePacks) {
-		return packAcceptor -> clientPackFinder(modResourcePacks, packAcceptor);
-	}
-
-	private static void clientPackFinder(Map<IModFile, ? extends PathPackResources> modResourcePacks, Consumer<Pack> packAcceptor) {
-		var hiddenPacks = new ArrayList<PathPackResources>();
-		for (Map.Entry<IModFile, ? extends PathPackResources> e : modResourcePacks.entrySet()) {
-			IModInfo mod = e.getKey().getModInfos().get(0);
-			final String name = "mod:" + mod.getModId();
-			final Pack modPack = Pack.readMetaAndCreate(
-					new PackLocationInfo(name, Component.literal(e.getValue().packId()), PackSource.DEFAULT, Optional.empty()),
-					new Pack.ResourcesSupplier() {
-						@Override
-						public PackResources openPrimary(PackLocationInfo p_326301_) {
-							return e.getValue();
-						}
-
-						@Override
-						public PackResources openFull(PackLocationInfo p_326241_, Pack.Metadata p_325959_) {
-							return e.getValue();
-						}
-					},
-					PackType.CLIENT_RESOURCES,
-					new PackSelectionConfig(false, Pack.Position.BOTTOM, false));
-			if (modPack == null) {
-				// Vanilla only logs an error, instead of propagating, so handle null and warn that something went wrong
-				LoadingModList.get().getModLoadingIssues().add(new ModLoadingIssue(ModLoadingIssue.Severity.ERROR, "fml.modloading.brokenresources", List.of(e.getKey().getFileName())));
-				continue;
-			}
-			Kiwi.LOGGER.debug("Generating PackInfo named {} for mod file {}", name, e.getKey().getFilePath());
-			if (mod.getOwningFile().showAsResourcePack()) {
-				packAcceptor.accept(modPack);
-			} else {
-				hiddenPacks.add(e.getValue());
-			}
-		}
-
-		// Create a resource pack merging all mod resources that should be hidden
-		final Pack modResourcesPack = Pack.readMetaAndCreate("mod_resources", Component.literal("Mod Resources"), true,
-				id -> new DelegatingPackResources(id, false, new PackMetadataSection(
-						Component.translatable("fml.resources.modresources", hiddenPacks.size()),
-						SharedConstants.getCurrentVersion().getPackVersion(PackType.CLIENT_RESOURCES)), hiddenPacks),
-				PackType.CLIENT_RESOURCES, Pack.Position.BOTTOM, PackSource.DEFAULT);
-		packAcceptor.accept(modResourcesPack);
-	}*/
 
 	public static Set<String> getBlockNamespaces() {
 		return blockNamespaces;
@@ -430,7 +378,7 @@ public final class CustomizationHooks {
 	}
 
 	public static boolean isColorlessGlass(BlockState blockState) {
-		return blockState.is(Tags.Blocks.GLASS_BLOCKS_COLORLESS);
+		return blockState.is(Tags.Blocks.GLASS_BLOCKS) && !(blockState.getBlock() instanceof StainedGlassBlock);
 	}
 
 	public static GlassType clearGlassType() {
@@ -444,8 +392,10 @@ public final class CustomizationHooks {
 
 	public static void frozen() {
 		ResourceManager resourceManager = collectKiwiPacks();
-		OneTimeLoader.Context context = new OneTimeLoader.Context();
+		OneTimeLoader.Context context = OneTimeLoader.Context.unavailable(RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY), "common setup");
 		BlockFamilies.reloadResources(resourceManager, context);
 		BuilderRules.reload(resourceManager, context);
 	}
+
+	private record BlockStatePairKey(BlockState pState, BlockState pAdjacentBlockState, Direction pDirection) {}
 }

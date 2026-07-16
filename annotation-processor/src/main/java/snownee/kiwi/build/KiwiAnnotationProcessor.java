@@ -44,7 +44,7 @@ import snownee.kiwi.KiwiAnnotationData;
 				KiwiAnnotationProcessor.MOD_ANNOTATION})
 @SupportedOptions(
 		{
-				"kiwi.clientOnlyMod",
+				"kiwi.useDataModule",
 				"kiwi.projectModId"})
 @SuppressWarnings({"unchecked"})
 public class KiwiAnnotationProcessor extends AbstractProcessor {
@@ -73,7 +73,7 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 		}
 		Messager messager = processingEnv.getMessager();
 		messager.printMessage(Kind.NOTE, "KiwiAnnotationProcessor is processing");
-		KiwiMetadata metadata = new KiwiMetadata(processingEnv.getOptions().containsKey("kiwi.clientOnlyMod"));
+		KiwiMetadata metadata = new KiwiMetadata(processingEnv.getOptions().containsKey("kiwi.useDataModule"));
 		String modId = null;
 		String optionModId = processingEnv.getOptions().get("kiwi.projectModId");
 		for (TypeElement annotation : annotations) {
@@ -119,7 +119,7 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 			}
 		}
 
-		if (metadata.map().isEmpty() && !metadata.clientOnly()) {
+		if (metadata.map().isEmpty() && !metadata.useDataModule()) {
 			return true;
 		}
 		metadata.map().values().forEach(list -> list.sort(Comparator.comparing(KiwiAnnotationData::getTarget)));

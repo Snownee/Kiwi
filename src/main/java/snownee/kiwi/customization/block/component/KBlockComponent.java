@@ -38,8 +38,7 @@ public interface KBlockComponent {
 			Direction pDirection,
 			BlockState pNeighborState,
 			LevelReader pLevel,
-			ScheduledTickAccess scheduledTickAccess,
-			BlockPos pPos,
+			ScheduledTickAccess scheduledTickAccess, BlockPos pPos,
 			BlockPos pNeighborPos) {
 		return pState;
 	}

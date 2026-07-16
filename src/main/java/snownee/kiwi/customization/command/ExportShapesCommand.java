@@ -30,7 +30,7 @@ public class ExportShapesCommand {
 		try (BufferedWriter writer = Files.newBufferedWriter(Paths.get("exported_shapes.json"))) {
 			BlockFundamentals fundamentals = BlockFundamentals.reload(
 					CustomizationHooks.collectKiwiPacks(),
-					new OneTimeLoader.Context(),
+					OneTimeLoader.Context.runtime(source.registryAccess(), source.enabledFeatures(), "export shapes command"),
 					false);
 			fundamentals.shapes().forEach((key, value) -> {
 				if (value.getClass() != ShapeGenerator.Unit.class) {

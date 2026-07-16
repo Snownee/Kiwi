@@ -97,7 +97,7 @@ public record ConfigureWallShape(
 			case COLLISION -> accessor.kiwi$getCollisionShapes();
 			default -> throw new IllegalStateException();
 		};
-		Function<BlockState, VoxelShape> newShapes = state -> operator.apply(shapes.apply(state));
+		Function<BlockState, VoxelShape> newShapes = MergeConfiguredShape.transform(block, operator, shapes);
 		switch (type) {
 			case MAIN -> accessor.kiwi$setShapes(newShapes);
 			case COLLISION -> accessor.kiwi$setCollisionShapes(newShapes);

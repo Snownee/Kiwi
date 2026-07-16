@@ -104,6 +104,7 @@ public class RegistryNameScanner {
 	}
 
 	private static boolean isPublicStatic(FieldNode fieldNode) {
+		// 检查是否包含 ACC_PUBLIC 且包含 ACC_STATIC
 		return (fieldNode.access & Opcodes.ACC_PUBLIC) != 0 &&
 				(fieldNode.access & Opcodes.ACC_STATIC) != 0;
 	}
@@ -114,10 +115,16 @@ public class RegistryNameScanner {
 	}
 
 	private static Class<?> getFieldClass(FieldNode fieldNode, ClassLoader loader) throws ClassNotFoundException {
+		// 1. 获取 Type 对象
 		Type type = Type.getType(fieldNode.desc);
+
+		// 2. 处理基本类型 (int, boolean, etc.)
 		if (isPrimitive(type)) {
 			throw new IllegalArgumentException("Field is of primitive type: " + fieldNode.name);
 		}
+
+		// 3. 获取类名并加载
+		// getClassName() 会自动处理数组（如 [Ljava/lang/String; -> java.lang.String[]）
 		String className = type.getClassName();
 		return Class.forName(className, false, loader);
 	}
