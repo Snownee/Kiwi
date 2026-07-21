@@ -24,7 +24,7 @@ public class ReloadFamiliesAndRulesCommand {
 	private static int reload(CommandSourceStack source) {
 		Stopwatch stopwatch = Stopwatch.createStarted();
 		ResourceManager resourceManager = CustomizationHooks.collectKiwiPacks();
-		OneTimeLoader.Context context = OneTimeLoader.Context.runtime(source.registryAccess(), source.enabledFeatures(), "reload families and rules command");
+		OneTimeLoader.Context context = OneTimeLoader.Context.create(source.registryAccess(), source.enabledFeatures());
 		BlockFamilies.reloadResources(resourceManager, context);
 		int familyCount = BlockFamilies.reloadTags();
 		int ruleCount = BuilderRules.reload(resourceManager, context);

@@ -29,7 +29,7 @@ public class ReloadBlockSettingsCommand {
 
 	private static int reload(CommandSourceStack source) {
 		Stopwatch stopwatch = Stopwatch.createStarted();
-		OneTimeLoader.Context context = OneTimeLoader.Context.runtime(source.registryAccess(), source.enabledFeatures(), "reload block settings command");
+		OneTimeLoader.Context context = OneTimeLoader.Context.create(source.registryAccess(), source.enabledFeatures());
 		BlockFundamentals fundamentals = BlockFundamentals.reload(CustomizationHooks.collectKiwiPacks(), context, false);
 		long parseTime = stopwatch.elapsed().toMillis();
 		stopwatch.reset().start();
