@@ -26,6 +26,7 @@ import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.flag.FeatureFlags;
 import net.neoforged.neoforge.common.conditions.ICondition;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.loader.Platform;
@@ -140,7 +141,7 @@ public class OneTimeLoader {
 
 		public Context(RegistryOps.RegistryInfoLookup registryLookup) {
 			this.registryLookup = registryLookup;
-			this.conditionContext = Platform.conditionContext(registryLookup, FeatureFlagSet.of());
+			this.conditionContext = Platform.conditionContext(registryLookup, FeatureFlags.VANILLA_SET);
 		}
 
 		public static Context create(HolderLookup.Provider registryProvider, FeatureFlagSet enabledFeatures) {
@@ -148,7 +149,7 @@ public class OneTimeLoader {
 		}
 
 		public static Context create(HolderLookup.Provider registryProvider) {
-			return create(registryProvider, FeatureFlagSet.of());
+			return create(registryProvider, FeatureFlags.VANILLA_SET);
 		}
 
 		public Expression getExpression(String expression) {
