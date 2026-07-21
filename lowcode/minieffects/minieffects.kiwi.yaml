@@ -1,4 +1,4 @@
-clientOnly: true
 configs:
-  - data: { type: CLIENT }
-    target: snownee.kiwi.minieffects.MiniEffectsConfig
+  - target: snownee.kiwi.minieffects.MiniEffectsConfig
+    data:
+      type: CLIENT
