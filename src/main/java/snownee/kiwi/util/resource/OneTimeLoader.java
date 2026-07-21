@@ -22,6 +22,7 @@ import com.mojang.serialization.JsonOps;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.flag.FeatureFlagSet;
@@ -104,7 +105,7 @@ public class OneTimeLoader {
 				return DataResult.error(() -> "Unknown extension: " + ext);
 			}
 			DataResult<Platform.ConditionDecision> nativeConditions = Platform.applyResourceConditions(
-					file, dynamic, context.registryProvider, context.conditionContext, context.stage);
+					file, dynamic, context);
 			if (nativeConditions.error().isPresent()) {
 				return DataResult.error(() -> nativeConditions.error().orElseThrow().message());
 			}
@@ -127,24 +128,27 @@ public class OneTimeLoader {
 	}
 
 	public static class Context {
-		private final HolderLookup.Provider registryProvider;
-		private final ICondition.@Nullable IContext conditionContext;
-		private final String stage;
+		public final RegistryOps.RegistryInfoLookup registryLookup;
+		public final ICondition.@Nullable IContext conditionContext;
 		private @Nullable Map<String, Expression> cachedExpressions;
 		private @Nullable Set<String> disabledNamespaces;
 
-		private Context(HolderLookup.Provider registryProvider, ICondition.@Nullable IContext conditionContext, String stage) {
-			this.registryProvider = registryProvider;
-			this.conditionContext = conditionContext;
-			this.stage = stage;
+		public Context(RegistryOps.RegistryInfoLookup registryLookup, FeatureFlagSet enabledFeatures) {
+			this.registryLookup = registryLookup;
+			this.conditionContext = Platform.conditionContext(registryLookup, enabledFeatures);
 		}
 
-		public static Context unavailable(HolderLookup.Provider registryProvider, String stage) {
-			return new Context(registryProvider, null, stage);
+		public Context(RegistryOps.RegistryInfoLookup registryLookup) {
+			this.registryLookup = registryLookup;
+			this.conditionContext = Platform.conditionContext(registryLookup, FeatureFlagSet.of());
 		}
 
-		public static Context runtime(HolderLookup.Provider registryProvider, FeatureFlagSet enabledFeatures, String stage) {
-			return new Context(registryProvider, Platform.conditionContext(registryProvider, enabledFeatures), stage);
+		public static Context create(HolderLookup.Provider registryProvider, FeatureFlagSet enabledFeatures) {
+			return new Context(new RegistryOps.HolderLookupAdapter(registryProvider), enabledFeatures);
+		}
+
+		public static Context create(HolderLookup.Provider registryProvider) {
+			return create(registryProvider, FeatureFlagSet.of());
 		}
 
 		public Expression getExpression(String expression) {

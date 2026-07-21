@@ -175,11 +175,11 @@ public final class CustomizationHooks {
 			Kiwi.registerRegistry(CustomizationRegistries.BUILDER_RULE_KEY, BuilderRule.Type.class);
 		});
 		modEventBus.addListener((AddPackFindersEvent event) -> event.addRepositorySource(new RequiredFolderRepositorySource(
-					CustomizationServiceFinder.PACK_DIRECTORY,
-					event.getPackType(),
-					PackSource.BUILT_IN,
-					LevelStorageSource.parseValidator(FMLPaths.GAMEDIR.get().resolve("allowed_symlinks.txt"))
-			)));
+				CustomizationServiceFinder.PACK_DIRECTORY,
+				event.getPackType(),
+				PackSource.BUILT_IN,
+				LevelStorageSource.parseValidator(FMLPaths.GAMEDIR.get().resolve("allowed_symlinks.txt"))
+		)));
 		forgeEventBus.addListener((BreakBlockEvent event) -> {
 			if (PlacementSystem.isDebugEnabled(event.getPlayer())) {
 				PlacementSystem.removeDebugBlocks(event.getPlayer().level(), event.getPos());
@@ -215,7 +215,7 @@ public final class CustomizationHooks {
 
 	public static void initLoader(IEventBus modEventBus) {
 		ResourceManager resourceManager = collectKiwiPacks();
-		OneTimeLoader.Context context = OneTimeLoader.Context.unavailable(RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY), "startup");
+		OneTimeLoader.Context context = OneTimeLoader.Context.create(RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY));
 		Map<String, CustomizationMetadata> metadataMap = CustomizationMetadata.loadMap(resourceManager, context);
 
 		SoundTypes.refreshWithValues(OneTimeLoader.load(
@@ -392,7 +392,7 @@ public final class CustomizationHooks {
 
 	public static void frozen() {
 		ResourceManager resourceManager = collectKiwiPacks();
-		OneTimeLoader.Context context = OneTimeLoader.Context.unavailable(RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY), "common setup");
+		OneTimeLoader.Context context = OneTimeLoader.Context.create(RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY));
 		BlockFamilies.reloadResources(resourceManager, context);
 		BuilderRules.reload(resourceManager, context);
 	}

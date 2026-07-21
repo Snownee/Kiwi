@@ -15,22 +15,22 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 
-import net.minecraft.core.Holder;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerEntity;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
@@ -52,6 +52,7 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.data.loading.DatagenModLoader;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import snownee.kiwi.util.VanillaActions;
+import snownee.kiwi.util.resource.OneTimeLoader;
 
 public class Platform {
 
@@ -60,17 +61,17 @@ public class Platform {
 		SKIP
 	}
 
-	public static ICondition.IContext conditionContext(HolderLookup.Provider provider, FeatureFlagSet enabledFeatures) {
+	public static ICondition.IContext conditionContext(RegistryOps.RegistryInfoLookup provider, FeatureFlagSet enabledFeatures) {
 		return new ICondition.IContext() {
 			@Override
 			public <T> boolean isTagLoaded(TagKey<T> key) {
-				return provider.lookup(key.registry()).flatMap($ -> $.get(key)).isPresent();
+				return provider.lookup(key.registry()).flatMap($ -> $.getter().get(key)).isPresent();
 			}
 
 			@Override
 			public <T> Collection<Holder<T>> getTag(TagKey<T> key) {
 				return provider.lookup(key.registry())
-						.flatMap($ -> $.get(key))
+						.flatMap($ -> $.getter().get(key))
 						.map($ -> $.stream().toList())
 						.orElseGet(List::of);
 			}
@@ -85,20 +86,22 @@ public class Platform {
 	public static <T> DataResult<ConditionDecision> applyResourceConditions(
 			Identifier file,
 			Dynamic<T> dynamic,
-			HolderLookup.Provider provider,
-			ICondition.@Nullable IContext context,
-			String stage) {
+			OneTimeLoader.@Nullable Context context) {
 		Optional<Dynamic<T>> conditions = dynamic.get(ConditionalOps.DEFAULT_CONDITIONS_KEY).result();
 		if (conditions.isEmpty()) {
 			return DataResult.success(ConditionDecision.ALLOW);
 		}
 		if (context == null) {
-			return DataResult.error(() -> "Native conditions in " + file + " cannot be evaluated during " + stage);
+			return DataResult.error(() -> "Native conditions in " + file + " cannot be evaluated");
 		}
-		ConditionalOps<T> ops = new ConditionalOps<>(net.minecraft.resources.RegistryOps.create(dynamic.getOps(), provider), context);
+		ConditionalOps<T> ops = new ConditionalOps<>(
+				RegistryOps.create(dynamic.getOps(), context.registryLookup),
+				context.conditionContext);
 		return ICondition.LIST_CODEC.parse(ops, conditions.get().getValue())
-				.map($ -> $.stream().allMatch(condition -> condition.test(context)) ? ConditionDecision.ALLOW : ConditionDecision.SKIP)
-				.mapError($ -> "Failed to parse native conditions in " + file + " during " + stage + ": " + $);
+				.map($ -> $.stream().allMatch(condition -> condition.test(context.conditionContext)) ?
+						ConditionDecision.ALLOW :
+						ConditionDecision.SKIP)
+				.mapError($ -> "Failed to parse native conditions in " + file + ": " + $);
 	}
 
 	public static boolean isModLoaded(String id) {
