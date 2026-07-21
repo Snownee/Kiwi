@@ -2,7 +2,7 @@ plugins {
     id "com.gradleup.shadow" version "9.3.1"
     id 'fabric-loom' version '1.11-SNAPSHOT'
     id 'maven-publish'
-    id "me.modmuss50.mod-publish-plugin" version "1.1.0"
+    id "me.modmuss50.mod-publish-plugin" version "2.+"
 }
 
 base {
@@ -230,6 +230,8 @@ publishMods {
 
     curseforge {
         projectId = "549404"
+        client = true
+        server = true
         accessToken = providers.environmentVariable("CURSE_TOKEN")
         minecraftVersions.add(minecraft_version)
         requires("fabric-api")
