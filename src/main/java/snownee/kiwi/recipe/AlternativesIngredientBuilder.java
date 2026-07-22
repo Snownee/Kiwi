@@ -132,9 +132,11 @@ public class AlternativesIngredientBuilder implements CustomIngredient {
 			return CODEC;
 		}
 
+		@SuppressWarnings("DataFlowIssue")
 		@Override
 		public StreamCodec<RegistryFriendlyByteBuf, AlternativesIngredientBuilder> getStreamCodec() {
-			throw new UnsupportedOperationException();
+			// Builder ingredients are data-generation only
+			return StreamCodec.unit(null);
 		}
 	}
 }
