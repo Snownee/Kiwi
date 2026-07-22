@@ -138,9 +138,11 @@ public class AlternativesIngredientBuilder implements CustomIngredient {
 			return this;
 		}
 
+		@SuppressWarnings("DataFlowIssue")
 		@Override
 		public StreamCodec<RegistryFriendlyByteBuf, AlternativesIngredientBuilder> getPacketCodec() {
-			throw new UnsupportedOperationException("Builder ingredients are data-generation only");
+			// Builder ingredients are data-generation only
+			return StreamCodec.unit(null);
 		}
 
 		@Override
@@ -155,8 +157,9 @@ public class AlternativesIngredientBuilder implements CustomIngredient {
 
 		@Override
 		public <T> RecordBuilder<T> encode(AlternativesIngredientBuilder input, DynamicOps<T> ops, RecordBuilder<T> prefix) {
-			return prefix.add("options", ops.createList(input.ingredients.stream().map(ingredient -> ingredient == null ?
-					ops.emptyList() : Ingredient.CODEC.encodeStart(ops, ingredient).getOrThrow())));
+			return prefix.add(
+					"options", ops.createList(input.ingredients.stream().map(ingredient -> ingredient == null ?
+							ops.emptyList() : Ingredient.CODEC.encodeStart(ops, ingredient).getOrThrow())));
 		}
 	}
 }
