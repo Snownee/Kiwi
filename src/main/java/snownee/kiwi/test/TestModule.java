@@ -26,7 +26,7 @@ public class TestModule extends AbstractModule {
 
 	// Register a simple item
 	@Category(value = Categories.FOOD_AND_DRINKS, after = "apple")
-	public static final KiwiGO<TestItem> FIRST_ITEM = go(Registries.ITEM, key -> new TestItem(itemProp().setId(key)));
+	public static final KiwiGO<TestItem> FIRST_ITEM = go(Registries.ITEM, key -> new TestItem(itemProp().rarity(Rarity.EPIC).setId(key)));
 	public static final KiwiGO<TestItem> ITEM2 = go(Registries.ITEM, key -> new TestItem(itemProp().setId(key)));
 	@Category(value = Categories.FOOD_AND_DRINKS, after = "kiwi:item2")
 	public static final KiwiGO<TestItem> ITEM3 = go(Registries.ITEM, key -> new TestItem(itemProp().setId(key)));

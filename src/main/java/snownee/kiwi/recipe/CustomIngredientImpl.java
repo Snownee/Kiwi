@@ -16,6 +16,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.neoforged.neoforge.common.crafting.ICustomIngredient;
 import net.neoforged.neoforge.common.crafting.IngredientType;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
@@ -77,6 +78,11 @@ public record CustomIngredientImpl<T extends CustomIngredient>(T ingredient) imp
 	@Override
 	public boolean isSimple() {
 		return !ingredient.requiresTesting();
+	}
+
+	@Override
+	public SlotDisplay display() {
+		return ingredient.display();
 	}
 
 	@Override

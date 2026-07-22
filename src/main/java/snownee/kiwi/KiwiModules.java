@@ -23,10 +23,10 @@ public final class KiwiModules {
 	private KiwiModules() {
 	}
 
-	public static void add(Identifier identifier, AbstractModule module, ModContext context) {
-		Preconditions.checkArgument(!isLoaded(identifier), "Duplicate module: %s", identifier);
-		LOADED_MODULES.add(identifier);
-		MODULES.put(identifier, new KiwiModuleContainer(identifier, module, context));
+	public static void add(Identifier resourceLocation, AbstractModule module, ModContext context) {
+		Preconditions.checkArgument(!isLoaded(resourceLocation), "Duplicate module: %s", resourceLocation);
+		LOADED_MODULES.add(resourceLocation);
+		MODULES.put(resourceLocation, new KiwiModuleContainer(resourceLocation, module, context));
 	}
 
 	public static boolean isLoaded(Identifier module) {

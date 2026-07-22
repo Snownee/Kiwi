@@ -3,7 +3,6 @@ package snownee.kiwi.recipe;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import com.google.common.base.Preconditions;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
@@ -62,7 +61,9 @@ public final class SizedIngredient {
 	private final int count;
 
 	public SizedIngredient(Ingredient ingredient, int count) {
-		Preconditions.checkArgument(count > 0, "Count must be positive");
+		if (count <= 0) {
+			throw new IllegalArgumentException("Size must be positive");
+		}
 		this.ingredient = ingredient;
 		this.count = count;
 	}

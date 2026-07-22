@@ -16,7 +16,7 @@ import snownee.kiwi.KiwiCommonConfig;
 import snownee.kiwi.config.ClothConfigIntegration;
 import snownee.kiwi.config.ConfigLibAttributes;
 import snownee.kiwi.config.KiwiConfigManager;
-import snownee.kiwi.loader.Platform;
+import snownee.kiwi.util.ClientProxy;
 
 public class KiwiClientCommand {
 
@@ -32,7 +32,7 @@ public class KiwiClientCommand {
 						context::sendFailure))));
 		LiteralArgumentBuilder<T> configure = context.literal("configure");
 		List<ConfigLibAttributes> list = Lists.newArrayList();
-		if (Platform.isModLoaded("cloth-config")) {
+		if (ClientProxy.clothConfig) {
 			list.add(ClothConfigIntegration.attributes());
 		}
 		if (list.isEmpty()) {
@@ -47,8 +47,6 @@ public class KiwiClientCommand {
 			}
 		}
 		builder.then(configure);
-		builder.then(context.literal("quiet")
-				.executes(ctx -> quiet()));
 		return builder;
 	}
 
@@ -75,13 +73,4 @@ public class KiwiClientCommand {
 			}));
 		}
 	}
-
-	private static int quiet() {
-		Minecraft mc = Minecraft.getInstance();
-		mc.gui.getChat().clearMessages(true);
-		mc.getToastManager().clear();
-		mc.getSoundManager().stop();
-		return 0;
-	}
-
 }

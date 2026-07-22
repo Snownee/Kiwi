@@ -2,12 +2,16 @@ package snownee.kiwi.util.client;
 
 import java.util.function.BooleanSupplier;
 
+import org.jspecify.annotations.Nullable;
+
 import com.mojang.blaze3d.platform.InputConstants;
 
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.Util;
 
 public class SmartKey extends KeyMapping {
+	private static final boolean ON_OSX = Util.getPlatform() == Util.OS.OSX;
 	//	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final long SHORT_PRESS_MAX_MS = 200;
 	private static final long DOUBLE_PRESS_INTERVAL_MS = 200;
@@ -15,10 +19,10 @@ public class SmartKey extends KeyMapping {
 	protected long pressSince = -1;
 	protected long lastShortPress = -1;
 	protected State state = State.Idle;
-	private final BooleanSupplier onShortPress;
-	private final BooleanSupplier onLongPress;
-	private final BooleanSupplier onDoublePress;
-	private final BooleanSupplier hasDoublePress;
+	private final @Nullable BooleanSupplier onShortPress;
+	private final @Nullable BooleanSupplier onLongPress;
+	private final @Nullable BooleanSupplier onDoublePress;
+	private final @Nullable BooleanSupplier hasDoublePress;
 	private final long longPressMinMs;
 
 	private SmartKey(Builder builder) {
@@ -114,21 +118,6 @@ public class SmartKey extends KeyMapping {
 		return false;
 	}
 
-	public static boolean hasShiftDown() {
-		var window = net.minecraft.client.Minecraft.getInstance().getWindow();
-		return InputConstants.isKeyDown(window, InputConstants.KEY_LSHIFT) || InputConstants.isKeyDown(window, InputConstants.KEY_RSHIFT);
-	}
-
-	public static boolean hasControlDown() {
-		var window = net.minecraft.client.Minecraft.getInstance().getWindow();
-		return InputConstants.isKeyDown(window, InputConstants.KEY_LCONTROL) || InputConstants.isKeyDown(window, InputConstants.KEY_RCONTROL);
-	}
-
-	public static boolean hasAltDown() {
-		var window = net.minecraft.client.Minecraft.getInstance().getWindow();
-		return InputConstants.isKeyDown(window, InputConstants.KEY_LALT) || InputConstants.isKeyDown(window, InputConstants.KEY_RALT);
-	}
-
 	public enum State {
 		Idle, ShortPress, WaitingForDoublePress, LongPress
 	}
@@ -138,10 +127,10 @@ public class SmartKey extends KeyMapping {
 		private final KeyMapping.Category category;
 		private InputConstants.Type type = InputConstants.Type.KEYSYM;
 		private int keyCode = -1; // unbound
-		private BooleanSupplier onShortPress;
-		private BooleanSupplier onLongPress;
-		private BooleanSupplier onDoublePress;
-		private BooleanSupplier hasDoublePress;
+		private @Nullable BooleanSupplier onShortPress;
+		private @Nullable BooleanSupplier onLongPress;
+		private @Nullable BooleanSupplier onDoublePress;
+		private @Nullable BooleanSupplier hasDoublePress;
 		private long longPressMinMs = LONG_PRESS_MIN_MS;
 
 		public Builder(String name, KeyMapping.Category category) {
@@ -183,5 +172,24 @@ public class SmartKey extends KeyMapping {
 			this.longPressMinMs = longPressMinMs;
 			return this;
 		}
+	}
+
+	public static boolean hasControlDown() {
+		if (ON_OSX) {
+			return InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), 343) ||
+					InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), 347);
+		}
+		return InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), 341) ||
+				InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), 345);
+	}
+
+	public static boolean hasShiftDown() {
+		return InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), 340) ||
+				InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), 344);
+	}
+
+	public static boolean hasAltDown() {
+		return InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), 342) ||
+				InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), 346);
 	}
 }

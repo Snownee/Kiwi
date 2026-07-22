@@ -181,9 +181,6 @@ public record CConvertItemPacket(
 				inventory.setItem(i, ItemStack.EMPTY);
 				matValue += BlockFamilies.getMatValue(stack);
 			}
-			if (matValue == 0) {
-				return;
-			}
 			ItemStack itemStack = to.getDefaultInstance();
 			if (player.hasInfiniteMaterials()) {
 				itemStack.setPopTime(Inventory.POP_TIME_DURATION);
@@ -192,7 +189,6 @@ public record CConvertItemPacket(
 				int count = (int) (matValue / BlockFamilies.getMatValue(to));
 				addToPlayer(player, itemStack, count, true);
 			}
-			broadcastChanges(player);
 		}
 
 		private static void addToPlayer(ServerPlayer player, ItemStack template, int count, boolean nextToSelected) {

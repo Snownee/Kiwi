@@ -26,9 +26,9 @@ public abstract class BlockEntityTypeMixin {
 	private Set<Block> validBlocks;
 
 	@Unique
-	private @Nullable Boolean kiwi$lenient;
+	private @Nullable Boolean lenient;
 	@Unique
-	private volatile @Nullable Set<Block> kiwi$lenientValidBlocks;
+	private volatile @Nullable Set<Block> lenientValidBlocks;
 
 	@Shadow
 	public abstract Holder.@Nullable Reference<BlockEntityType<?>> builtInRegistryHolder();
@@ -42,32 +42,34 @@ public abstract class BlockEntityTypeMixin {
 		if (object == null) {
 			return false;
 		}
-		if (kiwi$lenientValidBlocks != null && kiwi$lenientValidBlocks.contains(object)) {
+		Set<Block> lenientValidBlocks = this.lenientValidBlocks;
+		if (lenientValidBlocks != null && lenientValidBlocks.contains(object)) {
 			return true;
 		}
 		if (original.call(instance, object)) {
 			return true;
 		}
-		if (kiwi$lenient == null) {
+		if (lenient == null) {
 			Holder.Reference<BlockEntityType<?>> reference = builtInRegistryHolder();
 			if (reference == null) {
 				return false;
 			}
 			Identifier key = reference.key().identifier();
-			kiwi$lenient = CustomizationHooks.getLenientBETypeNamespaces().contains(key.getNamespace());
+			lenient = CustomizationHooks.getLenientBETypeNamespaces().contains(key.getNamespace());
 		}
-		if (!kiwi$lenient) {
+		if (!lenient) {
 			return false;
 		}
 		for (Block validBlock : validBlocks) {
 			if (validBlock.getClass() == object.getClass()) {
-				if (kiwi$lenientValidBlocks == null) {
-					//noinspection SynchronizeOnNonFinalField
-					synchronized (validBlocks) {
-						kiwi$lenientValidBlocks = Sets.newHashSet(validBlocks);
+				//noinspection SynchronizeOnNonFinalField
+				synchronized (validBlocks) {
+					lenientValidBlocks = this.lenientValidBlocks;
+					if (lenientValidBlocks == null) {
+						lenientValidBlocks = this.lenientValidBlocks = Sets.newHashSet(validBlocks);
 					}
+					lenientValidBlocks.add((Block) object);
 				}
-				kiwi$lenientValidBlocks.add((Block) object);
 				return true;
 			}
 		}

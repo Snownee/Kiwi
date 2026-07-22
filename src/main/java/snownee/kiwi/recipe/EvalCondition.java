@@ -1,7 +1,8 @@
 package snownee.kiwi.recipe;
 
+import com.ezylang.evalex.EvaluationException;
 import com.ezylang.evalex.Expression;
-import com.google.gson.JsonSyntaxException;
+import com.ezylang.evalex.parser.ParseException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -18,8 +19,8 @@ public record EvalCondition(String expression) implements ICondition {
 	public boolean test(IContext context) {
 		try {
 			return new Expression(expression, KEval.config()).evaluate().getBooleanValue();
-		} catch (Throwable e) {
-			throw new JsonSyntaxException(e);
+		} catch (EvaluationException | ParseException e) {
+			throw new RuntimeException(e);
 		}
 	}
 

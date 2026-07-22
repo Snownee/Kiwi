@@ -11,7 +11,9 @@ import snownee.kiwi.KiwiCommonConfig;
 import snownee.kiwi.KiwiGO;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.LoadingContext;
+import snownee.kiwi.loader.Platform;
 import snownee.kiwi.recipe.AlternativesIngredient;
+import snownee.kiwi.recipe.AlternativesIngredientBuilder;
 import snownee.kiwi.recipe.CustomIngredientSerializer;
 import snownee.kiwi.recipe.EvalCondition;
 import snownee.kiwi.recipe.ModuleLoadedCondition;
@@ -36,8 +38,10 @@ public final class DataModule extends AbstractModule {
 			SizedIngredient.SizedSlotDisplay.MAP_CODEC,
 			SizedIngredient.SizedSlotDisplay.STREAM_CODEC));
 
-	public DataModule() {
-		CustomIngredientSerializer.register(AlternativesIngredient.Serializer.INSTANCE);
+	@Override
+	protected void addEntries() {
+		CustomIngredientSerializer.register(Platform.isDataGen() ?
+				AlternativesIngredientBuilder.Serializer.INSTANCE : AlternativesIngredient.Serializer.INSTANCE);
 	}
 
 	@KiwiModule.LoadingCondition("data")
