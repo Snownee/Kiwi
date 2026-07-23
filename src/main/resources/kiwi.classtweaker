@@ -73,3 +73,5 @@ accessible field net/minecraft/data/tags/TagsProvider builders Ljava/util/Map;
 accessible field net/minecraft/world/item/Item$Properties id Lnet/minecraft/resources/ResourceKey;
 
 accessible field net/minecraft/world/item/crafting/Ingredient values Lnet/minecraft/core/HolderSet;
+
+accessible class net/minecraft/resources/RegistryOps$HolderLookupAdapter

@@ -20,10 +20,13 @@ import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JavaOps;
 import com.mojang.serialization.JsonOps;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.flag.FeatureFlags;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.KEval;
@@ -84,7 +87,11 @@ public class OneTimeLoader {
 		return result.result().orElseThrow();
 	}
 
-	public static <T> @Nullable DataResult<T> parseFile(Identifier file, Resource resource, Codec<T> codec, Context context) {
+	public static <T> @Nullable DataResult<T> parseFile(
+			Identifier file,
+			Resource resource,
+			Codec<T> codec,
+			Context context) {
 		String ext = file.getPath().substring(file.getPath().length() - 5);
 		try (BufferedReader reader = resource.openAsReader()) {
 			Dynamic<?> dynamic;
@@ -97,7 +104,12 @@ public class OneTimeLoader {
 			} else {
 				return DataResult.error(() -> "Unknown extension: " + ext);
 			}
-			if (Platform.applyResourceConditions(file, dynamic, context.registryInfo)) {
+			DataResult<Platform.ConditionDecision> nativeConditions = Platform.applyResourceConditions(
+					file, dynamic, context);
+			if (nativeConditions.error().isPresent()) {
+				return DataResult.error(() -> nativeConditions.error().orElseThrow().message());
+			}
+			if (nativeConditions.result().orElseThrow() == Platform.ConditionDecision.SKIP) {
 				return null;
 			}
 			Optional<String> condition = dynamic.get("kiwi:condition").asString().result();
@@ -114,15 +126,24 @@ public class OneTimeLoader {
 	}
 
 	public static class Context {
-		public static final Context EMPTY = new Context();
+		public final RegistryOps.RegistryInfoLookup registryLookup;
 		private @Nullable Map<String, Expression> cachedExpressions;
 		private @Nullable Set<String> disabledNamespaces;
-		private RegistryOps.@Nullable RegistryInfoLookup registryInfo;
 
-		public Context() {}
+		public Context(RegistryOps.RegistryInfoLookup registryLookup, FeatureFlagSet enabledFeatures) {
+			this.registryLookup = registryLookup;
+		}
 
-		public Context(RegistryOps.@Nullable RegistryInfoLookup registryInfo) {
-			this.registryInfo = registryInfo;
+		public Context(RegistryOps.RegistryInfoLookup registryLookup) {
+			this.registryLookup = registryLookup;
+		}
+
+		public static Context create(HolderLookup.Provider registryProvider, FeatureFlagSet enabledFeatures) {
+			return new Context(new RegistryOps.HolderLookupAdapter(registryProvider), enabledFeatures);
+		}
+
+		public static Context create(HolderLookup.Provider registryProvider) {
+			return create(registryProvider, FeatureFlags.VANILLA_SET);
 		}
 
 		public Expression getExpression(String expression) {

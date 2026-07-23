@@ -22,6 +22,7 @@ import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
@@ -181,7 +182,7 @@ public final class CustomizationHooks {
 
 	public static void initLoader() {
 		ResourceManager resourceManager = collectKiwiPacks();
-		OneTimeLoader.Context context = new OneTimeLoader.Context();
+		OneTimeLoader.Context context = OneTimeLoader.Context.create(RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY));
 		Map<String, CustomizationMetadata> metadataMap = CustomizationMetadata.loadMap(resourceManager, context);
 
 		SoundTypes.refreshWithValues(OneTimeLoader.load(
@@ -382,7 +383,7 @@ public final class CustomizationHooks {
 
 	public static void frozen() {
 		ResourceManager resourceManager = collectKiwiPacks();
-		OneTimeLoader.Context context = new OneTimeLoader.Context();
+		OneTimeLoader.Context context = OneTimeLoader.Context.create(RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY));
 		BlockFamilies.reloadResources(resourceManager, context);
 		BuilderRules.reload(resourceManager, context);
 	}

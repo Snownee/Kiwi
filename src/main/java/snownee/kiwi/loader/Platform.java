@@ -36,7 +36,6 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.resources.Identifier;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerEntity;
 import net.minecraft.tags.TagKey;
@@ -52,8 +51,14 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import snownee.kiwi.Kiwi;
+import snownee.kiwi.util.resource.OneTimeLoader;
 
 public final class Platform implements DedicatedServerModInitializer {
+
+	public enum ConditionDecision {
+		ALLOW,
+		SKIP
+	}
 
 	private static final Pattern VERSION_PATTERN = Pattern.compile("^(\\d+)\\.(\\d+)\\.(\\d+).*?$");
 	private static final boolean DATA_GEN = System.getProperty("fabric-api.datagen") != null;
@@ -191,31 +196,29 @@ public final class Platform implements DedicatedServerModInitializer {
 	}
 
 	@SuppressWarnings("UnstableApiUsage")
-	public static boolean applyResourceConditions(Identifier file, Dynamic<?> dynamic, RegistryOps.@Nullable RegistryInfoLookup lookup) {
+	public static <T> DataResult<ConditionDecision> applyResourceConditions(
+			Identifier file,
+			Dynamic<T> dynamic,
+			OneTimeLoader.Context context) {
 		boolean debugLogEnabled = ResourceConditionsImpl.LOGGER.isDebugEnabled();
 
-		Optional<? extends Dynamic<?>> optionalDynamic = dynamic.get(ResourceConditions.CONDITIONS_KEY).result();
-		if (optionalDynamic.isPresent()) {
-			DataResult<ResourceCondition> conditions = ResourceCondition.CONDITION_CODEC.parse(optionalDynamic.get());
-
-			if (conditions.isSuccess()) {
-				boolean matched = conditions.getOrThrow().test(lookup);
-
-				if (debugLogEnabled) {
-					String verdict = matched ? "Allowed" : "Rejected";
-					ResourceConditionsImpl.LOGGER.debug("{} resource of file {}", verdict, file);
-				}
-
-				return !matched;
-			} else {
-				ResourceConditionsImpl.LOGGER.error(
-						"Failed to parse resource conditions for file {}, skipping: {}",
-						file,
-						conditions.error().orElseThrow().message());
-			}
+		Optional<Dynamic<T>> optionalDynamic = dynamic.get(ResourceConditions.CONDITIONS_KEY).result();
+		if (optionalDynamic.isEmpty()) {
+			return DataResult.success(ConditionDecision.ALLOW);
 		}
 
-		return false;
+		return ResourceCondition.CONDITION_CODEC.parse(optionalDynamic.get())
+				.map(conditions -> {
+					boolean matched = conditions.test(context.registryLookup);
+
+					if (debugLogEnabled) {
+						String verdict = matched ? "Allowed" : "Rejected";
+						ResourceConditionsImpl.LOGGER.debug("{} resource of file {}", verdict, file);
+					}
+
+					return matched ? ConditionDecision.ALLOW : ConditionDecision.SKIP;
+				})
+				.mapError($ -> "Failed to parse native conditions in " + file + ": " + $);
 	}
 
 	@Override
