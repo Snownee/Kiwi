@@ -58,7 +58,11 @@ public class BlockFamilyInferrer {
 	}
 
 	private record PendingGroup(
-			String ruleName, String namespace, String path, boolean cascading, List<Holder.Reference<Block>> extraBlocks) {}
+			String ruleName,
+			String namespace,
+			String path,
+			boolean cascading,
+			List<Holder.Reference<Block>> extraBlocks) {}
 
 	public BlockFamilyInferrer(Map<String, AddonRule> addonRules, Collection<RecipeHolder<StonecutterRecipe>> stonecutterRecipes) {
 		this.addonRules = addonRules;
@@ -255,7 +259,10 @@ public class BlockFamilyInferrer {
 				Optional.empty(),
 				1,
 				BlockFamily.SwitchAttrs.create(true, cascading, false)));
-		families.add(family);
 		family.value().blocks().forEach(capturedBlocks::add);
+		if (family.value().itemHolders().isEmpty()) {
+			return;
+		}
+		families.add(family);
 	}
 }

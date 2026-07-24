@@ -17,8 +17,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ShovelItem;
 import net.minecraft.world.item.ToolMaterial;
 import snownee.kiwi.customization.InjectedCodec;
-import snownee.kiwi.customization.item.toolmaterial.ToolMaterials;
 import snownee.kiwi.customization.item.MultipleBlockItem;
+import snownee.kiwi.customization.item.toolmaterial.ToolMaterials;
 import snownee.kiwi.util.codec.KCodecs;
 
 public class ItemCodecs {

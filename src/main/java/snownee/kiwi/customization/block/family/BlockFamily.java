@@ -115,8 +115,8 @@ public class BlockFamily {
 			}
 			return holder;
 		}).filter(Optional::isPresent).map(Optional::get).toList());
-		this.stonecutterExchange = stonecutterExchange;
-		this.stonecutterFrom = stonecutterFrom.map($ -> {
+		this.stonecutterExchange = !this.items.isEmpty() && stonecutterExchange;
+		this.stonecutterFrom = this.items.isEmpty() ? Optional.empty() : stonecutterFrom.map($ -> {
 			Optional<Holder.Reference<Item>> holder = BuiltInRegistries.ITEM.get($);
 			if (strict) {
 				Preconditions.checkArgument(holder.isPresent(), "Item %s not found", $);
@@ -187,15 +187,16 @@ public class BlockFamily {
 		return switchAttrs;
 	}
 
-	protected Ingredient toIngredient(Stream<? extends Holder<Item>> items) {
+	protected Ingredient toIngredient(Stream<? extends Holder<Item>> items, boolean checkMatValue) {
 		return Ingredient.of(items.map(Holder::value).filter(item -> {
-			return BlockFamilies.getMatValue(item) >= BlockFamilies.BASE_MAT_VALUE;
+			return !checkMatValue || BlockFamilies.getMatValue(item) >= BlockFamilies.BASE_MAT_VALUE;
 		}));
 	}
 
+	@Nullable
 	public Ingredient ingredient() {
-		if (ingredient == null) {
-			ingredient = toIngredient(items.stream());
+		if (ingredient == null && !items.isEmpty()) {
+			ingredient = toIngredient(items.stream(), false);
 		}
 		return ingredient;
 	}
@@ -205,10 +206,10 @@ public class BlockFamily {
 			if (stonecutterFrom().isEmpty() || stonecutterFromMultiplier() != 1) {
 				exchangeIngredient = ingredient();
 			} else {
-				exchangeIngredient = toIngredient(Stream.concat(Stream.of(stonecutterFrom().get()), items.stream()));
+				exchangeIngredient = toIngredient(Stream.concat(Stream.of(stonecutterFrom().get()), items.stream()), true);
 			}
 		}
-		return exchangeIngredient;
+		return Objects.requireNonNull(exchangeIngredient);
 	}
 
 	public Ingredient exchangeIngredientInViewer() {
@@ -218,10 +219,10 @@ public class BlockFamily {
 						Objects.requireNonNull(stonecutterFromIngredient()) :
 						exchangeIngredient();
 			} else {
-				exchangeIngredientInViewer = toIngredient(exchangeInputsInViewer.get().stream());
+				exchangeIngredientInViewer = toIngredient(exchangeInputsInViewer.get().stream(), false);
 			}
 		}
-		return exchangeIngredientInViewer;
+		return Objects.requireNonNull(exchangeIngredientInViewer);
 	}
 
 	public boolean contains(Item item) {

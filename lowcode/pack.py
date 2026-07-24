@@ -6,6 +6,7 @@ import tempfile
 
 def main():
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    os.system('python copy_kswitch.py')
     if len(sys.argv) < 2:
         # Delete all jar files in the current directory
         for file in os.listdir('.'):
