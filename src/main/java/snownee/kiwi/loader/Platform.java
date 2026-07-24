@@ -86,13 +86,10 @@ public class Platform {
 	public static <T> DataResult<ConditionDecision> applyResourceConditions(
 			Identifier file,
 			Dynamic<T> dynamic,
-			OneTimeLoader.@Nullable Context context) {
+			OneTimeLoader.Context context) {
 		Optional<Dynamic<T>> conditions = dynamic.get(ConditionalOps.DEFAULT_CONDITIONS_KEY).result();
 		if (conditions.isEmpty()) {
 			return DataResult.success(ConditionDecision.ALLOW);
-		}
-		if (context == null) {
-			return DataResult.error(() -> "Native conditions in " + file + " cannot be evaluated");
 		}
 		ConditionalOps<T> ops = new ConditionalOps<>(
 				RegistryOps.create(dynamic.getOps(), context.registryLookup),

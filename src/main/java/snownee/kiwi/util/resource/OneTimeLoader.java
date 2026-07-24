@@ -113,9 +113,7 @@ public class OneTimeLoader {
 			if (nativeConditions.result().orElseThrow() == Platform.ConditionDecision.SKIP) {
 				return null;
 			}
-			Optional<? extends Dynamic<?>> conditionValue = dynamic.get("kiwi:condition").result();
-			Optional<String> condition = conditionValue.isPresent() ?
-					conditionValue.orElseThrow().asString().result() : dynamic.get("condition").asString().result();
+			Optional<String> condition = dynamic.get("kiwi:condition").asString().result();
 			if (condition.isPresent()) {
 				Expression expression = context.getExpression(condition.get());
 				if (expression.evaluate().getBooleanValue() != Boolean.FALSE) {
