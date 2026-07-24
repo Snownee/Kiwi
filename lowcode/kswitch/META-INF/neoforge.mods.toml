@@ -16,4 +16,4 @@ kiwiCustomization=true
 
 [[dependencies.kswitch]]
 modId = "kiwi"
-versionRange = "[15,)"
+versionRange = "[26.0.15,)"

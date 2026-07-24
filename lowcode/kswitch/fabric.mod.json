@@ -14,7 +14,7 @@
 	},
 	"license": "ARR",
 	"depends": {
-		"kiwi": ">=15"
+		"kiwi": ">=26.0.15"
 	},
 	"custom": {
 		"modmenu": {
