@@ -28,6 +28,8 @@
   "kiwi.config.customization": "Customization",
   "kiwi.config.customization.disableStonecuttingNamespaces": "Disable Stonecutting Namespaces",
   "kiwi.config.customization.disableStonecuttingNamespaces.desc": "",
+  "kiwi.config.customization.kSwitchAutoStonecuttingRecipes": "K Switch Auto Stonecutting Recipes",
+  "kiwi.config.customization.kSwitchAutoStonecuttingRecipes.desc": "",
   "kiwi.config.debug": "Debug",
   "kiwi.config.debug.F3CopyInInventory": "F3 Copy In Inventory",
   "kiwi.config.debug.F3CopyInInventory.desc": "",

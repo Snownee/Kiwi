@@ -14,7 +14,6 @@ import com.google.common.collect.Sets;
 
 import it.unimi.dsi.fastutil.objects.Object2ByteLinkedOpenHashMap;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.CommonLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
@@ -171,9 +170,6 @@ public final class CustomizationHooks {
 				return InteractionResult.SUCCESS_SERVER;
 			}
 			return InteractionResult.PASS;
-		});
-		CommonLifecycleEvents.TAGS_LOADED.register((registryAccess, client) -> {
-			BlockFamilies.reloadTags();
 		});
 		if (Platform.isPhysicalClient()) {
 			CustomizationClient.init();

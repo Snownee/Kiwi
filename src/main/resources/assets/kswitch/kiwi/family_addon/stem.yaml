@@ -1,0 +1,8 @@
+strict: false
+filter:
+  - group: log
+add_block:
+  - "{{namespace}}:{{path}}_stem"
+  - "{{namespace}}:{{path}}_hyphae"
+  - "{{namespace}}:stripped_{{path}}_stem"
+  - "{{namespace}}:stripped_{{path}}_hyphae"

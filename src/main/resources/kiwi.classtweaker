@@ -75,3 +75,4 @@ accessible field net/minecraft/world/item/Item$Properties id Lnet/minecraft/reso
 accessible field net/minecraft/world/item/crafting/Ingredient values Lnet/minecraft/core/HolderSet;
 
 accessible class net/minecraft/resources/RegistryOps$HolderLookupAdapter
+accessible method net/minecraft/world/item/crafting/SingleItemRecipe result ()Lnet/minecraft/world/item/ItemStackTemplate;

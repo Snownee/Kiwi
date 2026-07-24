@@ -7,10 +7,12 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.world.item.crafting.RecipeType;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.customization.CustomizationHooks;
 import snownee.kiwi.customization.block.family.BlockFamilies;
 import snownee.kiwi.customization.builder.BuilderRules;
+import snownee.kiwi.loader.Platform;
 import snownee.kiwi.util.resource.OneTimeLoader;
 
 public class ReloadFamiliesAndRulesCommand {
@@ -26,7 +28,7 @@ public class ReloadFamiliesAndRulesCommand {
 		ResourceManager resourceManager = CustomizationHooks.collectKiwiPacks();
 		OneTimeLoader.Context context = OneTimeLoader.Context.create(source.registryAccess(), source.enabledFeatures());
 		BlockFamilies.reloadResources(resourceManager, context);
-		int familyCount = BlockFamilies.reloadTags();
+		int familyCount = BlockFamilies.reloadRecipes(Platform.getRecipes(source.getServer().getRecipeManager(), RecipeType.STONECUTTING));
 		int ruleCount = BuilderRules.reload(resourceManager, context);
 		long reloadTime = stopwatch.elapsed().toMillis();
 		Kiwi.LOGGER.info("Reload time: %dms".formatted(reloadTime));

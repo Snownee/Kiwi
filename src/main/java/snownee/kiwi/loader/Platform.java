@@ -2,6 +2,7 @@ package snownee.kiwi.loader;
 
 import java.nio.file.Path;
 import java.text.MessageFormat;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -46,6 +47,11 @@ import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeInput;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -54,10 +60,8 @@ import snownee.kiwi.Kiwi;
 import snownee.kiwi.util.resource.OneTimeLoader;
 
 public final class Platform implements DedicatedServerModInitializer {
-
 	public enum ConditionDecision {
-		ALLOW,
-		SKIP
+		ALLOW, SKIP
 	}
 
 	private static final Pattern VERSION_PATTERN = Pattern.compile("^(\\d+)\\.(\\d+)\\.(\\d+).*?$");
@@ -102,9 +106,7 @@ public final class Platform implements DedicatedServerModInitializer {
 		if (matcher.matches()) {
 			try {
 				return new int[]{
-						Integer.parseInt(matcher.group(1)),
-						Integer.parseInt(matcher.group(2)),
-						Integer.parseInt(matcher.group(3))};
+						Integer.parseInt(matcher.group(1)), Integer.parseInt(matcher.group(2)), Integer.parseInt(matcher.group(3))};
 			} catch (Exception ignored) {
 			}
 		}
@@ -207,18 +209,22 @@ public final class Platform implements DedicatedServerModInitializer {
 			return DataResult.success(ConditionDecision.ALLOW);
 		}
 
-		return ResourceCondition.CONDITION_CODEC.parse(optionalDynamic.get())
-				.map(conditions -> {
-					boolean matched = conditions.test(context.registryLookup);
+		return ResourceCondition.CONDITION_CODEC.parse(optionalDynamic.get()).map(conditions -> {
+			boolean matched = conditions.test(context.registryLookup);
 
-					if (debugLogEnabled) {
-						String verdict = matched ? "Allowed" : "Rejected";
-						ResourceConditionsImpl.LOGGER.debug("{} resource of file {}", verdict, file);
-					}
+			if (debugLogEnabled) {
+				String verdict = matched ? "Allowed" : "Rejected";
+				ResourceConditionsImpl.LOGGER.debug("{} resource of file {}", verdict, file);
+			}
 
-					return matched ? ConditionDecision.ALLOW : ConditionDecision.SKIP;
-				})
-				.mapError($ -> "Failed to parse native conditions in " + file + ": " + $);
+			return matched ? ConditionDecision.ALLOW : ConditionDecision.SKIP;
+		}).mapError($ -> "Failed to parse native conditions in " + file + ": " + $);
+	}
+
+	public static <I extends RecipeInput, T extends Recipe<I>> Collection<RecipeHolder<T>> getRecipes(
+			RecipeManager recipeManager,
+			RecipeType<T> recipeType) {
+		return recipeManager.getAllOfType(recipeType);
 	}
 
 	@Override
