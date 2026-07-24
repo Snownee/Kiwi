@@ -1,0 +1,8 @@
+strict: false
+filter:
+  - group: log
+add_block:
+  - "{{namespace}}:{{path}}_log"
+  - "{{namespace}}:{{path}}_wood"
+  - "{{namespace}}:stripped_{{path}}_log"
+  - "{{namespace}}:stripped_{{path}}_wood"

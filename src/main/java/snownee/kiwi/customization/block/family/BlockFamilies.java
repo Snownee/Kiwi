@@ -24,7 +24,10 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.StonecutterRecipe;
 import snownee.kiwi.Kiwi;
+import snownee.kiwi.KiwiCommonConfig;
 import snownee.kiwi.customization.CustomizationHooks;
 import snownee.kiwi.util.KHolder;
 import snownee.kiwi.util.resource.OneTimeLoader;
@@ -35,6 +38,7 @@ public class BlockFamilies {
 	private static ImmutableList<KHolder<BlockFamily>> fromResources = ImmutableList.of();
 	private static ImmutableMap<Identifier, KHolder<BlockFamily>> byId = ImmutableMap.of();
 	private static ImmutableListMultimap<Item, KHolder<BlockFamily>> byStonecutterSource = ImmutableListMultimap.of();
+	private static Map<String, BlockFamilyInferrer.AddonRule> addonRules = Map.of();
 
 	public static Collection<KHolder<BlockFamily>> find(Item item) {
 		if (item == Items.AIR) {
@@ -65,12 +69,15 @@ public class BlockFamilies {
 				.collect(ImmutableList.toImmutableList());
 		// we need the byItem cache for automatically generating families
 		// we also need the byId cache because it is referenced by BuilderRules
+		addonRules = BlockFamilyInferrer.loadAddonRules(resourceManager, context);
 		reloadComplete(List::of);
 	}
 
-	public static int reloadTags() {
+	public static int reloadRecipes(Collection<RecipeHolder<StonecutterRecipe>> recipes) {
 		if (CustomizationHooks.kswitch) {
-			reloadComplete(new BlockFamilyInferrer()::generate);
+			reloadComplete(new BlockFamilyInferrer(
+					addonRules,
+					KiwiCommonConfig.kSwitchAutoStonecuttingRecipes ? recipes : List.of())::generate);
 		}
 		return byId.size();
 	}

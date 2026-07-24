@@ -24,4 +24,6 @@ public final class KiwiCommonConfig {
 	@ConfigUI.Typed(String.class)
 	@KiwiConfig.Path("customization.disableStonecuttingNamespaces")
 	public static List<String> disableStonecuttingNamespaces = List.of();
+	@KiwiConfig.Path("customization.kSwitchAutoStonecuttingRecipes")
+	public static boolean kSwitchAutoStonecuttingRecipes = true;
 }

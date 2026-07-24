@@ -1,0 +1,20 @@
+strict: false
+filter:
+  - group: colored_suffix
+add_block:
+  - "{{namespace}}:{{path}}_white"
+  - "{{namespace}}:{{path}}_light_gray"
+  - "{{namespace}}:{{path}}_gray"
+  - "{{namespace}}:{{path}}_black"
+  - "{{namespace}}:{{path}}_brown"
+  - "{{namespace}}:{{path}}_red"
+  - "{{namespace}}:{{path}}_orange"
+  - "{{namespace}}:{{path}}_yellow"
+  - "{{namespace}}:{{path}}_lime"
+  - "{{namespace}}:{{path}}_green"
+  - "{{namespace}}:{{path}}_cyan"
+  - "{{namespace}}:{{path}}_light_blue"
+  - "{{namespace}}:{{path}}_blue"
+  - "{{namespace}}:{{path}}_purple"
+  - "{{namespace}}:{{path}}_magenta"
+  - "{{namespace}}:{{path}}_pink"

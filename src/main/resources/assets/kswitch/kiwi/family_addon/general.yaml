@@ -1,0 +1,20 @@
+strict: false
+filter:
+  - group: general
+add_block:
+  - "{{namespace}}:{{path}}"
+  - "{{namespace}}:{{path}}_bricks"
+  - "{{namespace}}:{{path}}_block"
+  - "{{namespace}}:{{path}}_planks"
+  - "{{namespace}}:{{path}}_stairs"
+  - "{{namespace}}:{{path}}_slab"
+  - "{{namespace}}:{{path}}_wall"
+  - "{{namespace}}:{{path}}_fence"
+  - "{{namespace}}:{{path}}_fence_gate"
+  - "{{namespace}}:{{path}}_door"
+  - "{{namespace}}:{{path}}_trapdoor"
+  - "{{namespace}}:{{path}}_button"
+  - "{{namespace}}:{{path}}_pressure_plate"
+  - "{{namespace}}:{{path}}_bars"
+  - "{{namespace}}:{{path}}_chain"
+  - "{{namespace}}:{{path}}_shelf"
