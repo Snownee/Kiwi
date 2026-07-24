@@ -1,0 +1,13 @@
+strict: false
+filter:
+  - group: copper
+add_block:
+  - "{{namespace}}:{{path}}"
+  - "{{namespace}}:{{path}}_block"
+  - "{{namespace}}:cut_{{path}}"
+  - "{{namespace}}:chiseled_{{path}}"
+  - "{{namespace}}:{{path}}_door"
+  - "{{namespace}}:{{path}}_trapdoor"
+  - "{{namespace}}:{{path}}_chain"
+  - "{{namespace}}:{{path}}_grate"
+  - "{{namespace}}:{{path}}_bars"
