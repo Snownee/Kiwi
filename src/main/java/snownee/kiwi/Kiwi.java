@@ -122,6 +122,8 @@ import snownee.kiwi.config.ConfigHandler;
 import snownee.kiwi.config.KiwiConfig.ConfigType;
 import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.config.NeoClothConfigIntegration;
+import snownee.kiwi.data.NeoConditionWrapper;
+import snownee.kiwi.data.NeoIngredientWrapper;
 import snownee.kiwi.loader.ClientInitializer;
 import snownee.kiwi.loader.KiwiMetadataLoader;
 import snownee.kiwi.loader.Platform;
@@ -604,6 +606,15 @@ public class Kiwi {
 	}
 
 	private void postInit(InterModProcessEvent event) {
+		if (enableDataModule && !Platform.isModLoaded("connectorrecipebridge")) {
+			if (Platform.isModLoaded("fabric_resource_conditions_api_v1")) {
+				event.enqueueWork(NeoConditionWrapper::wrapAll);
+			}
+			if (Platform.isModLoaded("fabric_recipe_api_v1")) {
+				event.enqueueWork(NeoIngredientWrapper::wrapAll);
+			}
+		}
+
 		PostInitEvent e = new PostInitEvent(event);
 		KiwiModules.fire(m -> m.postInit(e));
 		ModLoadingContext.get().setActiveContainer(null);
