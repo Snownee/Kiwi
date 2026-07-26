@@ -112,6 +112,8 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.neoforged.neoforge.fluids.crafting.FluidIngredientType;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
+import net.neoforged.neoforge.registries.NewRegistryEvent;
+import net.neoforged.neoforge.registries.RegisterEvent;
 import net.neoforged.neoforgespi.language.IModInfo;
 import snownee.kiwi.build.KiwiMetadata;
 import snownee.kiwi.build.KiwiMetadataParser;
@@ -139,7 +141,7 @@ public class Kiwi {
 	public static @Nullable MinecraftServer currentServer;
 	private static @Nullable Multimap<String, KiwiAnnotationData> moduleData = ArrayListMultimap.create();
 	private static @Nullable Map<KiwiAnnotationData, String> conditions = Maps.newHashMap();
-	private static LoadingStage stage = LoadingStage.UNINITED;
+	private static LoadingStageState stage = new LoadingStageState(LoadingStage.UNINITED, false);
 	private static final Map<String, ResourceKey<CreativeModeTab>> GROUPS = Maps.newHashMap();
 	public static boolean enableDataModule = false;
 
@@ -274,10 +276,9 @@ public class Kiwi {
 	}
 
 	public Kiwi(IEventBus modEventBus) throws Exception {
-		if (stage != LoadingStage.UNINITED) {
+		if (!tryEnterStage(LoadingStage.CONSTRUCTOR)) {
 			return;
 		}
-		stage = LoadingStage.CONSTRUCTING;
 		Objects.requireNonNull(moduleData);
 		Objects.requireNonNull(defaultOptions);
 		Objects.requireNonNull(conditions);
@@ -382,24 +383,25 @@ public class Kiwi {
 		if (Platform.isPhysicalClient() && Platform.isModLoaded("cloth_config")) {
 			NeoClothConfigIntegration.init();
 		}
+		modEventBus.addListener(Kiwi::addRegistries);
 		modEventBus.addListener(this::init);
 		modEventBus.addListener(this::postInit);
 		modEventBus.addListener(this::loadComplete);
-		modEventBus.addListener((net.neoforged.neoforge.registries.RegisterEvent event) -> CustomIngredientImpl.onRegister(event));
+		modEventBus.addListener((RegisterEvent event) -> CustomIngredientImpl.onRegister(event));
 		if (Platform.isPhysicalClient()) {
 			NeoForge.EVENT_BUS.register(ClientInitializer.class);
 		}
 		NeoForge.EVENT_BUS.addListener(this::onCommandsRegister);
 		NeoForge.EVENT_BUS.addListener(this::onAttachEntity);
-		stage = LoadingStage.CONSTRUCTED;
+		exitStage();
 	}
 
 	public static Map<Identifier, Boolean> getDefaultOptions() {
 		return Objects.requireNonNull(defaultOptions);
 	}
 
-	public static void preInit() {
-		if (stage != LoadingStage.CONSTRUCTED) {
+	public static void addRegistries(NewRegistryEvent event) {
+		if (!tryEnterStage(LoadingStage.ADD_REGISTRIES)) {
 			return;
 		}
 
@@ -544,7 +546,13 @@ public class Kiwi {
 
 		KiwiModules.fire(KiwiModuleContainer::addRegistries);
 		ModLoadingContext.get().setActiveContainer(null);
+		exitStage();
+	}
 
+	public static void preInit() {
+		if (!tryEnterStage(LoadingStage.ADD_ENTRIES)) {
+			return;
+		}
 		for (KiwiModuleContainer container : KiwiModules.get()) {
 			container.loadGameObjects();
 		}
@@ -572,7 +580,7 @@ public class Kiwi {
 			}
 		}
 
-		stage = LoadingStage.INITED;
+		exitStage();
 	}
 
 	private static void instantiateModule(
@@ -610,8 +618,22 @@ public class Kiwi {
 		KUtil.onAttackEntity(event.getEntity(), event.getEntity().level(), InteractionHand.MAIN_HAND, event.getTarget(), null);
 	}
 
+	private static boolean tryEnterStage(LoadingStage stage) {
+		if (Kiwi.stage.stage.ordinal() + 1 != stage.ordinal() || Kiwi.stage.ongoing) {
+			return false;
+		}
+		Kiwi.stage = new LoadingStageState(stage, true);
+		return true;
+	}
+
+	private static void exitStage() {
+		stage = new LoadingStageState(stage.stage, false);
+	}
+
+	private record LoadingStageState(LoadingStage stage, boolean ongoing) {}
+
 	private enum LoadingStage {
-		UNINITED, CONSTRUCTING, CONSTRUCTED, INITED;
+		UNINITED, CONSTRUCTOR, ADD_REGISTRIES, ADD_ENTRIES;
 	}
 
 	private record Info(Identifier id, String className, List<Identifier> moduleRules) {

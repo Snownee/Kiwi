@@ -48,22 +48,17 @@ public class AlternativesIngredient implements CustomIngredient {
 		return wrapped != null && wrapped.test(stack);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
-	public List<ItemStack> getMatchingStacks() {
+	public Stream<Holder<Item>> items() {
 		init();
-		if (wrapped == null) {
-			return List.of();
-		}
-		@SuppressWarnings("deprecation")
-		Stream<Holder<Item>> items = wrapped.items();
-		return items.map(Holder::value).map(Item::getDefaultInstance).toList();
+		return wrapped != null ? wrapped.items() : Stream.empty();
 	}
 
 	@Override
 	public boolean requiresTesting() {
 		if (requiresTesting == null) {
-			requiresTesting = options.isEmpty() ? wrapped != null && wrapped.getCustomIngredient() != null :
-					!options.stream().allMatch(option -> option == null || option.getCustomIngredient() == null);
+			requiresTesting = !options.stream().allMatch($ -> $ == null || $.getCustomIngredient() == null);
 		}
 		return requiresTesting;
 	}
@@ -133,10 +128,6 @@ public class AlternativesIngredient implements CustomIngredient {
 
 		@Override
 		public <T> DataResult<AlternativesIngredient> decode(DynamicOps<T> ops, MapLike<T> input) {
-			return decodeOptions(ops, input).map(AlternativesIngredient::new);
-		}
-
-		static <T> DataResult<List<@Nullable Ingredient>> decodeOptions(DynamicOps<T> ops, MapLike<T> input) {
 			List<T> options = ops.getStream(Objects.requireNonNull(input.get("options"))).getOrThrow().toList();
 			ArrayList<String> errorMsgs = Lists.newArrayListWithExpectedSize(options.size());
 			List<@Nullable Ingredient> ingredients = Lists.newArrayListWithExpectedSize(options.size());
@@ -156,7 +147,7 @@ public class AlternativesIngredient implements CustomIngredient {
 			if (ingredients.isEmpty()) {
 				return DataResult.error(() -> "No valid ingredient found: " + String.join(", ", errorMsgs));
 			}
-			return DataResult.success(ingredients);
+			return DataResult.success(new AlternativesIngredient(ingredients));
 		}
 
 		@Override

@@ -66,13 +66,9 @@ public record CustomIngredientImpl<T extends CustomIngredient>(T ingredient) imp
 		return ingredient.test(itemStack);
 	}
 
-	public Stream<ItemStack> getItems() {
-		return this.ingredient.getMatchingStacks().stream();
-	}
-
 	@Override
 	public Stream<Holder<Item>> items() {
-		return getItems().map(ItemStack::getItem).map(item -> (Holder<Item>) item.builtInRegistryHolder()).distinct();
+		return ingredient.items();
 	}
 
 	@Override

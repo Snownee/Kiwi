@@ -13,7 +13,12 @@ public class GameDataMixin {
 
 	@Inject(at = @At("TAIL"), method = "unfreezeData")
 	private static void kiwi$unfreezeData(CallbackInfo ci) {
-		Kiwi.preInit();
+		try {
+			Kiwi.preInit();
+		} catch (Throwable e) {
+			Kiwi.LOGGER.error("Error while pre-initializing Kiwi", e);
+			throw e;
+		}
 	}
 
 }
