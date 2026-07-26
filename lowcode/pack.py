@@ -1,17 +1,24 @@
 import os
 import shutil
 import sys
-import tempfile
 import yaml
-
+import tempfile
 
 def main():
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    os.system('python copy_kswitch.py')
     if len(sys.argv) < 2:
+        # Delete all jar files in the current directory
+        for file in os.listdir('.'):
+            if file.endswith('.jar'):
+                os.remove(file)
+
         pack('kswitch')
         pack('ksit')
         pack('kiwicustomization')
         pack('persistentcreativeinventory')
         pack('fastscroll')
+        pack('lavaclearview')
         pack('minieffects')
         return
     pack(sys.argv[1])
@@ -47,6 +54,7 @@ def pack(dir):
     os.system('jar -c -f %s .' % path)
     os.chdir(curPath)
     shutil.rmtree(tempdir)
+    print('Packaged %s' % path)
 
 if __name__ == '__main__':
     main()

@@ -1,5 +1,6 @@
 package snownee.kiwi.customization.block.family;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -14,18 +15,21 @@ import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
-import net.neoforged.neoforge.common.Tags;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiCommonConfig;
 import snownee.kiwi.customization.CustomizationHooks;
@@ -39,6 +43,22 @@ public class BlockFamilies {
 	private static ImmutableMap<Identifier, KHolder<BlockFamily>> byId = ImmutableMap.of();
 	private static ImmutableListMultimap<Item, KHolder<BlockFamily>> byStonecutterSource = ImmutableListMultimap.of();
 	private static Map<String, BlockFamilyInferrer.AddonRule> addonRules = Map.of();
+	private static List<MatValueEntry> matValueEntries = List.of();
+
+	record MatValueEntry(TagKey<Item> tag, int multiply, int divide) {
+		static final Codec<MatValueEntry> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+				TagKey.codec(Registries.ITEM).fieldOf("tag").forGetter(MatValueEntry::tag),
+				ExtraCodecs.POSITIVE_INT.optionalFieldOf("multiply", 1).forGetter(MatValueEntry::multiply),
+				ExtraCodecs.POSITIVE_INT.optionalFieldOf("divide", 1).forGetter(MatValueEntry::divide)
+		).apply(instance, MatValueEntry::new));
+	}
+
+	record MatValueFile(int priority, List<MatValueEntry> entries) {
+		static final Codec<MatValueFile> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+				Codec.INT.optionalFieldOf("priority", 0).forGetter(MatValueFile::priority),
+				MatValueEntry.CODEC.listOf().fieldOf("entries").forGetter(MatValueFile::entries)
+		).apply(instance, MatValueFile::new));
+	}
 
 	public static Collection<KHolder<BlockFamily>> find(Item item) {
 		if (item == Items.AIR) {
@@ -70,6 +90,12 @@ public class BlockFamilies {
 		// we need the byItem cache for automatically generating families
 		// we also need the byId cache because it is referenced by BuilderRules
 		addonRules = BlockFamilyInferrer.loadAddonRules(resourceManager, context);
+		Map<Identifier, MatValueFile> matValueFiles = OneTimeLoader.load(resourceManager, "kiwi/mat_value", MatValueFile.CODEC, context);
+		List<MatValueEntry> allEntries = new ArrayList<>();
+		matValueFiles.values().stream()
+				.sorted((a, b) -> Integer.compare(b.priority(), a.priority()))
+				.forEach(file -> allEntries.addAll(file.entries()));
+		matValueEntries = List.copyOf(allEntries);
 		reloadComplete(List::of);
 	}
 
@@ -129,26 +155,17 @@ public class BlockFamilies {
 	}
 
 	private static long getMatValue(Holder<Item> holder) {
-		if (holder.is(Tags.Items.STORAGE_BLOCKS)) {
-			return BASE_MAT_VALUE * 9;
-		}
-		if (holder.is(ItemTags.SLABS)) {
-			return BASE_MAT_VALUE / 2;
-		}
-		if (holder.is(ItemTags.DOORS)) {
-			return BASE_MAT_VALUE * 2;
-		}
-		if (holder.is(ItemTags.TRAPDOORS)) {
-			return BASE_MAT_VALUE * 3;
-		}
-		if (holder.is(ItemTags.FENCE_GATES)) {
-			return BASE_MAT_VALUE * 4;
-		}
-		if (holder.is(ItemTags.WOODEN_PRESSURE_PLATES)) {
-			return BASE_MAT_VALUE * 2;
-		}
-		if (holder.is(ItemTags.BARS)) {
-			return BASE_MAT_VALUE / 24;
+		for (MatValueEntry entry : matValueEntries) {
+			if (holder.is(entry.tag())) {
+				long value = BASE_MAT_VALUE;
+				if (entry.multiply() != 1) {
+					value *= entry.multiply();
+				}
+				if (entry.divide() != 1) {
+					value /= entry.divide();
+				}
+				return value;
+			}
 		}
 		return BASE_MAT_VALUE;
 	}

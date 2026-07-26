@@ -51,7 +51,7 @@ public class JEICompat implements IModPlugin {
 				if (family.stonecutterExchange()) {
 					recipes.addAll(StonecutterRecipeMaker.makeRecipes("exchange_in_viewer", holder));
 				}
-				if (family.switchAttrs().enabled()) {
+				if (family.switchAttrs().enabled() && family.ingredient() != null) {
 					registration.addRecipes(KSWITCH, List.of(new KSwitchGroupRecipe(holder)));
 				}
 			}

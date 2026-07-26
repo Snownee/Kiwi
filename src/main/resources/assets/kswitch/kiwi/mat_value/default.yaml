@@ -1,0 +1,16 @@
+priority: -1000
+entries:
+  - tag: "c:storage_blocks"
+    multiply: 9
+  - tag: "minecraft:slabs"
+    divide: 2
+  - tag: "minecraft:doors"
+    multiply: 2
+  - tag: "minecraft:trapdoors"
+    multiply: 3
+  - tag: "minecraft:fence_gates"
+    multiply: 4
+  - tag: "minecraft:wooden_pressure_plates"
+    multiply: 2
+  - tag: "minecraft:bars"
+    divide: 24

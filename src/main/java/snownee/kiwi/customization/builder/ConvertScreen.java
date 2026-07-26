@@ -115,7 +115,7 @@ public class ConvertScreen extends Screen {
 		for (CConvertItemPacket.Group group : groups) {
 			accepted.addAll(group.entries());
 		}
-		int itemsPerLine = Mth.ceillog2(accepted.size());
+		int itemsPerLine = Mth.ceil(Math.sqrt(accepted.size()));
 		itemsPerLine = Mth.clamp(itemsPerLine, 4, 11);
 		for (CConvertItemPacket.Entry entry : accepted) {
 			if (!accepted.contains(entry)) {
