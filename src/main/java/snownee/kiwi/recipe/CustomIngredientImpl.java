@@ -45,10 +45,10 @@ public record CustomIngredientImpl<T extends CustomIngredient>(T ingredient) imp
 	}
 
 	private static <T extends CustomIngredient> IngredientType<CustomIngredientImpl<T>> makeSerializer(CustomIngredientSerializer<T> serializer) {
-		MapCodec<CustomIngredientImpl<T>> codec = serializer.getCodec(true).xmap(
+		MapCodec<CustomIngredientImpl<T>> codec = serializer.getCodec().xmap(
 				CustomIngredientImpl::new,
 				CustomIngredientImpl::ingredient);
-		StreamCodec<RegistryFriendlyByteBuf, CustomIngredientImpl<T>> streamCodec = serializer.getPacketCodec().map(
+		StreamCodec<RegistryFriendlyByteBuf, CustomIngredientImpl<T>> streamCodec = serializer.getStreamCodec().map(
 				CustomIngredientImpl::new,
 				CustomIngredientImpl::ingredient);
 		return new IngredientType<>(codec, streamCodec);

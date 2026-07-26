@@ -134,13 +134,13 @@ public class AlternativesIngredientBuilder implements CustomIngredient {
 		}
 
 		@Override
-		public MapCodec<AlternativesIngredientBuilder> getCodec(boolean allowEmpty) {
+		public MapCodec<AlternativesIngredientBuilder> getCodec() {
 			return this;
 		}
 
 		@SuppressWarnings("DataFlowIssue")
 		@Override
-		public StreamCodec<RegistryFriendlyByteBuf, AlternativesIngredientBuilder> getPacketCodec() {
+		public StreamCodec<RegistryFriendlyByteBuf, AlternativesIngredientBuilder> getStreamCodec() {
 			// Builder ingredients are data-generation only
 			return StreamCodec.unit(null);
 		}

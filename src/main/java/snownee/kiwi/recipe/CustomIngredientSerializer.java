@@ -45,14 +45,13 @@ public interface CustomIngredientSerializer<T extends CustomIngredient> {
 	 * <p>Codecs are used to read the ingredient from the recipe JSON files.
 	 *
 	 * @see Ingredient#CODEC
-	 * @see Ingredient#CODEC_NONEMPTY
 	 */
-	MapCodec<T> getCodec(boolean allowEmpty);
+	MapCodec<T> getCodec();
 
 	/**
 	 * {@return the packet codec for serializing this ingredient}.
 	 *
 	 * @see Ingredient#CONTENTS_STREAM_CODEC
 	 */
-	StreamCodec<RegistryFriendlyByteBuf, T> getPacketCodec();
+	StreamCodec<RegistryFriendlyByteBuf, T> getStreamCodec();
 }

@@ -108,7 +108,7 @@ public class AlternativesIngredient implements CustomIngredient {
 		}
 
 		@Override
-		public MapCodec<AlternativesIngredient> getCodec(boolean allowEmpty) {
+		public MapCodec<AlternativesIngredient> getCodec() {
 			return this;
 		}
 
@@ -122,7 +122,7 @@ public class AlternativesIngredient implements CustomIngredient {
 		}
 
 		@Override
-		public StreamCodec<RegistryFriendlyByteBuf, AlternativesIngredient> getPacketCodec() {
+		public StreamCodec<RegistryFriendlyByteBuf, AlternativesIngredient> getStreamCodec() {
 			return STREAM_CODEC;
 		}
 
