@@ -35,6 +35,11 @@ import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeInput;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -229,6 +234,12 @@ public class Platform {
 
 	public static void registerVillagerFood(ItemLike item, int value) {
 		VanillaActions.registerVillagerFood(item, value);
+	}
+
+	public static <I extends RecipeInput, T extends Recipe<I>> Collection<RecipeHolder<T>> getRecipes(
+			RecipeManager recipeManager,
+			RecipeType<T> recipeType) {
+		return recipeManager.recipeMap().byType(recipeType);
 	}
 
 	public enum Type {

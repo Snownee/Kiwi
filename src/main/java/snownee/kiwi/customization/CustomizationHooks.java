@@ -48,7 +48,6 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.event.AddPackFindersEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
-import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.block.BreakBlockEvent;
 import net.neoforged.neoforge.registries.NewRegistryEvent;
@@ -202,11 +201,6 @@ public final class CustomizationHooks {
 				event.setCanceled(true);
 			}
 		});
-		if (Platform.isPhysicalClient()) {
-			forgeEventBus.addListener((TagsUpdatedEvent.ClientPacketReceived event) -> BlockFamilies.reloadTags());
-		} else {
-			forgeEventBus.addListener((TagsUpdatedEvent.ServerDataLoad event) -> BlockFamilies.reloadTags());
-		}
 
 		if (Platform.isPhysicalClient()) {
 			CustomizationClient.init(modEventBus);

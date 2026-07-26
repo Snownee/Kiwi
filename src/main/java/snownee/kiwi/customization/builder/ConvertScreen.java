@@ -1,7 +1,6 @@
 package snownee.kiwi.customization.builder;
 
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -12,6 +11,7 @@ import org.joml.Vector2i;
 import org.jspecify.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.datafixers.util.Pair;
@@ -35,6 +35,7 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -105,15 +106,17 @@ public class ConvertScreen extends Screen {
 		int yStart = 0;
 		int curX = xStart;
 		int curY = yStart;
-		Set<CConvertItemPacket.Entry> accepted = Sets.newTreeSet(Comparator.comparing($ -> $.item()
-				.getDefaultInstance()
-				.getHoverName()
-				.getString()));
+//		Collection<CConvertItemPacket.Entry> accepted = Sets.newTreeSet(Comparator.comparing($ -> $.item()
+//				.getDefaultInstance()
+//				.getHoverName()
+//				.getString()));
+		Collection<CConvertItemPacket.Entry> accepted = Lists.newArrayList();
 		LocalPlayer player = Objects.requireNonNull(minecraft.player);
 		for (CConvertItemPacket.Group group : groups) {
 			accepted.addAll(group.entries());
 		}
-		int itemsPerLine = accepted.size() > 30 ? 11 : 4;
+		int itemsPerLine = Mth.ceillog2(accepted.size());
+		itemsPerLine = Mth.clamp(itemsPerLine, 4, 11);
 		for (CConvertItemPacket.Entry entry : accepted) {
 			if (!accepted.contains(entry)) {
 				continue;
