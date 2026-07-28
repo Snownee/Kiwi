@@ -167,7 +167,6 @@ def excludes = [
         "/assets/kaleidos",
         "/assets/kswitch",
         "/assets/test",
-        "/snownee/${project.mod_id}/datagen/KiwiDataGen.class",
         "/snownee/${project.mod_id}/test",
         "/data",
         "/.cache",
