@@ -35,7 +35,7 @@ public class ColorProviderUtil {
 	}
 
 	private static class BlockDelegate extends CachedSupplier<BlockTintSource> implements BlockTintSource {
-		BlockDelegate(Supplier<@Nullable BlockTintSource> getter) {
+		public BlockDelegate(Supplier<@Nullable BlockTintSource> getter) {
 			super(getter, Dummy.INSTANCE);
 		}
 
