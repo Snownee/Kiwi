@@ -3,16 +3,19 @@ package snownee.kiwi.build;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Messager;
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedOptions;
@@ -44,6 +47,15 @@ import snownee.kiwi.KiwiAnnotationData;
 @SuppressWarnings({"unchecked"})
 public class KiwiAnnotationProcessor extends AbstractProcessor {
 
+	TypeElement skipType;
+
+	@Override
+	public synchronized void init(ProcessingEnvironment processingEnv) {
+		super.init(processingEnv);
+		skipType = processingEnv.getElementUtils().getTypeElement("snownee.kiwi.KiwiModule.Skip");
+		Objects.requireNonNull(skipType);
+	}
+
 	@Override
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 		if (annotations.isEmpty()) {
@@ -63,6 +75,9 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 					continue;
 				}
 				AnnotationMirror a = getAnnotation(element, annotation);
+				if (a == null) {
+					continue;
+				}
 				Map<String, Object> o = new TreeMap<>();
 				for (Entry<? extends ExecutableElement, ? extends AnnotationValue> e : a.getElementValues().entrySet()) {
 					o.put(e.getKey().getSimpleName().toString(), mapValue(e.getValue()));
@@ -88,6 +103,11 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 				metadata.map().computeIfAbsent(type.yamlKey, _ -> new ArrayList<>()).add(value);
 			}
 		}
+		if (metadata.map().isEmpty() && !metadata.useDataModule()) {
+			return true;
+		}
+		metadata.map().values().forEach(list -> list.sort(Comparator.comparing(KiwiAnnotationData::getTarget)));
+
 		String yaml = new KiwiMetadataParser().dump(metadata);
 //		new KiwiMetadataParser().load(yaml);
 //		messager.printMessage(Kind.NOTE, yaml);
@@ -109,23 +129,31 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
 	}
 
 	// modified from Mixin
-	private static AnnotationMirror getAnnotation(Element elem, TypeElement annotation2) {
+	private AnnotationMirror getAnnotation(Element elem, TypeElement annotation2) {
 		if (elem == null) {
 			return null;
 		}
 
 		List<? extends AnnotationMirror> annotations = elem.getAnnotationMirrors();
 
+		if (annotations == null) {
+			return null;
+		}
+
+		AnnotationMirror found = null;
 		for (AnnotationMirror annotation : annotations) {
 			Element element = annotation.getAnnotationType().asElement();
 			if (!(element instanceof TypeElement annotationElement)) {
 				continue;
 			}
+			if (annotationElement.equals(skipType)) {
+				return null;
+			}
 			if (annotationElement.equals(annotation2)) {
-				return annotation;
+				found = annotation;
 			}
 		}
-		return null;
+		return found;
 	}
 
 	private static Object mapValue(AnnotationValue av) {

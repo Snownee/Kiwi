@@ -19,9 +19,6 @@ conditions:
     target: snownee.kiwi.test.TestCondition
 configs:
   - data:
-      value: ksit-common
-    target: snownee.kiwi.customization.block.behavior.KSitCommonConfig
-  - data:
       type: CLIENT
     target: snownee.kiwi.KiwiClientConfig
   - target: snownee.kiwi.KiwiCommonConfig
