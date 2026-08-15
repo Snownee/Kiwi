@@ -1,6 +1,5 @@
 package snownee.kiwi.build;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -10,11 +9,11 @@ import snownee.kiwi.KiwiAnnotationData;
 public record KiwiMetadata(Map<String, List<KiwiAnnotationData>> map, boolean useDataModule) {
 
 	public KiwiMetadata(boolean useDataModule) {
-		this(new HashMap<>(), useDataModule);
+		this(new TreeMap<>(), useDataModule);
 	}
 
 	public static KiwiMetadata of(Map<String, Object> raw) {
-		Map<String, List<KiwiAnnotationData>> map = new HashMap<>();
+		Map<String, List<KiwiAnnotationData>> map = new TreeMap<>();
 		for (Map.Entry<String, Object> entry : raw.entrySet()) {
 			String key = entry.getKey();
 			Object value = entry.getValue();
