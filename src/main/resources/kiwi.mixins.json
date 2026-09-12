@@ -43,6 +43,7 @@
 		"client.LavaFogEnvironmentMixin",
 		"client.LoadingOverlayMixin",
 		"client.OptionInstanceMixin",
+		"client.OptionsMixin",
 		"client.RenderLayerAccess",
 		"client.ScreenEffectRendererMixin",
 		"client.ScreenMixin",
