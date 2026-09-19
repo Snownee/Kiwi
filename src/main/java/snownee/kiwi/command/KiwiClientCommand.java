@@ -47,6 +47,7 @@ public class KiwiClientCommand {
 			}
 		}
 		builder.then(configure);
+		builder.then(context.literal("langpp").executes(ctx -> LangppCommand.print(context, ctx.getSource())));
 		return builder;
 	}
 

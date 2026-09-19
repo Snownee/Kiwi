@@ -68,6 +68,9 @@ dependencies {
 
     implementation "com.google.code.findbugs:jsr305:3.0.2"
 
+    testImplementation "org.junit.jupiter:junit-jupiter:5.11.4"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+
 //    implementation "dev.architectury:architectury-fabric:${project.architectury_version}"
 //    implementation "me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}"
     compileOnly "me.shedaniel:REIPluginCompatibilities-forge-annotations:12.+"
@@ -113,6 +116,11 @@ java {
 
     sourceCompatibility = JavaVersion.VERSION_25
     targetCompatibility = JavaVersion.VERSION_25
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    failOnNoDiscoveredTests = false
 }
 
 shadowJar {

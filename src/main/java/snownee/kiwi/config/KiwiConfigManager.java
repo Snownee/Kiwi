@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -88,6 +90,37 @@ public class KiwiConfigManager {
 
 	public static ConfigHandler getHandler(Class<?> clazz) {
 		return clazz2Configs.get(clazz);
+	}
+
+	/**
+	 * Resolves a value by a combined path of "{fileName}.{valuePath}", where the file name has no
+	 * extension and any '-' in it may be written as '.'.
+	 *
+	 * @param path the combined path
+	 * @return the matching value, or {@code null} if no config or value matches
+	 */
+	public static ConfigHandler.@Nullable Value<?> getValue(String path) {
+		ConfigHandler bestHandler = null;
+		String bestPath = null;
+		int bestScore = -1;
+		for (ConfigHandler config : allConfigs) {
+			String fileName = config.getFileName();
+			String rest = null;
+			if (path.startsWith(fileName + ".")) {
+				rest = path.substring(fileName.length() + 1);
+			} else {
+				String normalized = fileName.replace('-', '.') + ".";
+				if (path.startsWith(normalized)) {
+					rest = path.substring(normalized.length());
+				}
+			}
+			if (rest != null && !rest.isEmpty() && fileName.length() > bestScore) {
+				bestHandler = config;
+				bestPath = rest;
+				bestScore = fileName.length();
+			}
+		}
+		return bestHandler == null ? null : bestHandler.get(bestPath);
 	}
 
 	public static List<String> getModsWithScreen(ConfigLibAttributes attributes) {

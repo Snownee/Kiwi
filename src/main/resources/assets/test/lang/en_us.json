@@ -1,0 +1,8 @@
+{
+	"langpp.test.viewer": "111<#if jei>JEI installed!<#elif rei>REI installed!<#else>No recipe viewer installed<#endif>",
+	"langpp.test.kiwi": "<#if kiwi>\nKiwi is loaded\n<#else>\nKiwi is missing\n<#endif>",
+	"langpp.test.nested": "<#if kiwi>Kiwi<#if jei>[+JEI]<#else>[no JEI]<#endif><#else>not Kiwi<#endif>",
+	"langpp.test.escape": "escape: <##if kiwi>",
+	"langpp.test.version": "<#if MC[0] >= 1.21>modern<#else>legacy<#endif>",
+	"langpp.test.cfg": "<#if printExpr>eval prints<#else>eval silent<#endif>"
+}
