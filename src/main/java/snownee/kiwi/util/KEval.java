@@ -1,5 +1,7 @@
 package snownee.kiwi.util;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -19,10 +21,11 @@ import com.ezylang.evalex.parser.Token;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 
-import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.resources.Identifier;
 import snownee.kiwi.KiwiCommonConfig;
 import snownee.kiwi.KiwiModules;
+import snownee.kiwi.config.ConfigHandler;
+import snownee.kiwi.config.KiwiConfigManager;
 import snownee.kiwi.loader.Platform;
 
 public class KEval {
@@ -36,6 +39,7 @@ public class KEval {
 	static {
 		config().getFunctionDictionary().addFunction("HAS", new HasFunction());
 		config().getFunctionDictionary().addFunction("VER", new VerFunction());
+		config().getFunctionDictionary().addFunction("CFG", new CfgFunction());
 		config().getFunctionDictionary().addFunction("RESET", new ResetFunction());
 		config().getOperatorDictionary().addOperator("=", new AssignmentOperator());
 		config().getOperatorDictionary().addOperator("??", new NullishCoalescingOperator());
@@ -43,11 +47,19 @@ public class KEval {
 
 	private static Map<String, EvaluationValue> generateConstants() {
 		Map<String, EvaluationValue> map = new TreeMap<>(ExpressionConfiguration.StandardConstants);
-		map.put("MC", EvaluationValue.arrayValue(IntList.of(Platform.getVersionNumber(Identifier.DEFAULT_NAMESPACE))));
+		map.put("MC", versionArray(Platform.getVersionNumber(Identifier.DEFAULT_NAMESPACE)));
 		map.put("DEVENV", EvaluationValue.booleanValue(!Platform.isProduction()));
 		map.put("ISCLIENT", EvaluationValue.booleanValue(Platform.isPhysicalClient()));
 		map.put("MODLOADER", EvaluationValue.stringValue(Platform.getPlatform().name()));
 		return map;
+	}
+
+	private static EvaluationValue versionArray(int[] version) {
+		List<EvaluationValue> values = new ArrayList<>(version.length);
+		for (int part : version) {
+			values.add(EvaluationValue.numberValue(BigDecimal.valueOf(part)));
+		}
+		return EvaluationValue.arrayValue(values);
 	}
 
 	public static ExpressionConfiguration config() {
@@ -69,7 +81,7 @@ public class KEval {
 
 	@FunctionParameter(name = "id")
 	private static class VerFunction extends AbstractFunction {
-		private final Map<String, IntList> cache = Maps.newHashMap();
+		private final Map<String, EvaluationValue> cache = Maps.newHashMap();
 
 		@Override
 		public EvaluationValue evaluate(Expression expression, Token functionToken, EvaluationValue... parameterValues) {
@@ -77,7 +89,25 @@ public class KEval {
 			if (!Platform.isModLoaded(s)) {
 				return EvaluationValue.NULL_VALUE;
 			}
-			return EvaluationValue.arrayValue(cache.computeIfAbsent(s, id -> IntList.of(Platform.getVersionNumber(id))));
+			return cache.computeIfAbsent(s, id -> versionArray(Platform.getVersionNumber(id)));
+		}
+	}
+
+	@FunctionParameter(name = "path")
+	private static class CfgFunction extends AbstractFunction {
+		@Override
+		public EvaluationValue evaluate(Expression expression, Token functionToken, EvaluationValue... parameterValues) {
+			String path = parameterValues[0].getStringValue();
+			ConfigHandler.Value<?> value = KiwiConfigManager.getValue(path);
+			if (value == null) {
+				return EvaluationValue.NULL_VALUE;
+			}
+			Object raw = value.get();
+			try {
+				return EvaluationValue.of(raw, expression.getConfiguration());
+			} catch (Exception e) {
+				return EvaluationValue.stringValue(String.valueOf(raw));
+			}
 		}
 	}
 

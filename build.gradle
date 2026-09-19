@@ -259,6 +259,14 @@ dependencies {
 
     compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
     compileOnly "dev.emi:emi-neoforge:${emi_version}"
+
+    testImplementation "org.junit.jupiter:junit-jupiter:5.11.4"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    failOnNoDiscoveredTests = false
 }
 
 processResources {

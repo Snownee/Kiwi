@@ -36,6 +36,7 @@
 	],
 	"client": [
 		"client.AvatarRenderStateMixin",
+		"client.ClientLanguageMixin",
 		"client.ClientTelemetryManagerMixin",
 		"client.CreativeModeInventoryScreenMixin",
 		"client.EntityRendererMixin",

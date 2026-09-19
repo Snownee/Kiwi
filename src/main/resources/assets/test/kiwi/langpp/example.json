@@ -1,0 +1,10 @@
+{
+	"prefixes": ["langpp.test."],
+	"define": {
+		"jei": "has:jei",
+		"rei": "has:rei",
+		"kiwi": "has:kiwi",
+		"cloth": "has:cloth-config",
+		"printExpr": "cfg:kiwi.common.eval.printExpression"
+	}
+}
