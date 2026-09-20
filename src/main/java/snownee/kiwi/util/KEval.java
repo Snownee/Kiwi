@@ -119,8 +119,8 @@ public class KEval {
 		}
 	}
 
-	private static class DataAccessor implements DataAccessorIfc {
-		static final DataAccessor INSTANCE = new DataAccessor();
+	public static class DataAccessor implements DataAccessorIfc {
+		public static final DataAccessor INSTANCE = new DataAccessor();
 		private final Map<String, EvaluationValue> variables = new TreeMap<>();
 
 		@Override
@@ -136,7 +136,28 @@ public class KEval {
 			if (KiwiCommonConfig.vars.containsKey(variable)) {
 				throw new IllegalArgumentException("Cannot assign to constant");
 			}
+			Preconditions.checkArgument(isValidVariableName(variable), "Invalid variable name: %s", variable);
 			variables.put(variable, value);
+		}
+
+		private static boolean isValidVariableName(String name) {
+			if (name.isEmpty() || !isIdentifierStart(name.charAt(0))) {
+				return false;
+			}
+			for (int i = 1; i < name.length(); i++) {
+				if (!isIdentifierPart(name.charAt(i))) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		private static boolean isIdentifierStart(char c) {
+			return c == '_' || Character.isLetter(c);
+		}
+
+		private static boolean isIdentifierPart(char c) {
+			return c == '_' || Character.isLetterOrDigit(c);
 		}
 	}
 
