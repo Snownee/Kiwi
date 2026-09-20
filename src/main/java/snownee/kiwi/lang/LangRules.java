@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.jspecify.annotations.Nullable;
@@ -99,6 +100,7 @@ public final class LangRules {
 		private final String signature;
 		private final Map<String, String> preparedConditions = new HashMap<>();
 		private final Map<String, Boolean> conditionResults = new HashMap<>();
+		private final Map<String, String> expressionResults = new HashMap<>();
 
 		private Scope(Map<String, String> defines, String signature) {
 			this.defines = defines;
@@ -111,6 +113,20 @@ public final class LangRules {
 						rawCondition,
 						$ -> DefineResolver.prepare(rawCondition, defines, evaluator, warnings, signature + '|' + rawCondition));
 				return conditionResults.computeIfAbsent(prepared, evaluator::test);
+			};
+		}
+
+		public Function<String, String> expressionEvaluator(ConditionEvaluator evaluator, WarningSink warnings) {
+			return rawExpression -> {
+				String prepared = preparedConditions.computeIfAbsent(
+						rawExpression,
+						$ -> DefineResolver.prepare(
+								rawExpression,
+								defines,
+								evaluator,
+								warnings,
+								signature + "|eval|" + rawExpression));
+				return expressionResults.computeIfAbsent(prepared, evaluator::evaluate);
 			};
 		}
 	}

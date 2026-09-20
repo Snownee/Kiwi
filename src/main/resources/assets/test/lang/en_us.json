@@ -4,5 +4,6 @@
 	"langpp.test.nested": "<#if kiwi>Kiwi<#if jei>[+JEI]<#else>[no JEI]<#endif><#else>not Kiwi<#endif>",
 	"langpp.test.escape": "escape: <##if kiwi>",
 	"langpp.test.version": "<#if MC[0] >= 1.21>modern<#else>legacy<#endif>",
-	"langpp.test.cfg": "<#if printExpr>eval prints<#else>eval silent<#endif>"
+	"langpp.test.cfg": "<#if printExpr>eval prints<#else>eval silent<#endif>",
+	"langpp.test.eval": "MC major: <#eval MC[0]>"
 }

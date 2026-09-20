@@ -2,6 +2,7 @@ package snownee.kiwi.lang;
 
 import com.ezylang.evalex.EvaluationException;
 import com.ezylang.evalex.Expression;
+import com.ezylang.evalex.data.EvaluationValue;
 import com.ezylang.evalex.parser.ParseException;
 
 import snownee.kiwi.util.KEval;
@@ -15,6 +16,22 @@ public enum KEvalConditionEvaluator implements ConditionEvaluator {
 			return new Expression(expression, KEval.config()).evaluate().getBooleanValue();
 		} catch (EvaluationException | ParseException e) {
 			throw new IllegalArgumentException("Failed to evaluate condition: " + expression, e);
+		}
+	}
+
+	@Override
+	public String evaluate(String expression) {
+		try {
+			EvaluationValue value = new Expression(expression, KEval.config()).evaluate();
+			if (value.isNullValue()) {
+				return "";
+			}
+			if (value.isNumberValue()) {
+				return value.getNumberValue().stripTrailingZeros().toPlainString();
+			}
+			return String.valueOf(value.getValue());
+		} catch (EvaluationException | ParseException e) {
+			throw new IllegalArgumentException("Failed to evaluate expression: " + expression, e);
 		}
 	}
 

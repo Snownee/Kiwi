@@ -92,14 +92,41 @@ class TemplateTest {
 	}
 
 	@Test
-	void newlineBeforeDirectiveIsRemoved() {
+	void newlineBeforeEmptyConditionalIsRemoved() {
 		assertEquals("A", render("A\n<#if a>B<#endif>", Map.of("a", false)));
-		assertEquals("AB", render("A\n<#if a>B<#endif>", Map.of("a", true)));
+		assertEquals("A\nB", render("A\n<#if a>B<#endif>", Map.of("a", true)));
 	}
 
 	@Test
-	void crlfBeforeDirectiveIsRemoved() {
+	void crlfBeforeEmptyConditionalIsRemoved() {
 		assertEquals("A", render("A\r\n<#if a>B<#endif>", Map.of("a", false)));
+	}
+
+	@Test
+	void evalDirective() {
+		assertEquals("value=3", Template.parse("value=<#eval 1 + 2>").render(condition -> false, expression -> "3"));
+	}
+
+	@Test
+	void evalKeepsSurroundingNewlines() {
+		assertEquals("A\n3\nB", Template.parse("A\n<#eval e>\nB").render(condition -> false, expression -> "3"));
+	}
+
+	@Test
+	void evalInsideConditional() {
+		assertEquals("X=3", Template.parse("<#if a>X=<#eval e><#endif>").render(condition -> true, expression -> "3"));
+	}
+
+	@Test
+	void nestedLinesArePreserved() {
+		Map<String, Boolean> conditions = Map.of("a", true, "b", true);
+		assertEquals("A\nB\nC", render("<#if a>A\n<#if b>B<#endif>\nC<#endif>", conditions));
+	}
+
+	@Test
+	void blankLineKeptWhenSatisfiedAndRemovedWhenNot() {
+		assertEquals("A\n\nB", render("A\n\n<#if a>B<#endif>", Map.of("a", true)));
+		assertEquals("A\n", render("A\n\n<#if a>B<#endif>", Map.of("a", false)));
 	}
 
 	@Test
