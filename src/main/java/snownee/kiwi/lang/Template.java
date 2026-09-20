@@ -6,6 +6,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.jspecify.annotations.Nullable;
@@ -56,8 +57,25 @@ public final class Template {
 					if (end < n && source.charAt(end) == '>') {
 						stripTrailingNewline(text);
 						flush(text, current);
-						i = skipLeadingNewline(source, end + 1);
+						i = directive == Directive.ELSE ? skipLeadingNewline(source, end + 1) : end + 1;
 						current = applySimple(directive, stack, current);
+						continue;
+					}
+					text.append("<#");
+					i += 2;
+					continue;
+				}
+				if (directive == Directive.EVAL) {
+					int expressionStart = skipWhitespace(source, keywordEnd);
+					int expressionEnd = findConditionEnd(source, expressionStart);
+					if (expressionEnd >= 0) {
+						String expression = source.substring(expressionStart, expressionEnd).trim();
+						if (expression.isEmpty()) {
+							throw new TemplateException("Empty expression in <#eval>");
+						}
+						flush(text, current);
+						current.add(new Eval(expression));
+						i = expressionEnd + 1;
 						continue;
 					}
 					text.append("<#");
@@ -71,7 +89,9 @@ public final class Template {
 					if (condition.isEmpty()) {
 						throw new TemplateException("Empty condition in <#" + directive.keyword + ">");
 					}
-					stripTrailingNewline(text);
+					if (directive == Directive.ELIF) {
+						stripTrailingNewline(text);
+					}
 					flush(text, current);
 					i = skipLeadingNewline(source, conditionEnd + 1);
 					current = applyConditional(directive, condition, stack, current);
@@ -92,29 +112,73 @@ public final class Template {
 	}
 
 	public String render(Predicate<String> conditionTest) {
+		return render(conditionTest, expression -> expression);
+	}
+
+	public String render(Predicate<String> conditionTest, Function<String, String> expressionEval) {
 		StringBuilder out = new StringBuilder();
-		render(nodes, out, conditionTest);
+		render(nodes, out, conditionTest, expressionEval);
 		return out.toString();
 	}
 
-	private static void render(List<Node> nodes, StringBuilder out, Predicate<String> conditionTest) {
+	private static void render(
+			List<Node> nodes,
+			StringBuilder out,
+			Predicate<String> conditionTest,
+			Function<String, String> expressionEval) {
 		for (Node node : nodes) {
 			if (node instanceof Text text) {
 				out.append(text.value());
+			} else if (node instanceof Eval eval) {
+				out.append(expressionEval.apply(eval.expression()));
 			} else if (node instanceof Conditional conditional) {
-				boolean matched = false;
-				for (Branch branch : conditional.branches()) {
-					if (conditionTest.test(branch.condition())) {
-						render(branch.body(), out, conditionTest);
-						matched = true;
-						break;
-					}
-				}
-				if (!matched && conditional.elseBody() != null) {
-					render(conditional.elseBody(), out, conditionTest);
+				StringBuilder branch = new StringBuilder();
+				renderSelected(conditional, branch, conditionTest, expressionEval);
+				if (branch.isEmpty()) {
+					stripTrailingBlankLine(out);
+				} else {
+					out.append(branch);
 				}
 			}
 		}
+	}
+
+	private static void renderSelected(
+			Conditional conditional,
+			StringBuilder out,
+			Predicate<String> conditionTest,
+			Function<String, String> expressionEval) {
+		for (Branch branch : conditional.branches()) {
+			if (conditionTest.test(branch.condition())) {
+				render(branch.body(), out, conditionTest, expressionEval);
+				return;
+			}
+		}
+		if (conditional.elseBody() != null) {
+			render(conditional.elseBody(), out, conditionTest, expressionEval);
+		}
+	}
+
+	private static void stripTrailingBlankLine(StringBuilder out) {
+		int i = out.length();
+		while (i > 0 && isHorizontalWhitespace(out.charAt(i - 1))) {
+			i--;
+		}
+		if (i == 0) {
+			return;
+		}
+		char c = out.charAt(i - 1);
+		if (c != '\n' && c != '\r') {
+			return;
+		}
+		int cut = i - 1;
+		if (c == '\n' && cut > 0 && out.charAt(cut - 1) == '\r') {
+			cut--;
+		}
+		while (cut > 0 && isHorizontalWhitespace(out.charAt(cut - 1))) {
+			cut--;
+		}
+		out.setLength(cut);
 	}
 
 	private static List<Node> applyConditional(
@@ -256,7 +320,8 @@ public final class Template {
 		IF("if"),
 		ELIF("elif"),
 		ELSE("else"),
-		ENDIF("endif");
+		ENDIF("endif"),
+		EVAL("eval");
 
 		private final String keyword;
 
@@ -280,10 +345,13 @@ public final class Template {
 		}
 	}
 
-	private sealed interface Node permits Text, Conditional {
+	private sealed interface Node permits Text, Conditional, Eval {
 	}
 
 	private record Text(String value) implements Node {
+	}
+
+	private record Eval(String expression) implements Node {
 	}
 
 	private record Branch(String condition, List<Node> body) {

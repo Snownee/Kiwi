@@ -4,5 +4,6 @@
 	"langpp.test.nested": "<#if kiwi>Kiwi<#if jei>[+JEI]<#else>[无 JEI]<#endif><#else>非 Kiwi<#endif>",
 	"langpp.test.escape": "转义：<##if kiwi>",
 	"langpp.test.version": "<#if MC[0] >= 1.21>新版本<#else>旧版本<#endif>",
-	"langpp.test.cfg": "<#if printExpr>开启<#else>关闭<#endif>"
+	"langpp.test.cfg": "<#if printExpr>开启<#else>关闭<#endif>",
+	"langpp.test.eval": "MC 主版本：<#eval MC[0]>"
 }

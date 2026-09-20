@@ -39,7 +39,9 @@ public final class TranslationPreprocessor {
 			}
 			try {
 				Template template = templates.computeIfAbsent(value, Template::parse);
-				String rendered = template.render(scope.conditionTester(evaluator, warnings));
+				String rendered = template.render(
+						scope.conditionTester(evaluator, warnings),
+						scope.expressionEvaluator(evaluator, warnings));
 				if (!rendered.equals(value)) {
 					if (result == null) {
 						result = new HashMap<>(translations);

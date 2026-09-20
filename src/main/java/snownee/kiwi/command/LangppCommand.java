@@ -13,7 +13,8 @@ public final class LangppCommand {
 			"langpp.test.nested",
 			"langpp.test.escape",
 			"langpp.test.version",
-			"langpp.test.cfg");
+			"langpp.test.cfg",
+			"langpp.test.eval");
 
 	private LangppCommand() {
 	}
