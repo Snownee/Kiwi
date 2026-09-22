@@ -269,6 +269,11 @@ tasks.named('test') {
     failOnNoDiscoveredTests = false
 }
 
+sourceSets {
+    test.compileClasspath += sourceSets.main.compileClasspath
+    test.runtimeClasspath += sourceSets.main.runtimeClasspath
+}
+
 processResources {
     from('src/main/java') {
         include '**/*.json'
