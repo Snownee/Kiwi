@@ -17,7 +17,7 @@ import snownee.kiwi.lang.TranslationPreprocessor;
 public class ClientLanguageMixin {
 	@WrapOperation(
 			method = "loadFrom",
-			at = @At(value = "INVOKE", target = "Ljava/util/Map;copyOf(Ljava/util/Map;)Ljava/util/Map;"))
+			at = @At(value = "INVOKE", target = "Ljava/util/Map;copyOf(Ljava/util/Map;)Ljava/util/Map;", ordinal = 0))
 	private static Map<String, String> kiwi$preprocessTranslations(
 			Map<String, String> map,
 			Operation<Map<String, String>> original,

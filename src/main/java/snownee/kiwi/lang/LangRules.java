@@ -8,8 +8,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
+
+import com.google.common.base.Suppliers;
 
 import net.minecraft.core.Registry;
 import net.minecraft.resources.Identifier;
@@ -20,13 +23,13 @@ import snownee.kiwi.util.resource.OneTimeLoader;
 
 public final class LangRules {
 	public static final String DIRECTORY = "kiwi/langpp";
-	private static final OneTimeLoader.Context CONTEXT = new OneTimeLoader.Context(new RegistryOps.RegistryInfoLookup() {
+	private static final LangRules EMPTY = new LangRules(List.of());
+	private static final Supplier<OneTimeLoader.Context> CONTEXT = Suppliers.memoize(() -> new OneTimeLoader.Context(new RegistryOps.RegistryInfoLookup() {
 		@Override
 		public <T> Optional<RegistryOps.RegistryInfo<T>> lookup(ResourceKey<? extends Registry<? extends T>> registryKey) {
 			return Optional.empty();
 		}
-	});
-	private static final LangRules EMPTY = new LangRules(List.of());
+	}));
 
 	private final List<LangRule> rules;
 	private final Map<String, Scope> scopes = new HashMap<>();
@@ -36,7 +39,7 @@ public final class LangRules {
 	}
 
 	public static LangRules load(ResourceManager resourceManager) {
-		Map<Identifier, LangRule> loaded = OneTimeLoader.load(resourceManager, DIRECTORY, LangRule.CODEC, CONTEXT);
+		Map<Identifier, LangRule> loaded = OneTimeLoader.load(resourceManager, DIRECTORY, LangRule.CODEC, CONTEXT.get());
 		if (loaded.isEmpty()) {
 			return EMPTY;
 		}
@@ -83,13 +86,14 @@ public final class LangRules {
 			signature.append(match.prefix).append('@').append(match.index).append('\u0001');
 		}
 		String signatureKey = signature.toString();
-		return scopes.computeIfAbsent(signatureKey, $ -> {
-			Map<String, String> defines = new HashMap<>();
-			for (Match match : sorted) {
-				defines.putAll(rules.get(match.index).define());
-			}
-			return new Scope(Map.copyOf(defines), signatureKey);
-		});
+		return scopes.computeIfAbsent(
+				signatureKey, $ -> {
+					Map<String, String> defines = new HashMap<>();
+					for (Match match : sorted) {
+						defines.putAll(rules.get(match.index).define());
+					}
+					return new Scope(Map.copyOf(defines), signatureKey);
+				});
 	}
 
 	private record Match(int prefixLength, int index, String prefix) {
