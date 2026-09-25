@@ -123,6 +123,9 @@ public final class CustomizationClient {
 			int layer = 0;
 			List<BlockTintSource> tintSources = Lists.newArrayList();
 			for (Identifier id : properties.colorProvider().get()) {
+				if (Identifier.DEFAULT_NAMESPACE.equals(id.getNamespace()) && id.getPath().equals("grass")) {
+					id = Identifier.withDefaultNamespace("short_grass");
+				}
 				Block providerBlock = BuiltInRegistries.BLOCK.getValue(id);
 				if (providerBlock == Blocks.AIR) {
 					Kiwi.LOGGER.warn("Cannot find color provider block %s for block %s".formatted(id, entry.getKey()));
