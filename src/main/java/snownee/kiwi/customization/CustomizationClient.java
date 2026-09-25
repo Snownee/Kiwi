@@ -20,6 +20,7 @@ import net.minecraft.client.gui.components.debug.DebugScreenProfile;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
@@ -120,11 +121,14 @@ public final class CustomizationClient {
 			if (properties.colorProvider().isEmpty() || properties.colorProvider().get().isEmpty()) {
 				continue;
 			}
-			Block block = BuiltInRegistries.BLOCK.get(entry.getKey()).map($ -> $.value()).orElse(Blocks.AIR);
+			Block block = BuiltInRegistries.BLOCK.get(entry.getKey()).map(Holder.Reference::value).orElse(Blocks.AIR);
 			int layer = 0;
 			List<BlockTintSource> tintSources = Lists.newArrayList();
 			for (Identifier id : properties.colorProvider().get()) {
-				Block providerBlock = BuiltInRegistries.BLOCK.get(id).map($ -> $.value()).orElse(Blocks.AIR);
+				if (Identifier.DEFAULT_NAMESPACE.equals(id.getNamespace()) && id.getPath().equals("grass")) {
+					id = Identifier.withDefaultNamespace("short_grass");
+				}
+				Block providerBlock = BuiltInRegistries.BLOCK.getValue(id);
 				if (providerBlock == Blocks.AIR) {
 					Kiwi.LOGGER.warn("Cannot find color provider block %s for block %s".formatted(id, entry.getKey()));
 					continue blocks;
