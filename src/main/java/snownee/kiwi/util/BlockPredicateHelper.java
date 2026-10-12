@@ -5,8 +5,8 @@ import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
 
-import net.minecraft.advancements.criterion.BlockPredicate;
-import net.minecraft.advancements.criterion.DataComponentMatchers;
+import net.minecraft.advancements.predicates.BlockPredicate;
+import net.minecraft.advancements.predicates.DataComponentMatchers;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -22,21 +22,13 @@ public class BlockPredicateHelper {
 		if (predicate == ANY) {
 			return true;
 		}
-		if (predicate.blocks().isPresent() && !predicate.blocks().get().contains(blockstate.typeHolder())) {
+		if (!predicate.matchesState(blockstate)) {
 			return false;
 		}
-		if (!predicate.properties().map(propPredicate -> propPredicate.matches(blockstate)).orElse(Boolean.TRUE)) {
-			return false;
+		if (predicate.nbt().isEmpty() && predicate.components().isEmpty()) {
+			return true;
 		}
-		BlockEntity be = predicate.nbt().isPresent() || !predicate.components().isEmpty() ? beGetter.get() : null;
-		if (predicate.nbt().isPresent()) {
-			if (be == null || be.getLevel() == null || BlockPredicate.matchesBlockEntity(
-					be.getLevel(),
-					be,
-					predicate.nbt().orElseThrow())) {
-				return false;
-			}
-		}
-		return predicate.components().isEmpty() || BlockPredicate.matchesComponents(be, predicate.components());
+		BlockEntity be = beGetter.get();
+		return be != null && be.getLevel() != null && predicate.matchesBlockEntity(be.getLevel(), be);
 	}
 }

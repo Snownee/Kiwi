@@ -32,3 +32,11 @@ forge*changelog.txt
 /run/*
 !/run/kiwipacks
 /xkdeco/
+
+# Python QA scripts
+__pycache__/
+*.pyc
+
+# Local QA Python caches
+__pycache__/
+*.pyc

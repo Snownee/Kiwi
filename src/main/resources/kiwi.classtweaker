@@ -22,8 +22,6 @@ accessible field net/minecraft/server/packs/repository/FolderRepositorySource va
 accessible field net/minecraft/server/packs/repository/FolderRepositorySource packType Lnet/minecraft/server/packs/PackType;
 accessible method net/minecraft/server/packs/repository/FolderRepositorySource createDiscoveredFilePackInfo (Ljava/nio/file/Path;)Lnet/minecraft/server/packs/PackLocationInfo;
 
-accessible method net/minecraft/advancements/criterion/BlockPredicate matchesBlockEntity (Lnet/minecraft/world/level/LevelReader;Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/advancements/criterion/NbtPredicate;)Z
-accessible method net/minecraft/advancements/criterion/BlockPredicate matchesComponents (Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/advancements/criterion/DataComponentMatchers;)Z
 
 accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen hoveredSlot Lnet/minecraft/world/inventory/Slot;
 
@@ -34,7 +32,6 @@ accessible method net/minecraft/world/entity/Display$BlockDisplay setBlockState 
 accessible field net/minecraft/world/level/block/state/properties/IntegerProperty min I
 accessible field net/minecraft/world/level/block/state/properties/IntegerProperty max I
 
-accessible method net/minecraft/world/level/block/state/BlockBehaviour propertiesCodec ()Lcom/mojang/serialization/codecs/RecordCodecBuilder;
 accessible field net/minecraft/world/level/block/state/BlockBehaviour properties Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;
 mutable field net/minecraft/world/level/block/state/BlockBehaviour properties Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties hasCollision Z
@@ -76,3 +73,8 @@ accessible field net/minecraft/world/item/crafting/Ingredient values Lnet/minecr
 
 accessible class net/minecraft/resources/RegistryOps$HolderLookupAdapter
 accessible method net/minecraft/world/item/crafting/SingleItemRecipe result ()Lnet/minecraft/world/item/ItemStackTemplate;
+# Constructors used by Kiwi block templates after vanilla removed block codecs.
+accessible method net/minecraft/world/level/block/DoorBlock <init> (Lnet/minecraft/world/level/block/state/properties/BlockSetType;Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;)V
+accessible method net/minecraft/world/level/block/TrapDoorBlock <init> (Lnet/minecraft/world/level/block/state/properties/BlockSetType;Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;)V
+accessible method net/minecraft/world/level/block/PressurePlateBlock <init> (Lnet/minecraft/world/level/block/state/properties/BlockSetType;Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;)V
+accessible method net/minecraft/world/level/block/IronBarsBlock <init> (Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;)V

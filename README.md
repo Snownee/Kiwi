@@ -1,3 +1,5 @@
+> This branch is an unofficial Fabric 26.3 dependency port. See [build instructions and validation scope](PORTING-26.3.md).
+
 # Kiwi
 
 Kiwi is a Minecraft modding library designed to help developers focus on content creation instead of repetitive work.

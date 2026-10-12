@@ -36,7 +36,7 @@ public class PlanetLayer extends CosmeticLayer {
 			float yRot,
 			float xRot) {
 		poseStack.pushPose();
-		poseStack.mulPose(Axis.YP.rotationDegrees(-renderState.ageInTicks));
+		poseStack.rotateDegrees(Axis.YP, -renderState.ageInTicks);
 		poseStack.scale(0.7f, 0.7f, 0.7f);
 		submitNodeCollector.submitModel(
 				modelPlanet,
@@ -45,8 +45,7 @@ public class PlanetLayer extends CosmeticLayer {
 				RenderTypes.entityTranslucent(TEXTURE),
 				lightCoords,
 				OverlayTexture.NO_OVERLAY,
-				renderState.outlineColor,
-				null
+				renderState.outlineColor
 		);
 		poseStack.popPose();
 	}

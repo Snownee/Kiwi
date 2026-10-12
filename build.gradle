@@ -187,8 +187,6 @@ publishMods {
         server = true
         accessToken = providers.environmentVariable("CURSE_TOKEN")
         minecraftVersions.add(minecraft_version)
-        minecraftVersions.add("26.1")
-        minecraftVersions.add("26.1.1")
         requires("fabric-api")
         optional("cloth-config")
     }
@@ -196,8 +194,6 @@ publishMods {
         projectId = "ufdDoWPd"
         accessToken = providers.environmentVariable("MODRINTH_TOKEN")
         minecraftVersions.add(minecraft_version)
-        minecraftVersions.add("26.1")
-        minecraftVersions.add("26.1.1")
         requires("fabric-api")
         optional("cloth-config")
     }

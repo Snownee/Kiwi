@@ -12,7 +12,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.minecraft.advancements.criterion.BlockPredicate;
+import net.minecraft.advancements.predicates.BlockPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -35,11 +35,11 @@ public class CustomizationCodecs {
 	public static final BiMap<String, MapColor> MAP_COLORS = HashBiMap.create();
 	public static final Codec<MapColor> MAP_COLOR_CODEC = simpleByNameCodec(MAP_COLORS);
 	public static final Codec<PushReaction> PUSH_REACTION = simpleByNameCodec(ImmutableBiMap.of(
-			"normal", PushReaction.NORMAL,
-			"destroy", PushReaction.DESTROY,
-			"block", PushReaction.BLOCK,
-			"ignore", PushReaction.IGNORE,
-			"push_only", PushReaction.PUSH_ONLY));
+			"normal", PushReaction.PUSH_PULL,
+			"destroy", PushReaction.POPPED,
+			"block", PushReaction.IMMOVEABLE,
+			"ignore", PushReaction.IGNORE_ENTITY,
+			"push_only", PushReaction.PUSH));
 	public static final Codec<BlockBehaviour.OffsetType> OFFSET_TYPE = simpleByNameCodec(ImmutableBiMap.of(
 			"xz", BlockBehaviour.OffsetType.XZ,
 			"xyz", BlockBehaviour.OffsetType.XYZ));
@@ -57,22 +57,40 @@ public class CustomizationCodecs {
 			RecordCodecBuilder.create(instance -> instance.group(
 					Codec.STRING.fieldOf("name").forGetter(KCodecs.unsupportedGetter()),
 					Codec.FLOAT.optionalFieldOf("secondary_chance", 0F).forGetter(KCodecs.unsupportedGetter()),
-					ResourceKey.codec(Registries.CONFIGURED_FEATURE).optionalFieldOf("mega_tree").forGetter(KCodecs.unsupportedGetter()),
-					ResourceKey.codec(Registries.CONFIGURED_FEATURE)
+					ResourceKey.codec(Registries.FEATURE).optionalFieldOf("mega_tree").forGetter(KCodecs.unsupportedGetter()),
+					ResourceKey.codec(Registries.FEATURE)
 							.optionalFieldOf("secondary_mega_tree")
 							.forGetter(KCodecs.unsupportedGetter()),
-					ResourceKey.codec(Registries.CONFIGURED_FEATURE).optionalFieldOf("tree").forGetter(KCodecs.unsupportedGetter()),
-					ResourceKey.codec(Registries.CONFIGURED_FEATURE)
+					ResourceKey.codec(Registries.FEATURE).optionalFieldOf("tree").forGetter(KCodecs.unsupportedGetter()),
+					ResourceKey.codec(Registries.FEATURE)
 							.optionalFieldOf("secondary_tree")
 							.forGetter(KCodecs.unsupportedGetter()),
-					ResourceKey.codec(Registries.CONFIGURED_FEATURE).optionalFieldOf("flowers").forGetter(KCodecs.unsupportedGetter()),
-					ResourceKey.codec(Registries.CONFIGURED_FEATURE)
+					ResourceKey.codec(Registries.FEATURE).optionalFieldOf("flowers").forGetter(KCodecs.unsupportedGetter()),
+					ResourceKey.codec(Registries.FEATURE)
 							.optionalFieldOf("secondary_flowers")
 							.forGetter(KCodecs.unsupportedGetter())
-			).apply(instance, TreeGrower::new)));
+			).apply(instance, (name, chance, mega, secondaryMega, tree, secondaryTree, flowers, secondaryFlowers) ->
+					new TreeGrower(name, treeWeights(tree, secondaryTree, chance),
+							treeWeights(mega, secondaryMega, chance), treeWeights(flowers, secondaryFlowers, chance),
+							tree.orElseGet(() -> secondaryTree.orElse(null))))));
 	// TODO BlockPredicate has its own Codec now.
 	//  However, to use that, you need to wrap your JsonOps into RegistryOps, which requires a HolderLookup.Provider.
 	//  Meaning, you need to get HolderLookup.Provider somewhere.
+	private static <T> net.minecraft.util.random.WeightedList<T> treeWeights(
+			java.util.Optional<T> primary, java.util.Optional<T> secondary, float chance) {
+		var weights = net.minecraft.util.random.WeightedList.<T>builder();
+		if (primary.isEmpty()) {
+			secondary.ifPresent(weights::add);
+		} else if (secondary.isEmpty()) {
+			primary.ifPresent(weights::add);
+		} else {
+			int secondaryWeight = Math.round(Math.clamp(chance, 0F, 1F) * (1 << 24));
+			if (secondaryWeight < (1 << 24)) weights.add(primary.orElseThrow(), (1 << 24) - secondaryWeight);
+			if (secondaryWeight > 0) weights.add(secondary.orElseThrow(), secondaryWeight);
+		}
+		return weights.build();
+	}
+
 	public static final Codec<BlockPredicate> BLOCK_PREDICATE = new Codec<>() {
 		@Override
 		public <T> DataResult<Pair<BlockPredicate, T>> decode(DynamicOps<T> ops, T input) {
@@ -234,7 +252,7 @@ public class CustomizationCodecs {
 					if ("ocelot_or_parrot".equals(s)) {
 						return DataResult.success(Pair.of(
 								(state, world, pos, entity) -> {
-									return entity == EntityType.OCELOT || entity == EntityType.PARROT;
+									return entity == net.minecraft.world.entity.EntityTypes.OCELOT || entity == net.minecraft.world.entity.EntityTypes.PARROT;
 								}, ops.empty()));
 					}
 				}

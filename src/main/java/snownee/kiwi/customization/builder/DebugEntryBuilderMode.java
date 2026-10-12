@@ -22,7 +22,7 @@ public class DebugEntryBuilderMode implements DebugScreenEntry {
 			return;
 		}
 		String line = I18n.get("kiwi.builder_mode.debug_entry");
-		if (I18n.exists("kiwi.builder_mode.debug_key_hint")) {
+		if (net.minecraft.locale.Language.getInstance().has("kiwi.builder_mode.debug_key_hint")) {
 			line = line + " " + I18n.get(
 					"kiwi.builder_mode.debug_key_hint",
 					Objects.requireNonNull(CustomizationClient.buildersButtonKey).getTranslatedKeyMessage().getString());

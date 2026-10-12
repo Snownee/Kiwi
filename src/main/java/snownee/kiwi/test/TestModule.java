@@ -3,7 +3,7 @@ package snownee.kiwi.test;
 import org.jspecify.annotations.Nullable;
 
 import net.minecraft.core.registries.Registries;
-import net.minecraft.world.effect.InstantenousMobEffect;
+import net.minecraft.world.effect.InstantaneousMobEffect;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -41,7 +41,7 @@ public class TestModule extends AbstractModule {
 //	public static final KiwiGO<TestBlock> FIRST_BLOCK = go(() -> new TestBlock2(blockProp()));
 
 	// Register a simple effect
-	public static final KiwiGO<MobEffect> FIRST_EFFECT = go(() -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0xFF0000));
+	public static final KiwiGO<MobEffect> FIRST_EFFECT = go(() -> new InstantaneousMobEffect(MobEffectCategory.BENEFICIAL, 0xFF0000));
 
 	// And its potion
 	public static final KiwiGO<Potion> FIRST_POTION = go(() -> new Potion(

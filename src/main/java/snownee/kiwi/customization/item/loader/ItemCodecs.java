@@ -11,10 +11,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.item.AxeItem;
-import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ShovelItem;
 import net.minecraft.world.item.ToolMaterial;
 import snownee.kiwi.customization.InjectedCodec;
 import snownee.kiwi.customization.item.MultipleBlockItem;
@@ -51,9 +48,9 @@ public class ItemCodecs {
 	static {
 		register(Identifier.withDefaultNamespace("item"), simpleCodec(SIMPLE_ITEM_FACTORY));
 		register(Identifier.withDefaultNamespace("blocks"), MultipleBlockItem.CODEC);
-		register(Identifier.withDefaultNamespace("axe"), toolCodec(AxeItem::new));
-		register(Identifier.withDefaultNamespace("hoe"), toolCodec(HoeItem::new));
-		register(Identifier.withDefaultNamespace("shovel"), toolCodec(ShovelItem::new));
+		register(Identifier.withDefaultNamespace("axe"), toolCodec((mat, damage, speed, properties) -> new Item(properties.axe(mat, damage, speed))));
+		register(Identifier.withDefaultNamespace("hoe"), toolCodec((mat, damage, speed, properties) -> new Item(properties.hoe(mat, damage, speed))));
+		register(Identifier.withDefaultNamespace("shovel"), toolCodec((mat, damage, speed, properties) -> new Item(properties.shovel(mat, damage, speed))));
 		register(
 				Identifier.withDefaultNamespace("pickaxe"),
 				toolCodec((mat, damage, speed, properties) -> new Item(properties.pickaxe(mat, damage, speed))));

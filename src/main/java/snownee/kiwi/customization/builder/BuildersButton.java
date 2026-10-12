@@ -62,7 +62,7 @@ public class BuildersButton {
 		Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(
 				SoundEvents.EXPERIENCE_ORB_PICKUP,
 				(random.nextFloat() - random.nextFloat()) * 0.35F + 0.9F));
-		Minecraft.getInstance().getChatListener().handleSystemMessage(
+		Minecraft.getInstance().gui.chatListener().handleSystemMessage(
 				Component.translatable("kiwi.builder_mode.%s".formatted(builderMode ?
 						"on" :
 						"off")), false);
@@ -79,7 +79,7 @@ public class BuildersButton {
 		if (player == null) {
 			return false;
 		}
-		Screen screen = mc.screen;
+		Screen screen = mc.gui.screen();
 		if (screen instanceof ConvertScreen) {
 			screen.onClose();
 			return true;
@@ -107,12 +107,12 @@ public class BuildersButton {
 		}
 		List<CConvertItemPacket.Group> groups = findConvertGroups(player, player.getMainHandItem());
 		if (!groups.isEmpty()) {
-			mc.setScreen(new ConvertScreen(null, null, player.getInventory().getSelectedSlot(), groups));
+			mc.gui.setScreen(new ConvertScreen(null, null, player.getInventory().getSelectedSlot(), groups));
 			return true;
 		}
 		groups = findConvertGroups(player, player.getOffhandItem());
 		if (!groups.isEmpty()) {
-			mc.setScreen(new ConvertScreen(null, null, Inventory.SLOT_OFFHAND, groups));
+			mc.gui.setScreen(new ConvertScreen(null, null, Inventory.SLOT_OFFHAND, groups));
 			return true;
 		}
 		return false;
