@@ -55,11 +55,25 @@ kiwi.config.high: High
 kiwi.config.cosmeticScreenKeybind.desc: Opens the Kiwi Cosmetic Screen by holding K, if you have available cosmetics
 kiwi.config.globalTooltip.desc: Enables the feature to globally add item tooltips
 kiwi.config.noMicrosoftTelemetry.desc: Disables data collection added by Microsoft Mojang
+kiwi.config.eval.printExpression.desc: Prints the parsed expression when evaluating expressions
+kiwi.config.kSwitch.creativeOnly.desc: Only allows using kSwitch in creative mode
+kiwi.config.customization.disableStonecuttingNamespaces.desc: Namespaces excluded from auto-generated stonecutting recipes (use "*" to exclude all)
+kiwi.config.customization.kSwitchAutoStonecuttingRecipes.desc: Automatically generates stonecutting recipes between blocks of the same kSwitch group
 kiwi.config.debug.tagsTooltip.desc: Shows item tags in advanced tooltips (F3+H)
 kiwi.config.debug.tagsPerPage.desc: The number of tags to show per page in advanced tooltips
 kiwi.config.debug.NBTTooltip.desc: Shows item NBT in advanced tooltips (F3+H) while holding shift
+kiwi.config.debug.F3CopyInInventory.desc: Copies the hovered item's registry name to the clipboard while holding F3 in an inventory
+kiwi.config.debug.printDataComponentsWhenCopy.desc: Prints the hovered item's data components to chat when it is copied
+kiwi.config.debug.showTranslatedTagsByDefault.desc: Shows translated tag names instead of raw tag IDs by default (hold Ctrl to toggle)
+kiwi.config.debug.tagsTooltipAppendKeybindHint.desc: Appends the keybind hint to the tags tooltip
 kiwi.config.qol: Quality of Life
 kiwi.config.qol.suppressExperimentalSettingsWarning.desc: Skips the experimental settings warning screen when joining a world
+kiwi.config.qol.hideDataComponentsTooltip.desc: Hides the item components section in advanced tooltips (F3+H)
+kiwi.config.qol.titleScreenNoFade.desc: Disables the fade-in animation of the title screen
+kiwi.config.qol.loadingOverlayNoFade.desc: Disables the fade-out animation of the loading overlay after a world finishes loading
+kiwi.config.qol.superClearChat.desc: Also clears titles, toasts, and stops sounds when clearing the chat (F3+D)
+kiwi.config.qol.noForceBackup.desc: Skips the world backup prompt shown before loading a world
+kiwi.config.vars.desc: Custom constant variables that can be referenced in Kiwi expressions and conditions
 kiwi.config.vars: Variables
 commands.kiwi.reload.success: Configuration %s has been reloaded.
 commands.kiwi.reload.failed: Configuration %s is not found or not provided by Kiwi.

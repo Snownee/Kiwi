@@ -72,6 +72,9 @@ public final class ClientPlatform implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
+		if (!Platform.isProduction() && Boolean.getBoolean("kiwi.autoQuit")) {
+			ClientLifecycleEvents.CLIENT_STARTED.register(Minecraft::stop);
+		}
 		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
 			ClientCommandContext<FabricClientCommandSource> context = new ClientCommandContext<>(registryAccess);
 			dispatcher.register(KiwiClientCommand.create(context));
