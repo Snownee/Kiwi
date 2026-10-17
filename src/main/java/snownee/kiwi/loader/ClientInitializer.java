@@ -18,7 +18,7 @@ public class ClientInitializer {
 
 	@SubscribeEvent
 	public static void onClientStarted(ClientStartedEvent event) {
-		if (!Platform.isProduction() && Boolean.getBoolean("kiwi.autoQuit")) {
+		if (Boolean.getBoolean("kiwi.autoQuit")) {
 			event.getClient().stop();
 		}
 	}
