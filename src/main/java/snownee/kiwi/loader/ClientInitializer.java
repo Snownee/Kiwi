@@ -5,6 +5,7 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.neoforge.client.event.lifecycle.ClientStartedEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import snownee.kiwi.client.TooltipEvents;
 import snownee.kiwi.command.ClientCommandContext;
@@ -14,6 +15,13 @@ import snownee.kiwi.minieffects.EffectRenderingScreen;
 import snownee.kiwi.minieffects.MiniEffects;
 
 public class ClientInitializer {
+
+	@SubscribeEvent
+	public static void onClientStarted(ClientStartedEvent event) {
+		if (!Platform.isProduction() && Boolean.getBoolean("kiwi.autoQuit")) {
+			event.getClient().stop();
+		}
+	}
 
 	@SubscribeEvent(priority = EventPriority.HIGH)
 	public static void globalTooltip(ItemTooltipEvent event) {
