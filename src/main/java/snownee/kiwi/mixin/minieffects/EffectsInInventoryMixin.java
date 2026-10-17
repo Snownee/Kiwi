@@ -104,7 +104,7 @@ public abstract class EffectsInInventoryMixin implements KiwiEffectsInInventory 
 	@WrapOperation(
 			method = "extractEffects", at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/client/gui/screens/inventory/EffectsInInventory;renderText(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/Component;Lnet/minecraft/client/gui/Font;IIIIIILnet/minecraft/world/effect/MobEffectInstance;)V"))
+			target = "Lnet/minecraft/client/gui/screens/inventory/EffectsInInventory;extractText(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/Component;Lnet/minecraft/client/gui/Font;IIIIIILnet/minecraft/world/effect/MobEffectInstance;)V"))
 	private void kiwi$recordAreas(
 			EffectsInInventory instance,
 			final GuiGraphicsExtractor graphics,
