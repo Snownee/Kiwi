@@ -125,7 +125,7 @@ public class SmartKey extends KeyMapping {
 	public static class Builder {
 		private final String name;
 		private final KeyMapping.Category category;
-		private InputConstants.Type type = InputConstants.Type.KEYSYM;
+		private InputConstants.Type type = InputConstants.Type.KEYBOARD;
 		private int keyCode = -1; // unbound
 		private @Nullable BooleanSupplier onShortPress;
 		private @Nullable BooleanSupplier onLongPress;
@@ -176,20 +176,20 @@ public class SmartKey extends KeyMapping {
 
 	public static boolean hasControlDown() {
 		if (ON_OSX) {
-			return InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), 343) ||
-					InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), 347);
+			return InputConstants.isKeyDown(InputConstants.KEY_LGUI) ||
+					InputConstants.isKeyDown(InputConstants.KEY_RGUI);
 		}
-		return InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), 341) ||
-				InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), 345);
+		return InputConstants.isKeyDown(InputConstants.KEY_LCONTROL) ||
+				InputConstants.isKeyDown(InputConstants.KEY_RCONTROL);
 	}
 
 	public static boolean hasShiftDown() {
-		return InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), 340) ||
-				InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), 344);
+		return InputConstants.isKeyDown(InputConstants.KEY_LSHIFT) ||
+				InputConstants.isKeyDown(InputConstants.KEY_RSHIFT);
 	}
 
 	public static boolean hasAltDown() {
-		return InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), 342) ||
-				InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), 346);
+		return InputConstants.isKeyDown(InputConstants.KEY_LALT) ||
+				InputConstants.isKeyDown(InputConstants.KEY_RALT);
 	}
 }

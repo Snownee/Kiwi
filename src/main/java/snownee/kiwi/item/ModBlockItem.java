@@ -35,12 +35,13 @@ public class ModBlockItem extends BlockItem implements ItemCategoryFiller {
 	}
 
 	@Override
-	protected boolean updateCustomBlockEntityTag(
-			BlockPos pos,
-			Level worldIn,
-			@Nullable Player player,
-			ItemStack itemStack,
-			BlockState state) {
+	protected boolean placeBlock(net.minecraft.world.item.context.BlockPlaceContext context, BlockState state) {
+		if (!super.placeBlock(context, state)) {
+			return false;
+		}
+		Level worldIn = context.getLevel();
+		BlockPos pos = context.getClickedPos();
+		ItemStack itemStack = context.getItemInHand();
 		if (worldIn.isClientSide()) {
 			BlockEntity be = worldIn.getBlockEntity(pos);
 			if (be != null && INSTANT_UPDATE_TILES.contains(be.getType())) {
@@ -56,7 +57,7 @@ public class ModBlockItem extends BlockItem implements ItemCategoryFiller {
 				}
 			}
 		}
-		return super.updateCustomBlockEntityTag(pos, worldIn, player, itemStack, state);
+		return true;
 	}
 
 	@Override

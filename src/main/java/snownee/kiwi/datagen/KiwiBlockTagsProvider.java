@@ -33,7 +33,7 @@ public abstract class KiwiBlockTagsProvider extends FabricTagsProvider.BlockTags
 		List<Block> blocks = GameObjectLookup.all(registries, Registries.BLOCK, output.getModId())
 				.filter(b -> b.defaultBlockState().canBeReplaced()).toList();
 		if (!blocks.isEmpty()) {
-			valueLookupBuilder(BlockTags.REPLACEABLE).addAll(blocks);
+			blocks.forEach(block -> builder(BlockTags.REPLACEABLE).add(block.builtInRegistryHolder().key()));
 		}
 	}
 }

@@ -86,7 +86,7 @@ public final class TooltipEvents {
 		Minecraft mc = Minecraft.getInstance();
 		long millis = Util.getMillis();
 		if (KiwiClientConfig.f3CopyInInventory && mc.player != null && millis - latestPressF3 > 500 &&
-				InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), InputConstants.KEY_F3)) {
+				InputConstants.isKeyDown(InputConstants.KEY_F3)) {
 			latestPressF3 = millis;
 			MutableComponent component = Component.literal(BuiltInRegistries.ITEM.getKey(itemStack.getItem()).toString());
 			mc.keyboardHandler.setClipboard(component.getString());
@@ -263,7 +263,7 @@ public final class TooltipEvents {
 			for (TagKey<?> tag : tags) {
 				page.add("#" + tag.location());
 				String translationKey = Platform.getTagTranslationKey(tag);
-				if (I18n.exists(translationKey)) {
+				if (net.minecraft.locale.Language.getInstance().has(translationKey)) {
 					translatedPage.add("#" + I18n.get(translationKey));
 				} else {
 					translatedPage.add("#" + tag.location());

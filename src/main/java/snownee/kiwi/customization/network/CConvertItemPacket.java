@@ -228,7 +228,7 @@ public record CConvertItemPacket(
 				count -= singleCount;
 
 				if (!inventory.add(selectedSlot, itemStack) && !inventory.add(itemStack)) {
-					player.drop(itemStack, true);
+					player.drop(itemStack, true, net.minecraft.util.Prediction.SERVER_ONLY);
 				}
 			}
 		}

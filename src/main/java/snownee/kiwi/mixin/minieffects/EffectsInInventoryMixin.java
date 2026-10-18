@@ -156,9 +156,7 @@ public abstract class EffectsInInventoryMixin implements KiwiEffectsInInventory 
 		} else if (MiniEffectsConfig.holdTabToShow &&
 				Minecraft.getInstance().options.keyInventory.key.getValue() == InputConstants.KEY_TAB) {
 			ci.setReturnValue(false);
-		} else if (MiniEffectsConfig.holdTabToShow && !InputConstants.isKeyDown(
-				Minecraft.getInstance().getWindow(),
-				InputConstants.KEY_TAB)) {
+		} else if (MiniEffectsConfig.holdTabToShow && !InputConstants.isKeyDown(InputConstants.KEY_TAB)) {
 			ci.setReturnValue(false);
 		}
 	}

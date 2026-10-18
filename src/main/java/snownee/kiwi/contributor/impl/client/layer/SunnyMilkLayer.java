@@ -50,8 +50,7 @@ public class SunnyMilkLayer extends CosmeticLayer {
 				RenderTypes.entityTranslucent(TEXTURE),
 				lightCoords,
 				OverlayTexture.NO_OVERLAY,
-				renderState.outlineColor,
-				null
+				renderState.outlineColor
 		);
 		poseStack.popPose();
 	}

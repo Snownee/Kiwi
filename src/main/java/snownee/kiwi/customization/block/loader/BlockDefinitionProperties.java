@@ -101,7 +101,7 @@ public record BlockDefinitionProperties(
 			Optional<BlockBehaviour.StatePredicate> isSuffocating,
 			Optional<BlockBehaviour.StatePredicate> isViewBlocking,
 			Optional<BlockBehaviour.PostProcess> postProcess,
-			Optional<BlockBehaviour.StatePredicate> emissiveRendering) {
+			Optional<java.util.function.Predicate<net.minecraft.world.level.block.state.BlockState>> emissiveRendering) {
 		public static final MapCodec<PartialVanillaProperties> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 				ResourceKey.codec(Registries.BLOCK).optionalFieldOf("copy").forGetter(PartialVanillaProperties::copy),
 				Codec.BOOL.optionalFieldOf("no_collision").forGetter(PartialVanillaProperties::noCollision),
@@ -121,7 +121,7 @@ public record BlockDefinitionProperties(
 				CustomizationCodecs.STATE_PREDICATE.optionalFieldOf("is_suffocating").forGetter(PartialVanillaProperties::isSuffocating),
 				CustomizationCodecs.STATE_PREDICATE.optionalFieldOf("is_view_blocking").forGetter(PartialVanillaProperties::isViewBlocking),
 				CustomizationCodecs.POST_PROCESS.optionalFieldOf("post_process").forGetter(PartialVanillaProperties::postProcess),
-				CustomizationCodecs.STATE_PREDICATE.optionalFieldOf("emissive_rendering")
+				Codec.BOOL.xmap(value -> (java.util.function.Predicate<net.minecraft.world.level.block.state.BlockState>) state -> value, predicate -> predicate.test(net.minecraft.world.level.block.Blocks.AIR.defaultBlockState())).optionalFieldOf("emissive_rendering")
 						.forGetter(PartialVanillaProperties::emissiveRendering)
 		).apply(instance, PartialVanillaProperties::new));
 

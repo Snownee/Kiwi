@@ -26,7 +26,7 @@ public final class LangRules {
 	private static final LangRules EMPTY = new LangRules(List.of());
 	private static final Supplier<OneTimeLoader.Context> CONTEXT = Suppliers.memoize(() -> new OneTimeLoader.Context(new RegistryOps.RegistryInfoLookup() {
 		@Override
-		public <T> Optional<RegistryOps.RegistryInfo<T>> lookup(ResourceKey<? extends Registry<? extends T>> registryKey) {
+		public <T> Optional<net.minecraft.core.HolderGetter<T>> lookup(ResourceKey<? extends Registry<? extends T>> registryKey) {
 			return Optional.empty();
 		}
 	}));

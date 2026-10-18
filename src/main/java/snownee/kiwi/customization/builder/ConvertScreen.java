@@ -9,7 +9,7 @@ import org.joml.Matrix3x2fStack;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.jspecify.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLMouse;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -194,7 +194,7 @@ public class ConvertScreen extends Screen {
 		setFocused(button);
 		Window window = Objects.requireNonNull(minecraft.getWindow());
 		double scale = window.getGuiScale();
-		GLFW.glfwSetCursorPos(window.handle(), (button.getX() + 15) * scale, (button.getY() + 15) * scale);
+		SDLMouse.SDL_WarpMouseInWindow(window.handle(), (float) ((button.getX() + 15) * scale), (float) ((button.getY() + 15) * scale));
 	}
 
 	private void longPress(ItemButton button, CConvertItemPacket.Entry entry) {
@@ -364,7 +364,7 @@ public class ConvertScreen extends Screen {
 		lingeringScreen = this;
 		super.onClose();
 		if (inContainer) {
-			GLFW.glfwSetCursorPos(minecraft.getWindow().handle(), originalMousePos.x, originalMousePos.y);
+			SDLMouse.SDL_WarpMouseInWindow(minecraft.getWindow().handle(), (float) originalMousePos.x, (float) originalMousePos.y);
 		}
 	}
 
@@ -382,7 +382,7 @@ public class ConvertScreen extends Screen {
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
-		if (mc.screen != null || mc.getOverlay() != null || lingeringScreen.openProgress.settled()) {
+		if (mc.gui.screen() != null || mc.gui.overlay() != null || lingeringScreen.openProgress.settled()) {
 			lingeringScreen = null;
 			return;
 		}

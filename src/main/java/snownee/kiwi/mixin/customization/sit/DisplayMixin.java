@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import snownee.kiwi.customization.block.behavior.SitManager;
@@ -24,7 +25,7 @@ public abstract class DisplayMixin extends Entity {
 	@Inject(method = "tick", at = @At("HEAD"))
 	private void kiwi$tick(CallbackInfo ci) {
 		if (!level().isClientSide() && SitManager.isSeatEntity(this)) {
-			SitManager.tick(Objects.requireNonNull(EntityType.BLOCK_DISPLAY.tryCast(this)));
+			SitManager.tick(Objects.requireNonNull(EntityTypes.BLOCK_DISPLAY.tryCast(this)));
 		}
 	}
 

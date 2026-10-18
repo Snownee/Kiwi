@@ -102,21 +102,17 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 			preGenerate(lookup, translationEntries);
 			generateModNameAndDescription(lookup, translationEntries);
 			generateConfigEntries(lookup, translationEntries);
-			generateTranslations(
-					lookup, (String key, String value) -> {
-						Objects.requireNonNull(key);
-						Objects.requireNonNull(value);
-
-						if (translationEntries.containsKey(key)) {
-							throw new RuntimeException("Existing translation key found - " + key + " - Duplicate will be ignored.");
-						}
-
-						translationEntries.put(key, value);
-					});
-			FabricLanguageProvider.TranslationBuilder translationBuilder = (String key, String value) -> {
-				Objects.requireNonNull(key);
-				Objects.requireNonNull(value);
-				translationEntries.put(key, value);
+			FabricLanguageProvider.TranslationBuilder strictBuilder = new FabricLanguageProvider.TranslationBuilder() {
+				@Override public boolean has(String key) { return translationEntries.containsKey(key); }
+				@Override public String overwrite(String key, String value) {
+					return translationEntries.put(Objects.requireNonNull(key), Objects.requireNonNull(value));
+				}
+			};
+			generateTranslations(lookup, strictBuilder);
+			FabricLanguageProvider.TranslationBuilder translationBuilder = new FabricLanguageProvider.TranslationBuilder() {
+				@Override public boolean has(String key) { return strictBuilder.has(key); }
+				@Override public String overwrite(String key, String value) { return strictBuilder.overwrite(key, value); }
+				@Override public void add(String key, String value) { overwrite(key, value); }
 			};
 			if (createPath("en_us.existing", "yaml").map(Files::exists).orElse(false)) {
 				putExistingYamlTranslations(translationBuilder);

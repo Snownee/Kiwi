@@ -46,7 +46,7 @@ public class ClothConfigIntegration {
 
 	private static final ConfigLibAttributes ATTRIBUTES = new ConfigLibAttributes(
 			"cloth-config",
-			namespace -> create(Objects.requireNonNull(Minecraft.getInstance().screen), namespace),
+			namespace -> create(Objects.requireNonNull(Minecraft.getInstance().gui.screen()), namespace),
 			true,
 			false,
 			true);
@@ -83,7 +83,7 @@ public class ClothConfigIntegration {
 						subCatKey, $ -> {
 							String key0 = namespace + ".config." + $;
 							Component title0;
-							if (I18n.exists(key0)) {
+							if (net.minecraft.locale.Language.getInstance().has(key0)) {
 								title0 = Component.translatable(key0);
 							} else {
 								title0 = Component.literal(KUtil.friendlyText(path.getLast()));
@@ -97,7 +97,7 @@ public class ClothConfigIntegration {
 				TextDescription description = value.getAnnotation(TextDescription.class);
 				putDescription(subCat, entryBuilder, description, false);
 
-				if (I18n.exists(value.translation)) {
+				if (net.minecraft.locale.Language.getInstance().has(value.translation)) {
 					title = Component.translatable(value.translation);
 				} else {
 					title = Component.literal(KUtil.friendlyText(titleKey));

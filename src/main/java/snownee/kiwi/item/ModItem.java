@@ -35,7 +35,7 @@ public class ModItem extends Item {
 		} else { // ctrl
 			key = descriptionId + ".tip.ctrl";
 		}
-		boolean hasKey = I18n.exists(key);
+		boolean hasKey = net.minecraft.locale.Language.getInstance().has(key);
 		if (!hasKey && (shift != ctrl)) {
 			return;
 		}
@@ -51,8 +51,8 @@ public class ModItem extends Item {
 			/* on */
 		}
 		if (shift == ctrl) {
-			boolean hasShiftKey = I18n.exists(key + ".shift");
-			boolean hasCtrlKey = I18n.exists(key + ".ctrl");
+			boolean hasShiftKey = net.minecraft.locale.Language.getInstance().has(key + ".shift");
+			boolean hasCtrlKey = net.minecraft.locale.Language.getInstance().has(key + ".ctrl");
 			if (hasShiftKey && hasCtrlKey) {
 				tooltip.add(Component.translatable("tip.kiwi.press_shift_or_ctrl"));
 			} else if (hasShiftKey) {

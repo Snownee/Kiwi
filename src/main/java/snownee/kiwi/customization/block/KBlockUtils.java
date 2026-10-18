@@ -120,7 +120,7 @@ public interface KBlockUtils {
 		map.put("bamboo_leaves", BlockStateProperties.BAMBOO_LEAVES);
 		map.put("tilt", BlockStateProperties.TILT);
 		map.put("vertical_direction", BlockStateProperties.VERTICAL_DIRECTION);
-		map.put("dripstone_thickness", BlockStateProperties.DRIPSTONE_THICKNESS);
+		map.put("dripstone_thickness", BlockStateProperties.SPELEOTHEM_THICKNESS);
 		map.put("sculk_sensor_phase", BlockStateProperties.SCULK_SENSOR_PHASE);
 		map.put("dusted", BlockStateProperties.DUSTED);
 		map.put("cracked", BlockStateProperties.CRACKED);

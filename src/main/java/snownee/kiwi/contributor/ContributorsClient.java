@@ -45,17 +45,17 @@ public class ContributorsClient extends AbstractModule {
 	private static int hold;
 
 	public static void onKeyInput(Minecraft mc) {
-		if (!KiwiClientConfig.cosmeticScreenKeybind || mc.screen != null || mc.player == null || !mc.isWindowActive()) {
+		if (!KiwiClientConfig.cosmeticScreenKeybind || mc.gui.screen() != null || mc.player == null || !mc.isWindowActive()) {
 			return;
 		}
-		boolean K = InputConstants.isKeyDown(mc.getWindow(), InputConstants.KEY_K);
+		boolean K = InputConstants.isKeyDown(InputConstants.KEY_K);
 		if (!K || SmartKey.hasAltDown() || SmartKey.hasControlDown() || SmartKey.hasShiftDown()) {
 			hold = 0;
 			return;
 		}
 		if (++hold == 30) {
 			CosmeticScreen screen = new CosmeticScreen();
-			mc.setScreen(screen);
+			mc.gui.setScreen(screen);
 		}
 	}
 

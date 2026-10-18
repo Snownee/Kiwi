@@ -8,7 +8,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.ScreenEffectRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.world.effect.MobEffects;
@@ -16,10 +16,10 @@ import net.minecraft.world.effect.MobEffects;
 @Mixin(ScreenEffectRenderer.class)
 public class ScreenEffectRendererMixin {
 
-	@WrapMethod(method = "renderFire")
-	private static void kiwi$renderFire(
+	@WrapMethod(method = "submitFire")
+	private static void kiwi$submitFire(
 			PoseStack poseStack,
-			MultiBufferSource bufferSource,
+			SubmitNodeCollector bufferSource,
 			TextureAtlasSprite sprite,
 			Operation<Void> original) {
 		LocalPlayer player = Minecraft.getInstance().player;

@@ -37,8 +37,14 @@ public final class RecipeUtil {
 			}
 
 			@Override
-			public void includeRootAdvancement() {
-				output.includeRootAdvancement();
+			public <S> HolderGetter<S> lookup(ResourceKey<? extends net.minecraft.core.Registry<? extends S>> key) {
+				return output.lookup(key);
+			}
+
+			@Override
+			public <S> java.util.stream.Stream<net.minecraft.core.Holder.Reference<S>> listContextElements(
+					ResourceKey<? extends net.minecraft.core.Registry<? extends S>> key) {
+				return output.listContextElements(key);
 			}
 		};
 	}

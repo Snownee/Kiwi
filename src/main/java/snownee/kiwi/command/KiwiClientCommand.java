@@ -68,7 +68,7 @@ public class KiwiClientCommand {
 					return 0;
 				}
 				Minecraft.getInstance().schedule(() -> {
-					Minecraft.getInstance().setScreen(screen);
+					Minecraft.getInstance().gui.setScreen(screen);
 				});
 				return 1;
 			}));

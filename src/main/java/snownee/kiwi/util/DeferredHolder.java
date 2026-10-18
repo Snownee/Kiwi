@@ -33,7 +33,7 @@ import net.minecraft.tags.TagKey;
  *
  * @param <T> The type of object being held by this DeferredHolder.
  */
-public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
+public class DeferredHolder<R, T extends R> extends Holder.Reference<R> implements Supplier<T> {
 	public static <R, T extends R> Codec<DeferredHolder<R, T>> codec(ResourceKey<? extends Registry<R>> registryKey) {
 		return ResourceKey.codec(registryKey).xmap(DeferredHolder::new, DeferredHolder::getKey);
 	}
@@ -93,6 +93,7 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 	 * @see #create(ResourceKey)
 	 */
 	protected DeferredHolder(ResourceKey<R> key) {
+		super(Type.STAND_ALONE, new HolderOwner<>() {}, key, null);
 		this.key = Objects.requireNonNull(key);
 		this.bind(false);
 	}
@@ -210,10 +211,6 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 		return this.holder != null && this.holder.isBound();
 	}
 
-	@Override
-	public boolean areComponentsBound() {
-		return holder != null && holder.areComponentsBound();
-	}
 
 	/**
 	 * {@return true if the passed Identifier is the same as the ID of the target object}
@@ -269,6 +266,12 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 	public Stream<TagKey<R>> tags() {
 		bind(false);
 		return this.holder != null ? this.holder.tags() : Stream.empty();
+	}
+
+	@Override
+	public boolean areComponentsBound() {
+		bind(false);
+		return holder != null && holder.areComponentsBound();
 	}
 
 	@Override

@@ -68,7 +68,7 @@ public record KBlockDefinition(ConfiguredBlockTemplate template, BlockDefinition
 			vanilla.postProcess().ifPresent($::postProcess);
 			vanilla.isRedstoneConductor().ifPresent($::isRedstoneConductor);
 			vanilla.isSuffocating().ifPresent($::isSuffocating);
-			vanilla.isViewBlocking().ifPresent($::isViewBlocking);
+			vanilla.isViewBlocking().ifPresent(predicate -> $.isViewBlocking((state, level, pos, bounds) -> predicate.test(state, level, pos)));
 			vanilla.isValidSpawn().ifPresent($::isValidSpawn);
 			vanilla.offsetType().ifPresent($::offsetType);
 			vanilla.legacySolid().ifPresent(bl -> {

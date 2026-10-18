@@ -19,7 +19,7 @@ public class OptionInstanceMixin {
 	@Inject(at = @At("HEAD"), method = "get", cancellable = true)
 	private void kiwi$get(CallbackInfoReturnable<Object> ci) {
 		Minecraft mc = Minecraft.getInstance();
-		if (mc.screen instanceof MouseSettingsScreen) {
+		if (mc.gui.screen() instanceof MouseSettingsScreen) {
 			return;
 		}
 		//noinspection ConstantValue

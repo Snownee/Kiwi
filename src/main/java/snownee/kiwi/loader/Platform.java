@@ -18,11 +18,7 @@ import com.mojang.serialization.Dynamic;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.entity.FakePlayer;
-import net.fabricmc.fabric.api.registry.CompostableRegistry;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
-import net.fabricmc.fabric.api.registry.FlattenableBlockRegistry;
-import net.fabricmc.fabric.api.registry.StrippableBlockRegistry;
-import net.fabricmc.fabric.api.registry.TillableBlockRegistry;
 import net.fabricmc.fabric.api.registry.VillagerInteractionRegistries;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceCondition;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
@@ -173,29 +169,12 @@ public final class Platform implements DedicatedServerModInitializer {
 		FlammableBlockRegistry.getDefaultInstance().add(blockIn, burn, spread);
 	}
 
-	public static void registerHoeConversion(Block k, Pair<Predicate<UseOnContext>, Consumer<UseOnContext>> v) {
-		TillableBlockRegistry.register(k, v.getFirst(), v.getSecond());
-	}
-
-	public static void registerAxeConversion(Block k, Block v) {
-		StrippableBlockRegistry.register(k, v);
-	}
-
-	public static void registerShovelConversion(Block k, BlockState v) {
-		FlattenableBlockRegistry.register(k, v);
-	}
-
-	public static void registerCompostable(float chance, ItemLike itemIn) {
-		CompostableRegistry.INSTANCE.add(itemIn, chance);
-	}
-
+	// Tool transformations and composting are data components in 26.3.
+	// Register their data-driven definitions instead of the removed Fabric registries.
 	public static void registerVillagerCompostable(ItemLike item) {
 		VillagerInteractionRegistries.registerCompostable(item);
 	}
 
-	public static void registerVillagerFood(ItemLike item, int value) {
-		VillagerInteractionRegistries.registerFood(item, value);
-	}
 
 	@SuppressWarnings("UnstableApiUsage")
 	public static <T> DataResult<ConditionDecision> applyResourceConditions(

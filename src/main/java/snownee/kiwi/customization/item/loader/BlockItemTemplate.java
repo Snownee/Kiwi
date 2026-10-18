@@ -15,7 +15,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.item.BedItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DoubleHighBlockItem;
 import net.minecraft.world.item.Item;
@@ -63,7 +62,7 @@ public final class BlockItemTemplate extends KItemTemplate {
 				if (block instanceof DoorBlock || block instanceof DoublePlantBlock) {
 					return new DoubleHighBlockItem(block, properties);
 				} else if (block instanceof BedBlock) {
-					return new BedItem(block, properties);
+					return new BlockItem(block, properties);
 				} else if (block instanceof ScaffoldingBlock) {
 					return new ScaffoldingBlockItem(block, properties);
 				}
