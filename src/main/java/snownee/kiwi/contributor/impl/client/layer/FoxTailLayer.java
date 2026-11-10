@@ -53,8 +53,9 @@ public class FoxTailLayer extends CosmeticLayer {
 				RenderTypes.entitySolid(texture),
 				lightCoords,
 				OverlayTexture.NO_OVERLAY,
-				renderState.outlineColor,
-				null
+				-1,
+				null,
+				renderState.outlineColor
 		);
 		poseStack.popPose();
 	}

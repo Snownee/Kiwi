@@ -11,14 +11,12 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.advancements.predicates.BlockPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.level.BlockGetter;
@@ -35,12 +33,12 @@ public class CustomizationCodecs {
 	public static final Codec<NoteBlockInstrument> INSTRUMENT_CODEC = simpleByNameCodec(INSTRUMENTS);
 	public static final BiMap<String, MapColor> MAP_COLORS = HashBiMap.create();
 	public static final Codec<MapColor> MAP_COLOR_CODEC = simpleByNameCodec(MAP_COLORS);
-	public static final Codec<PushReaction> PUSH_REACTION = simpleByNameCodec(ImmutableBiMap.of(
-			"normal", PushReaction.NORMAL,
-			"destroy", PushReaction.DESTROY,
-			"block", PushReaction.BLOCK,
-			"ignore", PushReaction.IGNORE,
-			"push_only", PushReaction.PUSH_ONLY));
+	public static final Codec<PushReaction> PUSH_REACTION = simpleByNameCodec(ImmutableBiMap.<String, PushReaction>of(
+			"normal", PushReaction.PUSH_PULL,
+			"destroy", PushReaction.POPPED,
+			"block", PushReaction.IMMOVEABLE,
+			"ignore", PushReaction.IGNORE_ENTITY,
+			"push_only", PushReaction.PUSH));
 	public static final Codec<BlockBehaviour.OffsetType> OFFSET_TYPE = simpleByNameCodec(ImmutableBiMap.of(
 			"xz", BlockBehaviour.OffsetType.XZ,
 			"xyz", BlockBehaviour.OffsetType.XYZ));
@@ -59,24 +57,7 @@ public class CustomizationCodecs {
 			}, _ -> {
 				return DataResult.error(() -> "Unsupported operation");
 			});
-	public static final Codec<TreeGrower> TREE_GROWER = Codec.withAlternative(
-			TreeGrower.CODEC,
-			RecordCodecBuilder.create(instance -> instance.group(
-					Codec.STRING.fieldOf("name").forGetter(KCodecs.unsupportedGetter()),
-					Codec.FLOAT.optionalFieldOf("secondary_chance", 0F).forGetter(KCodecs.unsupportedGetter()),
-					ResourceKey.codec(Registries.CONFIGURED_FEATURE).optionalFieldOf("mega_tree").forGetter(KCodecs.unsupportedGetter()),
-					ResourceKey.codec(Registries.CONFIGURED_FEATURE)
-							.optionalFieldOf("secondary_mega_tree")
-							.forGetter(KCodecs.unsupportedGetter()),
-					ResourceKey.codec(Registries.CONFIGURED_FEATURE).optionalFieldOf("tree").forGetter(KCodecs.unsupportedGetter()),
-					ResourceKey.codec(Registries.CONFIGURED_FEATURE)
-							.optionalFieldOf("secondary_tree")
-							.forGetter(KCodecs.unsupportedGetter()),
-					ResourceKey.codec(Registries.CONFIGURED_FEATURE).optionalFieldOf("flowers").forGetter(KCodecs.unsupportedGetter()),
-					ResourceKey.codec(Registries.CONFIGURED_FEATURE)
-							.optionalFieldOf("secondary_flowers")
-							.forGetter(KCodecs.unsupportedGetter())
-			).apply(instance, TreeGrower::new)));
+	public static final Codec<TreeGrower> TREE_GROWER = TreeGrower.CODEC;
 	// TODO BlockPredicate has its own Codec now.
 	//  However, to use that, you need to wrap your JsonOps into RegistryOps, which requires a HolderLookup.Provider.
 	//  Meaning, you need to get HolderLookup.Provider somewhere.

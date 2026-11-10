@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.phys.AABB;
 import snownee.kiwi.customization.block.BlockFundamentals;
 import snownee.kiwi.customization.block.GlassType;
 import snownee.kiwi.customization.block.behavior.CanSurviveHandler;
@@ -101,7 +102,7 @@ public record BlockDefinitionProperties(
 			Optional<BlockBehaviour.StateArgumentPredicate<EntityType<?>>> isValidSpawn,
 			Optional<BlockBehaviour.StatePredicate> isRedstoneConductor,
 			Optional<BlockBehaviour.StatePredicate> isSuffocating,
-			Optional<BlockBehaviour.StatePredicate> isViewBlocking,
+			Optional<BlockBehaviour.StateArgumentPredicate<AABB>> isViewBlocking,
 			Optional<BlockBehaviour.PostProcess> postProcess,
 			Optional<Predicate<BlockState>> emissiveRendering) {
 		public static final MapCodec<PartialVanillaProperties> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -121,7 +122,8 @@ public record BlockDefinitionProperties(
 				CustomizationCodecs.STATE_PREDICATE.optionalFieldOf("is_redstone_conductor")
 						.forGetter(PartialVanillaProperties::isRedstoneConductor),
 				CustomizationCodecs.STATE_PREDICATE.optionalFieldOf("is_suffocating").forGetter(PartialVanillaProperties::isSuffocating),
-				CustomizationCodecs.STATE_PREDICATE.optionalFieldOf("is_view_blocking").forGetter(PartialVanillaProperties::isViewBlocking),
+				CustomizationCodecs.<AABB>stateArgumentPredicate().optionalFieldOf("is_view_blocking")
+						.forGetter(PartialVanillaProperties::isViewBlocking),
 				CustomizationCodecs.POST_PROCESS.optionalFieldOf("post_process").forGetter(PartialVanillaProperties::postProcess),
 				CustomizationCodecs.BLOCK_STATE_PREDICATE.optionalFieldOf("emissive_rendering")
 						.forGetter(PartialVanillaProperties::emissiveRendering)

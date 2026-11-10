@@ -24,7 +24,7 @@ loom {
     accessWidenerPath = file("src/main/resources/${project.mod_id}.classtweaker")
 
     runs {
-        configureEach {
+        client {
             programArgs("--username", "Dev")
         }
     }

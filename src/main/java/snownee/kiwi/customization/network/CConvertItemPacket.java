@@ -22,6 +22,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.ByIdMap;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
@@ -228,7 +229,7 @@ public record CConvertItemPacket(
 				count -= singleCount;
 
 				if (!inventory.add(selectedSlot, itemStack) && !inventory.add(itemStack)) {
-					player.drop(itemStack, true);
+					player.drop(itemStack, true, Prediction.SERVER_ONLY);
 				}
 			}
 		}

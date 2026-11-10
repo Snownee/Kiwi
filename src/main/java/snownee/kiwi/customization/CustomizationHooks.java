@@ -314,7 +314,7 @@ public final class CustomizationHooks {
 		packRepository.reload();
 //		selected.remove("mod_resources");
 //		selected.add(0, "mod_resources");
-		return new KiwiPackResourceManager(packRepository.getAvailablePacks().stream().map(Pack::open).toList());
+		return new KiwiPackResourceManager(packRepository.getAvailablePacks().stream().flatMap(Pack::open).toList());
 	}
 
 //	private static RepositorySource buildPackFinder(Map<IModFile, ? extends PathPackResources> modResourcePacks) {

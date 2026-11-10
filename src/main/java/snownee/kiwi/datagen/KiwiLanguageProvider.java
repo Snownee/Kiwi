@@ -103,20 +103,44 @@ public class KiwiLanguageProvider extends FabricLanguageProvider {
 			generateModNameAndDescription(lookup, translationEntries);
 			generateConfigEntries(lookup, translationEntries);
 			generateTranslations(
-					lookup, (String key, String value) -> {
-						Objects.requireNonNull(key);
-						Objects.requireNonNull(value);
-
-						if (translationEntries.containsKey(key)) {
-							throw new RuntimeException("Existing translation key found - " + key + " - Duplicate will be ignored.");
+					lookup, new FabricLanguageProvider.TranslationBuilder() {
+						@Override
+						public boolean has(String translationKey) {
+							return translationEntries.containsKey(translationKey);
 						}
 
-						translationEntries.put(key, value);
+						@Override
+						public @Nullable String overwrite(String translationKey, String value) {
+							Objects.requireNonNull(translationKey);
+							Objects.requireNonNull(value);
+
+							if (translationEntries.containsKey(translationKey)) {
+								throw new RuntimeException("Existing translation key found - " + translationKey + " - Duplicate will be ignored.");
+							}
+
+							translationEntries.put(translationKey, value);
+							return null;
+						}
 					});
-			FabricLanguageProvider.TranslationBuilder translationBuilder = (String key, String value) -> {
-				Objects.requireNonNull(key);
-				Objects.requireNonNull(value);
-				translationEntries.put(key, value);
+			FabricLanguageProvider.TranslationBuilder translationBuilder = new FabricLanguageProvider.TranslationBuilder() {
+				@Override
+				public boolean has(String translationKey) {
+					return translationEntries.containsKey(translationKey);
+				}
+
+				@Override
+				public @Nullable String overwrite(String translationKey, String value) {
+					Objects.requireNonNull(translationKey);
+					Objects.requireNonNull(value);
+					return translationEntries.put(translationKey, value);
+				}
+
+				@Override
+				public void add(String translationKey, String value) {
+					Objects.requireNonNull(translationKey);
+					Objects.requireNonNull(value);
+					translationEntries.put(translationKey, value);
+				}
 			};
 			if (createPath("en_us.existing", "yaml").map(Files::exists).orElse(false)) {
 				putExistingYamlTranslations(translationBuilder);

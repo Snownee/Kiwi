@@ -30,10 +30,7 @@ public class BlockPredicateHelper {
 		}
 		BlockEntity be = predicate.nbt().isPresent() || !predicate.components().isEmpty() ? beGetter.get() : null;
 		if (predicate.nbt().isPresent()) {
-			if (be == null || be.getLevel() == null || BlockPredicate.matchesBlockEntity(
-					be.getLevel(),
-					be,
-					predicate.nbt().orElseThrow())) {
+			if (be == null || be.getLevel() == null || predicate.matchesBlockEntity(be.getLevel(), be)) {
 				return false;
 			}
 		}

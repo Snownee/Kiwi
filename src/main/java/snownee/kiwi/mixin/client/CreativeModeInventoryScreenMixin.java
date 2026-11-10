@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
@@ -53,7 +54,7 @@ public abstract class CreativeModeInventoryScreenMixin extends AbstractContainer
 	//fix https://bugs.mojang.com/browse/MC-179165
 	@Inject(method = "mouseClicked", at = @At("HEAD"))
 	private void kiwi$mouseClicked(MouseButtonEvent event, boolean doubleClick, CallbackInfoReturnable<Boolean> cir) {
-		if (event.button() == 0) {
+		if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
 			clickedTab = null;
 			double x = event.x() - (double) this.leftPos;
 			double y = event.y() - (double) this.topPos;

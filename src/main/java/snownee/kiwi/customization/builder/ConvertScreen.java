@@ -9,10 +9,11 @@ import org.joml.Matrix3x2fStack;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.jspecify.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLMouse;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.datafixers.util.Pair;
 
@@ -194,7 +195,10 @@ public class ConvertScreen extends Screen {
 		setFocused(button);
 		Window window = Objects.requireNonNull(minecraft.getWindow());
 		double scale = window.getGuiScale();
-		GLFW.glfwSetCursorPos(window.handle(), (button.getX() + 15) * scale, (button.getY() + 15) * scale);
+		SDLMouse.SDL_WarpMouseInWindow(
+				window.handle(),
+				(float) ((button.getX() + 15) * scale),
+				(float) ((button.getY() + 15) * scale));
 	}
 
 	private void longPress(ItemButton button, CConvertItemPacket.Entry entry) {
@@ -282,7 +286,7 @@ public class ConvertScreen extends Screen {
 		if (super.mouseClicked(event, doubleClick)) {
 			return true;
 		}
-		if (event.button() == 0) {
+		if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
 			Rect2i bounds = layout().bounds();
 			Rect2i tolerance = new Rect2i(bounds.getX() - 10, bounds.getY() - 10, bounds.getWidth() + 20, bounds.getHeight() + 20);
 			if (!tolerance.contains((int) event.x(), (int) event.y())) {
@@ -364,7 +368,10 @@ public class ConvertScreen extends Screen {
 		lingeringScreen = this;
 		super.onClose();
 		if (inContainer) {
-			GLFW.glfwSetCursorPos(minecraft.getWindow().handle(), originalMousePos.x, originalMousePos.y);
+			SDLMouse.SDL_WarpMouseInWindow(
+					minecraft.getWindow().handle(),
+					(float) originalMousePos.x,
+					(float) originalMousePos.y);
 		}
 	}
 

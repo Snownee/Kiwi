@@ -22,6 +22,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.MapCodec;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.LanguageManager;
@@ -50,6 +51,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiClientConfig;
+import snownee.kiwi.block.IKiwiBlock;
 import snownee.kiwi.customization.CustomizationHooks;
 import snownee.kiwi.customization.CustomizationRegistries;
 import snownee.kiwi.customization.block.KBlockSettings;
@@ -148,10 +150,14 @@ public class ExportBlocksCommand {
 				if ("ignore".equals(template)) {
 					continue;
 				}
-				if ("door".equals(template) || "trapdoor".equals(template)) {
-					Codec<Block> codec = BlockCodecs.get(Identifier.parse(template)).codec();
+				MapCodec<? extends Block> blockCodec = block instanceof IKiwiBlock kiwiBlock ? kiwiBlock.codec() : null;
+				if (blockCodec == null && ("door".equals(template) || "trapdoor".equals(template))) {
+					blockCodec = BlockCodecs.get(Identifier.parse(template));
+				}
+				if (blockCodec != null) {
+					//noinspection unchecked
 					template += toYaml(
-							codec, block, json -> {
+							(Codec<Block>) blockCodec.codec(), block, json -> {
 								json.getAsJsonObject().remove(BlockCodecs.BLOCK_PROPERTIES_KEY);
 								return json;
 							});

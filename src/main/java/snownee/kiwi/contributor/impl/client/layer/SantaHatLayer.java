@@ -45,8 +45,9 @@ public class SantaHatLayer extends CosmeticLayer {
 				RenderTypes.entitySolid(TEXTURE),
 				lightCoords,
 				OverlayTexture.NO_OVERLAY,
-				renderState.outlineColor,
-				null
+				-1,
+				null,
+				renderState.outlineColor
 		);
 		poseStack.popPose();
 	}

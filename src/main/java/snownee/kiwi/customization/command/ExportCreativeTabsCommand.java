@@ -3,7 +3,6 @@ package snownee.kiwi.customization.command;
 import java.io.BufferedWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -36,6 +35,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SignBlock;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.level.block.entity.SignTextSlot;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class ExportCreativeTabsCommand {
@@ -171,7 +171,7 @@ public class ExportCreativeTabsCommand {
 		if (!(level.getBlockEntity(pos) instanceof SignBlockEntity blockEntity)) {
 			return DataResult.error(() -> "Target block is not a sign");
 		}
-		String signText = String.join("", Arrays.stream(blockEntity.getFrontText().getMessages(false))
+		String signText = String.join("", blockEntity.getText(SignTextSlot.FRONT).getMessages(false).stream()
 				.map(Component::getString)
 				.toList());
 		if (signText.isBlank()) {

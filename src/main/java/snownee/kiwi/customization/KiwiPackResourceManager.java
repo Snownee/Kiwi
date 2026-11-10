@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
@@ -46,7 +45,7 @@ public class KiwiPackResourceManager implements CloseableResourceManager {
 		for (PackResources pack : packs) {
 			ResourceFilterSection filterSection = this.getPackFilterSection(pack);
 			Set<String> providedNamespaces = pack.getNamespaces(PackType.CLIENT_RESOURCES);
-			Predicate<Identifier> pathFilter = filterSection != null ? location -> filterSection.isPathFiltered(location.getPath()) : null;
+			PackResources.Filter pathFilter = filterSection != null ? location -> filterSection.isPathFiltered(location.getPath()) : null;
 
 			for (String namespace : namespaces) {
 				boolean packContainsNamespace = providedNamespaces.contains(namespace);
@@ -98,7 +97,7 @@ public class KiwiPackResourceManager implements CloseableResourceManager {
 	}
 
 	@Override
-	public Map<Identifier, Resource> listResources(final String directory, final Predicate<Identifier> filter) {
+	public Map<Identifier, Resource> listResources(final String directory, final ResourceManager.Selector filter) {
 		checkTrailingDirectoryPath(directory);
 		Map<Identifier, Resource> result = new TreeMap<>();
 
@@ -110,7 +109,7 @@ public class KiwiPackResourceManager implements CloseableResourceManager {
 	}
 
 	@Override
-	public Map<Identifier, List<Resource>> listResourceStacks(final String directory, final Predicate<Identifier> filter) {
+	public Map<Identifier, List<Resource>> listResourceStacks(final String directory, final ResourceManager.Selector filter) {
 		checkTrailingDirectoryPath(directory);
 		Map<Identifier, List<Resource>> result = new TreeMap<>();
 

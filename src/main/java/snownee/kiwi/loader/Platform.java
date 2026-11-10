@@ -4,25 +4,18 @@ import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jspecify.annotations.Nullable;
 
-import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.entity.FakePlayer;
-import net.fabricmc.fabric.api.registry.CompostableRegistry;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
-import net.fabricmc.fabric.api.registry.FlattenableBlockRegistry;
-import net.fabricmc.fabric.api.registry.StrippableBlockRegistry;
-import net.fabricmc.fabric.api.registry.TillableBlockRegistry;
 import net.fabricmc.fabric.api.registry.VillagerInteractionRegistries;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceCondition;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
@@ -46,7 +39,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
-import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeInput;
@@ -54,7 +46,6 @@ import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.util.resource.OneTimeLoader;
@@ -173,28 +164,8 @@ public final class Platform implements DedicatedServerModInitializer {
 		FlammableBlockRegistry.getDefaultInstance().add(blockIn, burn, spread);
 	}
 
-	public static void registerHoeConversion(Block k, Pair<Predicate<UseOnContext>, Consumer<UseOnContext>> v) {
-		TillableBlockRegistry.register(k, v.getFirst(), v.getSecond());
-	}
-
-	public static void registerAxeConversion(Block k, Block v) {
-		StrippableBlockRegistry.register(k, v);
-	}
-
-	public static void registerShovelConversion(Block k, BlockState v) {
-		FlattenableBlockRegistry.register(k, v);
-	}
-
-	public static void registerCompostable(float chance, ItemLike itemIn) {
-		CompostableRegistry.INSTANCE.add(itemIn, chance);
-	}
-
 	public static void registerVillagerCompostable(ItemLike item) {
 		VillagerInteractionRegistries.registerCompostable(item);
-	}
-
-	public static void registerVillagerFood(ItemLike item, int value) {
-		VillagerInteractionRegistries.registerFood(item, value);
 	}
 
 	@SuppressWarnings("UnstableApiUsage")
