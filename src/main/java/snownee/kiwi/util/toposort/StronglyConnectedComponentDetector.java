@@ -1,108 +1,81 @@
-/*
- * Copyright (c) Forge Development LLC and contributors
- * SPDX-License-Identifier: LGPL-2.1-only
- */
-
 package snownee.kiwi.util.toposort;
 
-import java.util.BitSet;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import com.google.common.graph.Graph;
 
 /**
- * An object that splits a graph into strongly connected components lazily with
- * Tarjan's Strongly Connected Components Algorithm.
+ * Splits a directed graph into strongly connected components.
  *
- * <p>This algorithm allows to detect all cycles in dependencies that prevent topological
- * sorting.
- *
- * <p>This detector evaluates the graph lazily and won't reflect the modifications in the
- * graph after initial evaluation.
+ * <p>Uses Tarjan's algorithm. Every node belongs to exactly one component; a component with more
+ * than one node, or a single node with a self-loop, represents a cycle.
  */
 public class StronglyConnectedComponentDetector<T> {
-    private final Graph<T> graph;
-    private Map<T, Integer> ids;
-    private T[] elements;
-    private int[] dfn;
-    private int[] low;
-    private int[] stack;
-    private int top;
-    private BitSet onStack;
-    private Set<Set<T>> components;
+	private final Graph<T> graph;
 
-    public StronglyConnectedComponentDetector(Graph<T> graph) {
-        this.graph = graph;
-    }
+	public StronglyConnectedComponentDetector(Graph<T> graph) {
+		this.graph = graph;
+	}
 
-    public Set<Set<T>> getComponents() {
-        if (components == null) {
-            calculate();
-        }
-        return components;
-    }
+	/**
+	 * Returns all strongly connected components of the graph.
+	 *
+	 * @return one set per component
+	 */
+	public Set<Set<T>> getComponents() {
+		Map<T, Integer> indices = new HashMap<>();
+		Map<T, Integer> lowLinks = new HashMap<>();
+		Deque<T> stack = new ArrayDeque<>();
+		Set<T> onStack = new HashSet<>();
+		Set<Set<T>> components = new LinkedHashSet<>();
+		int[] nextIndex = {0};
+		for (T node : graph.nodes()) {
+			if (!indices.containsKey(node)) {
+				visit(node, indices, lowLinks, stack, onStack, components, nextIndex);
+			}
+		}
+		return components;
+	}
 
-    @SuppressWarnings("unchecked")
-    private void calculate() {
-        components = new HashSet<>();
-        int t = 0;
-        ids = new HashMap<>();
-        Set<T> nodes = graph.nodes();
-        elements = (T[]) new Object[nodes.size()];
-        for (T node : nodes) {
-            ids.put(node, t);
-            elements[t] = node;
-            t++;
-        }
+	private void visit(
+			T node,
+			Map<T, Integer> indices,
+			Map<T, Integer> lowLinks,
+			Deque<T> stack,
+			Set<T> onStack,
+			Set<Set<T>> components,
+			int[] nextIndex) {
+		int index = nextIndex[0]++;
+		indices.put(node, index);
+		lowLinks.put(node, index);
+		stack.push(node);
+		onStack.add(node);
 
-        final int n = nodes.size();
-        dfn = new int[n];
-        low = new int[n];
-        stack = new int[n];
-        onStack = new BitSet(n);
-        top = -1;
-        for (int i = 0; i < n; i++) {
-            if (dfn[i] == 0) {
-                dfs(i, 1);
-            }
-        }
-    }
+		for (T successor : graph.successors(node)) {
+			if (!indices.containsKey(successor)) {
+				visit(successor, indices, lowLinks, stack, onStack, components, nextIndex);
+				lowLinks.put(node, Math.min(lowLinks.get(node), lowLinks.get(successor)));
+			} else if (onStack.contains(successor)) {
+				lowLinks.put(node, Math.min(lowLinks.get(node), indices.get(successor)));
+			}
+		}
 
-    private void dfs(int now, int depth) {
-        dfn[now] = depth;
-        low[now] = depth;
-        top++;
-        stack[top] = now;
-        onStack.set(now);
-        for (T each : graph.successors(elements[now])) {
-            int to = ids.get(each);
-            if (dfn[to] != 0) {
-                if (low[now] > dfn[to]) {
-                    low[now] = dfn[to];
-                }
-            } else {
-                dfs(to, depth + 1);
-                if (low[now] > low[to]) {
-                    low[now] = low[to];
-                }
-            }
-        }
-
-        if (dfn[now] == low[now]) {
-            Set<T> component = new HashSet<>();
-            while (top >= 0) {
-                final int t = stack[top];
-                component.add(elements[t]);
-                onStack.clear(t);
-                top--;
-                if (t == now) {
-                    break;
-                }
-            }
-            components.add(component);
-        }
-    }
+		if (Objects.equals(lowLinks.get(node), indices.get(node))) {
+			Set<T> component = new LinkedHashSet<>();
+			T member;
+			do {
+				member = stack.pop();
+				onStack.remove(member);
+				component.add(member);
+			} while (!Objects.equals(member, node));
+			components.add(component);
+		}
+	}
 }
