@@ -21,6 +21,7 @@ import mezz.jei.api.recipe.types.IRecipeType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Holder;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.Identifier;
@@ -57,7 +58,7 @@ public class KSwitchGroupRecipeCategory extends AbstractRecipeCategory<KSwitchGr
 		Identifier key = recipe.family().key();
 		List<FormattedText> text = Lists.newArrayList();
 		String langKey = "kiwi.family.%s".formatted(key.toLanguageKey());
-		if (I18n.exists(langKey)) {
+		if (Language.getInstance().has(langKey)) {
 			text.add(Component.translatable(langKey));
 		}
 		text.add(Component.literal(key.toString()).withStyle(ChatFormatting.GRAY));

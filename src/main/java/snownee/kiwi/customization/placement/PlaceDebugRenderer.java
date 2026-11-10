@@ -37,7 +37,7 @@ public class PlaceDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 		long millis = Util.getMillis();
 		if (millis - this.lastUpdateTime > 300) {
 			this.lastUpdateTime = millis;
-			Entity entity = mc.gameRenderer.getMainCamera().entity();
+			Entity entity = mc.gameRenderer.mainCamera().entity();
 			Level level = entity.level();
 			this.slots = BlockPos.betweenClosedStream(entity.getBoundingBox().inflate(4)).map(BlockPos::immutable).flatMap(pos -> {
 				BlockState blockState = level.getBlockState(pos);

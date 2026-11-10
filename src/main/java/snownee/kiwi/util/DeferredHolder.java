@@ -33,7 +33,10 @@ import net.minecraft.tags.TagKey;
  *
  * @param <T> The type of object being held by this DeferredHolder.
  */
-public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
+public class DeferredHolder<R, T extends R> extends Holder.Reference<R> implements Supplier<T> {
+	private static final HolderOwner<?> OWNER = new HolderOwner<>() {
+	};
+
 	public static <R, T extends R> Codec<DeferredHolder<R, T>> codec(ResourceKey<? extends Registry<R>> registryKey) {
 		return ResourceKey.codec(registryKey).xmap(DeferredHolder::new, DeferredHolder::getKey);
 	}
@@ -72,11 +75,6 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 	}
 
 	/**
-	 * The resource key of the target object.
-	 */
-	protected final ResourceKey<R> key;
-
-	/**
 	 * The currently cached value.
 	 */
 	@Nullable
@@ -92,8 +90,9 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 	 * @see #create(Identifier, Identifier)
 	 * @see #create(ResourceKey)
 	 */
+	@SuppressWarnings("unchecked")
 	protected DeferredHolder(ResourceKey<R> key) {
-		this.key = Objects.requireNonNull(key);
+		super(Type.STAND_ALONE, (HolderOwner<R>) OWNER, Objects.requireNonNull(key), null);
 		this.bind(false);
 	}
 
@@ -108,7 +107,7 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 	public T value() {
 		bind(true);
 		if (this.holder == null) {
-			throw new NullPointerException("Trying to access unbound value: " + this.key);
+			throw new NullPointerException("Trying to access unbound value: " + key());
 		}
 
 		return (T) this.holder.value();
@@ -142,7 +141,7 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 	@Nullable
 	@SuppressWarnings("unchecked")
 	protected Registry<R> getRegistry() {
-		return (Registry<R>) BuiltInRegistries.REGISTRY.getValue(this.key.registry());
+		return (Registry<R>) BuiltInRegistries.REGISTRY.getValue(key().registry());
 	}
 
 	/**
@@ -160,9 +159,9 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 
 		Registry<R> registry = getRegistry();
 		if (registry != null) {
-			this.holder = registry.get(this.key).orElse(null);
+			this.holder = registry.get(key()).orElse(null);
 		} else if (throwOnMissingRegistry) {
-			throw new IllegalStateException("Registry not present for " + this + ": " + this.key.registry());
+			throw new IllegalStateException("Registry not present for " + this + ": " + key().registry());
 		}
 	}
 
@@ -170,14 +169,14 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 	 * @return The ID of the object pointed to by this DeferredHolder.
 	 */
 	public Identifier getId() {
-		return this.key.identifier();
+		return key().identifier();
 	}
 
 	/**
 	 * @return The ResourceKey of the object pointed to by this DeferredHolder.
 	 */
 	public ResourceKey<R> getKey() {
-		return this.key;
+		return key();
 	}
 
 	@Override
@@ -185,17 +184,17 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 		if (this == obj) {
 			return true;
 		}
-		return obj instanceof Holder<?> h && h.kind() == Kind.REFERENCE && h.unwrapKey().orElse(null) == this.key;
+		return obj instanceof Holder<?> h && h.kind() == Kind.REFERENCE && h.unwrapKey().orElse(null) == key();
 	}
 
 	@Override
 	public int hashCode() {
-		return this.key.hashCode();
+		return key().hashCode();
 	}
 
 	@Override
 	public String toString() {
-		return String.format(Locale.ENGLISH, "DeferredHolder{%s}", this.key);
+		return String.format(Locale.ENGLISH, "DeferredHolder{%s}", key());
 	}
 
 	/**
@@ -212,7 +211,7 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 
 	@Override
 	public boolean areComponentsBound() {
-		return holder != null && holder.areComponentsBound();
+		return this.holder != null && this.holder.areComponentsBound();
 	}
 
 	/**
@@ -220,7 +219,7 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 	 */
 	@Override
 	public boolean is(Identifier id) {
-		return id.equals(this.key.identifier());
+		return id.equals(key().identifier());
 	}
 
 	/**
@@ -228,7 +227,7 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 	 */
 	@Override
 	public boolean is(ResourceKey<R> key) {
-		return key == this.key;
+		return key == key();
 	}
 
 	/**
@@ -238,7 +237,7 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 	 */
 	@Override
 	public boolean is(Predicate<ResourceKey<R>> filter) {
-		return filter.test(this.key);
+		return filter.test(key());
 	}
 
 	/**
@@ -263,7 +262,7 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 	/**
 	 * {@return all tags present on the underlying object}
 	 *
-	 * <p>If the underlying object is not {@linkplain #isBound() bound} yet, and empty stream is returned.
+	 * <p>If the underlying object is not {@linkplain #isBound() bound} yet, an empty stream is returned.
 	 */
 	@Override
 	public Stream<TagKey<R>> tags() {
@@ -273,7 +272,7 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 
 	@Override
 	public DataComponentMap components() {
-		return Objects.requireNonNull(holder, "Components not bound yet").components();
+		return Objects.requireNonNull(this.holder, "Components not bound yet").components();
 	}
 
 	/**
@@ -284,7 +283,7 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 	@Override
 	public Either<ResourceKey<R>, R> unwrap() {
 		// Holder.Reference always returns the key, do the same here.
-		return Either.left(this.key);
+		return Either.left(key());
 	}
 
 	/**
@@ -295,7 +294,7 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
 	 */
 	@Override
 	public Optional<ResourceKey<R>> unwrapKey() {
-		return Optional.of(this.key);
+		return Optional.of(key());
 	}
 
 	@Override

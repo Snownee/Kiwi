@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagsProvider;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Block;
@@ -33,7 +34,8 @@ public abstract class KiwiBlockTagsProvider extends FabricTagsProvider.BlockTags
 		List<Block> blocks = GameObjectLookup.all(registries, Registries.BLOCK, output.getModId())
 				.filter(b -> b.defaultBlockState().canBeReplaced()).toList();
 		if (!blocks.isEmpty()) {
-			valueLookupBuilder(BlockTags.REPLACEABLE).addAll(blocks);
+			tag(BlockTags.REPLACEABLE).addAll(blocks.stream()
+					.map(block -> BuiltInRegistries.BLOCK.getResourceKey(block).orElseThrow()));
 		}
 	}
 }

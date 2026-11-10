@@ -51,7 +51,7 @@
 		"client.TitleScreenMixin",
 		"client.WorldOpenFlowsMixin",
 		"customization.client.DebugRendererMixin",
-		"customization.client.GameRendererMixin",
+		"customization.client.GuiMixin",
 		"customization.client.MultiPlayerGameModeMixin",
 		"customization.sit.ClientPacketListenerMixin",
 		"customization.sit.LocalPlayerMixin",

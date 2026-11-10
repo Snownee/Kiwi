@@ -31,7 +31,7 @@ public abstract class ClientPacketListenerMixin extends ClientCommonPacketListen
 			method = "handleSetEntityPassengersPacket",
 			at = @At(
 					value = "INVOKE",
-					target = "Lnet/minecraft/client/gui/Gui;setOverlayMessage(Lnet/minecraft/network/chat/Component;Z)V"))
+					target = "Lnet/minecraft/client/gui/Hud;setOverlayMessage(Lnet/minecraft/network/chat/Component;Z)V"))
 	private void kiwi$setPlayerYRotOnSeat(ClientboundSetPassengersPacket packet, CallbackInfo ci, @Local(name = "vehicle") Entity vehicle) {
 		if (SitManager.isSeatEntity(vehicle)) {
 			Objects.requireNonNull(minecraft.player);

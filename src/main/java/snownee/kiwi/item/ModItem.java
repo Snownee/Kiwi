@@ -8,6 +8,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -35,7 +36,7 @@ public class ModItem extends Item {
 		} else { // ctrl
 			key = descriptionId + ".tip.ctrl";
 		}
-		boolean hasKey = I18n.exists(key);
+		boolean hasKey = Language.getInstance().has(key);
 		if (!hasKey && (shift != ctrl)) {
 			return;
 		}
@@ -51,8 +52,8 @@ public class ModItem extends Item {
 			/* on */
 		}
 		if (shift == ctrl) {
-			boolean hasShiftKey = I18n.exists(key + ".shift");
-			boolean hasCtrlKey = I18n.exists(key + ".ctrl");
+			boolean hasShiftKey = Language.getInstance().has(key + ".shift");
+			boolean hasCtrlKey = Language.getInstance().has(key + ".ctrl");
 			if (hasShiftKey && hasCtrlKey) {
 				tooltip.add(Component.translatable("tip.kiwi.press_shift_or_ctrl"));
 			} else if (hasShiftKey) {

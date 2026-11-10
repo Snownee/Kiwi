@@ -31,6 +31,7 @@ import com.google.gson.JsonSyntaxException;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
@@ -421,7 +422,7 @@ public class ConfigHandler {
 			}
 			List<Component> tooltip = Lists.newArrayList();
 			String key = translation + ".desc";
-			if (I18n.exists(key) && !I18n.get(key).isEmpty()) {
+			if (Language.getInstance().has(key) && !I18n.get(key).isEmpty()) {
 				MutableComponent component = Component.translatable(key);
 				if (performance != null) {
 					component.append(" ").append(performance);

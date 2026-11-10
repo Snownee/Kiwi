@@ -29,6 +29,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
@@ -263,7 +264,7 @@ public final class TooltipEvents {
 			for (TagKey<?> tag : tags) {
 				page.add("#" + tag.location());
 				String translationKey = Platform.getTagTranslationKey(tag);
-				if (I18n.exists(translationKey)) {
+				if (Language.getInstance().has(translationKey)) {
 					translatedPage.add("#" + I18n.get(translationKey));
 				} else {
 					translatedPage.add("#" + tag.location());

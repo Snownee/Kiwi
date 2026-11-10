@@ -22,8 +22,8 @@ accessible field net/minecraft/server/packs/repository/FolderRepositorySource va
 accessible field net/minecraft/server/packs/repository/FolderRepositorySource packType Lnet/minecraft/server/packs/PackType;
 accessible method net/minecraft/server/packs/repository/FolderRepositorySource createDiscoveredFilePackInfo (Ljava/nio/file/Path;)Lnet/minecraft/server/packs/PackLocationInfo;
 
-accessible method net/minecraft/advancements/criterion/BlockPredicate matchesBlockEntity (Lnet/minecraft/world/level/LevelReader;Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/advancements/criterion/NbtPredicate;)Z
-accessible method net/minecraft/advancements/criterion/BlockPredicate matchesComponents (Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/advancements/criterion/DataComponentMatchers;)Z
+accessible method net/minecraft/advancements/predicates/BlockPredicate matchesBlockEntity (Lnet/minecraft/world/level/LevelReader;Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/advancements/predicates/NbtPredicate;)Z
+accessible method net/minecraft/advancements/predicates/BlockPredicate matchesComponents (Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/advancements/predicates/DataComponentMatchers;)Z
 
 accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen hoveredSlot Lnet/minecraft/world/inventory/Slot;
 

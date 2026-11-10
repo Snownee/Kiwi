@@ -79,7 +79,7 @@ dependencies {
 
 //    compileOnlyApi "mezz.jei:jei-${minecraft_version}-fabric-api:${jei_version}"
 //    implementation "mezz.jei:jei-${minecraft_version}-fabric:${jei_version}"
-    compileOnly "mezz.jei:jei-26.1.2-fabric:${jei_version}"
+    compileOnly "mezz.jei:jei-${minecraft_version}-fabric:${jei_version}"
 
 //    modCompileOnly "dev.emi:emi-fabric:${emi_version}:api"
 //    modRuntimeOnly "dev.emi:emi-fabric:${emi_version}"
@@ -187,8 +187,6 @@ publishMods {
         server = true
         accessToken = providers.environmentVariable("CURSE_TOKEN")
         minecraftVersions.add(minecraft_version)
-        minecraftVersions.add("26.1")
-        minecraftVersions.add("26.1.1")
         requires("fabric-api")
         optional("cloth-config")
     }
@@ -196,8 +194,6 @@ publishMods {
         projectId = "ufdDoWPd"
         accessToken = providers.environmentVariable("MODRINTH_TOKEN")
         minecraftVersions.add(minecraft_version)
-        minecraftVersions.add("26.1")
-        minecraftVersions.add("26.1.1")
         requires("fabric-api")
         optional("cloth-config")
     }

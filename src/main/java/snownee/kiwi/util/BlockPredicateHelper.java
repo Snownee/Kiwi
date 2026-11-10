@@ -5,8 +5,8 @@ import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
 
-import net.minecraft.advancements.criterion.BlockPredicate;
-import net.minecraft.advancements.criterion.DataComponentMatchers;
+import net.minecraft.advancements.predicates.BlockPredicate;
+import net.minecraft.advancements.predicates.DataComponentMatchers;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 

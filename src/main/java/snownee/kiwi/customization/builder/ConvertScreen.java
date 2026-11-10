@@ -382,7 +382,7 @@ public class ConvertScreen extends Screen {
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
-		if (mc.screen != null || mc.getOverlay() != null || lingeringScreen.openProgress.settled()) {
+		if (mc.gui.screen() != null || mc.gui.overlay() != null || lingeringScreen.openProgress.settled()) {
 			lingeringScreen = null;
 			return;
 		}

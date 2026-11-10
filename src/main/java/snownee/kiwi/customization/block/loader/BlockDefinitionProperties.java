@@ -2,6 +2,7 @@ package snownee.kiwi.customization.block.loader;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Either;
@@ -16,6 +17,7 @@ import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.PushReaction;
 import snownee.kiwi.customization.block.BlockFundamentals;
 import snownee.kiwi.customization.block.GlassType;
@@ -101,7 +103,7 @@ public record BlockDefinitionProperties(
 			Optional<BlockBehaviour.StatePredicate> isSuffocating,
 			Optional<BlockBehaviour.StatePredicate> isViewBlocking,
 			Optional<BlockBehaviour.PostProcess> postProcess,
-			Optional<BlockBehaviour.StatePredicate> emissiveRendering) {
+			Optional<Predicate<BlockState>> emissiveRendering) {
 		public static final MapCodec<PartialVanillaProperties> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 				ResourceKey.codec(Registries.BLOCK).optionalFieldOf("copy").forGetter(PartialVanillaProperties::copy),
 				Codec.BOOL.optionalFieldOf("no_collision").forGetter(PartialVanillaProperties::noCollision),
@@ -121,7 +123,7 @@ public record BlockDefinitionProperties(
 				CustomizationCodecs.STATE_PREDICATE.optionalFieldOf("is_suffocating").forGetter(PartialVanillaProperties::isSuffocating),
 				CustomizationCodecs.STATE_PREDICATE.optionalFieldOf("is_view_blocking").forGetter(PartialVanillaProperties::isViewBlocking),
 				CustomizationCodecs.POST_PROCESS.optionalFieldOf("post_process").forGetter(PartialVanillaProperties::postProcess),
-				CustomizationCodecs.STATE_PREDICATE.optionalFieldOf("emissive_rendering")
+				CustomizationCodecs.BLOCK_STATE_PREDICATE.optionalFieldOf("emissive_rendering")
 						.forGetter(PartialVanillaProperties::emissiveRendering)
 		).apply(instance, PartialVanillaProperties::new));
 

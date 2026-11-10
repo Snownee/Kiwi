@@ -16,7 +16,7 @@ import net.minecraft.world.attribute.BedRule;
 import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.Leashable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -101,11 +101,11 @@ public class SitManager {
 			return false;
 		} else if (!KSitCommonConfig.sitOnBed && block instanceof BedBlock) {
 			return false;
-		} else if (!level.getEntities(EntityType.BLOCK_DISPLAY, new AABB(pos).expandTowards(0, 1, 0), SitManager::isSeatEntity).isEmpty()) {
+		} else if (!level.getEntities(EntityTypes.BLOCK_DISPLAY, new AABB(pos).expandTowards(0, 1, 0), SitManager::isSeatEntity).isEmpty()) {
 			return false;
 		}
 		if (!level.isClientSide()) {
-			Display.BlockDisplay display = new Display.BlockDisplay(EntityType.BLOCK_DISPLAY, level);
+			Display.BlockDisplay display = new Display.BlockDisplay(EntityTypes.BLOCK_DISPLAY, level);
 			display.setCustomName(ENTITY_NAME);
 //			display.setInvisible(true);
 			display.setBlockState(blockState);
@@ -204,7 +204,7 @@ public class SitManager {
 	}
 
 	public static boolean isSeatEntity(@Nullable Entity entity) {
-		if (entity == null || entity.getType() != EntityType.BLOCK_DISPLAY) {
+		if (entity == null || entity.getType() != EntityTypes.BLOCK_DISPLAY) {
 			return false;
 		}
 		Component customName = entity.getCustomName();

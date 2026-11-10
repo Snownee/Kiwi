@@ -23,9 +23,9 @@ public class KeyboardHandlerMixin {
 			at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/ChatComponent;clearMessages(Z)V"))
 	private void kiwi$handleDebugKeys(KeyEvent event, CallbackInfoReturnable<Boolean> cir) {
 		if (KiwiClientConfig.superClearChat) {
-			minecraft.gui.clearTitles();
-			minecraft.gui.resetTitleTimes();
-			minecraft.getToastManager().clear();
+			minecraft.gui.hud.clearTitles();
+			minecraft.gui.hud.resetTitleTimes();
+			minecraft.gui.toastManager().clear();
 			minecraft.getSoundManager().stop();
 		}
 	}

@@ -51,7 +51,7 @@ public class CosmeticScreen extends Screen {
 			}
 		}
 		if (!added) {
-			minecraft.setScreen(null);
+			minecraft.gui.setScreen(null);
 		}
 		StringWidget stringWidget = new StringWidget(title, minecraft.font);
 		stringWidget.setPosition(180, 10);

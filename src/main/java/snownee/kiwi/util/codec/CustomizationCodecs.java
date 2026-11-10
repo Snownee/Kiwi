@@ -2,6 +2,7 @@ package snownee.kiwi.util.codec;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -12,14 +13,14 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.minecraft.advancements.criterion.BlockPredicate;
+import net.minecraft.advancements.predicates.BlockPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.grower.TreeGrower;
@@ -49,6 +50,12 @@ public class CustomizationCodecs {
 	public static final Codec<BlockBehaviour.StatePredicate> STATE_PREDICATE = Codec.BOOL.flatComapMap(
 			bl -> {
 				return bl ? Blocks::always : Blocks::never;
+			}, _ -> {
+				return DataResult.error(() -> "Unsupported operation");
+			});
+	public static final Codec<Predicate<BlockState>> BLOCK_STATE_PREDICATE = Codec.BOOL.flatComapMap(
+			bl -> {
+				return _ -> bl;
 			}, _ -> {
 				return DataResult.error(() -> "Unsupported operation");
 			});
@@ -234,7 +241,7 @@ public class CustomizationCodecs {
 					if ("ocelot_or_parrot".equals(s)) {
 						return DataResult.success(Pair.of(
 								(state, world, pos, entity) -> {
-									return entity == EntityType.OCELOT || entity == EntityType.PARROT;
+									return entity == EntityTypes.OCELOT || entity == EntityTypes.PARROT;
 								}, ops.empty()));
 					}
 				}

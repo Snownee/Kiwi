@@ -138,7 +138,7 @@ public class ExportCreativeTabsCommand {
 		ServerLevel level = source.getLevel();
 		LinkedHashSet<String> items = Sets.newLinkedHashSet();
 		for (Pair<BlockPos, Container> pair : pairs) {
-			level.setBlockAndUpdate(pair.getFirst().below(), Blocks.YELLOW_WOOL.defaultBlockState());
+			level.setBlockAndUpdate(pair.getFirst().below(), Blocks.WOOL.yellow().defaultBlockState());
 		}
 		for (Pair<BlockPos, Container> pair : pairs) {
 			Container container = pair.getSecond();
@@ -151,13 +151,13 @@ public class ExportCreativeTabsCommand {
 				if (!items.add(item)) {
 					for (Pair<BlockPos, Container> pair1 : pairs) {
 						if (pair1.getSecond().hasAnyMatching($ -> ItemStack.isSameItemSameComponents($, stack))) {
-							level.setBlockAndUpdate(pair1.getFirst().below(), Blocks.RED_WOOL.defaultBlockState());
+							level.setBlockAndUpdate(pair1.getFirst().below(), Blocks.WOOL.red().defaultBlockState());
 						}
 					}
 					throw new IllegalStateException("Duplicate item: %s (%s)".formatted(stack.getHoverName().getString(), item));
 				}
 			}
-			level.setBlockAndUpdate(pair.getFirst().below(), Blocks.LIME_WOOL.defaultBlockState());
+			level.setBlockAndUpdate(pair.getFirst().below(), Blocks.WOOL.lime().defaultBlockState());
 		}
 		return items;
 	}
