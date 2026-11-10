@@ -75,7 +75,7 @@ dependencies {
 //    implementation "me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}"
     compileOnly "me.shedaniel:REIPluginCompatibilities-forge-annotations:12.+"
 
-    compileOnly "maven.modrinth:jade:${jade_version}+fabric"
+    implementation "maven.modrinth:jade:${jade_version}+fabric"
 
 //    compileOnlyApi "mezz.jei:jei-${minecraft_version}-fabric-api:${jei_version}"
 //    implementation "mezz.jei:jei-${minecraft_version}-fabric:${jei_version}"

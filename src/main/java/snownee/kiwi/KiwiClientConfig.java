@@ -1,12 +1,15 @@
 package snownee.kiwi;
 
 import snownee.kiwi.config.ConfigUI;
+import snownee.kiwi.config.ConfigUiPreference;
 import snownee.kiwi.config.KiwiConfig;
 import snownee.kiwi.config.KiwiConfig.ConfigType;
 import snownee.kiwi.loader.Platform;
 
 @KiwiConfig(type = ConfigType.CLIENT)
 public final class KiwiClientConfig {
+
+	public static ConfigUiPreference configUiPreference = ConfigUiPreference.AUTO;
 
 	@ConfigUI.Hide
 	public static String contributorCosmetic = "";

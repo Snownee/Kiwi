@@ -47,6 +47,14 @@ kiwi.config.client: Client-side
 kiwi.config.server: Server-side
 kiwi.config.modules: Modules
 kiwi.config.requiresRestart: Requires restart
+kiwi.config.configUiPreference: Config UI Preference
+kiwi.config.configUiPreference.desc: Which mod's configuration screen to open. If the preferred mod is not installed, the other available screen is used.
+kiwi.config.configUiPreference.auto: Auto
+kiwi.config.configUiPreference.auto.desc: Prefer Cloth Config when available, otherwise use Jade.
+kiwi.config.configUiPreference.jade: Jade
+kiwi.config.configUiPreference.jade.desc: Prefer Jade's configuration screen.
+kiwi.config.configUiPreference.cloth: Cloth Config
+kiwi.config.configUiPreference.cloth.desc: Prefer Cloth Config's configuration screen.
 kiwi.config.performanceImpact: '[Performance impact: %s]'
 kiwi.config.none: None
 kiwi.config.low: Low
@@ -78,7 +86,11 @@ kiwi.config.vars: Variables
 commands.kiwi.reload.success: Configuration %s has been reloaded.
 commands.kiwi.reload.failed: Configuration %s is not found or not provided by Kiwi.
 commands.kiwi.configure.failed: Unknown error occurred.
-commands.kiwi.configure.install: Please install Cloth Config API to use this command.
+commands.kiwi.configure.install: Please install Jade or Cloth Config API to use this command.
+gui.kiwi.config: Configuration
+gui.kiwi.config.invalid: Invalid value. Fix it before saving.
+gui.kiwi.config.range: 'Range: %s ~ %s'
+gui.kiwi.config.subtitle: '%s: %s'
 gui.kiwi.cosmetic: Kiwi Cosmetics Screen
 gui.kiwi.cosmetic.disabled: Keybind Disabled
 gui.kiwi.cosmetic.enabled: Keybind Enabled

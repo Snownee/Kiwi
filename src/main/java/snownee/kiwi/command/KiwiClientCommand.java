@@ -3,7 +3,6 @@ package snownee.kiwi.command;
 import java.util.List;
 import java.util.Set;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -13,10 +12,9 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiCommonConfig;
-import snownee.kiwi.config.ClothConfigIntegration;
 import snownee.kiwi.config.ConfigLibAttributes;
+import snownee.kiwi.config.ConfigScreens;
 import snownee.kiwi.config.KiwiConfigManager;
-import snownee.kiwi.util.ClientProxy;
 
 public class KiwiClientCommand {
 
@@ -31,10 +29,7 @@ public class KiwiClientCommand {
 						context::sendSuccess,
 						context::sendFailure))));
 		LiteralArgumentBuilder<T> configure = context.literal("configure");
-		List<ConfigLibAttributes> list = Lists.newArrayList();
-		if (ClientProxy.clothConfig) {
-			list.add(ClothConfigIntegration.attributes());
-		}
+		List<ConfigLibAttributes> list = ConfigScreens.attributes();
 		if (list.isEmpty()) {
 			configure.executes(ctx -> {
 				context.sendSuccess(ctx.getSource(), Component.translatable("commands.kiwi.configure.install"));
@@ -62,7 +57,7 @@ public class KiwiClientCommand {
 			}
 			addedMods.add(modId);
 			node.then(context.literal(modId).executes(ctx -> {
-				Screen screen = attributes.screenFactory().apply(modId);
+				Screen screen = ConfigScreens.createScreen(modId);
 				if (screen == null) {
 					context.sendSuccess(ctx.getSource(), Component.translatable("commands.kiwi.configure.failed"));
 					return 0;
